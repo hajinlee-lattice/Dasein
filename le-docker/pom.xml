@@ -133,8 +133,8 @@
                                       overwrite="true" />
 
                                 <!-- python app -->
-                                <copy file="${project.basedir}/../le-dataplatform/target/leframework.tar.gz"
-                                      tofile="${project.basedir}/${pythonapp.docker.context}/leframework.tar.gz"
+                                <copy file="${project.basedir}/../le-dataplatform/src/main/python/leframework/webhdfs.py"
+                                      tofile="${project.basedir}/${pythonapp.docker.context}/webhdfs.py"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsdataloader.py"
                                       tofile="${project.basedir}/${pythonapp.docker.context}/apsdataloader.py"

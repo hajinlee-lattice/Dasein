@@ -5,9 +5,9 @@ import java.util.Map;
 public class JobRequest {
 
     private Map<String, String> parameters;
-    private String jobQueue;
+    private String jobQueue = "AWS-Python-Workflow-Job-Queue";
     private String jobName;
-    private String jobDefinition;
+    private String jobDefinition = "AWS-Python-Workflow-Job-Definition";
     private Integer cpus;
     private Integer memory;
     private Map<String, String> envs;

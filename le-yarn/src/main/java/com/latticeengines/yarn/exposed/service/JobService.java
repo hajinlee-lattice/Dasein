@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 
-public interface JobService {
+public interface JobService extends AwsBatchJobService {
 
     List<ApplicationReport> getJobReportsAll();
 
@@ -54,4 +54,5 @@ public interface JobService {
             Properties containerProperties);
 
     String getEmrClusterId();
+
 }

@@ -142,8 +142,6 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         jobName = jobName.replaceAll(" ", "_");
         log.info("Job name=" + jobName);
         jobRequest.setJobName(jobName);
-        jobRequest.setJobDefinition("AWS-Python-Workflow-Job-Definition");
-        jobRequest.setJobQueue("AWS-Python-Workflow-Job-Queue");
 
         Map<String, String> envs = getRuntimeEnvs();
         jobRequest.setEnvs(envs);

@@ -5,9 +5,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -33,7 +33,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
-import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -41,10 +40,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.JobCounters;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
+import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.MapReduceCustomizationService;
@@ -86,10 +87,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     private Boolean useEmr;
 
     @Inject
-    private EMRService emrService;
-
-    @Inject
     private EMRCacheService emrCacheService;
+
+    @Resource(name = "awsBatchjobService")
+    private AwsBatchJobService awsBatchJobService;
 
     @Override
     public List<ApplicationReport> getJobReportsAll() {
@@ -157,6 +158,16 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         } finally {
             yarnClientCustomizationService.finalize(yarnClientName, appMasterProperties, containerProperties);
         }
+    }
+
+    @Override
+    public ApplicationId submitAwsBatchJob(com.latticeengines.domain.exposed.dataplatform.Job job) {
+        return awsBatchJobService.submitAwsBatchJob(job);
+    }
+
+    @Override
+    public JobStatus getAwsBatchJobStatus(String jobId) {
+        return awsBatchJobService.getAwsBatchJobStatus(jobId);
     }
 
     @Override

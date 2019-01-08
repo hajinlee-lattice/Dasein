@@ -5,6 +5,7 @@ import javax.annotation.Resource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.mortbay.log.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,20 @@ public class ParallelDispatchServiceImpl implements DispatchService {
     @Value("${dataplatform.model.parallel.enabled:false}")
     private boolean configParallelEnabled;
 
+    @Value("${dataplatform.model.aws.batch.enabled:false}")
+    private boolean modelAwsBatchEnabled;
+
     @Resource(name = "singleContainerDispatcher")
     private DispatchService singleContainerDispatcher;
 
+    @Resource(name = "awsBatchContainerDispatcher")
+    private DispatchService awsBatchContainerDispatcher;
+
     @Resource(name = "mutipleContainerDispatcher")
     private DispatchService multipleContainerDispatcher;
+
+    @Value("${hadoop.use.emr:true}")
+    private Boolean useEmr;
 
     private DispatchService defaultContainerDispatcher;
 
@@ -91,6 +101,11 @@ public class ParallelDispatchServiceImpl implements DispatchService {
     @Override
     public ApplicationId submitJob(ModelingJob modelingJob, boolean isParallelEnabled, boolean isModeling) {
 
+        Log.info("useEmr=" + useEmr + " modelAwsBatchEnabled=" + modelAwsBatchEnabled + "isParallelEnabled="
+                + isParallelEnabled);
+        if (modelAwsBatchEnabled && !isParallelEnabled) {
+            return awsBatchContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);
+        }
         if (configParallelEnabled && !isParallelEnabled && isModeling) {
             return singleContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);
         }

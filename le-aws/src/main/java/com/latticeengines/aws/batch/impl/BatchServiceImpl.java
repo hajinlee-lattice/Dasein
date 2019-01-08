@@ -95,4 +95,13 @@ public class BatchServiceImpl implements BatchService {
 
         throw new RuntimeException("Job Id:" + jobId + " timeout within (ms)=" + maxWaitTime);
     }
+
+    @Override
+    public String getJobStatus(String jobId) {
+        DescribeJobsRequest describeJobsRequest = new DescribeJobsRequest();
+        describeJobsRequest.setJobs(Arrays.asList(jobId));
+        DescribeJobsResult jobResult = awsBatch.describeJobs(describeJobsRequest);
+        JobDetail jobDetail = jobResult.getJobs().get(0);
+        return jobDetail.getStatus();
+    }
 }

@@ -23,6 +23,9 @@ cp src/main/python/ledatascience/modelquality/*.py /tmp/app/dataplatform/scripts
 cp src/main/scripts/pythonlauncher.sh /tmp/app/dataplatform/scripts
 cp ../le-serviceflows/cdl/src/test/python/apsdataloader.py /tmp/app/dataplatform/scripts
 cp ../le-serviceflows/cdl/src/test/python/apsgenerator.py /tmp/app/dataplatform/scripts
+cp ../le-docker/src/main/scripts/pythonapp/app.py /tmp/app/dataplatform/scripts
+cp ../le-docker/src/main/scripts/pythonapp/apploader.py /tmp/app/dataplatform/scripts
+cp src/main/python/leframework/webhdfs.py /tmp/app/dataplatform/scripts
 
 cp src/main/python/ledatascience/modelquality/modelconfigs/*.csv /tmp/app/dataplatform/config/datascience
 

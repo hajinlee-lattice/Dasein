@@ -3,10 +3,13 @@ FROM  latticeengines/python
 WORKDIR /
 COPY apsdataloader.py /
 COPY apsgenerator.py /
-COPY start.sh /
-COPY leframework.tar.gz /
-RUN tar -xvzf leframework.tar.gz
 
-ENV PYTHON_PATH /opt/conda/bin:/:/leframework:$PYTHON_PATH
+COPY app.py /
+COPY apploader.py /
+
+COPY start.sh /
+COPY webhdfs.py /
+
+ENV PYTHON_PATH /opt/conda/bin:/
 
 ENTRYPOINT ["/start.sh"]

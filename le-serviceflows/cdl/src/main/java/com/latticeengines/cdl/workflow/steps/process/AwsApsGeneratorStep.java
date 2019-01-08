@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -188,8 +186,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     protected void localizePythonScripts() {
         try {
             String scriptDir = getScriptDirInHdfs();
-            InputStream is = HdfsUtils.getInputStream(yarnConfiguration, scriptDir + "/leframework.tar.gz");
-            CompressionUtils.untarInputStream(is, getPythonWorkspace().getPath());
+
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/webhdfs.py",
+                    getPythonWorkspace().getPath() + "/webhdfs.py");
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/pythonlauncher.sh",
                     getPythonWorkspace().getPath() + "/pythonlauncher.sh");
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsdataloader.py",

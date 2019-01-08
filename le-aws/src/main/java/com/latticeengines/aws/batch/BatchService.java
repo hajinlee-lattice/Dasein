@@ -5,4 +5,6 @@ public interface BatchService {
     String submitJob(JobRequest request);
 
     boolean waitForCompletion(String jobId, long maxWaitTime);
+
+    String getJobStatus(String jobId);
 }

@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.service.impl.modeling;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
-import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.domain.exposed.aws.LEApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
+import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
 import com.latticeengines.yarn.exposed.service.JobNameService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
@@ -36,6 +40,9 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
 
     @Autowired
     protected JobEntityMgr jobEntityMgr;
+
+    @Resource(name = "awsBatchModelingJobService")
+    protected AwsBatchJobService awsBatchJobService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -85,8 +92,18 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                 }
             }
         }
-        populateJobStatusFromYarnAppReport(jobStatus, applicationId);
+        if (!LEApplicationId.isAwsBatchJob(applicationId)) {
+            populateJobStatusFromYarnAppReport(jobStatus, applicationId);
+        } else {
+            populateJobStatusFromAwsBatchReport(jobStatus, applicationId);
+        }
         return jobStatus;
+    }
+
+    private void populateJobStatusFromAwsBatchReport(JobStatus jobStatus, String applicationId) {
+        jobStatus.setId(applicationId);
+        JobStatus awsJobStatus = awsBatchJobService.getAwsBatchJobStatus(applicationId);
+        jobStatus.setStatus(awsJobStatus.getStatus());
     }
 
     @Override

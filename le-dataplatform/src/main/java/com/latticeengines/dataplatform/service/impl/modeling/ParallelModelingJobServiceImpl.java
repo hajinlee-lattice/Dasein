@@ -74,6 +74,11 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     }
 
     protected ApplicationId submitJobInternal(ModelingJob modelingJob) {
+        Properties properties = configJobInternal(modelingJob);
+        return super.submitMRJob(PythonMRJob.PYTHON_MR_JOB, properties);
+    }
+
+    protected Properties configJobInternal(ModelingJob modelingJob) {
         Properties appMasterProperties = modelingJob.getAppMasterPropertiesObject();
         Properties containerProperties = modelingJob.getContainerPropertiesObject();
 
@@ -121,8 +126,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(PythonMRProperty.DEBUG.name(), debug);
         properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
         properties.put(PythonContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
-
-        return super.submitMRJob(PythonMRJob.PYTHON_MR_JOB, properties);
+        return properties;
     }
 
     private void setupProfilingMRConfig(Properties properties, Classifier classifier, int mapperSize, String inputDir)

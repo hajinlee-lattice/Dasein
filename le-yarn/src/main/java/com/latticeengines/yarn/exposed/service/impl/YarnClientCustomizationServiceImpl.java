@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -22,16 +21,9 @@ import org.springframework.yarn.am.AppmasterConstants;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.client.YarnClientCustomization;
-import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
-import com.latticeengines.yarn.exposed.service.JobNameService;
 import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 
 @Component("yarnClientCustomizationService")
@@ -42,17 +34,14 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private JobNameService jobNameService;
-
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
 
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
+    @Autowired
+    private JobServiceHelper jobServiceHelper;
 
     @Override
     public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
@@ -62,13 +51,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         if (customization == null) {
             return;
         }
-        String dir = UUID.randomUUID().toString();
-        try {
-            HdfsUtils.mkdir(yarnConfiguration, hdfsJobBaseDir + "/" + dir);
-            new File("./" + dir).mkdir();
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
-        }
+        String dir = jobServiceHelper.createJobDir();
         containerProperties.put(ContainerProperty.JOBDIR.name(), dir);
         containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
@@ -91,7 +74,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         customization.afterCreateLocalLauncherContextFile(containerProperties);
         List<String> commands = customization.getCommands(containerProperties, appMasterProperties);
         Map<String, String> environment = customization.setEnvironment(client.getEnvironment(), containerProperties);
-        client.setAppName(appName(appMasterProperties, clientName));
+        client.setAppName(jobServiceHelper.appName(appMasterProperties, clientName));
         if (resourceLocalizer != null) {
             client.setResourceLocalizer(resourceLocalizer);
         }
@@ -124,35 +107,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 //            client.setMaxAppAttempts(maxAppAttempts);
 //        }
 
-        // copy the metadata.json file to HDFS data directory
-        String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
-        if (jobType != null) {
-            String metadata = containerProperties.getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
-            Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
-            String hdfsDir = classifier.getDataDiagnosticsPath();
-            hdfsDir = hdfsDir.substring(0, hdfsDir.lastIndexOf('/') + 1);
-            String localDir = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
-            String random = "-" + UUID.randomUUID().toString();
-            String metaDataFileName = "metadata-" + jobType + random + ".json";
-            try {
-                HdfsUtils.copyLocalToHdfs(yarnConfiguration, localDir, hdfsDir + metaDataFileName);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_00000, e, new String[] { hdfsDir });
-            }
-        }
-    }
-
-    protected String appName(Properties appMasterProperties, String clientName) {
-        if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME.name())) {
-            return appMasterProperties.getProperty(AppMasterProperty.APP_NAME.name());
-        } else if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME_SUFFIX.name())) {
-            return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
-                    clientName) + JobNameServiceImpl.JOBNAME_DELIMITER
-                    + appMasterProperties.getProperty(AppMasterProperty.APP_NAME_SUFFIX.name());
-        } else {
-            return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
-                    clientName);
-        }
+        jobServiceHelper.writeMetadataJson(containerProperties);
     }
 
     private String createContainerLauncherContextFile(YarnClientCustomization customization,

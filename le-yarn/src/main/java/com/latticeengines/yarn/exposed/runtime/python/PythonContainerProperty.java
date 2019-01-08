@@ -19,5 +19,9 @@ public enum PythonContainerProperty {
     SWLIBARTIFACT, //
     RUNTIME_CONFIG, //
     CONDA_ENV, //
+    SHDP_HD_FSWEB, //
+    PYTHONPATH, //
+    PYTHONIOENCODING, //
+    DEBUG, //
     WEBHDFS_URL
 }

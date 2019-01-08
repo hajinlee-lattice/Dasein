@@ -9,7 +9,7 @@ import pwd
 import shutil
 from pandas import DataFrame
 from urlparse import urlparse
-from leframework.webhdfs import WebHDFS
+from webhdfs import WebHDFS
 import multiprocessing
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',

@@ -125,6 +125,11 @@ class Executor(object):
     def accept(self, filename): pass
 
     def getModelDirByContainerId(self, schema):
+        if "AWS_BATCH_JOB_ID" in os.environ:
+            tokens = os.environ['AWS_BATCH_JOB_ID'].split("_")
+            appIdList = tokens[1:3]
+            modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
+            return modelDirPath
         if "CONTAINER_ID" in os.environ:
             tokens = os.environ['CONTAINER_ID'].split("_")
             if(tokens[1].startswith("e")):

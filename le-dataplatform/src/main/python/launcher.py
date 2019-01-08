@@ -39,7 +39,7 @@ class Launcher(object):
 
     def __validateEnv(self):
         self.__validateEnvVariable("SHDP_HD_FSWEB")
-        self.__validateEnvVariable("CONTAINER_ID")
+#         self.__validateEnvVariable("CONTAINER_ID")
         self.__validateEnvVariable("DEBUG")
 
     def __validateParameters(self, schema):
