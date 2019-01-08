@@ -190,8 +190,9 @@ class EVSegmentationGenerator(State):
         apxBlockSize = numLeads / 100.0
         orderedScore['Score'] = orderedScore.index.map(lambda x: min(int(x / apxBlockSize) + 1, 100))
 
-        revRateChartDf = orderedScore.groupby('Score')[revenueColumn].agg(
+        revRateChartDf = orderedScore.groupby('Score')['ev'].agg(
             ['min', 'max', 'mean', 'sum', 'count'])
+
         revRateChartDf.columns = ['Min', 'Max', 'Mean', 'Sum', 'Count']
         new_segments = []
         lowestScore = 100
