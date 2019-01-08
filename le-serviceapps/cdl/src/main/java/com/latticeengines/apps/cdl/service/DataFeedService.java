@@ -17,6 +17,9 @@ public interface DataFeedService {
 
     DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 
+    DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus,
+                                      Long executionId);
+
     DataFeed createDataFeed(String customerSpace, String collectionName, DataFeed datafeed);
 
     DataFeed getOrCreateDataFeed(String customerSpace);
@@ -35,6 +38,9 @@ public interface DataFeedService {
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 
+    DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus,
+                                    Long executionId);
+
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
     void resetImport(String customerSpace, String datafeedName);
@@ -50,7 +56,7 @@ public interface DataFeedService {
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
 
-    boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
+    Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
 

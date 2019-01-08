@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("datafeedService")
@@ -83,7 +86,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+    public Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
         String lockName = new Path("/").append(LockType).append("/").append(customerSpace).toString();
         try {
             LockManager.registerCrossDivisionLock(lockName);
@@ -92,26 +95,26 @@ public class DataFeedServiceImpl implements DataFeedService {
             if (datafeed.getStatus().getDisallowedJobTypes().contains(jobType)) {
                 log.info(String.format("job type %s is disallowed by current data feed status %s", jobType,
                         datafeed.getStatus()));
-                return false;
+                return null;
             }
             if (!datafeed.getStatus().getAllowedJobTypes().contains(jobType)) {
                 DataFeedExecution execution = datafeed.getActiveExecution();
                 if (execution == null || execution.getWorkflowId() == null) {
                     log.info("can't lock execution due to either execution or workflowid is null");
-                    return false;
+                    return null;
                 }
                 Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
                 if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
                     log.info("can't lock execution due to workflow job is not terminated yet");
-                    return false;
+                    return null;
                 }
                 failExecution(datafeed, job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             }
-            prepareExecution(datafeed, jobType);
-            return true;
+            DataFeedExecution execution = prepareExecution(datafeed, jobType);
+            return execution.getPid();
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            return false;
+            return null;
         } finally {
             LockManager.releaseWriteLock(lockName);
         }
@@ -140,7 +143,10 @@ public class DataFeedServiceImpl implements DataFeedService {
         if (DataFeedExecutionJobType.PA == jobType) {
             return startPnAExecution(customerSpace, datafeedName, jobId);
         } else if (DataFeedExecutionJobType.CDLOperation == jobType) {
-            DataFeedExecution execution = datafeedEntityMgr.findByName(datafeedName).getActiveExecution();
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(jobId), customerSpace);
+            Map<String, String> inputs = job.getInputs();
+            DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(Long.valueOf(inputs.get(
+                    WorkflowContextConstants.Inputs.DATAFEED_EXECUTION_ID)));
             execution.setWorkflowId(jobId);
             datafeedExecutionEntityMgr.update(execution);
             return execution;
@@ -204,6 +210,13 @@ public class DataFeedServiceImpl implements DataFeedService {
 
         return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Completed,
                 getSuccessfulDataFeedStatus(initialDataFeedStatus));
+    }
+
+    @Override
+    public DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus,
+                                            Long executionId) {
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Completed,
+                getSuccessfulDataFeedStatus(initialDataFeedStatus), executionId);
     }
 
     @Override
@@ -308,6 +321,13 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public DataFeedExecution failExecution(String customerSpace, String datafeedName,
+                                           String initialDataFeedStatus, Long executionId) {
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Failed,
+                getFailedDataFeedStatus(initialDataFeedStatus), executionId);
+    }
+
+    @Override
     public DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId) {
         DataFeed datafeed = datafeedEntityMgr.findByName(datafeedName);
         if (datafeed == null) {
@@ -335,6 +355,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         Status datafeedStatus = Status.fromName(initialDataFeedStatus);
         switch (datafeedStatus) {
         case InitialLoaded:
+        case Deleting:
         case Active:
             return Status.Active;
         default:
@@ -417,7 +438,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
         DataFeedExecution execution = datafeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed,
                 jobType);
-        if (!lockExecution(customerSpace, datafeedName, jobType)) {
+        if (lockExecution(customerSpace, datafeedName, jobType) == null) {
             throw new RuntimeException("can't lock execution for job type:" + jobType);
         }
 

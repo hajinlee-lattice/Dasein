@@ -13,6 +13,9 @@ public interface DataFeedExecutionEntityMgr extends BaseEntityMgrRepository<Data
 
     List<DataFeedExecution> findByDataFeed(DataFeed datafeed);
 
+    List<DataFeedExecution> findActiveExecutionByDataFeedAndJobType(DataFeed dataFeed,
+                                                                    DataFeedExecutionJobType jobType);
+
     void updateImports(DataFeedExecution execution);
 
     DataFeedExecution findFirstByDataFeedAndJobTypeOrderByPidDesc(DataFeed datafeed, DataFeedExecutionJobType jobType);

@@ -84,6 +84,12 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
     }
 
     @Override
+    public List<DataFeedExecution> findActiveExecutionByDataFeedAndJobType(DataFeed dataFeed, DataFeedExecutionJobType jobType) {
+        return datafeedExecutionDao.findAllByFields("FK_FEED_ID", dataFeed.getPid(), "JOB_TYPE", jobType, "STATUS",
+                DataFeedExecution.Status.Started);
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findFirstByDataFeedAndJobTypeOrderByPidDesc(DataFeed datafeed,
             DataFeedExecutionJobType jobType) {

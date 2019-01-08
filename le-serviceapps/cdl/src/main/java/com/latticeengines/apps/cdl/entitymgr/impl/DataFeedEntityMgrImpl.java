@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -152,9 +154,48 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.setStatus(status);
         datafeedExecutionEntityMgr.update(execution);
-
         datafeed.setStatus(datafeedStatus);
         if (DataFeedExecution.Status.Completed == status && Status.Active == datafeedStatus) {
+            datafeed.setLastPublished(new Date());
+        }
+        log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName,
+                JsonUtils.serialize(datafeed)));
+        datafeedDao.update(datafeedDao.merge(datafeed));
+        return execution;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
+                                                               Status datafeedStatus, Long executionId) {
+        DataFeed datafeed = findByName(datafeedName);
+        if (datafeed == null) {
+            log.error("Can't find data feed: " + datafeedName);
+            return null;
+        }
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(executionId);
+        execution.setStatus(status);
+        datafeedExecutionEntityMgr.update(execution);
+
+        boolean flag = true;
+        if (execution.getDataFeedExecutionJobType() == DataFeedExecutionJobType.CDLOperation) {
+            if (execution.getPid() == datafeed.getActiveExecution().getPid()) {
+                List<DataFeedExecution> activeExecutions =
+                        datafeedExecutionEntityMgr.findActiveExecutionByDataFeedAndJobType(datafeed, DataFeedExecutionJobType.CDLOperation);
+                if (!CollectionUtils.isEmpty(activeExecutions)) {
+                    DataFeedExecution nextExecution = activeExecutions.get(0);
+                    datafeed.setActiveExecution(nextExecution);
+                    datafeed.setActiveExecutionId(nextExecution.getPid());
+                    flag = false;
+                } else {
+                    datafeed.setStatus(datafeedStatus);
+                }
+            }
+        } else {
+            datafeed.setStatus(datafeedStatus);
+        }
+
+        if (DataFeedExecution.Status.Completed == status && Status.Active == datafeedStatus && flag) {
             datafeed.setLastPublished(new Date());
         }
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName,

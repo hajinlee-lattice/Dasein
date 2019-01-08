@@ -6,12 +6,14 @@ import io.swagger.annotations.ApiOperation;
 import java.util.Date;
 import javax.inject.Inject;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -93,7 +95,7 @@ public class DefaultDataFeedController {
     @PostMapping(value = "/jobtype/{jobType}/lockexecution")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
-    public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
+    public ResponseDocument<Long> lockExecution(@PathVariable String customerSpace, //
             @PathVariable DataFeedExecutionJobType jobType) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, "", jobType));
@@ -129,18 +131,23 @@ public class DefaultDataFeedController {
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
     public DataFeedExecution finishExecution(@PathVariable String customerSpace,
-            @PathVariable String initialDataFeedStatus) {
+                                             @PathVariable String initialDataFeedStatus,
+                                             @RequestParam(required = false) Long executionId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus);
+        if (StringUtils.isEmpty(executionId))
+            return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus);
+        return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus, executionId);
     }
 
     @PostMapping(value = "/status/{initialDataFeedStatus}/failexecution")
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
     public DataFeedExecution failExecution(@PathVariable String customerSpace,
-            @PathVariable String initialDataFeedStatus) {
+            @PathVariable String initialDataFeedStatus, @RequestParam(required = false) Long executionId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus);
+        if (StringUtils.isEmpty(executionId))
+            return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus);
+        return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus, executionId);
     }
 
     @PostMapping(value = "/execution/workflow/{workflowId}")

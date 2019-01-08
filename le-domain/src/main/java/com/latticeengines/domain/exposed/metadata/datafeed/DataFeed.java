@@ -392,7 +392,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
         }, // master table has formed and pushed to data store
         ProcessAnalyzing("processAnalyzing"), //
-        Deleting("deleting");
+        Deleting("deleting") {
+            @Override
+            public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
+                return Arrays.asList(DataFeedExecutionJobType.CDLOperation);
+            }
+        };
 
         public static final EnumSet<Status> RUNNING_STATUS = EnumSet.of(ProcessAnalyzing, Deleting);
         private static Map<String, Status> nameMap;

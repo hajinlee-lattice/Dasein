@@ -17,6 +17,9 @@ public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Lon
     DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
                                                         Status datafeedStatus);
 
+    DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
+                                                        Status datafeedStatus, Long executionId);
+
     DataFeed findByNameInflatedWithAllExecutions(String datafeedName);
 
     DataFeed findByNameInflated(String datafeedName);

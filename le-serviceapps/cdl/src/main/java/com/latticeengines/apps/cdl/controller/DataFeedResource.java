@@ -1,12 +1,16 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,9 +53,9 @@ public class DataFeedResource {
     @PostMapping(value = "/{datafeedName}/jobtype/{jobType}/lockexecution", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
-    public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
-            @PathVariable String datafeedName, //
-            @PathVariable DataFeedExecutionJobType jobType) {
+    public ResponseDocument<Long> lockExecution(@PathVariable String customerSpace, //
+                                                   @PathVariable String datafeedName, //
+                                                   @PathVariable DataFeedExecutionJobType jobType) {
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, datafeedName, jobType));
     }
 
@@ -75,8 +79,12 @@ public class DataFeedResource {
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
     public DataFeedExecution finishExecution(@PathVariable String customerSpace, //
-            @PathVariable String datafeedName, @PathVariable String initialDataFeedStatus) {
-        return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus);
+                                             @PathVariable String datafeedName,
+                                             @PathVariable String initialDataFeedStatus,
+                                             @RequestParam(required = false) Long executionId) {
+        if (StringUtils.isEmpty(executionId))
+            return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus);
+        return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus, executionId);
     }
 
     @PostMapping(value = "/{datafeedName}/status/{initialDataFeedStatus}/failexecution",
@@ -84,8 +92,11 @@ public class DataFeedResource {
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
     public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String datafeedName,
-                                           @PathVariable String initialDataFeedStatus) {
-        return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus);
+                                           @PathVariable String initialDataFeedStatus,
+                                           @RequestParam(required = false) Long executionId) {
+        if (StringUtils.isEmpty(executionId))
+            return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus);
+        return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus, executionId);
     }
 
     @PostMapping(value = "/{datafeedName}/execution/workflow/{workflowId}", headers = "Accept=application/json")

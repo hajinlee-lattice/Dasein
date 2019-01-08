@@ -3,7 +3,9 @@ package com.latticeengines.apps.cdl.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -38,40 +40,61 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     @Inject
     private RedshiftService redshiftService;
 
+    private Map<BusinessEntity, String> tablename = new HashMap();
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-
-        verifyCleanup(BusinessEntity.Contact);
-        verifyCleanup(BusinessEntity.Transaction);
+        verifyCleanup();
         processAnalyze();
         verifyProcess();
         verifyCleanupAll();
     }
 
-    private void verifyCleanup(BusinessEntity entity) {
+    private void verifyCleanup() {
+        ApplicationId contact_appId = verifyCleanup(BusinessEntity.Contact);
+        ApplicationId transaction_appId = verifyCleanup(BusinessEntity.Transaction);
+        verifyLock();
+        verifyStatus(contact_appId);
+        verifyStatus(transaction_appId);
+        ApplicationId contactTable_appId = verifyDeleteTable(BusinessEntity.Contact);
+        ApplicationId transactionTable_appId = verifyDeleteTable(BusinessEntity.Transaction);
+        verifyAction(contactTable_appId, BusinessEntity.Contact);
+        verifyAction(transactionTable_appId, BusinessEntity.Transaction);
+    }
+
+    private ApplicationId verifyCleanup(BusinessEntity entity) {
         log.info(String.format("clean up all data for entity %s, current action number is %d", entity.toString(),
                 actionsNumber));
-
-        String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore());
-
         log.info("cleaning up all data of " + entity + " ... ");
+        tablename.put(entity, dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore()));
         ApplicationId appId = cdlProxy.cleanupAllData(customerSpace, entity, MultiTenantContext.getEmailAddress());
+        return appId;
+
+    }
+
+    private void verifyStatus(ApplicationId appId) {
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
+    }
 
+    private ApplicationId verifyDeleteTable(BusinessEntity entity) {
         log.info("assert the DataCollectionTable and MetadataTable is deleted.");
         Table table = dataCollectionProxy.getTable(customerSpace, entity.getBatchStore());
         assertNull(table);
-        table = metadataProxy.getTable(customerSpace, tableName);
+        log.info("delete tablename is :" + tablename.get(entity));
+        table = metadataProxy.getTable(customerSpace, tablename.get(entity));
         assertNull(table);
 
         log.info("cleaning up all metadata of " + entity + " ... ");
-        appId = cdlProxy.cleanupAll(CustomerSpace.parse(mainTestTenant.getId()).toString(), entity,
+        ApplicationId appId = cdlProxy.cleanupAll(CustomerSpace.parse(mainTestTenant.getId()).toString(), entity,
                 MultiTenantContext.getEmailAddress());
-        status = waitForWorkflowStatus(appId.toString(), false);
-        assertEquals(status, JobStatus.COMPLETED);
+        return appId;
+    }
+
+    private void verifyAction(ApplicationId appId, BusinessEntity entity) {
+        verifyStatus(appId);
         List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, entity.name());
         if (dfTasks != null) {
             assertEquals(dfTasks.size(), 0);
@@ -84,8 +107,8 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
         log.info("cleaning up all for all entities...");
         ApplicationId appId = cdlProxy.cleanupAll(customerSpace, null, MultiTenantContext.getEmailAddress());
-        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-        assertEquals(status, JobStatus.COMPLETED);
+        Assert.expectThrows(RuntimeException.class, () -> verifyCleanup(BusinessEntity.Contact));
+        verifyStatus(appId);
 
         log.info("assert the DataCollectionTable is deleted.");
         assertNull(dataCollectionProxy.getTable(customerSpace, BusinessEntity.Account.getBatchStore()));
@@ -129,6 +152,16 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                 "Should not have contact's stats cube.");
         Assert.assertFalse(container.getStatsCubes().containsKey(BusinessEntity.PurchaseHistory.name()),
                 "Should not have purchase history's stats cube.");
+    }
+
+    private void verifyLock() {
+        boolean hasError = false;
+        try {
+            processAnalyze();
+        } catch (RuntimeException e) {
+            hasError = e.getMessage().contains("can't start processAnalyze workflow");
+        }
+        Assert.assertTrue(hasError);
     }
 
 }

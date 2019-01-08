@@ -66,6 +66,8 @@ public class MaintenanceOperationListener extends LEJobListener {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String customerSpace = job.getTenant().getId();
         String status = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
+        String executionId = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_EXECUTION_ID);
+        DataFeedExecution dataFeedExecution = null;
         if (StringUtils.isEmpty(status)) {
             throw new RuntimeException("Cannot get initial data feed status for customer: " + customerSpace);
         }
@@ -73,7 +75,10 @@ public class MaintenanceOperationListener extends LEJobListener {
             // reset data feed status.
             log.info(String.format("Maintenance workflow failed. Update datafeed status for customer %s with status %s",
                     customerSpace, status));
-            DataFeedExecution dataFeedExecution = dataFeedProxy.failExecution(customerSpace, status);
+            if (StringUtils.isEmpty(executionId))
+                dataFeedExecution = dataFeedProxy.failExecution(customerSpace, status);
+            else
+                dataFeedExecution = dataFeedProxy.failExecution(customerSpace, status, Long.valueOf(executionId));
             if (dataFeedExecution.getStatus() != DataFeedExecution.Status.Failed) {
                 throw new RuntimeException("Cannot fail execution!");
             }
@@ -86,7 +91,10 @@ public class MaintenanceOperationListener extends LEJobListener {
                         reportName);
                 updateMaintenanceActionConfiguration(job, report);
             }
-            DataFeedExecution dataFeedExecution = dataFeedProxy.finishExecution(customerSpace, status);
+            if (StringUtils.isEmpty(executionId))
+                dataFeedExecution = dataFeedProxy.finishExecution(customerSpace, status);
+            else
+                dataFeedExecution = dataFeedProxy.finishExecution(customerSpace, status, Long.valueOf(executionId));
             if (dataFeedExecution.getStatus() != DataFeedExecution.Status.Completed) {
                 throw new RuntimeException("Cannot finish execution!");
             }

@@ -166,7 +166,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
                 Thread.sleep(100L);
                 MultiTenantContext.setTenant(t);
                 log.info("thread started locking execution");
-                assertFalse(datafeedService.lockExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA));
+                assertFalse(datafeedService.lockExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA) == -1L);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

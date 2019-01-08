@@ -5,6 +5,8 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -19,6 +21,8 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataFeedProxy")
 public class DataFeedProxy extends MicroserviceRestApiProxy {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFeedProxy.class);
 
     protected DataFeedProxy() {
         super("cdl");
@@ -64,14 +68,15 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean lockExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+    public Long lockExecution(String customerSpace, DataFeedExecutionJobType jobType) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/lockexecution",
                 shortenCustomerSpace(customerSpace), jobType);
-        ResponseDocument<Boolean> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
-        if (responseDoc == null) {
-            return Boolean.FALSE;
+        ResponseDocument<?> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
+        if (responseDoc == null || !responseDoc.isSuccess() || responseDoc.getResult() == null) {
+            return null;
         }
-        return responseDoc.getResult();
+        log.info("execution id is :" + responseDoc.getResult().toString());
+        return Long.valueOf(responseDoc.getResult().toString());
     }
 
     public DataFeedExecution getLatestExecution(String customerSpace, DataFeedExecutionJobType jobType) {
@@ -81,16 +86,35 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/finishexecution",
-                shortenCustomerSpace(customerSpace), initialDataFeedStatus);
+        return finishExecution(customerSpace, initialDataFeedStatus, null);
+    }
+
+    public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus, Long executionId) {
+        String base_url = "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/finishexecution";
+        String url;
+        if (executionId == null) {
+            url = constructUrl(base_url, shortenCustomerSpace(customerSpace), initialDataFeedStatus);
+        } else {
+            url = constructUrl(base_url + "?executionId={executionId}", shortenCustomerSpace(customerSpace),
+                    initialDataFeedStatus, executionId);
+        }
         return post("finishExecution", url, null, DataFeedExecution.class);
     }
 
     public DataFeedExecution failExecution(String customerSpace, String initialDataFeedStatus) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/failexecution",
-                shortenCustomerSpace(customerSpace), initialDataFeedStatus);
+        return failExecution(customerSpace, initialDataFeedStatus, null);
+    }
+
+    public DataFeedExecution failExecution(String customerSpace, String initialDataFeedStatus, Long executionId) {
+
+        String base_url = "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/failexecution";
+        String url;
+        if (executionId == null) {
+            url = constructUrl(base_url, shortenCustomerSpace(customerSpace), initialDataFeedStatus);
+        } else {
+            url = constructUrl(base_url + "?executionId={executionId}", shortenCustomerSpace(customerSpace),
+                    initialDataFeedStatus, executionId);
+        }
         return post("failExecution", url, null, DataFeedExecution.class);
     }
 

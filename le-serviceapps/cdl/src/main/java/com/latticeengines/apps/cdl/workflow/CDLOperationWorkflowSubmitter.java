@@ -2,9 +2,16 @@ package com.latticeengines.apps.cdl.workflow;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +34,17 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
@@ -49,6 +60,11 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private ActionService actionService;
 
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    private String executionId;
+
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace,
             MaintenanceOperationConfiguration maintenanceOperationConfiguration, WorkflowPidWrapper pidWrapper) {
@@ -60,7 +76,11 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
-        if (!dataFeedProxy.lockExecution(customerSpace.toString(), DataFeedExecutionJobType.CDLOperation)) {
+        checkDelete(customerSpace, maintenanceOperationConfiguration);
+        executionId = dataFeedProxy.lockExecution(customerSpace.toString(),
+                DataFeedExecutionJobType.CDLOperation).toString();
+        log.info("executionId = " + executionId);
+        if (StringUtils.isEmpty(executionId)) {
             String errorMessage;
             if (DataFeed.Status.ProcessAnalyzing.equals(dataFeedStatus)) {
                 errorMessage = "You cannot perform delete action while PA is running";
@@ -80,7 +100,6 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Action=%s", action));
         CDLOperationWorkflowConfiguration configuration = generateConfiguration(customerSpace,
                 maintenanceOperationConfiguration, action.getPid(), initialStatus);
-
         log.info(String.format("Submitting CDL operation workflow for customer %s", customerSpace));
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
@@ -166,7 +185,8 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
-                        .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName)//
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_EXECUTION_ID, executionId)//
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()).build())
                 .build();
     }
@@ -196,5 +216,49 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
             fileName = String.format("Transactions, Data during %s - %s", start, end);
         }
         return fileName;
+    }
+
+    private void checkDelete(CustomerSpace customerSpace,
+                             MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+        Set<BusinessEntity> inusedEntity = new HashSet();
+        List<Action> allAction = actionService.findAll();
+        List<String> jobPidStrs = allAction.stream()
+                .filter(action -> action.getType() == ActionType.CDL_OPERATION_WORKFLOW && action.getTrackingPid() != null && action.getActionStatus() != ActionStatus.CANCELED)
+                .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
+        log.info(String.format("JobPidStrs are %s", jobPidStrs));
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobPids(jobPidStrs,
+                customerSpace.toString());
+        List<Long> runningJobPids = CollectionUtils.isEmpty(jobs)
+                ? Collections.emptyList()
+                : jobs.stream().filter(
+                job -> job.getJobStatus() == JobStatus.PENDING || job.getJobStatus() == JobStatus.RUNNING)
+                .map(Job::getPid).collect(Collectors.toList());
+        log.info("runningJobPids is :" + runningJobPids.toString());
+        List<Action> inuseActions = allAction.stream()
+                .filter(action -> action.getType() == ActionType.CDL_OPERATION_WORKFLOW && runningJobPids.contains(action.getTrackingPid()))
+                .collect(Collectors.toList());
+
+        for (Action action : inuseActions) {
+            CleanupActionConfiguration cleanupActionConfiguration =
+                    (CleanupActionConfiguration) action.getActionConfiguration();
+            inusedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
+        }
+        Set<BusinessEntity> curEntity = new HashSet();
+        if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
+            BusinessEntity businessEntity = ((CleanupOperationConfiguration) maintenanceOperationConfiguration)
+                    .getEntity();
+            if (businessEntity == null) {
+                curEntity.add(BusinessEntity.Account);
+                curEntity.add(BusinessEntity.Contact);
+                curEntity.add(BusinessEntity.Product);
+                curEntity.add(BusinessEntity.Transaction);
+            } else {
+                curEntity.add(businessEntity);
+            }
+        }
+        curEntity.retainAll(inusedEntity);//Take the intersection of two sets
+        if (curEntity.size() > 0) {
+            throw new RuntimeException("You can not submit more than one delete per entity");
+        }
     }
 }
