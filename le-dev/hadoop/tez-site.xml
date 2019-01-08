@@ -33,4 +33,12 @@
         <name>tez.tez-ui.history-url.base</name>
         <value>http://localhost:8001/tez-ui/</value>
     </property>
+    <property>
+        <name>tez.am.launch.cmd-opts</name>
+        <value>-XX:+UseNUMA -XX:+UseG1GC</value>
+    </property>
+    <property>
+        <name>tez.task.launch.cmd-opts</name>
+        <value>-XX:+UseNUMA -XX:+UseG1GC</value>
+    </property>
 </configuration>

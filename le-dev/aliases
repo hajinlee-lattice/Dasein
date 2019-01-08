@@ -109,6 +109,7 @@ alias le-lint='bash $WSHOME/le-dev/scripts/lint.sh'
 
 alias emr-ip='bash $WSHOME/le-dev/scripts/emr_ip.sh'
 alias ministack-ip='bash $WSHOME/le-dev/scripts/ministack_ip.sh'
+alias emr-log='python $WSHOME/le-dev/scripts/emr_log.py'
 
 alias zk-qa='zk-shell 10.141.1.50,10.141.201.240,10.141.101.157'
 alias zk-prod='zk-shell zklayer4.prod.lattice.local,zklayer5.prod.lattice.local,zklayer6.prod.lattice.local'
