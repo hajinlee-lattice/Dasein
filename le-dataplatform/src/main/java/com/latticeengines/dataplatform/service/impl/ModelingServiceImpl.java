@@ -122,7 +122,7 @@ public class ModelingServiceImpl implements ModelingService {
     @Value("${dataplatform.container.memory}")
     private int memory;
 
-    @Value("${dataplatform.container.mapreduce.memory}")
+    @Value("${dataplatform.container.sample.mapreduce.memory}")
     private int samplingMapReduceMemorySize;
 
     @Value("${dataplatform.hdfs.stack:}")
