@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -104,9 +105,17 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             log.error("Failed to save merged products to table " + table.getName());
         }
 
+        // upsert product table
         dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(),
                 TableRoleInCollection.ConsolidatedProduct, inactive);
         log.info(String.format("Upsert table %s to role %s, version %s.", table.getName(), TableRoleInCollection.ConsolidatedProduct, inactive));
+
+        // update data collection status
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setProductCount(Long.valueOf(String.valueOf(mergeReport.get("Merged_NumProductIds"))));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
+        log.info("MergeProduct step: dataCollection Status is " + JsonUtils.serialize(detail));
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
 
         generateReport();
     }
