@@ -120,7 +120,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace);
 
-        if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
+        if (dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
             String errorMessage;
             if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
                 errorMessage = String.format(
