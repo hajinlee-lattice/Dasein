@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.aws.LEApplicationId;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.network.exposed.dataplatform.JobInterface;
@@ -35,7 +35,7 @@ public class JobResource implements JobInterface {
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     public JobStatus getJobStatus(@PathVariable String applicationId) {
-        if (!LEApplicationId.isAwsBatchJob(applicationId)) {
+        if (!AwsApplicationId.isAwsBatchJob(applicationId)) {
             return jobService.getJobStatus(applicationId);
         } else {
             return jobService.getAwsBatchJobStatus(applicationId);
