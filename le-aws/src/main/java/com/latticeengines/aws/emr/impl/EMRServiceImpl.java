@@ -2,6 +2,9 @@ package com.latticeengines.aws.emr.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -21,8 +24,6 @@ import com.amazonaws.services.elasticmapreduce.model.ClusterState;
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
-import com.amazonaws.services.elasticmapreduce.model.DescribeSecurityConfigurationRequest;
-import com.amazonaws.services.elasticmapreduce.model.DescribeSecurityConfigurationResult;
 import com.amazonaws.services.elasticmapreduce.model.Instance;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupModifyConfig;
@@ -36,10 +37,8 @@ import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsResult;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.emr.EMRService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Service("emrService")
@@ -79,26 +78,6 @@ public class EMRServiceImpl implements EMRService {
             }
         }
         return masterIp;
-    }
-
-    @Override
-    public boolean isEncrypted(String clusterId) {
-        boolean encrypted = false;
-        AmazonElasticMapReduce emr = getEmr();
-        if (StringUtils.isNotBlank(clusterId)) {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
-                    Collections.singleton(NoSuchEntityException.class));
-            DescribeClusterResult cluster = retryTemplate.execute(context -> //
-                    emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
-            String securityConf = cluster.getCluster().getSecurityConfiguration();
-            DescribeSecurityConfigurationRequest request = //
-                    new DescribeSecurityConfigurationRequest().withName(securityConf);
-            DescribeSecurityConfigurationResult result = retryTemplate.execute(context ->
-                    emr.describeSecurityConfiguration(request));
-            JsonNode jsonNode = JsonUtils.deserialize(result.getSecurityConfiguration(), JsonNode.class);
-            encrypted = jsonNode.get("EncryptionConfiguration").get("EnableAtRestEncryption").asBoolean();
-        }
-        return encrypted;
     }
 
     @Override
@@ -167,17 +146,7 @@ public class EMRServiceImpl implements EMRService {
 
     @Override
     public String getClusterId(String clusterName) {
-        AmazonElasticMapReduce emr = getEmr();
-        RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate( //
-                5, 5000L, 2.0D, null);
-        ListClustersResult clustersResult = retryTemplate.execute(context -> {
-            if (context.getRetryCount() > 0) {
-                log.info(String.format("(attempt=%d) list emr clusters", context.getRetryCount() + 1));
-            }
-            ListClustersRequest request = new ListClustersRequest().withClusterStates(ClusterState.RUNNING,
-                    ClusterState.WAITING);
-            return emr.listClusters(request);
-        });
+        ListClustersResult clustersResult = listClusters();
         for (ClusterSummary summary : clustersResult.getClusters()) {
             if (summary.getName().endsWith(clusterName)) {
                 log.info("Found an EMR cluster named " + summary.getName());
@@ -185,6 +154,30 @@ public class EMRServiceImpl implements EMRService {
             }
         }
         return null;
+    }
+
+    public List<ClusterSummary> findClusters(Predicate<ClusterSummary> filter) {
+        ListClustersResult clustersResult = listClusters();
+        if (clustersResult != null) {
+            return clustersResult.getClusters()
+                    .stream().filter(filter).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private ListClustersResult listClusters() {
+        AmazonElasticMapReduce emr = getEmr();
+        RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate( //
+                5, 5000L, 2.0D, null);
+        return retryTemplate.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info(String.format("(attempt=%d) list emr clusters", context.getRetryCount() + 1));
+            }
+            ListClustersRequest request = new ListClustersRequest().withClusterStates(ClusterState.RUNNING,
+                    ClusterState.WAITING);
+            return emr.listClusters(request);
+        });
     }
 
     @VisibleForTesting

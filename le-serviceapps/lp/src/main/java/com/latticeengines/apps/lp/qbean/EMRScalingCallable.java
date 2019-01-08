@@ -1,16 +1,21 @@
 package com.latticeengines.apps.lp.qbean;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
@@ -30,6 +35,8 @@ class EMRScalingCallable implements Callable<Boolean> {
     private EMRCacheService emrCacheService;
 
     private EMREnvService emrEnvService;
+
+    private LoadingCache<String, List<ClusterSummary>> clusterSummaryCache;
 
     private void setScalingClusters(List<String> scalingClusters) {
         this.scalingClusters = scalingClusters;
@@ -53,13 +60,25 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
+        initClusterIdCache();
         try {
             if (CollectionUtils.isNotEmpty(scalingClusters)) {
-                log.info("Invoking EMRScalingCallable. Scaling clusters: " + StringUtils.join(scalingClusters));
-                List<Runnable> runnables = scalingClusters.stream() //
-                        .filter(emrCluster -> StringUtils.isNotBlank(emrCacheService.getClusterId(emrCluster))) //
-                        .map(emrCluster -> new EMRScalingRunnable(emrCluster, minTaskNodes, emrService, emrCacheService, emrEnvService)) //
-                        .collect(Collectors.toList());
+                List<Runnable> runnables = new ArrayList<>();
+                for (String pattern: scalingClusters) {
+                    List<ClusterSummary> clusterSummaries = clusterSummaryCache.get(pattern);
+                    List<String> names = new ArrayList<>();
+                    if (CollectionUtils.isNotEmpty(clusterSummaries)) {
+                        clusterSummaries.forEach(summary -> {
+                            String clusterId = summary.getId();
+                            String clusterName = summary.getName();
+                            names.add(clusterName);
+                            runnables.add(new EMRScalingRunnable(clusterName, clusterId, //
+                                    minTaskNodes, emrService, emrCacheService, emrEnvService));
+                        });
+                    }
+                    log.info(String.format("Found %d clusters by pattern [%s]: %s", //
+                            CollectionUtils.size(names), pattern, names));
+                }
                 if (CollectionUtils.size(runnables) == 1) {
                     runnables.get(0).run();
                 } else {
@@ -70,6 +89,27 @@ class EMRScalingCallable implements Callable<Boolean> {
             log.error("Failed to run emr scaling job.", e);
         }
         return true;
+    }
+
+    private void initClusterIdCache() {
+        if (clusterSummaryCache == null) {
+            synchronized (this) {
+                if (clusterSummaryCache == null) {
+                    clusterSummaryCache = Caffeine.newBuilder() //
+                            .maximumSize(100) //
+                            .expireAfterWrite(10, TimeUnit.MINUTES) //
+                            .build(this::loadClusterSummaries);
+                }
+            }
+        }
+    }
+
+    private List<ClusterSummary> loadClusterSummaries(String pattern) {
+        Pattern regex = Pattern.compile(pattern);
+        return emrService.findClusters(clusterSummary -> {
+            String name = clusterSummary.getName();
+            return regex.matcher(name).matches();
+        });
     }
 
     static Builder builder() {

@@ -69,13 +69,13 @@ public class EMRScalingRunnable implements Runnable {
     private InstanceGroup taskGrp;
     private InstanceGroup coreGrp = null;
 
-    EMRScalingRunnable(String emrCluster, int minTaskNodes, EMRService emrService, EMRCacheService emrCacheService, //
+    EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, EMRService emrService, EMRCacheService emrCacheService, //
                        EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
         this.minTaskNodes = minTaskNodes;
         this.emrService = emrService;
         this.emrEnvService = emrEnvService;
-        this.clusterId = emrCacheService.getClusterId(emrCluster);
+        this.clusterId = clusterId;
     }
 
     @Override

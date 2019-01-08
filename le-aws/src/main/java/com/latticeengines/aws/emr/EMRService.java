@@ -1,5 +1,9 @@
 package com.latticeengines.aws.emr;
 
+import java.util.List;
+import java.util.function.Predicate;
+
+import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 
 public interface EMRService {
@@ -9,8 +13,6 @@ public interface EMRService {
     String getMasterIp(String clusterId);
 
     boolean isActive(String clusterId);
-
-    boolean isEncrypted(String clusterId);
 
     String getLogBucket(String clusterId);
 
@@ -23,5 +25,7 @@ public interface EMRService {
     void scaleTaskGroup(String clusterId, int targetCount);
 
     void scaleTaskGroup(InstanceGroup taskGrp, int targetCount);
+
+    List<ClusterSummary> findClusters(Predicate<ClusterSummary> filter);
 
 }
