@@ -825,49 +825,49 @@ angular.module('common.datacloud.query')
         return deferred.promise;
     };
 
-        this.GetEntitiesCounts = function(query, cancelPrevious) {
-            var deferred = $q.defer();
+    this.GetEntitiesCounts = function(query, cancelPrevious) {
+        var deferred = $q.defer();
 
-            if (this.cancelerCounts) {
-                this.cancelerCounts.resolve("cancelled");
+        if (this.cancelerCounts) {
+            this.cancelerCounts.resolve("cancelled");
+        }
+
+        this.cancelerCounts = $q.defer();
+
+        SegmentStore.sanitizeSegment(query);
+
+        $http({
+            method: 'POST',
+            url: '/pls/entities/counts',
+            data: query,
+            timeout: this.cancelerCounts.promise,
+            headers: {
+                'ErrorDisplayMethod': 'none'
             }
+        }).success(function(result) {
+            deferred.resolve(result);
+        }).error(function(result) {
+            deferred.resolve(result);
+        });
 
-            this.cancelerCounts = $q.defer();
+        return deferred.promise;
+    };
 
-            SegmentStore.sanitizeSegment(query);
+    this.GetDataByQuery = function(resourceType, query) {
+        var deferred = $q.defer();
 
-            $http({
-                method: 'POST',
-                url: '/pls/entities/counts',
-                data: query,
-                timeout: this.cancelerCounts.promise,
-                headers: {
-                    'ErrorDisplayMethod': 'none'
-                }
-            }).success(function(result) {
-                deferred.resolve(result);
-            }).error(function(result) {
-                deferred.resolve(result);
-            });
+        SegmentStore.sanitizeSegment(query);
 
-            return deferred.promise;
-        };
+        $http({
+            method: 'POST',
+            url: '/pls/' + resourceType + '/data',
+            data: query
+        }).success(function(result) {
+            deferred.resolve(result);
+        }).error(function(result) {
+            deferred.resolve(result);
+        });
 
-        this.GetDataByQuery = function(resourceType, query) {
-            var deferred = $q.defer();
-
-            SegmentStore.sanitizeSegment(query);
-
-            $http({
-                method: 'POST',
-                url: '/pls/' + resourceType + '/data',
-                data: query
-            }).success(function(result) {
-                deferred.resolve(result);
-            }).error(function(result) {
-                deferred.resolve(result);
-            });
-
-            return deferred.promise;
-        };
-    });
+        return deferred.promise;
+    };
+});
