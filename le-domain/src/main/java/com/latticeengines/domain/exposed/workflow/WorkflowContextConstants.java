@@ -43,5 +43,6 @@ public class WorkflowContextConstants {
         public static final String DRAINING = "DRAINING";
         public static final String RATING_ENGINE_ID = "RATING_ENGINE_ID";
         public static final String RATING_MODEL_ID = "RATING_MODEL_ID";
+        public static final String DATAFEED_EXECUTION_ID = "DATAFEED_EXECUTION_ID";
     }
 }
