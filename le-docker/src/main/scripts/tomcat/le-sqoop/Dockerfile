@@ -1,4 +1,4 @@
-FROM latticeengines/tomcat
+FROM latticeengines/tomcat-j8
 
 RUN rm -rf $CATALINA_HOME/webapps/ROOT \
     && rm -rf $CATALINA_HOME/webapps/examples \

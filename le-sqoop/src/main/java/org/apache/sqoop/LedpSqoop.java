@@ -41,15 +41,19 @@ public class LedpSqoop extends Sqoop {
     public static int runTool(String[] args, Configuration conf) {
         synchronized (LedpSqoop.class) {
             ClassLoader cl = ClassLoader.getSystemClassLoader();
-            URL[] urls = ((URLClassLoader) cl).getURLs();
-            StringBuilder sb = new StringBuilder();
-            for (URL url : urls) {
-                sb.append(url.getFile() + "\n");
+            if (cl instanceof URLClassLoader) {
+                URL[] urls = ((URLClassLoader) cl).getURLs();
+                StringBuilder sb = new StringBuilder();
+                for (URL url : urls) {
+                    sb.append(url.getFile()).append("\n");
+                }
+                log.info("Sqoop Classpath:\n" + sb.toString());
+            } else {
+                log.warn("ClassLoader is not an instance of URLClassLoader, cannot resolve the classpath");
             }
-            log.info("Sqoop Classpath:\n" + sb.toString());
 
             // Expand the options
-            String[] expandedArgs = null;
+            String[] expandedArgs;
             try {
                 expandedArgs = OptionsFileUtil.expandArguments(args);
             } catch (Exception ex) {
