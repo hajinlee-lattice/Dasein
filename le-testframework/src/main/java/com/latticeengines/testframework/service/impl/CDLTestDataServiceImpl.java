@@ -521,11 +521,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     private String servingStoreName(String tenantId, BusinessEntity entity) {
-        return NamingUtils.timestamp(tenantId + "_" + entity.name(), DATE);
-    }
-
-    private String batchStoreName(String tenantId, BusinessEntity entity) {
-        return NamingUtils.timestamp(tenantId + "_" + entity.name() + "_batch", DATE);
+        return NamingUtils.timestamp(tenantId + "_" + entity.getServingStore().name(), DATE);
     }
 
     private RetryTemplate getRedshiftRetryTemplate() {
