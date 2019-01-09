@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -85,22 +85,22 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     @Value("${pls.rating.coverageservice.threshold.parallel:3}")
     private Integer thresholdForParallelProcessing;
 
-    @Autowired
+    @Inject
     private RatingEngineService ratingEngineService;
 
-    @Autowired
+    @Inject
     private SegmentService segmentService;
 
-    @Autowired
+    @Inject
     private EntityProxy entityProxy;
 
-    @Autowired
+    @Inject
     private EventProxy eventProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
+    @Inject
     private RatingProxy ratingProxy;
 
     private ForkJoinPool tpForParallelStream;
@@ -627,12 +627,13 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
             RestrictionBuilder unscoredRestrictionbuilder = Restriction.builder().let(BusinessEntity.Rating, ratingField);
             RestrictionBuilder builder = Restriction.builder().and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestrictionbuilder.isNull().build());
-            
+
             FrontEndRestriction unscoredRestriction = new FrontEndRestriction(builder.build());
             FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
-            
+
             unscoredFrontEndQuery.setAccountRestriction(unscoredRestriction);
-            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(),unscoredFrontEndQuery));
+            unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
+            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
             if (targetSegment != null) {
 //                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
 //                    coverageInfo.setUnscoredAccountCount(targetSegment.getAccounts() - coverageInfo.getAccountCount());
