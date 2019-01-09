@@ -12,7 +12,7 @@ export LE_PROPDIR=$WSHOME/le-config/conf/env/${LE_ENVIRONMENT}
 echo "Using LE_PROPDIR=${LE_PROPDIR}"
 echo "Using LE_CLIENT_ADDRESS=${LE_CLIENT_ADDRESS}"
 
-if [[ ! -z "${J11_HOME}" ]]; then
+if [[ -n "${J11_HOME}" ]]; then
     export JAVA_HOME=${J11_HOME}
 fi
 
@@ -25,9 +25,10 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1098"
 export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
-if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseNUMA"
+if [[ -n $(java -version 2>&1 |  grep "11.0") ]]; then
     echo "Java version: $(java -version 2>&1)"
-    if [[ ! -z "${JPDA_PORT}" ]]; then
+    if [[ -n "${JPDA_PORT}" ]]; then
         export JAVA_OPTS="${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:4001"
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseParallelGC"
     else
@@ -36,7 +37,7 @@ if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseZGC"
     fi
 else
-    if [[ ! -z "${JPDA_PORT}" ]]; then
+    if [[ -n "${JPDA_PORT}" ]]; then
         export JAVA_OPTS="${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4001"
     else
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC"
