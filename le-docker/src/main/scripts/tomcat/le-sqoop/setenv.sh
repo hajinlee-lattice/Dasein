@@ -5,14 +5,9 @@ echo "CATALINA_HOME=${CATALINA_HOME}"
 
 export LE_PROPDIR="/etc/ledp"
 
-export JAVA_OPTS="-Duser.timezone=US/Eastern -Dfile.encoding=UTF8"
+export CATALINA_OPTS="-Duser.timezone=UTC -Dfile.encoding=UTF8 -Dlog4j.configurationFile=${CATALINA_HOME}/conf/log4j2.xml"
+export CLASSPATH="${HADOOP_CONF_DIR}:${HADOOP_COMMON_DIR}:${JAVA_HOME}/lib/tools.jar"
 
-if [ ! -z "${CATALINA_OPTS}" ]; then
-    export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
-fi
-export CATALINA_CLASSPATH="${CLASSPATH}:${HADOOP_CONF_DIR}:${HADOOP_COMMON_DIR}:${JAVA_HOME}/lib/tools.jar"
-
-echo ${JAVA_OPTS}
-echo ${CATALINA_CLASSPATH}
+echo ${CATALINA_OPTS}
 
 export HADOOP_USER_NAME=hdfs

@@ -37,8 +37,8 @@
         </Console>
         <RollingFile
                 name="RollingFile"
-                fileName="${log.dir}/le-{{APP}}.log"
-                filePattern="${log.dir}/le-{{APP}}-%d{yyyy-MM-dd}-%i.log.gz"
+                fileName="${log.dir}/le-sqoop.log"
+                filePattern="${log.dir}/le-sqoop-%d{yyyy-MM-dd}-%i.log.gz"
                 ignoreExceptions="false">
             <PatternLayout>
                 <Pattern>${log.pattern}</Pattern>
