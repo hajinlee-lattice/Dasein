@@ -1,4 +1,4 @@
-FROM latticeengines/tomcat:9.0
+FROM latticeengines/tomcat
 
 RUN rm -rf $CATALINA_HOME/webapps/ROOT \
     && rm -rf $CATALINA_HOME/webapps/examples \
@@ -24,7 +24,7 @@ COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
-COPY log4j.xml $CATALINA_HOME/conf/log4j.xml
+COPY log4j2.xml $CATALINA_HOME/conf/log4j2.xml
 COPY catalina.sh $CATALINA_HOME/bin/catalina.sh
 COPY setenv.sh $CATALINA_HOME/bin/setenv.sh
 
