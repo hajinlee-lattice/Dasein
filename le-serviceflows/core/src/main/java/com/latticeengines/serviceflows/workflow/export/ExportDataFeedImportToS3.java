@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,19 +39,23 @@ public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3S
             return;
         }
         List<String> pathList = eaiImportJobDetail.getPathDetail();
-        pathList.forEach(p -> {
-            p = pathBuilder.getFullPath(p);
-            String hdfsPrefix = "/Pods/" + podId;
-            int index = p.indexOf(hdfsPrefix);
-            if (index > 0)
-                p = p.substring(index);
-            String tgtDir = pathBuilder.convertAtlasTableDir(p, podId, tenantId, s3Bucket);
-            requests.add(new ImportExportRequest(p, tgtDir));
-        });
-        String filePath = getStringValueFromContext(WorkflowContextConstants.Outputs.EAI_JOB_INPUT_FILE_PATH);
-        if (StringUtils.isNotBlank(filePath)) {
-            String tgtDir = pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket);
-            requests.add(new ImportExportRequest(filePath, tgtDir));
+        if (CollectionUtils.isNotEmpty(pathList)) {
+            pathList.forEach(p -> {
+                p = pathBuilder.getFullPath(p);
+                String hdfsPrefix = "/Pods/" + podId;
+                int index = p.indexOf(hdfsPrefix);
+                if (index > 0)
+                    p = p.substring(index);
+                String tgtDir = pathBuilder.convertAtlasTableDir(p, podId, tenantId, s3Bucket);
+                requests.add(new ImportExportRequest(p, tgtDir));
+            });
+            String filePath = getStringValueFromContext(WorkflowContextConstants.Outputs.EAI_JOB_INPUT_FILE_PATH);
+            if (StringUtils.isNotBlank(filePath)) {
+                String tgtDir = pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket);
+                requests.add(new ImportExportRequest(filePath, tgtDir));
+            }
+        } else {
+            log.warn("There's no avro path found to export!");
         }
 
     }
