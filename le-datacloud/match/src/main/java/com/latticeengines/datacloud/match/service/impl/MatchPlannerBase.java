@@ -189,22 +189,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
         Map<MatchKey, List<String>> keyMap = null;
         if (isEntityMatch) {
-            // For now we assume that there is an Entity Match Key Map for Account.  This was checked during validation.
-            MatchInput.EntityKeyMap accountEntityKeyMap = null;
-            // Find the Entity Match Key Map for Account and create a key position map.  If not present, throw an
-            // exception.
-            for (MatchInput.EntityKeyMap entityKeyMap : input.getEntityKeyMapList()) {
-                if (BusinessEntity.Account.name().equalsIgnoreCase(entityKeyMap.getBusinessEntity())) {
-                    keyMap = entityKeyMap.getKeyMap();
-                }
-            }
-            if (keyMap == null) {
-                throw new UnsupportedOperationException("Entity Key Map must contain Account Key Map");
-            }
+            // EntityMatchKeyMaps should have a non-null entry for the Account Business Entity since this was checked
+            // during validation.  The Key Map for this entry should be non-null since this was also checked.
+            keyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name()).getKeyMap();
         } else {
             keyMap = input.getKeyMap();
         }
-
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input.getFields(), keyMap);
 
         List<InternalOutputRecord> records = new ArrayList<>();
@@ -269,7 +259,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
-        output.setEntityKeyMap(input.getEntityKeyMapList());
+        output.setEntityKeyMaps(input.getEntityKeyMaps());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
         if (CollectionUtils.isNotEmpty(metadatas)) {

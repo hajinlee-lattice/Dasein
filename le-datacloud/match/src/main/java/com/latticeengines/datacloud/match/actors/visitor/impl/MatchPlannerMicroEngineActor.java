@@ -107,13 +107,15 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
         }
 
         // Not sure if this is necessary, but for now double check KeyMap.
-        Map<MatchKey, List<String>> keyMap = null;
-        for (MatchInput.EntityKeyMap entityKeyMap : matchTraveler.getMatchInput().getEntityKeyMapList()) {
-            if (matchTraveler.getEntity().equals(entityKeyMap.getBusinessEntity())) {
-                keyMap = entityKeyMap.getKeyMap();
-            }
+        if (MapUtils.isEmpty(matchTraveler.getMatchInput().getEntityKeyMaps())) {
+            throw new IllegalArgumentException("MatchTraveler's MatchInput EntityKeyMaps should not be empty");
         }
-        if (keyMap == null) {
+        Map<String, MatchInput.EntityKeyMap> entityKeyMaps = matchTraveler.getMatchInput().getEntityKeyMaps();
+        if (!entityKeyMaps.containsKey(matchTraveler.getEntity())) {
+            throw new IllegalArgumentException("MatchTraveler missing EntityMatchKey map for match entity "
+                    + matchTraveler.getEntity());
+        }
+        if (MapUtils.isEmpty(entityKeyMaps.get(matchTraveler.getEntity()).getKeyMap())) {
             throw new IllegalArgumentException("MatchTraveler missing MatchKey map for match entity "
                     + matchTraveler.getEntity());
         }
@@ -146,12 +148,8 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
 
         MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
 
-        Map<MatchKey, List<String>> keyMap = null;
-        for (MatchInput.EntityKeyMap entityKeyMap : matchTraveler.getMatchInput().getEntityKeyMapList()) {
-            if (matchTraveler.getEntity().equals(entityKeyMap.getBusinessEntity())) {
-                keyMap = entityKeyMap.getKeyMap();
-            }
-        }
+        Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
+                .get(matchTraveler.getEntity()).getKeyMap();
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple);
 
         // Send domain data to DomainCollectionService since this was not done outside the Actor system.

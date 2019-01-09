@@ -48,7 +48,9 @@ public class MatchOutput {
     // BEGIN CDL MATCH PROPERTIES
     // ====================
 
-    private List<MatchInput.EntityKeyMap> entityKeyMap;
+    // A map from Business Entity (as a String) to EntityKeyMap.
+    private Map<String, MatchInput.EntityKeyMap> entityKeyMaps;
+
 
     // ====================
     // END CDL MATCH PROPERTIES
@@ -63,7 +65,6 @@ public class MatchOutput {
         this.rootOperationUID = rootOperationUID;
     }
 
-    // TODO(dzheng):  Why are the @JsonProperty flags on the fields in MatchInput and on the setter and getter here?
     @JsonProperty("InputFields")
     public List<String> getInputFields() {
         return inputFields;
@@ -204,9 +205,13 @@ public class MatchOutput {
         return getOutputFields().size();
     }
 
-    @JsonProperty("EntityKeyMap")
-    public List<MatchInput.EntityKeyMap> getEntityKeyMap() { return entityKeyMap; }
+    @JsonProperty("EntityKeyMaps")
+    public Map<String, MatchInput.EntityKeyMap> getEntityKeyMaps() {
+        return entityKeyMaps;
+    }
 
-    @JsonProperty("EntityKeyMap")
-    public void setEntityKeyMap(List<MatchInput.EntityKeyMap> entityKeyMap) { this.entityKeyMap = entityKeyMap; }
+    @JsonProperty("EntityKeyMaps")
+    public void setEntityKeyMaps(Map<String, MatchInput.EntityKeyMap> entityKeyMaps) {
+        this.entityKeyMaps = entityKeyMaps;
+    }
 }

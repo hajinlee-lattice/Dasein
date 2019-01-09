@@ -105,14 +105,8 @@ public class MatchInputValidator {
         // Verify that column selection is set appropriately for Entity Match.
         validateEntityMatchColumnSelection(input);
 
-        // Verify whether decision graph and entity are matched in match
-        // input
+        // Verify whether decision graph and entity are matched in MatchInput.
         validateEntityMatchDecisionGraph(input, decisionGraph);
-
-        // Verify that EntityKeyMap is set.
-        if (CollectionUtils.isEmpty(input.getEntityKeyMapList())) {
-            throw new IllegalArgumentException("MatchInput for Entity Match must contain EntityKeyMap.");
-        }
 
         // For now, Entity Match does not support automatic key resolution.
         if (!input.isSkipKeyResolution()) {
@@ -120,44 +114,43 @@ public class MatchInputValidator {
                     + "Automatic match key resolution not yet supported.");
         }
 
-        // TODO(jwinter): Remove this constraint once we start supporting other entities.
-        // For now, require that the Entity Key Map has a Key Map for Account Entity.
-        boolean hasAccountKeyMap = false;
+        // Verify that EntityKeyMap is set.
+        if (MapUtils.isEmpty(input.getEntityKeyMaps())) {
+            throw new IllegalArgumentException("MatchInput for Entity Match must contain EntityKeyMap.");
+        }
 
-        for (EntityKeyMap entityKeyMap : input.getEntityKeyMapList()) {
+        // TODO: Add other code to process other EntityKeyMaps besides the Account EntityKeyMap.
+        for (EntityKeyMap entityKeyMap : input.getEntityKeyMaps().values()) {
+            entityKeyMap.setKeyMap(resolveKeyMap(entityKeyMap.getKeyMap(), input.getFields(), true));
+        }
+
+        if (input.getEntityKeyMaps().containsKey(BusinessEntity.Account.name())) {
+            EntityKeyMap entityKeyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name());
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
-            entityKeyMap.setKeyMap(resolveKeyMap(keyMap, input.getFields(), true));
 
-            // TODO(jwinter): Add support for other Business Entities.
-            // For now, we only handle validation of Account Entity keys.
-            if (BusinessEntity.Account.name().equalsIgnoreCase(entityKeyMap.getBusinessEntity())) {
-                hasAccountKeyMap = true;
+            validateAccountMatchKeys(keyMap.keySet());
 
-                validateAccountMatchKeys(keyMap.keySet());
-
-                // For the Account Entity Key Map, also validate that the System ID priority matches the
-                // order in the key map.
-                if (keyMap.containsKey(MatchKey.SystemId)) {
-                    List<String> values = keyMap.get(MatchKey.SystemId);
-                    if (values.size() != entityKeyMap.getSystemIdPriority().size()) {
+            // For the Account Entity Key Map, also validate that the System ID priority matches the
+            // order in the key map.
+            if (keyMap.containsKey(MatchKey.SystemId)) {
+                List<String> values = keyMap.get(MatchKey.SystemId);
+                if (values.size() != entityKeyMap.getSystemIdPriority().size()) {
+                    throw new IllegalArgumentException(
+                            "System ID MatchKey values and System ID priority list are not the same size.");
+                }
+                if (entityKeyMap.getSystemIdPriority().isEmpty()) {
+                    throw new IllegalArgumentException("System ID priority list is empty.");
+                }
+                for (int i = 0; i < values.size(); i++) {
+                    if (!values.get(i).equals(entityKeyMap.getSystemIdPriority().get(i))) {
                         throw new IllegalArgumentException(
-                                "System ID MatchKey values and System ID priority list are not the same size.");
-                    }
-                    if (entityKeyMap.getSystemIdPriority().isEmpty()) {
-                        throw new IllegalArgumentException("System ID priority list is empty.");
-                    }
-                    for (int i = 0; i < values.size(); i++) {
-                        if (!values.get(i).equals(entityKeyMap.getSystemIdPriority().get(i))) {
-                            throw new IllegalArgumentException(
-                                    "System ID MatchKey values and System ID priority list mismatch at index " + i
-                                            + ".");
-                        }
+                                "System ID MatchKey values and System ID priority list mismatch at index " + i + ".");
                     }
                 }
             }
-        }
-
-        if (!hasAccountKeyMap) {
+        } else {
+            // TODO(jwinter): Remove this constraint once we start supporting other entities.
+            // For now, require that the map of EntityKeyMaps has a EntityKeyMap for Account Entity.
             throw new UnsupportedOperationException(
                     "Entity Map currently only supports Account match and requires this entity's key map.");
         }
@@ -226,8 +219,8 @@ public class MatchInputValidator {
     private static Map<MatchKey, List<String>> resolveKeyMap(Map<MatchKey, List<String>> keyMap,
                                                              List<String> inputFields, boolean isSkipKeyResolution) {
         Map<MatchKey, List<String>> newKeyMap = keyMap;
-        // TODO(jwinter): Automatic key resolution is not allowed for the Entity Match case.  This code would have
-        //     to be changed to work because it is not set up to handle multiple key maps, one for each entity, and
+        // TODO: Automatic key resolution is not allowed for the Entity Match case.  This code would have to be
+        //     changed to work because it is not set up to handle multiple key maps, one for each entity, and
         //     would currently populate each entity's key map with all input fields.
         if (!isSkipKeyResolution) {
             newKeyMap = MatchKeyUtils.resolveKeyMap(inputFields);

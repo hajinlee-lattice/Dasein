@@ -201,9 +201,8 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("TargetEntity")
     String targetEntity;
 
-    // TODO(jwinter): Change to map from BusinessEntity (as String) to EntityKeyMap.
-    @JsonProperty("EntityKeyMap")
-    private List<EntityKeyMap> entityKeyMapList;
+    // A map from Business Entity (as a String) to EntityKeyMap.
+    private Map<String, EntityKeyMap> entityKeyMaps;
 
     // ====================
     // END ENTITY MATCH PROPERTIES
@@ -588,12 +587,12 @@ public class MatchInput implements Fact, Dimension {
         this.targetEntity = targetEntity;
     }
 
-    public List<EntityKeyMap> getEntityKeyMapList() {
-        return entityKeyMapList;
+    public Map<String, EntityKeyMap> getEntityKeyMaps() {
+        return entityKeyMaps;
     }
 
-    public void setEntityKeyMapList(List<EntityKeyMap> entityKeyMapList) {
-        this.entityKeyMapList = entityKeyMapList;
+    public void setEntityKeyMaps(Map<String, EntityKeyMap> entityKeyMaps) {
+        this.entityKeyMaps = entityKeyMaps;
     }
 
     @Override

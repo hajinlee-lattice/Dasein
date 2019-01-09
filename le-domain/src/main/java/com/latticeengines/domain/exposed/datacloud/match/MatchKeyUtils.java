@@ -16,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
+//import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 
@@ -236,17 +238,22 @@ public class MatchKeyUtils {
         return String.join(",", sortedKeys);
     }
 
+    // Create a Map from field name to its column position.
+    private static Map<String, Integer> getFieldPositions(MatchInput input) {
+        return IntStream.range(0, input.getFields().size()).boxed()
+                .collect(Collectors.toMap(pos -> input.getFields().get(pos), pos -> pos));
+    }
+
     /**
      * Field name is treated as case sensitive, because field name in avro data
      * in Dynamo is case sensitive
-     * 
+     *
      * @param input
      * @return MatchKey -> list of match key's corresponding field indexes in
      *         MatchInput.data array
      */
     public static Map<MatchKey, List<Integer>> getKeyPositionMap(MatchInput input) {
-        Map<String, Integer> fieldPos = IntStream.range(0, input.getFields().size()).boxed()
-                .collect(Collectors.toMap(pos -> input.getFields().get(pos), pos -> pos));
+        Map<String, Integer> fieldPos = getFieldPositions(input);
 
         Map<MatchKey, List<Integer>> posMap = input.getKeyMap().keySet().stream()
                 .collect(Collectors.toMap(key -> key,
@@ -259,26 +266,24 @@ public class MatchKeyUtils {
     /**
      * Field name is treated as case sensitive, because field name in avro data
      * in Dynamo is case sensitive
-     * 
+     *
      * @param input
      * @return Entity -> (MatchKey -> list of match key's corresponding field
      *         indexes in MatchInput.data array)
      */
     public static Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMap(MatchInput input) {
-        Map<String, Integer> fieldPos = IntStream.range(0, input.getFields().size()).boxed()
-                .collect(Collectors.toMap(pos -> input.getFields().get(pos), pos -> pos));
+        Map<String, Integer> fieldPos = getFieldPositions(input);
 
-        Map<String, Map<MatchKey, List<Integer>>> posMap = input.getEntityKeyMapList().stream()
+        Map<String, Map<MatchKey, List<Integer>>> posMap = input.getEntityKeyMaps().entrySet().stream()
                 .collect(Collectors.toMap( //
-                        EntityKeyMap::getBusinessEntity, //
-                        entityKeyMap -> entityKeyMap.getKeyMap().keySet().stream()
+                        Map.Entry::getKey, //
+                        entityKeyMapEntry -> entityKeyMapEntry.getValue().getKeyMap().entrySet().stream()
                                 .collect(Collectors.toMap( //
-                                        key -> key, //
-                                        key -> entityKeyMap.getKeyMap().get(key).stream()
+                                        Map.Entry::getKey, //
+                                        keyMapEntry -> keyMapEntry.getValue().stream()
                                                 .map(field -> fieldPos.get(field)).collect(Collectors.toList())))));
 
         return posMap;
 
     }
-
 }

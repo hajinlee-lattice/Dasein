@@ -225,7 +225,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             matchInput.setTargetEntity(BusinessEntity.Account.name());
 
             EntityKeyMap entityKeyMap = new EntityKeyMap();
-            entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
             entityKeyMap.setKeyMap(getMatchKeys());
             // TODO(lming): Not sure how the System ID priority is supposed to get set up.  For now, copy from the
             //     Key Map.
@@ -233,9 +232,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     && entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
                 entityKeyMap.setSystemIdPriority(entityKeyMap.getKeyMap().get(MatchKey.SystemId));
             }
-            List<EntityKeyMap> entityKeyMapList = new ArrayList<>();
-            entityKeyMapList.add(entityKeyMap);
-            matchInput.setEntityKeyMapList(entityKeyMapList);
+            Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
+            entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
+            matchInput.setEntityKeyMaps(entityKeyMaps);
         }
         // TODO(lming): Need to set targetEntity and allocateId.
         config.setMatchInput(matchInput);

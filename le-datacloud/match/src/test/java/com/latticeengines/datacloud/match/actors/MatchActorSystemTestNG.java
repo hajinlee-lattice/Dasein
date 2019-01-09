@@ -37,6 +37,7 @@ import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -226,7 +227,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchInput.setUseRemoteDnB(false);
         matchInput.setTenant(new Tenant(this.getClass().getSimpleName()));
         matchInput.setAllocateId(true);
-        matchInput.setEntityKeyMapList(prepareEntityKeyMap());
+        matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setFields(Arrays.asList(DOMAIN_FIELD, DUNS_FIELD));
         try {
             DecisionGraph dg = matchDecisionGraphService.getDecisionGraph(dgName);
@@ -243,18 +244,17 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         return matchInput;
     }
 
-    private List<MatchInput.EntityKeyMap> prepareEntityKeyMap() {
-        List<MatchInput.EntityKeyMap> list = new ArrayList<>();
+    private Map<String, EntityKeyMap> prepareEntityKeyMap() {
+        Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
 
-        MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
+        EntityKeyMap entityKeyMap = new EntityKeyMap();
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList(DOMAIN_FIELD));
         keyMap.put(MatchKey.DUNS, Collections.singletonList(DUNS_FIELD));
         entityKeyMap.setKeyMap(keyMap);
-        list.add(entityKeyMap);
+        entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
 
-        return list;
+        return entityKeyMaps;
     }
 
     private List<OutputRecord> prepareData(int numRecords, String domain, String duns) {

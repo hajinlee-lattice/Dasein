@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
@@ -56,10 +57,10 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
 
         // Test MatchOutput set up.
         MatchOutput output = context.getOutput();
-        Assert.assertTrue(output.getEntityKeyMap() != null);
-        Assert.assertEquals(output.getEntityKeyMap().size(), 1);
-        MatchInput.EntityKeyMap entityKeyMap = output.getEntityKeyMap().get(0);
-        Assert.assertEquals(entityKeyMap.getBusinessEntity(), BusinessEntity.Account.name());
+        Assert.assertTrue(output.getEntityKeyMaps() != null);
+        Assert.assertEquals(output.getEntityKeyMaps().size(), 1);
+        Assert.assertTrue(output.getEntityKeyMaps().containsKey(BusinessEntity.Account.name()));
+        MatchInput.EntityKeyMap entityKeyMap = output.getEntityKeyMaps().get(BusinessEntity.Account.name());
         Assert.assertEquals(entityKeyMap.getSystemIdPriority(), Arrays.asList("AccountId", "MktoId", "SfdcId"));
     }
 
@@ -75,10 +76,8 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setAllocateId(false);
         input.setTargetEntity(BusinessEntity.Account.name());
-        input.setEntityKeyMapList(new ArrayList<>());
 
-        MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        entityKeyMap.setBusinessEntity(BusinessEntity.Account.name());
+        EntityKeyMap entityKeyMap = new EntityKeyMap();
         entityKeyMap.setSystemIdPriority(Arrays.asList("AccountId", "MktoId", "SfdcId"));
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
@@ -88,7 +87,8 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
         keyMap.put(MatchKey.SystemId, Arrays.asList("AccountId", "MktoId", "SfdcId"));
         entityKeyMap.setKeyMap(keyMap);
-        input.getEntityKeyMapList().add(entityKeyMap);
+        input.setEntityKeyMaps(new HashMap<>());
+        input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
 
         List<List<Object>> mockData = MatchInputValidatorUnitTestNG.generateMockData(100);
         input.setData(mockData);
