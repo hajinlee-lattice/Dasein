@@ -381,6 +381,8 @@ angular.module('common.datacloud.query.results', [
         if (vm.topNClicked && (vm.topNCount <= 0 || vm.topNCount == null)){
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', false);
+        } else if(!vm.recommendationCounts.launched) {
+            PlaybookWizardStore.setValidation('targets', false);
         } else {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);

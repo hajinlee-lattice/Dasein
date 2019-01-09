@@ -2,7 +2,7 @@ angular.module('lp.playbook.plays', [
     'mainApp.playbook.content.playlist.modals.deletePlayModal',
     'mainApp.appCommon.services.FilterService'
 ])
-.controller('PlayListController', function ($scope, $timeout, $element, $state, $stateParams, $interval, 
+.controller('PlayListController', function ($scope, $timeout, $element, $state, $stateParams, $interval, $filter,
     PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore, FilterService) {
 
     var vm = this,
@@ -39,15 +39,15 @@ angular.module('lp.playbook.plays', [
                         action: {}
                     },
                     {
-                        label: "Launched", 
+                        label: "Launched",  
                         action: { 
-                            launchHistory: {mostRecentLaunch: []}
+                            launchHistory: { mostRecentLaunch: { launchState: 'Launched' } }
                         }
                     },
                     {
                         label: "Unlaunched", 
                         action: { 
-                            launchHistory: {mostRecentLaunch: null}
+                            launchHistory: { mostRecentLaunch: null }
                         }
                     }
                 ]
@@ -212,6 +212,20 @@ angular.module('lp.playbook.plays', [
             label = 'ReLaunch';
         }
         return label;
+    }
+
+    vm.launchedByType = function(state, type, current) {
+        var ret = {};
+        var _filter = {};
+            _filter[type || 'playLaunch'] = { launchState: state };
+
+        var filter = {launchHistory: _filter};
+
+        var launched = $filter('filter')(vm.current.plays, filter, true);
+        if(launched) {
+            ret[type] = launched;
+        }
+        return ret[type] || 0;
     }
 
     vm.init = function($q) {
