@@ -21,7 +21,7 @@ angular
         switch (subType) {
           case "Date": {
             var cmp =
-              ret === "" ? "Ever" : QueryTreeService.transactionMap[ret];
+              ret === "" ? "EVER" : QueryTreeDateAttributeStore.dateAttributeMap[ret];
             return cmp;
           }
           default: {
@@ -47,7 +47,7 @@ angular
       }
       this.getPeriod = function(){
         var period = QueryTreeService.getPeriodValue(this.bucketrestriction, this.type, 'Date');
-        if(this.getCmp('Date') !== 'Ever'){
+        if(this.getCmp('Date') !== 'Ever' && this.getCmp('Date') !== 'IS_EMPTY'){
             return period+'(s)';
         }
       }

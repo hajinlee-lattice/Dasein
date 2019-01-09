@@ -751,7 +751,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return bucketRestriction.bkt && bucketRestriction.bkt.Vals;
         }
 
-        this.getValue = function (bucketRestriction, type, position, subType) { }
+        this.getValue = function (bucketRestriction, type, position, subType) { 
+            
+        }
 
         this.getValues = function (bucketRestriction, type, subType) {
             switch(type){
