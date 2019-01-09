@@ -104,13 +104,13 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.configFilters = angular.copy(vm.filters);
 
                     vm.configFilters.dataStores = [];
-                    if(vm.checkboxModel.datacloud) {
+                    if(vm.checkboxModel.datacloud === true) {
                         vm.configFilters.dataStores.push('DataCloud');
                     }
-                    if(vm.checkboxModel.cdl) {
+                    if(vm.checkboxModel.cdl === true) {
                         vm.configFilters.dataStores.push('CDL');
                     }
-                    if(vm.checkboxModel.customFile) {
+                    if(vm.checkboxModel.customFile === true) {
                         vm.configFilters.dataStores.push('CustomFileAttributes');
                     }
 
@@ -266,8 +266,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
             if(valid == true){
-                RatingsEngineStore.validation.training = true;
-                RatingsEngineStore.validation.refine = true;
+                RatingsEngineStore.setValidation('training', true);
+                RatingsEngineStore.setValidation('refine', true);
                 vm.recordsCountReturned = false;
                 vm.purchasesCountReturned = false;
 
@@ -319,11 +319,11 @@ angular.module('lp.ratingsengine.wizard.training', [
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                     vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
-                }, 500);
+                }, 1500);
 
             } else {
-                RatingsEngineStore.validation.training = false;
-                RatingsEngineStore.validation.refine = false;
+                RatingsEngineStore.setValidation('training', false);
+                RatingsEngineStore.setValidation('refine', false);
             }
         }
 
@@ -333,10 +333,11 @@ angular.module('lp.ratingsengine.wizard.training', [
         // ============================================================================================
         
         vm.checkForDisable = function(){
+
+            RatingsEngineStore.setValidation('training', false);
+
             if(vm.checkboxModel.datacloud == false && vm.checkboxModel.cdl == false){
-                RatingsEngineStore.setValidation("training", false);
-            } else {
-                RatingsEngineStore.setValidation("training", true);
+                RatingsEngineStore.setValidation('training', false);
             }
         }
 
@@ -356,10 +357,10 @@ angular.module('lp.ratingsengine.wizard.training', [
                         if(vm.dataStores.indexOf('DataCloud') == -1){
                             vm.configFilters.dataStores.push('DataCloud');
                         }
-                    }, 200);
+                    }, 100);
                 } else {
                     var index = vm.dataStores.indexOf('DataCloud');
-                    vm.dataStores.splice(index, 1);
+                    vm.configFilters.dataStores.splice(index, 1);
                 }
 
                 if(vm.checkboxModel.cdl) {
@@ -367,10 +368,10 @@ angular.module('lp.ratingsengine.wizard.training', [
                         if(vm.dataStores.indexOf('CDL') == -1){
                             vm.configFilters.dataStores.push('CDL');
                         }
-                    }, 200);
+                    }, 100);
                 } else {
                     var index = vm.dataStores.indexOf('CDL');
-                    vm.dataStores.splice(index, 1);
+                    vm.configFilters.dataStores.splice(index, 1);
                 }
 
                 if(vm.checkboxModel.customFile) {
@@ -381,7 +382,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                     }, 200);
                 } else {
                     var index = vm.dataStores.indexOf('CustomFileAttributes');
-                    vm.dataStores.splice(index, 1);
+                    vm.configFilters.dataStores.splice(index, 1);
                 }
 
                 if(vm.checkboxModel.deduplicationType) {
@@ -400,12 +401,13 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                 $timeout(function () {
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
+                    RatingsEngineStore.setValidation('training', true);
                     vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
-                }, 500);
+                }, 150);
 
             } else {
-                RatingsEngineStore.validation.training = false;
-                RatingsEngineStore.validation.refine = false;
+                RatingsEngineStore.setValidation('training', false);
+                RatingsEngineStore.setValidation('refine', false);
             }
 
         }
