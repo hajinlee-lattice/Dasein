@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.EmptyStrColsToNullFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.LatticeIdFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeBatchConvertFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMCleanerParameters;
@@ -137,10 +138,22 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
         for (String amCol : expectedAMFields) {
             if (!attrArgs.containsKey(amCol)) {
                 dropAttributes.add(amCol);
+                fieldMetaData.remove(amCol);
             }
         }
+
         // Removing columns that are to be dropped
-        return accountMaster.discard(new FieldList(dropAttributes));
+        accountMaster = accountMaster.discard(new FieldList(dropAttributes));
+
+        // Replace all empty string with null
+        Fields fieldDecForEmptyStr = new Fields(
+                accountMaster.getFieldNames().toArray(new String[accountMaster.getFieldNames().size()]));
+        EmptyStrColsToNullFunction emptyWithNull = new EmptyStrColsToNullFunction(fieldDecForEmptyStr);
+
+        accountMaster = accountMaster //
+                .apply(emptyWithNull, new FieldList(accountMaster.getFieldNames()), fieldMetaData,
+                        new FieldList(accountMaster.getFieldNames()), Fields.REPLACE);
+        return accountMaster;
     }
 
 }

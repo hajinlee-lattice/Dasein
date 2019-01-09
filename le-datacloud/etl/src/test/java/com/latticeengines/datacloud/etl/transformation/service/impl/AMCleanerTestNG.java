@@ -105,7 +105,9 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             { null, "AGAAJB", true, 114, null, "AAAAF", "HIJ", 0.0, 72L, "KLM", null, 1318318981L, "0000000000072" },
             { null, null, true, 128, null, "AAABBB", null, 99.0, 73L, "ANDKNS", null, 928491289L, "0000000000073" },
             { "JJAD", null, true, 1389, "AHBDKAN", null, "12313142", 198.0, 74L, null, "ghi.com", 248914897L,
-                    "0000000000074" }
+                    "0000000000074" },
+            // empty string attribute value replace with null
+            { "     ", null, false, 11, null, null, null, 22.0, 87L, null, null, 312492849L, "0000000000087" }
     };
 
     private Object[][] amData = new Object[][] {
@@ -115,7 +117,9 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             { null, "AGAAJB", "1", "0114", null, "AAAAF", "HIJ", 0, 72L, "KLM", null, 1318318981, false, true, "def" },
             { null, null, "Y", "128", null, "AAABBB", null, 99, 73L, "ANDKNS", null, 928491289, true, true, "ghi" },
             { "JJAD", null, "TRUE", "1389", "AHBDKAN", null, "12313142", 198, 74L, null, "ghi.com", 248914897, false,
-                    false, "jkl" }
+                    false, "jkl" },
+            // empty input value for string attributes
+            { "     ", "", "false", "11", "", "", null, 22, 87L, "", "", 312492849, false, true, "" }
     };
 
     @Override
