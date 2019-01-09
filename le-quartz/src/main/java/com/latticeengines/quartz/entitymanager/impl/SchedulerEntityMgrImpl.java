@@ -7,9 +7,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -286,7 +288,14 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             while (st.hasMoreTokens()) {
                 enabledJobs.add(st.nextToken());
             }
+            if (CollectionUtils.isNotEmpty(enabledJobs)) {
+                log.info("Enabled Jobs are: " + String.join(",", enabledJobs));
+            }
             List<JobConfig> jobConfigs = (List<JobConfig>) appContext.getBean("predefinedJobs");
+            if (CollectionUtils.isNotEmpty(jobConfigs)) {
+                List<String> allJobs = jobConfigs.stream().map(JobConfig::getJobName).collect(Collectors.toList());
+                log.info("All Predefined jobs: " + String.join(",", allJobs));
+            }
             for (JobConfig jobConfig : jobConfigs) {
                 if (enabledJobs.contains(jobConfig.getJobName())) {
                     log.info("Trying to add predefined job " + jobConfig.getJobName());
