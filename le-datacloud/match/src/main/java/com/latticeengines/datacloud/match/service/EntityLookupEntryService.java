@@ -1,15 +1,18 @@
 package com.latticeengines.datacloud.match.service;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.security.Tenant;
+
 /**
- * Service to manipulate {@link EntityLookupEntry} in different environment (e.g., staging, serving) for the given tenant.
+ * Service to manipulate {@link EntityLookupEntry} in different environment (e.g., staging, serving) for the
+ * given tenant.
+ *
  * Note that lookup entries cannot be modified once created.
  */
 public interface EntityLookupEntryService {
@@ -35,7 +38,8 @@ public interface EntityLookupEntryService {
      * {@literal null} will be inserted in the respective index.
      */
     List<String> get(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull List<EntityLookupEntry> lookupEntries);
 
     /**
      * Create the mapping from the input lookup entry to the target seed ID. Only create if the input lookup entry
@@ -45,11 +49,12 @@ public interface EntityLookupEntryService {
      * @param tenant target tenant
      * @param lookupEntry entry to create the mapping from
      * @param seedId seed ID to create the mapping to
+     * @param setTTL whether we should set TTL
      * @return true if mapping is created
      */
     boolean createIfNotExists(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId);
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId, boolean setTTL);
 
     /**
      * Set the mapping from the input lookup entry to the target seed ID. Only set if the input lookup entry
@@ -59,11 +64,12 @@ public interface EntityLookupEntryService {
      * @param tenant target tenant
      * @param lookupEntry entry to create the mapping from
      * @param seedId seed ID to create the mapping to
+     * @param setTTL whether we should set TTL
      * @return true if mapping is set
      */
     boolean setIfEquals(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId);
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId, boolean setTTL);
 
     /**
      * Set the list of mapping from the input [ lookup entry, seedId ] pair. If there are duplicate lookup entry,
@@ -72,8 +78,10 @@ public interface EntityLookupEntryService {
      * @param env environment to retrieve the entry from
      * @param tenant target tenant
      * @param pairs list of lookup entry / seed ID pair that will be set
+     * @param setTTL whether we should set TTL
      */
-    void set(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<Pair<EntityLookupEntry, String>> pairs);
+    void set(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            List<Pair<EntityLookupEntry, String>> pairs, boolean setTTL);
 
     /**
      * Delete the specified lookup entry.

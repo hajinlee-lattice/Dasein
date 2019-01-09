@@ -50,7 +50,7 @@ public class AccountEntityServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNull(accountEntityService.get(tenant, currentSeed.getId()));
 
         // set to serving and check we get the correct seed
-        entityRawSeedService.setIfNotExists(EntityMatchEnvironment.SERVING, tenant, currentSeed);
+        entityRawSeedService.setIfNotExists(EntityMatchEnvironment.SERVING, tenant, currentSeed, true);
         AccountSeed seed = accountEntityService.get(tenant, currentSeed.getId());
         Assert.assertEquals(seed, expectedSeed);
 

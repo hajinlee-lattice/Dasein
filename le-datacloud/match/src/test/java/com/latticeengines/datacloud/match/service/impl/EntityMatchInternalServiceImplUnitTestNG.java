@@ -1,22 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.google.common.collect.Sets;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import org.apache.commons.lang3.tuple.Pair;
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_NETFLIX_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_1;
@@ -36,8 +20,26 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_4;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
-import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
 public class EntityMatchInternalServiceImplUnitTestNG {
     private static final String TGEFA_SEED_ID = "testGetLookupEntriesFailedToAssociate";
@@ -251,13 +253,14 @@ public class EntityMatchInternalServiceImplUnitTestNG {
 
     private EntityMatchInternalServiceImpl newService(@NotNull Map<EntityLookupEntry, String> paramMap) {
         EntityLookupEntryService lookupEntryService = Mockito.mock(EntityLookupEntryService.class);
-        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any())).thenAnswer(invocation -> {
-            EntityLookupEntry entry = invocation.getArgument(2);
-            String seedId = invocation.getArgument(3);
-            paramMap.put(entry, seedId);
-            // result doesn't matter
-            return true;
-        });
+        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any(), anyBoolean()))
+                .thenAnswer(invocation -> {
+                    EntityLookupEntry entry = invocation.getArgument(2);
+                    String seedId = invocation.getArgument(3);
+                    paramMap.put(entry, seedId);
+                    // result doesn't matter
+                    return true;
+                });
         return new EntityMatchInternalServiceImpl(lookupEntryService, null, null);
     }
 

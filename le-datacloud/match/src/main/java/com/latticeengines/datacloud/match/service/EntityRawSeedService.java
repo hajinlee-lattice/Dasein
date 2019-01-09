@@ -21,11 +21,12 @@ public interface EntityRawSeedService {
      * @param tenant target tenant
      * @param entity target entity type
      * @param seedId seed ID
+     * @param setTTL whether we should set TTL
      * @return true if the seed is created
      */
     boolean createIfNotExists(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, @NotNull String seedId);
+            @NotNull String entity, @NotNull String seedId, boolean setTTL);
 
     /**
      * Set the seed entry with the specified info. Only set if a seed with the same info does NOT already exist.
@@ -33,10 +34,11 @@ public interface EntityRawSeedService {
      * @param env environment to create the entry in
      * @param tenant target tenant
      * @param seed seed object to be set
+     * @param setTTL whether we should set TTL
      * @return true if the seed is set
      */
     boolean setIfNotExists(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean setTTL);
 
     /**
      * Retrieve the seed with the specified into.
@@ -89,10 +91,12 @@ public interface EntityRawSeedService {
      * @param env environment to perform operation in
      * @param tenant target tenant
      * @param rawSeed seed object used to udpate
+     * @param setTTL whether we should set TTL
      * @return seed before update (can know whether a lookup key entry is updated successfully by looking at the value)
      */
     EntityRawSeed updateIfNotSet(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityRawSeed rawSeed, boolean setTTL);
 
     /**
      * Clear all {@link EntityLookupEntry} and attributes if the
@@ -138,8 +142,9 @@ public interface EntityRawSeedService {
      * @param env environment to perform operation in
      * @param tenant target tenant
      * @param rawSeeds seed list to be created.
+     * @param setTTL whether we should set TTL
      * @return true if the batch create succeeded
      */
     boolean batchCreate(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<EntityRawSeed> rawSeeds);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<EntityRawSeed> rawSeeds, boolean setTTL);
 }

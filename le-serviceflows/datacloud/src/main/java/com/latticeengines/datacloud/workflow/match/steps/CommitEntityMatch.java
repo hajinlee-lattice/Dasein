@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -81,8 +82,8 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                     }
 
                 }
-                entityRawSeedService.batchCreate(DEST_ENV, tenant, scanSeeds);
-                entityLookupEntryService.set(DEST_ENV, tenant, pairs);
+                entityRawSeedService.batchCreate(DEST_ENV, tenant, scanSeeds, EntityMatchUtils.shouldSetTTL(DEST_ENV));
+                entityLookupEntryService.set(DEST_ENV, tenant, pairs, EntityMatchUtils.shouldSetTTL(DEST_ENV));
             }
             scanSeeds.clear();
         } while (CollectionUtils.isNotEmpty(getSeedIds));

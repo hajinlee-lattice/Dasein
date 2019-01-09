@@ -294,7 +294,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         cleanupSeedAndLookup(env, seedId);
 
         boolean created = entityRawSeedService
-                .createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId);
+                .createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId, true);
         Assert.assertTrue(created);
 
         EntityRawSeed seedToUpdate1 = newSeed(seedId, "sfdc_1", "google.com");
@@ -357,9 +357,9 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         entityRawSeedService.delete(env, TEST_TENANT, entity, seedId);
         // prepare current state
         if (currSeed != null) {
-            entityRawSeedService.setIfNotExists(env, TEST_TENANT, currSeed);
+            entityRawSeedService.setIfNotExists(env, TEST_TENANT, currSeed, true);
         }
-        entityLookupEntryService.set(env, TEST_TENANT, currLookupMappings);
+        entityLookupEntryService.set(env, TEST_TENANT, currLookupMappings, true);
 
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
                 entityMatchInternalService.associate(TEST_TENANT, seedToAssociate);
@@ -400,6 +400,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // cleanup both seed & entries
         entityRawSeedService.delete(env, TEST_TENANT, entity, seedId);
+        seedToAssociate.getLookupEntries().forEach(entry -> entityLookupEntryService.delete(env, TEST_TENANT, entry));
         currLookupMappings.forEach(pair -> entityLookupEntryService.delete(env, TEST_TENANT, pair.getKey()));
     }
 
@@ -623,7 +624,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     private void setupServing(EntityLookupEntry... entries) {
         entityLookupEntryService.set(
                 EntityMatchEnvironment.SERVING, TEST_TENANT,
-                Arrays.stream(entries).map(entry -> Pair.of(entry, SEED_ID_FOR_LOOKUP)).collect(Collectors.toList()));
+                Arrays.stream(entries).map(entry -> Pair.of(entry, SEED_ID_FOR_LOOKUP)).collect(Collectors.toList()),
+                true);
     }
 
     private void cleanup(List<String> seedIds) {
@@ -633,7 +635,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
     private void setupServing(EntityRawSeed... seeds) {
         Arrays.stream(seeds).forEach(seed -> entityRawSeedService
-                .setIfNotExists(EntityMatchEnvironment.SERVING, TEST_TENANT, seed));
+                .setIfNotExists(EntityMatchEnvironment.SERVING, TEST_TENANT, seed, true));
     }
 
     /*

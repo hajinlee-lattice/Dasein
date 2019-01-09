@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.util;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
 import java.util.Objects;
@@ -35,5 +36,16 @@ public class EntityMatchUtils {
                 .filter(entryInSeed -> !Objects.equals(entryInSeed.getSerializedValues(), entry.getSerializedValues()))
                 .findAny();
         return conflictEntry.isPresent();
+    }
+
+    /**
+     * Based on the input environment, determine whether we should set TTL for seed/lookup entries or not.
+     *
+     * @param env input environment
+     * @return true if we should set TTL
+     */
+    public static boolean shouldSetTTL(EntityMatchEnvironment env) {
+        // at the moment, only set TTL for staging environment
+        return env == EntityMatchEnvironment.STAGING;
     }
 }

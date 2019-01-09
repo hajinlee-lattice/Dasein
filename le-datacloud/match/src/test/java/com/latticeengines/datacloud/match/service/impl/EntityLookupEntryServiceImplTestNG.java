@@ -1,12 +1,11 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,10 +18,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
@@ -71,8 +73,10 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
     private void testCreateIfNotExists(EntityMatchEnvironment env) {
         // since no current entry, entry is created successfully
-        Assert.assertTrue(entityLookupEntryService.createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID));
-        Assert.assertFalse(entityLookupEntryService.createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID));
+        Assert.assertTrue(entityLookupEntryService
+                .createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+        Assert.assertFalse(entityLookupEntryService
+                .createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
 
         // check the seed ID is set correctly
         Assert.assertEquals(entityLookupEntryService.get(env, TEST_TENANT, TEST_ENTRY_1), MAIN_TEST_SEED_ID);
@@ -81,20 +85,25 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
     private void testSetIfEquals(EntityMatchEnvironment env) {
         // since no current entry, entry is created successfully
-        Assert.assertTrue(entityLookupEntryService.setIfEquals(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID));
+        Assert.assertTrue(entityLookupEntryService
+                .setIfEquals(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
         // check the seed ID is set correctly
         Assert.assertEquals(entityLookupEntryService.get(env, TEST_TENANT, TEST_ENTRY_1), MAIN_TEST_SEED_ID);
         // set still succeeded since seed ID in the input is the same as mapped by the existing entry
-        Assert.assertTrue(entityLookupEntryService.setIfEquals(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID));
+        Assert.assertTrue(entityLookupEntryService
+                .setIfEquals(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
         // fail to set if the seed ID is different
-        Assert.assertFalse(entityLookupEntryService.setIfEquals(env, TEST_TENANT, TEST_ENTRY_1, OTHER_TEST_SEED_ID));
+        Assert.assertFalse(entityLookupEntryService
+                .setIfEquals(env, TEST_TENANT, TEST_ENTRY_1, OTHER_TEST_SEED_ID, true));
     }
 
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
     private void testBatchGet(EntityMatchEnvironment env) throws Exception {
         // create entries for batch get
-        Assert.assertTrue(entityLookupEntryService.createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID));
-        Assert.assertTrue(entityLookupEntryService.createIfNotExists(env, TEST_TENANT, TEST_ENTRY_4, OTHER_TEST_SEED_ID));
+        Assert.assertTrue(entityLookupEntryService
+                .createIfNotExists(env, TEST_TENANT, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+        Assert.assertTrue(entityLookupEntryService
+                .createIfNotExists(env, TEST_TENANT, TEST_ENTRY_4, OTHER_TEST_SEED_ID, true));
         Thread.sleep(2000L);
 
         List<String> seedIds = entityLookupEntryService.get(env, TEST_TENANT, TEST_ENTRIES);
@@ -120,7 +129,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
                 .stream()
                 .map(entry -> Pair.of(entry, MAIN_TEST_SEED_ID))
                 .collect(Collectors.toList());
-        entityLookupEntryService.set(env, TEST_TENANT, pairs);
+        entityLookupEntryService.set(env, TEST_TENANT, pairs, true);
 
         // wait a bit for eventual consistency
         Thread.sleep(3000);

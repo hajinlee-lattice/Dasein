@@ -1,5 +1,39 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.S;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.SS;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.if_not_exists;
+import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_ONE;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
@@ -24,40 +58,6 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.retry.support.RetryTemplate;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.S;
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.SS;
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.if_not_exists;
-import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_ONE;
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toSet;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -103,18 +103,18 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     @Override
     public boolean createIfNotExists(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, @NotNull String seedId) {
+            @NotNull String entity, @NotNull String seedId, boolean setTTL) {
         checkNotNull(env, tenant, entity, seedId);
-        Item item = getBaseItem(env, tenant, entity, seedId);
+        Item item = getBaseItem(env, tenant, entity, seedId, setTTL);
         return getRetryTemplate(env).execute(ctx ->
                 conditionalSet(getTableName(env), item));
     }
 
     @Override
     public boolean setIfNotExists(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean setTTL) {
         checkNotNull(env, tenant, seed);
-        Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId());
+        Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL);
         // set attributes
         getStringAttributes(seed).forEach(item::withString);
         getStringSetAttributes(seed).forEach(item::withStringSet);
@@ -221,7 +221,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     @Override
     public EntityRawSeed updateIfNotSet(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityRawSeed rawSeed, boolean setTTL) {
         checkNotNull(env, tenant, rawSeed);
 
         PrimaryKey key = getPrimaryKey(env, tenant, rawSeed);
@@ -229,9 +230,11 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 .addUpdate(S(ATTR_SEED_ID).set(rawSeed.getId()))
                 .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity()))
                 // increase the version by 1
-                .addUpdate(N(ATTR_SEED_VERSION).add(1))
-                // set TTL (no effect on serving)
-                .addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
+                .addUpdate(N(ATTR_SEED_VERSION).add(1));
+
+        if (setTTL) {
+            builder.addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
+        }
 
         getStringAttributes(rawSeed).forEach((attrName, attrValue) -> builder.addUpdate(
                 S(attrName).set(if_not_exists(attrName, attrValue)))); // update if the attr not exist
@@ -275,14 +278,15 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     @Override
-    public boolean batchCreate(EntityMatchEnvironment env, Tenant tenant, List<EntityRawSeed> rawSeeds) {
+    public boolean batchCreate(
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<EntityRawSeed> rawSeeds, boolean setTTL) {
         checkNotNull(env, tenant);
         if (CollectionUtils.isEmpty(rawSeeds)) {
             return false;
         }
         List<Item> batchItems = rawSeeds.stream()
                 .map(seed -> {
-                    Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId());
+                    Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL);
                     getStringAttributes(seed).forEach(item::withString);
                     getStringSetAttributes(seed).forEach(item::withStringSet);
                     return item;
@@ -302,9 +306,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         checkNotNull(env, tenant, rawSeed);
 
         PrimaryKey key = getPrimaryKey(env, tenant, rawSeed);
-        ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
-                // set TTL (no effect on serving)
-                .addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
+        // not setting ttl to honor the original setting
+        ExpressionSpecBuilder builder = new ExpressionSpecBuilder();
+
         if (useOptimisticLocking) {
             // increase the version by 1
             builder.addUpdate(N(ATTR_SEED_VERSION).add(1))
@@ -437,16 +441,18 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     private Item getBaseItem(
-            EntityMatchEnvironment env, Tenant tenant, String entity, String seedId) {
+            EntityMatchEnvironment env, Tenant tenant, String entity, String seedId, boolean shouldSetTTL) {
         int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
-        return new Item()
+        Item item =  new Item()
                 .withPrimaryKey(key)
                 .withString(ATTR_SEED_ID, seedId)
                 .withString(ATTR_SEED_ENTITY, entity)
-                .withNumber(ATTR_SEED_VERSION, INITIAL_SEED_VERSION)
-                // set TTL (no effect on serving)
-                .withNumber(ATTR_EXPIRED_AT, getExpiredAt());
+                .withNumber(ATTR_SEED_VERSION, INITIAL_SEED_VERSION);
+        if (shouldSetTTL) {
+            item.withNumber(ATTR_EXPIRED_AT, getExpiredAt());
+        }
+        return item;
     }
 
     private PrimaryKey getPrimaryKey(

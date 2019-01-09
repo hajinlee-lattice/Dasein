@@ -97,9 +97,9 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         cleanup(env, seedId);
 
         // create successfully because no seed at the moment
-        Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+        Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId, true));
         // should already exists
-        Assert.assertFalse(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId));
+        Assert.assertFalse(entityRawSeedService.createIfNotExists(env, TEST_TENANT, TEST_ENTITY, seedId, true));
 
         // check the created seed
         EntityRawSeed seed = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
@@ -129,7 +129,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         // create successfully because no seed at the moment
         for (String seedId : seedIds) {
-            Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_SCAN_TENANT, TEST_ENTITY, seedId));
+            Assert.assertTrue(entityRawSeedService.createIfNotExists(env, TEST_SCAN_TENANT, TEST_ENTITY, seedId, true));
         }
         // should already exists
         List<String> getSeedIds = new ArrayList<>();
@@ -193,7 +193,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(loopCount, 2);
         Assert.assertEquals(scanSeeds.size(), seedIds.size());
 
-        Assert.assertTrue(entityRawSeedService.batchCreate(destEnv, TEST_SCAN_TENANT, scanSeeds));
+        Assert.assertTrue(entityRawSeedService.batchCreate(destEnv, TEST_SCAN_TENANT, scanSeeds, true));
         Thread.sleep(1000L);
         EntityRawSeed rawSeed = entityRawSeedService.get(destEnv, TEST_SCAN_TENANT, TEST_ENTITY, seedIds.get(0));
         Assert.assertNotNull(rawSeed);
@@ -219,9 +219,9 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
                 seedId, "sfdc_1", "mkt_1", "9999", "google.com", "facebook.com");
 
         // create successfully because no seed at the moment
-        Assert.assertTrue(entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed));
+        Assert.assertTrue(entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed, true));
         // should already exists
-        Assert.assertFalse(entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed));
+        Assert.assertFalse(entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed, true));
 
         // check the created seed
         EntityRawSeed updatedSeed = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
@@ -240,14 +240,14 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         cleanup(env, seedId);
 
         EntityRawSeed seed1 = newSeed(seedId, "sfdc_1", null, "lattice_1", "domain1.com");
-        EntityRawSeed result1 = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed1);
+        EntityRawSeed result1 = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed1, true);
         // currently no seed exists, so the returned old seed will be null
         Assert.assertNull(result1);
         // check all attributes are updated correctly
         Assert.assertEquals(entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId), seed1);
 
         EntityRawSeed seed2 = newSeed(seedId, "sfdc_2", "marketo_1", "lattice_2", "domain2.com");
-        EntityRawSeed result2 = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed2);
+        EntityRawSeed result2 = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed2, true);
         // seed before update should be seed1
         Assert.assertEquals(result2, seed1);
         EntityRawSeed resultAfterUpdate2 = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, seedId);
@@ -281,12 +281,12 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
             // prepare current state
             cleanup(env, seedId);
             if (currentState != null) {
-                boolean currStateSet = entityRawSeedService.setIfNotExists(env, TEST_TENANT, currentState);
+                boolean currStateSet = entityRawSeedService.setIfNotExists(env, TEST_TENANT, currentState, true);
                 Assert.assertTrue(currStateSet);
             }
 
             // update
-            EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seedToUpdate);
+            EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seedToUpdate, true);
             // cannot check lookup entry because only attributes that we attempt to update will be in the seed
             if (currentState == null) {
                 Assert.assertNull(seedBeforeUpdate);
@@ -318,7 +318,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         EntityRawSeed seed = newSeed(seedId,
                 NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1, NC_NETFLIX_1, NC_GOOGLE_3, DC_GOOGLE_2,
                 DC_FACEBOOK_2, DUNS_5, DC_FACEBOOK_1, SFDC_1, MKTO_3, DC_FACEBOOK_4);
-        boolean seedSet = entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed);
+        boolean seedSet = entityRawSeedService.setIfNotExists(env, TEST_TENANT, seed, true);
         Assert.assertTrue(seedSet);
         Thread.sleep(500L);
 
@@ -357,7 +357,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         EntityRawSeed seed = newSeed(
                 seedId, "sfdc_1", null, "lattice_1",
                 "domain1.com", "domain2.com");
-        EntityRawSeed result = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed);
+        EntityRawSeed result = entityRawSeedService.updateIfNotSet(env, TEST_TENANT, seed, true);
         // currently no seed exists, so the returned old seed will be null
         Assert.assertNull(result);
         // check all attributes are updated correctly
