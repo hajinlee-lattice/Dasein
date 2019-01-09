@@ -97,10 +97,6 @@ if [[ "${ENABLE_JACOCO}" == "true" ]] && [[ -f "/var/lib/jacocoagent.jar" ]]; th
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jacocoagent.jar=destfile=${JACOCO_DEST_FILE},append=true,includes=com.latticeengines.*,jmx=true"
 fi
 
-#if [[ ! -z "${CATALINA_OPTS}" ]]; then
-#    export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
-#fi
-
 export CATALINA_CLASSPATH=$CLASSPATH:$HADOOP_CONF_DIR
 
 echo ${JAVA_OPTS}

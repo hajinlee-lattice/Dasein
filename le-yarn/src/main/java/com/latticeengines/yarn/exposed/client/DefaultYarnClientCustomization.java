@@ -100,7 +100,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         if (JacocoUtils.needToLocalizeJacoco()) {
             hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                     LocalResourceVisibility.PUBLIC, //
-                    String.format("/app/%s/lib/jacocoagent.jar", versionManager.getCurrentVersionInStack(stackName)), //
+                    "/apps/jacoco/jacocoagent-0.8.2.jar", //
                     false));
         }
 

@@ -98,7 +98,7 @@
 
         <!-- versions should be easy to upgrade: keep them updated! -->
         <checkstyle.version>8.15</checkstyle.version>
-        <jacoco.version>0.7.9</jacoco.version>
+        <jacoco.version>0.8.2</jacoco.version>
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version> <!-- javax.validation -->
         <quartz.version>2.3.0</quartz.version>
         <aspectj.version>1.8.13</aspectj.version>
@@ -1823,7 +1823,7 @@
                     <exclusion>
                         <groupId>commons-beanutils</groupId>
                         <artifactId>commons-beanutils-core</artifactId>
-                    </exclusion>                
+                    </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -1855,7 +1855,7 @@
                     <exclusion>
                         <groupId>commons-beanutils</groupId>
                         <artifactId>commons-beanutils-core</artifactId>
-                    </exclusion>                   
+                    </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -1886,7 +1886,7 @@
                     <exclusion>
                         <groupId>xerces</groupId>
                         <artifactId>xercesImpl</artifactId>
-                    </exclusion>                
+                    </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -2093,7 +2093,7 @@
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
-                    </exclusion>                  
+                    </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>

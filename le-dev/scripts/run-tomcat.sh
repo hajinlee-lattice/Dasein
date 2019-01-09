@@ -45,7 +45,7 @@ fi
 
 if [[ "${ENABLE_JACOCO}" == "true" ]]; then
     JACOCO_DEST_FILE="${WSHOME}/jacoco/tomcat.exec"
-    JACOCO_AGENT_FILE="${WSHOME}/le-dev/jacocoagent.jar"
+    JACOCO_AGENT_FILE="${WSHOME}/le-dev/jacocoagent-0.8.2.jar"
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:${JACOCO_AGENT_FILE}=includes=com.latticeengines.*,destfile=${JACOCO_DEST_FILE},append=true,jmx=true"
 fi
 
