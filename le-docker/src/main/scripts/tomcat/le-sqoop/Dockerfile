@@ -25,10 +25,10 @@ COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
 COPY log4j2.xml $CATALINA_HOME/conf/log4j2.xml
-COPY catalina.sh $CATALINA_HOME/bin/catalina.sh
 COPY setenv.sh $CATALINA_HOME/bin/setenv.sh
 
 COPY webapps/latticeengines.properties /etc/ledp/latticeengines.properties
 COPY start.sh /start.sh
 
 EXPOSE 8081
+CMD ["bash", "/start.sh"]

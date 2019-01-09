@@ -1,5 +1,7 @@
 package com.latticeengines.hadoop.service.impl;
 
+import java.util.Collections;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -74,7 +77,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
         return retryTemplate.execute(context -> _impl.getClusterIdFromAWS(clusterName));
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", sync=true)
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", unless="#result == null")
     public String getClusterIdFromAWS(String clusterName) {
         String clusterId = "";
         try {
@@ -92,7 +95,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)")
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)", unless="#result == null")
     public String getMasterIp(String clusterName) {
         String masterIp = "";
         try {
@@ -123,11 +126,17 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     private String getValueFromConsul(String key) {
         String kvUrl = consul + "/v1/kv/" + key;
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
-        JsonNode json = retry.execute(context -> restTemplate.getForObject(kvUrl, JsonNode.class));
-        if (json != null && json.size() >= 1) {
-            String data = json.get(0).get("Value").asText();
-            return new String(Base64Utils.decodeBase64(data));
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, null, //
+                Collections.singleton(HttpClientErrorException.NotFound.class));
+        try {
+            JsonNode json = retry.execute(context -> restTemplate.getForObject(kvUrl, JsonNode.class));
+            if (json != null && json.size() >= 1) {
+                String data = json.get(0).get("Value").asText();
+                return new String(Base64Utils.decodeBase64(data));
+            }
+        } catch (HttpClientErrorException.NotFound e) {
+            // key not exists
+            return null;
         }
         return null;
     }

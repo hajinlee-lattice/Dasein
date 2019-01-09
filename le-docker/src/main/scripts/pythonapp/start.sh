@@ -6,12 +6,12 @@ echo "start.sh:"
 
 echo "  * Anaconda env: ${CONDA_ENV}"
 
-if [ "${ANACONDA_HOME}" = "" ]; then
+if [[ "${ANACONDA_HOME}" = "" ]]; then
     ANACONDA_HOME=/opt/conda
 fi
 echo "  * ANACONDA_HOME: ${ANACONDA_HOME}"
 
-if [ -n "${CONDA_ENV}" ]; then
+if [[ -n "${CONDA_ENV}" ]]; then
 	source $ANACONDA_HOME/bin/activate ${CONDA_ENV}
 else
 	source $ANACONDA_HOME/bin/activate v01
@@ -20,7 +20,7 @@ fi
 #The following are required env variables set by caller. Here's samples for testing purpose.
 #export StepflowConfig="{\"inputPaths\":[\"/Pods/Aps/input/*.avro\"], \"outputPath\":\"/Pods/Aps/output\"}"
 #export PYTHON_APP="./apsgenerator.py"
-if [ "${SHDP_HD_FSWEB}" = 'http://webhdfs.lattice.local:14000/webhdfs/v1' ]; then
+if [[ "${SHDP_HD_FSWEB}" = 'http://webhdfs.lattice.local:14000/webhdfs/v1' ]]; then
     export SHDP_HD_FSWEB='http://10.41.1.183:14000/webhdfs/v1'
 fi
 #export SHDP_HD_FSWEB='http://10.41.1.183:14000/webhdfs/v1'

@@ -1,19 +1,4 @@
 # ==================================================
-# le-microservice/core/conf/env/devcluster/microservice.properties
-# ==================================================
-microservice.rest.endpoint.hostport=https://localhost:9080
-microservice.modules=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,quartz,dellebi,sqoop,objectapi,dante
-microservice.apps=microservice
-
-microservice.admin.health.url=https://localhost:9085/admin/health
-microservice.pls.health.url=https://localhost:9081/pls/health
-microservice.oauth2.health.url=https://localhost:9072/health
-microservice.playmaker.health.url=https://localhost:9071/health
-microservice.scoringapi.health.url=https://localhost:9073/score/health
-microservice.matchapi.health.url=https://localhost:9076/match/health
-microservice.microservice.health.url=https://localhost:9080/doc/health
-microservice.ulysses.health.url=https://localhost:9075/ulysses/health
-# ==================================================
 # le-documentdb/conf/env/devcluster/documentdb.properties
 # ==================================================
 documentdb.datasource.driver=com.mysql.jdbc.Driver
@@ -30,25 +15,844 @@ documentdb.datasource.reader.poolsize.max=8
 documentdb.datasource.reader.poolsize.max.webapp=8
 documentdb.datasource.reader.poolsize.max.appmaster=8
 # ==================================================
+# le-common/conf/env/devcluster/common.properties
+# ==================================================
+common.le.environment=devcluster
+common.le.stack=default
+
+# for application runtime
+common.admin.url=https://localhost:9085
+common.pls.url=https://localhost:9081
+common.microservice.url=https://localhost:9080
+common.playmaker.url=https://localhost:9071
+common.oauth.url=https://localhost:9072
+common.scoringapi.url=https://localhost:9073
+common.matchapi.url=https://localhost:9076
+common.saml.url=https://localhost:9087
+common.sqoop.url=https://localhost:9080
+common.allow.cors=true
+common.ulysses.url=https://localhost:9075
+
+common.internal.app.url=
+
+# for deployment test client
+common.test.env=devcluster
+
+common.test.admin.url=https://localhost:9085
+common.test.pls.url=https://localhost:9081
+common.test.modeling.url=https://localhost:9074
+common.test.microservice.url=https://localhost:9080
+common.test.playmaker.url=https://localhost:9071
+common.test.oauth.url=https://localhost:9072
+common.test.scoringapi.url=https://localhost:9073
+common.test.matchapi.url=https://localhost:9076
+common.test.saml.url=https://localhost:9087
+common.test.sqoop.url=https://10.41.1.85:8080
+common.test.ulysses.url=https://localhost:9075
+
+# ==================================================
+# le-datacloudapi/conf/env/devcluster/propdata.properties
+# ==================================================
+#Collection
+propdata.collection.sqoop.mapper.number=8
+propdata.collection.cascading.partitions=8
+
+propdata.job.default.schedule=0 0 0 1 1 * * 1900
+propdata.job.heartbeat.schedule=0 0 0 1 1 * * 1900
+
+# test
+propdata.api.functional.hostport=https://localhost:9080/
+propdata.test.match.client=PD130
+propdata.test.env=DevCluster
+# ==================================================
+# le-microservice/core/conf/env/devcluster/microservice.properties
+# ==================================================
+microservice.rest.endpoint.hostport=https://localhost:9080
+microservice.modules=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,quartz,dellebi,sqoop,objectapi,dante
+microservice.apps=microservice
+
+microservice.admin.health.url=https://localhost:9085/admin/health
+microservice.pls.health.url=https://localhost:9081/pls/health
+microservice.oauth2.health.url=https://localhost:9072/health
+microservice.playmaker.health.url=https://localhost:9071/health
+microservice.scoringapi.health.url=https://localhost:9073/score/health
+microservice.matchapi.health.url=https://localhost:9076/match/health
+microservice.microservice.health.url=https://localhost:9080/doc/health
+microservice.ulysses.health.url=https://localhost:9075/ulysses/health
+
+# ==================================================
+# le-proxy/conf/env/devcluster/proxy.properties
+# ==================================================
+proxy.retry.initialwaitmsec=500
+proxy.retry.multiplier=2
+proxy.retry.maxattempts=10
+proxy.test.rest.endpoint.hostport=https://localhost:9084
+proxy.test.keystore.path=/etc/pki/java/ledp_keystore.jks
+proxy.test.keystore.password.encrypted=bi0mpJJNxiYpEka5C6JO4nPtT7hklEeCNtDmGKIYmUVPgPJWtoNmB3S0W9gon80h
+
+# ==================================================
+# le-serviceapps/cdl/conf/env/devcluster/cdl.properties
+# ==================================================
+cdl.transform.workflow.mem.mb=2048
+cdl.modeling.workflow.mem.mb=2048
+cdl.aps.generate.enabled=false
+cdl.aps.generate.in.aws=false
+cdl.play.service.threadpool.size=5
+cdl.rating.service.threadpool.size=5
+cdl.pa.default.max.iteration=2
+cdl.rating.crossell.minimum.events=50
+cdl.play.service.default.types=List,Cross-Sell,Prospecting,Renewal,Upsell
+cdl.play.service.default.types.user=ga_dev@lattice-engines.com
+cdl.s3.sqs.listener.start=false
+cdl.s3.file.import.sqs.name=S3_File_Import_Test
+cdl.feature.importance.transform.suffixes=Grouped,___ISNULL__,_PA
+cdl.feature.importance.special.suffix=_RANGE_
+cdl.largeimport.account.filename=Accounts.csv
+cdl.largeimport.contact.filename=Contacts
+cdl.largeimport.contact.filenum=5
+cdl.largeimport.transaction.filename=Transaction
+cdl.largeimport.transaction.filenum=10
+common.dante.url=https://test.lattice-engines.com/DT_LECLEANX/index.aspx
+# ==================================================
+# le-serviceapps/lp/conf/env/devcluster/lp.properties
+# ==================================================
+lp.emr.scaling.clusters=
+lp.emr.scaling.min.task.nodes=1
+
+# ==================================================
+# le-pls/conf/env/devcluster/pls.properties
+# ==================================================
+pls.accountmaster.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+pls.accountmaster.datasource.url=jdbc:sqlserver://10.41.1.250:1433;databaseName=AccountMaster;
+pls.accountmaster.datasource.user=root
+pls.accountmaster.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
+pls.accountmaster.datasource.host=10.41.1.250
+pls.accountmaster.datasource.port=1433
+pls.accountmaster.datasource.dbname=AccountMaster
+pls.accountmaster.datasource.type=SQLServer
+
+pls.modelingservice.basedir=/user/s-analytics/customers/
+pls.modeldeletion.core.pool.size=10
+pls.modeldeletion.max.pool.size=20
+pls.modeldeletion.queue.capacity=20
+
+pls.downloader.core.pool.size=10
+pls.downloader.max.pool.size=20
+pls.downloader.queue.capacity=20
+pls.jmx.downloader.check.frequency=600
+
+pls.modelingservice.testdsdb=LeadScoringDB_dev
+pls.modelingservice.testdsdbhost=10.41.1.250
+pls.modelingservice.testdsdbuser=root
+pls.modelingservice.testdsdbpasswd.encrypted=KPpl2JWz+k79LWvYIKz6cA==
+pls.modelingservice.testdsdbport=1433
+
+pls.dataloader.rest.api=http://10.41.1.187:8081/DLRestService
+pls.dataloader.sfdc.login.url=https://login.salesforce.com/services/Soap/u/33.0
+pls.dataloader.marketo.login.url=https://na-sj02.marketo.com/soap/mktows/2_0
+pls.dataloader.eloqua.login.url=https://login.eloqua.com/id
+
+pls.modelalerts.min.success.events=500
+pls.modelalerts.min.conversion.percentage=5
+pls.modelalerts.min.rocscore=0.7
+pls.modelalerts.max.rocscore=0.85
+pls.modelalerts.max.discrete.values=200
+pls.modelalerts.max.feature.importance=0.1
+pls.modelalerts.max.null.lift=1
+
+pls.default.buyerinsights.num.predictors=50
+
+pls.ff.plstestflag=true
+pls.ff.setuppage=true
+pls.ff.adminalertstab=false
+pls.ff.deploymentwizardpage=true
+pls.ff.leadenrichmentpage=true
+
+# for tests
+pls.test.functional.api=https://localhost:9081/
+pls.test.contract=IntegrationTest
+pls.test.tenant.reg.json=tenant-registration-qa.json
+pls.test.sfdc.user.name=apeters-widgettech@lattice-engines.com
+pls.test.sfdc.passwd.encrypted=Uc0UtTndCxC2oeN4hwzvTQ==
+pls.test.sfdc.securitytoken=oIogZVEFGbL3n0qiAp6F66TC
+pls.test.security.api=https://localhost:9080
+
+# workflow
+pls.fitflow.stoplist.path=/Pods/Default/Services/PropData/MatchService/PublicDomain/*.avro
+pls.accountmaster.path=/Pods/Default/Services/PropData/MatchService/AccountMaster
+
+pls.cdl.transform.cascading.partitions=4
+pls.cdl.transform.tez.task.vcores=1
+pls.cdl.transform.tez.task.mem.gb=1
+pls.cdl.transform.sort.max.split.threads=2
+pls.cdl.transform.default.cascading.engine=tez
+
+pls.sureshot.map.creds.auth=https://incindio-qa.azurewebsites.net/lattice/credentials/
+pls.sureshot.scoring.settings=https://incindio-qa.azurewebsites.net/lattice/scoring/
+pls.sureshot.enrichment.settings=https://incindio-qa.azurewebsites.net/lattice/enrichment/
+pls.sureshot.playmaker.endpoint=https://testapi.lattice-engines.com
+pls.fileupload.maxupload.bytes=500000000
+pls.fileupload.maxupload.rows=1000000
+pls.modeling.validation.min.rows=300
+pls.modeling.validation.min.eventrows=50
+pls..modeling.validation.min.negativerows=250
+
+pls.sourcefile.retain.days=7
+
+pls.scoring.use.rtsapi=false
+
+pls.leadenrichment.premium.max=10
+pls.marketo.enrichment.webhook.url=https://localhost:9073/score/enrich/record/
+pls.marketo.scoring.webhook.resource=https://localhost:9073/score/external/record/
+
+pls.rating.coverageservice.threshold.parallel=4
+pls.rating.coverageservice.threadpool.size=20
+pls.play.service.threadpool.size=20
+
+pls.segment.export.max=500000
+
+pls.saml.local.redirection.allowed=true
+
+# ==================================================
+# le-scoring/conf/env/devcluster/scoring.properties
+# ==================================================
+scoring.core.pool.size=6
+scoring.max.pool.size=6
+scoring.queue.capacity=100
+scoring.dao.datasource.dialect=org.hibernate.dialect.SQLServerDialect
+scoring.dao.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+scoring.dao.datasource.user=root
+scoring.dao.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
+scoring.dao.datasource.url=jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_devcluster;user=$$USER$$;password=$$PASSWD$$
+scoring.dao.datasource.type=SQLServer
+
+scoring.output.table.sample=ScoreOutput
+scoring.cleanup.timeinternval=120
+scoring.test.table=2CheckoutTest
+scoring.cleanup.enableCleanHdfs=false
+
+scoring.mapper.threshold=10000
+scoring.mapper.logdir=/var/log/scoring/mapper
+scoring.mapper.max.input.split.size=5242880
+scoring.mapper.min.input.split.size=5242880
+
+scoring.processor.threadpool.size=5
+scoring.processor.threadpool.timeoutmin=1440
+scoring.processor.bulkrecord.size=100
+scoring.processor.vcores=1
+scoring.processor.memory=2048
+# ==================================================
+# le-workflowapi/conf/env/devcluster/workflowapi.properties
+# ==================================================
+workflowapi.modelingservice.basedir=/user/s-analytics/customers/
+
+workflowapi.test.sfdc.user.name=apeters-widgettech@lattice-engines.com
+workflowapi.test.sfdc.passwd.encrypted=Uc0UtTndCxC2oeN4hwzvTQ==
+workflowapi.test.sfdc.securitytoken=oIogZVEFGbL3n0qiAp6F66TC
+workflowapi.test.accountmaster.path=/tmp/AccountMaster
+
+workflowapi.use.spark=true
+
+# ==================================================
+# le-ulysses/conf/env/devcluster/ulysses.properties
+# ==================================================
+
+# ==================================================
+# le-oauth2db/conf/env/devcluster/oauth2.properties
+# ==================================================
+oauth2.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+oauth2.datasource.driver=com.mysql.jdbc.Driver
+oauth2.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/oauth2DB?autoReconnect=true&useSSL=false
+oauth2.datasource.type=MySQL
+oauth2.datasource.user=LPI
+oauth2.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+oauth2.datasource.poolsize.max=32
+oauth2.datasource.poolsize.max.webapp=32
+oauth2.datasource.poolsize.max.appmaster=16
+
+oauth2.password_expiration_days=1
+# ==================================================
+# le-yarn/conf/env/devcluster/yarn.properties
+# ==================================================
+yarn.jacoco.enabled=true
+yarn.jacoco.data.dir=/tmp/jacoco
+
+# url used in yarn
+yarn.pls.url=https://{LE_CLIENT_ADDRESS}:9081
+
+# functional test
+yarn.use.minicluster=false
+# ==================================================
+# le-hadoop/conf/env/devcluster/hadoop.properties
+# ==================================================
+hadoop.use.emr=true
+hadoop.dfs.nameservices=
+hadoop.dfs.client.failover.proxy.provider=
+dfs.namenode.rpc-address.nn1=
+dfs.namenode.rpc-address.nn2=
+hadoop.fs.defaultFS=hdfs://bodcdevvhort148.lattice.local:8020
+hadoop.mapred.job.tracker=bodcdevvhort167.lattice.local:9001
+# ------
+hadoop.yarn.resourcemanager.ha.enabled=false
+hadoop.yarn.resourcemanager.ha.rm-ids=rm1,rm2
+hadoop.yarn.resourcemanager.ha.id=rm1
+hadoop.yarn.resourcemanager.address.rm1=bodcdevvhort167.lattice.local:8050
+hadoop.yarn.resourcemanager.scheduler.address.rm1=bodcdevvhort167.lattice.local:8030
+hadoop.yarn.resourcemanager.webapp.address.rm1=bodcdevvhort167.lattice.local:8088
+hadoop.yarn.resourcemanager.address.rm2=bodcdevvhort167.lattice.local:8050
+hadoop.yarn.resourcemanager.scheduler.address.rm2=bodcdevvhort167.lattice.local:8030
+hadoop.yarn.resourcemanager.webapp.address.rm2=bodcdevvhort167.lattice.local:8088
+hadoop.yarn.client.failover-sleep-base-ms=2000
+hadoop.yarn.client.failover-sleep-max-ms=20000
+# ------
+hadoop.yarn.resourcemanager.address=bodcdevvhort167.lattice.local:8050
+hadoop.yarn.resourcemanager.scheduler.address=bodcdevvhort167.lattice.local:8030
+hadoop.yarn.resourcemanager.webapp.address=bodcdevvhort167.lattice.local:8088
+hadoop.mapreduce.jobhistory.webapp.api.address=http://bodcdevvhort148.lattice.local:19888/ws/v1/history/mapreduce/jobs
+hadoop.mapreduce.jobhistory.address=bodcdevvhort148.lattice.local:10020
+hadoop.mapreduce.jobhistory.webapp.address=bodcdevvhort148.lattice.local:19888
+hadoop.yarn.timeline-service.webapp.address=http://bodcdevvhort148.lattice.local:8188/applicationhistory
+hadoop.fs.web.defaultFS=http://bodcdevvhort148.lattice.local:50070/webhdfs/v1
+hadoop.fs.web.webhdfs=webhdfs://bodcdevvhort148.lattice.local:50070
+hadoop.yarn.nodemanager.remote-app-log-dir=/app-logs
+hadoop.hadoop.security.key.provider.path=jceks://file@/${user.home}/kms.keystore
+hadoop.dfs.encryption.key.provider.uri=jceks://file@/${user.home}/kms.keystore
+hadoop.dfs.replace-datanode-on-failure.policy=NEVER
+# -----
+tez.lib.uris=/apps/tez/tez-0.9.0.tar.gz
+# -----
+hadoop.use.ambari=false
+hadoop.ambari.yarn.cp=$HADOOP_CONF_DIR,/usr/hdp/current/hadoop-client/*,/usr/hdp/current/hadoop-client/lib/*,/usr/hdp/current/hadoop-hdfs-client/*,/usr/hdp/current/hadoop-hdfs-client/lib/*,/usr/hdp/current/hadoop-yarn-client/*,/usr/hdp/current/hadoop-yarn-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/*,/usr/hdp/current/tez-client/conf
+hadoop.ambari.mr.cp=$HADOOP_CONF_DIR,/usr/hdp/current/hadoop-client/*,/usr/hdp/current/hadoop-client/lib/*,/usr/hdp/current/hadoop-hdfs-client/*,/usr/hdp/current/hadoop-hdfs-client/lib/*,/usr/hdp/current/hadoop-yarn-client/*,/usr/hdp/current/hadoop-yarn-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/*,/usr/hdp/current/tez-client/conf,$PWD/mr-framework/hadoop/share/hadoop/mapreduce/*:$PWD/mr-framework/hadoop/share/hadoop/mapreduce/lib/*:$PWD/mr-framework/hadoop/share/hadoop/common/*:$PWD/mr-framework/hadoop/share/hadoop/common/lib/*:$PWD/mr-framework/hadoop/share/hadoop/yarn/*:$PWD/mr-framework/hadoop/share/hadoop/yarn/lib/*:$PWD/mr-framework/hadoop/share/hadoop/hdfs/*:$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*:$PWD/mr-framework/hadoop/share/hadoop/tools/lib/*
+hadoop.emr.yarn.cp=$HADOOP_CONF_DIR,$HADOOP_COMMON_HOME/*,$HADOOP_COMMON_HOME/lib/*,$HADOOP_HDFS_HOME/*,$HADOOP_HDFS_HOME/lib/*,$HADOOP_MAPRED_HOME/*,$HADOOP_MAPRED_HOME/lib/*,$HADOOP_YARN_HOME/*,$HADOOP_YARN_HOME/lib/*,/usr/lib/hadoop-lzo/lib/*,/usr/share/aws/emr/emrfs/conf,/usr/share/aws/emr/emrfs/lib/*,/usr/share/aws/emr/emrfs/auxlib/*,/usr/share/aws/emr/lib/*,/usr/share/aws/emr/ddb/lib/emr-ddb-hadoop.jar,/usr/share/aws/emr/goodies/lib/emr-hadoop-goodies.jar,/usr/share/aws/emr/kinesis/lib/emr-kinesis-hadoop.jar,/usr/share/aws/emr/cloudwatch-sink/lib/*,/usr/share/aws/aws-java-sdk/*
+hadoop.emr.mr.cp=$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*,$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*,/usr/lib/hadoop-lzo/lib/*,/usr/share/aws/emr/emrfs/conf,/usr/share/aws/emr/emrfs/lib/*,/usr/share/aws/emr/emrfs/auxlib/*,/usr/share/aws/emr/lib/*,/usr/share/aws/emr/ddb/lib/emr-ddb-hadoop.jar,/usr/share/aws/emr/goodies/lib/emr-hadoop-goodies.jar,/usr/share/aws/emr/kinesis/lib/emr-kinesis-hadoop.jar,/usr/share/aws/emr/cloudwatch-sink/lib/*,/usr/share/aws/aws-java-sdk/*
+# -----
+hadoop.consul.url=http://internal-consul-1214146536.us-east-1.elb.amazonaws.com:8500
+
+# ==================================================
+# le-transform/conf/env/devcluster/transform.properties
+# ==================================================
+transform.transformer.cache.maxsize=500
+# ==================================================
+# le-dataplatform/conf/env/devcluster/dataplatform.properties
+# ==================================================
+dataplatform.yarn.job.basedir=/modeling-job
+dataplatform.yarn.job.runtime.config=runtimeconfig.properties
+dataplatform.customer.basedir=/user/s-analytics/customers
+dataplatform.modeling.row.threshold=50
+dataplatform.retry.wait.time=30000
+dataplatform.sqoopjob.core.pool.size=1
+dataplatform.sqoopjob.max.pool.size=6
+dataplatform.sqoopjob.queue.capacity=1
+dataplatform.queue.scheme=default
+dataplatform.hdfs.stack=default
+dataplatform.completedjob.querylimit=1000
+dataplatform.python.conda.env.ambari=lattice
+dataplatform.python.conda.env=lattice_20181019
+#Yarn HA
+# ------
+dataplatform.dlorchestrationjob.core.pool.size=1
+dataplatform.dlorchestrationjob.max.pool.size=6
+dataplatform.dlorchestrationjob.queue.capacity=1
+dataplatform.dlorchestrationjob.wait.time=180
+dataplatform.dlorchestrationjob.row.fail.threshold=500
+dataplatform.dlorchestrationjob.row.warn.threshold=1000
+dataplatform.dlorchestrationjob.postiveevent.fail.threshold=100
+dataplatform.dlorchestrationjob.postiveevent.warn.threshold=500
+dataplatform.dlorchestration.datasource.dialect=org.hibernate.dialect.SQLServerDialect
+dataplatform.dlorchestration.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+dataplatform.dlorchestration.datasource.url=jdbc:sqlserver://10.41.1.250:1433;databaseName=LeadScoringDB_dev;
+dataplatform.dlorchestration.datasource.user=root
+dataplatform.dlorchestration.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
+dataplatform.dlorchestration.datasource.host=10.41.1.250
+dataplatform.dlorchestration.datasource.port=1433
+dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_dev
+dataplatform.dlorchestration.datasource.type=SQLServer
+dataplatform.dlorchestration.metadataerror.fail=true
+dataplatform.container.virtualcores=1
+dataplatform.container.memory=1024
+dataplatform.container.map.virtualcores=4
+dataplatform.container.reduce.virtualcores=1
+dataplatform.container.mapreduce.memory=1024
+dataplatform.container.sample.mapreduce.memory=1024
+dataplatform.throttle.threshold=1800000
+#test data source ----
+dataplatform.test.datasource.user=root
+dataplatform.test.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
+dataplatform.test.datasource.host=10.41.1.250
+dataplatform.test.datasource.port=1433
+dataplatform.test.datasource.dbname=ledp_test_datasource
+dataplatform.test.datasource.type=SQLServer
+#parallel
+dataplatform.model.parallel.enabled=false
+dataplatform.model.aws.batch.enabled=false
+dataplatform.model.aws.batch.local.enabled=true
+dataplatform.sampling.parallel.trainingset.number=4
+dataplatform.profiling.parallel.mapper.number=4
+dataplatform.container.parallel.map.memory=1024
+dataplatform.container.parallel.reduce.memory=1024
+
+#mapreduce property
+dataplatform.mapreduce.task.timeout=600000
+
+dataplatform.trustore.jks=
+# ==================================================
+# le-dataplatform/conf/env/devcluster/hadoop-metrics2.properties
+# ==================================================
+#
+#   Licensed to the Apache Software Foundation (ASF) under one or more
+#   contributor license agreements.  See the NOTICE file distributed with
+#   this work for additional information regarding copyright ownership.
+#   The ASF licenses this file to You under the Apache License, Version 2.0
+#   (the "License"); you may not use this file except in compliance with
+#   the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+# syntax: [prefix].[source|sink].[instance].[options]
+# See javadoc of package-info.java for org.apache.hadoop.metrics2 for details
+
+ledpjob.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.LedpGangliaSink
+ledpjob.sink.ganglia.servers=bodcdevvhort147.lattice.local:8659
+ledpjob.sink.ganglia.tagsForPrefix.ledpjob=AppId,ContainerId,Priority,Queue,Customer
+
+ledpjob.sink.file.class=com.latticeengines.perf.exposed.metric.sink.SocketSink
+ledpjob.sink.*.period=5
+ledpjob.sink.file.server=localhost:6789
+
+
+
+# ==================================================
+# le-datadb/conf/env/devcluster/db.properties
+# ==================================================
+datadb.datasource.driver=com.mysql.jdbc.Driver
+datadb.datasource.url=jdbc:mysql://lpi-data-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/Data_MultiTenant?autoReconnect=true&useSSL=false
+datadb.datasource.sqoop.url=jdbc:mysql://lpi-data-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/Data_MultiTenant?autoReconnect=true&useSSL=false
+datadb.datasource.user=LPI
+datadb.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+datadb.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+datadb.datasource.type=MySQL
+datadb.datasource.poolsize.max=8
+datadb.datasource.poolsize.max.webapp=8
+datadb.datasource.poolsize.max.appmaster=8
+# ==================================================
+# le-metadata/conf/env/devcluster/metadata.properties
+# ==================================================
+metadata.hive.enabled=false
+metadata.hive.url=jdbc:hive2://bodcdevvhort149.lattice.local:10000
+metadata.hive.username=yarn
+metadata.hive.password.encrypted=
+
+# ==================================================
+# le-playmaker/conf/env/devcluster/playmaker.properties
+# ==================================================
+playmaker.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+playmaker.datasource.driver=com.mysql.jdbc.Driver
+playmaker.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/oauth2DB?autoReconnect=true&useSSL=false
+playmaker.datasource.type=MySQL
+playmaker.datasource.user=LPI
+playmaker.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+playmaker.datasource.mssql.user=LPI
+playmaker.datasource.mssql.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+
+playmaker.jdbc.pool.min.size=0
+playmaker.jdbc.pool.max.size=10
+playmaker.jdbc.pool.max.idle=120
+playmaker.jdbc.pool.max.checkout=60000
+
+playmaker.update.bulk.max=1000
+playmaker.recommendations.years.keep=2
+
+# ==================================================
+# le-quartzclient/conf/env/devcluster/quartzclient.properties
+# ==================================================
+quartzclient.datasource.driver=com.mysql.jdbc.Driver
+quartzclient.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/QuartzDB?autoReconnect=true&useSSL=false
+quartzclient.datasource.user=LPI
+quartzclient.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+quartzclient.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+quartzclient.datasource.type=MySQL
+quartzclient.datasource.poolsize.max=4
+quartzclient.datasource.poolsize.max.webapp=4
+quartzclient.datasource.poolsize.max.appmaster=4
+
+# ==================================================
+# le-matchapi/conf/env/devcluster/matchapi.properties
+# ==================================================
+matchapi.test.functional.hostport=https://localhost:9076
+datacloud.core.accountmasterstats.numericbuckets.enabled=true
+datacloud.core.accountmasterstats.dummybuckets.enabled=false
+
+# ==================================================
+# le-quartz/conf/env/devcluster/quartz.properties
+# ==================================================
+quartz.test.functional.testdesturl=http://www.w3school.com.cn/example/jquery/demo_test_post.asp
+
+quartz.jobStore.driver.delegate=org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+
+quartz.scheduler.jobs.history.displaycount=5
+
+quartz.scheduler.jobs.history.retaining.days=30
+
+quartz.scheduler.jobs.history.cleanup.trigger=0 0 5 * * ?
+
+#predefined jobs
+quartz.predefined.jobs.enabled=
+
+#lp
+quartz.lp.predefined.job.primary.url=
+quartz.lp.predefined.job.secondary.url=
+quartz.lp.predefined.job.query.api=
+quartz.lp.predefined.job.check.bean.url=
+quartz.lp.modelsummarydownload.job.cron=0/15 * * * * ?
+quartz.lp.modelsummarydownload.job.timeout=3600
+quartz.lp.emrscaling.job.cron=0 * * * * ?
+
+#test
+quartz.test.functional.testjob.primary.url=https://localhost:9080/quartz/quartzjob/triggerjob
+quartz.test.functional.testjob.secondary.url=https://localhost:9080/quartz/quartzjob/triggerjob
+quartz.test.functional.testjob.query.api=https://localhost:9080/quartz/quartzjob/checkactivejob
+quartz.test.functional.testjob.check.bean.url=https://localhost:9080/quartz/quartzjob/checkjobbean
+quartz.test.functional.testjob.cron=0/5 * * * * ?
+
+#deployment test
+quartz.test.deployment.testjob.primary.url=https://localhost:9081/pls/quartzjob/triggerjob
+quartz.test.deployment.testjob.secondary.url=https://localhost:9081/pls/quartzjob/triggerjob
+quartz.test.deployment.testjob.query.api=https://%s:9081/pls/quartzjob/checkactivejob
+quartz.test.deployment.testjob.check.bean.url=https://localhost:9081/pls/quartzjob/checkjobbean
+quartz.test.deployment.testjob.cron=0 0 5 * * ?
+
+#datacloudcollection
+#other properties will copy from datacloudapi.
+quartz.datacloudcollection.job.cron=0/30 * * * * ?
+quartz.datacloudcollection.job.timeout=3000
+
+# ==================================================
+# le-monitor/conf/env/devcluster/monitor.properties
+# ==================================================
+monitor.alert.service.enabled=false
+
+monitor.influxdb.url=
+monitor.influxdb.username=
+monitor.influxdb.password=
+monitor.influxdb.environment=
+
+monitor.emailsettings.from=no-reply@lattice-engines.com
+monitor.emailsettings.server=smtprelay.lattice.local
+monitor.emailsettings.username=build@lattice-engines.com
+monitor.emailsettings.password=ryTy2wEiaw51Le9qTXxx3w==
+monitor.emailsettings.port=25
+monitor.emailsettings.useSSL=false
+monitor.emailsettings.useSTARTTLS=false
+monitor.email.enabled=false
+
+monitor.health.inspection.enabled=true
+
+monitor.urls.helpcenter=http://help.lattice-engines.com
+
+# ==================================================
+# le-admin/conf/env/devcluster/admin.properties
+# ==================================================
+admin.bardjams.dryrun=false
+admin.dante.dryrun=true
+admin.vdbdl.dryrun=false
+admin.pls.dryrun=false
+admin.cdl.dryrun=false
+admin.vdb.tpl.dryrun=false
+admin.dl.tpl.dryrun=false
+admin.eai.dryrun=false
+admin.metadata.dryrun=false
+admin.modeling.dryrun=false
+
+admin.upload.schema=false
+
+# the jetty server suppose only reads/writes system files under this directory
+admin.mount.rootpath=/mnt
+admin.mount.vdb.permstore=visidb
+admin.mount.dl.datastore=dl
+admin.mount.tpl=tpl
+
+#Bard JAMS
+admin.bardjams.datasource.dialect=org.hibernate.dialect.SQLServerDialect
+admin.bardjams.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+admin.bardjams.datasource.url=jdbc:sqlserver://10.41.1.247;databaseName=JAMSCFG_dev;
+admin.bardjams.datasource.user=bardjams
+admin.bardjams.datasource.password.encrypted=SIv6wwDR3NpTOC2rIcMe5A==
+
+#Modeling
+admin.modelingservice.basedir=/user/s-analytics/customers/
+
+# overwrite default configuration and schema
+admin.overwrite.vdb.servername=BODCDEVVINT187
+admin.overwrite.vdb.servername.options=BODCDEVVINT187,BODCDEVVINT207
+
+# properties for test
+admin.test.contract=IntegrationTest
+admin.test.dl.url=http://bodcdevvint187.dev.lattice.local:8081
+admin.test.vdb.servername=bodcdevvint187
+admin.test.vdb.permstore.server=BODCDEVVINT207
+admin.test.dl.user=richard.liu@lattice-engines.com
+admin.test.dl.datastore.server=BODCDEVVINT187
+admin.test.dl.datastore.path=\\\\BODCDEVVINT187\\DataLoader\\Customers
+
+admin.test.functional.api=https://localhost:9085
+
+# ==================================================
+# le-aws/conf/env/devcluster/aws.properties
+# ==================================================
+aws.region=us-east-1
+
+aws.default.access.key=AKIAJZANYOAEKEWN4HIA
+aws.default.secret.key.encrypted=bi0mpJJNxiYpEka5C6JO4uuyFoO8IiKpLn5ZS/LmNslND9h+pMMRbh58ZB/qVA0jn/08q5MnTQjhcH9bt9zwsBvRTvUEOR1YcOPWgg8Cs24=
+aws.customer.access.key=AKIAIHT4ZQEB4MYGTX4Q
+aws.customer.secret.key.encrypted=bi0mpJJNxiYpEka5C6JO4o8NB03vDAVHhRNdhbOKYO3NDgYdwu8iNOkZ9h3Ky4p4Y453rdY84B8algZYqy+D5+5l3L70rk2OlZyxZX56wTY=
+
+aws.s3.bucket=latticeengines-devcluster
+aws.customer.account.id=009790583811
+
+aws.emr.cluster=devcluster_20181228
+
+aws.dynamo.endpoint=
+aws.elasticache.cluster.name=dev-encrypted
+
+aws.test.s3.bucket=latticeengines-test-devcluster
+aws.test.emr.cluster=devcluster_20181228
+aws.test.customer.access.key=AKIAIJRFJ2Y62KWUWF6Q
+aws.test.customer.secret.key.encrypted=bi0mpJJNxiYpEka5C6JO4qm733fGidS8PyuKAZFqKIb9yb4hknHabZfpAJu526xebnC8cKbEbkFQvV159j9EBNbRpllctLmQ1nx9gir2Kak=
+aws.customer.s3.bucket=latticeengines-devcluster
+aws.customer.s3.region=us-east1
+aws.customer.iam.group=Customers
+
+# ==================================================
+# le-dataflowapi/conf/env/devcluster/dataflowapi.properties
+# ==================================================
+dataflowapi.engine=TEZ
+dataflowapi.checkpoint=false
+dataflowapi.am.mem=2048
+dataflowapi.flink.local.vcores=2
+dataflowapi.flink.local.mem=4096
+
+dataflowapi.spark.driver.cores=1
+dataflowapi.spark.driver.mem=1g
+dataflowapi.spark.executor.cores=1
+dataflowapi.spark.executor.mem=1g
+dataflowapi.spark.min.executors=1
+dataflowapi.spark.max.executors=4
+
+
+# ==================================================
+# le-saml/conf/env/devcluster/saml.properties
+# ==================================================
+saml.lb.scheme=https
+saml.lb.servername=localhost
+saml.lb.includeserverport=true
+saml.lb.serverport=3000
+saml.lb.contextpath=/pls/saml/login/
+
+saml.metadata.refresh.frequency=5000
+saml.timeout.authNInstant.hours=12
+
+saml.keystore.resource.path.encrypted=bi0mpJJNxiYpEka5C6JO4vlPNZjHN1jIDsnR1ZIk7qxl1nz/pjl4rGPUW0NZtZ9D7dTiqsIFhJQdhj+pxQZ+uYkHtJUV+CwqC6Z/V1co/2M=
+saml.keystore.defaultKey.encrypted=bi0mpJJNxiYpEka5C6JO4sBIJb3KRwhYHLIdd5fUHTrpEl7LO9Un8VkojEn4BW8yxIRJ5jNzAFQuUrMJTVfLOQ==
+saml.keystore.password.encrypted=bi0mpJJNxiYpEka5C6JO4vqffppMiq58CaHeqMFI4SvgfF2ACdGs39AggGjR0yPV
+saml.keystore.storePass.encrypted=bi0mpJJNxiYpEka5C6JO4vqffppMiq58CaHeqMFI4SvgfF2ACdGs39AggGjR0yPV
+
+# ==================================================
+# le-scoringapi/conf/env/devcluster/scoringapi.properties
+# ==================================================
+scoringapi.scoreartifact.cache.maxsize=50
+scoringapi.scoreartifact.cache.default.size=2097152
+scoringapi.scoreartifact.cache.max.threshold=0.5
+scoringapi.scoreartifact.cache.max.weight=4294967296
+scoringapi.scoreartifact.cache.ratio=60
+scoringapi.scoreartifact.cache.concurrency.level=1
+scoringapi.scoreartifact.cache.expiration.time=1
+scoringapi.scoreartifact.cache.refresh.time=120
+
+scoringapi.modeldetailsandfields.cache.maxsize=500
+scoringapi.modeldetailsandfields.cache.expiration.time=1
+
+scoringapi.enrichment.cache.size=100
+scoringapi.enrichment.cache.expiration.time=5
+
+scoringapi.propdata.shortcircuit=false
+scoringapi.ratelimit.max=120
+scoringapi.ratelimit.bulk.requests.max=60
+scoringapi.ratelimit.single.requests.max=120
+
+scoringapi.jythonengine.cache.maxsize=200
+
+scoringapi.modeljson.cache.dir=/var/cache/scoringapi/%s/%s/%s/
+
+# ==================================================
+# le-dellebi/conf/env/devcluster/dellebi.properties
+# ==================================================
+#dellebi.datahadoopinpath is the directory to place the data which waits for importing to HDFS.
+dellebi.camelunzipoutputpath=hdfs2://bodcdevvhort148.lattice.local:8020/latticeengines/in
+dellebi.cascadinginpath=hdfs://bodcdevvhort148.lattice.local:8020/latticeengines/in
+dellebi.datahadoopinpath=/latticeengines/in
+dellebi.cascadinginputdelimiter=|~|
+
+dellebi.datahadoopworkingpath=/user/dellebi
+dellebi.datahadooperrorworkingpath=/user/dellebi/errordata
+dellebi.datahadooprootpath=hdfs://bodcdevvhort148.lattice.local:8020
+dellebi.datainputfiletype=/*.txt
+
+dellebi.inputfileregex=tgt_(quote_trans_global).+(.zip)
+dellebi.ordersummary=order_summary
+dellebi.orderdetail=order_detail
+dellebi.shiptoaddrlattice=ship_to_addr_lattice
+dellebi.warrantyglobal=warranty_global
+dellebi.quotetrans=quote_trans
+dellebi.quotetrans.storeprocedure=SP_QUOTE_STAGE_UPDATE
+dellebi.output.hdfsdata.remove=true
+
+#Target DB Info
+dellebi.datatarget.dialect=org.hibernate.dialect.SQLServerDialect
+dellebi.datatarget.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+dellebi.datatarget.url=jdbc:sqlserver://10.51.15.145:1433;database=DELL_EBI_STAGE_QUOTES_DEV
+dellebi.datatarget.host=10.51.15.145
+dellebi.datatarget.port=1433
+dellebi.datatarget.dbname=DELL_EBI_STAGE_QUOTES_DEV
+dellebi.datatarget.type=SQLServer
+dellebi.datatarget.user=hadoop
+dellebi.datatarget.password.encrypted=8xuq8yYNOoNtHQpFel/J7w==
+
+dellebi.sqoopexporter.mapper.number=8
+
+dellebi.datatarget.stagefinal.dbname=DELL_EBI_STAGE_FINAL_USE_DEV
+
+dellebi.configdb.datasource.dialect=org.hibernate.dialect.SQLServerDialect
+dellebi.configdb.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+dellebi.configdb.datasource.url=jdbc:sqlserver://10.51.15.145:1433;database=DELL_EBI_CONTROL_DEVCLUSTER
+dellebi.configdb.datasource.user=hadoop
+dellebi.configdb.datasource.password.encrypted=8xuq8yYNOoNtHQpFel/J7w==
+dellebi.configdb.datasource.host=10.51.15.145
+dellebi.configdb.datasource.port=1433
+dellebi.configdb.datasource.dbname=DELL_EBI_CONTROL_DEVCLUSTER
+dellebi.configdb.datasource.type=SQLServer
+
+dellebi.customer="Dell EBI"
+dellebi.output.table.sample=PRE_STAGE_STG_QUOTE_DATA
+
+dellebi.fileTypes.dellebiManagerJob1=quote
+dellebi.fileTypes.dellebiManagerJob2=Order_Detail,SKU_Global,Channel,Warranty
+dellebi.fileTypes.dellebiManagerJob3=Order_Summary,SKU_Itm_Cls_Code,Calendar,Account_Cust,SKU_Manufacturer
+dellebi.dellebiManagerJob.schedule=0 0/5 * * * ?
+
+dellebi.mailhost=smtprelay.lattice.local
+dellebi.mailfrom=DBA@lattice-engines.com
+dellebi.mailreceivelist=lming@lattice-engines.com,jwilliams@lattice-engines.com
+
+dellebi.smbaccount=LATTICE\\s-hadoop
+dellebi.smbps=#a5cHe@d00p!
+
+dellebi.local.inboxpath=/tmp/dellebi
+dellebi.local.datatarget.dbname=DELL_EBI_STAGE_QUOTES_DEV
+
+dellebi.env=DEVCLUSTER
+
+# ==================================================
+# le-dataflow/conf/env/devcluster/dataflow.properties
+# ==================================================
+
+# ==================================================
+# le-security/conf/env/devcluster/security.properties
+# ==================================================
+security.test.api.hostport=https://localhost:9084/security
+security.globalauth.url=https://haproxy-test04.lattice.local
+security.app.public.url=https://localhost:3000
+
+security.ldap.url=ldaps://bodc-dev-dc1.dev.lattice.local:636
+security.ldap.domain=dev.lattice.local
+
+security.zendesk.enabled=false
+security.zendesk.url=https://lattice-engines.zendesk.com/
+security.zendesk.email=johndoe@lattice-engines.com
+security.zendesk.encryptedApiToken=bi0mpJJNxiYpEka5C6JO4tTD2CJkHRaABQA/VYwQNaW8mBTxRp+0YQN5WBwl4ZRd
+
+security.zendesk.jwt.redirecturl=https://lattice-engines.zendesk.com/access/jwt
+security.zendesk.jwt.secretkey=zbcHrhuhVwTBwwY0ZTICn1aIpTXQNEe1L5gWwIFsAwEKTgwA
+
+# ==================================================
 # le-api/conf/env/devcluster/api.properties
 # ==================================================
 api.rest.endpoint.hostport=https://localhost:9074
 documentation.services.version=1.0
 documentation.services.basePath=https://localhost:9074/rest
 # ==================================================
-# le-transform/conf/env/devcluster/transform.properties
+# le-workflow/conf/env/devcluster/workflow.properties
 # ==================================================
-transform.transformer.cache.maxsize=500
+workflow.jobs.numthreads=10
+workflow.jobs.cache.namespace=devcluster
+
+workflow.datasource.driver=com.mysql.jdbc.Driver
+workflow.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false
+workflow.datasource.reader.url=jdbc:mysql://lpi-dev-cluster.cluster-ro-ctigbumfbvzz.us-east-1.rds.amazonaws.com:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false
+workflow.datasource.user=LPI
+workflow.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+workflow.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+workflow.datasource.poolsize.max=16
+workflow.datasource.poolsize.max.webapp=16
+workflow.datasource.poolsize.max.appmaster=4
+
+
 # ==================================================
-# le-dantedb/conf/env/devcluster/dantedb.properties
+# le-db/conf/env/devcluster/db.properties
 # ==================================================
-dantedb.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-dantedb.datasource.url=jdbc:sqlserver://bodcdevvobs97.dev.lattice.local;databaseName=LPI_DanteDB;
-dantedb.datasource.user=lpiDanteUser
-dantedb.datasource.password.encrypted=hjl5F8+oM0X9tBVaI56E6Q==
-dantedb.datasource.dialect=org.hibernate.dialect.SQLServerDialect
-dantedb.datasource.type=SQLServer
-dantedb.datasource.dbname=LPI_DanteDB
+db.datasource.driver=com.mysql.jdbc.Driver
+db.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false
+db.datasource.reader.driver=com.mysql.jdbc.Driver
+db.datasource.reader.url=jdbc:mysql://lpi-dev-cluster.cluster-ro-ctigbumfbvzz.us-east-1.rds.amazonaws.com/PLS_MultiTenant?autoReconnect=true&useSSL=false
+db.datasource.user=LPI
+db.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+db.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+db.datasource.type=MySQL
+db.datasource.show_sql=false
+db.datasource.poolsize.max=32
+db.datasource.poolsize.max.webapp=32
+db.datasource.poolsize.max.appmaster=16
+db.datasource.reader.poolsize.max=32
+db.datasource.reader.poolsize.max.webapp=32
+db.datasource.reader.poolsize.max.appmaster=16
+
+# ==================================================
+# le-eai/conf/env/devcluster/eai.properties
+# ==================================================
+eai.salesforce.production.loginurl=https://login.salesforce.com
+eai.salesforce.sandbox.loginurl=https://test.salesforce.com
+eai.salesforce.clientid=3MVG9CVKiXR7Ri5qgebamGAhq9fChr3m1hoj51ftmqQpl5IbCFpK.BOIOgR5uRH7YKz0epGD1yBpgvtRKUGPX
+eai.salesforce.clientsecret=473823972728429785
+
+eai.vdb.file.size=100000000
+
+eai.max.redeliveries=5
+eai.backoff.multiplier=2
+
+eai.test.salesforce.username=apeters-widgettech@lattice-engines.com
+eai.test.salesforce.password.encrypted=bi0mpJJNxiYpEka5C6JO4l3HqtRSPPdF/FPQG/J1yDqXLtkIj9S4rDIb7sZ5VaUA
+eai.test.salesforce.securitytoken=oIogZVEFGbL3n0qiAp6F66TC
+eai.test.metadata.port=8080
+eai.test.metadata.url=http://10.41.1.44:8080/metadata
+eai.test.sftp.host=10.141.1.239
+eai.test.sftp.user=sftpdev
+eai.test.sftp.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
+eai.test.vdb.connector.tenant=ManualELQ_2016_12_06_1050
+eai.test.vdb.connector.dl.endpoint=http://10.41.1.207:8081
+eai.test.vdb.connector.loadgroup=TestDP_5M_500
+
+eai.file.csv.error.lines=1000
+
+eai.export.dynamo.num.mappers=16
+eai.export.dynamo.signature=20180425
+
 # ==================================================
 # le-datacloud/conf/env/devcluster/datacloud.properties
 # ==================================================
@@ -82,12 +886,16 @@ datacloud.match.retention.days=7
 datacloud.match.bulk.snappy.compress=true
 
 datacloud.match.latest.data.cloud.major.version=2.0
-datacloud.match.default.decision.graph=Pokemon
+datacloud.match.default.decision.graph=IceCreamSandwich
+datacloud.match.default.decision.graph.account=PetitFour
+
 
 datacloud.match.dnbLookupActor.actor.cardinality=3
 datacloud.match.dnbCacheLookupActor.actor.cardinality=4
 datacloud.match.dynamoLookupActor.actor.cardinality=8
 datacloud.match.dunsGuideBookLookupActor.actor.cardinality=4
+datacloud.match.entityLookupActor.actor.cardinality=4
+datacloud.match.entityAssociateActor.actor.cardinality=2
 datacloud.match.metricActor.actor.cardinality=4
 
 datacloud.match.actor.datasource.default.threadpool.count.min=8
@@ -104,12 +912,21 @@ datacloud.match.dynamo.fetchers.chunk.size=25
 
 datacloud.match.publish.match.history=false
 
+# Entity match
+datacloud.match.entity.staging.shards=2
+datacloud.match.entity.staging.table=CDLMatchDev_20181126
+datacloud.match.entity.serving.table=CDLMatchServingDev_20181126
+datacloud.match.entity.staging.ttl=86400
+datacloud.match.entity.lookup.resolve.num.threads=4
+datacloud.match.entity.cache.version.ttl=1800
+
 datacloud.yarn.container.mem.mb=2048
-datacloud.yarn.container.vcores=1
+datacloud.yarn.container.vcores=2
 datacloud.yarn.container.mem.mb.actors=4096
 datacloud.yarn.container.vcores.actors=2
 datacloud.yarn.actors.num.threads=128
 datacloud.yarn.actors.group.size=16
+datacloud.yarn.fetchonly.num.threads=4
 
 datacloud.ga.username=propdata-service@lattice-engines.com
 datacloud.ga.password.hash=EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=
@@ -153,7 +970,10 @@ datacloud.etl.profile.encode.bit=64
 datacloud.etl.profile.attrs=1000
 datacloud.etl.am.max.decode.num=100
 
+#notification
 datacloud.slack.webhook.url=
+# if multiple recipients, separated by ,
+datacloud.email.recipients=
 
 #dnb
 datacloud.dnb.use.remote.global=true
@@ -233,6 +1053,10 @@ datacloud.dnb.bulk.getstatus.transactioncode.xpath=//TransactionResult/ResultID
 datacloud.dnb.bulk.getstatus.servicebatchid.xpath=//ListBatchResponseDetail/Batch[%s]/BatchDetail/ServiceBatchID
 datacloud.dnb.bulk.getstatus.status.xpath=//ListBatchResponseDetail/Batch[%s]/BatchResult/ResultID
 
+# patcher
+datacloud.patcher.log.s3bucket=latticeengines-devcluster
+datacloud.patcher.log.dir=DataCloudPatchLogs
+
 # aws creds
 datacloud.aws.qa.access.key=bi0mpJJNxiYpEka5C6JO4oHwKjKDDkN1OtGcSx6m3TOO20J0JJzWTzNWB0kOXR4yM8mGlBYofKHAUPsb0U92MA==
 datacloud.aws.qa.secret.key=bi0mpJJNxiYpEka5C6JO4uuyFoO8IiKpLn5ZS/LmNslND9h+pMMRbh58ZB/qVA0jn/08q5MnTQjhcH9bt9zwsBvRTvUEOR1YcOPWgg8Cs24=
@@ -296,440 +1120,13 @@ datacloud.collection.test.domains=asus.com,gigabyte.com,bp.com,ca.com,google.com
 
 #ingestion of collected data
 datacloud.collection.bw.timestamp=CollectedAt
-#3600 second
-datacloud.collection.ingestion.partion.period=3600
-# ==================================================
-# le-pls/conf/env/devcluster/pls.properties
-# ==================================================
-pls.accountmaster.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-pls.accountmaster.datasource.url=jdbc:sqlserver://10.41.1.250:1433;databaseName=AccountMaster;
-pls.accountmaster.datasource.user=root
-pls.accountmaster.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
-pls.accountmaster.datasource.host=10.41.1.250
-pls.accountmaster.datasource.port=1433
-pls.accountmaster.datasource.dbname=AccountMaster
-pls.accountmaster.datasource.type=SQLServer
-
-pls.modelingservice.basedir=/user/s-analytics/customers/
-pls.modeldeletion.core.pool.size=10
-pls.modeldeletion.max.pool.size=20
-pls.modeldeletion.queue.capacity=20
-
-pls.downloader.core.pool.size=10
-pls.downloader.max.pool.size=20
-pls.downloader.queue.capacity=20
-pls.jmx.downloader.check.frequency=600
-
-pls.modelingservice.testdsdb=LeadScoringDB_dev
-pls.modelingservice.testdsdbhost=10.41.1.250
-pls.modelingservice.testdsdbuser=root
-pls.modelingservice.testdsdbpasswd.encrypted=KPpl2JWz+k79LWvYIKz6cA==
-pls.modelingservice.testdsdbport=1433
-
-pls.dataloader.rest.api=http://10.41.1.187:8081/DLRestService
-pls.dataloader.sfdc.login.url=https://login.salesforce.com/services/Soap/u/33.0
-pls.dataloader.marketo.login.url=https://na-sj02.marketo.com/soap/mktows/2_0
-pls.dataloader.eloqua.login.url=https://login.eloqua.com/id
-
-pls.modelalerts.min.success.events=500
-pls.modelalerts.min.conversion.percentage=5
-pls.modelalerts.min.rocscore=0.7
-pls.modelalerts.max.rocscore=0.85
-pls.modelalerts.max.discrete.values=200
-pls.modelalerts.max.feature.importance=0.1
-pls.modelalerts.max.null.lift=1
-
-pls.default.buyerinsights.num.predictors=50
-
-pls.ff.plstestflag=true
-pls.ff.setuppage=true
-pls.ff.adminalertstab=false
-pls.ff.deploymentwizardpage=true
-pls.ff.leadenrichmentpage=true
-
-# for tests
-pls.test.functional.api=https://localhost:9081/
-pls.test.contract=IntegrationTest
-pls.test.tenant.reg.json=tenant-registration-qa.json
-pls.test.sfdc.user.name=apeters-widgettech@lattice-engines.com
-pls.test.sfdc.passwd.encrypted=Uc0UtTndCxC2oeN4hwzvTQ==
-pls.test.sfdc.securitytoken=oIogZVEFGbL3n0qiAp6F66TC
-pls.test.security.api=https://localhost:9080
-
-# workflow
-pls.fitflow.stoplist.path=/Pods/Default/Services/PropData/MatchService/PublicDomain/*.avro
-pls.accountmaster.path=/Pods/Default/Services/PropData/MatchService/AccountMaster
-
-pls.cdl.transform.cascading.partitions=8
-pls.cdl.transform.tez.task.mem.gb=1
-pls.cdl.transform.sort.max.split.threads=2
-pls.cdl.transform.default.cascading.engine=tez
-
-pls.sureshot.map.creds.auth=https://incindio-qa.azurewebsites.net/lattice/credentials/
-pls.sureshot.scoring.settings=https://incindio-qa.azurewebsites.net/lattice/scoring/
-pls.sureshot.enrichment.settings=https://incindio-qa.azurewebsites.net/lattice/enrichment/
-pls.sureshot.playmaker.endpoint=https://testapi.lattice-engines.com
-pls.fileupload.maxupload.bytes=500000000
-pls.fileupload.maxupload.rows=1000000
-pls.modeling.validation.min.rows=300
-pls.modeling.validation.min.eventrows=50
-pls..modeling.validation.min.negativerows=250
-
-pls.sourcefile.retain.days=7
-
-pls.scoring.use.rtsapi=false
-
-pls.leadenrichment.premium.max=10
-pls.marketo.enrichment.webhook.url=https://localhost:9073/score/enrich/record/
-pls.marketo.scoring.webhook.resource=https://localhost:9073/score/external/record/
-
-pls.rating.coverageservice.threshold.parallel=4
-pls.rating.coverageservice.threadpool.size=20
-pls.play.service.threadpool.size=20
-
-pls.segment.export.max=500000
-
-pls.saml.local.redirection.allowed=true
-# ==================================================
-# le-datadb/conf/env/devcluster/db.properties
-# ==================================================
-datadb.datasource.driver=com.mysql.jdbc.Driver
-datadb.datasource.url=jdbc:mysql://lpi-data-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/Data_MultiTenant?autoReconnect=true&useSSL=false
-datadb.datasource.sqoop.url=jdbc:mysql://lpi-data-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/Data_MultiTenant?autoReconnect=true&useSSL=false
-datadb.datasource.user=LPI
-datadb.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-datadb.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-datadb.datasource.type=MySQL
-datadb.datasource.poolsize.max=8
-datadb.datasource.poolsize.max.webapp=8
-datadb.datasource.poolsize.max.appmaster=8
-# ==================================================
-# le-oauth2db/conf/env/devcluster/oauth2.properties
-# ==================================================
-oauth2.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-oauth2.datasource.driver=com.mysql.jdbc.Driver
-oauth2.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/oauth2DB?autoReconnect=true&useSSL=false
-oauth2.datasource.type=MySQL
-oauth2.datasource.user=LPI
-oauth2.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-oauth2.datasource.poolsize.max=32
-oauth2.datasource.poolsize.max.webapp=32
-oauth2.datasource.poolsize.max.appmaster=16
-
-oauth2.password_expiration_days=1
-# ==================================================
-# le-eai/conf/env/devcluster/eai.properties
-# ==================================================
-eai.salesforce.production.loginurl=https://login.salesforce.com
-eai.salesforce.sandbox.loginurl=https://test.salesforce.com
-eai.salesforce.clientid=3MVG9CVKiXR7Ri5qgebamGAhq9fChr3m1hoj51ftmqQpl5IbCFpK.BOIOgR5uRH7YKz0epGD1yBpgvtRKUGPX
-eai.salesforce.clientsecret=473823972728429785
-
-eai.vdb.file.size=100000000
-
-eai.max.redeliveries=5
-eai.backoff.multiplier=2
-
-eai.test.salesforce.username=apeters-widgettech@lattice-engines.com
-eai.test.salesforce.password.encrypted=bi0mpJJNxiYpEka5C6JO4l3HqtRSPPdF/FPQG/J1yDqXLtkIj9S4rDIb7sZ5VaUA
-eai.test.salesforce.securitytoken=oIogZVEFGbL3n0qiAp6F66TC
-eai.test.metadata.port=8080
-eai.test.metadata.url=http://10.41.1.44:8080/metadata
-eai.test.sftp.host=10.41.1.31
-eai.test.sftp.user=sftpdev
-eai.test.sftp.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
-eai.test.vdb.connector.tenant=ManualELQ_2016_12_06_1050
-eai.test.vdb.connector.dl.endpoint=http://10.41.1.207:8081
-eai.test.vdb.connector.loadgroup=TestDP_5M_500
-
-eai.file.csv.error.lines=1000
-
-eai.export.dynamo.num.mappers=16
-eai.export.dynamo.signature=20180425
-# ==================================================
-# le-encryption/conf/env/devcluster/encryption.properties
-# ==================================================
-encryption.enabled=true
-encryption.key.policy=contract
-encryption.key.policy.master.key.name=master
-
-# ==================================================
-# le-quartz/conf/env/devcluster/quartz.properties
-# ==================================================
-quartz.test.functional.testdesturl=http://www.w3school.com.cn/example/jquery/demo_test_post.asp
-
-quartz.jobStore.driver.delegate=org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-
-quartz.scheduler.jobs.history.displaycount=5
-
-quartz.scheduler.jobs.history.retaining.days=30
-
-quartz.scheduler.jobs.history.cleanup.trigger=0 0 5 * * ?
-
-#predefined jobs
-quartz.predefined.jobs.enabled=
-
-#lp
-quartz.lp.predefined.job.primary.url=
-quartz.lp.predefined.job.secondary.url=
-quartz.lp.predefined.job.query.api=
-quartz.lp.predefined.job.check.bean.url=
-quartz.lp.modelsummarydownload.job.cron=0/15 * * * * ?
-quartz.lp.modelsummarydownload.job.timeout=3600
-
-#test
-quartz.test.functional.testjob.primary.url=https://localhost:9080/quartz/quartzjob/triggerjob
-quartz.test.functional.testjob.secondary.url=https://localhost:9080/quartz/quartzjob/triggerjob
-quartz.test.functional.testjob.query.api=https://localhost:9080/quartz/quartzjob/checkactivejob
-quartz.test.functional.testjob.check.bean.url=https://localhost:9080/quartz/quartzjob/checkjobbean
-quartz.test.functional.testjob.cron=0/5 * * * * ?
-
-#deployment test
-quartz.test.deployment.testjob.primary.url=https://localhost:9081/pls/quartzjob/triggerjob
-quartz.test.deployment.testjob.secondary.url=https://localhost:9081/pls/quartzjob/triggerjob
-quartz.test.deployment.testjob.query.api=https://%s:9081/pls/quartzjob/checkactivejob
-quartz.test.deployment.testjob.check.bean.url=https://localhost:9081/pls/quartzjob/checkjobbean
-quartz.test.deployment.testjob.cron=0 0 5 * * ?
-
-#datacloudcollection
-#other properties will copy from datacloudapi.
-quartz.datacloudcollection.job.cron=0/30 * * * * ?
-quartz.datacloudcollection.job.timeout=3000
-# ==================================================
-# le-dataplatform/conf/env/devcluster/dataplatform.properties
-# ==================================================
-dataplatform.yarn.job.basedir=/modeling-job
-dataplatform.yarn.job.runtime.config=runtimeconfig.properties
-dataplatform.customer.basedir=/user/s-analytics/customers
-dataplatform.modeling.row.threshold=50
-dataplatform.retry.wait.time=30000
-dataplatform.sqoopjob.core.pool.size=1
-dataplatform.sqoopjob.max.pool.size=6
-dataplatform.sqoopjob.queue.capacity=1
-dataplatform.queue.scheme=default
-dataplatform.hdfs.stack=${LE_STACK}
-dataplatform.completedjob.querylimit=1000
-dataplatform.python.conda.env=lattice
-#Yarn HA
-# ------
-dataplatform.dlorchestrationjob.core.pool.size=1
-dataplatform.dlorchestrationjob.max.pool.size=6
-dataplatform.dlorchestrationjob.queue.capacity=1
-dataplatform.dlorchestrationjob.wait.time=180
-dataplatform.dlorchestrationjob.row.fail.threshold=500
-dataplatform.dlorchestrationjob.row.warn.threshold=1000
-dataplatform.dlorchestrationjob.postiveevent.fail.threshold=100
-dataplatform.dlorchestrationjob.postiveevent.warn.threshold=500
-dataplatform.dlorchestration.datasource.dialect=org.hibernate.dialect.SQLServerDialect
-dataplatform.dlorchestration.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-dataplatform.dlorchestration.datasource.url=jdbc:sqlserver://10.41.1.250:1433;databaseName=LeadScoringDB_dev;
-dataplatform.dlorchestration.datasource.user=root
-dataplatform.dlorchestration.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
-dataplatform.dlorchestration.datasource.host=10.41.1.250
-dataplatform.dlorchestration.datasource.port=1433
-dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_dev
-dataplatform.dlorchestration.datasource.type=SQLServer
-dataplatform.dlorchestration.metadataerror.fail=true
-dataplatform.container.virtualcores=1
-dataplatform.container.memory=1024
-dataplatform.container.map.virtualcores=4
-dataplatform.container.reduce.virtualcores=1
-dataplatform.container.mapreduce.memory=1024
-dataplatform.throttle.threshold=1800000
-#test data source ----
-dataplatform.test.datasource.user=root
-dataplatform.test.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
-dataplatform.test.datasource.host=10.41.1.250
-dataplatform.test.datasource.port=1433
-dataplatform.test.datasource.dbname=ledp_test_datasource
-dataplatform.test.datasource.type=SQLServer
-#parallel
-dataplatform.model.parallel.enabled=false
-dataplatform.sampling.parallel.trainingset.number=4
-dataplatform.profiling.parallel.mapper.number=4
-dataplatform.container.parallel.map.memory=1024
-dataplatform.container.parallel.reduce.memory=1024
-
-#mapreduce property
-dataplatform.mapreduce.task.timeout=600000
-
-dataplatform.trustore.jks=
-# ==================================================
-# le-dataplatform/conf/env/devcluster/hadoop-metrics2.properties
-# ==================================================
-#
-#   Licensed to the Apache Software Foundation (ASF) under one or more
-#   contributor license agreements.  See the NOTICE file distributed with
-#   this work for additional information regarding copyright ownership.
-#   The ASF licenses this file to You under the Apache License, Version 2.0
-#   (the "License"); you may not use this file except in compliance with
-#   the License.  You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-#
-
-# syntax: [prefix].[source|sink].[instance].[options]
-# See javadoc of package-info.java for org.apache.hadoop.metrics2 for details
-
-ledpjob.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.LedpGangliaSink
-ledpjob.sink.ganglia.servers=bodcdevvhort147.lattice.local:8659
-ledpjob.sink.ganglia.tagsForPrefix.ledpjob=AppId,ContainerId,Priority,Queue,Customer
-
-ledpjob.sink.file.class=com.latticeengines.perf.exposed.metric.sink.SocketSink
-ledpjob.sink.*.period=5
-ledpjob.sink.file.server=localhost:6789
-
-
-
-# ==================================================
-# le-auth/conf/env/devcluster/auth.properties
-# ==================================================
-auth.globalauth.datasource.driver=com.mysql.jdbc.Driver
-auth.globalauth.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/GlobalAuthentication?autoReconnect=true&useSSL=false
-auth.globalauth.datasource.user=LPI
-auth.globalauth.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-auth.globalauth.hibernate.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-auth.globalauth.datasource.poolsize.max=4
-auth.globalauth.datasource.poolsize.max.webapp=8
-auth.globalauth.datasource.poolsize.max.appmaster=4
-# ==================================================
-# le-hadoop/conf/env/devcluster/hadoop.properties
-# ==================================================
-hadoop.use.emr=
-hadoop.dfs.nameservices=
-hadoop.dfs.client.failover.proxy.provider=
-dfs.namenode.rpc-address.nn1=
-dfs.namenode.rpc-address.nn2=
-hadoop.fs.defaultFS=hdfs://bodcdevvhort148.lattice.local:8020
-hadoop.mapred.job.tracker=bodcdevvhort167.lattice.local:9001
-# ------
-hadoop.yarn.resourcemanager.ha.enabled=false
-hadoop.yarn.resourcemanager.ha.rm-ids=rm1,rm2
-hadoop.yarn.resourcemanager.ha.id=rm1
-hadoop.yarn.resourcemanager.address.rm1=bodcdevvhort167.lattice.local:8050
-hadoop.yarn.resourcemanager.scheduler.address.rm1=bodcdevvhort167.lattice.local:8030
-hadoop.yarn.resourcemanager.webapp.address.rm1=bodcdevvhort167.lattice.local:8088
-hadoop.yarn.resourcemanager.address.rm2=bodcdevvhort167.lattice.local:8050
-hadoop.yarn.resourcemanager.scheduler.address.rm2=bodcdevvhort167.lattice.local:8030
-hadoop.yarn.resourcemanager.webapp.address.rm2=bodcdevvhort167.lattice.local:8088
-hadoop.yarn.client.failover-sleep-base-ms=2000
-hadoop.yarn.client.failover-sleep-max-ms=20000
-# ------
-hadoop.yarn.resourcemanager.address=bodcdevvhort167.lattice.local:8050
-hadoop.yarn.resourcemanager.scheduler.address=bodcdevvhort167.lattice.local:8030
-hadoop.yarn.resourcemanager.webapp.address=bodcdevvhort167.lattice.local:8088
-hadoop.mapreduce.jobhistory.webapp.api.address=http://bodcdevvhort148.lattice.local:19888/ws/v1/history/mapreduce/jobs
-hadoop.mapreduce.jobhistory.address=bodcdevvhort148.lattice.local:10020
-hadoop.mapreduce.jobhistory.webapp.address=bodcdevvhort148.lattice.local:19888
-hadoop.yarn.timeline-service.webapp.address=http://bodcdevvhort148.lattice.local:8188/applicationhistory
-hadoop.fs.web.defaultFS=http://bodcdevvhort148.lattice.local:50070/webhdfs/v1
-hadoop.fs.web.webhdfs=webhdfs://bodcdevvhort148.lattice.local:50070
-hadoop.yarn.nodemanager.remote-app-log-dir=/app-logs
-hadoop.hadoop.security.key.provider.path=jceks://file@/${user.home}/kms.keystore
-hadoop.dfs.encryption.key.provider.uri=jceks://file@/${user.home}/kms.keystore
-hadoop.dfs.replace-datanode-on-failure.policy=NEVER
-# -----
-tez.lib.uris=/apps/tez/tez-0.9.0.tar.gz
-# -----
-hadoop.use.ambari=true
-hadoop.ambari.yarn.cp=$HADOOP_CONF_DIR,/usr/hdp/current/hadoop-client/*,/usr/hdp/current/hadoop-client/lib/*,/usr/hdp/current/hadoop-hdfs-client/*,/usr/hdp/current/hadoop-hdfs-client/lib/*,/usr/hdp/current/hadoop-yarn-client/*,/usr/hdp/current/hadoop-yarn-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/*,/usr/hdp/current/tez-client/conf
-hadoop.ambari.mr.cp=$HADOOP_CONF_DIR,/usr/hdp/current/hadoop-client/*,/usr/hdp/current/hadoop-client/lib/*,/usr/hdp/current/hadoop-hdfs-client/*,/usr/hdp/current/hadoop-hdfs-client/lib/*,/usr/hdp/current/hadoop-yarn-client/*,/usr/hdp/current/hadoop-yarn-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/lib/*,/usr/hdp/current/hadoop-mapreduce-client/*,/usr/hdp/current/tez-client/conf,$PWD/mr-framework/hadoop/share/hadoop/mapreduce/*:$PWD/mr-framework/hadoop/share/hadoop/mapreduce/lib/*:$PWD/mr-framework/hadoop/share/hadoop/common/*:$PWD/mr-framework/hadoop/share/hadoop/common/lib/*:$PWD/mr-framework/hadoop/share/hadoop/yarn/*:$PWD/mr-framework/hadoop/share/hadoop/yarn/lib/*:$PWD/mr-framework/hadoop/share/hadoop/hdfs/*:$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*:$PWD/mr-framework/hadoop/share/hadoop/tools/lib/*
-
-
-# ==================================================
-# le-dataflow/conf/env/devcluster/dataflow.properties
-# ==================================================
-
-# ==================================================
-# le-playmaker/conf/env/devcluster/playmaker.properties
-# ==================================================
-playmaker.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-playmaker.datasource.driver=com.mysql.jdbc.Driver
-playmaker.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/oauth2DB?autoReconnect=true&useSSL=false
-playmaker.datasource.type=MySQL
-playmaker.datasource.user=LPI
-playmaker.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-playmaker.datasource.mssql.user=LPI
-playmaker.datasource.mssql.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-
-playmaker.jdbc.pool.min.size=0
-playmaker.jdbc.pool.max.size=10
-playmaker.jdbc.pool.max.idle=120
-playmaker.jdbc.pool.max.checkout=60000
-
-playmaker.update.bulk.max=1000
-playmaker.recommendations.years.keep=2
-
-# ==================================================
-# le-ulysses/conf/env/devcluster/ulysses.properties
-# ==================================================
-
-# ==================================================
-# le-quartzclient/conf/env/devcluster/quartzclient.properties
-# ==================================================
-quartzclient.datasource.driver=com.mysql.jdbc.Driver
-quartzclient.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/QuartzDB?autoReconnect=true&useSSL=false
-quartzclient.datasource.user=LPI
-quartzclient.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-quartzclient.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-quartzclient.datasource.type=MySQL
-quartzclient.datasource.poolsize.max=4
-quartzclient.datasource.poolsize.max.webapp=4
-quartzclient.datasource.poolsize.max.appmaster=4
-
-# ==================================================
-# le-aws/conf/env/devcluster/aws.properties
-# ==================================================
-aws.region=us-east-1
-
-aws.default.access.key=AKIAJZANYOAEKEWN4HIA
-aws.default.secret.key.encrypted=bi0mpJJNxiYpEka5C6JO4uuyFoO8IiKpLn5ZS/LmNslND9h+pMMRbh58ZB/qVA0jn/08q5MnTQjhcH9bt9zwsBvRTvUEOR1YcOPWgg8Cs24=
-aws.customer.access.key=AKIAIHT4ZQEB4MYGTX4Q
-aws.customer.secret.key.encrypted=bi0mpJJNxiYpEka5C6JO4o8NB03vDAVHhRNdhbOKYO3NDgYdwu8iNOkZ9h3Ky4p4Y453rdY84B8algZYqy+D5+5l3L70rk2OlZyxZX56wTY=
-
-aws.s3.bucket=latticeengines-devcluster
-aws.customer.account.id=009790583811
-
-aws.emr.cluster=devcluster
-aws.dynamo.endpoint=
-aws.elasticache.cluster.name=dev-encrypted
-
-aws.test.s3.bucket=latticeengines-test-devcluster
-aws.test.emr.cluster=devcluster
-aws.test.customer.access.key=AKIAIJRFJ2Y62KWUWF6Q
-aws.test.customer.secret.key.encrypted=bi0mpJJNxiYpEka5C6JO4qm733fGidS8PyuKAZFqKIb9yb4hknHabZfpAJu526xebnC8cKbEbkFQvV159j9EBNbRpllctLmQ1nx9gir2Kak=
-aws.customer.s3.bucket=latticeengines-devcluster
-aws.customer.iam.group=Customers
-
-# ==================================================
-# le-serviceapps/cdl/conf/env/devcluster/cdl.properties
-# ==================================================
-cdl.transform.workflow.mem.mb=2048
-cdl.modeling.workflow.mem.mb=2048
-cdl.aps.generate.enabled=false
-cdl.aps.generate.in.aws=false
-cdl.play.service.threadpool.size=5
-cdl.rating.service.threadpool.size=5
-cdl.pa.default.max.iteration=2
-cdl.rating.crossell.minimum.events=50
-cdl.play.service.default.types=List,Cross-Sell,Prospecting,Renewal,Upsell
-cdl.play.service.default.types.user=ga_dev@lattice-engines.com
-# ==================================================
-# le-serviceapps/lp/conf/env/devcluster/lp.properties
-# ==================================================
-
-# ==================================================
-# le-matchapi/conf/env/devcluster/matchapi.properties
-# ==================================================
-matchapi.test.functional.hostport=https://localhost:9076
-datacloud.core.accountmasterstats.numericbuckets.enabled=true
-datacloud.core.accountmasterstats.dummybuckets.enabled=false
+datacloud.collection.alexa.timestamp=Creation_Date
+datacloud.collection.semrush.timestamp=Creation_Date
+datacloud.collection.orbintelligencev2.timestamp=LE_Last_Upload_Date
+datacloud.ingestion.column.id=LEInternalID
+datacloud.ingestion.column.pid=LEParentInternalID
+#ingestion period = 1 week = 86400 * 7 = 604800
+datacloud.collection.ingestion.partion.period=604800
 
 # ==================================================
 # le-ldc-collectiondb/conf/env/devcluster/ldc_collectiondb.properties
@@ -748,6 +1145,43 @@ ldc_collectiondb.datasource.reader.poolsize.max=8
 ldc_collectiondb.datasource.reader.poolsize.max.webapp=20
 ldc_collectiondb.datasource.reader.poolsize.max.appmaster=8
 # ==================================================
+# le-graph/conf/env/devcluster/graph.properties
+# ==================================================
+graph.ns.env=devcluster
+graph.ns.version=1.0
+graph.ns.is.postfix=true
+graph.exception.ignore=true
+graph.contact.url=lpi-graph-dev.ctigbumfbvzz.us-east-1.neptune.amazonaws.com
+graph.contact.port=8182
+
+
+# ==================================================
+# le-auth/conf/env/devcluster/auth.properties
+# ==================================================
+auth.globalauth.datasource.driver=com.mysql.jdbc.Driver
+auth.globalauth.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com/GlobalAuthentication?autoReconnect=true&useSSL=false
+auth.globalauth.datasource.user=LPI
+auth.globalauth.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
+auth.globalauth.hibernate.dialect=org.hibernate.dialect.MySQLInnoDBDialect
+auth.globalauth.datasource.poolsize.max=4
+auth.globalauth.datasource.poolsize.max.webapp=8
+auth.globalauth.datasource.poolsize.max.appmaster=4
+# ==================================================
+# le-cache/conf/env/devcluster/cache.properties
+# ==================================================
+cache.type=local
+cache.redis.command.timeout.min=1
+cache.local.redis=false
+
+# ==================================================
+# le-camille/conf/env/devcluster/camille.properties
+# ==================================================
+camille.zk.connectionString=qazklayer1.lattice.local,qazklayer4.lattice.local,qazklayer5.lattice.local
+camille.zk.pod.id=Default
+camille.zk.sharedQueues=bootstrap_Dante
+camille.zk.division=default
+
+# ==================================================
 # le-modelquality/conf/env/devcluster/modelquality.properties
 # ==================================================
 modelquality.file.upload.hdfs.dir=/Pods/Default/Services/ModelQuality
@@ -756,246 +1190,14 @@ modelquality.pls.login.username=modelQuality@lattice-engines.com
 modelquality.pls.login.password=Lattice123
 modelquality.pls.login.password.hash=3OCRIbECCiTtJ8FyaNgvTjNES/eyjQUK59Z5rMCnrAk=
 # ==================================================
-# le-common/conf/env/devcluster/common.properties
+# le-redshiftdb/conf/env/devcluster/redshift.properties
 # ==================================================
-common.le.environment=devcluster
-common.le.stack=${LE_STACK}
-
-# for application runtime
-common.admin.url=https://${LE_CLIENT_ADDRESS}:9085
-common.pls.url=https://${LE_CLIENT_ADDRESS}:9081
-common.microservice.url=https://${LE_CLIENT_ADDRESS}:9080
-common.playmaker.url=https://${LE_CLIENT_ADDRESS}:9071
-common.oauth.url=https://${LE_CLIENT_ADDRESS}:9072
-common.scoringapi.url=https://${LE_CLIENT_ADDRESS}:9073
-common.matchapi.url=https://${LE_CLIENT_ADDRESS}:9076
-common.saml.url=https://${LE_CLIENT_ADDRESS}:9087
-common.sqoop.url=https://10.41.1.85:8080
-common.allow.cors=true
-common.ulysses.url=https://${LE_CLIENT_ADDRESS}:9075
-
-# for deployment test client
-common.test.env=devcluster
-
-common.test.admin.url=https://${LE_CLIENT_ADDRESS}:9085
-common.test.pls.url=https://${LE_CLIENT_ADDRESS}:9081
-common.test.modeling.url=https://${LE_CLIENT_ADDRESS}:9074
-common.test.microservice.url=https://${LE_CLIENT_ADDRESS}:9080
-common.test.playmaker.url=https://${LE_CLIENT_ADDRESS}:9071
-common.test.oauth.url=https://${LE_CLIENT_ADDRESS}:9072
-common.test.scoringapi.url=https://${LE_CLIENT_ADDRESS}:9073
-common.test.matchapi.url=https://${LE_CLIENT_ADDRESS}:9076
-common.test.saml.url=https://${LE_CLIENT_ADDRESS}:9087
-common.test.sqoop.url=https://10.41.1.85:8080
-common.test.ulysses.url=https://${LE_CLIENT_ADDRESS}:9075
-
-
-# ==================================================
-# le-monitor/conf/env/devcluster/monitor.properties
-# ==================================================
-monitor.alert.service.enabled=false
-
-monitor.influxdb.url=
-monitor.influxdb.username=
-monitor.influxdb.password=
-monitor.influxdb.environment=
-
-monitor.emailsettings.from=no-reply@lattice-engines.com
-monitor.emailsettings.server=smtprelay.lattice.local
-monitor.emailsettings.username=build@lattice-engines.com
-monitor.emailsettings.password=ryTy2wEiaw51Le9qTXxx3w==
-monitor.emailsettings.port=25
-monitor.emailsettings.useSSL=false
-monitor.emailsettings.useSTARTTLS=false
-monitor.email.enabled=false
-
-monitor.health.inspection.enabled=true
-
-# ==================================================
-# le-yarn/conf/env/devcluster/yarn.properties
-# ==================================================
-yarn.jacoco.enabled=true
-yarn.jacoco.data.dir=/tmp/jacoco
-
-# url used in yarn
-yarn.pls.url=https://{LE_CLIENT_ADDRESS}:9081
-
-# functional test
-yarn.use.minicluster=false
-# ==================================================
-# le-security/conf/env/devcluster/security.properties
-# ==================================================
-security.test.api.hostport=https://localhost:9084/security
-security.globalauth.url=https://haproxy-test04.lattice.local
-security.app.public.url=https://localhost:3000
-
-security.ldap.url=ldaps://bodc-dev-dc1.dev.lattice.local:636
-security.ldap.domain=dev.lattice.local
-
-security.zendesk.enabled=false
-security.zendesk.url=https://lattice-engines.zendesk.com/
-security.zendesk.email=johndoe@lattice-engines.com
-security.zendesk.encryptedApiToken=bi0mpJJNxiYpEka5C6JO4tTD2CJkHRaABQA/VYwQNaW8mBTxRp+0YQN5WBwl4ZRd
-
-security.zendesk.jwt.redirecturl=https://lattice-engines.zendesk.com/access/jwt
-security.zendesk.jwt.secretkey=zbcHrhuhVwTBwwY0ZTICn1aIpTXQNEe1L5gWwIFsAwEKTgwA
-
-# ==================================================
-# le-workflowapi/conf/env/devcluster/workflowapi.properties
-# ==================================================
-workflowapi.modelingservice.basedir=/user/s-analytics/customers/
-
-workflowapi.test.sfdc.user.name=apeters-widgettech@lattice-engines.com
-workflowapi.test.sfdc.passwd.encrypted=Uc0UtTndCxC2oeN4hwzvTQ==
-workflowapi.test.sfdc.securitytoken=oIogZVEFGbL3n0qiAp6F66TC
-workflowapi.test.accountmaster.path=/tmp/AccountMaster
-
-
-# ==================================================
-# le-admin/conf/env/devcluster/admin.properties
-# ==================================================
-admin.bardjams.dryrun=false
-admin.dante.dryrun=true
-admin.vdbdl.dryrun=false
-admin.pls.dryrun=false
-admin.cdl.dryrun=false
-admin.vdb.tpl.dryrun=false
-admin.dl.tpl.dryrun=false
-admin.eai.dryrun=false
-admin.metadata.dryrun=false
-admin.modeling.dryrun=false
-
-admin.upload.schema=false
-
-# the jetty server suppose only reads/writes system files under this directory
-admin.mount.rootpath=/mnt
-admin.mount.vdb.permstore=visidb
-admin.mount.dl.datastore=dl
-admin.mount.tpl=tpl
-
-#Bard JAMS
-admin.bardjams.datasource.dialect=org.hibernate.dialect.SQLServerDialect
-admin.bardjams.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-admin.bardjams.datasource.url=jdbc:sqlserver://10.41.1.247;databaseName=JAMSCFG_dev;
-admin.bardjams.datasource.user=bardjams
-admin.bardjams.datasource.password.encrypted=SIv6wwDR3NpTOC2rIcMe5A==
-
-#Modeling
-admin.modelingservice.basedir=/user/s-analytics/customers/
-
-# overwrite default configuration and schema
-admin.overwrite.vdb.servername=BODCDEVVINT187
-admin.overwrite.vdb.servername.options=BODCDEVVINT187,BODCDEVVINT207
-
-# properties for test
-admin.test.contract=IntegrationTest
-admin.test.dl.url=http://bodcdevvint187.dev.lattice.local:8081
-admin.test.vdb.servername=bodcdevvint187
-admin.test.vdb.permstore.server=BODCDEVVINT207
-admin.test.dl.user=richard.liu@lattice-engines.com
-admin.test.dl.datastore.server=BODCDEVVINT187
-admin.test.dl.datastore.path=\\\\BODCDEVVINT187\\DataLoader\\Customers
-
-admin.test.functional.api=https://localhost:9085
-
-# ==================================================
-# le-datacloudapi/conf/env/devcluster/propdata.properties
-# ==================================================
-#Collection
-propdata.collection.sqoop.mapper.number=8
-propdata.collection.cascading.partitions=8
-
-propdata.job.default.schedule=0 0 0 1 1 * * 1900
-propdata.job.heartbeat.schedule=0 0 0 1 1 * * 1900
-
-# test
-propdata.api.functional.hostport=https://localhost:9080/
-propdata.test.match.client=PD130
-propdata.test.env=DevCluster
-# ==================================================
-# le-dellebi/conf/env/devcluster/dellebi.properties
-# ==================================================
-#dellebi.datahadoopinpath is the directory to place the data which waits for importing to HDFS.
-dellebi.camelunzipoutputpath = hdfs2://bodcdevvhort148.lattice.local:8020/latticeengines/in
-dellebi.cascadinginpath = hdfs://bodcdevvhort148.lattice.local:8020/latticeengines/in
-dellebi.datahadoopinpath = /latticeengines/in
-dellebi.cascadinginputdelimiter = |~|
-
-dellebi.datahadoopworkingpath = /user/dellebi
-dellebi.datahadooperrorworkingpath = /user/dellebi/errordata
-dellebi.datahadooprootpath = hdfs://bodcdevvhort148.lattice.local:8020
-dellebi.datainputfiletype = /*.txt
-
-dellebi.inputfileregex = tgt_(quote_trans_global).+(.zip)
-dellebi.ordersummary = order_summary
-dellebi.orderdetail = order_detail
-dellebi.shiptoaddrlattice = ship_to_addr_lattice
-dellebi.warrantyglobal = warranty_global
-dellebi.quotetrans = quote_trans
-dellebi.quotetrans.storeprocedure = SP_QUOTE_STAGE_UPDATE
-dellebi.output.hdfsdata.remove=true
-
-#Target DB Info
-dellebi.datatarget.dialect=org.hibernate.dialect.SQLServerDialect
-dellebi.datatarget.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-dellebi.datatarget.url=jdbc:sqlserver://10.51.15.145:1433;database=DELL_EBI_STAGE_QUOTES_DEV
-dellebi.datatarget.host=10.51.15.145
-dellebi.datatarget.port=1433
-dellebi.datatarget.dbname=DELL_EBI_STAGE_QUOTES_DEV
-dellebi.datatarget.type=SQLServer
-dellebi.datatarget.user=hadoop
-dellebi.datatarget.password.encrypted=8xuq8yYNOoNtHQpFel/J7w==
-
-dellebi.sqoopexporter.mapper.number=8
-
-dellebi.datatarget.stagefinal.dbname=DELL_EBI_STAGE_FINAL_USE_DEV
-
-dellebi.configdb.datasource.dialect=org.hibernate.dialect.SQLServerDialect
-dellebi.configdb.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-dellebi.configdb.datasource.url=jdbc:sqlserver://10.51.15.145:1433;database=DELL_EBI_CONTROL_DEVCLUSTER
-dellebi.configdb.datasource.user=hadoop
-dellebi.configdb.datasource.password.encrypted=8xuq8yYNOoNtHQpFel/J7w==
-dellebi.configdb.datasource.host=10.51.15.145
-dellebi.configdb.datasource.port=1433
-dellebi.configdb.datasource.dbname=DELL_EBI_CONTROL_DEVCLUSTER
-dellebi.configdb.datasource.type=SQLServer
-
-dellebi.customer="Dell EBI"
-dellebi.output.table.sample=PRE_STAGE_STG_QUOTE_DATA
-
-dellebi.fileTypes.dellebiManagerJob1=quote
-dellebi.fileTypes.dellebiManagerJob2=Order_Detail,SKU_Global,Channel,Warranty
-dellebi.fileTypes.dellebiManagerJob3=Order_Summary,SKU_Itm_Cls_Code,Calendar,Account_Cust,SKU_Manufacturer
-dellebi.dellebiManagerJob.schedule=0 0/5 * * * ?
-
-dellebi.mailhost = smtprelay.lattice.local
-dellebi.mailfrom = DBA@lattice-engines.com
-dellebi.mailreceivelist = lming@lattice-engines.com,jwilliams@lattice-engines.com
-
-dellebi.smbaccount = LATTICE\\s-hadoop
-dellebi.smbps = #a5cHe@d00p!
-
-dellebi.local.inboxpath=/tmp/dellebi
-dellebi.local.datatarget.dbname=DELL_EBI_STAGE_QUOTES_DEV
-
-dellebi.env = DEVCLUSTER
-
-# ==================================================
-# le-dataflowapi/conf/env/devcluster/dataflowapi.properties
-# ==================================================
-dataflowapi.engine=TEZ
-dataflowapi.checkpoint=false
-dataflowapi.am.mem=2048
-dataflowapi.flink.local.vcores=2
-dataflowapi.flink.local.mem=4096
-
-# ==================================================
-# le-metadata/conf/env/devcluster/metadata.properties
-# ==================================================
-metadata.hive.enabled=false
-metadata.hive.url=jdbc:hive2://bodcdevvhort149.lattice.local:10000
-metadata.hive.username=yarn
-metadata.hive.password.encrypted=
+redshift.root.user=batch
+redshift.segment.user=segment
+redshift.password.encrypted=hjl5F8+oM0X9tBVaI56E6Q==
+redshift.jdbc.url=jdbc:redshift://lpi.cegcmwpsftfz.us-east-1.redshift.amazonaws.com:5439
+redshift.app.database=app
+redshift.test.load.tests.per.thread=4
 
 # ==================================================
 # le-datafabric/conf/env/devcluster/datafabric.properties
@@ -1011,157 +1213,4 @@ datafabric.dataService.redis.servers=10.41.0.11,10.41.1.107,10.41.1.112
 datafabric.dataService.redis.port=26379
 datafabric.dataService.redis.ha.enabled=true
 datafabric.generic.entity.kafka.replication=1
-
-# ==================================================
-# le-graph/conf/env/devcluster/graph.properties
-# ==================================================
-graph.ns.env=devcluster
-graph.ns.version=1.0
-graph.ns.is.postfix=true
-graph.exception.ignore=true
-graph.contact.url=lpi-graph-dev.ctigbumfbvzz.us-east-1.neptune.amazonaws.com
-graph.contact.port=8182
-
-
-# ==================================================
-# le-scoringapi/conf/env/devcluster/scoringapi.properties
-# ==================================================
-scoringapi.scoreartifact.cache.maxsize=50
-scoringapi.scoreartifact.cache.default.size=2097152
-scoringapi.scoreartifact.cache.max.threshold=0.5
-scoringapi.scoreartifact.cache.max.weight=4294967296
-scoringapi.scoreartifact.cache.ratio=60
-scoringapi.scoreartifact.cache.concurrency.level=1
-scoringapi.scoreartifact.cache.expiration.time=1
-scoringapi.scoreartifact.cache.refresh.time=120
-
-scoringapi.modeldetailsandfields.cache.maxsize=500
-scoringapi.modeldetailsandfields.cache.expiration.time=1
-
-scoringapi.enrichment.cache.size=100
-scoringapi.enrichment.cache.expiration.time=5
-
-scoringapi.propdata.shortcircuit=false
-scoringapi.ratelimit.max=120
-scoringapi.ratelimit.bulk.requests.max=60
-scoringapi.ratelimit.single.requests.max=120
-
-scoringapi.jythonengine.cache.maxsize=200
-
-scoringapi.modeljson.cache.dir=/var/cache/scoringapi/%s/%s/%s/
-
-# ==================================================
-# le-db/conf/env/devcluster/db.properties
-# ==================================================
-db.datasource.driver=com.mysql.jdbc.Driver
-db.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false
-db.datasource.reader.driver=com.mysql.jdbc.Driver
-db.datasource.reader.url=jdbc:mysql://lpi-dev-cluster.cluster-ro-ctigbumfbvzz.us-east-1.rds.amazonaws.com/PLS_MultiTenant?autoReconnect=true&useSSL=false
-db.datasource.user=LPI
-db.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-db.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-db.datasource.type=MySQL
-db.datasource.show_sql=false
-db.datasource.poolsize.max=32
-db.datasource.poolsize.max.webapp=32
-db.datasource.poolsize.max.appmaster=16
-db.datasource.reader.poolsize.max=32
-db.datasource.reader.poolsize.max.webapp=32
-db.datasource.reader.poolsize.max.appmaster=16
-
-# ==================================================
-# le-cache/conf/env/devcluster/cache.properties
-# ==================================================
-cache.type=local
-cache.redis.command.timeout.min=1
-# ==================================================
-# le-proxy/conf/env/devcluster/proxy.properties
-# ==================================================
-proxy.retry.initialwaitmsec=500
-proxy.retry.multiplier=2
-proxy.retry.maxattempts=10
-proxy.test.rest.endpoint.hostport=https://localhost:9084
-proxy.test.keystore.path=/ledp_keystore.jks
-# ==================================================
-# le-workflow/conf/env/devcluster/workflow.properties
-# ==================================================
-workflow.jobs.numthreads=10
-workflow.jobs.cache.namespace=devcluster
-
-workflow.datasource.driver=com.mysql.jdbc.Driver
-workflow.datasource.url=jdbc:mysql://lpi-dev-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false
-workflow.datasource.reader.url=jdbc:mysql://lpi-dev-cluster.cluster-ro-ctigbumfbvzz.us-east-1.rds.amazonaws.com:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false
-workflow.datasource.user=LPI
-workflow.datasource.password.encrypted=bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7
-workflow.datasource.dialect=org.hibernate.dialect.MySQLInnoDBDialect
-workflow.datasource.poolsize.max=32
-workflow.datasource.poolsize.max.webapp=32
-workflow.datasource.poolsize.max.appmaster=8
-
-# ==================================================
-# le-scoring/conf/env/devcluster/scoring.properties
-# ==================================================
-scoring.core.pool.size=6
-scoring.max.pool.size=6
-scoring.queue.capacity=100
-scoring.dao.datasource.dialect=org.hibernate.dialect.SQLServerDialect
-scoring.dao.datasource.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-scoring.dao.datasource.user=root
-scoring.dao.datasource.password.encrypted=KPpl2JWz+k79LWvYIKz6cA==
-scoring.dao.datasource.url=jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_devcluster;user=$$USER$$;password=$$PASSWD$$
-scoring.dao.datasource.type=SQLServer
-
-scoring.output.table.sample=ScoreOutput
-scoring.cleanup.timeinternval=120
-scoring.test.table=2CheckoutTest
-scoring.cleanup.enableCleanHdfs=false
-
-scoring.mapper.threshold=10000
-scoring.mapper.logdir=/var/log/scoring/mapper
-scoring.mapper.max.input.split.size=5242880
-scoring.mapper.min.input.split.size=5242880
-
-scoring.processor.threadpool.size=5
-scoring.processor.threadpool.timeoutmin=1440
-scoring.processor.bulkrecord.size=100
-scoring.processor.vcores=1
-scoring.processor.memory=2048
-# ==================================================
-# le-redshiftdb/conf/env/devcluster/redshift.properties
-# ==================================================
-redshift.root.user=batch
-redshift.segment.user=segment
-redshift.password.encrypted=hjl5F8+oM0X9tBVaI56E6Q==
-redshift.jdbc.url=jdbc:redshift://lpi.cegcmwpsftfz.us-east-1.redshift.amazonaws.com:5439
-redshift.app.database=app
-redshift.test.load.tests.per.thread=4
-
-# ==================================================
-# le-camille/conf/env/devcluster/camille.properties
-# ==================================================
-camille.zk.connectionString=qazklayer1.lattice.local,qazklayer4.lattice.local,qazklayer5.lattice.local
-camille.zk.pod.id=Default
-camille.zk.sharedQueues=bootstrap_Dante
-camille.zk.division=default
-
-# ==================================================
-# le-dante/conf/env/devcluster/dante.properties
-# ==================================================
-common.dante.url=https://test.lattice-engines.com/DT_LECLEANX/index.aspx
-# ==================================================
-# le-saml/conf/env/devcluster/saml.properties
-# ==================================================
-saml.lb.scheme=https
-saml.lb.servername=localhost
-saml.lb.includeserverport=true
-saml.lb.serverport=3000
-saml.lb.contextpath=/pls/saml/login/
-
-saml.metadata.refresh.frequency=5000
-saml.timeout.authNInstant.hours=12
-
-saml.keystore.resource.path.encrypted=bi0mpJJNxiYpEka5C6JO4vlPNZjHN1jIDsnR1ZIk7qxl1nz/pjl4rGPUW0NZtZ9D7dTiqsIFhJQdhj+pxQZ+uYkHtJUV+CwqC6Z/V1co/2M=
-saml.keystore.defaultKey.encrypted=bi0mpJJNxiYpEka5C6JO4sBIJb3KRwhYHLIdd5fUHTrpEl7LO9Un8VkojEn4BW8yxIRJ5jNzAFQuUrMJTVfLOQ==
-saml.keystore.password.encrypted=bi0mpJJNxiYpEka5C6JO4vqffppMiq58CaHeqMFI4SvgfF2ACdGs39AggGjR0yPV
-saml.keystore.storePass.encrypted=bi0mpJJNxiYpEka5C6JO4vqffppMiq58CaHeqMFI4SvgfF2ACdGs39AggGjR0yPV
 
