@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.TravelLog;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -29,7 +31,6 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -135,6 +136,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler));
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
+                dumpEntityMatchErrors(matchRecord, traveler);
             }
         }
 
@@ -317,6 +319,18 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     record.addErrorMessages(logEntry.getMessage() + " : " + logEntry.getThrowable().getMessage());
                 }
             }
+        }
+    }
+
+    /*
+     * traveler#getMatchInput should not be null
+     */
+    private void dumpEntityMatchErrors(@NotNull InternalOutputRecord record, @NotNull MatchTraveler traveler) {
+        if (!OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
+            return;
+        }
+        if (CollectionUtils.isNotEmpty(traveler.getEntityMatchErrors())) {
+            traveler.getEntityMatchErrors().forEach(record::addErrorMessages);
         }
     }
 

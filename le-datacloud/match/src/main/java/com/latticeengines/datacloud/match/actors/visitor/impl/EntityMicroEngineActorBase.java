@@ -141,7 +141,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             // TODO retry if (a) association failed and (b) allocateId flag is true
 
             if (CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors())) {
-                // TODO set association error to traveler
+                traveler.setEntityMatchErrors(associationResponse.getAssociationErrors());
             }
         } else {
             log.error("Got invalid entity association response in actor {}, should not have happened", self());

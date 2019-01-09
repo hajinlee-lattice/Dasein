@@ -12,7 +12,6 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,9 +32,11 @@ import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -203,7 +204,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             Map<String, Object> results = internalRecord.getQueryResult();
 
-            boolean matchedRecord = internalRecord.isMatched() || (internalRecord.getLatticeAccountId() != null);
+            // NOTE for entity match, check for entityId
+            // otherwise, check for latticeAccountId to determine if we have a match or not
+            boolean matchedRecord = internalRecord.isMatched()
+                    || (!isEntityMatch && (internalRecord.getLatticeAccountId() != null))
+                    || (isEntityMatch && StringUtils.isNotBlank(internalRecord.getEntityId()));
 
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
@@ -212,7 +217,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
                 Object value = null;
 
-                if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
+                if (InterfaceName.EntityId.name().equalsIgnoreCase(field)) {
+                    // retrieve entity ID (for entity match)
+                    value = internalRecord.getEntityId();
+                } else if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
                     value = StringStandardizationUtils.getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
                 } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)

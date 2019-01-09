@@ -81,6 +81,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // string elements corresponding to the MatchKeyTuples for which the lookup failed.
     private List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults;
 
+    // Entity match errors
+    private List<String> entityMatchErrors;
+
     /***********************
      * Overridden methods
      ***********************/
@@ -236,5 +239,13 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setEntityMatchLookupResults(List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults) {
         this.entityMatchLookupResults = entityMatchLookupResults;
+    }
+
+    public List<String> getEntityMatchErrors() {
+        return entityMatchErrors;
+    }
+
+    public void setEntityMatchErrors(List<String> entityMatchErrors) {
+        this.entityMatchErrors = entityMatchErrors;
     }
 }
