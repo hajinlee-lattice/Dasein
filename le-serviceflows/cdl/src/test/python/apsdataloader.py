@@ -116,7 +116,7 @@ class ApsDataLoader(object):
         for inputFile in inputFiles:
             with open(inputFile, "rb") as fp:
                 reader = avro.reader(fp)
-                records = [r for r in reader]
+                records = [r for r in reader if not r.has_key('ProductType') or 'Analytic' == r['ProductType']]
                 df = pd.DataFrame.from_records(records)
                 dfs.append(df)
         logger.info("Finished reading Dataframe from avro file.")
