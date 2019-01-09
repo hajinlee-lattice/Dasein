@@ -1,5 +1,7 @@
 package com.latticeengines.testframework.service.impl;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -127,6 +129,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         for (BusinessEntity entity : BusinessEntity.values()) {
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
         }
+        tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
         updateDataCollectionStatus(shortTenantId, entityCounts);
     }
@@ -152,6 +155,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             });
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
         }
+        tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
         updateDataCollectionStatus(shortTenantId, entityCounts);
     }
@@ -467,25 +471,34 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
     }
 
-    private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version, ConcurrentMap<String, Long> entityCounts) {
+    private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version, //
+                                      ConcurrentMap<String, Long> entityCounts) {
+        Long count = populateTableRole(tenantId, entity.getServingStore(), s3Version);
+        if (count != null) {
+            entityCounts.put(entity.name(), count);
+        }
+    }
+
+    private Long populateTableRole(String tenantId, TableRoleInCollection role, String s3Version) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
-        Table table = readTableFromS3(entity.getServingStore(), s3Version);
+        Table table = readTableFromS3(role, s3Version);
         if (table != null) {
-            String tableName = servingStoreName(tenantId, entity);
+            String tableName = NamingUtils.timestamp(tenantId + "_" + role, DATE);
             table.setName(tableName);
-            table.setDisplayName(entity.getServingStore().name());
+            table.setDisplayName(role.name());
             metadataProxy.createTable(customerSpace, tableName, table);
             log.info("Metadata Table: {}, created with attributes: {}", tableName, table.getAttributes().size());
             DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
-            dataCollectionProxy.upsertTable(customerSpace, tableName, entity.getServingStore(), activeVersion);
-            try {
-                if (CollectionUtils.isNotEmpty(table.getExtracts())) {
-                    entityCounts.put(entity.name(), table.getExtracts().get(0).getProcessedRecords());
+            dataCollectionProxy.upsertTable(customerSpace, tableName, role, activeVersion);
+            if (CollectionUtils.isNotEmpty(table.getExtracts())) {
+                try {
+                    return table.getExtracts().get(0).getProcessedRecords();
+                } catch (Exception e) {
+                    log.warn("Failed to get " + role + " count.", e);
                 }
-            } catch (Exception e) {
-                log.warn("Failed to update " + entity + " count.", e);
             }
         }
+        return null;
     }
 
     private Table readTableFromS3(TableRoleInCollection role, String version) {
@@ -509,6 +522,10 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     private String servingStoreName(String tenantId, BusinessEntity entity) {
         return NamingUtils.timestamp(tenantId + "_" + entity.name(), DATE);
+    }
+
+    private String batchStoreName(String tenantId, BusinessEntity entity) {
+        return NamingUtils.timestamp(tenantId + "_" + entity.name() + "_batch", DATE);
     }
 
     private RetryTemplate getRedshiftRetryTemplate() {
