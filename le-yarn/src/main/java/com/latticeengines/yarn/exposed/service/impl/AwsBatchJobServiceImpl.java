@@ -117,7 +117,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
         JobRequest jobRequest = new JobRequest();
         String jobName = jobServiceHelper.appName(job.getAppMasterPropertiesObject(), job.getClient());
         jobName = jobName.replaceAll("[^0-9a-zA-Z-_]", "_");
-        jobName = jobName.substring(0, jobName.length());
+        jobName = jobName.substring(0, Math.min(128, jobName.length()));
 
         jobRequest.setJobName(jobName);
         jobRequest.setMemory(getResourceConfig(containerProperties, ContainerProperty.MEMORY.name()));
