@@ -624,24 +624,20 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
 
             // Populate Unscored counts
+            // unscored accounts
             String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
-            Restriction unscoredRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull().build();         
+            Restriction unscoredRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull().build();
             Restriction unscoredAccountsInSegmentRest = Restriction.builder().and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
             FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
             unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
             unscoredFrontEndQuery.setAccountRestriction(new FrontEndRestriction(unscoredAccountsInSegmentRest));
-            unscoredFrontEndQuery.setContactRestriction(new FrontEndRestriction(LogicalRestriction.builder().or(new ArrayList<>()).build()));
+            unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
             coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(),unscoredFrontEndQuery));
-            
-            if (targetSegment != null) {
-//                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
-//                    coverageInfo.setUnscoredAccountCount(targetSegment.getAccounts() - coverageInfo.getAccountCount());
-//                }
-                if (coverageInfo.getContactCount() != null && targetSegment.getContacts() != null
-                        && targetSegment.getContacts() > 0) {
-                    coverageInfo.setUnscoredContactCount(targetSegment.getContacts() - coverageInfo.getContactCount());
-                }
-            }
+
+            // unscored contacts
+            unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+            Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
+            coverageInfo.setUnscoredContactCount(unscoredContactCount);
             return coverageInfo;
         } catch (Exception ex) {
             throw ex;
