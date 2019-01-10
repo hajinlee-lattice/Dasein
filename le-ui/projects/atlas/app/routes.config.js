@@ -535,27 +535,6 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 }
             }
         })
-        .state('home.model.refine', {
-            url: '/refine',
-            params: {
-                pageIcon: 'ico-refine',
-                pageTitle: 'Refine'
-            },
-            resolve: {
-                loadKendo: [
-                    '$ocLazyLoad',
-                    function($ocLazyLoad) {
-                        return $ocLazyLoad.load('lib/js/kendo.all.min.js');
-                    }
-                ]
-            },
-            views: {
-                'main@': {
-                    controller: 'ManageFieldsController',
-                    templateUrl: 'app/setup/views/ManageFieldsView.html'
-                }
-            }
-        })
         .state('home.model.review', {
             url: '/review',
             params: {
@@ -1917,7 +1896,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             '/dante?sin=806262c0-3053-458e-8fb8-0128416e7c82&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000002sfm8AAA&Recommendation=76b4a228-ba12-4c47-801d-dc8aeb3365fd&HasSalesprism=false&CustomSettings=%7B"SupportEmail"%3A"pliu%40lattice-engines.com"%2C"ShowScore"%3A%20false%2C"ShowLift"%3A%20false%2C"ShowPurchaseHistory"%3A%20true%2C"NoPlaysMessage"%3A"No%20Plays%20Found."%2C"NoDataMessage"%3A"No%20Data%20Found."%2C"hideNavigation"%3A%20false%2C"HideTabs"%3A%20false%2C"HideHeader"%3A%20true%2C"DefaultTab"%3A"TalkingPoints"%7D&PurchaseHistoryAccount=0016100001RU35QAAT';
                         //var host = '/dante?sin=806262c0-3053-458e-8fb8-0128416e7c82&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000002sfm8AAA&Recommendation=cf5132a2-6212-4f81-ba43-1783be7f695c&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pliu%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20false%2C%22HideTabs%22%3A%20false%2C%22HideHeader%22%3A%20false%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=0016100001RU35QAAT';
                         var host =
-                            '/dante?sin=2b7200f2-ff35-4e46-9c27-01b2b25443b5&serverurl=https://api.lattice-engines.com&Directory=salesforce&userlink=00541000003kNLHAA2&Recommendation=b91b9612-06ef-48f7-b280-1b433e58f0d5&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pliu%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20true%2C%22HideTabs%22%3A%20true%2C%22HideHeader%22%3A%20true%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=0014100001dHn4VAAS';
+                            '/dante/?sin=e95f1069-09b5-4cf4-8f9d-9de2c5f62d19&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000000hjkMAAQ&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pliu%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20true%2C%22HideTabs%22%3A%20true%2C%22HideHeader%22%3A%20true%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=hierarchy_acct3';
 
                         $('#sureshot_iframe_container').html(
                             "<iframe id='dante_iframe' src='" +

@@ -1,4 +1,4 @@
-angular.module('pd.navigation.navdash', [
+angular.module('lp.navigation.navdash', [
 
 ])
 

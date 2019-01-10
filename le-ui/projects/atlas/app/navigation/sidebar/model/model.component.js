@@ -1,5 +1,5 @@
 angular
-.module('pd.navigation.sidebar.model', [
+.module('lp.navigation.sidebar.model', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.FeatureFlagService',

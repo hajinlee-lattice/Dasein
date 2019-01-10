@@ -1,4 +1,4 @@
-angular.module('pd.navigation.table', [
+angular.module('lp.navigation.table', [
 
 ])
 

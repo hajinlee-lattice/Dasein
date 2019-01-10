@@ -1,5 +1,5 @@
 angular
-    .module('pd.navigation.sidebar', [
+    .module('lp.navigation.sidebar', [
         'pd.builder.attributes'
     ])
     .controller('SidebarCtrl', function($scope, $rootScope) {

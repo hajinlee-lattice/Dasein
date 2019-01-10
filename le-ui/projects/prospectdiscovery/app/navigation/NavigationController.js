@@ -1,9 +1,9 @@
-angular.module('pd.navigation', [
-    'pd.navigation.pagination',
-    'pd.navigation.sidebar',
-    'pd.navigation.table',
-    'pd.navigation.message',
-    'pd.navigation.links',
-    'pd.navigation.navdash',
-    'pd.navigation.subnav'
+angular.module('lp.navigation', [
+    'lp.navigation.pagination',
+    'lp.navigation.sidebar',
+    'lp.navigation.table',
+    'lp.navigation.message',
+    'lp.navigation.links',
+    'lp.navigation.navdash',
+    'lp.navigation.subnav'
 ]);

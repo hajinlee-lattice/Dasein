@@ -1,6 +1,6 @@
 angular
-    .module("lp.jobs")
-    .service("JobsService", function($http, $q, _, $stateParams) {
+    .module('lp.jobs')
+    .service('JobsService', function($http, $q, _, $stateParams) {
         var numStepsInGroup = {
             load_data: 0,
             match_data: 0,
@@ -15,21 +15,21 @@ angular
             //jobType = jobType == 'importMatchAndModelWorkflow' ? 'models' : 'scores';
 
             $http({
-                method: "GET",
+                method: 'GET',
                 url:
-                    "/pls/fileuploads/" +
-                    JobReport.name.replace("_Report", "") +
-                    "/import/errors",
+                    '/pls/fileuploads/' +
+                    JobReport.name.replace('_Report', '') +
+                    '/import/errors',
                 headers: {
-                    Accept: "application/csv;charset=utf-8",
-                    ErrorDisplayMethod: "modal"
+                    Accept: 'application/csv;charset=utf-8',
+                    ErrorDisplayMethod: 'modal'
                 }
             }).then(
                 function onSuccess(response) {
                     var result = response.data;
                     if (
                         result != null &&
-                        result !== "" &&
+                        result !== '' &&
                         result.Success == true
                     ) {
                         result = response.data;
@@ -49,7 +49,7 @@ angular
                     }
 
                     var errorMsg =
-                        response.data.errorMsg || "unspecified error";
+                        response.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -61,12 +61,12 @@ angular
             var deferred = $q.defer();
 
             $http({
-                method: "GET",
-                url: "/pls/jobs/" + jobId + "/report/download"
+                method: 'GET',
+                url: '/pls/jobs/' + jobId + '/report/download'
             }).then(
                 function onSuccess(response) {
                     var result = response.data;
-                    if (result != null && result !== "") {
+                    if (result != null && result !== '') {
                         result = response.data;
                         deferred.resolve(result);
                     } else {
@@ -81,9 +81,9 @@ angular
                             response.data = {};
                         }
 
-                        var errorCode = response.data.errorCode || "Error";
+                        var errorCode = response.data.errorCode || 'Error';
                         var errorMsg =
-                            response.data.errorMsg || "unspecified error.";
+                            response.data.errorMsg || 'unspecified error.';
 
                         deferred.resolve(errorMsg);
                     }
@@ -94,7 +94,7 @@ angular
                     }
 
                     var errorMsg =
-                        response.data.errorMsg || "unspecified error";
+                        response.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -106,16 +106,16 @@ angular
             var deferred = $q.defer();
 
             $http({
-                method: "GET",
-                url: "/pls/scores/jobs/" + job.id + "/results/score",
+                method: 'GET',
+                url: '/pls/scores/jobs/' + job.id + '/results/score',
                 headers: {
-                    Accept: "application/csv;charset=utf-8",
-                    ErrorDisplayMethod: "banner"
+                    Accept: 'application/csv;charset=utf-8',
+                    ErrorDisplayMethod: 'banner'
                 }
             }).then(
                 function onSuccess(response) {
                     var result = response.data;
-                    if (result != null && result !== "") {
+                    if (result != null && result !== '') {
                         result = response.data;
                         deferred.resolve(result);
                     } else {
@@ -130,9 +130,9 @@ angular
                             response.data = {};
                         }
 
-                        var errorCode = response.data.errorCode || "Error";
+                        var errorCode = response.data.errorCode || 'Error';
                         var errorMsg =
-                            response.data.errorMsg || "unspecified error.";
+                            response.data.errorMsg || 'unspecified error.';
 
                         deferred.resolve(errorMsg);
                     }
@@ -143,7 +143,7 @@ angular
                     }
 
                     var errorMsg =
-                        response.data.errorMsg || "unspecified error";
+                        response.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -155,29 +155,29 @@ angular
             var deferred = $q.defer();
             var result;
             var modelId = $stateParams.modelId;
-            var url = modelId ? "/pls/scores/jobs/" + modelId : "/pls/jobs";
+            var url = modelId ? '/pls/scores/jobs/' + modelId : '/pls/jobs';
 
             var params =
                 modelId || !statusFilter || statusFilter.length == 0
-                    ? ""
-                    : "?includeEmptyPA=false&status=pending&status=running";
+                    ? ''
+                    : '?includeEmptyPA=false&status=pending&status=running';
 
             $http({
-                method: "GET",
+                method: 'GET',
                 url: url + params,
                 headers: {
-                    "If-Modified-Since": 0,
-                    ErrorDisplayMethod: "banner"
+                    'If-Modified-Since': 0,
+                    ErrorDisplayMethod: 'banner'
                 }
             }).then(
                 function onSuccess(response) {
-                    if (response.data != null && response.data !== "") {
+                    if (response.data != null && response.data !== '') {
                         result = {
                             success: true,
                             resultObj: null
                         };
 
-                        var jobs = _.sortBy(response.data, "startTimestamp");
+                        var jobs = _.sortBy(response.data, 'startTimestamp');
                         result.resultObj = _.map(jobs, function(job) {
                             clearNumSteps();
                             var stepRunning = getStepRunning(job);
@@ -192,7 +192,7 @@ angular
                                 id: job.id,
                                 applicationId: job.applicationId,
                                 timestamp: job.startTimestamp,
-                                note: job.note ? job.note : "",
+                                note: job.note ? job.note : '',
                                 errorCode: job.errorCode,
                                 errorMsg: job.errorMsg,
                                 jobType: job.jobType,
@@ -218,10 +218,10 @@ angular
                                     ? job.inputs.MODEL_TYPE
                                     : null,
                                 sourceFileExists: job.inputs
-                                    ? job.inputs.SOURCE_FILE_EXISTS == "true"
+                                    ? job.inputs.SOURCE_FILE_EXISTS == 'true'
                                     : null,
                                 isDeleted: job.inputs
-                                    ? job.inputs.MODEL_DELETED == "true"
+                                    ? job.inputs.MODEL_DELETED == 'true'
                                     : null,
                                 startTimestamp: job.startTimestamp,
                                 endTimestamp: job.endTimestamp,
@@ -246,9 +246,9 @@ angular
                             result.data = {};
                         }
 
-                        var errorCode = result.data.errorCode || "Error";
+                        var errorCode = result.data.errorCode || 'Error';
                         var errorMsg =
-                            result.data.errorMsg || "unspecified error.";
+                            result.data.errorMsg || 'unspecified error.';
 
                         deferred.resolve(errorMsg);
                     }
@@ -258,7 +258,7 @@ angular
                         result.data = {};
                     }
 
-                    var errorMsg = result.data.errorMsg || "unspecified error";
+                    var errorMsg = result.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -274,11 +274,11 @@ angular
             }
 
             $http({
-                method: "GET",
-                url: "/pls/jobs/" + jobId,
+                method: 'GET',
+                url: '/pls/jobs/' + jobId,
                 headers: {
-                    ErrorDisplayMethod: "none",
-                    "If-Modified-Since": 0
+                    ErrorDisplayMethod: 'none',
+                    'If-Modified-Since': 0
                 }
             }).then(
                 function onSuccess(response) {
@@ -297,16 +297,16 @@ angular
                     }
 
                     if (
-                        (stepRunning === "generate_insights" ||
-                            stepRunning === "create_global_target_market") &&
-                        stepsCompleted.indexOf("score_training_set") > -1
+                        (stepRunning === 'generate_insights' ||
+                            stepRunning === 'create_global_target_market') &&
+                        stepsCompleted.indexOf('score_training_set') > -1
                     ) {
-                        stepRunning = "score_training_set";
+                        stepRunning = 'score_training_set';
                     } else if (
-                        stepRunning === "load_data" &&
-                        stepsCompleted.indexOf("generate_insights") > -1
+                        stepRunning === 'load_data' &&
+                        stepsCompleted.indexOf('generate_insights') > -1
                     ) {
-                        stepRunning = "generate_insights";
+                        stepRunning = 'generate_insights';
                     }
                     result = {
                         success: true,
@@ -349,10 +349,10 @@ angular
                                 ? job.inputs.MODEL_TYPE
                                 : null,
                             sourceFileExists: job.inputs
-                                ? job.inputs.SOURCE_FILE_EXISTS == "true"
+                                ? job.inputs.SOURCE_FILE_EXISTS == 'true'
                                 : null,
                             isDeleted: job.inputs
-                                ? job.inputs.MODEL_DELETED == "true"
+                                ? job.inputs.MODEL_DELETED == 'true'
                                 : null,
                             applicationLogUrl: job.outputs
                                 ? job.outputs.YARN_LOG_LINK_PATH
@@ -368,7 +368,7 @@ angular
                     }
 
                     var errorMsg =
-                        response.data.errorMsg || "unspecified error";
+                        response.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -380,11 +380,11 @@ angular
             var result;
 
             $http({
-                method: "GET",
-                url: "/pls/jobs/yarnapps/" + applicationId,
+                method: 'GET',
+                url: '/pls/jobs/yarnapps/' + applicationId,
                 headers: {
-                    ErrorDisplayMethod: "banner",
-                    "If-Modified-Since": 0
+                    ErrorDisplayMethod: 'banner',
+                    'If-Modified-Since': 0
                 }
             }).then(
                 function onSuccess(response) {
@@ -395,16 +395,16 @@ angular
                     var stepFailed = getStepFailed(job);
 
                     if (
-                        (stepRunning === "generate_insights" ||
-                            stepRunning === "create_global_target_market") &&
-                        stepsCompleted.indexOf("score_training_set") > -1
+                        (stepRunning === 'generate_insights' ||
+                            stepRunning === 'create_global_target_market') &&
+                        stepsCompleted.indexOf('score_training_set') > -1
                     ) {
-                        stepRunning = "score_training_set";
+                        stepRunning = 'score_training_set';
                     } else if (
-                        stepRunning === "load_data" &&
-                        stepsCompleted.indexOf("generate_insights") > -1
+                        stepRunning === 'load_data' &&
+                        stepsCompleted.indexOf('generate_insights') > -1
                     ) {
-                        stepRunning = "generate_insights";
+                        stepRunning = 'generate_insights';
                     }
                     result = {
                         success: true,
@@ -450,14 +450,14 @@ angular
             var modelId = $stateParams.modelId;
 
             $http({
-                method: "POST",
-                url: "/pls/scores/" + modelId + "/training",
+                method: 'POST',
+                url: '/pls/scores/' + modelId + '/training',
                 params: {
                     performEnrichment: performEnrichment,
                     useRtsApi: performEnrichment
                 },
                 headers: {
-                    ErrorDisplayMethod: "modal"
+                    ErrorDisplayMethod: 'modal'
                 }
             }).then(
                 function onSuccess(response) {
@@ -470,7 +470,7 @@ angular
                     }
 
                     var errorMsg =
-                        response.data.errorMsg || "unspecified error";
+                        response.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -480,8 +480,8 @@ angular
 
         this.rescoreJob = function(jobId) {
             return $http({
-                method: "POST",
-                url: "/pls/jobs/" + jobId + "/restart"
+                method: 'POST',
+                url: '/pls/jobs/' + jobId + '/restart'
             });
         };
 
@@ -496,48 +496,48 @@ angular
             };
             var currStepIndex = 0;
             if (
-                runningStep !== "load_data" &&
-                completedSteps.indexOf("load_data") > -1
+                runningStep !== 'load_data' &&
+                completedSteps.indexOf('load_data') > -1
             ) {
                 currStepIndex += numStepsInGroup.load_data;
                 completedTimes.load_data =
                     job.steps[currStepIndex - 1].endTimestamp;
             }
             if (
-                runningStep !== "match_data" &&
-                completedSteps.indexOf("match_data") > -1
+                runningStep !== 'match_data' &&
+                completedSteps.indexOf('match_data') > -1
             ) {
                 currStepIndex += numStepsInGroup.match_data;
                 completedTimes.match_data =
                     job.steps[currStepIndex - 1].endTimestamp;
             }
             if (
-                runningStep !== "generate_insights" &&
-                completedSteps.indexOf("generate_insights") > -1
+                runningStep !== 'generate_insights' &&
+                completedSteps.indexOf('generate_insights') > -1
             ) {
                 currStepIndex += numStepsInGroup.generate_insights;
                 completedTimes.generate_insights =
                     job.steps[currStepIndex - 1].endTimestamp;
             }
             if (
-                runningStep !== "create_global_model" &&
-                completedSteps.indexOf("create_global_model") > -1
+                runningStep !== 'create_global_model' &&
+                completedSteps.indexOf('create_global_model') > -1
             ) {
                 currStepIndex += numStepsInGroup.create_global_model;
                 completedTimes.create_global_model =
                     job.steps[currStepIndex - 1].endTimestamp;
             }
             if (
-                runningStep !== "create_global_target_market" &&
-                completedSteps.indexOf("create_global_target_market") > -1
+                runningStep !== 'create_global_target_market' &&
+                completedSteps.indexOf('create_global_target_market') > -1
             ) {
                 currStepIndex += numStepsInGroup.create_global_target_market;
                 completedTimes.create_global_target_market =
                     job.steps[currStepIndex - 1].endTimestamp;
             }
             if (
-                runningStep !== "score_training_set" &&
-                completedSteps.indexOf("score_training_set") > -1
+                runningStep !== 'score_training_set' &&
+                completedSteps.indexOf('score_training_set') > -1
             ) {
                 currStepIndex += numStepsInGroup.score_training_set;
                 completedTimes.score_training_set =
@@ -548,8 +548,8 @@ angular
 
         this.cancelJob = function(jobId) {
             return $http({
-                method: "POST",
-                url: "/pls/jobs/" + jobId + "/cancel"
+                method: 'POST',
+                url: '/pls/jobs/' + jobId + '/cancel'
             });
         };
 
@@ -560,15 +560,15 @@ angular
         this.runJob = function(job) {
             var deferred = $q.defer();
             $http({
-                method: "POST",
-                url: "/pls/cdl/processanalyze"
+                method: 'POST',
+                url: '/pls/cdl/processanalyze'
             }).then(
                 function onSuccess(response) {
                     var result = response.data;
 
                     if (
                         result != null &&
-                        result !== "" &&
+                        result !== '' &&
                         result.Success == true
                     ) {
                         deferred.resolve(result);
@@ -587,10 +587,10 @@ angular
                     if (!response.data) {
                         response.data = {};
                     }
-                    job.status = "Failed";
+                    job.status = 'Failed';
 
                     var errorMsg =
-                        response.data.errorMsg || "unspecified error";
+                        response.data.errorMsg || 'unspecified error';
                     deferred.resolve(errorMsg);
                 }
             );
@@ -602,8 +602,8 @@ angular
             if (job.steps) {
                 for (var i = 0; i < job.steps.length; i++) {
                     if (
-                        job.steps[i].stepStatus === "Failed" ||
-                        job.steps[i].stepStatus === "Cancelled"
+                        job.steps[i].stepStatus === 'Failed' ||
+                        job.steps[i].stepStatus === 'Cancelled'
                     ) {
                         return job.steps[i].name;
                     }
@@ -613,7 +613,7 @@ angular
         }
 
         function getStepRunning(job) {
-            if (job.jobStatus !== "Running") {
+            if (job.jobStatus !== 'Running') {
                 //return null;
             }
 
@@ -621,7 +621,7 @@ angular
                 return;
             }
             for (var i = 0; i < job.steps.length; i++) {
-                if (job.steps[i].stepStatus === "Running") {
+                if (job.steps[i].stepStatus === 'Running') {
                     return job.steps[i].name;
                 }
             }
@@ -635,13 +635,13 @@ angular
 
             var stepsCompleted = [];
             for (var i = 0; i < job.steps.length; i++) {
-                if (job.steps[i].stepStatus === "Completed") {
+                if (job.steps[i].stepStatus === 'Completed') {
                     var stepCompleted = job.steps[i].name;
 
                     if (
-                        (stepCompleted === "generate_insights" ||
-                            stepCompleted === "create_global_target_market") &&
-                        stepsCompleted.indexOf("score_training_set") > -1
+                        (stepCompleted === 'generate_insights' ||
+                            stepCompleted === 'create_global_target_market') &&
+                        stepsCompleted.indexOf('score_training_set') > -1
                     ) {
                         numStepsInGroup.score_training_set += 1;
                         continue;
@@ -698,29 +698,29 @@ angular
             console.log(`post orphan workflow ${type}`);
 
             // var evtSource = new EventSource(
-            //     `/sse/datacollection/orphans/type/${type}/submit?Authorization=ad9c454a-f3f7-446b-8d84-6037c43ffddb.ESmLqV6gNxfgvXLk&TenantId=QA_CDL_Auto_Demo_1212.QA_CDL_Auto_Demo_1212.Production&Method=POST`
+            //     `/sse/datacollection/orphans/type/${type}/submit?Authorization=dfedf78f-9dbc-4797-990e-878bcf21251e.GbmUj4GqNB4vT7Ph&TenantId=QA_CDL_Auto_Demo_1212.QA_CDL_Auto_Demo_1212.Production&Method=POST`
             // );
 
             // evtSource.onopen = function(e) {
-            //     console.log("-!- event onopen:", e.data, e);
+            //     console.log('-!- event onopen:', e.data, e);
             //     deferred.resolve(e);
             // };
 
             // evtSource.onmessage = function(e) {
-            //     console.log("-!- event onmessage:", e.data, e);
+            //     console.log('-!- event onmessage:', e.data, e);
             //     deferred.resolve(e);
             // };
 
             // evtSource.onerror = function(e) {
-            //     console.log("-!- event onerror:", e.data, e);
+            //     console.log('-!- event onerror:', e.data, e);
             //     deferred.resolve(e);
             // };
 
             $http({
-                method: "POST",
+                method: 'POST',
                 url: `/pls/datacollection/orphans/type/${type}/submit`
             }).then(res => {
-                console.log("request end", res);
+                console.log('request end', res);
             });
 
             return deferred.promise;

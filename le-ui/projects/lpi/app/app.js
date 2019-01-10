@@ -30,11 +30,11 @@ var mainApp = angular
     "common.datacloud",
 
     //'lp.header',
-    "pd.navigation",
+    "lp.navigation",
     "lp.jobs",
     // "lp.campaigns",
     // "lp.campaigns.models",
-    "lp.segments.segments",
+    "lp.segments",
     "lp.models.list",
     "lp.models.review",
     "lp.models.ratings",

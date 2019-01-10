@@ -1,4 +1,4 @@
-angular.module('pd.navigation.subnav', [
+angular.module('lp.navigation.subnav', [
         'pd.builder.attributes'
     ])
 

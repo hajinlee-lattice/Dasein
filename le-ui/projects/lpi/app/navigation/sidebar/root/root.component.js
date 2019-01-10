@@ -1,5 +1,5 @@
 angular
-.module('pd.navigation.sidebar.root', [])
+.module('lp.navigation.sidebar.root', [])
 .controller('SidebarRootController', function(SidebarStore, ResourceUtility) {
     var vm = this;
     vm.items = SidebarStore.get();

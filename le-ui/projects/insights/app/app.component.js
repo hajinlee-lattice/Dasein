@@ -10,7 +10,7 @@ var mainApp = angular.module('insightsApp', [
     'common.exceptions',
     'common.datacloud',
     'common.utilities.SessionTimeout',
-    'pd.navigation.pagination',
+    'lp.navigation.pagination',
     'angulartics', 
     'angulartics.mixpanel',
 

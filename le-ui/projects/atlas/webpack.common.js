@@ -16,12 +16,15 @@ module.exports = {
     },
 
     entry: {
-        angular: '../common/angular-vendor.index.js',
-        vendor: '../common/vendor.index.js',
-        visualization: '../common/vendor-visualization.index.js',
-        app: '../common/app/app.index.js',
-        components: '../common/components/components.index.js',
-        atlas: './index.js'
+        common_angular: '../common/angular-vendor.index.js',
+        common_vendor: '../common/vendor.index.js',
+        common_visualization: '../common/vendor-visualization.index.js',
+        common_app: '../common/app/app.index.js',
+        common_components: '../common/components/components.index.js',
+        common_styles: '../common/assets/sass/lattice.scss',
+        atlas_app_1: './index.js',
+        atlas_app_2: './index_2.js',
+        atlas_sass: './assets/styles/main.scss'
     },
 
     optimization: {
@@ -45,15 +48,19 @@ module.exports = {
         rules: [
             {
                 test: /\.(png|svg|jpg|gif)$/,
-                exclude: /node_modules/,
+                exclude: '/node_modules/',
                 use: ['file-loader']
             },
             {
                 test: /\.(woff|woff2|eot|ttf|otf)$/,
-                exclude: /node_modules/,
+                exclude: '/node_modules/',
                 use: ['file-loader']
             },
-            { test: /\.html$/, exclude: /node_modules/, use: ['raw-loader'] },
+            {
+                test: /\.html$/,
+                exclude: '/node_modules/',
+                use: ['raw-loader']
+            },
             {
                 test: /\.js$/,
                 exclude: /node_modules/,

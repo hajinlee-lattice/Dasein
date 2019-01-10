@@ -1,5 +1,5 @@
 angular
-    .module('pd.navigation.pagination', [])
+    .module('lp.navigation.pagination', [])
     /* 
         startFrom filter combined with limitTo makes pagination possible 
     */

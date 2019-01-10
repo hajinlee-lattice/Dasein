@@ -1,7 +1,7 @@
 angular
-.module('pd.navigation.sidebar', [
-    'pd.navigation.sidebar.root',
-    'pd.navigation.sidebar.model',
+.module('lp.navigation.sidebar', [
+    'lp.navigation.sidebar.root',
+    'lp.navigation.sidebar.model',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.FeatureFlagService',

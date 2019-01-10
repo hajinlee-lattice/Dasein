@@ -9,7 +9,7 @@ var app = angular.module('TenantConsoleApp', [
     'app.tenants.controller.TenantConfigCtrl',
     'app.modelquality',
     'app.datacloud',
-    'pd.navigation.pagination',
+    'lp.navigation.pagination',
     'templates-main'
 ]);
 

@@ -2,7 +2,7 @@ angular
     .module('lp.ratingsengine', [
         'common.wizard',
         'common.datacloud',
-        'lp.segments.segments',
+        'lp.segments',
         'lp.ratingsengine.ratingsenginetabs',
         'lp.ratingsengine.ratingslist',
         'lp.ratingsengine.creationhistory',

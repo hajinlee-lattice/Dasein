@@ -3,7 +3,7 @@ angular.module('pd.jobs', [
     'pd.jobs.import.file',
     'pd.jobs.import.ready',
     'pd.jobs.status',
-    'pd.navigation.pagination',
+    'lp.navigation.pagination',
     'mainApp.core.utilities.BrowserStorageUtility',
 ])
 

@@ -1,4 +1,4 @@
-angular.module('pd.navigation.message', [
+angular.module('lp.navigation.message', [
 
 ])
 

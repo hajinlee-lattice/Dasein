@@ -1,4 +1,4 @@
-import './controllers/ManageFieldsController';
+//import './controllers/ManageFieldsController';
 import './modals/DiscardEditFieldsModel';
 import './modals/FieldMappingSettingsModal';
 import './modals/UpdateFieldsModal';

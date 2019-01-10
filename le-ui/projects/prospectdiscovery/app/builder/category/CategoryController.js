@@ -1,6 +1,6 @@
 angular
     .module('pd.builder.attributes', [
-        'pd.navigation.pagination'
+        'lp.navigation.pagination'
     ])
     .service('AttributesModel', function($q, AttributesService, StateMapping, $filter) {
         // Map used to determine AttrKey's sub category

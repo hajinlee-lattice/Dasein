@@ -1,4 +1,4 @@
-angular.module('pd.navigation.header', [
+angular.module('lp.navigation.header', [
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'common.exceptions',

@@ -1,4 +1,4 @@
- angular.module('mainApp.appCommon.Widgets', [
+angular.module('lp.widgets', [
     'mainApp.appCommon.widgets.AdminInfoAlertsWidget',
     'mainApp.appCommon.widgets.AdminInfoSummaryWidget',
     'mainApp.appCommon.widgets.LeadsTabWidget',

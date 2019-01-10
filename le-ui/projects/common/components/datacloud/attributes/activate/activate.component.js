@@ -1,35 +1,32 @@
-/* jshint -W014 */
 angular
-    .module("common.attributes.activate", [
-        /*"mainApp.core.redux"*/
-    ])
+    .module('common.attributes.activate', ['mainApp.core.redux'])
     .config(function($stateProvider) {
-        $stateProvider.state("home.attributes.activate", {
-            url: "/activate/:category/:subcategory",
+        $stateProvider.state('home.attributes.activate', {
+            url: '/activate/:category/:subcategory',
             params: {
                 category: {
                     dynamic: false,
-                    value: "Intent"
+                    value: 'Intent'
                 },
                 subcategory: {
                     dynamic: true,
-                    value: ""
+                    value: ''
                 }
             },
             onExit: [
-                "AttrConfigStore",
+                'AttrConfigStore',
                 function(AttrConfigStore) {
                     AttrConfigStore.init();
                 }
             ],
             resolve: {
                 overview: [
-                    "$q",
-                    "AttrConfigService",
+                    '$q',
+                    'AttrConfigService',
                     function($q, AttrConfigService) {
                         var deferred = $q.defer();
 
-                        AttrConfigService.getOverview("activation").then(
+                        AttrConfigService.getOverview('activation').then(
                             function(response) {
                                 deferred.resolve(response.data || []);
                             }
@@ -39,10 +36,10 @@ angular
                     }
                 ],
                 config: [
-                    "$q",
-                    "$stateParams",
-                    "AttrConfigService",
-                    "AttrConfigStore",
+                    '$q',
+                    '$stateParams',
+                    'AttrConfigService',
+                    'AttrConfigStore',
                     function(
                         $q,
                         $stateParams,
@@ -52,14 +49,14 @@ angular
                         var deferred = $q.defer();
                         var category = $stateParams.category;
 
-                        AttrConfigStore.set("category", category);
+                        AttrConfigStore.set('category', category);
 
                         AttrConfigService.getConfig(
-                            "activation",
+                            'activation',
                             category
                         ).then(function(response) {
                             AttrConfigStore.setData(
-                                "config",
+                                'config',
                                 response.data || []
                             );
                             deferred.resolve(response.data || []);
@@ -70,36 +67,39 @@ angular
                 ]
             },
             views: {
-                "subsummary@": "attrSubheader",
-                "main@": "attrActivate"
+                'subsummary@': 'attrSubheader',
+                'main@': 'attrActivate'
             }
         });
     })
-    .component("attrActivate", {
+    .component('attrActivate', {
         templateUrl:
-            "/components/datacloud/attributes/activate/activate.component.html",
+            '/components/datacloud/attributes/activate/activate.component.html',
         bindings: {
-            overview: "<",
-            config: "<"
+            overview: '<',
+            config: '<'
         },
-        controller: function(AttrConfigStore /*, $state, $ngRedux*/) {
+        controller: function(AttrConfigStore, $state, $ngRedux) {
             let vm = this;
 
             vm.store = AttrConfigStore;
-            vm.filters = vm.store.get("filters");
+            vm.filters = vm.store.get('filters');
             vm.uiCanExit = vm.store.uiCanExit;
-            /*
-            vm.redux = $state.get("home.attributes").data.redux;
 
-            console.log("init", this, $state.get("home.attributes"));
+            vm.redux = $state.get('home.attributes').data.redux;
+
+            console.log(
+                '-!- Redux controller init',
+                this,
+                $state.get('home.attributes')
+            );
 
             vm.$onInit = function() {
                 $ngRedux.subscribe(state => {
-                    console.log("changed", vm.redux.store);
+                    console.log('-!- Redux store has changed', vm.redux.store);
                 });
 
                 vm.redux.get();
             };
-            */
         }
     });

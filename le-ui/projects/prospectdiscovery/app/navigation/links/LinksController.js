@@ -1,4 +1,4 @@
-angular.module('pd.navigation.links', [
+angular.module('lp.navigation.links', [
 
 ])
 

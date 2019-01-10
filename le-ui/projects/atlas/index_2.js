@@ -1,0 +1,17 @@
+import 'atlas/marketo/marketo.index';
+import 'atlas/models/models.index';
+import 'atlas/navigation/navigation.index';
+import 'atlas/notes/notes.index';
+import 'atlas/playbook/playbook.index';
+import 'atlas/ratingsengine/ratingsengine.index';
+import 'atlas/setup/setup.index';
+import 'atlas/segments/segments.index';
+import 'atlas/sfdc/sfsc.index';
+import 'atlas/ssoconfig/ssocinfig.index';
+import 'atlas/userManagement/user-management.index';
+import 'atlas/create/create.index';
+import 'atlas/delete/delete.index';
+import 'atlas/jobs/jobs.index';
+import 'atlas/app';
+import './help.index';
+import './zendesk.index';

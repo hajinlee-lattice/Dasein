@@ -1,5 +1,5 @@
 angular.module('login.tenants', [
-    'pd.navigation.pagination',
+    'lp.navigation.pagination',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'common.utilities.SessionTimeout'

@@ -2,11 +2,11 @@ angular.module('lp.ratingsengine', [])
 .service('RatingsEngineStore', function(){})
 .service('RatingsEngineService', function(){});
 
-angular.module('lp.segments.segments', [])
+angular.module('lp.segments', [])
 .controller('SegmentationListController', function (){});
 
 angular
-.module('lp.segments.segments')
+.module('lp.segments')
 .service('SegmentStore', function(){})
 .service('SegmentService', function(){});
 

@@ -1,4 +1,4 @@
-angular.module('lp.segments.segments', [
+angular.module('lp.segments', [
     'common.modal',
     'lp.tile.edit'
 ])

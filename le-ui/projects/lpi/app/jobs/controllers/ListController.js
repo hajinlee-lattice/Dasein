@@ -1,6 +1,6 @@
 angular.module('lp.jobs.model', [
     'lp.jobs.status',
-    'pd.navigation.pagination',
+    'lp.navigation.pagination',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.services.HealthService',
     '720kb.tooltips'
