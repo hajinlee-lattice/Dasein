@@ -46,10 +46,23 @@ angular
         }
       }
       this.getPeriod = function(){
-        var period = QueryTreeService.getPeriodValue(this.bucketrestriction, this.type, 'Date');
-        if(this.getCmp('Date') !== 'Ever' && this.getCmp('Date') !== 'IS_EMPTY'){
-            return period+'(s)';
+        console.log('PERIOD', this.bucketrestriction.bkt.Fltr.Period);
+        var period = QueryTreeDateAttributeStore.getPeriod(this.bucketrestriction.bkt);
+        switch(this.bucketrestriction.bkt.Fltr.Cmp){
+          case 'EVER':
+          case 'IS_EMPTY':
+          case 'BETWEEN_DATE':
+          case 'BEFORE':
+          case 'AFTER':
+
+          return '';
+
+          default:
+          return period+'(s)';
         }
+        // if(this.getCmp('Date') !== 'Ever' && this.getCmp('Date') !== 'IS_EMPTY'){
+        //     return period+'(s)';
+        // }
       }
       this.init();
     }

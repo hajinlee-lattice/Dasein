@@ -136,11 +136,20 @@ angular
         }
       }
     };
+    this.getPeriod = function(bkt){
+      if(bkt && bkt.Fltr){
+        return bkt.Fltr.Period;
+      }else{
+        return '';
+      }
+    }
 
     this.changeCmp = function(bkt, cmp, period, valsArray){
+      console.log('Changing CMP ',bkt);
       bkt.Fltr.Cmp = cmp;
       bkt.Fltr.Period = period;
       bkt.Fltr.Vals = valsArray;
+      console.log('Changed CMP ',bkt);
     };
     
     this.changeValue = function (cmp, valsArray, position, value) {

@@ -82,9 +82,7 @@ angular
         this.periodsList = QueryTreeDateAttributeStore.periodList();
         this.changeCmp(this.timeCmp);
       };
-      this.changeValue = function(type, position, value) {
-        console.log("TYPE ", type, " POSITION ", position, " VALUE ", value);
-      };
+
       this.changeCmp = function(value, type) {
         // this.showTimeFrame = false;
         setTimeout(() => {
@@ -148,7 +146,7 @@ angular
               this.showToPeriod = false;
               this.showFromTime = true;
               this.showToTime = true;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, this.timeframePeriod, this.bucketrestriction.bkt.Fltr.Vals);
+              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Date', this.bucketrestriction.bkt.Fltr.Vals);
               break;
 
             case "BEFORE":
@@ -157,9 +155,9 @@ angular
               this.showPeriodNumber = false;
               this.showFromPeriod = false;
               this.showToPeriod = false;
-              this.showFromTime = false;
-              this.showToTime = true;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, this.timeframePeriod, this.bucketrestriction.bkt.Fltr.Vals);
+              this.showFromTime = true;
+              this.showToTime = false;
+              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Date', this.bucketrestriction.bkt.Fltr.Vals);
               break;
 
             case "AFTER":
@@ -170,7 +168,7 @@ angular
               this.showToPeriod = false;
               this.showFromTime = true;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, this.timeframePeriod, this.bucketrestriction.bkt.Fltr.Vals);
+              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Date', this.bucketrestriction.bkt.Fltr.Vals);
               break;
           }
         }, 0);
