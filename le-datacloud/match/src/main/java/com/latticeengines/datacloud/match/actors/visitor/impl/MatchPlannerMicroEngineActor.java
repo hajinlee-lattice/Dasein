@@ -23,11 +23,11 @@ import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
-import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -92,18 +92,16 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
             throw new IllegalArgumentException("MatchTraveler should not have MatchKeyTuple set for Entity Match.");
         }
 
-        if (CollectionUtils.isEmpty(matchTraveler.getInputRecord())) {
+        if (CollectionUtils.isEmpty(matchTraveler.getInputDataRecord())) {
             throw new IllegalArgumentException("MatchTraveler must have input record data to generate MatchKeyTuple.");
         }
 
-        // TODO(jwinter): Refactor code to avoid using InternalOutputRecord in actor system.
-        // For now, we need an InternalOutputRecord in the MatchTraveler.
-        if (matchTraveler.getInternalOutputRecord() == null) {
-            throw new IllegalArgumentException("MatchTraveler must have InternalOutputRecord set for Match Planning");
+        if (MapUtils.isEmpty(matchTraveler.getEntityKeyPositionMaps())) {
+            throw new IllegalArgumentException("MatchTraveler must have EntityKeyPositionMap set.");
         }
 
-        if (MapUtils.isEmpty(matchTraveler.getInternalOutputRecord().getKeyPositionMap())) {
-            throw new IllegalArgumentException("MatchTraveler must have InternalOutputRecord with KeyPositionMap.");
+        if (MapUtils.isEmpty(matchTraveler.getEntityKeyPositionMaps().get(matchTraveler.getEntity()))) {
+            throw new IllegalArgumentException("MatchTraveler EntityKeyPositionMap must have map for set entity");
         }
 
         // Not sure if this is necessary, but for now double check KeyMap.
@@ -130,23 +128,21 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
         return 4;
     }
 
-    // TODO(jwinter): Refactor to avoid needing InternalOutputRecord.
     @Override
     protected void execute(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        InternalOutputRecord matchRecord = matchTraveler.getInternalOutputRecord();
-        List<Object> inputRecord = matchTraveler.getInputRecord();
-        Map<MatchKey, List<Integer>> keyPositionMap = matchRecord.getKeyPositionMap();
+        List<Object> inputRecord = matchTraveler.getInputDataRecord();
+        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps().get(matchTraveler
+                .getEntity());
+        EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null,
-                matchRecord);
-        matchStandardizationService.parseRecordForDuns(inputRecord, keyPositionMap, matchRecord);
+                entityMatchKeyRecord);
+        matchStandardizationService.parseRecordForDuns(inputRecord, keyPositionMap, entityMatchKeyRecord);
         matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap, null,
-                matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), matchRecord);
-        matchStandardizationService.parseRecordForLatticeAccountId(inputRecord, keyPositionMap, matchRecord);
-        matchStandardizationService.parseRecordForLookupId(inputRecord, keyPositionMap, matchRecord);
+                matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
-        MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
+        MatchKeyTuple matchKeyTuple = MatchKeyUtils.createMatchKeyTuple(entityMatchKeyRecord);
 
         Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
                 .get(matchTraveler.getEntity()).getKeyMap();
@@ -159,25 +155,5 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
         }
 
         matchTraveler.setMatchKeyTuple(matchKeyTuple);
-    }
-
-    // TODO(jwinter): This is temporary until we stop using InternalOutputRecord to pass in data to the actor system.
-    private static MatchKeyTuple createMatchKeyTuple(InternalOutputRecord matchRecord) {
-        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
-        NameLocation nameLocationInfo = matchRecord.getParsedNameLocation();
-        if (nameLocationInfo != null) {
-            matchKeyTuple.setCity(nameLocationInfo.getCity());
-            matchKeyTuple.setCountry(nameLocationInfo.getCountry());
-            matchKeyTuple.setCountryCode(nameLocationInfo.getCountryCode());
-            matchKeyTuple.setName(nameLocationInfo.getName());
-            matchKeyTuple.setState(nameLocationInfo.getState());
-            matchKeyTuple.setZipcode(nameLocationInfo.getZipcode());
-            matchKeyTuple.setPhoneNumber(nameLocationInfo.getPhoneNumber());
-        }
-        if (!matchRecord.isPublicDomain() || matchRecord.isMatchEvenIsPublicDomain()) {
-            matchKeyTuple.setDomain(matchRecord.getParsedDomain());
-        }
-        matchKeyTuple.setDuns(matchRecord.getParsedDuns());
-        return matchKeyTuple;
     }
 }

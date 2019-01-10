@@ -2,10 +2,8 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
@@ -47,9 +45,11 @@ public class InternalOutputRecord extends OutputRecord {
     private MatchHistory fabricMatchHistory = new MatchHistory();
     private Date requestTimeStamp = new Date();
 
-    // For Entity Match, the InternalOutputRecord must contain the map between the Match Keys and the position of the
-    // corresponding fields in the input record.  This will be used by the Match Planner actor.
-    private Map<MatchKey, List<Integer>> keyPositionMap;
+    // For Entity Match, the InternalOutputRecord must contain the map between the MatchKeys and the position of the
+    // corresponding fields in the input record, for each Entity.  This is then passed on to the MatchTraveler and
+    // is used by the Match Planner actor.
+    // Entity -> (MatchKey -> list of field indexes in the input data record (above) which correspond to the match key)
+    private Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps;
 
     public String getParsedDomain() {
         return parsedDomain;
@@ -261,11 +261,11 @@ public class InternalOutputRecord extends OutputRecord {
         this.requestTimeStamp = requestTimeStamp;
     }
 
-    public Map<MatchKey, List<Integer>> getKeyPositionMap() {
-        return keyPositionMap;
+    public Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMaps() {
+        return entityKeyPositionMaps;
     }
 
-    public void setKeyPositionMap(Map<MatchKey, List<Integer>> keyPositionMap) {
-        this.keyPositionMap = keyPositionMap;
+    public void setEntityKeyPositionMap(Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
+        this.entityKeyPositionMaps = entityKeyPositionMaps;
     }
 }

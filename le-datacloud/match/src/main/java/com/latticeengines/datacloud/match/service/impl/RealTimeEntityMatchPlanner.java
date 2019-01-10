@@ -59,7 +59,7 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
         context.setColumnSelection(columnSelection);
 
         MatchOutput output = initializeMatchOutput(input, columnSelection, metadatas);
-        context = scanInputData(input, context);
+        context = scanEntityInputData(input, context);
         context.setInput(input);
         context.setOutput(output);
 

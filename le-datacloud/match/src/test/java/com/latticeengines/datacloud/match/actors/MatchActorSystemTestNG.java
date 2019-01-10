@@ -270,7 +270,9 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             Map<MatchKey, List<Integer>> keyPosMap = new HashMap<>();
             keyPosMap.put(MatchKey.Domain, Arrays.asList(0));
             keyPosMap.put(MatchKey.DUNS, Arrays.asList(1));
-            matchRecord.setKeyPositionMap(keyPosMap);
+            Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps = new HashMap<>();
+            entityKeyPositionMaps.put(BusinessEntity.Account.name(), keyPosMap);
+            matchRecord.setEntityKeyPositionMap(entityKeyPositionMaps);
             matchRecords.add(matchRecord);
         }
         return matchRecords;

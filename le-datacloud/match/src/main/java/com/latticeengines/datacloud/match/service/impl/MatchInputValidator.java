@@ -120,7 +120,12 @@ public class MatchInputValidator {
         }
 
         // TODO: Add other code to process other EntityKeyMaps besides the Account EntityKeyMap.
-        for (EntityKeyMap entityKeyMap : input.getEntityKeyMaps().values()) {
+        for (Map.Entry<String, EntityKeyMap> entry : input.getEntityKeyMaps().entrySet()) {
+            EntityKeyMap entityKeyMap = entry.getValue();
+            if (entityKeyMap == null) {
+                throw new IllegalArgumentException(
+                        "EntityKeyMap for entity " + entry.getKey() + " needs to be initialized.");
+            }
             entityKeyMap.setKeyMap(resolveKeyMap(entityKeyMap.getKeyMap(), input.getFields(), true));
         }
 

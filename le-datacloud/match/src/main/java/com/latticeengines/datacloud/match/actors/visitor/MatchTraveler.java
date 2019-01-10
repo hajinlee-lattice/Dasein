@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -14,8 +15,8 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
-import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -42,18 +43,13 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Duns from different source could be treated differently
     private Map<String, String> dunsOriginMap;
 
-    // TODO(jwinter): Refactor code to avoid needing to include InternalOutputRecord in MatchTraveler.
-    // For Entity Match, the InternalOutputRecord is included in the MatchTraveler so that Match Standardization can
-    // occur in the Match Planner Actor.
-    private InternalOutputRecord internalOutputRecord;
-
-    // TODO(jwinter): Not used yet, for next implementation.
-    // Entity -> (MatchKey -> list of match keys corresponding field indexes in MatchInput.data array)
-    private Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMap;
-
-    // TODO(jwinter): Better name?
     // The raw input data record we are matching.
-    private List<Object> inputRecord;
+    private List<Object> inputDataRecord;
+
+    // Entity -> (MatchKey -> list of field indexes in the input data record (above) which correspond to the match key)
+    private Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps;
+
+    private EntityMatchKeyRecord entityMatchKeyRecord;
 
     // Match result: entity -> entityId
     private final Map<String, String> entityIds = new HashMap<>();
@@ -197,28 +193,28 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         }
     }
 
-    public InternalOutputRecord getInternalOutputRecord() {
-        return internalOutputRecord;
+    public List<Object> getInputDataRecord() {
+        return inputDataRecord;
     }
 
-    public void setInternalOutputRecord(InternalOutputRecord internalOutputRecord) {
-        this.internalOutputRecord = internalOutputRecord;
+    public void setInputDataRecord(List<Object> inputDataRecord) {
+        this.inputDataRecord = inputDataRecord;
     }
 
-    public Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMap() {
-        return entityKeyPositionMap;
+    public Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMaps() {
+        return entityKeyPositionMaps;
     }
 
-    public void setEntityKeyPositionMap(Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMap) {
-        this.entityKeyPositionMap = entityKeyPositionMap;
+    public void setEntityKeyPositionMaps(Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
+        this.entityKeyPositionMaps = entityKeyPositionMaps;
     }
 
-    public List<Object> getInputRecord() {
-        return inputRecord;
+    public EntityMatchKeyRecord getEntityMatchKeyRecord() {
+        return entityMatchKeyRecord;
     }
 
-    public void setInputRecord(List<Object> inputRecord) {
-        this.inputRecord = inputRecord;
+    public void setEntityMatchKeyRecord(EntityMatchKeyRecord entityMatchKeyRecord) {
+        this.entityMatchKeyRecord = entityMatchKeyRecord;
     }
 
     public Map<String, String> getEntityIds() {

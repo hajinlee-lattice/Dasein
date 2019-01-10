@@ -28,6 +28,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchConfigurationServic
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -99,6 +100,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 // fetch: traveler.getEntityIds()
                 if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
                     matchRecord.setEntityId(result);
+                    // Copy data from EntityMatchKeyRecord in MatchTraveler that was set by MatchPlannerMicroEngineActor
+                    // into the InternalOutputRecord.
+                    copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);
                 } else {
                     // TODO(jwinter/lming): Add code to be able to return Lattice Account ID along with Atlas ID.
                     matchRecord.setLatticeAccountId(result);
@@ -245,14 +249,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     // Revisit later
                     entityMatchConfigurationService.setIsAllocateMode(matchInput.isAllocateId());
                     matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), null);
-                    // TODO(jwinter): Refactor code to avoid passing around large InternalOutputRecord object in
-                    //     Match Traveler.
-                    // For now, we pass in the InternalOutputRecord to the MatchTraveler so the
-                    // MatchPlannerMicroEngineActor can standardize the input and update the InternalOutputRecord.
-                    matchTraveler.setInternalOutputRecord(matchRecord);
-                    // TODO(dzheng): Implement this alternative way of passing the key position map.
-                    //matchTraveler.setKeyPosMap(MatchKeyUtils.getEntityKeyPositionMap(matchInput));
-                    matchTraveler.setInputRecord(matchRecord.getInput());
+                    matchTraveler.setInputDataRecord(matchRecord.getInput());
+                    matchTraveler.setEntityKeyPositionMaps(matchRecord.getEntityKeyPositionMaps());
+                    matchTraveler.setEntityMatchKeyRecord(new EntityMatchKeyRecord());
                     // 1st decision graph's entity is just final target entity
                     matchTraveler.setEntity(matchInput.getTargetEntity());
                 } else {
@@ -299,6 +298,23 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 throw new RuntimeException("Expected request of type " + InternalOutputRecord.class);
             }
         }
+    }
+
+    // Used only for Entity Match to copy data from the smaller EntityMatchKeyRecord passed along in the MatchTraveler to
+    // the InternalOutputRecord used outside the actor system.
+    void copyFromEntityToInternalOutputRecord(EntityMatchKeyRecord entityRecord, InternalOutputRecord internalRecord) {
+        internalRecord.setParsedDomain(entityRecord.getParsedDomain());
+        internalRecord.setPublicDomain(entityRecord.isPublicDomain());
+        internalRecord.setMatchEvenIsPublicDomain(entityRecord.isMatchEvenIsPublicDomain());
+        internalRecord.setParsedDuns(entityRecord.getParsedDuns());
+        internalRecord.setParsedNameLocation(entityRecord.getParsedNameLocation());
+        internalRecord.setParsedEmail(entityRecord.getParsedEmail());
+        internalRecord.setOrigDomain(entityRecord.getOrigDomain());
+        internalRecord.setOrigNameLocation(entityRecord.getOrigNameLocation());
+        internalRecord.setOrigDuns(entityRecord.getOrigDuns());
+        internalRecord.setOrigEmail(entityRecord.getOrigEmail());
+        internalRecord.setFailed(entityRecord.isFailed());
+        internalRecord.setErrorMessages(entityRecord.getErrorMessages());
     }
 
     private void dumpTravelStory(InternalOutputRecord record, MatchTraveler traveler, Level level) {

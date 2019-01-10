@@ -202,6 +202,7 @@ public class MatchInput implements Fact, Dimension {
     String targetEntity;
 
     // A map from Business Entity (as a String) to EntityKeyMap.
+    @JsonProperty("EntityKeyMaps")
     private Map<String, EntityKeyMap> entityKeyMaps;
 
     // ====================

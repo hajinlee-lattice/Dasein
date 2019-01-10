@@ -66,7 +66,7 @@ public class MatchInputValidatorUnitTestNG {
         Boolean failed;
 
 
-        // Test 1:  Fail on missing fields.
+        // Fail on missing fields.
         failed = false;
 
         try {
@@ -77,7 +77,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on missing fields.");
 
 
-        // Test 2:  Fail on empty Match Key map.
+        // Fail on empty Match Key map.
         failed = false;
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS"));
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
@@ -91,7 +91,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on empty key map.");
 
 
-        // Test 3:  Fail on missing Match Key value element not found in input fields.
+        // Fail on missing Match Key value element not found in input fields.
         failed = false;
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
         keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
@@ -108,7 +108,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on missing MatchKey value element in input fields.");
 
 
-        // Test 4:  Fail on empty input data.
+        // Fail on empty input data.
         failed = false;
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
         keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
@@ -125,7 +125,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on empty data.");
 
 
-        // Test 5:  Fail on too many data rows.
+        // Fail on too many data rows.
         failed = false;
         input.setData(generateMockData(2000));
 
@@ -137,7 +137,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on too many data.");
 
 
-        // Test 6:  Pass on valid data.
+        // Pass on valid data.
         failed = false;
         input.setData(generateMockData(100));
         try {
@@ -150,7 +150,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertFalse(failed, "Should pass on valid data.");
 
 
-        // Test 7:  Pass on DUNS match only.
+        // Pass on DUNS match only.
         keyMap.clear();
         keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
         input.setKeyMap(keyMap);
@@ -176,7 +176,7 @@ public class MatchInputValidatorUnitTestNG {
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         Boolean failed;
 
-        // Test 1:  Input fields not set.
+        // Input fields not set.
         failed = false;
 
         try {
@@ -191,7 +191,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should fail on empty input fields.");
 
 
-        // Test 2:  Predefined Selection not set.
+        // Predefined Selection not set.
         failed = false;
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS",
                 "SfdcId", "MktoId"));
@@ -209,7 +209,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should fail on missing predefined column selection.");
 
 
-        // Test 3:  Custom Selection is set.
+        // Custom Selection is set.
         failed = false;
         input.setPredefinedSelection(Predefined.LeadEnrichment);
         input.setCustomSelection(new ColumnSelection());
@@ -226,7 +226,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should fail on custom column selection being set.");
 
 
-        // Test 4:  Only valid predefined column selections are allowed.
+        // Only valid predefined column selections are allowed.
         failed = false;
         input.setCustomSelection(null);
 
@@ -244,7 +244,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Predefined column selection Predefined.LeadEnrichment should not be supported.");
 
 
-        // Test 5:  Entity Key Map must be populated.
+        // EntityKeyMaps must be populated.
         failed = false;
         input.setPredefinedSelection(Predefined.Segment);
 
@@ -259,9 +259,27 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should fail when Entity Key Map is empty or null.");
 
 
-        // Test 6:  Key Map cannot be null or empty.
+        // Each EntityKeyMap must be initialized.
         failed = false;
         input.setEntityKeyMaps(new HashMap<>());
+        input.getEntityKeyMaps().put(BusinessEntity.Account.name(), null);
+
+        try {
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+        } catch (IllegalArgumentException e) {
+            failed = true;
+            Assert.assertTrue(e.getMessage().contains(
+                    "EntityKeyMap for entity " + BusinessEntity.Account.name() + " needs to be initialized."),
+                    "Wrong error message: " + e.getMessage());
+        } catch (Exception e) {
+            Assert.fail("Failed on wrong exception: " + e.getMessage());
+        }
+        Assert.assertTrue(failed, "Should fail when an EntityKeyMap is not initialized.");
+
+
+        // Key Map cannot be null or empty.
+        failed = false;
+        input.getEntityKeyMaps().remove(BusinessEntity.Account.name());
         EntityKeyMap entityKeyMap = new EntityKeyMap();
         entityKeyMap.setSystemIdPriority(Arrays.asList("ID"));
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
@@ -279,7 +297,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should fail when Key Map inside Entity Key Map is empty.");
 
 
-        // Test 7:  Match Key key cannot be null.
+        // Match Key key cannot be null.
         failed = false;
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         // Empty MatchKey value should not be a problem.
@@ -306,7 +324,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "MatchKey key cannot be null.");
 
 
-        // Test 8: Match Keys should all be contained in input fields.
+        // Match Keys should all be contained in input fields.
         failed = false;
         entityKeyMap.getKeyMap().remove(null);
         entityKeyMap.getKeyMap().put(MatchKey.State, Collections.singletonList("????"));
@@ -323,7 +341,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "All match keys should appear in the list of input fields.");
 
 
-        // Test 9:  Match Key value list cannot contain null or empty elements.
+        // Match Key value list cannot contain null or empty elements.
         failed = false;
         entityKeyMap.getKeyMap().put(MatchKey.State, Collections.singletonList("State_Province"));
         entityKeyMap.getKeyMap().put(MatchKey.SystemId, Arrays.asList("ID", null, "MktoId"));
@@ -340,7 +358,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "MatchKey value list cannot contain null or empty elements.");
 
 
-        // Test 10:  Should fail on System ID MatchKey values / System ID priority list length mismatch.
+        // Should fail on System ID MatchKey values / System ID priority list length mismatch.
         failed = false;
         entityKeyMap.getKeyMap().put(MatchKey.SystemId, Arrays.asList("ID", "SfdcId", "MktoId"));
 
@@ -357,7 +375,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "System ID MatchKey values and System ID priority list must be same length.");
 
 
-        // Test 11:  Should fail on System Id priority mismatch.
+        // Should fail on System Id priority mismatch.
         failed = false;
         entityKeyMap.setSystemIdPriority(Arrays.asList("ID", "MktoId", "SfdcId"));
 
@@ -374,12 +392,11 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "System ID MatchKey values and System ID priority list must match.");
 
 
-        // Test 12:  Entity Key Map must contain Account Key Map.
+        // EntityKeyMaps must contain Account Key Map.
         failed = false;
         entityKeyMap.setSystemIdPriority(Arrays.asList("ID", "SfdcId", "MktoId"));
         input.getEntityKeyMaps().remove(BusinessEntity.Account.name());
         input.getEntityKeyMaps().put(BusinessEntity.Contact.name(), entityKeyMap);
-
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
@@ -394,7 +411,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Entity Key Map must contain Account Key Map.");
 
 
-        // Test 13:  Should fail on empty data.
+        // Should fail on empty data.
         failed = false;
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
 
@@ -410,7 +427,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Input data must be non-empty.");
 
 
-        // Test 14:  Should fail on wrong size input data.
+        // Should fail on wrong size input data.
         failed = false;
         input.setData(generateMockData(100, true));
         // Add extra row to input data with two many elements.
@@ -428,7 +445,7 @@ public class MatchInputValidatorUnitTestNG {
         }
         Assert.assertTrue(failed, "Input data must not be longer than number of input fields.");
 
-        // Test 15: Should fail on unmatched decision graph and target entity.
+        // Should fail on unmatched decision graph and target entity.
         failed = false;
         input.setData(generateMockData(100, true));
         // Fake some decision graph name just for testing purpose
@@ -450,7 +467,7 @@ public class MatchInputValidatorUnitTestNG {
                 "Decision graph AccountDecisionGraph and target entity Contact are not matched. Target entity for decision graph AccountDecisionGraph is Account");
 
 
-        // Test 16: Should pass on valid data.
+        // Should pass on valid data.
         failed = false;
         input.setData(generateMockData(100, true));
         input.setDecisionGraph(null);

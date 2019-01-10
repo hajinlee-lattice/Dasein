@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,10 +18,10 @@ import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-
 
 import javax.inject.Inject;
 
@@ -42,7 +41,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
 
     public void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                      Set<String> domainSet, boolean treatPublicDomainAsNormal,
-                                     InternalOutputRecord record) {
+                                     EntityMatchKeyRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
             boolean relaxPublicDomainCheck = isPublicDomainCheckRelaxed(record.getParsedNameLocation().getName(),
                     record.getParsedDuns());
@@ -94,7 +93,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     }
 
     public void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                           Set<NameLocation> nameLocationSet, InternalOutputRecord record) {
+                                           Set<NameLocation> nameLocationSet, EntityMatchKeyRecord record) {
         try {
             String originalName = null;
             if (keyPositionMap.containsKey(MatchKey.Name)) {
@@ -186,7 +185,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     }
 
     public void parseRecordForDuns(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                   InternalOutputRecord record) {
+                                   EntityMatchKeyRecord record) {
         if (keyPositionMap.containsKey(MatchKey.DUNS)) {
             List<Integer> dunsPosList = keyPositionMap.get(MatchKey.DUNS);
             try {
@@ -204,42 +203,6 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessages("Error when cleanup duns field: " + e.getMessage());
-            }
-        }
-    }
-
-    public void parseRecordForLatticeAccountId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                               InternalOutputRecord record) {
-        if (keyPositionMap.containsKey(MatchKey.LatticeAccountID)) {
-            List<Integer> idPosList = keyPositionMap.get(MatchKey.LatticeAccountID);
-            try {
-                String cleanId = null;
-                for (Integer idPos : idPosList) {
-                    String originalId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
-                    if (StringUtils.isNotEmpty(originalId)) {
-                        cleanId = StringStandardizationUtils.getStandardizedInputLatticeID(originalId);
-                        break;
-                    }
-                }
-                record.setLatticeAccountId(cleanId);
-            } catch (Exception e) {
-                record.setFailed(true);
-                record.addErrorMessages("Error when cleanup lattice account id field: " + e.getMessage());
-            }
-        }
-    }
-
-    public void parseRecordForLookupId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                       InternalOutputRecord record) {
-        if (keyPositionMap.containsKey(MatchKey.LookupId)) {
-            List<Integer> idPosList = keyPositionMap.get(MatchKey.LookupId);
-            Integer idPos = idPosList.get(0);
-            try {
-                String lookupId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
-                record.setLookupIdValue(lookupId);
-            } catch (Exception e) {
-                record.setFailed(true);
-                record.addErrorMessages("Error when cleanup lookup id field: " + e.getMessage());
             }
         }
     }
@@ -271,4 +234,44 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         }
         matchKeyTuple.setSystemIds(systemIds);
     }
+
+    // TODO(jwinter): The two methods below are not used right now but I'm not deleting them in case they are needed
+    //     later.
+    /*
+    public void parseRecordForLatticeAccountId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+                                               EntityMatchKeyRecord record) {
+        if (keyPositionMap.containsKey(MatchKey.LatticeAccountID)) {
+            List<Integer> idPosList = keyPositionMap.get(MatchKey.LatticeAccountID);
+            try {
+                String cleanId = null;
+                for (Integer idPos : idPosList) {
+                    String originalId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
+                    if (StringUtils.isNotEmpty(originalId)) {
+                        cleanId = StringStandardizationUtils.getStandardizedInputLatticeID(originalId);
+                        break;
+                    }
+                }
+                record.setLatticeAccountId(cleanId);
+            } catch (Exception e) {
+                record.setFailed(true);
+                record.addErrorMessages("Error when cleanup lattice account id field: " + e.getMessage());
+            }
+        }
+    }
+
+    public void parseRecordForLookupId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+                                       EntityMatchKeyRecord record) {
+        if (keyPositionMap.containsKey(MatchKey.LookupId)) {
+            List<Integer> idPosList = keyPositionMap.get(MatchKey.LookupId);
+            Integer idPos = idPosList.get(0);
+            try {
+                String lookupId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
+                record.setLookupIdValue(lookupId);
+            } catch (Exception e) {
+                record.setFailed(true);
+                record.addErrorMessages("Error when cleanup lookup id field: " + e.getMessage());
+            }
+        }
+    }
+    */
 }

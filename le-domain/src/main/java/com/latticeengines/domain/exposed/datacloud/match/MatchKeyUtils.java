@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-//import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 
 public class MatchKeyUtils {
 
@@ -271,7 +269,7 @@ public class MatchKeyUtils {
      * @return Entity -> (MatchKey -> list of match key's corresponding field
      *         indexes in MatchInput.data array)
      */
-    public static Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMap(MatchInput input) {
+    public static Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMaps(MatchInput input) {
         Map<String, Integer> fieldPos = getFieldPositions(input);
 
         Map<String, Map<MatchKey, List<Integer>>> posMap = input.getEntityKeyMaps().entrySet().stream()
@@ -285,5 +283,24 @@ public class MatchKeyUtils {
 
         return posMap;
 
+    }
+
+    public static MatchKeyTuple createMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
+        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
+        NameLocation nameLocationInfo = entityRecord.getParsedNameLocation();
+        if (nameLocationInfo != null) {
+            matchKeyTuple.setCity(nameLocationInfo.getCity());
+            matchKeyTuple.setCountry(nameLocationInfo.getCountry());
+            matchKeyTuple.setCountryCode(nameLocationInfo.getCountryCode());
+            matchKeyTuple.setName(nameLocationInfo.getName());
+            matchKeyTuple.setState(nameLocationInfo.getState());
+            matchKeyTuple.setZipcode(nameLocationInfo.getZipcode());
+            matchKeyTuple.setPhoneNumber(nameLocationInfo.getPhoneNumber());
+        }
+        if (!entityRecord.isPublicDomain() || entityRecord.isMatchEvenIsPublicDomain()) {
+            matchKeyTuple.setDomain(entityRecord.getParsedDomain());
+        }
+        matchKeyTuple.setDuns(entityRecord.getParsedDuns());
+        return matchKeyTuple;
     }
 }

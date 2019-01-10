@@ -51,7 +51,6 @@ public class MatchOutput {
     // A map from Business Entity (as a String) to EntityKeyMap.
     private Map<String, MatchInput.EntityKeyMap> entityKeyMaps;
 
-
     // ====================
     // END CDL MATCH PROPERTIES
     // ====================
