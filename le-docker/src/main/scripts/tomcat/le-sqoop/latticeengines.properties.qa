@@ -285,7 +285,7 @@ yarn.use.minicluster=false
 # ==================================================
 # le-hadoop/conf/env/devcluster/hadoop.properties
 # ==================================================
-hadoop.use.emr=true
+hadoop.use.emr=
 hadoop.dfs.nameservices=
 hadoop.dfs.client.failover.proxy.provider=
 dfs.namenode.rpc-address.nn1=
