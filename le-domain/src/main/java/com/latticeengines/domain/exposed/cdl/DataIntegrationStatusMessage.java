@@ -24,11 +24,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Table(name = "DATA_INTEG_STATUS_MESSAGE")
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataIntegrationStatusMessage implements HasPid {
+public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
 
     @Id
     @JsonProperty("pid")
@@ -38,7 +39,7 @@ public class DataIntegrationStatusMessage implements HasPid {
     private Long pid;
 
     @ManyToOne(cascade = { CascadeType.MERGE })
-    @JoinColumn(name = "FK_WORKFLOW_REQ_ID", nullable = false)
+    @JoinColumn(name = "FK_DATA_INTEG_MONITORING_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private DataIntegrationStatusMonitor statusMonitor;
@@ -64,6 +65,16 @@ public class DataIntegrationStatusMessage implements HasPid {
     @JsonProperty("message")
     @Column(name = "MESSAGE", nullable = true)
     private String message;
+
+    @JsonProperty("createdDate")
+    @Column(name = "CREATED_DATE", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+
+    @JsonProperty("updatedDate")
+    @Column(name = "UPDATED_DATE", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedDate;
 
     public Long getPid() {
         return pid;
@@ -122,5 +133,21 @@ public class DataIntegrationStatusMessage implements HasPid {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Date getCreated() {
+        return createdDate;
+    }
+
+    public void setCreated(Date created) {
+        this.createdDate = created;
+    }
+
+    public Date getUpdated() {
+        return updatedDate;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updatedDate = updated;
     }
 }
