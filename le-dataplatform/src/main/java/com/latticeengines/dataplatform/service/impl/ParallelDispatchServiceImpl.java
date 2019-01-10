@@ -31,7 +31,7 @@ public class ParallelDispatchServiceImpl implements DispatchService {
     @Resource(name = "mutipleContainerDispatcher")
     private DispatchService multipleContainerDispatcher;
 
-    @Value("${hadoop.use.emr:true}")
+    @Value("${hadoop.use.emr:false}")
     private Boolean useEmr;
 
     private DispatchService defaultContainerDispatcher;
@@ -103,7 +103,7 @@ public class ParallelDispatchServiceImpl implements DispatchService {
 
         Log.info("useEmr=" + useEmr + " modelAwsBatchEnabled=" + modelAwsBatchEnabled + "isParallelEnabled="
                 + isParallelEnabled);
-        if (modelAwsBatchEnabled && !isParallelEnabled) {
+        if (useEmr && modelAwsBatchEnabled && !isParallelEnabled) {
             return awsBatchContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);
         }
         if (configParallelEnabled && !isParallelEnabled && isModeling) {
