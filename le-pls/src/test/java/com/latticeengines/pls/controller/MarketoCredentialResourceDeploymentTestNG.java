@@ -105,7 +105,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         MarketoCredential marketoCredential = MarketoConnectorHelper.getTestMarketoCredentialConfig();
         String credName = CREDENTIAL_NAME + System.currentTimeMillis();
         marketoCredential.setName(credName);
-        
+
         marketoCredProxy.createMarketoCredential(marketoCredential);
         
         List<MarketoCredential> credentialList = marketoCredProxy.getMarketoCredentialsSimplified();
