@@ -187,6 +187,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName)//
                         .put(WorkflowContextConstants.Inputs.DATAFEED_EXECUTION_ID, executionId)//
+                        .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName())
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()).build())
                 .build();
     }

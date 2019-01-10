@@ -370,6 +370,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         case InitialLoaded:
             return Status.InitialLoaded;
         case Active:
+        case Deleting:
         case ProcessAnalyzing:
             return Status.Active;
         default:
