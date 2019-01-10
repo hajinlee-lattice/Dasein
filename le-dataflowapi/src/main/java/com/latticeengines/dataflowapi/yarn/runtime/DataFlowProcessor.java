@@ -172,6 +172,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
             ctx.setProperty(DataFlowProperty.ENGINE, engine);
         }
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
+        ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
         Integer partitions = dataFlowConfig.getPartitions();
         if (partitions != null) {
