@@ -12,6 +12,7 @@ COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
+COPY setenv.sh $CATALINA_HOME/bin/setenv.sh
 
 COPY cacerts /etc/pki/java/cacerts
 COPY tomcat.jks /etc/pki/java/tomcat.jks
