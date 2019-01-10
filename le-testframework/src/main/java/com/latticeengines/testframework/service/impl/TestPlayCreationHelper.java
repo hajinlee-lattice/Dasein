@@ -79,6 +79,7 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.proxy.objectapi.EntityProxyImpl;
 import com.latticeengines.proxy.objectapi.RatingProxyImpl;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
@@ -233,19 +234,25 @@ public class TestPlayCreationHelper {
         setupTenantAndCreatePlay(null);
     }
 
-    public void setupTenantAndCreatePlay(String existingTenant) throws Exception {
-        if (StringUtils.isNotBlank(existingTenant)) {
-            useExistingTenant(existingTenant);
+    public void setupTenantAndCreatePlay(PlayLaunchConfig playLaunchConfig) throws Exception {
+        if (StringUtils.isNotBlank(playLaunchConfig.getExistingTenant())) {
+            useExistingTenant(playLaunchConfig.getExistingTenant());
         } else {
             setupTenantAndData();
         }
         setupPlayTestEnv();
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
-        testCrud();
-        createPlayLaunch();
+        if (playLaunchConfig.isMockRatingTable()) {
+            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
+        }
+        createDefaultPlayAndTestCrud(playLaunchConfig);
+        createPlayLaunch(playLaunchConfig);
 
         Assert.assertNotNull(play);
         Assert.assertNotNull(playLaunch);
+
+        if (playLaunchConfig.isLaunchPlay()) {
+            launchPlayWorkflow(playLaunchConfig);
+        }
     }
 
     public void setupPlayTestEnv() throws Exception {
@@ -264,8 +271,8 @@ public class TestPlayCreationHelper {
         // createCrossSellRatingEngineWithPublishedRating(segment);
     }
 
-    public void createPlay() {
-        testCrud();
+    public void createPlay(PlayLaunchConfig playLaunchConfig) {
+        createDefaultPlayAndTestCrud(playLaunchConfig);
         Assert.assertNotNull(play);
         Assert.assertNotNull(play.getRatingEngine());
     }
@@ -311,43 +318,41 @@ public class TestPlayCreationHelper {
         return playProxy.createOrUpdatePlay(tenantIdentifier, play, false);
     }
 
-    public void createPlayLaunch() {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch());
+    public void createPlayLaunch(PlayLaunchConfig playLaunchConfig) {
+        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(playLaunchConfig));
         assertPlayLaunch(playLaunch);
     }
 
-    public void createPlayLaunch(boolean isDryRunMode, Set<RatingBucketName> bucketsToLaunch,
-            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
-                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount));
-        assertPlayLaunch(playLaunch);
-        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(), isDryRunMode);
-        if (isDryRunMode) {
+    public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig) {
+        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(), playLaunchConfig.isPlayLaunchDryRun());
+        if (playLaunchConfig.isPlayLaunchDryRun()) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {
             Assert.assertNotNull(playLaunch.getApplicationId());
         }
+        return playLaunch;
     }
 
-    private PlayLaunch createDefaultPlayLaunch() {
-        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
-
-    }
-
-    private PlayLaunch createDefaultPlayLaunch(Set<RatingBucketName> bucketsToLaunch,
-            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
+    private PlayLaunch preparePlayLaunchObject(PlayLaunchConfig playLaunchConfig) {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(bucketsToLaunch);
-        playLaunch.setDestinationOrgId(destinationOrgId);
-        playLaunch.setDestinationSysType(destinationOrgType);
+        playLaunch.setBucketsToLaunch(
+                playLaunchConfig.getBucketsToLaunch() != null ? playLaunchConfig.getBucketsToLaunch()
+                        : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
+        playLaunch.setDestinationOrgId(
+                playLaunchConfig.getDestinationSystemId() != null ? playLaunchConfig.getDestinationSystemId()
+                        : destinationOrgId);
+        playLaunch.setDestinationSysType(
+                playLaunchConfig.getDestinationSystemType() != null ? playLaunchConfig.getDestinationSystemType()
+                        : destinationOrgType);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
-        playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
+        playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
-        playLaunch.setTopNCount(topNCount);
+        playLaunch.setTopNCount(playLaunchConfig.getTopNCount());
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;
     }
+
 
     private void assertPlayLaunch(PlayLaunch playLaunch) {
         Assert.assertNotNull(playLaunch);
@@ -369,13 +374,18 @@ public class TestPlayCreationHelper {
         }
     }
 
-    public void testCrud() {
+    public void createDefaultPlayAndTestCrud(PlayLaunchConfig playLaunchConfig) {
         List<Play> playList = playProxy.getPlays(tenant.getId(), null, null);
         int existingPlays = playList == null ? 0 : playList.size();
         Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
+        
+        if (!playLaunchConfig.isTestPlayCrud()) {
+            return;
+        }
+
         Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
                 ratingEngine.getId());
         Assert.assertNotNull(dependencies);
@@ -825,4 +835,5 @@ public class TestPlayCreationHelper {
         Restriction contactRestriction = createContactRestriction();
         return createSegment(NamingUtils.timestamp("TargetSegment"), accountRestriction, contactRestriction);
     }
+
 }

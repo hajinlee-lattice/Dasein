@@ -19,11 +19,14 @@ public class DateTimeUtils {
     private static final String UTC = "UTC";
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-
+    private static final String FILEPATH_DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
+    private static final SimpleDateFormat filePathDateFormat = new SimpleDateFormat(FILEPATH_DATE_FORMAT_STRING);
+    
     public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        filePathDateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
     static {
@@ -80,6 +83,10 @@ public class DateTimeUtils {
         Long timeLong = Long.valueOf(time);
         String result = dateOnlyFormat.format(new Date(timeLong));
         return result;
+    }
+
+    public static String currentTimeAsString() {
+        return filePathDateFormat.format(new Date());
     }
 
     public static Integer dateToDayPeriod(String dateString) {

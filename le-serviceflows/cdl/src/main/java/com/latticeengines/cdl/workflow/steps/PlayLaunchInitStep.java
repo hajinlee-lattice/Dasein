@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -53,7 +54,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info(String.format("For playId: %s", playName));
             log.info(String.format("For playLaunchId: %s", playLaunchId));
 
-            playLaunchProcessor.launchPlay(tenant, config);
+            String recAvroHdfsFilePath = playLaunchProcessor.launchPlay(tenant, config);
+            putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH, recAvroHdfsFilePath);
             successUpdates(customerSpace, playName, playLaunchId);
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);

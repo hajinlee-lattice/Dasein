@@ -75,7 +75,11 @@ public final class PathBuilder {
 
     public static Path buildDataTablePath(String podId, CustomerSpace space, String namespace) {
         Path path = buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLES);
+        path = buildPathWithNamespace(path, namespace);
+        return path;
+    }
 
+    private static Path buildPathWithNamespace(Path path, String namespace) {
         if (!StringUtils.isEmpty(namespace)) {
             String[] namespaceTokens = namespace.split("\\.");
             for (String namespaceToken : namespaceTokens) {
@@ -96,12 +100,7 @@ public final class PathBuilder {
     public static Path buildDataTableSchemaPath(String podId, CustomerSpace space, String namespace) {
         Path path = buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLE_SCHEMAS);
 
-        if (!StringUtils.isEmpty(namespace)) {
-            String[] namespaceTokens = namespace.split("\\.");
-            for (String namespaceToken : namespaceTokens) {
-                path = path.append(namespaceToken);
-            }
-        }
+        path = buildPathWithNamespace(path, namespace);
         return path;
     }
 
@@ -116,6 +115,12 @@ public final class PathBuilder {
     public static Path buildDataFileExportPath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES)
                 .append(PathConstants.EXPORTS);
+    }
+
+    public static Path buildDataFileExportPath(String podId, CustomerSpace space, String namespace) {
+        Path path = buildDataFileExportPath(podId, space);
+        path = buildPathWithNamespace(path, namespace);
+        return path;
     }
 
     public static Path buildDataFileUniqueExportPath(String podId, CustomerSpace space) {

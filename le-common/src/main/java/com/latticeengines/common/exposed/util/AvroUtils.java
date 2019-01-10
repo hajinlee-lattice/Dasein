@@ -1,11 +1,16 @@
 package com.latticeengines.common.exposed.util;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.JDBCType;
 import java.sql.SQLType;
 import java.sql.Types;
@@ -24,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -39,6 +45,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableFileInput;
 import org.apache.avro.file.SeekableInput;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -61,6 +68,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StreamUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -76,6 +84,7 @@ public class AvroUtils {
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
         SeekableInput input;
         FileReader<GenericRecord> reader;
+        
         try {
             input = new FsInput(path, config);
             GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
@@ -852,6 +861,53 @@ public class AvroUtils {
         return data;
     }
 
+    public static void getAvroFileReader(Configuration config, Path path, File jsonFile,
+            Function<GenericRecord, GenericRecord> recProcessor) throws IOException {
+        try (FileReader<GenericRecord> reader = getAvroFileReader(config, path)) {
+            writeAvroToJsonFile(jsonFile, recProcessor, reader);
+        }
+    }
+
+    public static void convertAvroToJSON(String avroFilePath, File jsonFile,
+            Function<GenericRecord, GenericRecord> recProcessor) throws IOException {
+        File avroFile = new File(avroFilePath);
+        try (FileReader<GenericRecord> reader = DataFileReader.openReader(avroFile,
+                new GenericDatumReader<GenericRecord>())) {
+            writeAvroToJsonFile(jsonFile, recProcessor, reader);
+        }
+    }
+
+    public static void convertAvroToJSON(Configuration config, Path path, File jsonFile,
+            Function<GenericRecord, GenericRecord> recProcessor) throws IOException {
+        try (FileReader<GenericRecord> reader = getAvroFileReader(config, path)) {
+            writeAvroToJsonFile(jsonFile, recProcessor, reader);
+        }
+    }
+
+    public static void writeAvroToJsonFile(File jsonFile, Function<GenericRecord, GenericRecord> recProcessor,
+            FileReader<GenericRecord> avroReader) throws IOException, FileNotFoundException {
+        final GenericData genericData = GenericData.get();
+        try (FileOutputStream writer = new FileOutputStream(jsonFile)) {
+            writer.write("[".getBytes());
+            boolean firstRecord = true;
+            while (avroReader.hasNext()) {
+                GenericRecord currRecord = avroReader.next();
+                if (currRecord == null) {
+                    continue;
+                }
+                if (!firstRecord) {
+                    writer.write(",".getBytes());
+                } else {
+                    firstRecord = false;
+                }
+                currRecord = recProcessor != null ? recProcessor.apply(currRecord) : currRecord;
+                byte[] bytes = genericData.toString(currRecord).getBytes(StandardCharsets.UTF_8);
+                writer.write(bytes);
+            }
+            writer.write("]".getBytes());
+        }
+    }
+
     public static long countLocalDir(String dir) {
         Collection<File> files = FileUtils.listFiles(new File(dir), new String[]{ "avro" }, false);
         List<Callable<Long>> callables = new ArrayList<>();
@@ -1254,4 +1310,5 @@ public class AvroUtils {
         }
         return column.matches("^[A-Za-z\\d][A-Za-z\\d\\_]*$");
     }
+
 }

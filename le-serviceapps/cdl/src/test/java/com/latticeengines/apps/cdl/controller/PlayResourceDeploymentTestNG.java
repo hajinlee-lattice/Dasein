@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -52,8 +53,11 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private long totalRatedAccounts;
 
+    PlayLaunchConfig playLaunchConfig = null;
+    
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
+        playLaunchConfig = new PlayLaunchConfig.Builder().build();
         if (USE_EXISTING_TENANT) {
             setupTestEnvironment(EXISTING_TENANT);
         } else {
@@ -75,13 +79,13 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment-app")
     public void testCrud() {
-        playCreationHelper.testCrud();
+        playCreationHelper.createDefaultPlayAndTestCrud(playLaunchConfig);
         playName = playCreationHelper.getPlayName();
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
     public void createPlayLaunch() {
-        playCreationHelper.createPlayLaunch();
+        playCreationHelper.createPlayLaunch(playLaunchConfig);
         play = playCreationHelper.getPlay();
         playLaunch = playCreationHelper.getPlayLaunch();
         playLaunch = playProxy.launchPlay(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(), true);

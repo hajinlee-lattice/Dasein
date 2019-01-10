@@ -6,10 +6,13 @@
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:component-scan base-package="com.latticeengines.cdl" />
+    <context:component-scan base-package="com.latticeengines.proxy.exposed" />
 
     <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:serviceflows-cdl-dataflow-context.xml"/>
     <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
+    <import resource="classpath:yarn-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
 
 </beans>

@@ -59,6 +59,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -97,13 +98,17 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = "";// "LETest1539973036934";
+        String existingTenant = null;//"LETest1546299140564";
 
-        testPlayCreationHelper.setupTenantAndCreatePlay(existingTenant);
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder()
+                .existingTenant(existingTenant)
+                .mockRatingTable(true)
+                .build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         play = testPlayCreationHelper.getPlay();
         String ratingEngineId = play.getRatingEngine().getId();
-        // String ratingEngineId = "engine_amfzwkicrhokafnfhv4ruq";
+        //ratingEngineId = "engine_3r2jgb3stpy5heu0rm8nda";
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(), ratingEngineId);
 
         Assert.assertNotNull(ratingEngine);

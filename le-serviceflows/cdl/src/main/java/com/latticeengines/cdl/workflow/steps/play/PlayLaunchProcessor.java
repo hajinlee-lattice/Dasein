@@ -126,7 +126,7 @@ public class PlayLaunchProcessor {
     @Inject
     private PlayProxy playProxy;
 
-    public void launchPlay(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
+    public String launchPlay(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
         // initialize play launch context
         PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
@@ -176,7 +176,8 @@ public class PlayLaunchProcessor {
                 throw new LedpException(LedpCode.LEDP_18159,
                         new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
             } else {
-                runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis, avroFileName, localFile);
+                String recAvroHdfsFilePath = runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis,
+                        avroFileName, localFile);
                 long suppressedAccounts = (totalAccountsAvailableForLaunch - playLaunch.getAccountsLaunched()
                         - playLaunch.getAccountsErrored());
                 playLaunch.setAccountsSuppressed(suppressedAccounts);
@@ -184,6 +185,7 @@ public class PlayLaunchProcessor {
                 log.info(String.format("Total launched accounts count: %d", playLaunch.getAccountsLaunched()));
                 log.info(String.format("Total errored accounts count: %d", playLaunch.getAccountsErrored()));
                 log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
+                return recAvroHdfsFilePath;
             }
         } catch (Exception ex) {
             log.info(String.format("Setting all counts to 0L as we encountered critical exception: %s",
@@ -230,7 +232,7 @@ public class PlayLaunchProcessor {
         return totalAccountsCount;
     }
 
-    private void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
+    private String runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
             Long currentTimeMillis, String avroFileName, File localFile) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         String path = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
@@ -238,9 +240,10 @@ public class PlayLaunchProcessor {
         path += currentTimeMillis + "/";
 
         String avroPath = path + "avro/";
+        String recAvroHdfsFilePath = avroPath + avroFileName;
 
         try {
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), avroPath + avroFileName);
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), recAvroHdfsFilePath);
         } finally {
             FileUtils.deleteQuietly(localFile);
         }
@@ -258,7 +261,7 @@ public class PlayLaunchProcessor {
         if (!export(playLaunchContext, avroPath)) {
             throw new LedpException(LedpCode.LEDP_18168);
         }
-
+        //TODO: Move to cleanup Listener
         try {
             HdfsUtils.rmdir(yarnConfiguration, //
                     avroPath.substring(0, avroPath.lastIndexOf("/avro")));
@@ -268,6 +271,8 @@ public class PlayLaunchProcessor {
                             + avroPath.substring(0, avroPath.lastIndexOf("/avro")), //
                     ex);
         }
+
+        return recAvroHdfsFilePath;
     }
 
     private boolean export(PlayLaunchContext playLaunchContext, String avroPath) {

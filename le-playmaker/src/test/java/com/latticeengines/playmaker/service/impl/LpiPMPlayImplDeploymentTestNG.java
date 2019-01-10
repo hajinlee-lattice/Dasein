@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -59,8 +60,11 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
             "SfdcAccountID", //
             "RowNum");
 
+    PlayLaunchConfig playLaunchConfig = null;
+    
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        playLaunchConfig = new PlayLaunchConfig.Builder().build();
         testPlayCreationHelper.setupTenantAndData();
     }
 
@@ -72,8 +76,9 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountWithoutPlayCreation" })
     public void testGetPlayCountAfterCreatingPlayWithoutLaunch() throws Exception {
+        PlayLaunchConfig plConfig = new PlayLaunchConfig.Builder().build(); 
         testPlayCreationHelper.setupPlayTestEnv();
-        testPlayCreationHelper.createPlay();
+        testPlayCreationHelper.createPlay(plConfig);
 
         int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 0);
@@ -82,7 +87,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingPlayWithoutLaunch" })
     public void testGetPlayCountAfterCreatingPlayWithLaunch() throws Exception {
         tenant = testPlayCreationHelper.getTenant();
-        testPlayCreationHelper.createPlayLaunch();
+        testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
         firstPlayWithLaunch = testPlayCreationHelper.getPlay();
         firstPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         playProxy.updatePlayLaunch(tenant.getId(), firstPlayWithLaunch.getName(), firstPlayLaunch.getLaunchId(),
@@ -104,7 +109,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 1);
 
-        testPlayCreationHelper.createPlayLaunch();
+        testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
         secondPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         playProxy.updatePlayLaunch(tenant.getId(), secondPlay.getName(), secondPlayLaunch.getLaunchId(),
                 LaunchState.Launching);

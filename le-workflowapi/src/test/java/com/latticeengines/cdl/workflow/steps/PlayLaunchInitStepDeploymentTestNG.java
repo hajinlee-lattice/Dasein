@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,6 +46,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 import com.latticeengines.yarn.exposed.service.JobService;
@@ -124,19 +126,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     private PlayLaunch rulesBasedPlayLaunch;
 
-    private Play crossSellPlay;
-
-    private PlayLaunch crossSellPlayLaunch;
-
-    private Play customeEventPlay;
-
-    private PlayLaunch customEventPlayLaunch;
-
     private CustomerSpace customerSpace;
-
-    private Set<RatingBucketName> bucketsToLaunch;
-
-    private Boolean excludeItemsWithoutSalesforceId;
 
     private Long topNCount;
 
@@ -144,14 +134,20 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.values()));
-        excludeItemsWithoutSalesforceId = true;
         topNCount = 1500L;
+
+        PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder()
+                .excludeItemsWithoutSalesforceId(true)
+                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())))
+                .topNCount(topNCount)
+                .playLaunchDryRun(true)
+                .build();
 
         testPlayCreationHelper.setupTenantAndData();
         testPlayCreationHelper.setupPlayTestEnv();
-        testPlayCreationHelper.createPlay();
-        testPlayCreationHelper.createPlayLaunch(true, bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount);
+        testPlayCreationHelper.createPlay(playLaunchConfig);
+        testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
+        testPlayCreationHelper.launchPlayWorkflow(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         rulesBasedPlay = testPlayCreationHelper.getPlay();
@@ -179,6 +175,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
         playLaunchInitStep.setPlayProxy(playProxy);
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
+        playLaunchInitStep.setExecutionContext(new ExecutionContext());
 
         customerSpace = CustomerSpace.parse(tenant.getId());
         playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));

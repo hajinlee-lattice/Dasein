@@ -5,16 +5,26 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 public class AvroUtilsUnitTestNG {
 
@@ -139,6 +149,33 @@ public class AvroUtilsUnitTestNG {
         records.forEach(record -> {
             System.out.println(record.toString());
         });
+    }
+
+    @Test(groups = "unit")
+    public void convertAvroToJSON() throws IOException {
+        URL avroUrl = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
+        File jsonFile = File.createTempFile("RecommendationsTest_", ".json");
+        AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile, new Function<GenericRecord, GenericRecord>() {
+            @Override
+            public GenericRecord apply(GenericRecord rec) {
+                Object obj = rec.get("CONTACTS");
+                if (obj != null && StringUtils.isNotBlank(obj.toString())) {
+                    obj = JsonUtils.deserialize(obj.toString(), new TypeReference<List<Map<String, String>>>(){});
+                    rec.put("CONTACTS", obj);
+                }
+                return rec;
+            }
+        });
+
+        ObjectMapper om = new ObjectMapper();
+        try(FileInputStream fis = new FileInputStream(jsonFile)) {
+            JsonNode node = om.readTree(fis);
+            Assert.assertEquals(node.getNodeType(), JsonNodeType.ARRAY);
+            Assert.assertNotNull(node.get(0));
+            JsonNode firstRecommendationObject = node.get(0);
+            JsonNode contactList = firstRecommendationObject.get("CONTACTS");
+            Assert.assertEquals(contactList.getNodeType(), JsonNodeType.ARRAY);
+        }
     }
 
     @Test(groups = "unit", dataProvider = "columnProvider")

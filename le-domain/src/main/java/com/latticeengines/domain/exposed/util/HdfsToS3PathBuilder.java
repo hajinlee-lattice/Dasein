@@ -62,6 +62,10 @@ public class HdfsToS3PathBuilder {
         return String.format(hdfsAtlasMetadataDir, pod, tenantId, tenantId);
     }
 
+    public String getHdfsAtlasFileExportDir(String pod, String tenantId) {
+        return getHdfsAtlasFilesDir(pod, tenantId) + PATH_SEPARATOR + "Exports";
+    }
+
     public String getHdfsAtlasTablesDir(String pod, String tenantId) {
         return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "Tables";
     }
@@ -126,6 +130,10 @@ public class HdfsToS3PathBuilder {
 
     public String getS3AtlasMetadataDir(String s3Bucket, String tenantId) {
         return String.format(protocol + s3AtlasMetadataDir, s3Bucket, tenantId);
+    }
+
+    public String getS3AtlasFileExportsDir(String s3Bucket, String tenantId) {
+        return getS3AtlasFilesDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Exports";
     }
 
     public String getS3AtlasTablesDir(String s3Bucket, String tenantId) {
@@ -225,6 +233,18 @@ public class HdfsToS3PathBuilder {
         }
         String fileName = FilenameUtils.getName(inputFileDir);
         return builder.append(getS3AtlasFilesDir(s3Bucket, tenantId)).append(PATH_SEPARATOR).append(fileName)
+                .toString();
+    }
+
+    public String convertAtlasFileExport(String inputExportFileDir, String pod, String tenantId, String s3Bucket) {
+        StringBuilder builder = new StringBuilder();
+        String hdfsExportsDir = getHdfsAtlasFileExportDir(pod, tenantId);
+        if (inputExportFileDir.startsWith(hdfsExportsDir)) {
+            return builder.append(getS3AtlasFileExportsDir(s3Bucket, tenantId))
+                    .append(inputExportFileDir.substring(hdfsExportsDir.length())).toString();
+        }
+        String fileName = FilenameUtils.getName(inputExportFileDir);
+        return builder.append(getS3AtlasFileExportsDir(s3Bucket, tenantId)).append(PATH_SEPARATOR).append(fileName)
                 .toString();
     }
 
