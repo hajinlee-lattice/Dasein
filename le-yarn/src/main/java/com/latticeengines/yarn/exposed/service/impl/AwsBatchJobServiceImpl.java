@@ -153,8 +153,10 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
             envs.put("AWS_BATCH_JOB_ID", applicationId.toString());
         }
 
+        // envs.put(PythonContainerProperty.CONDA_ENV.name(),
+        // containerProperties.getProperty(PythonContainerProperty.CONDA_ENV.name()));
         envs.put(PythonContainerProperty.CONDA_ENV.name(),
-                containerProperties.getProperty(PythonContainerProperty.CONDA_ENV.name()));
+                "lattice");
         envs.put(PythonContainerProperty.SHDP_HD_FSWEB.name(),
                 containerProperties.getProperty(PythonContainerProperty.WEBHDFS_URL.name()));
         envs.put(PythonContainerProperty.PYTHONPATH.name(),
