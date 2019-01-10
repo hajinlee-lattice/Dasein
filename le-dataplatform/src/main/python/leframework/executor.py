@@ -145,7 +145,7 @@ class Executor(object):
         metadata = dict()
         realColNameToRecord = dict()
 
-        if os.path.isfile(schema):
+        if os.path.isfile(schema) and schema.endswith(".avro"):
             with open(schema) as fp:
                 reader = avro.reader(fp)
                 for record in reader:
