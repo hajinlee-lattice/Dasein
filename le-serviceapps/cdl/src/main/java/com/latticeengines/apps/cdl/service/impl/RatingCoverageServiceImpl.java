@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -624,15 +625,14 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
             // Populate Unscored counts
             String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
-            RestrictionBuilder unscoredRestrictionbuilder = Restriction.builder().let(BusinessEntity.Rating, ratingField);
-            RestrictionBuilder builder = Restriction.builder().and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestrictionbuilder.isNull().build());
-
-            FrontEndRestriction unscoredRestriction = new FrontEndRestriction(builder.build());
+            Restriction unscoredRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull().build();         
+            Restriction unscoredAccountsInSegmentRest = Restriction.builder().and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
             FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
-
-            unscoredFrontEndQuery.setAccountRestriction(unscoredRestriction);
             unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
-            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
+            unscoredFrontEndQuery.setAccountRestriction(new FrontEndRestriction(unscoredAccountsInSegmentRest));
+            unscoredFrontEndQuery.setContactRestriction(new FrontEndRestriction(LogicalRestriction.builder().or(new ArrayList<>()).build()));
+            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(),unscoredFrontEndQuery));
+            
             if (targetSegment != null) {
 //                if (targetSegment.getAccounts() != null && targetSegment.getAccounts() > 0) {
 //                    coverageInfo.setUnscoredAccountCount(targetSegment.getAccounts() - coverageInfo.getAccountCount());
