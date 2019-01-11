@@ -117,6 +117,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         this.start();
     }
 
+    @MetricField(name = "DataCloudVersion")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    private void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+
     public MatchInput getMatchInput() {
         return matchInput;
     }
@@ -130,44 +139,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         setDataCloudVersion(matchInput.getDataCloudVersion());
     }
 
-    @MetricField(name = "Matched", fieldType = MetricField.FieldType.BOOLEAN)
-    public Boolean isMatched() {
-        return isMatched;
-    }
-
-    public void setMatched(Boolean isMatched) {
-        this.isMatched = isMatched;
-    }
-
-    @MetricFieldGroup
-    public MatchKeyTuple getMatchKeyTuple() {
-        return matchKeyTuple;
-    }
-
-    public void setMatchKeyTuple(MatchKeyTuple matchKeyTuple) {
-        this.matchKeyTuple = matchKeyTuple;
-    }
-
     public List<DnBMatchContext> getDnBMatchContexts() {
         return dnBMatchContexts;
     }
 
     public void appendDnBMatchContext(DnBMatchContext dnBMatchContext) {
         this.dnBMatchContexts.add(dnBMatchContext);
-    }
-
-    @MetricField(name = "DataCloudVersion")
-    public String getDataCloudVersion() {
-        return dataCloudVersion;
-    }
-
-    private void setDataCloudVersion(String dataCloudVersion) {
-        this.dataCloudVersion = dataCloudVersion;
-    }
-
-    @MetricField(name = "LatticeAccountId")
-    public String getLatticeAccountId() {
-        return entityIds.get(BusinessEntity.LatticeAccount.name());
     }
 
     @MetricTag(tag = "Mode")
@@ -219,6 +196,29 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public Map<String, String> getEntityIds() {
         return entityIds;
+    }
+
+    @MetricField(name = "LatticeAccountId")
+    public String getLatticeAccountId() {
+        return entityIds.get(BusinessEntity.LatticeAccount.name());
+    }
+
+    @MetricFieldGroup
+    public MatchKeyTuple getMatchKeyTuple() {
+        return matchKeyTuple;
+    }
+
+    public void setMatchKeyTuple(MatchKeyTuple matchKeyTuple) {
+        this.matchKeyTuple = matchKeyTuple;
+    }
+
+    @MetricField(name = "Matched", fieldType = MetricField.FieldType.BOOLEAN)
+    public Boolean isMatched() {
+        return isMatched;
+    }
+
+    public void setMatched(Boolean isMatched) {
+        this.isMatched = isMatched;
     }
 
     public String getEntity() {
