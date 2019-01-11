@@ -18,9 +18,17 @@ angular
     },
     controller: function(QueryTreeService, QueryTreeDateAttributeStore) {
       this.$onInit = function() {
-        // console.log("STarted");
-        this.timeCmp = QueryTreeService.getCmp(this.bucketrestriction, this.type, 'Date');
-        this.timeframePeriod = QueryTreeService.getPeriodValue(this.bucketrestriction, this.type, 'Date');
+        console.log("Started", this.bucketrestriction);
+        this.timeCmp = QueryTreeService.getCmp(
+          this.bucketrestriction,
+          this.type,
+          "Date"
+        );
+        this.timeframePeriod = QueryTreeService.getPeriodValue(
+          this.bucketrestriction,
+          this.type,
+          "Date"
+        );
         this.showTimeFrame = false;
         this.showPeriodSelect = false;
         this.showPeriodNumber = false;
@@ -28,11 +36,17 @@ angular
         this.showToPeriod = false;
         this.showFromTime = false;
         this.showToTime = false;
-
+        this.periodsList = QueryTreeDateAttributeStore.periodList();
+        this.changeCmp(this.timeCmp);
         this.periodTimeConfig = {
           from: {
             name: "from-time",
-            initial: QueryTreeDateAttributeStore.getVal('Date', this.timeCmp, this.bucketrestriction.bkt, 0),
+            initial: QueryTreeDateAttributeStore.getVal(
+              "Date",
+              this.timeCmp,
+              this.bucketrestriction.bkt,
+              0
+            ),
             position: 0,
             type: "Date",
             visible: this.showFromTime,
@@ -40,7 +54,12 @@ angular
           },
           to: {
             name: "to-time",
-            initial: QueryTreeDateAttributeStore.getVal('Date', this.timeCmp, this.bucketrestriction.bkt, 1),
+            initial: QueryTreeDateAttributeStore.getVal(
+              "Date",
+              this.timeCmp,
+              this.bucketrestriction.bkt,
+              1
+            ),
             position: 1,
             type: "Date",
             visible: this.showToTime,
@@ -50,7 +69,12 @@ angular
         this.periodNumberConfig = {
           from: {
             name: "from-period",
-            value: QueryTreeDateAttributeStore.getVal('Numerical', this.timeCmp, this.bucketrestriction.bkt, 0),
+            value: QueryTreeDateAttributeStore.getVal(
+              "Numerical",
+              this.timeCmp,
+              this.bucketrestriction.bkt,
+              0
+            ),
             position: 0,
             type: "Date",
             min: "1",
@@ -59,7 +83,12 @@ angular
           },
           to: {
             name: "to-period",
-            value: QueryTreeDateAttributeStore.getVal('Numerical', this.timeCmp, this.bucketrestriction.bkt, 1),
+            value: QueryTreeDateAttributeStore.getVal(
+              "Numerical",
+              this.timeCmp,
+              this.bucketrestriction.bkt,
+              1
+            ),
             position: 1,
             type: "Date",
             min: "1",
@@ -79,8 +108,6 @@ angular
           { name: "AFTER", displayName: "After" },
           { name: "IS_EMPTY", displayName: "Is Empty" }
         ];
-        this.periodsList = QueryTreeDateAttributeStore.periodList();
-        this.changeCmp(this.timeCmp);
       };
 
       this.changeCmp = function(value, type) {
@@ -96,7 +123,12 @@ angular
               this.showToPeriod = false;
               this.showFromTime = false;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Day', []);
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                "Day",
+                []
+              );
               break;
             case "IN_CURRENT_PERIOD":
               this.showTimeFrame = false;
@@ -106,7 +138,12 @@ angular
               this.showToPeriod = false;
               this.showFromTime = false;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, this.timeframePeriod, []);
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                this.timeframePeriod,
+                []
+              );
               break;
             case "WITHIN":
               this.showTimeFrame = false;
@@ -116,7 +153,12 @@ angular
               this.showToPeriod = false;
               this.showFromTime = false;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, this.timeframePeriod, this.bucketrestriction.bkt.Fltr.Vals);
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                this.timeframePeriod,
+                this.bucketrestriction.bkt.Fltr.Vals
+              );
               break;
             case "LAST":
               this.showTimeFrame = false;
@@ -126,7 +168,12 @@ angular
               this.showToPeriod = false;
               this.showFromTime = false;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Day', this.bucketrestriction.bkt.Fltr.Vals);
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                "Day",
+                this.bucketrestriction.bkt.Fltr.Vals
+              );
               break;
             case "BETWEEN":
               this.showTimeFrame = false;
@@ -136,9 +183,17 @@ angular
               this.showToPeriod = true;
               this.showFromTime = false;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, this.timeframePeriod, this.bucketrestriction.bkt.Fltr.Vals);
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                this.timeframePeriod,
+                this.bucketrestriction.bkt.Fltr.Vals
+              );
               break;
             case "BETWEEN_DATE":
+              QueryTreeDateAttributeStore.restValues(
+                this.bucketrestriction.bkt
+              );
               this.showTimeFrame = true;
               this.showPeriodSelect = false;
               this.showPeriodNumber = false;
@@ -146,10 +201,21 @@ angular
               this.showToPeriod = false;
               this.showFromTime = true;
               this.showToTime = true;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Date', this.bucketrestriction.bkt.Fltr.Vals);
+              this.periodTimeConfig.from.visible = true;
+              this.periodTimeConfig.to.visible = true;
+
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                "Date",
+                this.bucketrestriction.bkt.Fltr.Vals
+              );
               break;
 
             case "BEFORE":
+              QueryTreeDateAttributeStore.restValues(
+                this.bucketrestriction.bkt
+              );
               this.showTimeFrame = true;
               this.showPeriodSelect = false;
               this.showPeriodNumber = false;
@@ -157,10 +223,20 @@ angular
               this.showToPeriod = false;
               this.showFromTime = true;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Date', this.bucketrestriction.bkt.Fltr.Vals);
+              this.periodTimeConfig.from.visible = true;
+              this.periodTimeConfig.to.visible = false;
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                "Date",
+                this.bucketrestriction.bkt.Fltr.Vals
+              );
               break;
 
             case "AFTER":
+              QueryTreeDateAttributeStore.restValues(
+                this.bucketrestriction.bkt
+              );
               this.showTimeFrame = true;
               this.showPeriodSelect = false;
               this.showPeriodNumber = false;
@@ -168,17 +244,49 @@ angular
               this.showToPeriod = false;
               this.showFromTime = true;
               this.showToTime = false;
-              QueryTreeDateAttributeStore.changeCmp(this.bucketrestriction.bkt, value, 'Date', this.bucketrestriction.bkt.Fltr.Vals);
+              this.periodTimeConfig.from.visible = true;
+              this.periodTimeConfig.to.visible = false;
+
+              QueryTreeDateAttributeStore.changeCmp(
+                this.bucketrestriction.bkt,
+                value,
+                "Date",
+                this.bucketrestriction.bkt.Fltr.Vals
+              );
               break;
           }
         }, 0);
       };
       this.changePeriod = function() {
-        QueryTreeService.changeTimeframePeriod(this.bucketrestriction, this.type, {Period:this.timeframePeriod, Vals: this.bucketrestriction.bkt.Fltr.Vals});
+        QueryTreeService.changeTimeframePeriod(
+          this.bucketrestriction,
+          this.type,
+          {
+            Period: this.timeframePeriod,
+            Vals: this.bucketrestriction.bkt.Fltr.Vals
+          }
+        );
       };
-      this.callbackChangedValue = function (type, position, value) {
-        QueryTreeDateAttributeStore.changeValue(this.timeCmp, this.bucketrestriction.bkt.Fltr.Vals, position, value);
+      this.callbackChangedValue = function(type, position, value) {
+        QueryTreeDateAttributeStore.changeValue(
+          this.timeCmp,
+          this.bucketrestriction.bkt.Fltr.Vals,
+          position,
+          value
+        );
         // QueryTreeDateAttributeStore.changeValue(this.bucketrestriction, this.type, value, position, type);
+        this.periodTimeConfig.from.initial = QueryTreeDateAttributeStore.getVal(
+          "Date",
+          this.timeCmp,
+          this.bucketrestriction.bkt,
+          0
+        );
+        this.periodTimeConfig.to.initial = QueryTreeDateAttributeStore.getVal(
+          "Date",
+          this.timeCmp,
+          this.bucketrestriction.bkt,
+          1
+        );
       };
       // this.init();
     }

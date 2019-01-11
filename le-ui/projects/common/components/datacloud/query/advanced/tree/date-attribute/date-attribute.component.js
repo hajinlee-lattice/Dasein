@@ -46,7 +46,7 @@ angular
         }
       }
       this.getPeriod = function(){
-        console.log('PERIOD', this.bucketrestriction.bkt.Fltr.Period);
+        // console.log('PERIOD', this.bucketrestriction.bkt.Fltr.Period);
         var period = QueryTreeDateAttributeStore.getPeriod(this.bucketrestriction.bkt);
         switch(this.bucketrestriction.bkt.Fltr.Cmp){
           case 'EVER':

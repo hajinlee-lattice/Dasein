@@ -163,7 +163,7 @@ angular
 
                 function initDatePicker() {
                     var fromConf = getConfigField(0);
-                    if ((fromConf.visible && fromConf.visible == true) || $scope.showfrom) {
+                    if (fromConf.visible && fromConf.visible == true) {
                         var from = document.getElementById($scope.getFromDateId());
 
                         if (from != null) {
@@ -190,7 +190,7 @@ angular
                         }
                     }
                     var toConf = getConfigField(1);
-                    if ((toConf.visible && toConf.visible == true) || $scope.showto) {
+                    if (toConf.visible && toConf.visible == true) {
                         var to = document.getElementById($scope.getToDateId());
                         if (to != null) {
                             // var triggerTo = document.getElementById($scope.getToDateTriggerId());
@@ -258,28 +258,16 @@ angular
                 $scope.openPicker = function(position){
                     switch(position){
                         case 0: {
-                            if(fromPicker){
-                                fromPicker.show();
-                            }else{
-                                initDatePicker();
-                                fromPicker.show();
-                            }
+                            fromPicker.show();
                             break;
                         }
                         case 1: {
-                            if(toPicker){
-                                toPicker.show();
-                            }else {
-                                initDatePicker();
-                                toPicker.show();
-                            }
+                            toPicker.show();
                             break;
                         }
                     }
                 }
-                $scope.getElement = function(position){
 
-                }
                 $scope.getErrorMsg = function(){
                     if(getConfigField(0).visible == true &&  getConfigField(1).visible == true){
                         return 'Enter a valid range';
