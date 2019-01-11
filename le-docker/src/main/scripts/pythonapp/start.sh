@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "start.sh:"
+echo "start.sh"
 
 #The following are required env variables set by caller. Here's samples for testing purpose.
 #export CONDA_ENV=v01
@@ -11,21 +11,14 @@ if [[ "${ANACONDA_HOME}" = "" ]]; then
 fi
 echo "  * ANACONDA_HOME: ${ANACONDA_HOME}"
 
+envname=v01
 if [[ -n "${CONDA_ENV}" ]]; then
-	source $ANACONDA_HOME/bin/activate ${CONDA_ENV}
-else
-	source $ANACONDA_HOME/bin/activate v01
+	envname=${CONDA_ENV}
 fi
+source $ANACONDA_HOME/bin/activate $envname
 
-#The following are required env variables set by caller. Here's samples for testing purpose.
-#export StepflowConfig="{\"inputPaths\":[\"/Pods/Aps/input/*.avro\"], \"outputPath\":\"/Pods/Aps/output\"}"
-#export PYTHON_APP="./apsgenerator.py"
-if [[ "${SHDP_HD_FSWEB}" = 'http://webhdfs.lattice.local:14000/webhdfs/v1' ]]; then
-    export SHDP_HD_FSWEB='http://10.41.1.183:14000/webhdfs/v1'
-fi
-#export SHDP_HD_FSWEB='http://10.41.1.183:14000/webhdfs/v1'
-##export SHDP_HD_FSWEB='http://webhdfs.lattice.local:14000/webhdfs/v1'
-##export SHDP_HD_FSWEB='http://webhdfs.prod.lattice.local:14000/webhdfs/v1'
-
+cp /python_app/libgcrypt.so.11.8.2 ${ANACONDA_HOME}/envs/$envname/lib
+ln -s ${ANACONDA_HOME}/envs/$envname/lib/libgcrypt.so.11.8.2 ${ANACONDA_HOME}/envs/$envname/lib/libgcrypt.so.11
+ 
 echo "python app:" $PYTHON_APP
 python $PYTHON_APP
