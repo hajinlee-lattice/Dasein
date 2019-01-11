@@ -73,6 +73,22 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         return getGuideBook().next(ActorUtils.getPath(self()), traveler);
     }
 
+    /**
+     * Return whether current actor should be skipped in retried travel
+     * 
+     * Some decision graph needs to retry the whole travel if target goal is not
+     * met. But most of actors don't need to re-do the task for retried travel.
+     * 
+     * For actors which need to re-do the task in retried travel, override the
+     * method
+     * 
+     * @return
+     */
+    protected boolean skipIfRetravel(Traveler traveler) {
+        // Skip if it's retried travel
+        return traveler.getRetries() > 1;
+    }
+
     @Override
     protected void processMessage(Object msg) {
         if (isValidMessageType(msg)) {
@@ -89,10 +105,15 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                 setOriginalSender(traveler, sender());
 
                 try {
-                    boolean sentToExternalActor = process(traveler);
-                    if (sentToExternalActor) {
-                        // unblock current actor
-                        return;
+                    getGuideBook().logVisit(ActorUtils.getPath(self()), traveler);
+                    if (skipIfRetravel(traveler)) {
+                        traveler.debug("Skipped " + getActorSystem().getActorName(self()) + " in retried travel");
+                    } else {
+                        boolean sentToExternalActor = process(traveler);
+                        if (sentToExternalActor) {
+                            // unblock current actor
+                            return;
+                        }
                     }
                     rejected = true;
                 } catch (Exception e) {

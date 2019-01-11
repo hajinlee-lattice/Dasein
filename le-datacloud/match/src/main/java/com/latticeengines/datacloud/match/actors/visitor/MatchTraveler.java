@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -76,6 +77,10 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // IDs for lookup, giving multiple results.  If lookup failed, the result should be a list with one or more null
     // string elements corresponding to the MatchKeyTuples for which the lookup failed.
     private List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults;
+
+    // actor name -> index of entity match lookup result got from the actor in
+    // entityMatchLookupResults list
+    private Map<String, Integer> actorLookupResIdxes = new HashMap<>();
 
     // Entity match errors
     private List<String> entityMatchErrors;
@@ -229,12 +234,42 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         this.entity = entity;
     }
 
+    // Use addLookupResult() to add entity match lookup result instead of
+    // directly adding to the list
     public List<Pair<MatchKeyTuple, List<String>>> getEntityMatchLookupResults() {
         return entityMatchLookupResults;
     }
 
     public void setEntityMatchLookupResults(List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults) {
         this.entityMatchLookupResults = entityMatchLookupResults;
+    }
+
+    // Use this method to add entity match lookup result instead of
+    // directly adding to list entityMatchLookupResults
+    public void addLookupResult(String actorName, Pair<MatchKeyTuple, List<String>> lookupResults) {
+        if (actorLookupResIdxes.get(actorName) == null) {
+            // 1st time lookup
+            entityMatchLookupResults.add(lookupResults);
+            actorLookupResIdxes.put(actorName, entityMatchLookupResults.size() - 1);
+        } else {
+            // overwrite existing lookup result in retried lookup
+            int idx = actorLookupResIdxes.get(actorName);
+            entityMatchLookupResults.set(idx, lookupResults);
+        }
+    }
+
+    public boolean hasCompleteLookupResults(String actorName) {
+        if (actorLookupResIdxes.get(actorName) == null) {
+            return false;
+        }
+        int idx = actorLookupResIdxes.get(actorName);
+        if (entityMatchLookupResults.size() <= idx || entityMatchLookupResults.get(idx) == null) {
+            return false; // should not happen
+        }
+        if (CollectionUtils.isEmpty(entityMatchLookupResults.get(idx).getRight())) {
+            return false; // should not happen
+        }
+        return !entityMatchLookupResults.get(idx).getRight().contains(null);
     }
 
     public List<String> getEntityMatchErrors() {

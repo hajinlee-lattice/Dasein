@@ -100,6 +100,14 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
                 && CollectionUtils.isNotEmpty(matchTraveler.getEntityMatchLookupResults());
     }
 
+    // Actually no retry for lookup mode. MatchAnchorActor decides it. Just
+    // safeguard
+    @Override
+    protected boolean skipIfRetravel(Traveler traveler) {
+        // Skip if it's retried travel
+        return traveler.getRetries() > 1;
+    }
+
     @Override
     protected boolean isValidMessageType(Object msg) {
         return msg instanceof MatchTraveler;

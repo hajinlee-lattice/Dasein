@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.utils.ActorUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 
 import akka.actor.ActorRef;
 
@@ -32,8 +33,15 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
+        traveler.addRetry();
+        if (shouldPrepareRetravel(traveler)) {
+            traveler.prepareForRetravel();
+            traveler.debug(String.format("Start traveling in decision graph %s for %d times",
+                    traveler.getDecisionGraph(), traveler.getRetries()));
+        }
         if (!traveler.isProcessed()) {
-            // Just enter current decision graph
+            // Just enter current decision graph or will re-travel in current
+            // decision graph
             traveler.setAnchorActorLocation(ActorUtils.getPath(self()));
             return false;
         } else if (CollectionUtils.isNotEmpty(traveler.getTransitionHistory())) {
@@ -58,6 +66,28 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
     @Override
     protected boolean needAssistantActor() {
         return false;
+    }
+
+    @Override
+    protected boolean skipIfRetravel(Traveler traveler) {
+        return false;
+    }
+
+    protected boolean shouldPrepareRetravel(Traveler traveler) {
+        if (traveler.getRetries() <= 1 || traveler.getResult() != null) {
+            return false;
+        }
+        DecisionGraph decisionGraph;
+        try {
+            decisionGraph = getGuideBook().getDecisionGraphByName(traveler.getDecisionGraph());
+        } catch (Exception e) {
+            traveler.warn("Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
+            return false;
+        }
+        if (decisionGraph.getRetries() == null || traveler.getRetries() > decisionGraph.getRetries()) {
+            return false;
+        }
+        return true;
     }
 
 }

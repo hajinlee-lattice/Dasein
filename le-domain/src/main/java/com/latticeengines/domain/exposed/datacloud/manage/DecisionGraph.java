@@ -62,6 +62,10 @@ public class DecisionGraph implements HasPid, Serializable {
     @Column(name = "Entity", length = 100)
     private String entity;
 
+    // If target result is not got in traveling, how many times to retry
+    @Column(name = "Retries")
+    private Integer retries;
+
     @Transient
     private List<Node> startingNodes;
 
@@ -122,6 +126,15 @@ public class DecisionGraph implements HasPid, Serializable {
     public void setEntity(String entity) {
         this.entity = entity;
     }
+
+    public Integer getRetries() {
+        return retries;
+    }
+
+    public void setRetries(Integer retries) {
+        this.retries = retries;
+    }
+
 
     /********************
      * Business methods

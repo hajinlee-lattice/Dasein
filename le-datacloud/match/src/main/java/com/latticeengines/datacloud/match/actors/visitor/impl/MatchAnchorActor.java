@@ -1,27 +1,33 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.template.AnchorActorTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 
 @Component("matchAnchorActor")
 @Scope("prototype")
 public class MatchAnchorActor extends AnchorActorTemplate {
 
-    @Autowired
+    @Inject
     @Qualifier("matchGuideBook")
     protected MatchGuideBook guideBook;
 
-    @Autowired
+    @Inject
     private MatchActorSystem matchActorSystem;
+
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
 
     @Override
     public GuideBook getGuideBook() {
@@ -41,6 +47,14 @@ public class MatchAnchorActor extends AnchorActorTemplate {
     @Override
     protected boolean logCheckInNOut() {
         return false;
+    }
+
+    @Override
+    protected boolean shouldPrepareRetravel(Traveler traveler) {
+        if (!entityMatchConfigurationService.isAllocateMode()) {
+            return false;
+        }
+        return super.shouldPrepareRetravel(traveler);
     }
 
 }

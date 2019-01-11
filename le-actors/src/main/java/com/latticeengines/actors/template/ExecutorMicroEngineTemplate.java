@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 
 /**
@@ -55,7 +54,6 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
-        getGuideBook().logVisit(ActorUtils.getPath(self()), traveler);
         if (accept(traveler)) {
             if (!executorInitiated.get()) {
                 initExecutors();

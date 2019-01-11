@@ -42,7 +42,6 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
     @Override
     protected boolean process(Traveler traveler) {
         try {
-            getGuideBook().logVisit(ActorUtils.getPath(self()), traveler);
             if (accept(traveler)) {
                 DecisionGraph nextDG = findNextDecisionGraph(traveler.getDecisionGraph());
                 setupTravelerBeforeTransfer(traveler, nextDG.getGraphName());
@@ -70,7 +69,7 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
 
     private void setupTravelerBeforeTransfer(Traveler traveler, String nextDGName) {
         traveler.setProcessed(false);
-        traveler.pushToTransitionHistory(getActorName(self()), traveler.getDecisionGraph(), true);
+        traveler.pushToTransitionHistory(getActorName(self()), true);
         traveler.setDecisionGraph(nextDGName);
         traveler.clearResult();
         prepareTravelerBeforeTransfer(traveler);
@@ -78,8 +77,7 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
 
     private void recoverTraveler(Traveler traveler) {
         traveler.setProcessed(true);
-        String originalDGName = traveler.recoverTransitionHistory();
-        traveler.setDecisionGraph(originalDGName);
+        traveler.recoverTransitionHistory();
         traveler.setAnchorActorLocation(ActorUtils.getPath(getActorSystem().getAnchor()));
         traveler.clearResult();
         prepareTravelerAfterTransfer(traveler);

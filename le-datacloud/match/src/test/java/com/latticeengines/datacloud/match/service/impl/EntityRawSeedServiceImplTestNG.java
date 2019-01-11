@@ -45,6 +45,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -62,6 +64,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(EntityRawSeedServiceImplTestNG.class);
+
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final Tenant TEST_TENANT = new Tenant("raw_seed_service_test_tenant_1");
@@ -295,7 +300,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
                 Assert.assertEquals(seedBeforeUpdate.getId(), seedId);
                 Assert.assertEquals(seedBeforeUpdate.getEntity(), entity);
             }
-            System.out.println(String.format(
+            log.info(String.format(
                     "Waiting for update to take effect for env = %s, seedToUpdate = %s", env, seedToUpdate));
             Thread.sleep(1000L);
 

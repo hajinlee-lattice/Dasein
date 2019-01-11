@@ -1,14 +1,15 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-
-import javax.inject.Inject;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 
 @Component("entityIdAssociateMicroEngineActor")
 @Scope("prototype")
@@ -36,5 +37,12 @@ public class EntityIdAssociateMicroEngineActor extends EntityMicroEngineActorBas
     @Override
     protected Object prepareInputData(MatchTraveler traveler) {
         return prepareAssociationRequest(traveler);
+    }
+
+    // Always need to re-associate because the reason to retry is in previous
+    // run, id is not successfully associated
+    @Override
+    protected boolean skipIfRetravel(Traveler traveler) {
+        return false;
     }
 }

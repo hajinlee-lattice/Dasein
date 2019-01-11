@@ -54,22 +54,37 @@ public abstract class Traveler {
     /***********************************
      * Bound to current decision graph
      ***********************************/
-    // Goal of travel
+    // Goal of travel in current decision graph
     private Object result;
+
     private String decisionGraph;
+
     // TODO(ZDD): Add comment
     private Map<String, Set<String>> visitedHistory = new HashMap<>();
-    // TODO(ZDD): Add comment
+
+    // To capture how much time the travel spends in current actor
+    // For junction actor, travel time in transfered decision graph is counted
+    // For micro-engine actor which needs external assistant actor, time in
+    // external assistant actor is also counted
+    // actor name -> duration
     private Map<String, Long> checkpoints = new HashMap<>();
-    // TODO(ZDD): Add comment
+
+    // Nodes in decision graph to be visited sequentially
     private Queue<String> visitingQueue = new LinkedList<>();
-    // TODO(ZDD): Add comment
+
+    // Catch exception during traveling
     private TravelException travelException;
+
     // When the 1st time anchor receives the traveler in current decision graph,
     // isProcessed will be set as true
     private boolean isProcessed = false;
+
     // Set with anchor location of current decision graph
     private String anchorActorLocation;
+
+    // Number of retries in current decision graph (1st try is counted as
+    // retries = 1, not 0)
+    private int retries = 0;
 
 
     /*******************************
@@ -183,6 +198,18 @@ public abstract class Traveler {
         this.travelTimeout = travelTimeout;
     }
 
+    public int getRetries() {
+        return retries;
+    }
+
+    public void setRetries(int retries) {
+        this.retries = retries;
+    }
+
+    public void addRetry() {
+        this.retries++;
+    }
+
     /********************
      * Business methods
      ********************/
@@ -215,6 +242,8 @@ public abstract class Traveler {
         }
     }
 
+    // When unexpected issue happens, nodes to be visited are cleared. Force to
+    // return anchor
     public void clearLocationsToVisitingQueue() {
         visitingQueue.clear();
     }
@@ -295,38 +324,48 @@ public abstract class Traveler {
         return new VisitingHistory( this.travelerId, site, duration);
     }
 
+    /**
+     * If need to re-travel at anchor, clean up necessary status
+     */
+    public void prepareForRetravel() {
+        isProcessed = false;
+        result = null;
+        visitedHistory.clear();
+        checkpoints.clear();
+        visitingQueue.clear();
+    }
+
     @Override
     public String toString() {
         return String.format("%s[%s:%s]", getClass().getSimpleName(), getTravelerId(), getRootOperationUid());
     }
 
-    // TODO: After moving decisionGraph from MatchTraveler to Traveler
-    // 1. remove decisionGraph from parameter
-    // 2. clear decisionGraph if clearCurrent = true
-    public void pushToTransitionHistory(String junction, String decisionGraph, boolean clearCurrent) {
+    public void pushToTransitionHistory(String junction, boolean clearCurrent) {
         TransitionHistory snapshot = new TransitionHistoryBuilder()//
                 .withJunction(junction) //
                 .withDecisionGraph(decisionGraph) //
                 .withVisitedHistory(visitedHistory) //
                 .withCheckpoints(checkpoints) //
                 .withVisitingQueue(visitingQueue) //
+                .withRetries(retries) //
                 .build();
         transitionHistory.push(snapshot);
         if (clearCurrent) {
             visitedHistory.clear();
             checkpoints.clear();
             visitingQueue.clear();
+            retries = 0;
+            decisionGraph = null;
         }
     }
 
-    // TODO: After moving decisionGraph from MatchTraveler to Traveler
-    // 1. Recover decision graph and no longer return
-    public String recoverTransitionHistory() {
+    public void recoverTransitionHistory() {
         TransitionHistory snapshot = transitionHistory.pop();
         visitedHistory = snapshot.getVisitedHistory();
         checkpoints = snapshot.getCheckpoints();
         visitingQueue = snapshot.getVisitingQueue();
-        return snapshot.getDecisionGraph();
+        retries = snapshot.getRetries();
+        decisionGraph = snapshot.getDecisionGraph();
     }
 
 
@@ -339,6 +378,7 @@ public abstract class Traveler {
         private Map<String, Set<String>> visitedHistory;
         private Map<String, Long> checkpoints;
         private Queue<String> visitingQueue;
+        private int retries;
 
         public String getJunction() {
             return junction;
@@ -380,6 +420,14 @@ public abstract class Traveler {
             this.visitingQueue = visitingQueue;
         }
 
+        public int getRetries() {
+            return retries;
+        }
+
+        public void setRetries(int retries) {
+            this.retries = retries;
+        }
+
     }
 
     public static final class TransitionHistoryBuilder {
@@ -413,6 +461,11 @@ public abstract class Traveler {
 
         public TransitionHistoryBuilder withVisitingQueue(Queue<String> visitingQueue) {
             transitionHistory.setVisitingQueue(new LinkedList<>(visitingQueue));
+            return this;
+        }
+
+        public TransitionHistoryBuilder withRetries(int retries) {
+            transitionHistory.setRetries(retries);
             return this;
         }
 

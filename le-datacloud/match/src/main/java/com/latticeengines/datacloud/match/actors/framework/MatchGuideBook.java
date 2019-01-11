@@ -41,9 +41,8 @@ public class MatchGuideBook extends GuideBook {
     }
 
     @Override
-    protected DecisionGraph getDecisionGraphFromTraveler(Traveler traveler) throws Exception {
-        MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        return matchDecisionGraphService.getDecisionGraph(matchTraveler);
+    public DecisionGraph getDecisionGraphByName(String decisionGraph) throws Exception {
+        return matchDecisionGraphService.getDecisionGraph(decisionGraph);
     }
 
 }

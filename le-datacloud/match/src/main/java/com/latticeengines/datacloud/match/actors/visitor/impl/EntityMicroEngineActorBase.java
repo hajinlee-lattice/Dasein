@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
@@ -48,6 +49,17 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      * @return true if this actor should process this tuple, false otherwise.
      */
     protected abstract boolean shouldProcess(@NotNull MatchTraveler traveler);
+
+    // For entity lookup actors. EntityIdAssociateActor and EntityIdResolveActor
+    // both override this method
+    @Override
+    protected boolean skipIfRetravel(Traveler traveler) {
+        if (traveler.getRetries() <= 1) {
+            return false;
+        }
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
+        return matchTraveler.hasCompleteLookupResults(getCurrentActorName());
+    }
 
     @Override
     protected boolean accept(MatchTraveler traveler) {
@@ -185,7 +197,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 traveler.setEntityMatchLookupResults(new ArrayList<>());
             }
             // add lookup result
-            traveler.getEntityMatchLookupResults().add(
+            traveler.addLookupResult(getCurrentActorName(),
                     Pair.of(lookupResponse.getTuple(), lookupResponse.getEntityIds()));
         } else {
             log.error("Got invalid entity lookup response in actor {}, should not have happened", self());

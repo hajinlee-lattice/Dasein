@@ -2,7 +2,6 @@ package com.latticeengines.actors.template;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.actors.utils.ActorUtils;
 
 /**
  * Actors in decision graph have 3 types: anchor, micro-engine & junction
@@ -40,7 +39,6 @@ public abstract class ProxyMicroEngineTemplate extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
-        getGuideBook().logVisit(ActorUtils.getPath(self()), traveler);
         if (accept(traveler)) {
             sendReqToAssistantActor(traveler);
             return true;

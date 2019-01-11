@@ -40,13 +40,13 @@ public abstract class GuideBook {
     protected abstract String getSerializedTravelerContext(Traveler traveler);
 
     /**
-     * Get current decision graph info from traveler
+     * Get current decision graph info by graph name
      * 
      * @param traveler
      * @return
      * @throws Exception
      */
-    protected abstract DecisionGraph getDecisionGraphFromTraveler(Traveler traveler) throws Exception;
+    public abstract DecisionGraph getDecisionGraphByName(String decisionGraph) throws Exception;
 
 
     public String next(String currentLocation, Traveler traveler) {
@@ -65,7 +65,7 @@ public abstract class GuideBook {
     public void logVisit(String traversedActor, Traveler traveler) {
         DecisionGraph decisionGraph;
         try {
-            decisionGraph = getDecisionGraphFromTraveler(traveler);
+            decisionGraph = getDecisionGraphByName(traveler.getDecisionGraph());
         } catch (Exception e) {
             traveler.warn("Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
             traveler.clearLocationsToVisitingQueue();
@@ -100,7 +100,7 @@ public abstract class GuideBook {
 
             DecisionGraph decisionGraph;
             try {
-                decisionGraph = getDecisionGraphFromTraveler(traveler);
+                decisionGraph = getDecisionGraphByName(traveler.getDecisionGraph());
             } catch (Exception e) {
                 traveler.warn(
                         "Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);

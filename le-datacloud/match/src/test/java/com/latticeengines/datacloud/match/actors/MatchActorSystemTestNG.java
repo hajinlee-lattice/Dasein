@@ -13,11 +13,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -29,9 +29,11 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMic
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -41,6 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -53,7 +56,6 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     private String ldcMatchDG;
     // TODO: Will change to default decision graph per entity in property file
     private String accountMatchDG = "PetitFour";
-    private String contactMatchDG = "Cupcake";
 
     private static final String DUNS = "079942718";
     private static final String DOMAIN = "abc.xyz";
@@ -62,110 +64,129 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final String DOMAIN_FIELD = "Domain";
     private static final String DUNS_FIELD = "DUNS";
 
-    @Autowired
+    private static final String FUZZY_MATCH_JUNCTION_ACTOR = "FuzzyMatchJunctionActor";
+    private static final String[] LDC_TRAVEL_STOPS = { //
+            DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
+    };
+    private static final String[] ACCOUNT_TRAVEL_STOPS = {
+            MatchPlannerMicroEngineActor.class.getSimpleName(), //
+            EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
+            FUZZY_MATCH_JUNCTION_ACTOR, //
+            EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
+            EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
+            EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
+            EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
+            EntityIdResolveMicroEngineActor.class.getSimpleName(), //
+    };
+
+    @Inject
     private FuzzyMatchService service;
 
-    @Autowired
+    @Inject
     private MatchActorSystem actorSystem;
 
-    @Autowired
+    @Inject
     private MatchDecisionGraphService matchDecisionGraphService;
 
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
+    private static final Tenant TENANT = new Tenant(MatchActorSystemTestNG.class.getSimpleName());
+
+
     // Realtime and batch mode cannot run at same time. Must be prioritized
-    @Test(groups = "functional", dataProvider = "actorSystemTestData", priority = 1)
-    public void testActorSystemRealtimeMode(int numRequests, String decisionGraph, String expectedTravelStopStr,
-            String expectedID, String domain, String duns) throws Exception {
+    @Test(groups = "functional", dataProvider = "actorSystemTestData", priority = 1, enabled = true)
+    public void testActorSystemRealtimeMode(int numRequests, String decisionGraph, String expectedID, String domain,
+            String duns) throws Exception {
         actorSystem.setBatchMode(false);
-
-        LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
-        LogManager.getLogger("com.latticeengines.datacloud.match.actors").setLevel(Level.DEBUG);
-        LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.DEBUG);
-
-        testActorSystem(numRequests, decisionGraph, expectedTravelStopStr, expectedID, domain, duns);
+        entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
+        testActorSystem(numRequests, decisionGraph, expectedID, domain, duns);
     }
 
-    @Test(groups = "functional", dataProvider = "actorSystemTestData", priority = 2, enabled = false)
-    public void testActorSystemBatchMode(int numRequests, String decisionGraph, String expectedTravelStopStr,
-            String expectedID, String domain, String duns) throws Exception {
+    @Test(groups = "functional", dataProvider = "actorSystemTestData", priority = 2, enabled = true)
+    public void testActorSystemBatchMode(int numRequests, String decisionGraph, String expectedID, String domain,
+            String duns) throws Exception {
         actorSystem.setBatchMode(true);
-        testActorSystem(numRequests * 10, decisionGraph, null, expectedID, domain, duns);
+        entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
+        testActorSystem(numRequests * 10, decisionGraph, expectedID, domain, duns);
     }
 
-    private void testActorSystem(int numRequests, String decisionGraph, String expectedTravelStopStr, String expectedID,
-            String domain, String duns) throws Exception {
+    private void testActorSystem(int numRequests, String decisionGraph, String expectedID, String domain, String duns)
+            throws Exception {
         try {
+            Integer maxRetries = null;
+            try {
+                DecisionGraph dg = matchDecisionGraphService.getDecisionGraph(decisionGraph);
+                maxRetries = dg.getRetries();
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Fail to load decision graph " + decisionGraph, e);
+            }
+            maxRetries = maxRetries == null ? 1 : maxRetries;
+
             MatchInput input = prepareMatchInput(decisionGraph);
             List<OutputRecord> matchRecords = prepareData(numRequests, domain, duns);
             service.callMatch(matchRecords, input);
 
             boolean hasError = false;
+            String expectedEntityId = null;
             for (OutputRecord result : matchRecords) {
-                Queue<String> expectedTravelStops = parseTravelStops(expectedTravelStopStr);
+                int retries = getTravelRetriesFromTravelHistory(decisionGraph, result.getMatchLogs());
+                Assert.assertTrue(retries <= maxRetries);
+
+                Queue<String> expectedTravelStops = parseTravelStops(decisionGraph, retries);
                 Assert.assertNotNull(result);
+                /* Uncomment these lines for troubleshooting
+                log.info(String.format("Retries = %d, Expected Stops = %s", retries,
+                        String.join(",", expectedTravelStops)));
                 log.info("MatchTravelerHistory");
                 log.info(String.join("\n", result.getMatchLogs()));
+                */
 
                 // Verify travel history
-                if (expectedTravelStopStr != null) {
-                    hasError = hasError || verifyTravelHistory(result.getMatchLogs(), expectedTravelStops);
-                }
+                hasError = hasError || verifyTravelHistory(result.getMatchLogs(), expectedTravelStops);
 
                 // Verify match result
                 InternalOutputRecord record = (InternalOutputRecord) result;
                 if (decisionGraph.equals(ldcMatchDG)) {
                     hasError = hasError || verifyLDCMatchResult(record, expectedID);
                 } else {
-                    hasError = hasError || verifyEntityMatchResult(record);
+                    hasError = hasError || verifyEntityMatchResult(record, expectedEntityId);
+                    // Expect all the records match to same entity id as input
+                    // is same
+                    if (record.getEntityId() != null) {
+                        expectedEntityId = record.getEntityId();
+                    }
                 }
-
             }
             Assert.assertFalse(hasError, "There are errors, see logs above.");
         } finally {
-            LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
-            LogManager.getLogger("com.latticeengines.datacloud.match.actors").setLevel(Level.INFO);
-            LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.INFO);
             actorSystem.setBatchMode(false);
         }
 
     }
 
-    // #Row, DecisionGraph, ExpectedTravelHistory, ExpectedID, Domain, Duns
+    // #Row, DecisionGraph, ExpectedID, Domain, Duns
     @DataProvider(name = "actorSystemTestData")
     public Object[][] provideActorTestData() {
         return new Object[][] { //
-                { 50, ldcMatchDG, DunsDomainBasedMicroEngineActor.class.getSimpleName(), LATTICE_ID, DOMAIN, DUNS }, //
-                { 50, accountMatchDG, String.join(",", //
-                        MatchPlannerMicroEngineActor.class.getSimpleName(), //
-                        EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
-                        "FuzzyMatchJunctionActor", //
-                        DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName()), //
-                        null, DOMAIN, DUNS }, //
-                // Disble contact match test for now. More initialization work
-                // to be done
-                /*
-                { 50, contactMatchDG, String.join(",", //
-                        MatchPlannerMicroEngineActor.class.getSimpleName(), //
-                        EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
-                        "AccountMatchJunctionActor", //
-                        MatchPlannerMicroEngineActor.class.getSimpleName(), //
-                        EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
-                        "FuzzyMatchJunctionActor",  //
-                        DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
-                        EntityIdResolveMicroEngineActor.class.getSimpleName(), //
-                        EntityEmailBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
-                        EntityIdAssociateMicroEngineActor.class.getSimpleName()), //
-                        null, DOMAIN, DUNS }, //
-                        */
+                { 50, ldcMatchDG, LATTICE_ID, DOMAIN, DUNS }, //
+                { 50, accountMatchDG, null, DOMAIN, DUNS }, //
         };
+    }
+
+    private int getTravelRetriesFromTravelHistory(String decisionGraph, List<String> travelLogs) {
+        int retries = 1;
+        Pattern pattern = Pattern.compile("Start traveling in decision graph " + decisionGraph + " for (\\d+) times");
+        for (String log : travelLogs) {
+            Matcher matcher = pattern.matcher(log);
+            if (matcher.find()) {
+                int round = Integer.valueOf(matcher.group(1));
+                if (round > retries) {
+                    retries = round;
+                }
+            }
+        }
+        return retries;
     }
 
     // TODO: Should have full travel stops in traveler instead of parsing
@@ -188,13 +209,29 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         return false;
     }
 
-    private Queue<String> parseTravelStops(String travelStops) {
-        if (travelStops == null) {
-            return null;
+    private Queue<String> parseTravelStops(String decisionGraph, int retries) {
+        List<String> travelStops = new ArrayList<>();
+        if (ldcMatchDG.equals(decisionGraph)) {
+            // LDC match decision graph does not retry
+            travelStops.addAll(Arrays.asList(LDC_TRAVEL_STOPS));
+        } else if (accountMatchDG.equals(decisionGraph)) {
+            // Only testing AllocateId mode for entity match which has retries.
+            // Lookup mode in entity match does not have retries
+            if (retries == 1) {
+                travelStops.addAll(getAccountTravelStopsSingleRun());
+            } else {
+                travelStops.addAll(getAccountTravelStopsMultiRunsFor1stRun());
+                for (int i = 2; i <= retries - 1; i++) {
+                    travelStops.addAll(getAccountTravelStopsMultiRunsNoId());
+                }
+                travelStops.addAll(getAccountTravelStopsMultiRunsWithId());
+
+            }
+        } else {
+            throw new IllegalArgumentException("Unhandled decision graph " + decisionGraph);
         }
-        String[] stops = travelStops.split(",");
-        Queue<String> parsedTravelStops = new LinkedList<>(Arrays.asList(stops));
-        return parsedTravelStops;
+        return new LinkedList<>(travelStops);
+
     }
 
     private boolean verifyLDCMatchResult(InternalOutputRecord record, String expectedID) {
@@ -207,9 +244,15 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         return false;
     }
 
-    private boolean verifyEntityMatchResult(InternalOutputRecord record) {
+    private boolean verifyEntityMatchResult(InternalOutputRecord record, String expectedEntityId) {
         try {
-            Assert.assertNotNull(record.getEntityId());
+            if (expectedEntityId == null) {
+                // expectedEntityId = null is not having expected entity id yet,
+                // not expected to be null
+                Assert.assertNotNull(record.getEntityId());
+            } else {
+                Assert.assertEquals(record.getEntityId(), expectedEntityId);
+            }
         } catch (AssertionError e) {
             log.error("Exception in verifing entity match result", e);
             return true;
@@ -225,7 +268,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchInput.setRootOperationUid(UUID.randomUUID().toString());
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(false);
-        matchInput.setTenant(new Tenant(this.getClass().getSimpleName()));
+        matchInput.setTenant(TENANT);
         matchInput.setAllocateId(true);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setFields(Arrays.asList(DOMAIN_FIELD, DUNS_FIELD));
@@ -278,4 +321,38 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         return matchRecords;
     }
 
+    // Only travel once
+    private List<String> getAccountTravelStopsSingleRun() {
+        List<String> travelStops = new ArrayList<>(Arrays.asList(ACCOUNT_TRAVEL_STOPS));
+        // Inject travel stops for ldc match decision graph
+        int fuzzyMatchJunctionIdx = travelStops.indexOf(FUZZY_MATCH_JUNCTION_ACTOR);
+        travelStops.addAll(fuzzyMatchJunctionIdx + 1, Arrays.asList(LDC_TRAVEL_STOPS));
+        // Remove last EntityIdResolveMicroEngineActor because
+        // EntityIdAssociateMicroEngineActor already gets a match
+        travelStops.remove(travelStops.size() - 1);
+        return travelStops;
+    }
+
+    // If travel multiple times, for 1st run and no id associated
+    private List<String> getAccountTravelStopsMultiRunsFor1stRun() {
+        List<String> travelStops = new ArrayList<>(Arrays.asList(ACCOUNT_TRAVEL_STOPS));
+        // Inject travel stops for ldc match decision graph
+        int fuzzyMatchJunctionIdx = travelStops.indexOf(FUZZY_MATCH_JUNCTION_ACTOR);
+        travelStops.addAll(fuzzyMatchJunctionIdx + 1, Arrays.asList(LDC_TRAVEL_STOPS));
+        return travelStops;
+    }
+
+    // If travel multiple times, for non-1st run and no id associated
+    private List<String> getAccountTravelStopsMultiRunsNoId() {
+        return new ArrayList<>(Arrays.asList(ACCOUNT_TRAVEL_STOPS));
+    }
+
+    // If travel multiple times, for final run with id associated
+    private List<String> getAccountTravelStopsMultiRunsWithId() {
+        List<String> travelStops = new ArrayList<>(Arrays.asList(ACCOUNT_TRAVEL_STOPS));
+        // Remove last EntityIdResolveMicroEngineActor because
+        // EntityIdAssociateMicroEngineActor already gets a match
+        travelStops.remove(travelStops.size() - 1);
+        return travelStops;
+    }
 }

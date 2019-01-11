@@ -123,7 +123,7 @@ public class SampleMatchGuideBook extends GuideBook {
     }
 
     @Override
-    protected DecisionGraph getDecisionGraphFromTraveler(Traveler traveler) throws Exception {
+    public DecisionGraph getDecisionGraphByName(String decisionGraph) throws Exception {
         // TODO Auto-generated method stub
         return null;
     }
