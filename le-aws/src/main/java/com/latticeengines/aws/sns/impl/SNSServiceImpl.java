@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,6 +23,7 @@ import com.amazonaws.services.sns.model.ListTopicsResult;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
+import com.amazonaws.services.sns.model.Topic;
 import com.latticeengines.aws.sns.SNSService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
@@ -47,30 +49,37 @@ public class SNSServiceImpl implements SNSService {
     }
 
     @Override
-    public String getTopicArn(String name) {
-        return createTopic(name).getTopicArn();
+    public String getTopicArnByName(String name) {
+        List<Topic> topics = getAllTopics().getTopics();
+        topics = topics.stream().filter(topic -> topic.getTopicArn().endsWith(name))
+                .collect(Collectors.toList());
+        return topics.size() != 1 ? null : topics.get(0).getTopicArn();
+    }
+
+    @Cacheable(cacheNames = "SNSTopicsCache", key = "#displayName", sync = true)
+    @Override
+    public String getTopicArnByDisplayName(String displayName) {
+        List<Topic> topics = getAllTopics().getTopics();
+        topics = topics.stream().filter(topic -> filterByDisplayName(topic, displayName))
+                .collect(Collectors.toList());
+        return topics.size() != 1 ? null : topics.get(0).getTopicArn();
+    }
+
+    private boolean filterByDisplayName(Topic topic, String displayName) {
+        return snsClient.getTopicAttributes(topic.getTopicArn()).getAttributes()
+                .getOrDefault("DisplayName", "").equals(displayName);
     }
 
     @Override
     public PublishResult publishToTopic(String topicArn, String message,
-            Map<String, List<String>> messageAttributes) throws Exception {
-        if (StringUtils.isEmpty(topicArn) || topicArn == null) {
-            throw new Exception("topicArn is invalid");
-        } else if (StringUtils.isEmpty(message) || message == null) {
-            throw new Exception("Message is invalid");
+            Map<String, MessageAttributeValue> messageAttributes) throws Exception {
+        if (StringUtils.isEmpty(topicArn) || StringUtils.isEmpty(message)) {
+            throw new Exception(
+                    String.format("TopicArn and/or message is invalid: %s, %s", topicArn, message));
         }
 
         PublishRequest publishRequest = new PublishRequest().withTopicArn(topicArn)
-                .withMessage(message);
-        if (messageAttributes != null && !messageAttributes.isEmpty()) {
-            Map<String, MessageAttributeValue> attributeValues = messageAttributes.entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(entry -> entry.getKey(),
-                            entry -> new MessageAttributeValue()
-                                    .withDataType(entry.getValue().get(0))
-                                    .withStringValue(entry.getValue().get(1))));
-            publishRequest.withMessageAttributes(attributeValues);
-        }
+                .withMessage(message).withMessageAttributes(messageAttributes);
 
         log.info(String.format("Publishing message to TopicArn %s : ", topicArn)
                 + JsonUtils.serialize(publishRequest));
