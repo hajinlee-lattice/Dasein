@@ -159,7 +159,8 @@ angular.module('lp.marketo.models', [])
             resolve = $scope.$parent.$resolve,
             model = resolve.Model,
             scoringRequest = resolve.ScoringRequest,
-            credential = resolve.MarketoCredentials;
+            credential = resolve.MarketoCredentials,
+            backState = resolve.BackState;
 
         angular.extend(vm, {
             credentialId: $stateParams.credentialId,
@@ -168,7 +169,10 @@ angular.module('lp.marketo.models', [])
             marketoScoringMatchFields: scoringRequest.marketoScoringMatchFields,
             secretKey: credential ? credential.lattice_secret_key : 'null',
             rule: "{{campaign.name}}",
-            responseMappingText: "<Select matching Marketo field>"
+            responseMappingText: "<Select matching Marketo field>",
+            backState: backState || "home.marketosettings.scoring",
+            modelUuid: scoringRequest.modelUuid
+
         });
 
         vm.init = function() {

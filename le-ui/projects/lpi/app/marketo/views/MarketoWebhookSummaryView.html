@@ -78,7 +78,12 @@
 			</table>
 		</div>
 		<div class="marketo-footer">
-			<a class="pull-left" ui-sref="home.marketosettings.scoring({credentialId: $ctrl.credentialId})">
+			<a class="pull-left" ui-sref="home.marketosettings.scoring({credentialId: $ctrl.credentialId})" ng-if="$ctrl.backState == 'home.marketosettings.scoring'">
+				<button class="button gray-button"> 
+					Back
+				</button>
+			</a>
+			<a class="pull-left" ui-sref="home.marketosettings.setup({credentialId: $ctrl.credentialId, modelUuid: $ctrl.modelUuid})" ng-if="$ctrl.backState != 'home.marketosettings.scoring'">
 				<button class="button gray-button"> 
 					Back
 				</button>
