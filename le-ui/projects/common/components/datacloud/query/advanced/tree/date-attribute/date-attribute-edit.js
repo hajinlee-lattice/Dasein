@@ -84,13 +84,13 @@ angular
           to: {
             name: "to-period",
             value: QueryTreeDateAttributeStore.getVal(
-              "Date",
+              "Numerical",
               this.timeCmp,
               this.bucketrestriction.bkt,
               1
             ),
             position: 1,
-            type: "Date",
+            type: "Numerical",
             min: "1",
             max: "",
             pattern: "\\d*"
