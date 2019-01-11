@@ -3,10 +3,12 @@ package com.latticeengines.matchapi.testframework;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -17,6 +19,9 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.YarnClient;
@@ -24,7 +29,13 @@ import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
@@ -49,8 +60,21 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
     @Autowired
     protected ColumnMetadataProxy columnMetadataProxy;
 
+    @Autowired
+    protected HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private MatchCommandService matchCommandService;
+
+    @Override
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
+    }
+
+    protected void uploadAvroData(Object[][] data, List<String> fieldNames, List<Class<?>> fieldTypes, String avroDir,
+            String fileName) {
+        List<List<Object>> list = Arrays.stream(data).map(d -> Arrays.asList(d)).collect(Collectors.toList());
+        uploadAvroData(list, fieldNames, fieldTypes, avroDir, fileName);
     }
 
     protected void uploadAvroData(List<List<Object>> data, List<String> fieldNames, List<Class<?>> fieldTypes,
@@ -155,6 +179,28 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
         } catch (Exception e) {
             Assert.fail("Failed to clean up " + avroDir, e);
         }
+    }
+
+    /*
+     * run bulk match job and verify the job finished correctly
+     */
+    protected MatchCommand runAndVerifyBulkMatch(MatchInput input, String podId) {
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+
+        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getProgress(), 1f);
+        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
+        Assert.assertEquals(finalStatus.getResultLocation(),
+                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        return finalStatus;
     }
 
 }

@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 
@@ -50,7 +48,7 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
 
         context.setCdlLookup(false);
         if (metadatas == null) {
-            metadatas = parseColumnMetadata(input);
+            metadatas = parseEntityMetadata(input);
         }
         ColumnSelection columnSelection = new ColumnSelection();
         List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
@@ -66,17 +64,6 @@ public class RealTimeEntityMatchPlanner extends MatchPlannerBase implements Matc
         return context;
     }
 
-    List<ColumnMetadata> parseColumnMetadata(MatchInput input) {
-        // For now, we only handle the Column Metadata case for a predefined column selection of ID.
-        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
-            ColumnMetadata atlasIdColumnMetadata = new ColumnMetadata();
-            atlasIdColumnMetadata.setAttrName(InterfaceName.EntityId.name());
-            atlasIdColumnMetadata.setJavaClass(String.class.getSimpleName());
-            return Collections.singletonList(atlasIdColumnMetadata);
-        } else {
-            throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
-        }
-    }
 
     protected void validate(MatchInput input) {
         DecisionGraph decisionGraph = findDecisionGraph(input);

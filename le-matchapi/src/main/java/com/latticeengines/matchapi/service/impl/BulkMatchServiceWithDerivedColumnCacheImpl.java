@@ -2,26 +2,30 @@ package com.latticeengines.matchapi.service.impl;
 
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.datacloud.core.service.DataCloudTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.datacloud.match.service.impl.MatchInputValidator;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -31,17 +35,20 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
 
     private static Logger log = LoggerFactory.getLogger(BulkMatchServiceWithDerivedColumnCacheImpl.class);
 
-    @Autowired
+    @Inject
     protected MatchCommandService matchCommandService;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     protected DataCloudTenantService dataCloudTenantService;
+
+    @Inject
+    private MatchDecisionGraphService matchDecisionGraphService;
 
     @Value("${datacloud.match.max.num.blocks:4}")
     private Integer maxNumBlocks;
@@ -68,7 +75,10 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
 
     @Override
     public MatchCommand match(MatchInput input, String hdfsPodId) {
-        MatchInputValidator.validateBulkInput(input, yarnConfiguration);
+        DecisionGraph decisionGraph = OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())
+                ? matchDecisionGraphService.findDecisionGraph(input.getDecisionGraph())
+                : null;
+        MatchInputValidator.validateBulkInput(input, yarnConfiguration, decisionGraph);
         input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
         String rootOperationUid = UUID.randomUUID().toString();
         hdfsPodId = setPodId(hdfsPodId);

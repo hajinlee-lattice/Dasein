@@ -115,7 +115,7 @@ public abstract class GuideBook {
             }
 
             traveler.addLocationsToVisitingQueue(startingNodes);
-            return traveler.getNextLocationFromVisitingQueue();
+            return traveler.findNextLocationFromVisitingQueue();
         } else {
             return traveler.getOriginalLocation();
         }
@@ -126,7 +126,7 @@ public abstract class GuideBook {
 
         if (!stopTravel(traveler)) {
             do {
-                destinationLocation = traveler.getNextLocationFromVisitingQueue();
+                destinationLocation = traveler.findNextLocationFromVisitingQueue();
                 if (!visitSameMicroEngineWithSameDataAgain(destinationLocation, traveler)) {
                     return destinationLocation;
                 }

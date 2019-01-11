@@ -11,6 +11,20 @@ public interface MatchDecisionGraphService {
 
     DecisionGraph getDecisionGraph(String graphName) throws ExecutionException;
 
+    /**
+     * Plan to replace getDecisionGraph with findDecisionGraph by not exposing
+     * ExecutionException to caller.
+     * 
+     * Currently if not providing graphName, findDecisionGraph() does not return
+     * default decision graph. getDecisionGraph() returns default decision graph
+     * for ldc match. Need to consider how to merge and handle default decision
+     * graph for both entity mach and ldc match
+     * 
+     * @param graphName
+     * @return
+     */
+    DecisionGraph findDecisionGraph(String graphName);
+
     DecisionGraph findNextDecisionGraphForJunction(String currentGraphName, String junctionName)
             throws ExecutionException;
 

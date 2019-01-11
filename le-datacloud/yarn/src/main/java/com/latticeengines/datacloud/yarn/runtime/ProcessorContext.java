@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -319,17 +320,19 @@ public class ProcessorContext {
         this.jobConfiguration = jobConfiguration;
         this.dataCloudProcessor = dataCloudProcessor;
         setMatchInput(jobConfiguration);
-        dataCloudVersion = jobConfiguration.getMatchInput().getDataCloudVersion();
+        originalInput = jobConfiguration.getMatchInput();
+
+        dataCloudVersion = originalInput.getDataCloudVersion();
         log.info("Use DataCloudVersion=" + dataCloudVersion);
 
         receivedAt = new Date();
 
         podId = jobConfiguration.getHdfsPodId();
-        originalInput = jobConfiguration.getMatchInput();
+
 
         returnUnmatched = true;
-        excludePublicDomain = jobConfiguration.getMatchInput().getExcludePublicDomain();
-        publicDomainAsNormalDomain = jobConfiguration.getMatchInput().isPublicDomainAsNormalDomain();
+        excludePublicDomain = originalInput.getExcludePublicDomain();
+        publicDomainAsNormalDomain = originalInput.isPublicDomainAsNormalDomain();
         HdfsPodContext.changeHdfsPodId(podId);
         log.info("Use PodId=" + podId);
 
@@ -338,29 +341,28 @@ public class ProcessorContext {
         outputJson = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid).toString();
 
         blockRootDir = hdfsPathBuilder.constructMatchBlockDir(rootOperationUid, blockOperationUid).toString();
-        if (jobConfiguration.getMatchInput().getSplitsPerBlock() != null) {
-            splits = Math.max(1, jobConfiguration.getMatchInput().getSplitsPerBlock());
+        if (originalInput.getSplitsPerBlock() != null) {
+            splits = Math.max(1, originalInput.getSplitsPerBlock());
             log.info("Generating " + splits + " splits.");
         }
 
         CustomerSpace space = jobConfiguration.getCustomerSpace();
         tenant = new Tenant(space.toString());
-        datacloudOnly = Boolean.TRUE.equals(jobConfiguration.getMatchInput().getDataCloudOnly())
-                || !zkConfigurationService.isCDLTenant(space);
+        datacloudOnly = Boolean.TRUE.equals(originalInput.getDataCloudOnly())
+                || (!zkConfigurationService.isCDLTenant(space)
+                        && !OperationalMode.ENTITY_MATCH.equals(originalInput.getOperationalMode()));
 
-        if (jobConfiguration.getMatchInput().getUnionSelection() != null
-                || jobConfiguration.getMatchInput().getCustomSelection() != null) {
-            columnSelection = ((MatchPlannerBase) matchPlanner).parseColumnSelection(jobConfiguration.getMatchInput());
+        if (originalInput.getUnionSelection() != null || originalInput.getCustomSelection() != null) {
+            columnSelection = ((MatchPlannerBase) matchPlanner).parseColumnSelection(originalInput);
         } else {
-            predefinedSelection = jobConfiguration.getMatchInput().getPredefinedSelection();
+            predefinedSelection = originalInput.getPredefinedSelection();
         }
 
-        decisionGraph = jobConfiguration.getMatchInput().getDecisionGraph();
-        if (Boolean.TRUE.equals(jobConfiguration.getMatchInput().isFetchOnly())) {
+        if (Boolean.TRUE.equals(originalInput.isFetchOnly())) {
             useRemoteDnB = false;
         } else {
-            if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
-                useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
+            if (originalInput.getUseRemoteDnB() != null) {
+                useRemoteDnB = originalInput.getUseRemoteDnB();
             } else {
                 useRemoteDnB = true;
             }
@@ -368,13 +370,20 @@ public class ProcessorContext {
             useRemoteDnB = useRemoteDnB && zkConfigurationService.useRemoteDnBGlobal();
         }
         log.info("Use remote DnB ? " + useRemoteDnB);
+
+        // TODO: Feeling match planning for bulk match is not well-organized.
+        // Some of them happen in BulkMatchPlanner, some of them happen here
+        ((MatchPlannerBase) matchPlanner).setEntityDecisionGraph(originalInput);
+        log.info("Match target entity: " + originalInput.getTargetEntity());
+        decisionGraph = originalInput.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
-            log.info("Overwrite decision graph be default value " + decisionGraph);
+            log.info("Decision graph is not provided, use default " + decisionGraph);
+        } else {
+            log.info("Use decision graph " + decisionGraph);
         }
-        log.info("Use decision graph " + decisionGraph);
 
-        keyMap = jobConfiguration.getMatchInput().getKeyMap();
+        keyMap = originalInput.getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
         timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(60));
         this.recordTimeOut = timeOut;
@@ -383,7 +392,7 @@ public class ProcessorContext {
         }
         log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
 
-        useProxy = Boolean.TRUE.equals(jobConfiguration.getMatchInput().getUseRealTimeProxy());
+        useProxy = Boolean.TRUE.equals(originalInput.getUseRealTimeProxy());
         if (useProxy) {
             String overwritingProxyUrl = jobConfiguration.getRealTimeProxyUrl();
             if (StringUtils.isNotEmpty(overwritingProxyUrl)) {
@@ -418,7 +427,7 @@ public class ProcessorContext {
                 + " and a thread pool of size " + numThreads);
         inputSchema = jobConfiguration.getInputAvroSchema();
         outputSchema = constructOutputSchema("DataCloudMatchOutput_" + blockOperationUid.replace("-", "_"),
-                jobConfiguration.getMatchInput().getDataCloudVersion());
+                originalInput);
 
         // sequence is very important in outputschema
         // am output attr -> dedupe -> debug
@@ -430,15 +439,14 @@ public class ProcessorContext {
         }
 
         matchDebugEnabled = zkConfigurationService.isMatchDebugEnabled(space)
-                || jobConfiguration.getMatchInput().isMatchDebugEnabled();
-        jobConfiguration.getMatchInput().setMatchDebugEnabled(matchDebugEnabled);
+                || originalInput.isMatchDebugEnabled();
+        originalInput.setMatchDebugEnabled(matchDebugEnabled);
         log.info("Match Debug Enabled=" + matchDebugEnabled);
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);
         }
 
-        disableDunsValidation = jobConfiguration.getMatchInput() != null
-                && jobConfiguration.getMatchInput().isDisableDunsValidation();
+        disableDunsValidation = originalInput.isDisableDunsValidation();
         log.info(String.format("Duns validation is disabled: %b", disableDunsValidation));
         cleanup();
 
@@ -505,10 +513,10 @@ public class ProcessorContext {
     }
 
     @MatchStep
-    private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
+    private Schema constructOutputSchema(String recordName, MatchInput input) {
+        Schema outputSchema;
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         if (datacloudOnly) {
-            Schema outputSchema;
-            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
             if (columnSelection == null) {
                 log.info("Generating output schema using predefined selection " + predefinedSelection);
                 outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
@@ -521,19 +529,30 @@ public class ProcessorContext {
                 metadataFields = parseMetadataFields();
             }
             log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
-            if (inputSchema == null) {
-                inputSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
-                log.info("Using extracted input schema: \n"
-                        + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
-            } else {
-                log.info("Using provided input schema: \n"
-                        + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
-            }
-            Schema newInputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
-            return (Schema) AvroUtils.combineSchemas(newInputSchema, outputSchema)[0];
+        } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            // TODO: Feeling match planning for bulk match is not
+            // well-organized. Some of them happen in BulkMatchPlanner, some of
+            // them happen here
+            metadatas = ((MatchPlannerBase) matchPlanner).parseEntityMetadata(input);
+            metadataFields = parseMetadataFields();
+            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
+                    dataCloudVersion);
+            log.info("Output schema has " + outputSchema.getFields().size() + " fields for entity match.");
+
         } else {
             throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
         }
+
+        if (inputSchema == null) {
+            inputSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
+            log.info("Using extracted input schema: \n"
+                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+        } else {
+            log.info("Using provided input schema: \n"
+                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+        }
+        Schema newInputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
+        return (Schema) AvroUtils.combineSchemas(newInputSchema, outputSchema)[0];
     }
 
     private List<String> parseMetadataFields() {

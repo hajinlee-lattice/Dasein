@@ -55,6 +55,11 @@ public class MatchInputValidator {
     }
 
     public static void validateBulkInput(MatchInput input, Configuration yarnConfiguration) {
+        validateBulkInput(input, yarnConfiguration, null);
+    }
+
+    public static void validateBulkInput(MatchInput input, Configuration yarnConfiguration,
+            DecisionGraph decisionGraph) {
         if (input.getInputBuffer() == null) {
             throw new IllegalArgumentException("Bulk input must have an IO buffer.");
         }
@@ -83,9 +88,15 @@ public class MatchInputValidator {
         input.setFields(inputFields);
 
         commonValidation(input);
-        Map<MatchKey, List<String>> keyMap = validateNonEntityMatch(input);
-        input.setKeyMap(keyMap);
-        validateAccountMatchKeys(input.getKeyMap().keySet());
+
+        // Perform a different set of validation operations for Entity Match
+        // case.
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            validateEntityMatch(input, decisionGraph);
+        } else {
+            input.setKeyMap(validateNonEntityMatch(input));
+            validateAccountMatchKeys(input.getKeyMap().keySet());
+        }
     }
 
     private static void commonValidation(MatchInput input) {

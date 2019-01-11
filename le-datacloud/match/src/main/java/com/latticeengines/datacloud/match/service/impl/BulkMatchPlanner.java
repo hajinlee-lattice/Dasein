@@ -11,6 +11,7 @@ import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
@@ -26,6 +27,10 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
 
     @Override
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            setEntityDecisionGraph(input);
+        }
+
         MatchContext context = new MatchContext();
         context.setInput(input);
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
@@ -47,6 +52,24 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             context.setCustomAccountDataUnit(parseCustomAccount(input));
             context.setCustomDataUnits(parseCustomDynamo(input));
             output = initializeMatchOutput(input, columnSelection, metadatas);
+        } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            context.setCdlLookup(false);
+            // TODO: Currently copied from RealtimeEntityMatchPlanner
+            // Think more:
+            // 1. Based on current RealtimeEntityMatchPlanner, is it
+            // really necessary to separate RealtimeEntityMatchPlanner and
+            // RealtimeMatchPlanner? Looks like not too much difference and
+            // if-else still exists in shared methods
+            // 2. If Q1 is yes, probably create BulkEntityMatchPlanner too and
+            // create EntityMatchPlannerBase
+            if (metadatas == null) {
+                metadatas = parseEntityMetadata(input);
+            }
+            columnSelection = new ColumnSelection();
+            List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
+                    .collect(Collectors.toList());
+            columnSelection.setColumns(columns);
+            output = initializeMatchOutput(input, columnSelection, metadatas);
         } else {
             context.setCdlLookup(false);
             columnSelection = parseColumnSelection(input);
@@ -55,7 +78,12 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         context.setColumnSelection(columnSelection);
         logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumns().size()));
         context.setOutput(output);
-        context = scanInputData(input, context);
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            context = scanEntityInputData(input, context);
+        } else {
+            context = scanInputData(input, context);
+
+        }
         context = sketchExecutionPlan(context, skipExecutionPlanning);
         return context;
     }

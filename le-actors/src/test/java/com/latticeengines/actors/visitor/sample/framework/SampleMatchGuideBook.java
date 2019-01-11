@@ -74,7 +74,7 @@ public class SampleMatchGuideBook extends GuideBook {
             traveler.setProcessed(true);
             // initialization
             traveler.addLocationsToVisitingQueue(dummyPathGraph.toArray(new String[dummyPathGraph.size()]));
-            return traveler.getNextLocationFromVisitingQueue();
+            return traveler.findNextLocationFromVisitingQueue();
         } else {
             return traveler.getOriginalLocation();
         }
@@ -84,7 +84,7 @@ public class SampleMatchGuideBook extends GuideBook {
         String destinationLocation;
 
         do {
-            destinationLocation = traveler.getNextLocationFromVisitingQueue();
+            destinationLocation = traveler.findNextLocationFromVisitingQueue();
             if (!visitSameMicroEngineWithSameDataAgain(destinationLocation, traveler)) {
                 return destinationLocation;
             }

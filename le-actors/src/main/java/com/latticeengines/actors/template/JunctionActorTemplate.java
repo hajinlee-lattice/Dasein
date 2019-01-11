@@ -72,7 +72,7 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
         traveler.setProcessed(false);
         traveler.pushToTransitionHistory(getActorName(self()), traveler.getDecisionGraph(), true);
         traveler.setDecisionGraph(nextDGName);
-        traveler.setResult(null);
+        traveler.clearResult();
         prepareTravelerBeforeTransfer(traveler);
     }
 
@@ -81,7 +81,7 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
         String originalDGName = traveler.recoverTransitionHistory();
         traveler.setDecisionGraph(originalDGName);
         traveler.setAnchorActorLocation(ActorUtils.getPath(getActorSystem().getAnchor()));
-        traveler.setResult(null);
+        traveler.clearResult();
         prepareTravelerAfterTransfer(traveler);
     }
 }

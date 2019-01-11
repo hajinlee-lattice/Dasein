@@ -59,6 +59,28 @@ public class MatchDecisionGraphServiceImpl implements MatchDecisionGraphService 
         return decisionGraphLoadingCache.get(graphName);
     }
 
+
+    /**
+     * Plan to replace getDecisionGraph with findDecisionGraph by not exposing
+     * ExecutionException to caller.
+     * 
+     * Currently if not providing graphName, findDecisionGraph() does not return
+     * default decision graph. getDecisionGraph() returns default decision graph
+     * for ldc match. Need to consider how to merge and handle default decision
+     * graph for both entity mach and ldc match
+     */
+    @Override
+    public DecisionGraph findDecisionGraph(String graphName) {
+        if (StringUtils.isBlank(graphName)) {
+            return null;
+        }
+        try {
+            return getDecisionGraph(graphName);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Fail to find decision graph " + graphName);
+        }
+    }
+
     @Override
     public DecisionGraph findNextDecisionGraphForJunction(String currentGraphName, String junctionName)
             throws ExecutionException {

@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -27,9 +25,11 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.exposed.util.TestDunsGuideBookUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -143,16 +143,25 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     public void testBulkMatchWithCache(String scenario) {
         MatchInput input = prepareBulkMatchInput(scenario, true);
 
-        MatchCommand finalStatus = runAndVerifyBulkMatch(input);
+        MatchCommand finalStatus = runAndVerifyBulkMatch(input, podId);
 
         validateBulkMatchResult(scenario, finalStatus.getResultLocation());
     }
 
     @DataProvider(name = "bulkCatchScenarios")
     private Iterator<Object[]> bulkCatchScenarios() {
-        String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
-                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
-                SCENARIO_INCOMPLETELOCATION, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
+        String[] scenarios = {
+                SCENARIO_VALIDLOCATION, //
+                SCENARIO_VALIDLOCATION_INVALIDDOMAIN, //
+                SCENARIO_WITHOUT_NAME, //
+                SCENARIO_WITHOUT_COUNTRY, //
+                SCENARIO_WITHOUT_STATE, //
+                SCENARIO_WITHOUT_CITY, //
+                SCENARIO_WITHOUT_STATE_CITY, //
+                SCENARIO_INCOMPLETELOCATION, //
+                SCENARIO_NAME_PHONE, //
+                SCENARIO_NAME_ZIPCODE, //
+                };
         List<Object[]> objs = new ArrayList<>();
         for (String scenario : scenarios) {
             objs.add(new Object[] { scenario });
@@ -197,7 +206,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         buf.setAvroDir(fullAvroDir);
         MatchInput input = TestDunsGuideBookUtils.newBulkMatchInput(DUNS_GUIDE_BOOK_DATACLOUD_VERSION,
                 DECISION_GRAPH_WITHOUT_GUIDE_BOOK, true, true, buf, prepareColumnSelection());
-        MatchCommand command = runAndVerifyBulkMatch(input);
+        MatchCommand command = runAndVerifyBulkMatch(input, podId);
         Iterator<GenericRecord> records =
                 AvroUtils.iterator(yarnConfiguration, command.getResultLocation() + "/*.avro");
         // should get srcDuns using the old decision graph
@@ -205,7 +214,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
         input = TestDunsGuideBookUtils.newBulkMatchInput(DUNS_GUIDE_BOOK_DATACLOUD_VERSION,
                 DECISION_GRAPH_WITH_GUIDE_BOOK, true, true, buf, prepareColumnSelection());
-        command = runAndVerifyBulkMatch(input);
+        command = runAndVerifyBulkMatch(input, podId);
         records = AvroUtils.iterator(yarnConfiguration, command.getResultLocation() + "/*.avro");
         // redirect to the target DUNS
         validateMatchedDuns(records, expectedResult, 2); // expected target DUNS
@@ -470,27 +479,6 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 TestDunsGuideBookUtils.getBulkMatchAvroData(), fullAvroDir, DUNS_GUIDE_BOOK_TEST_FILE);
     }
 
-    /*
-     * run bulk match job and verify the job finished correctly
-     */
-    private MatchCommand runAndVerifyBulkMatch(MatchInput input) {
-        MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
-        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-
-        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
-        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
-        Assert.assertEquals(finalStatus.getProgress(), 1f);
-        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
-        Assert.assertEquals(finalStatus.getResultLocation(),
-                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
-        return finalStatus;
-    }
 
     /*
      * verify that matched DUNS in bulk match output matches the expected DUNS, dunsFieldIdx is used to specify

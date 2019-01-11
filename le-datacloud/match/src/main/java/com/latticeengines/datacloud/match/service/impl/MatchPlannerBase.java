@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,7 +96,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    protected void setEntityDecisionGraph(MatchInput input) {
+    public void setEntityDecisionGraph(MatchInput input) {
         // No need to handle cases that both targetEntity and decisionGraph are
         // empty or populated. These 2 cases are already handled in validator
         if (StringUtils.isBlank(input.getDecisionGraph())) {
@@ -168,6 +169,19 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     List<DynamoDataUnit> parseCustomDynamo(MatchInput input) {
         return cdlColumnSelectionService.parseCustomDynamo(input);
+    }
+
+    public List<ColumnMetadata> parseEntityMetadata(MatchInput input) {
+        // For now, we only handle the Column Metadata case for a predefined
+        // column selection of ID.
+        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
+            ColumnMetadata atlasIdColumnMetadata = new ColumnMetadata();
+            atlasIdColumnMetadata.setAttrName(InterfaceName.EntityId.name());
+            atlasIdColumnMetadata.setJavaClass(String.class.getSimpleName());
+            return Collections.singletonList(atlasIdColumnMetadata);
+        } else {
+            throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
+        }
     }
 
     @MatchStep(threshold = 100L)

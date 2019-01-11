@@ -112,6 +112,10 @@ public abstract class Traveler {
         this.result = result;
     }
 
+    public void clearResult() {
+        this.result = null;
+    }
+
     public String getOriginalLocation() {
         return originalLocation;
     }
@@ -197,7 +201,9 @@ public abstract class Traveler {
                 .add(getInputData() == null ? "" : getInputData().toString());
     }
 
-    public String getNextLocationFromVisitingQueue() {
+    // Don't call it as getXXX. When serializing the object, getXXX is called
+    // and visitingQueue is polled which causes unexpected behavior
+    public String findNextLocationFromVisitingQueue() {
         return visitingQueue.poll();
     }
 
