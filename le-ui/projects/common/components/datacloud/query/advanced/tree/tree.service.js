@@ -710,6 +710,12 @@ angular.module('common.datacloud.query.builder.tree.service', [
             }
             return bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] ? bucketRestriction.bkt.Vals[0] : 'any (*)';
         }
+        function getDateValue(bucketRestriction){
+            if (bucketRestriction.bkt.Fltr.Cmp == 'IS_NULL' || bucketRestriction.bkt.Fltr.Cmp == 'IS_NOT_NULL') {
+                return '';
+            }
+            return bucketRestriction.bkt.Fltr.Vals && bucketRestriction.bkt.Fltr.Vals[0] ? bucketRestriction.bkt.Fltr.Vals[0] : 'any (*)';
+        }
 
         this.getOperationValue = function (bucketRestriction, operatorType, position) {
             // console.log('Operation Value', operatorType, position);
@@ -726,6 +732,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 case 'String': {
                     return getStringValue(bucketRestriction);
                 };
+                case 'Date': {
+                    let tmp = getDateValue(bucketRestriction);
+                    console.log('TMP ', tmp);
+                    return tmp;
+                }
                 default: return 'Unknown';
             }
         }

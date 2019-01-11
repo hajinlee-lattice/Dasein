@@ -4,7 +4,7 @@ angular.module('lp.segments', [
 ])
 .controller('SegmentationListController', function ($q, $scope, $rootScope, $element, $state, $stateParams,
     SegmentsList, Enrichments, Cube, Modal, Banner, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
-    DataCloudStore, LookupResponse, LookupStore, PercentStore, AttrConfigStore
+    DataCloudStore, LookupResponse, LookupStore, PercentStore, QueryTreeDateAttributeStore, AttrConfigStore
 ) {
     var vm = this;
 
@@ -321,6 +321,19 @@ angular.module('lp.segments', [
                             attrs.push({label: enrichment.DisplayName + ': ', value: value});
 
                             break;
+                        case 'Date':
+                            var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, "Date");
+                            console.log('Value for date ', vals);
+                            var ret = QueryTreeDateAttributeStore.getCmpValueReadable(enrichment.DisplayName, restriction.bucketRestriction.bkt);
+                            attrs.push(ret);
+                        // if (vals.length > 1) {
+                        //     attrs.push({label: enrichment.DisplayName + ': ', value: vals.length + ' Values Selected'});
+                        // } else {
+
+                        //     attrs.push({label: enrichment.DisplayName + ': ', value:  
+                        //     `${vals[0] != undefined ? `${vals[0]}` : `${QueryTreeDateAttributeStore.dateAttributeMap[restriction.bucketRestriction.bkt.Fltr.Cmp]}`}`});
+                        // }
+                        break;
                     }
                 } else {
                     // for pure string attributes

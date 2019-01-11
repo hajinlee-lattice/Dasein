@@ -8,16 +8,16 @@ angular
     var QueryTreeDateAttributeStore = this;
     QueryTreeDateAttributeStore.periods = [];
     this.dateAttributeMap = {
-      'EVER': 'Ever',
-      'IN_CURRENT_PERIOD': 'Current',
-      'WITHIN': 'Previous',
-      'PRIOR_ONLY': 'Only Prior to Last',
-      'BETWEEN': 'Between Last',
-      'BETWEEN_DATE':'Between',
-      'BEFORE': 'Before',
-      'AFTER': 'After',
-      "IS_EMPTY": 'Is Empty' ,
-      "LAST": 'Last'
+      EVER: "Ever",
+      IN_CURRENT_PERIOD: "Current",
+      WITHIN: "Previous",
+      PRIOR_ONLY: "Only Prior to Last",
+      BETWEEN: "Between Last",
+      BETWEEN_DATE: "Between",
+      BEFORE: "Before",
+      AFTER: "After",
+      IS_EMPTY: "Is Empty",
+      LAST: "Last"
     };
     this.getPeriodNumericalConfig = function() {
       return {
@@ -87,7 +87,7 @@ angular
             });
           });
           QueryTreeDateAttributeStore.periods.push({
-            name: 'Day',
+            name: "Day",
             displayName: "Day(s)"
           });
         });
@@ -118,7 +118,7 @@ angular
       var valsArray = bkt.Fltr.Vals;
       switch (cmp) {
         case "BETWEEN":
-        case 'BETWEEN_DATE': {
+        case "BETWEEN_DATE": {
           return valsArray[position];
         }
         case "WITHIN":
@@ -136,38 +136,72 @@ angular
         }
       }
     };
-    this.getPeriod = function(bkt){
-      if(bkt && bkt.Fltr){
+    this.getPeriod = function(bkt) {
+      if (bkt && bkt.Fltr) {
         return bkt.Fltr.Period;
-      }else{
-        return '';
+      } else {
+        return "";
       }
-    }
+    };
 
-    this.changeCmp = function(bkt, cmp, period, valsArray){
+    this.changeCmp = function(bkt, cmp, period, valsArray) {
       bkt.Fltr.Cmp = cmp;
       bkt.Fltr.Period = period;
       bkt.Fltr.Vals = valsArray;
     };
-    
-    this.changeValue = function (cmp, valsArray, position, value) {
-        switch (cmp) {
-            case 'BETWEEN':
-            case 'BETWEEN_DATE':
-                {
-                    valsArray[position] = value;
-                    break;
-                }
-            default:
-                {
-                    valsArray[0] = value;
-                }
+
+    this.changeValue = function(cmp, valsArray, position, value) {
+      switch (cmp) {
+        case "BETWEEN":
+        case "BETWEEN_DATE": {
+          valsArray[position] = value;
+          break;
         }
+        default: {
+          valsArray[0] = value;
+        }
+      }
     };
-    this.restValues = function (bkt) {
-        bkt.Fltr.Vals = [];
+    this.restValues = function(bkt) {
+      bkt.Fltr.Vals = [];
     };
 
+    this.getCmpValueReadable = function(displayName, bkt) {
+      let cmp = QueryTreeDateAttributeStore.dateAttributeMap[bkt.Fltr.Cmp];
+      let vals = bkt.Fltr.Vals;
+      let period = `${bkt.Fltr.Period}(s)`;
+      let valRedable = "";
+      switch (bkt.Fltr.Cmp) {
+        case "EVER":
+        case "IS_EMPTY":
+          valRedable = "";
+          period = "";
+          break;
+        case "IN_CURRENT_PERIOD":
+          valRedable = "";
+          break;
+        case "LAST":
+        case "WITHIN":
+          valRedable = vals[0];
+          break;
+
+        case "BEFORE":
+        case "AFTER":
+          valRedable = vals[0];
+          period = "";
+          break;
+        case "BETWEEN":
+        case "BETWEEN_DATE":
+          valRedable = `${vals[0]} - ${vals[1]}`;
+          period = "";
+          break;
+      }
+      let ret = {
+        label: displayName + ": ",
+        value: `${cmp} ${valRedable} ${period}`
+      };
+      return ret;
+    };
   })
   .service("QueryTreeDateAttributeService", function($http, $q) {
     this.getPeriods = function(resourceType, query) {

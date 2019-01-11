@@ -100,7 +100,6 @@
                                 Add description
                             </span>
                         </p> -->
-
                         <p ng-if="!vm.invalidSegments.has(segment.name)" ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index" class="attributesDisplay">
                             {{attr.label}}<em>{{attr.value}}</em>
                         </p>
