@@ -217,13 +217,9 @@ class Launcher(object):
             return None
 
 def traverse(directory):
-    (dirpath, directories, filenames) = os.walk(directory).next()
-
-    for filename in filenames:
-        logger.info(dirpath + "/" + filename)
-
-    for d in directories:
-        traverse(dirpath + "/" + d)
+    for dirpath, sub_dirs, filenames in os.walk(directory):
+        for filename in filenames:
+            logger.info(dirpath + "/" + filename)
 
 if __name__ == "__main__":
     """

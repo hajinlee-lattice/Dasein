@@ -409,7 +409,7 @@ public class ProcessorContext {
             if (useRemoteDnB) {
                 groupSize = 128;
             } else if (originalInput.isFetchOnly()) {
-                groupSize = 1000;
+                groupSize = 500;
                 numThreads = fetchonlyThreadPool;
             }
         } else {

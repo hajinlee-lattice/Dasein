@@ -13,8 +13,8 @@ rm -Rf $HADOOP_HOME/logs/userlogs/*
 export YARN_RESOURCEMANAGER_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5001,server=y,suspend=n"
 export YARN_NODEMANAGER_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5002,server=y,suspend=n"
 
-if [[ -n "${J11_HOME}" ]]; then
-    export JAVA_HOME=${J11_HOME}
+if [[ -f "/opt/java/default" ]]; then
+    export JAVA_HOME="/opt/java/default"
 fi
 
 ${HADOOP_HOME}/sbin/hadoop-daemon.sh start namenode
