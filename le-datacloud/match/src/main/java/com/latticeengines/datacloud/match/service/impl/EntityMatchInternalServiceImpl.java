@@ -167,7 +167,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     @Override
     public Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull EntityRawSeed seed) {
+            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
         checkNotNull(tenant, seed);
         if (!isAllocateMode()) {
@@ -185,7 +185,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // clear one to one entries in seed that we failed to set in the lookup table
         List<EntityLookupEntry> entriesToClear = entriesFailedToSetLookup
                 .stream()
-                .filter(entry -> entry.getType().mapping == EntityLookupEntry.Mapping.ONE_TO_ONE)
+                .filter(entry -> clearAllFailedLookupEntries
+                        || entry.getType().mapping == EntityLookupEntry.Mapping.ONE_TO_ONE)
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(entriesToClear)) {
             EntityRawSeed seedToClear = new EntityRawSeed(seed.getId(), seed.getEntity(), entriesToClear, null);
@@ -193,6 +194,17 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         return Triple.of(seedBeforeUpdate, new ArrayList<>(entriesFailedToAssociate), entriesFailedToSetLookup);
+    }
+
+    @Override
+    public void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId) {
+        checkNotNull(tenant, entity, seedId);
+        // TODO batch the seedIds and cleanup async
+
+        // cleanup staging first so the seed ID cannot be allocated before we cleanup
+        // all environments
+        entityRawSeedService.delete(EntityMatchEnvironment.STAGING, tenant, entity, seedId);
+        entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId);
     }
 
     @VisibleForTesting
@@ -259,7 +271,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         || entry.getType().mapping == EntityLookupEntry.Mapping.MANY_TO_ONE)
                 .filter(entry -> {
                     Pair<EntityLookupEntry.Type, String> key = Pair.of(entry.getType(), entry.getSerializedKeys());
-                    // not already have value or have value but not equals
+                    // already have value and not equals the one we try to associate
                     return existingLookupPairs.containsKey(key)
                             && !existingLookupPairs.get(key).contains(entry.getSerializedValues());
                 })

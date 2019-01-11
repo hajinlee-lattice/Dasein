@@ -18,7 +18,6 @@ import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
-import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +34,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
@@ -269,7 +269,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                         targetEntitySeed.getId(), targetEntitySeed.getEntity(),
                         Collections.emptyList(), request.getExtraAttributes());
                 // ignore result as attribute update won't fail
-                entityMatchInternalService.associate(request.getTenant(), seedToUpdate);
+                entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false);
             }
             return getResponse(request, targetEntitySeed.getId());
         }
@@ -284,11 +284,19 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             // try to associate with the highest priority entry, if fail, return as match failure
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> maxPriorityResult =
                     entityMatchInternalService.associate(tenant, prepareSeedToAssociate(
-                            targetEntitySeed, Collections.singletonList(maxPriorityEntry), null));
-            if (hasAssociationFailure(maxPriorityResult)) {
+                            targetEntitySeed, Collections.singletonList(maxPriorityEntry), null), true);
+            if (hasAssociationError(maxPriorityResult)) {
                 log.debug("Failed to associate highest priority lookup entry {} to target entity (ID={})," +
                         " requestId={}, tenant (ID={}), entity={}",
                         maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
+                // NOTE even conflict on lookup mapping for many to X entry is considered
+                // failure for highest priority key
+                if (maxPriorityResult.getLeft() == null) {
+                    log.debug("Cleanup orphan seed, entity={} entityId={}, tenant (ID={})", tenantId,
+                            request.getEntity(), targetEntitySeed.getId());
+                    // the target entity is newly allocated, cleanup orphan seed
+                    entityMatchInternalService.cleanupOrphanSeed(tenant, entity, targetEntitySeed.getId());
+                }
                 // fail to associate the highest priority entry
                 return getResponse(
                         request, null, getAssociationErrors(
@@ -317,7 +325,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             //      , it does not actually save anything (except for a few bytes sent over network).
             EntityRawSeed seedToUpdate = prepareSeedToAssociate(request, targetEntitySeed, seedConflictEntries);
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
-                    entityMatchInternalService.associate(tenant, seedToUpdate);
+                    entityMatchInternalService.associate(tenant, seedToUpdate, false);
             Preconditions.checkNotNull(result);
 
             log.debug("Association result = {}, mapping conflict entries = {}," +
@@ -425,7 +433,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         return new EntityRawSeed(target.getId(), target.getEntity(), entries, extraAttributes);
     }
 
-    private boolean hasAssociationFailure(
+    private boolean hasAssociationError(
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result) {
         if (result == null) {
             return false;
@@ -455,7 +463,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     " requestId=%s, tenantId=%s", seedConflictEntries, requestId, tenantId);
             errors.add(msg);
         }
-        if (hasAssociationFailure(result)) {
+        if (hasAssociationError(result)) {
             // conflict occurs during association
             String msg = String.format("Failed to associate to target entity=%s, conflict in seed=%s," +
                     " conflict in lookup=%s, requestId=%s, tenantId=%s",

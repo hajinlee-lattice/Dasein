@@ -1,11 +1,11 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_GOOGLE_3;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DUNS_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.ELOQUA_3;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.MKTO_2;
@@ -326,7 +326,8 @@ public class EntityAssociateServiceImplUnitTestNG {
             throws Exception {
         EntityAssociateServiceImpl service = new EntityAssociateServiceImpl();
         EntityMatchInternalService internalService = Mockito.mock(EntityMatchInternalService.class);
-        Mockito.when(internalService.associate(Mockito.any(), Mockito.any())).thenAnswer(invocation -> {
+        Mockito.when(internalService.associate(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+                .thenAnswer(invocation -> {
             Tenant inputTenant = invocation.getArgument(0);
             EntityRawSeed seed = invocation.getArgument(1);
             Assert.assertNotNull(inputTenant);

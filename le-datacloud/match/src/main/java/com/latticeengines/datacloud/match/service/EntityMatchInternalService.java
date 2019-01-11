@@ -1,12 +1,13 @@
 package com.latticeengines.datacloud.match.service;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Triple;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.lang3.tuple.Triple;
-
-import java.util.List;
 
 /**
  * Internal service to manipulate {@link EntityLookupEntry} and {@link EntityRawSeed} for entities. Data integrity
@@ -67,17 +68,38 @@ public interface EntityMatchInternalService {
     String allocateId(@NotNull Tenant tenant, @NotNull String entity);
 
     /**
-     * Associate all lookup entries and attributes in the input {@link EntityRawSeed} to the current ones and return
-     * all lookup entries that cannot be associated (have conflict with current entries).
+     * Associate all lookup entries and attributes in the input
+     * {@link EntityRawSeed} to the current ones and return all lookup entries that
+     * cannot be associated (have conflict with current entries).
      *
-     * @param tenant target tenant
-     * @param seed seed object containing lookup entries and attributes that we want to associate
-     * @return a triple where
-     *   the left object is the state before association
-     *   the middle list contains all lookup entries that cannot be associated to the current seed.
-     *   the right list contains all lookup entries that already mapped to another seed
-     * @throws UnsupportedOperationException if allocating new accounts are not supported
+     * @param tenant
+     *            target tenant
+     * @param seed
+     *            seed object containing lookup entries and attributes that we want
+     *            to associate
+     * @param clearAllFailedLookupEntries
+     *            true if we clear all lookup entries that failed to set lookup
+     *            mapping, false if we only clear one to one entries that failed
+     * @return a triple where the left object is the state before association the
+     *         middle list contains all lookup entries that cannot be associated to
+     *         the current seed. the right list contains all lookup entries that
+     *         already mapped to another seed
+     * @throws UnsupportedOperationException
+     *             if allocating new accounts are not supported
      */
     Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull EntityRawSeed seed);
+            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries);
+
+    /**
+     * Cleanup entity seed that is supposed to be orphan (not mapped by any of its
+     * lookup entry)
+     * 
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            entity
+     * @param seedId
+     *            seed ID to cleanup
+     */
+    void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
 }
