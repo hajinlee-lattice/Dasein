@@ -37,7 +37,7 @@ angular
         this.showFromTime = false;
         this.showToTime = false;
         this.periodsList = QueryTreeDateAttributeStore.periodList();
-        this.changeCmp(this.timeCmp);
+       
         this.periodTimeConfig = {
           from: {
             name: "from-time",
@@ -76,7 +76,7 @@ angular
               0
             ),
             position: 0,
-            type: "Date",
+            type: "Numerical",
             min: "1",
             max: "",
             pattern: "\\d*"
@@ -84,7 +84,7 @@ angular
           to: {
             name: "to-period",
             value: QueryTreeDateAttributeStore.getVal(
-              "Numerical",
+              "Date",
               this.timeCmp,
               this.bucketrestriction.bkt,
               1
@@ -108,6 +108,7 @@ angular
           { name: "AFTER", displayName: "After" },
           { name: "IS_EMPTY", displayName: "Is Empty" }
         ];
+        this.changeCmp(this.timeCmp);
       };
 
       this.changeCmp = function(value, type) {
@@ -127,7 +128,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 "Day",
-                []
+                this.bucketrestriction.bkt.Fltr.Vals
               );
               break;
             case "IN_CURRENT_PERIOD":
@@ -142,7 +143,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 this.timeframePeriod,
-                []
+                this.bucketrestriction.bkt.Fltr.Vals
               );
               break;
             case "WITHIN":

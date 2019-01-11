@@ -96,6 +96,7 @@ angular
     };
 
     this.getVal = function(type, cmp, bkt, position) {
+      console.log("VAL ", type, cmp, bkt, position);
       switch (type) {
         case "Date":
           if (cmp !== "BETWEEN_DATE" || cmp === "BEFORE" || cmp === "AFTER") {
@@ -105,10 +106,10 @@ angular
           }
 
         case "Numerical":
-          if (cmp !== "WITHIN" || cmp === "LAST" || cmp === "BETWEEN") {
-            return undefined;
-          } else {
+          if (cmp == "WITHIN" || cmp == "LAST" || cmp == "BETWEEN") {
             return this.getValue(cmp, bkt, position);
+          } else {
+            return undefined;
           }
         default:
           return undefined;

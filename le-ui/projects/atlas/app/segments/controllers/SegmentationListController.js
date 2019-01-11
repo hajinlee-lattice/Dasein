@@ -322,17 +322,8 @@ angular.module('lp.segments', [
 
                             break;
                         case 'Date':
-                            var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, "Date");
-                            console.log('Value for date ', vals);
                             var ret = QueryTreeDateAttributeStore.getCmpValueReadable(enrichment.DisplayName, restriction.bucketRestriction.bkt);
                             attrs.push(ret);
-                        // if (vals.length > 1) {
-                        //     attrs.push({label: enrichment.DisplayName + ': ', value: vals.length + ' Values Selected'});
-                        // } else {
-
-                        //     attrs.push({label: enrichment.DisplayName + ': ', value:  
-                        //     `${vals[0] != undefined ? `${vals[0]}` : `${QueryTreeDateAttributeStore.dateAttributeMap[restriction.bucketRestriction.bkt.Fltr.Cmp]}`}`});
-                        // }
                         break;
                     }
                 } else {
