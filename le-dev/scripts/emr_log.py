@@ -79,8 +79,11 @@ def get_cluster_name_master_ip(cluster_id):
         ClusterId=cluster_id
     )
     cluster_name = resp['Cluster']['Name']
-    master_addr = resp['Cluster']['MasterPublicDnsName']
-    master_ip = master_addr.split(".")[0].replace("ip-", "").replace("-", ".")
+    resp = emr.list_instances(
+        ClusterId=cluster_id,
+        InstanceGroupTypes=['MASTER']
+    )
+    master_ip = resp['Instances'][0]['PrivateIpAddress']
     return cluster_name, master_ip
 
 def emr_client():
@@ -115,7 +118,7 @@ if __name__ == "__main__":
 
     app_id = args.__dict__['app-id']
     if args.dest is None:
-        dest = os.path.join('~', 'Downloads', app_id)
+        dest = os.path.join(os.environ['HOME'], 'Downloads', app_id)
     else:
         dest = args.dest
 
