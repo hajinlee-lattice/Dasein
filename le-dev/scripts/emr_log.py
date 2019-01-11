@@ -12,7 +12,9 @@ S3_CLIENT = None
 
 
 def download_log(env, app_id, cluster_id, dest):
-    print("Downloading the log for application %s on cluster %s to %s" % (app_id, cluster_id, dest))
+    cluster_name, master_ip = get_cluster_name_master_ip(cluster_id)
+    print("Downloading the log for application %s on cluster %s (%s, %s) to %s" %
+          (app_id, cluster_id, cluster_name, master_ip, dest))
     if os.path.isdir(dest):
         print('cleaning up destination directory %s ' % dest)
         rmtree(dest)
@@ -70,6 +72,16 @@ def get_clusters(active):
         )
     clusters = resp['Clusters']
     return [c['Id'] for c in clusters]
+
+def get_cluster_name_master_ip(cluster_id):
+    emr = emr_client()
+    resp = emr.describe_cluster(
+        ClusterId=cluster_id
+    )
+    cluster_name = resp['Cluster']['Name']
+    master_addr = resp['Cluster']['MasterPublicDnsName']
+    master_ip = master_addr.split(".")[0].replace("ip-", "").replace("-", ".")
+    return cluster_name, master_ip
 
 def emr_client():
     global EMR_CLIENT
