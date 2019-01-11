@@ -25,7 +25,7 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 @Component("redShiftCleanupService")
 public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
-    private static final Logger log = LoggerFactory.getLogger(RedShiftCleanupService.class);
+    private static final Logger log = LoggerFactory.getLogger(RedShiftCleanupServiceImpl.class);
 
     @Inject
     private RedshiftService redshiftService;
@@ -77,8 +77,8 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             log.info("redshift tablename under tenant is :" + redshift_tableNames.toString());
             // 3.drop table
             dropTable(redshift_tableNames, new ArrayList<>(tableNames));
-        }catch (Exception e) {
-            log.info(e.toString());
+        } catch (Exception e) {
+            log.error(e.toString());
         }
     }
 
