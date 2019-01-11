@@ -13,8 +13,6 @@ public interface SNSService {
 
     public String getTopicArnByName(String name);
 
-    public String getTopicArnByDisplayName(String displayName);
-
     public PublishResult publishToTopic(String topicArn, String message,
             Map<String, MessageAttributeValue> messageAttributes) throws Exception;
 

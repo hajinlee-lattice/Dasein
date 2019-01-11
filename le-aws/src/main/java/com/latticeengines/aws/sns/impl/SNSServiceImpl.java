@@ -51,28 +51,15 @@ public class SNSServiceImpl implements SNSService {
     @Override
     public String getTopicArnByName(String name) {
         List<Topic> topics = getAllTopics().getTopics();
-        topics = topics.stream().filter(topic -> topic.getTopicArn().endsWith(name))
+        topics = topics.stream().filter(topic -> topic.getTopicArn().endsWith(":" + name))
                 .collect(Collectors.toList());
         return topics.size() != 1 ? null : topics.get(0).getTopicArn();
     }
 
-    @Cacheable(cacheNames = "SNSTopicsCache", key = "#displayName", sync = true)
     @Override
-    public String getTopicArnByDisplayName(String displayName) {
-        List<Topic> topics = getAllTopics().getTopics();
-        topics = topics.stream().filter(topic -> filterByDisplayName(topic, displayName))
-                .collect(Collectors.toList());
-        return topics.size() != 1 ? null : topics.get(0).getTopicArn();
-    }
-
-    private boolean filterByDisplayName(Topic topic, String displayName) {
-        return snsClient.getTopicAttributes(topic.getTopicArn()).getAttributes()
-                .getOrDefault("DisplayName", "").equals(displayName);
-    }
-
-    @Override
-    public PublishResult publishToTopic(String topicArn, String message,
+    public PublishResult publishToTopic(String queueName, String message,
             Map<String, MessageAttributeValue> messageAttributes) throws Exception {
+        String topicArn = getTopicArnByName(queueName);
         if (StringUtils.isEmpty(topicArn) || StringUtils.isEmpty(message)) {
             throw new Exception(
                     String.format("TopicArn and/or message is invalid: %s, %s", topicArn, message));
