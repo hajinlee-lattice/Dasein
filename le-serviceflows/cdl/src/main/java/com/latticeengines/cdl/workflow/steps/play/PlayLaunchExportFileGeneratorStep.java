@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow.steps.play;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -60,7 +59,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
 
         File localJsonFile = new File(String.format("pl_rec_%s_%s_%s_%s.json", customerSpace.getTenantId(), playLaunchId,
                 config.getDestinationSysType(), System.currentTimeMillis()));
-        log.info("Generating JSON File: %s", localJsonFile);
+        log.info("Generating JSON File: {}", localJsonFile);
         try {
             AvroUtils.convertAvroToJSON(yarnConfiguration, new Path(recAvroHdfsFilePath), localJsonFile, RecommendationJsonFormatter);
             //TODO:Jaya: Replace marketo with DestinationSystemName 
@@ -68,8 +67,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
                     config.getPlayName(), config.getPlayLaunchId(), DateTimeUtils.currentTimeAsString());
             String path = PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), customerSpace, namespace).toString();
             path = path.endsWith("/") ? path : path + "/";
-            path += "Recommendations.json";
-
+            
             String recFilePathForMarketo = path += "Recommendations.json";
 
             try {
