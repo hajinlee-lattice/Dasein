@@ -49,7 +49,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
 
-    private static final Tenant TENANT = new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE);
+    private static final Tenant TENANT = new Tenant(DataCloudConstants.SERVICE_TENANT);
 
     private static final String SFDC_ID = "SfdcId";
     private static final String MKTO_ID = "MktoId";
