@@ -1,3 +1,0 @@
-2017-03-05T02:33:56 [TARGET_LOAD ]E: Failed to write data to file. Data lenght 4529099. (Partial data), "{\"internal_resource_host_port\":\"propdata\",\"transformation_configuration\":\"{\\\"sourceName\\\":null,\\\"serviceBeanName\\\":\\\"hgDataTechIndicatorsService\\\",\\\"version\\\":\\\"2016-10-04_16... [122405] File does not contain a full data record. (csv_util.c:1245)
-
-2017-03-05T02:33:56 [TARGET_LOAD ]E: Failed to write record to file [122405] File does not contain a full data record. (csv_target.c:1331)
