@@ -31,7 +31,7 @@ public class VersionManager {
         return getCurrentVersionInStack("");
     }
 
-    public String getCurrentSvnRevision() {
+    public String getCurrentGitCommit() {
         try {
             return Manifests.read("LE-SCM-Revision");
         } catch (Exception e) {
