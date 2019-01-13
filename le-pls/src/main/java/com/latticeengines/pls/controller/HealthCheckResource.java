@@ -1,23 +1,21 @@
 package com.latticeengines.pls.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.domain.exposed.StatusDocument;
+import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.pls.service.SystemStatusService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.domain.exposed.StatusDocument;
-import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
-import com.latticeengines.pls.service.SystemStatusService;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import javax.inject.Inject;
 
 @Api(value = "health", description = "REST resource for checking health of LP app")
 @RestController
@@ -60,7 +58,7 @@ public class HealthCheckResource {
         Map<String, String> response = new HashMap<>();
         response.put("CurrentStack", currentStack);
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
-        response.put("SvnRevision", versionManager.getCurrentSvnRevision());
+        response.put("GitCommit", versionManager.getCurrentGitCommit());
         response.put("HadoopCluster", clusterName);
         return response;
     }

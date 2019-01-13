@@ -27,8 +27,9 @@
 
     <build>
         <plugins>
-            <!-- Override parent pom to exclude svn revision number.  
+            <!-- Override parent pom to exclude svn revision number.
                  For some reason it's failing for certain developers. -->
+            <!--
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -36,6 +37,7 @@
                    <skip>true</skip>
                 </configuration>
             </plugin>
+            -->
        </plugins>
     </build>
 
