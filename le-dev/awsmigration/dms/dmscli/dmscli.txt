@@ -1,8 +1,0 @@
-aws dms create-replication-task \
---replication-task-identifier expr-03041509pls-cli-workflowjobparams \
---source-endpoint-arn arn:aws:dms:us-east-1:028036828464:endpoint:5W5JZ3DQHXWHPYVMMNBCWYNCG4 \
---target-endpoint-arn arn:aws:dms:us-east-1:028036828464:endpoint:NW3BT5XGWU3E2DA2R6OPMFUILY \
---replication-instance-arn arn:aws:dms:us-east-1:028036828464:rep:MXDJP3K4RMOVW3CPWPHU4VROMY \
---migration-type full-load \
---table-mappings file://mappingfile.json \
---replication-task-settings file://tasksettings.json
