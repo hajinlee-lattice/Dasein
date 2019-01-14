@@ -63,7 +63,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         if (StringUtils.isNotBlank(configuration.getRatingEngineId())) {
             RatingModel ratingModel = ratingEngineProxy.getRatingModel(configuration.getCustomerSpace().toString(),
                     configuration.getRatingEngineId(), configuration.getAiModelId());
-            if (ratingModel != null && ratingModel instanceof AIModel) {
+            if (ratingModel instanceof AIModel) {
                 AIModel aiModel = (AIModel) ratingModel;
                 for (String event : eventToModelId.keySet()) {
                     aiModel.setModelSummaryId(eventToModelSummary.get(event).getId());

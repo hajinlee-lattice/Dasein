@@ -1,26 +1,5 @@
 package com.latticeengines.apps.lp.service.impl;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.hdfs.BlockMissingException;
-import org.hibernate.exception.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -35,6 +14,25 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hdfs.BlockMissingException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -65,39 +63,30 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
+        String startingHdfsPoint = modelServiceHdfsBaseDir;
+        if (!startingHdfsPoint.endsWith("/")) {
+            startingHdfsPoint += "/";
+        }
+        startingHdfsPoint += CustomerSpace.parse(tenant.getId()) + "/models";
         final long acceptTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
-        HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-
-                if (file.getModificationTime() < acceptTime) {
-                    return false;
-                }
-
-                String name = file.getPath().getName();
-                return name.equals("modelsummary.json");
+        HdfsUtils.HdfsFileFilter filter = file -> {
+            if (file == null) {
+                return false;
             }
+
+            if (file.getModificationTime() < acceptTime) {
+                return false;
+            }
+
+            String name = file.getPath().getName();
+            return name.equals("modelsummary.json");
         };
 
-        HdfsUtils.HdfsFileFilter folderFilter = new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-
-                if (file.getModificationTime() < acceptTime) {
-                    return false;
-                }
-                return true;
+        HdfsUtils.HdfsFileFilter folderFilter = file -> {
+            if (file == null) {
+                return false;
             }
-
+            return file.getModificationTime() >= acceptTime;
         };
 
         if (!HdfsUtils.fileExists(yarnConfiguration, startingHdfsPoint)) {
@@ -105,7 +94,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return false;
         }
 
-        List<String> files = new ArrayList<>();
+        List<String> files;
         try {
             long startTime = System.currentTimeMillis();
             files = HdfsUtils.getFilesForDirRecursiveWithFilterOnDir(yarnConfiguration, startingHdfsPoint, filter,
