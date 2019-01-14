@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -57,7 +58,11 @@ public class ScoreArtifactRetriever {
     private String getModelAppIdSubfolder(CustomerSpace customerSpace, ModelSummary modelSummary) {
         String appId = modelSummary.getApplicationId();
         if (!StringUtils.isBlank(appId) && appId.length() > "application_".length()) {
-            appId = appId.substring("application_".length());
+            if (AwsApplicationId.isAwsBatchJob(appId)) {
+                appId = AwsApplicationId.getAwsBatchJobId(appId);
+            } else {
+                appId = appId.substring("application_".length());
+            }
             if (!StringUtils.isBlank(appId)) {
                 log.info("Parsed appId foldername from modelsummary:" + appId);
                 return appId;
