@@ -31,6 +31,11 @@ public class CommitEntityMatchWorkflowConfiguration extends BaseDataCloudWorkflo
             return this;
         }
 
+        public CommitEntityMatchWorkflowConfiguration.Builder entityMatchEnabled (boolean entityMatchEnabled) {
+            commitEntity.setSkipStep(!entityMatchEnabled);
+            return this;
+        }
+
         public CommitEntityMatchWorkflowConfiguration build() {
             configuration.setContainerConfiguration("commitEntityMatchWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

@@ -1,8 +1,11 @@
 package com.latticeengines.datacloud.workflow.match.steps;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,6 +25,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -53,11 +57,27 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             throw new RuntimeException(
                     "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
         }
-        if (CollectionUtils.isNotEmpty(configuration.getEntitySet())) {
-            configuration.getEntitySet().forEach(entity -> publishEntity(tenant, entity));
+        Set<String> commitEntities = getEntitySet();
+        if (CollectionUtils.isNotEmpty(commitEntities)) {
+            commitEntities.forEach(entity -> publishEntity(tenant, entity));
         } else {
             log.error("There is no entity to publish");
         }
+    }
+
+    private Set<String> getEntitySet() {
+        Set<String> entitySet = new HashSet<>();
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                BusinessEntity.class, List.class);
+        if (MapUtils.isNotEmpty(entityImportsMap)) {
+            entitySet.addAll(entityImportsMap.keySet().stream().map(Enum::name).collect(Collectors.toSet()));
+            log.info("CONSOLIDATE_INPUT_IMPORTS entities set: " + entitySet.toString());
+        }
+        if (CollectionUtils.isNotEmpty(configuration.getEntitySet())) {
+            entitySet.addAll(configuration.getEntitySet());
+        }
+        log.info("CommitEntityMatch entities set: " + entitySet.toString());
+        return entitySet;
     }
 
     private void publishEntity(Tenant tenant, String entity) {

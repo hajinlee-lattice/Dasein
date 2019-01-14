@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -18,6 +19,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -120,12 +122,23 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         setupTestEnvironment(null);
     }
 
+    protected void setupTestEnvironmentWithFeatureFlags(Map<String, Boolean> featureFlagMap) {
+        setupTestEnvironment(null, featureFlagMap);
+    }
+
     protected void setupTestEnvironment(String existingTenant) {
+        setupTestEnvironment(existingTenant, null);
+    }
+
+    protected void setupTestEnvironment(String existingTenant, Map<String, Boolean> featureFlagMap) {
         if (!StringUtils.isEmpty(existingTenant)) {
             testBed.useExistingTenantAsMain(existingTenant);
         } else {
-            testBed.bootstrapForProduct(LatticeProduct.CG);
-
+            if (MapUtils.isEmpty(featureFlagMap)) {
+                testBed.bootstrapForProduct(LatticeProduct.CG);
+            } else {
+                testBed.bootstrapForProduct(LatticeProduct.CG, featureFlagMap);
+            }
         }
         mainTestTenant = testBed.getMainTestTenant();
         mainCustomerSpace = mainTestTenant.getId();
