@@ -1,0 +1,6 @@
+AccountMasterColumn*.csv
+AccountMasterFact.csv
+CategoricalAttribute.csv
+CustomerSourceAttribute.csv
+SourceAttribute.csv
+SourceColumn.csv
