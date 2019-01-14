@@ -43,6 +43,7 @@ import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -600,7 +601,13 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (modelApplicationIdToEventColumn != null) {
             applicationFilters = new HashSet<>();
             for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
-                applicationFilters.add(modelApplicationId.replace("application_", ""));
+                String coreId;
+                if (AwsApplicationId.isAwsBatchJob(modelApplicationId)) {
+                    coreId = AwsApplicationId.getAwsBatchJob(modelApplicationId);
+                } else {
+                    coreId = modelApplicationId.replace("application_", "");
+                }
+                applicationFilters.add(coreId);
             }
         }
 
@@ -614,7 +621,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(modelSummaryParser) //
                 .featureImportanceParser(featureImportanceParser) //
-                .modelSummaryIds(modelSummaryIds).applicationFilters(applicationFilters);
+                .modelSummaryIds(modelSummaryIds) //
+                .applicationFilters(applicationFilters);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
 
         modelSummaryDownloadFlagEntityMgr.addExcludeFlag(tenantId);

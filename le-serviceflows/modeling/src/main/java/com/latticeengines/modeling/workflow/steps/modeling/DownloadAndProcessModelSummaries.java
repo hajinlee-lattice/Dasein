@@ -1,6 +1,7 @@
 package com.latticeengines.modeling.workflow.steps.modeling;
 
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +64,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         if (StringUtils.isNotBlank(configuration.getRatingEngineId())) {
             RatingModel ratingModel = ratingEngineProxy.getRatingModel(configuration.getCustomerSpace().toString(),
                     configuration.getRatingEngineId(), configuration.getAiModelId());
-            if (ratingModel != null && ratingModel instanceof AIModel) {
+            if (ratingModel instanceof AIModel) {
                 AIModel aiModel = (AIModel) ratingModel;
                 for (String event : eventToModelId.keySet()) {
                     aiModel.setModelSummaryId(eventToModelSummary.get(event).getId());

@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.hdfs.BlockMissingException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -26,6 +25,7 @@ import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -65,39 +65,30 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
+        String startingHdfsPoint = modelServiceHdfsBaseDir;
+        if (!startingHdfsPoint.endsWith("/")) {
+            startingHdfsPoint += "/";
+        }
+        startingHdfsPoint += CustomerSpace.parse(tenant.getId()) + "/models";
         final long acceptTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
-        HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-
-                if (file.getModificationTime() < acceptTime) {
-                    return false;
-                }
-
-                String name = file.getPath().getName();
-                return name.equals("modelsummary.json");
+        HdfsUtils.HdfsFileFilter filter = file -> {
+            if (file == null) {
+                return false;
             }
+
+            if (file.getModificationTime() < acceptTime) {
+                return false;
+            }
+
+            String name = file.getPath().getName();
+            return name.equals("modelsummary.json");
         };
 
-        HdfsUtils.HdfsFileFilter folderFilter = new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-
-                if (file.getModificationTime() < acceptTime) {
-                    return false;
-                }
-                return true;
+        HdfsUtils.HdfsFileFilter folderFilter = file -> {
+            if (file == null) {
+                return false;
             }
-
+            return file.getModificationTime() >= acceptTime;
         };
 
         if (!HdfsUtils.fileExists(yarnConfiguration, startingHdfsPoint)) {
@@ -105,7 +96,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return false;
         }
 
-        List<String> files = new ArrayList<>();
+        List<String> files;
         try {
             long startTime = System.currentTimeMillis();
             files = HdfsUtils.getFilesForDirRecursiveWithFilterOnDir(yarnConfiguration, startingHdfsPoint, filter,
@@ -156,7 +147,12 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 }
 
                 try {
-                    summary.setApplicationId("application_" + tokens[tokens.length - 3]);
+                    String coreId = tokens[tokens.length - 3];
+                    String applicationId = "application_" + coreId;
+                    if (AwsApplicationId.isAwsBatchJob(applicationId + "_aws")) {
+                        applicationId = applicationId + "_aws";
+                    }
+                    summary.setApplicationId(applicationId);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     log.error(String.format("Cannot set application id of model summary with id %s.", modelSummaryId));
                 }
