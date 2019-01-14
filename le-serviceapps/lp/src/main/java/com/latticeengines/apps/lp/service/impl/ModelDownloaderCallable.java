@@ -48,8 +48,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     private Configuration yarnConfiguration;
     private ModelSummaryParser parser;
     private FeatureImportanceParser featureImportanceParser;
-    private Set<String> modelSummaryIds;
     private Set<String> applicationFilters;
+    private final Set<String> modelSummaryIds;
 
     public ModelDownloaderCallable(Builder builder) {
         this.tenant = builder.getTenant();
