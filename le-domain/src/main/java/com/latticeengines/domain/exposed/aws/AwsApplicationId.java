@@ -42,7 +42,7 @@ public class AwsApplicationId extends ApplicationId {
     }
 
     public static boolean isAwsBatchJob(String jobId) {
-        return jobId.toLowerCase().matches("^application_[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}_aws$");
+        return jobId.toLowerCase().matches("^application_[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}_aws$");
     }
 
     public static String getAwsBatchJob(String jobId) {

@@ -11,7 +11,7 @@ public class AwsApplicationIdUnitTestNG {
     public void testIsAwsBatchJob() {
         String uuid = UUID.randomUUID().toString();
         String appId = "application_" + uuid + "_aws";
-        Assert.assertFalse(AwsApplicationId.isAwsBatchJob(appId), appId);
+        Assert.assertTrue(AwsApplicationId.isAwsBatchJob(appId), appId);
 
         appId = "application_1546931484138_12140_aws";
         Assert.assertFalse(AwsApplicationId.isAwsBatchJob(appId));
