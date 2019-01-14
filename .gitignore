@@ -27,19 +27,3 @@ ddl_*.sql
 # jacoco output
 jacoco/
 *.exec
-.gitignore
-AccountMasterColumn2010.csv
-AccountMasterColumn2011.csv
-AccountMasterColumn2012.csv
-AccountMasterColumn2013.csv
-AccountMasterColumn2014.csv
-AccountMasterColumn2015.csv
-AccountMasterColumn2016.csv
-AccountMasterColumn206.csv
-AccountMasterColumn208.csv
-AccountMasterColumn209.csv
-AccountMasterFact.csv
-CategoricalAttribute.csv
-CustomerSourceAttribute.csv
-SourceAttribute.csv
-SourceColumn.csv
