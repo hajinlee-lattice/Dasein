@@ -1026,9 +1026,6 @@
                         <source>${compiler.version}</source>
                         <target>${compiler.version}</target>
                         <executable>${JAVA_HOME}/bin/javac</executable>
-                        <compilerArguments>
-                            <Werror />
-                        </compilerArguments>
                     </configuration>
                 </plugin>
                 <plugin>
