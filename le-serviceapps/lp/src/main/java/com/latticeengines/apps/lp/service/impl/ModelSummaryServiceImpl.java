@@ -38,6 +38,7 @@ import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
@@ -579,6 +580,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public boolean downloadModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
         boolean result = downloadModelSummaryForTenant(tenantId, modelApplicationIdToEventColumn);
         if (!result) {
+            log.info("No result of downloading model summary for " //
+                    + JsonUtils.serialize(modelApplicationIdToEventColumn));
             try {
                 getEventToModelSummary(tenantId, modelApplicationIdToEventColumn);
                 return true;
@@ -678,6 +681,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                         eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
                         foundModels.add(modelApplicationId);
                     } else {
+                        log.info("Did not find model summary with application id " + modelApplicationId + ", download now.");
                         downloadModelSummary(tenantId, modelApplicationIdToEventColumn);
                     }
                 }
