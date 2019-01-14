@@ -1,19 +1,15 @@
 package com.latticeengines.apps.lp.service.impl;
 
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
-import com.latticeengines.apps.lp.service.BucketedScoreService;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
-import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -24,15 +20,21 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -145,7 +147,12 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 }
 
                 try {
-                    summary.setApplicationId("application_" + tokens[tokens.length - 3]);
+                    String coreId = tokens[tokens.length - 3];
+                    String applicationId = "application_" + coreId;
+                    if (AwsApplicationId.isAwsBatchJob(applicationId + "_aws")) {
+                        applicationId = applicationId + "_aws";
+                    }
+                    summary.setApplicationId(applicationId);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     log.error(String.format("Cannot set application id of model summary with id %s.", modelSummaryId));
                 }

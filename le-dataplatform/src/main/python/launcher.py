@@ -123,7 +123,8 @@ class Launcher(object):
 
         # Get hdfs model dir
         modelHdfsDir = executor.getModelDirPath(schema)
-        if not modelHdfsDir.endswith("/"): modelHdfsDir += "/"
+        if not modelHdfsDir.endswith("/"):
+            modelHdfsDir += "/"
 
         params = dict()
         params["modelLocalDir"] = modelLocalDir
