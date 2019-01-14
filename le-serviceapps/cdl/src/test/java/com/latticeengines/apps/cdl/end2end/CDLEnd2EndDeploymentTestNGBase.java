@@ -302,11 +302,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected void cleanup() throws Exception {
         checkpointService.cleanup();
     }
-
     protected void setupEnd2EndTestEnvironment() throws Exception {
+        setupEnd2EndTestEnvironment(null);
+    }
+
+    protected void setupEnd2EndTestEnvironment(Map<String, Boolean> featureFlagMap) throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
 
-        setupTestEnvironment();
+        if (MapUtils.isEmpty(featureFlagMap)) {
+            setupTestEnvironment();
+        } else {
+            setupTestEnvironmentWithFeatureFlags(featureFlagMap);
+        }
         mainTestTenant = testBed.getMainTestTenant();
 
         log.info("Test environment setup finished.");

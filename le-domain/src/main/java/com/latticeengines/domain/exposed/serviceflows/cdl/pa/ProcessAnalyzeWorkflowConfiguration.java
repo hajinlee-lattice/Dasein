@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -150,6 +151,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.rebuildEntities(entities);
             curatedAttributesWorkflowBuilder.rebuildEntities(entities);
             processRatingWorkflowBuilder.rebuildEntities(entities);
+            if (CollectionUtils.isNotEmpty(entities)) {
+                commitEntityWorkflowBuilder.entitySet(entities.stream().map(Enum::name).collect(Collectors.toSet()));
+            }
             return this;
         }
 
@@ -200,11 +204,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
-            return this;
-        }
-
-        public Builder matchEntities(Set<String> entitySet) {
-            commitEntityWorkflowBuilder.entitySet(entitySet);
+            commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 

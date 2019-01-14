@@ -355,7 +355,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
-                .matchEntities(Collections.singleton(BusinessEntity.Account.name()))
                 .build();
     }
 
