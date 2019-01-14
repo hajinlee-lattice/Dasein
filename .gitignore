@@ -18,6 +18,9 @@ target/
 **/.mvn/
 **/target/
 
+# python
+__pycache__
+
 # generated ddl
 ddl_*.sql
 
