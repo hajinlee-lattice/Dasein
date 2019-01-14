@@ -69,11 +69,6 @@
         <module name="ExecutableStatementCount">
             <property name="max" value="40"/>
         </module>
-        <module name="MethodCount">
-            <property name="maxPublic" value="30"/>
-            <property name="maxPackage" value="30"/>
-            <property name="maxTotal" value="50"/>
-        </module>
 
     </module>
 

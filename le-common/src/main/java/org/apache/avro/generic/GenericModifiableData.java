@@ -1013,6 +1013,7 @@ public class GenericModifiableData extends GenericData {
      * @return the default value associated with the given field, or null if
      *         none is specified in the schema.
      */
+    @SuppressWarnings("deprecation")
     public Object getDefaultValue(Field field) {
         JsonNode json = field.defaultValue();
         if (json == null)
