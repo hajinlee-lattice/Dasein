@@ -1,5 +1,4 @@
 ## PRE-REQUISITE PROGRAMS
-##Test
 You must have these programs installed:
 
 1.  Ruby
