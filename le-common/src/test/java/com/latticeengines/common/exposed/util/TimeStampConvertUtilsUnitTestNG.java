@@ -50,6 +50,29 @@ public class TimeStampConvertUtilsUnitTestNG {
     }
 
     @Test(groups = { "unit", "functional" })
+    public void testConvertToLongWithDateTimeFormatWithENLocale() throws Exception {
+        long actualTime = TimeStampConvertUtils.convertToLong("01-Feb-2018",
+                "DD-MMM-YYYY", "");
+        Assert.assertEquals(actualTime, 1517443200000L);
+        actualTime = TimeStampConvertUtils.convertToLong("01/Feb/2018",
+                "DD/MMM/YYYY", "");
+        Assert.assertEquals(actualTime, 1517443200000L);
+
+        actualTime = TimeStampConvertUtils.convertToLong("Feb.01.2018",
+                "MMM.DD.YYYY", "");
+        Assert.assertEquals(actualTime, 1517443200000L);
+
+        actualTime = TimeStampConvertUtils.convertToLong("2018/Feb/01",
+                "YYYY/MMM/DD", "");
+        Assert.assertEquals(actualTime, 1517443200000L);
+
+        actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018 01-23-45 Pm",
+                "MMM-DD-YYYY 00-00-00 12H", "");
+        Assert.assertEquals(actualTime, 1522761825000L);
+    }
+
+
+    @Test(groups = { "unit", "functional" })
     public void testConvertToLongWithDateTimeFormatStringAndTimezone() throws Exception {
 
         // Test Case 1: Simple date with format MM/DD/YYYY, default timezone (UTC).

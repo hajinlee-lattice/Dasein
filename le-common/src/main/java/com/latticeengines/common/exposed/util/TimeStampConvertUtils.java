@@ -6,9 +6,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +32,7 @@ public class TimeStampConvertUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
     // Regular expression for date portion of user defined format.
-    public static final String dateRegexStr = "((DD|MM|YYYY)[-/.](DD|MM)[-/.](DD|MM|YYYY|YY))";
+    public static final String dateRegexStr = "((DD|MM|MMM|YYYY)[-/.](DD|MM|MMM)[-/.](DD|MM|YYYY|YY))";
     // Regular expression for time portion of user defined format.
     public static final String timeRegexStr =
             "00:00:00 12H|00-00-00 12H|00 00 00 12H|00:00:00 24H|00-00-00 24H|00 00 00 24H";
@@ -40,6 +42,10 @@ public class TimeStampConvertUtils {
     private static final Map<String, String> userToJavaDateFormatMap = new HashMap<>();
     // Mapping from user defined time format to Java 8 date/time library format.
     private static final Map<String, String> userToJavaTimeFormatMap = new HashMap<>();
+
+    public static final Set<String> SUPPORTED_DATE_FORMAT = new HashSet<>();
+
+    public static final Set<String> SUPPORTED_TIME_FORMAT = new HashSet<>();
 
     // Set up static mappings from user defined date and time format to Java 8 formats.
     static {
@@ -59,12 +65,31 @@ public class TimeStampConvertUtils {
         userToJavaDateFormatMap.put("DD-MM-YY", "d-M-yy");
         userToJavaDateFormatMap.put("DD.MM.YY", "d.M.yy");
 
+        userToJavaDateFormatMap.put("MMM/DD/YYYY", "MMM/d/yyyy");
+        userToJavaDateFormatMap.put("MMM-DD-YYYY", "MMM-d-yyyy");
+        userToJavaDateFormatMap.put("MMM.DD.YYYY", "MMM.d.yyyy");
+        userToJavaDateFormatMap.put("MMM/DD/YY", "MMM/d/yy");
+        userToJavaDateFormatMap.put("MMM-DD-YY", "MMM-d-yy");
+        userToJavaDateFormatMap.put("MMM.DD.YY", "MMM.d.yy");
+        userToJavaDateFormatMap.put("DD/MMM/YYYY", "d/MMM/yyyy");
+        userToJavaDateFormatMap.put("DD-MMM-YYYY", "d-MMM-yyyy");
+        userToJavaDateFormatMap.put("DD.MMM.YYYY", "d.MMM.yyyy");
+        userToJavaDateFormatMap.put("DD/MMM/YY", "d/MMM/yy");
+        userToJavaDateFormatMap.put("DD-MMM-YY", "d-MMM-yy");
+        userToJavaDateFormatMap.put("DD.MMM.YY", "d.MMM.yy");
+        userToJavaDateFormatMap.put("YYYY/MMM/DD", "yyyy/MMM/d");
+        userToJavaDateFormatMap.put("YYYY-MMM-DD", "yyyy-MMM-d");
+        userToJavaDateFormatMap.put("YYYY.MMM.DD", "yyyy.MMM.d");
+
         userToJavaTimeFormatMap.put("00:00:00 12H", "h:m:s a");
         userToJavaTimeFormatMap.put("00-00-00 12H", "h-m-s a");
         userToJavaTimeFormatMap.put("00 00 00 12H", "h m s a");
         userToJavaTimeFormatMap.put("00:00:00 24H", "H:m:s");
         userToJavaTimeFormatMap.put("00-00-00 24H", "H-m-s");
         userToJavaTimeFormatMap.put("00 00 00 24H", "H m s");
+
+        SUPPORTED_DATE_FORMAT.addAll(userToJavaDateFormatMap.keySet());
+        SUPPORTED_TIME_FORMAT.addAll(userToJavaTimeFormatMap.keySet());
     }
 
     // Joda Time date/time formatter for simple original converter.  Only handles dates without times.
@@ -128,7 +153,6 @@ public class TimeStampConvertUtils {
     // If no timezone is provided, UTC is assumed.
     public static long convertToLong(String dateTime, String dateTimeFormatString, String timezone) {
         log.debug(" Date is: " + dateTime + "  Format is: " + dateTimeFormatString + "  Timezone: " + timezone);
-
         try {
             if (StringUtils.isNotEmpty(dateTimeFormatString)) {
                 // Match the pattern string against the regular expression of acceptable date time formats.
@@ -152,7 +176,7 @@ public class TimeStampConvertUtils {
                         log.debug(" Java date/time format string is: "+ javaDateFormatStr + " " + javaTimeFormatStr);
 
                         // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
-                        dateTime = dateTime.toUpperCase();
+                        dateTime = dateTime.replaceAll("([aA])([mM])", "AM").replaceAll("([pP])([mM])", "PM");
                         // Parse the provided date/time value using a DateTimeFormatter with combined date and time
                         // components.
                         localDateTime = LocalDateTime.parse(dateTime,
@@ -231,5 +255,9 @@ public class TimeStampConvertUtils {
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String date = sdf.format(new Date(timeStamp));
         return date;
+    }
+
+    public static String[] getAvailableTimeZoneIDs() {
+        return TimeZone.getAvailableIDs();
     }
 }

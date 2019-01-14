@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.pls.service.FileUploadService;
@@ -163,25 +166,15 @@ public class ModelingFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "/cdlexternalsystems", method = RequestMethod.GET)
+    @RequestMapping(value = "/dateformat", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "return a map with all existed external systems.")
-    public ResponseDocument<Map<String, List<String>>> getCDLExternalSystemMap(
-            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
-        CDLExternalSystem externalSystem = cdlExternalSystemProxy
-                .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity);
-        Map<String, List<String>> result = new HashMap<>();
-        if (externalSystem == null) {
-            for (CDLExternalSystemType type : CDLExternalSystemType.values()) {
-                result.put(type.name(), new ArrayList<>());
-            }
-        } else {
-            result.put(CDLExternalSystemType.CRM.name(), externalSystem.getCRMIdList());
-            result.put(CDLExternalSystemType.MAP.name(), externalSystem.getMAPIdList());
-            result.put(CDLExternalSystemType.ERP.name(), externalSystem.getERPIdList());
-            result.put(CDLExternalSystemType.OTHER.name(), externalSystem.getOtherIdList());
-        }
-        return ResponseDocument.successResponse(result);
+    @ApiOperation(value = "return supported date/time format and timezone.")
+    public ResponseDocument<AvailableDateFormat> getSupportedDateTimeFormat() {
+        AvailableDateFormat availableDateFormat = new AvailableDateFormat();
+        availableDateFormat.setDateFormats(new ArrayList<>(TimeStampConvertUtils.SUPPORTED_DATE_FORMAT));
+        availableDateFormat.setTimeFormats(new ArrayList<>(TimeStampConvertUtils.SUPPORTED_TIME_FORMAT));
+        availableDateFormat.setTimezones(Arrays.asList(TimeStampConvertUtils.getAvailableTimeZoneIDs()));
+        return ResponseDocument.successResponse(availableDateFormat);
     }
 
     @RequestMapping(value = "/uploaddeletefiletemplate", method = RequestMethod.POST)
@@ -205,6 +198,27 @@ public class ModelingFileUploadResource {
 
         return ResponseDocument.successResponse(
                 fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation, cleanupOperationType));
+    }
+
+    @RequestMapping(value = "/cdlexternalsystems", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "return a map with all existed external systems.")
+    public ResponseDocument<Map<String, List<String>>> getCDLExternalSystemMap(
+            @RequestParam(value = "entity", required = false, defaultValue = "Account") String entity) {
+        CDLExternalSystem externalSystem = cdlExternalSystemProxy
+                .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity);
+        Map<String, List<String>> result = new HashMap<>();
+        if (externalSystem == null) {
+            for (CDLExternalSystemType type : CDLExternalSystemType.values()) {
+                result.put(type.name(), new ArrayList<>());
+            }
+        } else {
+            result.put(CDLExternalSystemType.CRM.name(), externalSystem.getCRMIdList());
+            result.put(CDLExternalSystemType.MAP.name(), externalSystem.getMAPIdList());
+            result.put(CDLExternalSystemType.ERP.name(), externalSystem.getERPIdList());
+            result.put(CDLExternalSystemType.OTHER.name(), externalSystem.getOtherIdList());
+        }
+        return ResponseDocument.successResponse(result);
     }
 
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
