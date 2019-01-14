@@ -125,10 +125,12 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 String modelSummaryId = UuidUtils.parseUuid(file);
                 String appId = UuidUtils.parseAppId(file);
                 if (CollectionUtils.isNotEmpty(applicationFilters) && !applicationFilters.contains(appId)) {
+                    log.info("appId " + appId + " is not in applicationFilters");
                     continue;
                 }
                 synchronized (modelSummaryIds) {
                     if (modelSummaryIds.contains(modelSummaryId)) {
+                        log.info("modelSummaryId " + modelSummaryId + " already exists in modelSummaryIds.");
                         continue;
                     } else {
                         modelSummaryIds.add(modelSummaryId);

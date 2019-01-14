@@ -90,7 +90,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
             status.setStatus(FinalApplicationStatus.SUCCEEDED);
             return status;
         }
-        jobId = AwsApplicationId.getAwsBatchJob(jobId);
+        jobId = AwsApplicationId.getAwsBatchJobId(jobId);
         String batchStatus = batchService.getJobStatus(jobId);
         log.info("Got Aws batch job status = " + batchStatus);
         status.setStatus(FinalApplicationStatus.UNDEFINED);
@@ -150,7 +150,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
                 "metadata.json " + containerProperties.getProperty(ContainerProperty.RUNTIME_CONFIG.name()));
         envs.put("PYTHON_APP", APP_PY);
         if (applicationId != null) {
-            envs.put("AWS_BATCH_JOB_ID", applicationId.toString());
+            envs.put("AWS_BATCH_JOB_ID", applicationId.getJobId());
         }
 
         // envs.put(PythonContainerProperty.CONDA_ENV.name(),

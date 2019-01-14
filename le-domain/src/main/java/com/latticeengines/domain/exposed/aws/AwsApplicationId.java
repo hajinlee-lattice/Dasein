@@ -10,6 +10,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 public class AwsApplicationId extends ApplicationId {
 
     private String jobId;
+    private String applicationId;
+    private static final String UUID_PATTERN = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
 
     @Override
     protected void build() {
@@ -33,30 +35,35 @@ public class AwsApplicationId extends ApplicationId {
     protected void setId(int arg0) {
     }
 
+    public String getApplicationId() {
+        return applicationId;
+    }
+
     public String getJobId() {
         return jobId;
     }
 
     public void setJobId(String jobId) {
-        this.jobId = "application_" + jobId + "_aws";
+        this.jobId = jobId;
+        this.applicationId = "application_" + jobId + "_aws";
     }
 
     public static boolean isAwsBatchJob(String jobId) {
-      return jobId.toLowerCase().matches("^application_[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}_aws$");
+      return jobId.toLowerCase().matches("^application_" + UUID_PATTERN + "_aws$");
     }
 
-    public static String getAwsBatchJob(String jobId) {
-        Matcher matcher = Pattern.compile("^application_(?<awsJobId>.*)_aws").matcher(jobId);
+    public static String getAwsBatchJobId(String applicationId) {
+        Matcher matcher = Pattern.compile("^application_(?<awsJobId>.*)_aws").matcher(applicationId);
         if (matcher.matches()) {
             return matcher.group("awsJobId");
         }
-        return jobId;
+        return applicationId;
 
     }
 
     @Override
     public String toString() {
-        return jobId;
+        return applicationId;
     }
 
     @Override

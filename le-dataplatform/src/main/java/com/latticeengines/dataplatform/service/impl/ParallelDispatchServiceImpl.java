@@ -103,14 +103,13 @@ public class ParallelDispatchServiceImpl implements DispatchService {
 
         Log.info("useEmr=" + useEmr + " modelAwsBatchEnabled=" + modelAwsBatchEnabled + "isParallelEnabled="
                 + isParallelEnabled);
-        if (Boolean.TRUE.equals(useEmr) && modelAwsBatchEnabled && !isParallelEnabled) {
+        if (modelAwsBatchEnabled && !isParallelEnabled) {
             return awsBatchContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);
         }
         if (configParallelEnabled && !isParallelEnabled && isModeling) {
             return singleContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);
         }
         return getContainerDispatcher(isParallelEnabled).submitJob(modelingJob, isParallelEnabled, isModeling);
-
     }
 
     @Override

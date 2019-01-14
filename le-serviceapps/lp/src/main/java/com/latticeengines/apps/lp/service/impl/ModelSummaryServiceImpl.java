@@ -606,7 +606,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
                 String coreId;
                 if (AwsApplicationId.isAwsBatchJob(modelApplicationId)) {
-                    coreId = AwsApplicationId.getAwsBatchJob(modelApplicationId);
+                    coreId = AwsApplicationId.getAwsBatchJobId(modelApplicationId);
                 } else {
                     coreId = modelApplicationId.replace("application_", "");
                 }
