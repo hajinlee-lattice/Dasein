@@ -73,9 +73,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
                 return runAwsBatchLocal(job);
             }
             String batchJobId = executeInAwsBatch(job);
-            AwsApplicationId appId = new AwsApplicationId();
-            appId.setJobId(batchJobId);
-            return appId;
+            return AwsApplicationId.fromJobId(batchJobId);
         } finally {
             awsBatchCustomizationService.finalize(job.getClient(), job.getAppMasterPropertiesObject(),
                     job.getContainerPropertiesObject());

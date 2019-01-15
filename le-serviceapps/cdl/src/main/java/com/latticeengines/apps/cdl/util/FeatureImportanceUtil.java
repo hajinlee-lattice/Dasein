@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 import reactor.core.publisher.Flux;
@@ -68,7 +69,7 @@ public class FeatureImportanceUtil {
                     filePathParts[0], // 1
                     filePathParts[1], // 2
                     filePathParts[2], // 3
-                    modelSummary.getApplicationId().substring("application_".length())); // 4
+                    ApplicationIdUtils.stripJobId(modelSummary.getApplicationId())); // 4
             featureImportanceFilePath = getS3Path(customerSpace, featureImportanceFilePath);
             if (!HdfsUtils.fileExists(yarnConfiguration, featureImportanceFilePath)) {
                 log.error("Failed to find the feature importance file: " + featureImportanceFilePath);

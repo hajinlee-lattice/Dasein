@@ -61,6 +61,7 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -413,12 +414,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
      */
     private String getModelAppIdSubfolder(CustomerSpace customerSpace, ModelSummary modelSummary) {
         String appId = modelSummary.getApplicationId();
-        if (!StringUtils.isBlank(appId) && appId.length() > "application_".length()) {
-            appId = appId.substring("application_".length());
-            if (!StringUtils.isBlank(appId)) {
-                log.info("Parsed appId foldername from modelsummary:" + appId);
-                return appId;
-            }
+        try {
+            String jobId = ApplicationIdUtils.stripJobId(appId);
+            log.info("Parsed jobId foldername from modelsummary:" + jobId);
+            return jobId;
+        } catch (Exception e) {
+            log.warn("cannot parse job id from app id " + appId, e);
         }
 
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);

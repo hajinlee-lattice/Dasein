@@ -12,18 +12,17 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class ScoreArtifactRetriever {
@@ -57,16 +56,12 @@ public class ScoreArtifactRetriever {
 
     private String getModelAppIdSubfolder(CustomerSpace customerSpace, ModelSummary modelSummary) {
         String appId = modelSummary.getApplicationId();
-        if (!StringUtils.isBlank(appId) && appId.length() > "application_".length()) {
-            if (AwsApplicationId.isAwsBatchJob(appId)) {
-                appId = AwsApplicationId.getAwsBatchJobId(appId);
-            } else {
-                appId = appId.substring("application_".length());
-            }
-            if (!StringUtils.isBlank(appId)) {
-                log.info("Parsed appId foldername from modelsummary:" + appId);
-                return appId;
-            }
+        try {
+            String jobId = ApplicationIdUtils.stripJobId(appId);
+            log.info("Parsed jobId foldername from modelsummary:" + jobId);
+            return jobId;
+        } catch (Exception e) {
+            log.warn("cannot parse job id from app id " + appId, e);
         }
 
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);

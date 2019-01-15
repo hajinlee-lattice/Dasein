@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -128,10 +129,10 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         }
         if (CollectionUtils.isNotEmpty(paths)) {
             if (StringUtils.isNotEmpty(summary.getApplicationId())) {
-                String applicationIdDirectory = summary.getApplicationId().substring("application_".length());
+                String applicationIdDirectory = ApplicationIdUtils.stripJobId(summary.getApplicationId());
                 Optional<String> completedModelingPath = paths.stream()
                         .filter(path -> path.contains(applicationIdDirectory)).findFirst();
-                return completedModelingPath.isPresent() ? completedModelingPath.get() : paths.get(0);
+                return completedModelingPath.orElseGet(() -> paths.get(0));
             }
             return paths.get(0);
         }
@@ -187,7 +188,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         List<String> paths = importFromS3Service.getFilesForDir(tupleIdPath, fileFilter);
         if (CollectionUtils.isNotEmpty(paths)) {
             if (StringUtils.isNotEmpty(summary.getApplicationId())) {
-                String applicationIdDirectory = summary.getApplicationId().substring("application_".length());
+                String applicationIdDirectory = ApplicationIdUtils.stripJobId(summary.getApplicationId());
                 Optional<String> completedModelingPath = paths.stream()
                         .filter(path -> path.contains(applicationIdDirectory)).findFirst();
                 return completedModelingPath.isPresent() ? completedModelingPath.get() : paths.get(0);

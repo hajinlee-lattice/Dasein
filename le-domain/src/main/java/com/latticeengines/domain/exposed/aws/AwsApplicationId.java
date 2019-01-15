@@ -13,6 +13,21 @@ public class AwsApplicationId extends ApplicationId {
     private String applicationId;
     private static final String UUID_PATTERN = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
 
+    public static AwsApplicationId fromJobId(String jobId) {
+        AwsApplicationId awsApplicationId = new AwsApplicationId();
+        awsApplicationId.setJobId(jobId);
+        return awsApplicationId;
+    }
+
+    public static AwsApplicationId fromString(String appIdStr) {
+        if (AwsApplicationId.isAwsBatchJob(appIdStr)) {
+            String jobId = AwsApplicationId.getAwsBatchJobId(appIdStr);
+            return AwsApplicationId.fromJobId(jobId);
+        } else {
+            throw new IllegalArgumentException("Malformed AwsApplicationId " + appIdStr);
+        }
+    }
+
     @Override
     protected void build() {
     }
