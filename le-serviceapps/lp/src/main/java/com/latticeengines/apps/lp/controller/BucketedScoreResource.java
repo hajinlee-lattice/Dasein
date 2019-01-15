@@ -2,27 +2,25 @@ package com.latticeengines.apps.lp.controller;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "bucketedscore", description = "REST resource for bucketed scores")
 @RestController
@@ -63,6 +61,15 @@ public class BucketedScoreResource {
     public List<BucketMetadata> getUpToDateABCDBucketsByModelGuid(@PathVariable String customerSpace,
             @PathVariable String modelGuid) {
         return bucketedScoreService.getABCDBucketsByModelGuid(modelGuid);
+    }
+
+    @GetMapping(value = "/publishedbuckets/model")
+    @ResponseBody
+    @ApiOperation(value = "Get all up-to-date ABCD Buckets info from list of by model GUID")
+    public Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(
+            @PathVariable String customerSpace, @ApiParam(value = "List of model summary ids", required = true) //
+            @RequestParam(value = "model-summary-id", required = true) List<String> modelSummaryIdList) {
+        return bucketedScoreService.getAllPublishedBucketMetadataByModelSummaryIdList(modelSummaryIdList);
     }
 
     @GetMapping(value = "/publishedbuckets/model/{modelSummaryId}")
