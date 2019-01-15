@@ -17,8 +17,8 @@ projects/dante/.sass-cache/**
 projects/insights/dist/**
 projects/login/dist/**
 projects/lp2/.sass-cache/**
-projects/lp2/app/production_1547079553276.min.js
-projects/lp2/assets/styles/production_1547079553276.min.css
+projects/lp2/app/*.min.js
+projects/lp2/assets/styles/*.min.css
 projects/lp2/index.html
 projects/lpi/dist/**
 projects/tenantconsole/dist/**
