@@ -30,6 +30,12 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
+    public List<DataUnit> findAllByType(DataUnit.StorageType storageType) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.findAllByTypeFromReader(tenantId, storageType);
+    }
+
+    @Override
     public DataUnit findByNameTypeFromReader(String name, DataUnit.StorageType storageType) {
         String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findByNameTypeFromReader(tenantId, name, storageType);

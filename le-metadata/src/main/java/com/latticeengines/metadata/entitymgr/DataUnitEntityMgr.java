@@ -10,6 +10,8 @@ public interface DataUnitEntityMgr {
 
     List<DataUnit> findByNameFromReader(String tenantId, String name);
 
+    List<DataUnit> findAllByTypeFromReader(String tenantId, DataUnit.StorageType storageType);
+
     DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType);
 
     void deleteByName(String tenantId, String name, DataUnit.StorageType storageType);
