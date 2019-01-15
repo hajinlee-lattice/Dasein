@@ -23,7 +23,8 @@ __pycache__
 python_model_workspace/
 
 # generated ddl
-ddl_*.sql
+/ddl_*.sql
+/dumps/
 
 # jacoco output
 jacoco/
