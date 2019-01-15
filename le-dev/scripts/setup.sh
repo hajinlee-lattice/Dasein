@@ -55,6 +55,8 @@ echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
 
+bash ${WSHOME}/le-dev/scripts/deploy_leds.sh
+
 if [[ -d ${ANACONDA_HOME}/envs/p2 ]]; then
     source ${ANACONDA_HOME}/bin/activate p2
 else
@@ -66,10 +68,11 @@ if [[ "${USE_QA_RTS}" == "true" ]]; then
 else
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
 fi
+source ${ANACONDA_HOME}/bin/deactivate
 
 echo "Clean up old test tenants"
 runtest testframework -g cleanup -t GlobalAuthCleanupTestNG
 
 echo "Success!!!"
 
-source ${ANACONDA_HOME}/bin/deactivate
+
