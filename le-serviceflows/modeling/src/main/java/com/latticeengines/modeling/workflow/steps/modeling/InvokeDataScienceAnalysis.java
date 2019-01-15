@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.DataScienceInvocationInfo;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
@@ -59,7 +60,7 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
 
         Path modelsDir = new Path(configuration.getModelingServiceHdfsBaseDir())
                 .append(configuration.getCustomerSpace().toString()).append("models").append(parts[1]).append(parts[2])
-                .append(summary.getApplicationId().replace("application_", ""));
+                .append(ApplicationIdUtils.stripJobId(summary.getApplicationId()));
 
         info.setModelDirectory(modelsDir.toString());
         return info;

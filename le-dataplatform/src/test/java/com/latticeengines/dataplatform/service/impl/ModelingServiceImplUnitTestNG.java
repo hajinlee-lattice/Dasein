@@ -30,28 +30,28 @@ public class ModelingServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void doThrottlingNullConfig() {
-        assertFalse(modelingService.doThrottling(null, algorithm, 1));
+        assertFalse(modelingService.doThrottling(null, 1));
     }
 
     @Test(groups = "unit")
     public void doThrottlingDisabledConfig() {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setEnabled(false);
-        assertFalse(modelingService.doThrottling(config, algorithm, 1));
+        assertFalse(modelingService.doThrottling(config, 1));
     }
 
     @Test(groups = "unit")
     public void doThrottlingEnabledConfigCutoff2() {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setJobRankCutoff(2);
-        assertFalse(modelingService.doThrottling(config, algorithm, 1));
+        assertFalse(modelingService.doThrottling(config, 1));
     }
 
     @Test(groups = "unit")
     public void doThrottlingEnabledConfigCutoff1() {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setJobRankCutoff(1);
-        assertTrue(modelingService.doThrottling(config, algorithm, 1));
+        assertTrue(modelingService.doThrottling(config,  1));
     }
 
     @Test(groups = "unit")

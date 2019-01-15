@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -147,6 +146,7 @@ public class ModelingServiceImpl implements ModelingService {
                 .setTargetDir(targetDir)//
                 .setDbCreds(config.getCreds()) //
                 .setQueue(assignedQueue)//
+                .setNumMappers(32) //
                 .setCustomer(model.getCustomer())//
                 .setSplitColumn(StringUtils.join(config.getKeyCols(), ","))//
                 .setTable(config.getTable());
@@ -165,16 +165,13 @@ public class ModelingServiceImpl implements ModelingService {
     @Override
     public ApplicationId exportData(ExportConfiguration config) {
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-        //
-        // return sqoopSyncJobService.exportData(config.getTable(),
-        // config.getHdfsDirPath(), config.getCreds(),
-        // assignedQueue, config.getCustomer());
         SqoopExporter exporter = new SqoopExporter.Builder() //
                 .setQueue(assignedQueue)//
                 .setTable(config.getTable()) //
                 .setSourceDir(config.getHdfsDirPath()) //
                 .setDbCreds(config.getCreds()) //
                 .setCustomer(config.getCustomer())//
+                .setNumMappers(32) //
                 .build();
         String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
         return ConverterUtils.toApplicationId(appId);
@@ -238,7 +235,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         m.setDataFormat("avro");
         m.setTargetsList(dataProfileConfig.getTargets());
-        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
+        m.setKeyCols(Collections.singletonList(featureList.get(0)));
         m.setFeaturesList(featureList);
 
         m.setModelHdfsDir(m.getMetadataHdfsPath());
@@ -256,7 +253,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
+        modelDefinition.addAlgorithms(Collections.singletonList(dataProfileAlgorithm));
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
 
@@ -282,7 +279,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         m.setDataFormat("avro");
         m.setTargetsList(dataReviewConfig.getTargets());
-        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
+        m.setKeyCols(Collections.singletonList(featureList.get(0)));
         m.setFeaturesList(featureList);
 
         m.setModelHdfsDir(m.getMetadataHdfsPath());
@@ -301,7 +298,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (!StringUtils.isEmpty(dataReviewConfig.getScript())) {
             dataReviewAlgorithm.setScript(dataReviewConfig.getScript());
         }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataReviewAlgorithm }));
+        modelDefinition.addAlgorithms(Collections.singletonList(dataReviewAlgorithm));
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
 
@@ -338,10 +335,10 @@ public class ModelingServiceImpl implements ModelingService {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_15006, e);
         }
-        List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
+        List<ApplicationId> applicationIds = new ArrayList<>();
         ModelDefinition modelDefinition = model.getModelDefinition();
 
-        List<Algorithm> algorithms = null;
+        List<Algorithm> algorithms;
 
         if (modelDefinition != null) {
             algorithms = modelDefinition.getAlgorithms();
@@ -351,19 +348,13 @@ public class ModelingServiceImpl implements ModelingService {
 
         algorithms = checkModelAndAlgorithm(model, algorithms);
 
-        Collections.sort(algorithms, new Comparator<Algorithm>() {
-            @Override
-            public int compare(Algorithm o1, Algorithm o2) {
-                return o1.getPriority() - o2.getPriority();
-            }
-
-        });
+        algorithms.sort(Comparator.comparingInt(Algorithm::getPriority));
         ThrottleConfiguration config = throttleConfigurationEntityMgr.getLatestConfig();
 
         for (int i = 1; i <= algorithms.size(); i++) {
             Algorithm algorithm = algorithms.get(i - 1);
 
-            if (doThrottling(config, algorithm, i)) {
+            if (doThrottling(config, i)) {
                 continue;
             }
 
@@ -387,7 +378,7 @@ public class ModelingServiceImpl implements ModelingService {
             model.setFeaturesList(getFeatures(model, false));
         }
         if (CollectionUtils.isEmpty(algorithms)) {
-            algorithms = new ArrayList<Algorithm>();
+            algorithms = new ArrayList<>();
             RandomForestAlgorithm algorithm = new RandomForestAlgorithm();
             algorithm.resetAlgorithmProperties();
             algorithm.setSampleName("all");
@@ -421,7 +412,7 @@ public class ModelingServiceImpl implements ModelingService {
         return m;
     }
 
-    private void validateModelInputData(Model model) throws Exception {
+    private void validateModelInputData(Model model) {
         try {
             ModelValidationService validator = ModelValidationService
                     .get(model.getModelDefinition().getAlgorithms().get(0).getName());
@@ -509,7 +500,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         // The model quality framework specifies the production version to run;
         // keep the path as-is
-        Pattern pattern_stack_and_version = Pattern.compile("^/app/(a|b)/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
+        Pattern pattern_stack_and_version = Pattern.compile("^/app/([ab])/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
         Matcher c_stack_and_version = pattern_stack_and_version.matcher(script);
         if (c_stack_and_version.matches()) {
             return script;
@@ -519,7 +510,7 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private String getDataProfileAvroPathInHdfs(String path) {
-        List<String> files = new ArrayList<String>();
+        List<String> files = new ArrayList<>();
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, "profile.avro");
         } catch (Exception e) {
@@ -535,7 +526,7 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private String getConfigMetadataPathInHdfs(String path) {
-        List<String> files = new ArrayList<String>();
+        List<String> files = new ArrayList<>();
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, HdfsFileFormat.AVSC_FILE);
         } catch (Exception e) {
@@ -571,7 +562,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     private String getAvroFileHdfsPath(final String samplePrefix, String baseDir) {
         String format = ".*" + samplePrefix + HdfsFileFormat.AVRO_FILE;
-        List<String> files = new ArrayList<String>();
+        List<String> files;
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir, format);
         } catch (Exception e) {
@@ -608,7 +599,7 @@ public class ModelingServiceImpl implements ModelingService {
         return modelingJob;
     }
 
-    boolean doThrottling(ThrottleConfiguration config, Algorithm algorithm, int index) {
+    boolean doThrottling(ThrottleConfiguration config, int index) {
         if (config == null || !config.isEnabled()) {
             return false;
         }
@@ -630,7 +621,7 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private List<String> getFeatureList(DataProfileConfiguration dataProfileConfig, Model m) {
-        List<String> featureList = new ArrayList<String>();
+        List<String> featureList = new ArrayList<>();
         List<String> includeList = dataProfileConfig.getIncludeColumnList();
         List<String> excludeList = dataProfileConfig.getExcludeColumnList();
         List<String> eventList = getEventList(dataProfileConfig.getTargets());
@@ -669,11 +660,11 @@ public class ModelingServiceImpl implements ModelingService {
         setupModelProperties(model);
         String sampleSchemaPath = model.getSampleHdfsPath();
         String metadataPath = model.getMetadataHdfsPath();
-        Schema dataSchema = null;
-        List<GenericRecord> data = new ArrayList<GenericRecord>();
-        List<String> features = new ArrayList<String>();
+        Schema dataSchema;
+        List<GenericRecord> data = new ArrayList<>();
+        List<String> features = new ArrayList<>();
         Set<String> pivotedFeatures = new LinkedHashSet<>();
-        Map<String, Double> featureScoreMap = new HashMap<String, Double>();
+        Map<String, Double> featureScoreMap = new HashMap<>();
 
         try {
             List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleSchemaPath,
@@ -692,8 +683,8 @@ public class ModelingServiceImpl implements ModelingService {
                 data.addAll(AvroUtils.getData(yarnConfiguration, new Path(avroMetadataFile)));
             }
 
-            Set<String> columnSet = new HashSet<String>();
-            Set<String> featureSet = new HashSet<String>();
+            Set<String> columnSet = new HashSet<>();
+            Set<String> featureSet = new HashSet<>();
 
             for (org.apache.avro.Schema.Field field : dataSchema.getFields()) {
                 columnSet.add(field.getProp("columnName"));
@@ -741,26 +732,21 @@ public class ModelingServiceImpl implements ModelingService {
         }
 
         if (depivoted) {
-            return new ArrayList<String>(features);
+            return new ArrayList<>(features);
         } else {
             if (model.getFeaturesThreshold() > 0) {
                 return getSortedFeatureList(featureScoreMap, model.getFeaturesThreshold());
             } else {
-                return new ArrayList<String>(pivotedFeatures);
+                return new ArrayList<>(pivotedFeatures);
             }
         }
     }
 
     List<String> getSortedFeatureList(Map<String, Double> featureScoreMap, int featuresTreshold) {
         List<Map.Entry<String, Double>> featureEntries = new ArrayList<>(featureScoreMap.entrySet());
-        Collections.sort(featureEntries, new Comparator<Map.Entry<String, Double>>() {
-            @Override
-            public int compare(Entry<String, Double> e1, Entry<String, Double> e2) {
-                return Double.compare(e2.getValue(), e1.getValue());
-            }
-        });
+        featureEntries.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
 
-        List<String> features = new ArrayList<String>();
+        List<String> features = new ArrayList<>();
         for (Map.Entry<String, Double> featureEntry : featureEntries) {
             features.add(featureEntry.getKey());
         }
@@ -786,7 +772,7 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private String getSchemaPath(String sampleDataPath) {
-        String schemaPath = null;
+        String schemaPath;
         try {
             List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDataPath, HdfsFileFormat.AVRO_FILE);
             if (CollectionUtils.isEmpty(paths)) {
@@ -801,7 +787,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     @VisibleForTesting
     List<String> getEventList(List<String> targets) {
-        List<String> eventList = new ArrayList<String>();
+        List<String> eventList = new ArrayList<>();
         String eventKey = "Event:"; // assumes key:value form
         for (String token : targets) {
             int index = token.indexOf(eventKey);
@@ -813,7 +799,7 @@ public class ModelingServiceImpl implements ModelingService {
         }
 
         // List of columns
-        Set<String> eventSet = new HashSet<String>(targets);
+        Set<String> eventSet = new HashSet<>(targets);
         eventList.addAll(eventSet);
 
         return eventList;

@@ -44,7 +44,6 @@ import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -60,6 +59,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @Component("modelSummaryService")
@@ -604,13 +604,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (modelApplicationIdToEventColumn != null) {
             applicationFilters = new HashSet<>();
             for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
-                String coreId;
-                if (AwsApplicationId.isAwsBatchJob(modelApplicationId)) {
-                    coreId = AwsApplicationId.getAwsBatchJobId(modelApplicationId);
-                } else {
-                    coreId = modelApplicationId.replace("application_", "");
-                }
-                applicationFilters.add(coreId);
+                applicationFilters.add(ApplicationIdUtils.stripJobId(modelApplicationId));
             }
         }
 

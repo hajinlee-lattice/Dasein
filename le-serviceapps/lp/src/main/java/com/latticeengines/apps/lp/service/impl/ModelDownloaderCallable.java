@@ -25,7 +25,6 @@ import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -35,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -149,11 +149,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 }
 
                 try {
-                    String coreId = tokens[tokens.length - 3];
-                    String applicationId = "application_" + coreId;
-                    if (AwsApplicationId.isAwsBatchJob(applicationId + "_aws")) {
-                        applicationId = applicationId + "_aws";
-                    }
+                    String jobId = tokens[tokens.length - 3];
+                    String applicationId = ApplicationIdUtils.expandToApplicationId(jobId);
                     summary.setApplicationId(applicationId);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     log.error(String.format("Cannot set application id of model summary with id %s.", modelSummaryId));

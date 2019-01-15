@@ -92,10 +92,10 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                 }
             }
         }
-        if (!AwsApplicationId.isAwsBatchJob(applicationId)) {
-            populateJobStatusFromYarnAppReport(jobStatus, applicationId);
-        } else {
+        if (AwsApplicationId.isAwsBatchJob(applicationId)) {
             populateJobStatusFromAwsBatchReport(jobStatus, applicationId);
+        } else {
+            populateJobStatusFromYarnAppReport(jobStatus, applicationId);
         }
         return jobStatus;
     }
