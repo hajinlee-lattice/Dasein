@@ -1,3 +1,0 @@
-#!/bin/bash -x
-service jetty restart > /opt/jetty/logs/`date +"20%y_%m_%d.stderrout.log"` 2>&1
-

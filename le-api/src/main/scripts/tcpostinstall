@@ -1,4 +1,0 @@
-#!/bin/bash
-
-echo "finishing"
-ll $CATALINA_HOME/webapps/api/*.war

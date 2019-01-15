@@ -33,7 +33,6 @@ if [[ -n $(java -version 2>&1 |  grep "11.0") ]]; then
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseParallelGC"
     else
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions"
-        export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseZGC"
     fi
 else

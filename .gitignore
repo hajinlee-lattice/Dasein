@@ -1,6 +1,7 @@
 # Eclipse
 *.classpath
 *.project
+*.pydevproject
 .settings/
 
 # Intellij

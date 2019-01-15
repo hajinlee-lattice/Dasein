@@ -1,6 +1,0 @@
-#!/bin/bash
-source /etc/profile
-rm -rf $CATALINA_HOME/webapps/api/*.war
-
-id -u tomcat &>/dev/null || useradd tomcat
-getent group tomcat || groupadd tomcat

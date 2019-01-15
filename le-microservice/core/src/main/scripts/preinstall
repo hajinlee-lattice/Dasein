@@ -1,3 +1,0 @@
-#!/bin/bash
-rm -rf /opt/jetty/webapps/le-*-microservice-*.war
-rm -rf /tmp/jetty-*
