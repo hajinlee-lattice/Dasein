@@ -26,6 +26,7 @@ import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -68,6 +69,9 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;
+
+    @Autowired
+    private BatonService batonService;
 
     @PostConstruct
     private void postConstruct() {
@@ -358,8 +362,9 @@ public class AttributeServiceImpl implements AttributeService {
                 .build();
 
         List<LeadEnrichmentAttribute> attributes = processor.getPage();
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
-                getCSVFromAttributes(attributes));
+        DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
+        builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromAttributes(attributes)).setBatonService(batonService);
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }
 

@@ -224,8 +224,9 @@ public class LatticeInsightsResource {
         InputStream stream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(String.format(SEGMENT_CONTACTS_FILE_LOCAL_PATH, state));
         String inputStream = IOUtils.toString(new InputStreamReader(stream));
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader("application/csv", "segments-contacts.csv",
-                inputStream);
+        DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
+        builder.setMimeType("application/csv").setFileName("segments-contacts.csv").setFileContent(inputStream).setBatonService(batonService);
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }
 

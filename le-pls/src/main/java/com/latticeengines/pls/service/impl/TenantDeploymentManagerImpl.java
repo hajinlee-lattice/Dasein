@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.JobStatus;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
@@ -68,6 +69,9 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private BatonService batonService;
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
@@ -282,7 +286,9 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                 startRow += rows;
             } while (result.getRemainingRows() > 0);
 
-            DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName, stringBuilder.toString());
+            DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
+            builder.setMimeType(mimeType).setFileName(fileName).setFileContent(stringBuilder.toString()).setBatonService(batonService);
+            DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
             downloader.downloadFile(request, response);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18062, e, new String[] { e.getMessage() });
