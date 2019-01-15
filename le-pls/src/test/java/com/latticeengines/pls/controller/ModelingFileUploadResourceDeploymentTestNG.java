@@ -19,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -133,6 +135,24 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
 
         List<SourceFile> files = sourceFileRepository.findAll();
         foundTheFiles(path, files);
+    }
+
+    @Test(groups = "deployment")
+    public void testGetAvailableFormat() {
+        switchToExternalAdmin();
+        String uri = String.format("/pls/models/uploadfile/dateformat");
+        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.GET,
+                null, String.class);
+        ResponseDocument<AvailableDateFormat> responseDocument = JsonUtils.deserialize(result.getBody(),
+                new TypeReference<ResponseDocument<AvailableDateFormat>>() {
+        });
+        Assert.assertNotNull(responseDocument);
+        Assert.assertTrue(responseDocument.isSuccess());
+        AvailableDateFormat availableDateFormat = responseDocument.getResult();
+        Assert.assertNotNull(availableDateFormat);
+        Assert.assertTrue(availableDateFormat.getDateFormats().contains("MM/DD/YYYY"));
+        Assert.assertTrue(availableDateFormat.getTimeFormats().contains("00:00:00 12H"));
+        Assert.assertTrue(availableDateFormat.getTimezones().contains("UTC"));
     }
 
     private void foundTheFiles(String path, List<SourceFile> files) {
