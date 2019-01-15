@@ -36,6 +36,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             checkboxModel: {},
             repeatPurchaseRemodel: false,
         });
+        
 
         vm.getNumericalConfig = function(){
             var config = {debounce: 800};
