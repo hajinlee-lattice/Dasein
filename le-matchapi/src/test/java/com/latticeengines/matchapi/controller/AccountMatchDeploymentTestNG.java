@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -126,14 +126,16 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private String resultEntityId = null;
 
-    @PostConstruct
+    @BeforeClass(groups = "deployment")
     public void init() {
         tenant.setName(TENANT_ID);
         tenantService.registerTenant(tenant);
+        // populate pid so that the tenant could be deleted in destroy()
+        tenant = tenantService.findByTenantId(tenant.getId());
         entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, tenant);
     }
 
-    @PreDestroy
+    @AfterClass(groups = "deployment")
     public void destroy() {
         tenantService.discardTenant(tenant);
     }
