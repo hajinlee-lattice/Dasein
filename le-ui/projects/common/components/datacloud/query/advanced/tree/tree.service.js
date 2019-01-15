@@ -746,7 +746,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
             var isSameBucket = true;
             if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
                 isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
+            }else if(bucket && bucket.Fltr !== undefined && bucket.Fltr.Vals != null && bkt.Fltr && bkt.Fltr.Vals !== undefined && bkt.Fltr.Vals != null){
+                isSameBucket = bkt.Fltr.Vals[0] == bucket.Fltr.Vals[0] && bkt.Fltr.Vals[1] == bucket.Fltr.Vals[1] && bkt.Fltr.Cmp == bucket.Fltr.Cmp;
             }
+
+            
 
             return isSameAttribute && isSameBucket;
         }
