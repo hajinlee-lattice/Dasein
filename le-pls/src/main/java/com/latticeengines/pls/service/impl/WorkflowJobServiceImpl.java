@@ -461,8 +461,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 if (action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getActionStatus() ==
                         ActionStatus.CANCELED)
                     canceled_workflowJobPids.add(action.getTrackingPid().toString());
-                else
-                    workflowJobPids.add(action.getTrackingPid().toString());
+                workflowJobPids.add(action.getTrackingPid().toString());
             } else if (isVisibleAction(action)) {
                 Job job = new Job();
                 job.setName(action.getType().getDisplayName());
@@ -487,7 +486,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
             List<Job> workflowJobs = workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
                     MultiTenantContext.getCustomerSpace().toString());
-            if (CollectionUtils.isNotEmpty(canceled_workflowJobPids)) {
+            if (CollectionUtils.isNotEmpty(canceled_workflowJobPids) && CollectionUtils.isNotEmpty(workflowJobs)) {
                 for (Job job : workflowJobs) {
                     if (canceled_workflowJobPids.contains(job.getId().toString())) {
                         job.setJobStatus(JobStatus.CANCELLED);
