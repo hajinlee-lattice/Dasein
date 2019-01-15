@@ -32,10 +32,10 @@ public class DataUnitResource {
         return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
     }
 
-    @GetMapping("")
-    public List<DataUnit> findAllByType(@PathVariable String customerSpace,
-                                  @RequestParam(name = "type") DataUnit.StorageType storageType) {
-        return dataUnitService.findAllByType(storageType);
+    @GetMapping("/type/{type}")
+    public List<DataUnit> getByStorageType(@PathVariable String customerSpace,
+                                  @PathVariable String type) {
+        return dataUnitService.findAllByType(DataUnit.StorageType.valueOf(type));
     }
 
     @GetMapping("/name/{name}")

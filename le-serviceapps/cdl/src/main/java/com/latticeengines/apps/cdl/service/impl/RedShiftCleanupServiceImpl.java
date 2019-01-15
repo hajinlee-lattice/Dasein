@@ -99,7 +99,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     }
 
     private List<String> getRedShiftTableName(Tenant tenant) {//remove those tableName which isn't in this tenant
-        List<DataUnit> dataUnits = dataUnitProxy.findAll(tenant.getId(), DataUnit.StorageType.Redshift);
+        List<DataUnit> dataUnits = dataUnitProxy.getByStorageType(tenant.getId(), DataUnit.StorageType.Redshift);
         Set<String> finalTableName = new HashSet<>();
         for (DataUnit dataUnit : dataUnits) {
             log.info("dataUnit = " + dataUnit.getName());
