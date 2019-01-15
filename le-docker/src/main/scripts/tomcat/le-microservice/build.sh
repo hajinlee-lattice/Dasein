@@ -66,10 +66,6 @@ function build_docker() {
     docker build -t ${IMAGE} . 2>/tmp/${IMAGE}-errors.txt
     process_error ${IMAGE}
     popd
-
-    if [[ -n "${DOCKER_SLIM_HOME}" ]]; then
-		echo -ne '\n' | ${DOCKER_SLIM_HOME}/docker-slim --verbose build ${IMAGE} --tag ${IMAGE}
-	fi
 }
 
 MICROSERVICES=$1
