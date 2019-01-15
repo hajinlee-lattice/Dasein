@@ -43,7 +43,6 @@
         <maven.aspectj.version>1.11</maven.aspectj.version>
 
         <maven.archetype.version>3.0.1</maven.archetype.version>
-        <maven.rpm.version>2.1.5</maven.rpm.version> <!-- upgrade ? -->
         <maven.antrun.version>1.8</maven.antrun.version> <!-- Last update in 2014, we should move away -->
 
         <!-- javax mostly specification interfaces, keep up with implementations -->
@@ -1165,11 +1164,6 @@
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>rpm-maven-plugin</artifactId>
-                    <version>${maven.rpm.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

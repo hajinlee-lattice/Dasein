@@ -1,4 +1,0 @@
-#!/bin/bash
-rm -rf /opt/jetty/webapps/le-saml-*-SNAPSHOT.war
-rm -rf /tmp/jetty-*
-
