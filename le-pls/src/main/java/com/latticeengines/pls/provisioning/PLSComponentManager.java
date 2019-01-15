@@ -53,7 +53,7 @@ public class PLSComponentManager {
     @Inject
     private TenantConfigService tenantConfigService;
 
-    @Value("${pls.admin.operation.specialAdmin}")
+    @Value("${pls.admin.operation.specialAdmin:}")
     private String specialAdmin;
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
