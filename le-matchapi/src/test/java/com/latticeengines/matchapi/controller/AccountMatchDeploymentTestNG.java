@@ -7,14 +7,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -22,7 +24,7 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
+import com.latticeengines.security.exposed.service.TenantService;
 
 public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AccountMatchDeploymentTestNG.class);
@@ -49,7 +52,12 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
 
-    private static final Tenant TENANT = new Tenant(DataCloudConstants.SERVICE_TENANT);
+    @Inject
+    private TenantService tenantService;
+
+    private static final String TENANT_ID = AccountMatchDeploymentTestNG.class.getSimpleName()
+            + UUID.randomUUID().toString();
+    private Tenant tenant = new Tenant(CustomerSpace.parse(TENANT_ID).toString());
 
     private static final String SFDC_ID = "SfdcId";
     private static final String MKTO_ID = "MktoId";
@@ -118,9 +126,18 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private String resultEntityId = null;
 
-    @PostConstruct
+    @BeforeClass(groups = "deployment")
     public void init() {
-        entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
+        tenant.setName(TENANT_ID);
+        tenantService.registerTenant(tenant);
+        // populate pid so that the tenant could be deleted in destroy()
+        tenant = tenantService.findByTenantId(tenant.getId());
+        entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, tenant);
+    }
+
+    @AfterClass(groups = "deployment")
+    public void destroy() {
+        tenantService.discardTenant(tenant);
     }
 
     @Test(groups = "deployment", priority = 1)
@@ -148,7 +165,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         // com.latticeengines.domain.exposed.workflow.WorkflowJob.tenant
         // Need to think more how to avoid creating tenant for every match test
         // and void conflict while running entity match test in parallel
-        input.setTenant(TENANT);
+        input.setTenant(tenant);
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         input.setPredefinedSelection(Predefined.ID);
         input.setFields(Arrays.asList(FIELDS));
