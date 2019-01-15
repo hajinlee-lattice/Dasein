@@ -23,10 +23,6 @@ function build_docker() {
 	    docker build -f Dockerfile.tmp -t ${IMAGE} . || true
 	fi
 	rm Dockerfile.tmp
-
-	if [[ -n "${DOCKER_SLIM_HOME}" ]]; then
-		echo -ne '\n' | ${DOCKER_SLIM_HOME}/docker-slim --verbose build ${IMAGE} --tag ${IMAGE}
-	fi
 }
 
 function create_network() {
