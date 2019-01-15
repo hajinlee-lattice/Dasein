@@ -2,13 +2,13 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +20,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import com.latticeengines.datacloud.core.annotation.PodContextAware;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
@@ -33,11 +31,15 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 
 @Api(value = "match", description = "REST resource for propdata matches")
@@ -54,6 +56,9 @@ public class MatchResource {
 
     @Inject
     private MatchValidationService matchValidationService;
+
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -118,6 +123,9 @@ public class MatchResource {
             String matchVersion = input.getDataCloudVersion();
             matchValidationService.validateDataCloudVersion(matchVersion);
             matchValidationService.validateDecisionGraph(input.getDecisionGraph());
+            if (input.bumpupEntitySeedVersion()) {
+                entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, input.getTenant());
+            }
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
