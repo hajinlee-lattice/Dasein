@@ -205,6 +205,11 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("EntityKeyMaps")
     private Map<String, EntityKeyMap> entityKeyMaps;
 
+    // Temporary flag for entity bulk match test. Will remove after we have
+    // workflow for testing
+    @JsonProperty("BumpupEntitySeedVersion")
+    private boolean bumpupEntitySeedVersion;
+
     // ====================
     // END ENTITY MATCH PROPERTIES
     // ====================
@@ -594,6 +599,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setEntityKeyMaps(Map<String, EntityKeyMap> entityKeyMaps) {
         this.entityKeyMaps = entityKeyMaps;
+    }
+
+    public boolean bumpupEntitySeedVersion() {
+        return bumpupEntitySeedVersion;
+    }
+
+    public void setBumpupEntitySeedVersion(boolean bumpupEntitySeedVersion) {
+        this.bumpupEntitySeedVersion = bumpupEntitySeedVersion;
     }
 
     @Override
