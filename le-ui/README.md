@@ -74,4 +74,3 @@ TROUBLESHOOTING
     If you have multiple versions of node installed using nvm, you can switch between them using `nvm use <version>`.  The Express server is tested to work with 4.1.2, so you might want to `nvm install 4.1.2` specifically and then `nvm use 4.1.2` if you are having weird issues during runtime.
     If you can’t connect, make sure the server is running and verify the console.log output makes sense for the environment you are running in.
     If you get an EADDRINUSE error when starting the server, killall node and try again. (Windows?  Use `grunt killnode`)
-
