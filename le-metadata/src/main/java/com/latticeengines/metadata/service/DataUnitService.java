@@ -10,6 +10,8 @@ public interface DataUnitService {
 
     List<DataUnit> findByNameFromReader(String name);
 
+    List<DataUnit> findAllByType(DataUnit.StorageType storageType);
+
     DataUnit findByNameTypeFromReader(String name, DataUnit.StorageType storageType);
 
     void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType);

@@ -9,27 +9,35 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
-public class RedShiftCleanupTestNG extends CDLFunctionalTestNGBase {
+public class RedShiftCleanupDeploymentTestNG extends CDLDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(RedShiftCleanupDeploymentTestNG.class);
 
     @Inject
     private RedshiftService redshiftService;
@@ -37,17 +45,20 @@ public class RedShiftCleanupTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private RedShiftCleanupService redshiftCleanupService;
 
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
     private String desTableName;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() {
-        super.setupTestEnvironmentWithDataCollection();
+        super.setupTestEnvironment();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testCreateTable() {
         Tenant tenant = MultiTenantContext.getTenant();
         this.desTableName = tenant.getName() + "_" + System.currentTimeMillis();
@@ -101,13 +112,26 @@ public class RedShiftCleanupTestNG extends CDLFunctionalTestNGBase {
         assertTrue(redshiftService.hasTable(this.desTableName));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateTable")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateTable")
+    public void testCreateDataUnit() {
+        RedshiftDataUnit dataUnit = new RedshiftDataUnit();
+        dataUnit.setRedshiftTable(this.desTableName.toLowerCase());
+        dataUnit.setTenant(mainTestTenant.getName());
+        dataUnit.setName(this.desTableName);
+        log.info(dataUnit.getTenant());
+        DataUnit desDataUnit =
+                dataUnitProxy.create(mainTestTenant.getId(), dataUnit);
+        log.info(desDataUnit.getTenant());
+        Assert.assertEquals(dataUnit.getName(), desDataUnit.getName());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testCreateDataUnit")
     public void testRedshiftCleanup() {
         redshiftCleanupService.removeUnusedTableByTenant(MultiTenantContext.getCustomerSpace().toString());
         assertFalse(redshiftService.hasTable(this.desTableName));
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void cleanup() {
         if (redshiftService.hasTable(this.desTableName))
             redshiftService.dropTable(this.desTableName);

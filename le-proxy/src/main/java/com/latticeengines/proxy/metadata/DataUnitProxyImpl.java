@@ -27,6 +27,14 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    public List<DataUnit> findAll(String customerSpace, DataUnit.StorageType type) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit?type={type}",
+                shortenCustomerSpace(customerSpace), type.name());
+        List<?> list = get("get data units", url, List.class);
+        return JsonUtils.convertList(list, DataUnit.class);
+    }
+
+    @Override
     public DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type) {
         List<DataUnit> units = getDataUnits(customerSpace, name, type);
         if (CollectionUtils.isNotEmpty(units)) {

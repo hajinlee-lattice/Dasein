@@ -19,7 +19,9 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("redShiftCleanupService")
@@ -38,6 +40,9 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Override
     public boolean removeUnusedTable() {
@@ -73,7 +78,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, inactiveVersion));
             log.info("inuse tableNames:" + tableNames.toString());
             // 2. get all tablename in this tenant_id on redshift
-            List<String> redshift_tableNames = redshiftService.getTables(tenant.getName());
+            List<String> redshift_tableNames = getRedShiftTableName(tenant);
             log.info("redshift tablename under tenant is :" + redshift_tableNames.toString());
             // 3.drop table
             dropTable(redshift_tableNames, new ArrayList<>(tableNames));
@@ -91,6 +96,16 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             log.info("drop table : " + simpleTable);
             redshiftService.dropTable(simpleTable);
         }
+    }
+
+    private List<String> getRedShiftTableName(Tenant tenant) {//remove those tableName which isn't in this tenant
+        List<DataUnit> dataUnits = dataUnitProxy.findAll(tenant.getId(), DataUnit.StorageType.Redshift);
+        Set<String> finalTableName = new HashSet<>();
+        for (DataUnit dataUnit : dataUnits) {
+            log.info("dataUnit = " + dataUnit.getName());
+            finalTableName.add(dataUnit.getName());
+        }
+        return new ArrayList<>(finalTableName);
     }
 
 }
