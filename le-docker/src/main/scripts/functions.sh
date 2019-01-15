@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function process_error() {
-    if [ ! -z "$(cat /tmp/errors.txt)" ]
+    if [[ ! -z "$(cat /tmp/errors.txt)" ]]
     then
         echo "Error!"
         cat /tmp/errors.txt
@@ -13,28 +13,32 @@ function build_docker() {
 	IMAGE=$1
     NO_CACHE=$2
     echo "Building docker image ${IMAGE} in ${PWD}"
-    if [ -f "Dockerfile.tmp" ]; then
+    if [[ -f "Dockerfile.tmp" ]]; then
         rm Dockerfile.tmp
     fi
 	sed "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile> Dockerfile.tmp
-	if [ "${NO_CACHE}" == "--no-cache" ]; then
+	if [[ "${NO_CACHE}" == "--no-cache" ]]; then
 	    docker build --no-cache -f Dockerfile.tmp -t ${IMAGE} . || true
 	else
 	    docker build -f Dockerfile.tmp -t ${IMAGE} . || true
 	fi
 	rm Dockerfile.tmp
+
+	if [[ -n "${DOCKER_SLIM_HOME}" ]]; then
+		echo -ne '\n' | ${DOCKER_SLIM_HOME}/docker-slim --verbose build ${IMAGE} --tag ${IMAGE}
+	fi
 }
 
 function create_network() {
 
-    if [ -z "$1" ]; then
+    if [[ -z "$1" ]]; then
         echo please specify network name
         exit -1
     fi
 
     NETWORK=$1
 
-    if [ -z "$(docker network ls -f name=${NETWORK} | grep ${NETWORK})" ]; then
+    if [[ -z "$(docker network ls -f name=${NETWORK} | grep ${NETWORK})" ]]; then
         echo "creating network ${NETWORK} ..."
         docker network create ${NETWORK}
     else
@@ -44,7 +48,7 @@ function create_network() {
 }
 
 function verify_consul() {
-    if [ -z "$(docker ps | grep consul)" ]; then
+    if [[ -z "$(docker ps | grep consul)" ]]; then
         echo "must start the consul docker first!"
         docker_ps
         exit -1
@@ -53,7 +57,7 @@ function verify_consul() {
 
 function rm_by_label() {
 
-    if [ "$#" -lt 2 ]; then
+    if [[ "$#" -lt 2 ]]; then
       echo "Usage: $0 LABEL VALUE" >&2
       exit 1
     fi
@@ -63,7 +67,7 @@ function rm_by_label() {
 
     for container in $(docker ps --format "table {{.Names}}" --filter=label=${LABEL}=${VALUE});
     do
-        if [ $container == "NAMES" ]; then continue ; fi && \
+        if [[ ${container} == "NAMES" ]]; then continue ; fi && \
         echo stopping $container ... && \
         docker stop $container &
     done
@@ -78,7 +82,7 @@ function rm_by_label() {
 
 function register_service() {
 
-    if [ "$#" -lt 3 ]; then
+    if [[ "$#" -lt 3 ]]; then
       echo "Usage: $0 SERVICE CONTAINER PORT" >&2
       exit 1
     fi
