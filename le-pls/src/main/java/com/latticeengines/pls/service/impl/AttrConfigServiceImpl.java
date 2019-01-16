@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -26,7 +27,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -133,6 +133,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Inject
     private CommonTenantConfigServiceImpl appTenantConfigService;
+
     @SuppressWarnings("unchecked")
     @Override
     public AttrConfigStateOverview getOverallAttrConfigActivationOverview() {
@@ -177,12 +178,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
             selection.setDisplayName(mapUsageToDisplayName(property));
             selections.add(selection);
-            TreeMap<String, Long> categories = new TreeMap<String, Long>(new Comparator<String>() {
-                @Override
-                public int compare(String a, String b) {
-                    return Category.fromName(a).getOrder().compareTo(Category.fromName(b).getOrder());
-                }
-            });
+            TreeMap<String, Long> categories = new TreeMap<>(Comparator.comparing(a -> //
+                    Objects.requireNonNull(Category.fromName(a)).getOrder()));
             selection.setCategories(categories);
             long selectedNum = 0L;
             for (String category : map.keySet()) {
@@ -636,13 +633,13 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     /*
                      * DP-6630 For Activate/Deactivate page, hide attributes
                      * that are: Inactive and AllowCustomization=FALSE
-                     * 
+                     *
                      * For Enable/Disable page, hide attributes that are:
                      * disabled and AllowCustomization=FALSE.
-                     * 
+                     *
                      * PLS-11145 For Enable/Disable page, hide attributes that
                      * are: disabled and Deprecated
-                     * 
+                     *
                      * 'onlyActivateAttrs=false' indicates it is
                      * Activate/Deactivate page, otherwise it is Usage
                      * Enable/Disable page
@@ -695,7 +692,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             /*
                              * For Enable/Disable page, hide attributes that
                              * are: disabled and AllowCustomization=FALSE.
-                             * 
+                             *
                              * For Enable/Disable page, hide attributes that
                              * are: disabled and Deprecated
                              */

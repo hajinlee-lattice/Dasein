@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -66,6 +67,9 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Mock
     private ActionService actionService;
+
+    @Mock
+    private CommonTenantConfigServiceImpl appTenantConfigService;
 
     @InjectMocks
     private AttrConfigServiceImpl attrConfigService;
@@ -129,6 +133,8 @@ public class AttrConfigServiceImplUnitTestNG {
                 Arrays.asList(ColumnSelection.Predefined.usageProperties), true))
                         .thenReturn(AttrConfigServiceImplTestUtils.generatePropertyAttrConfigOverviewForUsage(
                                 Arrays.asList(ColumnSelection.Predefined.usageProperties)));
+        when(appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(anyString(), anyString()))
+                .thenReturn(1000);
         AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
         log.info("overall usageOverview is " + usageOverview);
         List<AttrConfigSelection> selections = usageOverview.getSelections();
