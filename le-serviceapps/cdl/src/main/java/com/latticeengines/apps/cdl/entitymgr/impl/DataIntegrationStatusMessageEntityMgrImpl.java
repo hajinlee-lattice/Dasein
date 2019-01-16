@@ -27,8 +27,8 @@ public class DataIntegrationStatusMessageEntityMgrImpl
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public List<DataIntegrationStatusMessage> getAllStatusMessages(String eventId) {
-        return dataIntegrationStatusMessageDao.findAllByField("FK_DATA_INTEG_MONITORING_ID", eventId);
+    public List<DataIntegrationStatusMessage> getAllStatusMessages(Long statusMonitorPid) {
+        return dataIntegrationStatusMessageDao.findAllByField("FK_DATA_INTEG_MONITORING_ID", statusMonitorPid);
     }
 
 }

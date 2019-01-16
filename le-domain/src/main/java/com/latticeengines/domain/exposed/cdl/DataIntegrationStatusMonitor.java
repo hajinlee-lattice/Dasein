@@ -24,8 +24,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -42,6 +42,22 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class DataIntegrationStatusMonitor
         implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
+    public DataIntegrationStatusMonitor() {
+    }
+
+    public DataIntegrationStatusMonitor(DataIntegrationStatusMonitorMessage statusMessage,
+            Tenant tenant) {
+        this.tenant = tenant;
+        this.workflowRequestId = statusMessage.getWorkflowRequestId();
+        this.operation = statusMessage.getOperation();
+        this.entityName = statusMessage.getEntityName();
+        this.entityId = statusMessage.getEntityId();
+        this.externalSystemId = statusMessage.getExternalSystemId();
+        this.sourceFile = statusMessage.getSourceFile();
+        this.errorFile = statusMessage.getErrorFile();
+        this.status = statusMessage.getEventType();
+    }
+
     @Id
     @JsonProperty("pid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,6 +68,7 @@ public class DataIntegrationStatusMonitor
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Tenant tenant;
 
     @JsonProperty("operation")
@@ -111,10 +128,12 @@ public class DataIntegrationStatusMonitor
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -227,18 +246,22 @@ public class DataIntegrationStatusMonitor
         this.eventCompletedTime = eventCompletedTime;
     }
 
+    @Override
     public Date getCreated() {
         return createdDate;
     }
 
+    @Override
     public void setCreated(Date created) {
         this.createdDate = created;
     }
 
+    @Override
     public Date getUpdated() {
         return updatedDate;
     }
 
+    @Override
     public void setUpdated(Date updated) {
         this.updatedDate = updated;
     }
