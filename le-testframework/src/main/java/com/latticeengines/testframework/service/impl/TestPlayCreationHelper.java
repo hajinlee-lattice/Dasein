@@ -230,10 +230,6 @@ public class TestPlayCreationHelper {
         MultiTenantContext.setTenant(tenant);
     }
 
-    public void setupTenantAndCreatePlay() throws Exception {
-        setupTenantAndCreatePlay(null);
-    }
-
     public void setupTenantAndCreatePlay(PlayLaunchConfig playLaunchConfig) throws Exception {
         if (StringUtils.isNotBlank(playLaunchConfig.getExistingTenant())) {
             useExistingTenant(playLaunchConfig.getExistingTenant());
