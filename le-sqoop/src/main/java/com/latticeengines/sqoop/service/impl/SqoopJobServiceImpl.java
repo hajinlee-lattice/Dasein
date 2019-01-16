@@ -65,9 +65,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         log.info("Use yarnConfiguration with default Fs: " + yarnConfiguration.get("fs.defaultFS"));
 
         int numMappers = exporter.getNumMappers();
-        if (numMappers < 1) {
-            numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
-        }
+        numMappers = Math.max(numMappers, 32);
 
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
@@ -137,14 +135,11 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         }
 
         int numMappers = importer.getNumMappers();
-        if (numMappers < 1) {
-            numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
-        }
-
         String table = importer.getTable();
-        if (importer.getSplitColumn() == null || importer.getSplitColumn().isEmpty()
-                || (StringUtils.isNotEmpty(table) && table.startsWith("Play"))) {
+        if (StringUtils.isBlank(importer.getSplitColumn())) {
             numMappers = 1;
+        } else {
+            numMappers = Math.max(32, numMappers);
         }
 
         List<String> cmds = new ArrayList<>();
@@ -168,6 +163,8 @@ public class SqoopJobServiceImpl implements SqoopJobService {
             cmds.add("--query");
             cmds.add(importer.getQuery());
         }
+        cmds.add("--fetch-size");
+        cmds.add("200");
         cmds.add("--mapreduce-job-name");
         cmds.add(importer.fullJobName());
         if (importer.getColumnsToInclude() != null && !importer.getColumnsToInclude().isEmpty()) {
