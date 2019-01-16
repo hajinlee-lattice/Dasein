@@ -26,6 +26,7 @@
     "http-proxy-middleware": "^0.17.4",
     "https": "^1.0.0",
     "morgan": "1.9.1",
+    "node-sass": "^4.11.0",
     "request": "^2.69.0"
   },
   "devDependencies": {
