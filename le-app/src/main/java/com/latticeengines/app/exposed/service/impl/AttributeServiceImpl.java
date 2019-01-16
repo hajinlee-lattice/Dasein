@@ -338,7 +338,7 @@ public class AttributeServiceImpl implements AttributeService {
         for (DataLicense license : DataLicense.values()) {
             int attributeLimitation = appTenantConfigService
                     .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
-                    license);
+                            license.getDataLicense());
             limitationMap.put(license.getDataLicense() + KEY_SUFFIX, attributeLimitation);
         }
         int maxLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(), null);

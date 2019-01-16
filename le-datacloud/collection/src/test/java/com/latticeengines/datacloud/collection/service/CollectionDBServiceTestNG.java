@@ -94,7 +94,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testLoad() throws Exception {
 
         List<String> pathSet = Arrays.asList(

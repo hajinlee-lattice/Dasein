@@ -7,7 +7,9 @@
         { "Node": "MaxEnrichAttributes", "Data": {"Type": "number", "Required": false}},
         { "Node": "HG", "Data": {"Type": "number", "Required": false}},
         { "Node": "Bombora", "Data": {"Type": "number", "Required": false}},
-        { "Node": "WebsiteKeywords", "Data": {"Type": "number", "Required": false}}
+        { "Node": "WebsiteKeywords", "Data": {"Type": "number", "Required": false}},
+        { "Node": "CompanyProfile", "Data": {"Type": "number", "Required": false}},
+        { "Node": "Enrichment", "Data": {"Type": "number", "Required": false}}
       ]
     }
   ]

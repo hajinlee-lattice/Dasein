@@ -3,15 +3,17 @@ package com.latticeengines.apps.core.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.service.AttrValidator;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
-import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -24,6 +26,9 @@ public class UsageLimitValidator extends AttrValidator {
     private static final Logger log = LoggerFactory.getLogger(UsageLimitValidator.class);
 
     public static final String VALIDATOR_NAME = "USAGE_LIMIT_VALIDATOR";
+
+    @Inject
+    private ZKConfigService zkConfigService;
 
     private List<String> usageLimitCheckList = Arrays.asList(ColumnSelection.Predefined.Enrichment.getName(),
             ColumnSelection.Predefined.CompanyProfile.getName());
@@ -47,10 +52,9 @@ public class UsageLimitValidator extends AttrValidator {
         int result = 0;
         switch (ColumnSelection.Predefined.fromName(usage)) {
         case Enrichment:
-            result = (int) AttrConfigUsageOverview.defaultExportLimit;
-            break;
         case CompanyProfile:
-            result = (int) AttrConfigUsageOverview.defaultCompanyProfileLimit;
+            result = zkConfigService
+                    .getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), usage);
             break;
         default:
             break;
