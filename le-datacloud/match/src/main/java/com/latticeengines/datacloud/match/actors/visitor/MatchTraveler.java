@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -98,6 +97,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void setResult(Object result) {
         super.setResult(result);
         entityIds.put(entity, (String) result);
+    }
+
+    @Override
+    public void prepareForRetravel() {
+        super.prepareForRetravel();
+        entityMatchErrors = null;
     }
 
     @Override
