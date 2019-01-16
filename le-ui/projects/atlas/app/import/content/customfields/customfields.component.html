@@ -81,8 +81,13 @@
         class="customfield"
       >
         <ul class="field">
-          <li class="field-name">{{ field.userField }}</li>
-          <li class="type">
+          <li class="field-name">
+            <span>{{ field.userField }}</span>
+          </li>
+          <li
+            class="type"
+            ng-class="fieldMapping[field.userField].fieldType == 'DATE' ? 'DATE' : ''"
+          >
             <select
               ng-disabled="fieldMapping[field.userField].ignore === true"
               class="form-control"
@@ -98,21 +103,48 @@
               <option value="BOOLEAN">Boolean</option>
               <option value="DATE">Date</option>
             </select>
+            <div
+              class="date-options"
+              ng-if="fieldMapping[field.userField].fieldType == 'DATE'"
+            >
+              <select>
+                <option>MM/DD/YYYY</option>
+                <option>MM-DD-YYYY</option>
+                <option>MM.DD.YYYY</option>
+                <option>DD/MM/YYYY</option>
+                <option>DD-MM-YYYY</option>
+                <option>DD.MM.YYYY</option>
+                <option>YYYY/MM/DD</option>
+                <option>YYYY-MM-DD</option>
+                <option>YYYY.MM.DD</option>
+                <option>MM/DD/YY</option>
+                <option>MM-DD-YY</option>
+                <option>MM.DD.YY</option>
+                <option>DD/MM/YY</option>
+                <option>DD-MM-YY</option>
+                <option>DD.MM.YY</option>
+              </select>
+
+              <select>
+                <option>00:00:00 12H</option>
+                <option>00-00-00 12H</option>
+                <option>00 00 00 12H</option>
+                <option>00:00:00 24H</option>
+                <option>00-00-00 24H</option>
+                <option>00 00 00 24H</option>
+              </select>
+            </div>
+            <div  ng-if="fieldMapping[field.userField].fieldType == 'DATE'">
+              <select>
+                <option>UTC-USA/Los Angeles -8</option>
+                <option>UTC-USA/Los Angeles -8</option>
+                <option>UTC-USA/Los Angeles -8</option>
+                <option>UTC-USA/Los Angeles -8</option>
+                <option>UTC-USA/Los Angeles -8</option>
+              </select>
+            </div>
           </li>
-          <!-- <li>
-            <select>
-              <option>A</option>
-              <option>B</option>
-              <option>C</option>
-            </select>
-          </li>
-          <li>
-            <select>
-              <option>A</option>
-              <option>B</option>
-              <option>C</option>
-            </select>
-          </li> -->
+
           <li class="ignore">
             <input
               type="checkbox"
@@ -121,10 +153,25 @@
               ng-change="vm.changeIgnore(fieldMapping)"
               ng-disabled="field.defaultIgnored === true"
             />
-            <label for="{{field.userField}}">Ignore</label>
+            <!-- <label for="{{field.userField}}">Ignore</label> -->
           </li>
         </ul>
       </li>
     </ul>
   </form>
 </div>
+<!-- "MM/DD/YYYY"
+"MM-DD-YYYY"
+"MM.DD.YYYY"
+"DD/MM/YYYY"
+"DD-MM-YYYY"
+"DD.MM.YYYY"
+"YYYY/MM/DD"
+"YYYY-MM-DD"
+"YYYY.MM.DD"
+"MM/DD/YY"
+"MM-DD-YY"
+"MM.DD.YY"
+"DD/MM/YY"
+"DD-MM-YY"
+"DD.MM.YY" -->
