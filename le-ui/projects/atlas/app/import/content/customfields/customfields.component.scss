@@ -53,7 +53,7 @@
                 & > li {
                     @include flex-item(0 1 auto);
                     @include text-ellipsis;
-                    width: 100%;
+                    width: calc((100% - 80px) / 2);
                     &.ignore {
                         width: 90px;
                         label {
@@ -65,7 +65,7 @@
                     }
                     &.DATE{
                         display: inline-flex;
-                        width: 100%;
+                        
                     }
                 }
             }
