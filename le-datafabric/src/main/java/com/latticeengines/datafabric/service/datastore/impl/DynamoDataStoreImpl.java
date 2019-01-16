@@ -95,8 +95,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         String attrProp = schema.getProp(DynamoUtil.ATTRIBUTES);
         this.tableAttributes = DynamoUtil.getAttributes(attrProp);
 
-        // by default, do not enforce remote dynamo
-        useRemoteDynamo(false);
+        // default to remote now since only some tests are using local dynamo and
+        // switching can cause other services to get local client
+        useRemoteDynamo(true);
 
         log.info("Constructed Dynamo data store repo " + repository + " record " + recordType + " attributes "
                 + keyProp);
