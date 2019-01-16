@@ -112,7 +112,7 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
     }
 
     @Override
-    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, DataLicense dataLicense) {
+    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense) {
         String maxPremiumLeadEnrichmentAttributes;
         Camille camille = CamilleEnvironment.getCamille();
         Path contractPath = null;
@@ -123,7 +123,7 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
             if (dataLicense == null) {
                 path = contractPath.append(DATA_CLOUD_LICENSE).append(MAX_ENRICH_ATTRIBUTES);
             } else {
-                path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense.getDataLicense());
+                path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense);
             }
             maxPremiumLeadEnrichmentAttributes = camille.get(path).getData();
         } catch (KeeperException.NoNodeException ex) {
@@ -135,7 +135,7 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
                         .append(new Path(DATA_CLOUD_LICENSE).append(new Path(MAX_ENRICH_ATTRIBUTES)));
             } else {
                 defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
-                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path("/" + dataLicense.getDataLicense())));
+                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path("/" + dataLicense)));
             }
 
             String defaultPremiumLeadEnrichmentAttributes;

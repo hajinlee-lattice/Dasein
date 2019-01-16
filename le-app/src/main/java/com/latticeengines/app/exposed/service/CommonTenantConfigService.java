@@ -20,5 +20,5 @@ public interface CommonTenantConfigService {
 
     TenantConfiguration getTenantConfiguration();
 
-    int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, DataLicense dataLicense);
+    int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);
 }
