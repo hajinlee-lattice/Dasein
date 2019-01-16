@@ -37,7 +37,7 @@ else
     mkdir -p ${ARTIFACT_DIR}
 fi
 
-LEDS_VERSION=$(cat ${WSHOME}/le-config/conf/env/dev/latticeengines.properties | grep dataplatform.leds.version | cut -d= -f 2)
+LEDS_VERSION=$(cat ${WSHOME}/le-config/conf/env/dev/latticeengines.properties | grep hadoop.leds.version | cut -d= -f 2)
 echo "LEDS_VERSION=${LEDS_VERSION}"
 
 DS_ROOT="/datascience/${LEDS_VERSION}"
@@ -51,6 +51,7 @@ else
     S3_DIR="release/sklearn-pipeline/v${LEDS_VERSION}"
 fi
 
+HAS_CHANGE=""
 for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts'; do
     artifact=$(echo ${params} | cut -d \| -f 1)
     dir1=$(echo ${params} | cut -d \| -f 2)
@@ -59,6 +60,7 @@ for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scorin
         echo "No need to upload ${artifact}"
     else
         echo "Need to upload ${artifact}"
+        HAS_CHANGE="true"
         pushd ${ARTIFACT_DIR}
         unzip ${artifact}-${LEDS_VERSION}.zip
         hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
@@ -69,4 +71,6 @@ for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scorin
     fi
 done
 
-hdfs dfs -ls -R -h ${DS_ROOT}
+if [[ -n "${HAS_CHANGE}" ]]; then
+    hdfs dfs -ls -R -h ${DS_ROOT}
+fi

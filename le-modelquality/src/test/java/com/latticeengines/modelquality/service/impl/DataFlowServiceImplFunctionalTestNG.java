@@ -26,7 +26,7 @@ public class DataFlowServiceImplFunctionalTestNG extends ModelQualityFunctionalT
             }
 
             DataFlowServiceImpl spiedDataFlowService = spy((DataFlowServiceImpl) dataFlowService);
-            doReturn("z/9.9.8-SNAPSHOT").when(spiedDataFlowService).getVersion();
+            doReturn("z/9.9.8-SNAPSHOT").when(spiedDataFlowService).getLedsVersion();
 
             df = spiedDataFlowService.createLatestProductionDataFlow();
             Assert.assertNotNull(df);
@@ -34,7 +34,7 @@ public class DataFlowServiceImplFunctionalTestNG extends ModelQualityFunctionalT
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", df.getName());
             Assert.assertNotNull(dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
-            doReturn("z/9.9.9-SNAPSHOT").when(spiedDataFlowService).getVersion();
+            doReturn("z/9.9.9-SNAPSHOT").when(spiedDataFlowService).getLedsVersion();
             df = spiedDataFlowService.createLatestProductionDataFlow();
             Assert.assertNotNull(df);
             Assert.assertEquals(new Integer(initialVersion + 2), df.getVersion());

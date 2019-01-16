@@ -9,6 +9,6 @@ public class AggregationAlgorithm extends AlgorithmBase {
 
     public AggregationAlgorithm() {
         setName("AG");
-        setScript("/app/dataplatform/scripts/algorithm/aggregate_train.py");
+        setScript("/datascience/dataplatform/scripts/algorithm/aggregate_train.py");
     }
 }

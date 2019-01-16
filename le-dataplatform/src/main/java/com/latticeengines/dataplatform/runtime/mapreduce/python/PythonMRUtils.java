@@ -24,14 +24,15 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 public class PythonMRUtils {
     public static final String METADATA_JSON_PATH = "./metadata.json";
+    private static final String DS = "datascience";
 
     private static final Logger log = LoggerFactory.getLogger(PythonMRUtils.class);
 
     public static String setupArchiveFilePath(Classifier classifier, String version) {
-        List<String> paths = new ArrayList<String>();
+        List<String> paths = new ArrayList<>();
         paths.add(classifier.getPythonPipelineLibHdfsPath());
-        paths.add(String.format("/app/%s/dataplatform/scripts/leframework.tar.gz", version));
-
+        paths.add(String.format("/%s/%s/dataplatform/scripts/leframework.tar.gz", DS, version));
+        paths = getScriptPathsWithVersion(paths, version);
         return StringUtils.join(paths, ",");
     }
 
@@ -54,37 +55,46 @@ public class PythonMRUtils {
         for (String trainingSet : trainingSets) {
             paths.add(trainingHdfsDir + "/" + trainingSet);
         }
-
         return setupCacheFiles(paths, classifier, version);
     }
 
-    private static String getScriptPathWithVersion(String script, String version) {
-        String afterPart = StringUtils.substringAfter(script, "/app");
-        return "/app/" + version + afterPart;
+    public static String getScriptPathWithVersion(String script, String version) {
+        String afterPart = StringUtils.substringAfter(script, "/" + DS);
+        String expaned = "/" + DS + "/" + version + afterPart;
+        log.info(String.format("Expanded path %s to %s", script, expaned));
+        return expaned;
+    }
+
+    private static List<String> getScriptPathsWithVersion(List<String> paths, String version) {
+        List<String> expandedPaths = new ArrayList<>();
+        paths.forEach(path -> {
+            if (path.startsWith("/" + DS + "/") && !path.startsWith("/" + DS + "/" + version)) {
+                expandedPaths.add(getScriptPathWithVersion(path, version));
+            } else {
+                expandedPaths.add(path);
+            }
+        });
+        log.info("paths: " + expandedPaths);
+        return expandedPaths;
     }
 
     private static String setupCacheFiles(List<String> paths, Classifier classifier, String version) {
-        paths.add(String.format("/app/%s/conf/latticeengines.properties", version));
-        paths.add(String.format("/app/%s/dataplatform/scripts/launcher.py", version));
-        paths.add(String.format("/app/%s/dataplatform/scripts/pipelinefwk.py", version));
-        paths.add(String.format("/app/%s/dataplatform/scripts/rulefwk.py", version));
-        paths.add(String.format("/app/%s/dataplatform/scripts/pythonlauncher.sh", version));
+        paths.add(String.format("/%s/%s/dataplatform/scripts/launcher.py", DS, version));
+        paths.add(String.format("/%s/%s/dataplatform/scripts/pipelinefwk.py", DS, version));
+        paths.add(String.format("/%s/%s/dataplatform/scripts/rulefwk.py", DS, version));
+        paths.add(String.format("/%s/%s/dataplatform/scripts/pythonlauncher.sh", DS, version));
         paths.add(classifier.getTestDataHdfsPath());
         paths.add(classifier.getSchemaHdfsPath());
         paths.add(classifier.getPythonScriptHdfsPath());
         paths.add(classifier.getPythonPipelineScriptHdfsPath());
 
         String pipelineDriver = classifier.getPipelineDriver();
-
         if (StringUtils.isEmpty(pipelineDriver)) {
             pipelineDriver = new RandomForestAlgorithm().getPipelineDriver();
-            pipelineDriver = getScriptPathWithVersion(pipelineDriver, version);
         }
         paths.add(pipelineDriver);
 
         String script = new AggregationAlgorithm().getScript();
-        String afterPart = StringUtils.substringAfter(script, "/app");
-        script = "/app/" + version + afterPart;
         paths.add(script);
 
         String configMetadata = classifier.getConfigMetadataHdfsPath();
@@ -92,6 +102,7 @@ public class PythonMRUtils {
             paths.add(configMetadata);
         }
 
+        paths = getScriptPathsWithVersion(paths, version);
         return StringUtils.join(paths, ",");
     }
 

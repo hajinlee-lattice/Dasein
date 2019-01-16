@@ -63,8 +63,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
             ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
             // List<ScoreOutput> resultList = new ArrayList<>();
-            if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(),
-                    Boolean.FALSE.booleanValue()) == Boolean.TRUE.booleanValue()) {
+            if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(),false)) {
                 log.info("Using score derivation to generate percentile score.");
                 Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
                         .deserializeLocalScoreDerivationFiles(uris);
@@ -75,13 +74,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 ScoringMapperPredictUtil.processScoreFiles(config, modelAndRecordInfo, models, recordFileThreshold,
                         taskId);
             }
-            // log.info("The mapper has scored: " + resultList.size() + "
-            // records.");
-            // if (totalRecordCount != resultList.size()) {
-            // throw new LedpException(LedpCode.LEDP_20009,
-            // new String[] { String.valueOf(totalRecordCount),
-            // String.valueOf(resultList.size()) });
-            // }
 
             long scoringEndTime = System.currentTimeMillis();
             long scoringTotalTime = scoringEndTime - transformEndTime;

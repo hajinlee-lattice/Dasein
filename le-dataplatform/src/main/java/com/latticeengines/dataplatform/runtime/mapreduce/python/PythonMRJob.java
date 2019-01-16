@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.util.Properties;
 
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -28,6 +29,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     public static final String PYTHON_MR_JOB = "pythonMRJob";
 
     private VersionManager versionManager;
+    private ManifestService manifestService;
     private EMRCacheService emrCacheService;
     private String stackName;
     private String condaEnv;
@@ -44,7 +46,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     public PythonMRJob(//
             Configuration config, //
             MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-            VersionManager versionManager, //
+            ManifestService manifestService, //
             EMRCacheService emrCacheService, //
             String stackName, //
             String condaEnv, //
@@ -52,7 +54,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             Boolean useEmr) {
         setConf(config);
         mapReduceCustomizationRegistry.register(this);
-        this.versionManager = versionManager;
+        this.manifestService = manifestService;
         this.emrCacheService = emrCacheService;
         this.stackName = stackName;
         this.condaEnv = condaEnv;
@@ -63,6 +65,11 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     @VisibleForTesting
     void setVersionManager(VersionManager versionManager) {
         this.versionManager = versionManager;
+    }
+
+    @VisibleForTesting
+    void setManifestService(ManifestService manifestService) {
+        this.manifestService = manifestService;
     }
 
     @Override
@@ -123,8 +130,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         if (reduceMemorySize != null) {
             config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
         }
-        config.set(PythonContainerProperty.VERSION.name(),
-                versionManager.getCurrentVersionInStack(stackName));
+        config.set(PythonContainerProperty.VERSION.name(), manifestService.getLedsVersion());
 
         config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
         config.set("mapreduce.map.maxattempts", "1");

@@ -52,7 +52,7 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         // create a t-1 prod pipeline
         AnalyticPipelineServiceImpl spiedAnalyticPipelineService = spy(
                 (AnalyticPipelineServiceImpl) analyticPipelineService);
-        doReturn("z/9.9.8-SNAPSHOT").when(spiedAnalyticPipelineService).getVersion();
+        doReturn("z/9.9.8-SNAPSHOT").when(spiedAnalyticPipelineService).getLedsVersion();
         AnalyticPipeline oldProdAp = spiedAnalyticPipelineService.createLatestProductionAnalyticPipeline();
 
         // create a selected pipeline test and a prod test with the t-1 pipeline
@@ -71,7 +71,7 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         analyticTestService.createAnalyticTest(analyticTestEntityNames);
 
         // create a t prod pipeline
-        doReturn("z/9.9.9-SNAPSHOT").when(spiedAnalyticPipelineService).getVersion();
+        doReturn("z/9.9.9-SNAPSHOT").when(spiedAnalyticPipelineService).getLedsVersion();
         AnalyticPipeline newProdAp = spiedAnalyticPipelineService.createLatestProductionAnalyticPipeline();
 
         // run update, verify tests and modelruns

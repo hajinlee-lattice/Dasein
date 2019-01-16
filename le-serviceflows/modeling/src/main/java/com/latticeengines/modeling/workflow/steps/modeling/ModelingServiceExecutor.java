@@ -160,7 +160,7 @@ public class ModelingServiceExecutor {
         config.setTargets(Arrays.asList(builder.getTargets()));
         config.setParallelEnabled(true);
         if (builder.isV2ProfilingEnabled()) {
-            config.setScript("/app/dataplatform/scripts/algorithm/data_profile_v2.py");
+            config.setScript("/datascience/dataplatform/scripts/algorithm/data_profile_v2.py");
         }
         AppSubmission submission = modelProxy.profile(config);
         String appId = submission.getApplicationIds().get(0);
@@ -286,10 +286,10 @@ public class ModelingServiceExecutor {
     private Algorithm getCdlAlgorithm() {
         Algorithm algorithm = new RandomForestAlgorithm();
         algorithm.setSampleName("all");
-        algorithm.setScript("/app/dataplatform/scripts/algorithm/parallel_rf_train.py");
+        algorithm.setScript("/datascience/dataplatform/scripts/algorithm/parallel_rf_train.py");
         if (builder.isExpectedValue()) {
-            algorithm.setPipelineScript("/app/playmaker/evmodel/evpipeline.py");
-            algorithm.setPipelineLibScript("/app/playmaker/evmodel/evpipeline.tar.gz");
+            algorithm.setPipelineScript("/datascience/playmaker/evmodel/evpipeline.py");
+            algorithm.setPipelineLibScript("/datascience/playmaker/evmodel/evpipeline.tar.gz");
             log.info("This is EV model!.");
         }
         algorithm.setPriority(2);
