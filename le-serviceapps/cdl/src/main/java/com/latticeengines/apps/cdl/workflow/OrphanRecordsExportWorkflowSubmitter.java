@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,6 +22,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -31,6 +34,7 @@ import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component("orphanRecordsExportWorkflowSubmitter")
 public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
@@ -44,6 +48,9 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     @WithWorkflowJobPid
     public ApplicationId submit(String customerSpace, OrphanRecordsExportRequest request,
@@ -76,6 +83,9 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 artifact);
         log.info("Created dataCollectionArtifact=" + JsonUtils.serialize(artifact));
 
+        List<Attribute> importedAttributes = getImportAttributes(orphanRecordsType.getDataSource(),
+                orphanRecordsType.getDataFeedType(), orphanRecordsType.getEntity().name());
+
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
                 OrphanRecordsExportWorkflowConfiguration.WORKFLOW_NAME);
@@ -101,6 +111,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 .workflow(OrphanRecordsExportWorkflowConfiguration.WORKFLOW_NAME) //
                 .orphanRecordExportId(request.getExportId()) //
                 .orphanRecordsType(orphanRecordsType) //
+                .originalAttributeNames(importedAttributes) //
                 .inputProperties(inputProperties) //
                 .targetPath(targetPath) //
                 .exportInputPath(targetPath) //
@@ -130,5 +141,16 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                     String.format("Cannot get table %s from version %s.", tableRoleInCollection, version));
         }
         return table;
+    }
+
+    private List<Attribute> getImportAttributes(String source, String dataFeedType, String entity) {
+        String tenant = getCustomerSpace().toString();
+        DataFeedTask task = dataFeedProxy.getDataFeedTask(tenant, source, dataFeedType, entity);
+
+        if (task == null) {
+            return null;
+        }
+
+        return task.getImportTemplate().getAttributes();
     }
 }

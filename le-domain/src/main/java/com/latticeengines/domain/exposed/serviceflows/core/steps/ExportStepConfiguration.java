@@ -3,9 +3,10 @@ package com.latticeengines.domain.exposed.serviceflows.core.steps;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
@@ -25,6 +26,8 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     private boolean exportMergedFile = Boolean.FALSE;
 
     private String mergedFileName;
+
+    private Map<String, Attribute> nameToAttributeMap;
 
     private Map<String, String> properties = new HashMap<>();
 
@@ -108,4 +111,11 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
         this.mergedFileName = mergedFileName;
     }
 
+    public Map<String, Attribute> getNameToAttributeMap() {
+        return nameToAttributeMap;
+    }
+
+    public void setAttributes(Map<String, Attribute> nameToAttributeMap) {
+        this.nameToAttributeMap = nameToAttributeMap;
+    }
 }

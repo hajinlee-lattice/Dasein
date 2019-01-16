@@ -1,11 +1,14 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ComputeOrphanRecordsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportOrphansToS3StepConfiguration;
@@ -133,6 +136,15 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder dataCollectionVersion(DataCollection.Version version) {
             computeOrphans.setDataCollectionVersion(version);
             exportToS3.setVersion(version);
+            return this;
+        }
+
+        public Builder originalAttributeNames(List<Attribute> importedAttributes) {
+            Map<String, Attribute> nameToAttributeMap = new HashMap<>();
+            if (importedAttributes != null) {
+                importedAttributes.forEach(attrib -> nameToAttributeMap.put(attrib.getName(), attrib));
+            }
+            avroToCsvExport.setAttributes(nameToAttributeMap);
             return this;
         }
 
