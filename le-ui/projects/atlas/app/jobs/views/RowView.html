@@ -53,7 +53,7 @@
                     </a>
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button"
-                      ng-if="jobType == 'importMatchAndModelWorkflow' || jobType == 'customEventModelingWorkflow'">
+                      ng-if="jobType == 'importMatchAndModelWorkflow' || jobType == 'customEventModelingWorkflow' || jobType == 'crossSellImportMatchAndModelWorkflow'">
                     <a ui-sref="home.jobs.status.csv({jobId: job.id})">
                         <i class="fa fa-list-alt"></i>Report
                     </a>
@@ -96,7 +96,7 @@
             <div class="twelve columns">
 
 
-                <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow' || jobType == 'modelAndEmailWorkflow' || jobType == 'customEventModelingWorkflow'">
+                <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow' || jobType == 'modelAndEmailWorkflow' || jobType == 'customEventModelingWorkflow' || jobType == 'crossSellImportMatchAndModelWorkflow'">
                     <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
                         <div>
 

@@ -33,6 +33,8 @@ angular
             $scope.isRatingEngine = (job.inputs.RATING_ENGINE_ID != undefined);
             $scope.isPMML = job.modelType === 'PmmlModel';
 
+            
+
             if ($scope.job.rating_id && JobsStore.cancelledJobs[$scope.job.rating_id] != undefined) {
                 $scope.cancelling[job.id] = true;
             }
