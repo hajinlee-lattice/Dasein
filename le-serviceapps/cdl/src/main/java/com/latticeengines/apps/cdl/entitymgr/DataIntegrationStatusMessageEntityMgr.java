@@ -8,5 +8,5 @@ public interface DataIntegrationStatusMessageEntityMgr {
 
     public void create(DataIntegrationStatusMessage statusMessage);
 
-    public List<DataIntegrationStatusMessage> getAllStatusMessages(String eventId);
+    public List<DataIntegrationStatusMessage> getAllStatusMessages(Long statusMonitorPid);
 }

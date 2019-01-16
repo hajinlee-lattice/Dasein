@@ -789,6 +789,8 @@ public enum LedpCode {
     LEDP_40045("Cannot count rating models coverage for segment {0}, as it doesn't exists"),
     LEDP_40046("Too few events to learn from - the model needs at least {0} successes. Try modeling on "
             + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."),
+    LEDP_40047("Invalid state transition from {0} to {1}"), //
+    LEDP_40048("Workflow status handler does not exist for event type {0}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
