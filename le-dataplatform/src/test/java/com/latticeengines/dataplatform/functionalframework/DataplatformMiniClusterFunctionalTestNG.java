@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.functionalframework;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -17,8 +16,5 @@ public class DataplatformMiniClusterFunctionalTestNG extends YarnMiniClusterFunc
     protected static final Logger log = LoggerFactory.getLogger(DataplatformMiniClusterFunctionalTestNG.class);
 
     protected String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
-
-    @Value("${dataplatform.hdfs.stack:}")
-    protected String stackName;
 
 }

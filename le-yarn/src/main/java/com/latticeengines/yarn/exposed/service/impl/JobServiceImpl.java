@@ -217,7 +217,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
             config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrCacheService.getWebHdfsUrl());
         }
-        config.forEach(entry -> log.info(String.format("%s: %s", entry.getKey(), entry.getValue())));
+        config.forEach(entry -> log.debug(String.format("%s: %s", entry.getKey(), entry.getValue())));
         try {
             JobID jobId = JobService.runMRJob(job, mrJobName, false);
             return TypeConverter.toYarn(jobId).getAppId();

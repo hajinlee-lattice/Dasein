@@ -28,7 +28,7 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
             }
 
             PropDataServiceImpl spiedPropDataService = spy((PropDataServiceImpl) propDataService);
-            doReturn("z/9.9.8-SNAPSHOT").when(spiedPropDataService).getVersion();
+            doReturn("z/9.9.8-SNAPSHOT").when(spiedPropDataService).getLedsVersion();
 
             pd = spiedPropDataService.createLatestProductionPropData();
             Assert.assertNotNull(pd);
@@ -36,7 +36,7 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", pd.getName());
             Assert.assertNotNull(propDataEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
-            doReturn("z/9.9.9-SNAPSHOT").when(spiedPropDataService).getVersion();
+            doReturn("z/9.9.9-SNAPSHOT").when(spiedPropDataService).getLedsVersion();
             pd = spiedPropDataService.createLatestProductionPropData();
             Assert.assertNotNull(pd);
             Assert.assertEquals(new Integer(initialVersion + 2), pd.getVersion());

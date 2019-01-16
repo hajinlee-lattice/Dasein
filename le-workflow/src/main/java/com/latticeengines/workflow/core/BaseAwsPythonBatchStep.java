@@ -20,10 +20,10 @@ import org.zeroturnaround.exec.ProcessResult;
 
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfiguration> extends AbstractStep<T>
@@ -35,17 +35,14 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
     @Value("${hadoop.fs.web.defaultFS}")
     String webHdfs;
 
-    @Value("${dataplatform.hdfs.stack:}")
-    private String stackName;
-
-    @Inject
-    private VersionManager versionManager;
-
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
     @Inject
     private EMRCacheService emrCacheService;
+
+    @Inject
+    private ManifestService manifestService;
 
     protected ApplicationContext applicationContext;
 
@@ -204,9 +201,8 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
     }
 
     protected String getScriptDirInHdfs() {
-        String artifactVersion = versionManager.getCurrentVersionInStack(stackName);
-        String scriptDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataplatform/scripts"
-                : "/app/" + artifactVersion + "/dataplatform/scripts";
+        String artifactVersion = manifestService.getLedsVersion();
+        String scriptDir = "/datascience/" + artifactVersion + "/dataplatform/scripts";
         log.info("Using python script dir = " + scriptDir);
         return scriptDir;
     }

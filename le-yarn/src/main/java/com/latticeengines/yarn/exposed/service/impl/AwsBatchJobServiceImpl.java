@@ -9,13 +9,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,7 @@ import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
@@ -39,11 +41,14 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
 
     protected static final Logger log = LoggerFactory.getLogger(AwsBatchJobServiceImpl.class);
 
-    @Autowired
+    @Inject
     private BatchService batchService;
 
-    @Autowired
+    @Inject
     private JobServiceHelper jobServiceHelper;
+
+    @Inject
+    private ManifestService manifestService;
 
     @Value("${hadoop.fs.web.defaultFS}")
     String webHdfs;
@@ -57,10 +62,10 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
     @Value("${dataplatform.model.aws.batch.local.enabled}")
     private boolean batchLocal;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private YarnClientCustomizationService awsBatchCustomizationService;
 
     public ApplicationId submitAwsBatchJob(com.latticeengines.domain.exposed.dataplatform.Job job) {
@@ -169,8 +174,8 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
         List<String> paths = new ArrayList<>();
         paths.add(jobServiceHelper.getJobDir(containerProperties) + "/*");
         String version = containerProperties.getProperty(PythonContainerProperty.VERSION.name());
-        paths.add("/app/" + version + "/dataplatform/scripts/*");
-        paths.add("/app/" + version + "/dataplatform/scripts/leframework.tar.gz");
+        paths.add("/datascience/" + version + "/dataplatform/scripts/*");
+        paths.add("/datascience/" + version + "/dataplatform/scripts/leframework.tar.gz");
 
         paths.add(containerProperties.getProperty(PythonContainerProperty.TRAINING.name()));
         paths.add(containerProperties.getProperty(PythonContainerProperty.TEST.name()));
@@ -216,9 +221,8 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
 
     public String getScriptDirInHdfs(com.latticeengines.domain.exposed.dataplatform.Job job) {
         Properties containerProperties = job.getContainerPropertiesObject();
-        String artifactVersion = containerProperties.getProperty(PythonContainerProperty.VERSION.name());
-        String scriptDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataplatform/scripts"
-                : "/app/" + artifactVersion + "/dataplatform/scripts";
+        String version = containerProperties.getProperty(PythonContainerProperty.VERSION.name());
+        String scriptDir = "/datascience/" + version + "/dataplatform/scripts";
         log.info("Using python script dir = " + scriptDir);
         return scriptDir;
     }

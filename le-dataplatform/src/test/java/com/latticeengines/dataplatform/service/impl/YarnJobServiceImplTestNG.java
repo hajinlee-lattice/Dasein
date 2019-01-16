@@ -66,12 +66,11 @@ public class YarnJobServiceImplTestNG extends DataplatformMiniClusterFunctionalT
         classifier.setDataFormat("csv");
         classifier.setDataProfileHdfsPath(baseDir + "/datascientist1/EventMetadata");
         classifier.setConfigMetadataHdfsPath(baseDir + "/datascientist1/EventMetadata");
-        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName)
+
+        classifier.setPythonPipelineLibHdfsPath(manifestService.getLedsPath() //
                 + "/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath(
-                "/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.py");
-        classifier.setPipelineDriver(
-                "/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.json");
+        classifier.setPythonPipelineScriptHdfsPath(manifestService.getLedsPath() + "/dataplatform/scripts/pipeline.py");
+        classifier.setPipelineDriver(manifestService.getLedsPath() + "/dataplatform/scripts/pipeline.json");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();

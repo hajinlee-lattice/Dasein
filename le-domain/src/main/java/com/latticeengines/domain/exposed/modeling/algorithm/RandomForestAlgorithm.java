@@ -16,11 +16,11 @@ public class RandomForestAlgorithm extends AlgorithmBase {
 
     public RandomForestAlgorithm() {
         setName("RF");
-        setScript("/app/dataplatform/scripts/algorithm/rf_train.py");
+        setScript("/datascience/dataplatform/scripts/algorithm/rf_train.py");
         setAlgorithmProperties(StringUtils.join(getAlgorithmPropertyArray(), " "));
-        setPipelineDriver("/app/dataplatform/scripts/pipeline.json");
-        setPipelineScript("/app/dataplatform/scripts/pipeline.py");
-        setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
+        setPipelineDriver("/datascience/dataplatform/scripts/pipeline.json");
+        setPipelineScript("/datascience/dataplatform/scripts/pipeline.py");
+        setPipelineLibScript("/datascience/dataplatform/scripts/lepipeline.tar.gz");
         setPipelineProperties(StringUtils.join(getPipelinePropertyArray(), " "));
     }
 

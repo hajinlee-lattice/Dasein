@@ -20,8 +20,8 @@ public class PythonMRTestUtils {
         feature.add("feature1");
         feature.add("feature2");
         classifier.setFeatures(feature);
-        classifier.setTargets(new ArrayList<String>());
-        classifier.setKeyCols(new ArrayList<String>());
+        classifier.setTargets(new ArrayList<>());
+        classifier.setKeyCols(new ArrayList<>());
         classifier.setPythonScriptHdfsPath("pythonScriptPath");
 
         classifier.setPythonPipelineLibHdfsPath("pipelineLibScriptPath");

@@ -47,8 +47,7 @@ hdfs dfs -mkdir -p /app/${LE_STACK} || true
 pushd ${WSHOME}/le-dataplatform
 mvn -Ppkg-shaded -DskipTests package &&
 echo "Deploying artifacts to hdfs ..."
-hdfs dfs -copyFromLocal target/dist /app/${LE_STACK}/$(leversion) &&
-hdfs dfs -copyFromLocal target/dist_python/* /app/${LE_STACK}/$(leversion)
+hdfs dfs -copyFromLocal target/dist /app/${LE_STACK}/$(leversion)
 popd
 
 echo "deploy properties file"

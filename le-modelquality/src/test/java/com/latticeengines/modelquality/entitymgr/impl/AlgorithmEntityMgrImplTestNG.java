@@ -29,7 +29,7 @@ public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBa
 
         algorithm = new Algorithm();
         algorithm.setName(algorithmName);
-        algorithm.setScript("/app/dataplatform/scripts/random_forest.py");
+        algorithm.setScript("/datascience/dataplatform/scripts/random_forest.py");
         AlgorithmPropertyDef numTrees = new AlgorithmPropertyDef("n_estimators");
         AlgorithmPropertyValue numTrees100 = new AlgorithmPropertyValue("100");
         AlgorithmPropertyValue numTrees200 = new AlgorithmPropertyValue("200");

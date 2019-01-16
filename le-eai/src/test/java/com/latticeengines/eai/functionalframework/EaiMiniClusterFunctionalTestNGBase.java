@@ -18,8 +18,7 @@ public class EaiMiniClusterFunctionalTestNGBase extends YarnMiniClusterFunctiona
     @Override
     protected void uploadArtifactsToHdfs() throws IOException {
         super.uploadArtifactsToHdfs();
-        String eaiHdfsPath = String.format("/app/%s/eai", versionManager.getCurrentVersionInStack(stackName))
-                .toString();
+        String eaiHdfsPath = String.format("%s/eai", manifestService.getLedpPath());
         FileUtils.deleteDirectory(new File("eai"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, eaiHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "eai", eaiHdfsPath);

@@ -36,7 +36,7 @@ public class ScoringJobUtil {
         return findModelUrlsToLocalize(yarnConfiguration, tenant, modelGuids, modelFilePaths, useScoreDerivation);
     }
 
-    public static List<String> findAllModelPathsInHdfs(Configuration yarnConfiguration, String tenant,
+    private static List<String> findAllModelPathsInHdfs(Configuration yarnConfiguration, String tenant,
             String customerBaseDir) {
         String customerModelPath = customerBaseDir + "/" + tenant + "/models";
         List<String> modelFilePaths = getModelFiles(yarnConfiguration, customerModelPath);
@@ -103,7 +103,7 @@ public class ScoringJobUtil {
         return jsonObj;
     }
 
-    public static Table createGenericOutputSchema(String uniqueKeyColumn, boolean hasRevenue, boolean isCdl) {
+    static Table createGenericOutputSchema(String uniqueKeyColumn, boolean hasRevenue, boolean isCdl) {
         Table scoreResultTable = new Table();
         String tableName = "ScoreResult";
         scoreResultTable.setName(tableName);
@@ -167,20 +167,21 @@ public class ScoringJobUtil {
         return attribute;
     }
 
-    public static List<String> getCacheFiles(Configuration yarnConfiguration, String currentVersionInStack)
+    public static List<String> getCacheFiles(Configuration yarnConfiguration, String ledpStackVersion, String ledsVersion)
             throws IOException {
-        List<String> files = new ArrayList<>();
-        String dependencyPath = "/app/";
+        String appDir = "/app/";
         String jarDependencyPath = "/scoring/lib";
+        String log4jXmlPath = "/conf/log4j2-yarn.xml";
+        List<String> files = new ArrayList<>(HdfsUtils.getFilesForDir(yarnConfiguration,
+                appDir + ledpStackVersion + jarDependencyPath, ".*\\.jar$"));
+        files.add(appDir + ledpStackVersion + log4jXmlPath);
+
+        String dsDir = "/datascience/";
         String scoringPythonPath = "/scoring/scripts/scoring.py";
         String pythonLauncherPath = "/dataplatform/scripts/pythonlauncher.sh";
-        String log4jXmlPath = "/conf/log4j2-yarn.xml";
+        files.add(dsDir + ledsVersion + scoringPythonPath);
+        files.add(dsDir + ledsVersion + pythonLauncherPath);
 
-        files.add(dependencyPath + currentVersionInStack + scoringPythonPath);
-        files.add(dependencyPath + currentVersionInStack + pythonLauncherPath);
-        files.addAll(HdfsUtils.getFilesForDir(yarnConfiguration,
-                dependencyPath + currentVersionInStack + jarDependencyPath, ".*\\.jar$"));
-        files.add(dependencyPath + currentVersionInStack + log4jXmlPath);
         return files;
 
     }

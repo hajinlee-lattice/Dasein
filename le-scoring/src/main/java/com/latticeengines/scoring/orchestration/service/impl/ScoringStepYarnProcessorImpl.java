@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -36,6 +35,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -64,9 +64,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private Configuration yarnConfiguration;
 
     @Inject
-    private VersionManager versionManager;
-
-    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     @Inject
@@ -80,6 +77,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Inject
     private ScoringJobService scoringJobService;
+
+    @Inject
+    private ManifestService manifestService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -151,14 +151,12 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 .setSplitColumn(PID)//
                 .build();//
         String appIdStr = sqoopProxy.importData(importer).getApplicationIds().get(0);
-        ApplicationId appId = ConverterUtils.toApplicationId(appIdStr);
-        return appId;
+        return ApplicationId.fromString(appIdStr);
     }
 
     private ApplicationId score(ScoringCommand scoringCommand) {
         Properties properties = generateCustomizedProperties(scoringCommand);
-        ApplicationId appId = scoringJobService.score(properties);
-        return appId;
+        return scoringJobService.score(properties);
     }
 
     private ApplicationId export(ScoringCommand scoringCommand) {
@@ -229,8 +227,8 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         List<String> cacheFiles;
         try {
             scoringJobService.syncModelsFromS3ToHdfs(tenant);
-            cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
-                    versionManager.getCurrentVersionInStack(stackName));
+            cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration, manifestService.getLedpStackVersion(), //
+                    manifestService.getLedsVersion());
             cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
                     modelGuids, Boolean.FALSE));
         } catch (IOException e) {
