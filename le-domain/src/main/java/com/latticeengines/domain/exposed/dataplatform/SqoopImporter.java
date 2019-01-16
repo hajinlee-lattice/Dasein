@@ -24,11 +24,13 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SqoopImporter {
 
-    private static List<String> defaultHadoopArgs = Arrays.asList("-Dmapreduce.task.timeout=600000", //
-            "-Dmapreduce.job.running.map.limit=32", //
-            "-Dmapreduce.tasktracker.map.tasks.maximum=32");
+    private static List<String> defaultHadoopArgs = Arrays.asList( //
+            "-Dmapreduce.task.timeout=600000", //
+            "-Dmapreduce.job.running.map.limit=64", //
+            "-Dmapreduce.tasktracker.map.tasks.maximum=64");
 
-    private static List<String> defaultOptions = Arrays.asList("--relaxed-isolation", //
+    private static List<String> defaultOptions = Arrays.asList( //
+            "--relaxed-isolation", //
             "--as-avrodatafile", //
             "--compress");
 
