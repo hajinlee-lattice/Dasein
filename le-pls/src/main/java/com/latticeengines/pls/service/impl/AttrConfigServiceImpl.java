@@ -32,8 +32,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.app.exposed.service.DataLakeService;
-import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -132,7 +132,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private ServingStoreProxy servingStoreProxy;
 
     @Inject
-    private CommonTenantConfigServiceImpl appTenantConfigService;
+    private CommonTenantConfigService appTenantConfigService;
 
     @SuppressWarnings("unchecked")
     @Override

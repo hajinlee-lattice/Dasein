@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
+import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -69,7 +69,7 @@ public class AttrConfigServiceImplUnitTestNG {
     private ActionService actionService;
 
     @Mock
-    private CommonTenantConfigServiceImpl appTenantConfigService;
+    private CommonTenantConfigService appTenantConfigService;
 
     @InjectMocks
     private AttrConfigServiceImpl attrConfigService;
