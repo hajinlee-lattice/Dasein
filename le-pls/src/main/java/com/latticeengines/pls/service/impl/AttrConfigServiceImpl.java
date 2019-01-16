@@ -26,12 +26,14 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -129,6 +131,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private CommonTenantConfigServiceImpl appTenantConfigService;
     @SuppressWarnings("unchecked")
     @Override
     public AttrConfigStateOverview getOverallAttrConfigActivationOverview() {
@@ -166,10 +170,10 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
         for (String property : usagePropertyList) {
             AttrConfigSelection selection = new AttrConfigSelection();
-            if (property.equals(ColumnSelection.Predefined.Enrichment.getName())) {
-                selection.setLimit(AttrConfigUsageOverview.defaultExportLimit);
-            } else if (property.equals(ColumnSelection.Predefined.CompanyProfile.getName())) {
-                selection.setLimit(AttrConfigUsageOverview.defaultCompanyProfileLimit);
+            if (property.equals(ColumnSelection.Predefined.Enrichment.getName())
+                    || property.equals(ColumnSelection.Predefined.CompanyProfile.getName())) {
+                selection.setLimit((long) appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                        MultiTenantContext.getShortTenantId(), property));
             }
             selection.setDisplayName(mapUsageToDisplayName(property));
             selections.add(selection);
