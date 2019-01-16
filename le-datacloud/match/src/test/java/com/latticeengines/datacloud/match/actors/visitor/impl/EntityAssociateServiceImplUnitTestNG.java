@@ -12,6 +12,7 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_GOOGLE_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -84,6 +85,92 @@ public class EntityAssociateServiceImplUnitTestNG {
             // we can use equals of seed here because we need the lookup entries in the same order
             Assert.assertEquals(seed, expectedSeed);
         });
+    }
+
+    @Test(groups = "unit", dataProvider = "conflictInHighestPriorityEntry")
+    private void testConflictInHighestPriorityEntry(EntityAssociationRequest request, EntityRawSeed target,
+            boolean expectedResult) {
+        EntityAssociateServiceImpl service = new EntityAssociateServiceImpl();
+        Assert.assertEquals(service.conflictInHighestPriorityEntry(request, target), expectedResult);
+    }
+
+    @DataProvider(name = "conflictInHighestPriorityEntry")
+    private Object[][] provideConflictInHighestPriorityEntryTestData() {
+        return new Object[][] {
+                // NOTE highest priority entry (that maps to some entity) in the request must
+                // map to target entity
+                /*
+                 * Case #1: highest priority entry map to target entity (no conflict
+                 */
+                { //
+                        newRequest(new Object[][] { { SFDC_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1), //
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { SFDC_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DUNS_1), // has other entries
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { DUNS_1, TEST_ENTITY_ID }, { DC_FACEBOOK_1, null } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_1), //
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { NC_GOOGLE_1, TEST_ENTITY_ID }, { DC_FACEBOOK_1, null } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_1, NC_GOOGLE_1), //
+                        false //
+                }, //
+                /*
+                 * Case #2: highest priority entry map to nothing and NOT in target
+                 */
+                { //
+                        newRequest(new Object[][] { { SFDC_1, null }, { MKTO_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, MKTO_1, DUNS_1), //
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { DUNS_1, null }, { NC_GOOGLE_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, NC_GOOGLE_1), //
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { NC_GOOGLE_1, null }, { DC_FACEBOOK_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_1, DC_FACEBOOK_1), //
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { NC_GOOGLE_1, null }, { DC_FACEBOOK_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_1, NC_GOOGLE_2, DC_FACEBOOK_1), // can have other n/c entry
+                        false //
+                }, //
+                /*
+                 * Case #3: highest priority entry map to nothing and in target (either someone
+                 * update entity after lookup is finished for this request or it was there with
+                 * different value)
+                 */
+                { //
+                        newRequest(new Object[][] { { SFDC_1, null }, { MKTO_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_1, DUNS_1), // same value, so no conflict
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { SFDC_1, null }, { MKTO_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_2, MKTO_1, DUNS_1), // diff value, has conflict
+                        true //
+                }, //
+                { //
+                        newRequest(new Object[][] { { DUNS_1, null }, { NC_GOOGLE_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_1, NC_GOOGLE_1), //
+                        false //
+                }, //
+                { //
+                        newRequest(new Object[][] { { DUNS_1, null }, { NC_GOOGLE_1, TEST_ENTITY_ID } }), //
+                        newSeed(TEST_ENTITY_ID, SFDC_1, DUNS_2, NC_GOOGLE_1), //
+                        true //
+                }, //
+        };
     }
 
     @DataProvider(name = "entityAssociation")

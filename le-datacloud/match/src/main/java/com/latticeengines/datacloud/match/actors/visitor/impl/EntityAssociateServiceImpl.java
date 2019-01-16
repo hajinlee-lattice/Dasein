@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -165,10 +166,15 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         Tenant tenant = request.getTenant();
         String entity = request.getEntity();
         if (StringUtils.isNotBlank(seedId)) {
-            return entityMatchInternalService.get(tenant, entity, seedId);
-        } else {
-            return anonymousOrNewEntity(request);
+            EntityRawSeed seed = entityMatchInternalService.get(tenant, entity, seedId);
+            if (!conflictInHighestPriorityEntry(request, seed)) {
+                // has target seed (found with some lookup entry) and no conflict with highest
+                // priority entry in target seed
+                return seed;
+            }
         }
+
+        return anonymousOrNewEntity(request);
     }
 
     /*
@@ -203,14 +209,45 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 .mapToObj(idx -> {
                     String entity = requests.get(idx).getEntity();
                     String seedId = seedIds.get(idx);
-                    if (StringUtils.isNotBlank(seedId)) {
-                        // seed should exist
+                    if (StringUtils.isNotBlank(seedId) && !conflictInHighestPriorityEntry(requests.get(idx),
+                            entitySeedMap.get(entity).get(seedId))) {
+                        // has target seed (found with some lookup entry) and no conflict with highest
+                        // priority entry in target seed
                         return entitySeedMap.get(entity).get(seedId);
                     } else {
                         return anonymousOrNewEntity(requests.get(idx));
                     }
                 })
                 .collect(Collectors.toList());
+    }
+
+    /*
+     * determine if the highest priority lookup entry (we try to associate) has
+     * conflict with target seed
+     */
+    @VisibleForTesting
+    protected boolean conflictInHighestPriorityEntry(@NotNull EntityAssociationRequest request,
+            @NotNull EntityRawSeed targetSeed) {
+        // lookup result should not be empty here
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(request.getLookupResults()));
+        EntityLookupEntry maxPriorityEntry = getEntry(request.getEntity(), request.getLookupResults().get(0).getKey());
+        EntityLookupEntry.Mapping mapping = maxPriorityEntry.getType().mapping;
+        if (mapping == MANY_TO_MANY) {
+            // no way of causing conflict with many to many entry
+            return false;
+        }
+
+        return targetSeed.getLookupEntries().stream().anyMatch(entry -> {
+            if (entry.getType() != maxPriorityEntry.getType()
+                    || !Objects.equals(entry.getSerializedKeys(), maxPriorityEntry.getSerializedKeys())) {
+                // not the same type/serialized key
+                return false;
+            }
+
+            // has conflict only if the serialized values are not equals (e.g., want to
+            // associate DUNS=123 but target seed already has DUNS=456)
+            return !Objects.equals(entry.getSerializedValues(), maxPriorityEntry.getSerializedValues());
+        });
     }
 
     /*
