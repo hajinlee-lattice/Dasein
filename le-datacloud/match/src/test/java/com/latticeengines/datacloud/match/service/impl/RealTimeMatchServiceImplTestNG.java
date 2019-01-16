@@ -441,7 +441,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             Object[][] data = new Object[][] { (Object[]) entry.getValue()[1] };
             MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, (String[]) entry.getValue()[0]);
             input.setLogLevelEnum(Level.DEBUG);
-            input.setDataCloudVersion("2.0.7");
+            input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
             if (entry.getKey().equals("Key_Loc_Data_Loc_CacheMiss")) {
                 removeDnBCacheForCacheMiss((Object[]) entry.getValue()[1]);
             }
@@ -449,7 +449,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             log.info("TestCase: " + entry.getKey());
             Assert.assertNotNull(output);
             Assert.assertEquals(output.getResult().size(), 1);
-            Assert.assertEquals(output.getStatistics().getRowsMatched(), (Integer) entry.getValue()[2]);
+            Assert.assertEquals(output.getStatistics().getRowsMatched(), entry.getValue()[2]);
             Set<String> logs = new HashSet<>();
             for (String log : output.getResult().get(0).getMatchLogs()) {
                 logs.add(log.replaceFirst("\\[.+\\] ", ""));
