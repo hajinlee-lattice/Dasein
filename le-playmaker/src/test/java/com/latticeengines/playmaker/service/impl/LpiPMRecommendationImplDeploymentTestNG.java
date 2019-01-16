@@ -37,6 +37,7 @@ import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -99,7 +100,9 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         eloquaAppId2 = new HashMap<String, String>();
         eloquaAppId1.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
         eloquaAppId2.put(CDLConstants.AUTH_APP_ID, "BIS01234");
-        testPlayCreationHelper.setupTenantAndCreatePlay();
+
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         customerSpace = CustomerSpace.parse(tenant.getId());
