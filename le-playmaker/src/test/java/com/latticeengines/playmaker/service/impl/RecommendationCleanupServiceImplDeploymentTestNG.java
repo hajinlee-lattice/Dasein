@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -68,7 +69,8 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndCreatePlay();
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         play = testPlayCreationHelper.getPlay();
