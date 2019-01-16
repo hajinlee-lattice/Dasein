@@ -76,11 +76,13 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
         SuccessDescribeMObject result = null;
         String fullSoapEndPoint = soapEndPoint + "?WSDL";
         try {
+            log.info("Creating marketo SOAP Request");
             URL soapUrl = new URL(fullSoapEndPoint);
             QName serviceName = new QName("http://www.marketo.com/mktows/", "MktMktowsApiService");
             MktMktowsApiService service = new MktMktowsApiService(soapUrl, serviceName);
             MktowsPort port = service.getMktowsApiSoapPort();
 
+            log.info("Created marketo Service and Port");
             // Create Signature
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
             String text = df.format(new Date());
@@ -104,7 +106,9 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
             ParamsDescribeMObject request = new ParamsDescribeMObject();
             request.setObjectName("LeadRecord");
 
+            log.info("Invoking describe Request");
             result = port.describeMObject(request, header);
+            log.info("Got the Result: " + result);
 
             if (result == null) {
                 throw new LedpException(LedpCode.LEDP_21035, new String[] { fullSoapEndPoint });
@@ -114,7 +118,8 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_21034, new String[] { soapEndPoint });
         } catch (NoClassDefFoundError|ExceptionInInitializerError e) {
-            throw new LedpException(LedpCode.LEDP_21036, new String[] { userId, encryptionKey });
+            log.warn("Marketo Describe Failure: ", e);
+            throw new LedpException(LedpCode.LEDP_21036, new String[] { userId + " "+ encryptionKey, e.getMessage()});
         } catch (InvalidKeyException e) {
             log.error(fatal, "InvalidKeyException", e);
         } catch (NoSuchAlgorithmException e) {
