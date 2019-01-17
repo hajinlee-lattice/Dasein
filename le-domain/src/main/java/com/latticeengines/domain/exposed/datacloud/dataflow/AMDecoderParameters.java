@@ -18,6 +18,11 @@ public class AMDecoderParameters extends TransformationFlowParameters {
     @JsonProperty("CodeBookLookup")
     private Map<String, String> codeBookLookup; // decoded attr -> encoded attr
 
+    // AMDecoderConfig.DecodeFields & AMDecoderConfig.RetainFields are both
+    // empty. Decode all the am attributes and retain all the plain attributes
+    @JsonProperty("DecodeAll")
+    private boolean decodeAll;
+
     public String[] getDecodeFields() {
         return decodeFields;
     }
@@ -49,4 +54,13 @@ public class AMDecoderParameters extends TransformationFlowParameters {
     public void setCodeBookLookup(Map<String, String> codeBookLookup) {
         this.codeBookLookup = codeBookLookup;
     }
+
+    public boolean isDecodeAll() {
+        return decodeAll;
+    }
+
+    public void setDecodeAll(boolean decodeAll) {
+        this.decodeAll = decodeAll;
+    }
+
 }
