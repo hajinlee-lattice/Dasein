@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.NameLocationService;
-import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
@@ -29,9 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 public class MatchStandardizationServiceImpl implements MatchStandardizationService {
 
     private static Logger log = LoggerFactory.getLogger(MatchStandardizationServiceImpl.class);
-
-    @Inject
-    private ZkConfigurationService zkConfigurationService;
 
     @Inject
     private PublicDomainService publicDomainService;
@@ -57,7 +53,6 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                         break;
                     }
                 }
-                record.setParsedDomain(cleanDomain);
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
                     // For match input with domain, but without name and duns,
                     // and domain is not in email format, public domain is
@@ -72,6 +67,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                                 + ", but treat it as normal domain in match");
                     } else {
                         record.addErrorMessages("Parsed to a public domain: " + cleanDomain);
+                        // public domain is not used for match
+                        cleanDomain = null;
                     }
                     record.setPublicDomain(true);
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
@@ -81,6 +78,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                         domainSet.add(cleanDomain);
                     }
                 }
+                record.setParsedDomain(cleanDomain);
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessages("Error when cleanup domain field: " + e.getMessage());
@@ -88,9 +86,9 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         }
     }
 
+    // No need to check ZK setting as ldc match will remove zk check too
     private boolean isPublicDomainCheckRelaxed(String name, String duns) {
-        return zkConfigurationService.isPublicDomainCheckRelaxed() && StringUtils.isBlank(name)
-                && StringUtils.isBlank(duns);
+        return StringUtils.isBlank(name) && StringUtils.isBlank(duns);
     }
 
     @Override
