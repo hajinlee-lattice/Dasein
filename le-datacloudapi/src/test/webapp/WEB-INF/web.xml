@@ -6,16 +6,16 @@
 
     <display-name>LEDP REST API</display-name>
     <description>Lattice Engines Data Cloud REST API</description>
-    
+
     <servlet>
         <servlet-name>datacloudapi</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
         <servlet-name>datacloudapi</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/datacloudapi/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

@@ -9,7 +9,7 @@
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="contextPath">/datacloudapi</Set>
+    <Set name="contextPath">/</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-datacloudapi-4.14.0-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

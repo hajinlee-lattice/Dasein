@@ -6,13 +6,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <context:component-scan base-package="com.latticeengines.datacloud.api" />
+    <context:component-scan base-package="com.latticeengines.datacloudapi.api" />
 
     <mvc:annotation-driven/>
 
     <import resource="classpath:test-propdata-engine-context.xml"/>
     <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
-    
+
 
 </beans>
