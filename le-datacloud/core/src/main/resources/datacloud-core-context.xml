@@ -11,6 +11,7 @@
     <context:component-scan base-package="com.latticeengines.ldc_collectiondb.entitymgr" />
 
     <import resource="classpath:db-context.xml" />
+    <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:hadoop-config-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
