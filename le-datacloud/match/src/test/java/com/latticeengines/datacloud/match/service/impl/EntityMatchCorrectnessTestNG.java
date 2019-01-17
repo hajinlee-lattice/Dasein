@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchConfigurationServic
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -38,7 +40,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final String TEST_TENANT_ID = "entity_match_correctness_test_tenant";
+    private static final String TEST_TENANT_ID = EntityMatchCorrectnessTestNG.class.getSimpleName()
+            + UUID.randomUUID().toString();
     private static final Tenant TEST_TENANT = new Tenant(TEST_TENANT_ID);
     private static final String ACCOUNT_DECISION_GRAPH = "PetitFour";
 
@@ -73,7 +76,7 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
     @Inject
     private EntityMatchConfigurationService entityMatchConfigurationService;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", priority = 1)
     private void testAllocateAndLookup() {
         // prevent old data from affecting the test
         testEntityMatchService.bumpVersion(TEST_TENANT_ID);
@@ -90,6 +93,32 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
         Assert.assertEquals(lookupAccount("sfdc_1", null, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(null, "mkto_1", null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(null, null, null, "GOOGLE", null, "USA", null), entityId);
+    }
+
+    @Test(groups = "functional", priority = 2)
+    private void testPublicDomain() {
+        // prevent old data from affecting the test
+        testEntityMatchService.bumpVersion(TEST_TENANT_ID);
+
+        // public domain without duns/name, and not in email format, treat as
+        // normal domain
+        List<Object> data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null);
+        MatchOutput output = matchAccount(data, true);
+        String publicDomainEntityId = verifyAndGetEntityId(output);
+        Assert.assertNotNull(publicDomainEntityId);
+
+        // public domain without duns/name, but in email format, treat as public
+        // domain
+        data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null);
+        output = matchAccount(data, true);
+        Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
+
+        // public domain with duns/name, , treat as public domain
+        data = Arrays.asList(null, null, null, "public domain company name", "gmail.com", "USA", null);
+        output = matchAccount(data, true);
+        String entityId = verifyAndGetEntityId(output);
+        Assert.assertNotNull(entityId);
+        Assert.assertNotEquals(entityId, publicDomainEntityId);
     }
 
     // TODO add correctness test here
@@ -115,8 +144,9 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
         // check if output contains only entityId column
         Assert.assertEquals(output.getOutputFields(), Collections.singletonList(InterfaceName.EntityId.name()));
         Assert.assertEquals(record.getOutput().size(), 1);
-        // make sure we get string (and non-null) entity id
-        Assert.assertTrue(record.getOutput().get(0) instanceof String);
+        if (record.getOutput().get(0) != null) {
+            Assert.assertTrue(record.getOutput().get(0) instanceof String);
+        }
         return (String) record.getOutput().get(0);
     }
 
