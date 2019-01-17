@@ -19,6 +19,7 @@ COPY META-INF/context.xml /META-INF/context.xml
 COPY conf/env/devcluster/latticeengines.properties /tmp/conf/env/devcluster/latticeengines.properties
 COPY conf/env/qacluster/latticeengines.properties /tmp/conf/env/qacluster/latticeengines.properties
 COPY conf/env/prodcluster/latticeengines.properties /tmp/conf/env/prodcluster/latticeengines.properties
+COPY conf/env/prodcluster_dr/latticeengines.properties /tmp/conf/env/prodcluster_dr/latticeengines.properties
 COPY start.sh /start.sh
 
 EXPOSE 8080 8443 1099
