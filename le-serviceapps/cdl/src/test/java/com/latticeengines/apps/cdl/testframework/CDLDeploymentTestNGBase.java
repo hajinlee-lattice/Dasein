@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.testframework;
 
-import static org.testng.Assert.assertNotNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +12,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -71,6 +68,8 @@ import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
+import static org.testng.Assert.assertNotNull;
+
 @Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-context.xml" })
@@ -116,7 +115,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected String deployedHostPort;
 
     @Value("${camille.zk.pod.id}")
-    private String podId;
+    protected String podId;
 
     protected void setupTestEnvironment() {
         setupTestEnvironment(null);

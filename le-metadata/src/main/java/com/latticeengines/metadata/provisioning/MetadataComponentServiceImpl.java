@@ -56,4 +56,19 @@ public class MetadataComponentServiceImpl extends ComponentServiceBase {
         return true;
     }
 
+    @Override
+    public boolean reset(String customerSpace) {
+        log.info("Start reset Metadata component for: " + customerSpace);
+        try {
+            CustomerSpace cs = CustomerSpace.parse(customerSpace);
+            metadataProvisioningService.removeImportTables(cs);
+
+            Thread.sleep(1000);
+            metadataProvisioningService.provisionImportTables(cs);
+        } catch (Exception e) {
+            log.error(String.format("Reset component for: %s failed. %s", customerSpace, e.toString()));
+            return false;
+        }
+        return true;
+    }
 }

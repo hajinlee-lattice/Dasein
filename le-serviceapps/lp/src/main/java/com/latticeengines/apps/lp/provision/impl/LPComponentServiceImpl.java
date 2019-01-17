@@ -2,13 +2,18 @@ package com.latticeengines.apps.lp.provision.impl;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.lp.provision.LPComponentManager;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.component.exposed.service.ComponentServiceBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 
@@ -19,6 +24,9 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private LPComponentManager lpComponentManager;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     public LPComponentServiceImpl() {
         super(ComponentConstants.LP);
@@ -52,6 +60,35 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
             lpComponentManager.discardTenant(cs.toString());
         } catch (Exception e) {
             log.error(String.format("Uninstall component LP for: %s failed. %s", customerSpace, e.toString()));
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean reset(String customerSpace) {
+        log.info("Start reset LP component for: " + customerSpace);
+        try {
+            String podId = CamilleEnvironment.getPodId();
+            String customerBase = "/user/s-analytics/customers";
+            CustomerSpace cs = CustomerSpace.parse(customerSpace);
+
+            String contractPath = PathBuilder.buildContractPath(podId, cs.getContractId()).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            }
+
+            String customerPath = new Path(customerBase).append(cs.toString()).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, customerPath);
+            }
+
+            contractPath = new Path(customerBase).append(cs.getContractId()).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            }
+        } catch (Exception e) {
+            log.error(String.format("Reset component LP for: %s failed. %s", customerSpace, e.toString()));
             return false;
         }
         return true;
