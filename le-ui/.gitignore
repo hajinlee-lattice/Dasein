@@ -22,3 +22,4 @@ projects/lp2/assets/styles/*.min.css
 projects/lp2/index.html
 projects/lpi/dist/**
 projects/tenantconsole/dist/**
+.vscode/

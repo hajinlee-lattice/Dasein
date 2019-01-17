@@ -27,7 +27,7 @@
                         {{ RunningJobs.length + RunningImportJobs.length+ SubJobsDataProcessing.length + RunningSubJubsDataCount+ RunningExportJobs.length}}
                     </span> -->
                     <span ng-class="{'fa fa-spin': (RunningJobs = (getActiveJobs())).length > 0 }" class="ico-container">
-                        <span class="ico ico-cog ico-black"></span>
+                        <span class="ico ico-jobs ico-black"></span>
                     </span>
                     <span class="jobs-nav-number badge green-badge" ng-if="RunningJobs.length">
                         {{ RunningJobs.length }}
