@@ -1,8 +1,0 @@
-<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: portfolioPlay.LaunchRuleExternalID, renderType: RenderWorker.LAUNCH_ACTION_RENDERER}) %>
-<select class="launch-action-select-renderer" title="<%= portfolioPlay.LaunchRuleDisplayName%>"<%= portfolioPlay.Status.IsUnavailable === true ? 'disabled' : ''%>>
-        <% for(var i=0; i< portfolioPlay.AvailableLaunchRules.length; i++) {%>
-          <option value="<%= portfolioPlay.AvailableLaunchRules[i].Key %>" <% if (portfolioPlay.LaunchRuleExternalID == portfolioPlay.AvailableLaunchRules[i].Key) { %> selected <% } %>>
-            <%=portfolioPlay.AvailableLaunchRules[i].Value%>
-          </option>
-        <% } %>
-</select>
