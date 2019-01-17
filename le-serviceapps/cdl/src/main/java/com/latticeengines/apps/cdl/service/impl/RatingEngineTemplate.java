@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -33,7 +39,7 @@ public abstract class RatingEngineTemplate {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineTemplate.class);
 
-    private ForkJoinPool tpForParallelStream;
+    private ExecutorService tpForParallelStream;
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
@@ -43,20 +49,22 @@ public abstract class RatingEngineTemplate {
 
     List<RatingEngineSummary> constructRatingEngineSummaries(List<RatingEngine> ratingList, String tenantId,
             Date lastRefreshedDate) {
-        List<String> modelSummaryIds = ratingList.stream()
-                .map(ratingEngine -> ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
+        List<String> modelSummaryIds = ratingList.stream() //
+                .filter(re -> re.getPublishedIteration() != null && re.getPublishedIteration() instanceof AIModel) //
+                .map(re -> (AIModel) re.getPublishedIteration()) //
+                .filter(ai -> StringUtils.isNotBlank(ai.getModelSummaryId())) //
+                .map(AIModel::getModelSummaryId) //
                 .collect(Collectors.toList());
+
         Map<String, List<BucketMetadata>> modelSummaryToBucketListMap =
                 bucketedScoreProxy.getAllPublishedBucketMetadataByModelSummaryIdList(tenantId, modelSummaryIds);
 
-        List<RatingEngineSummary> result = tpForParallelStream
-                .submit(//
-                        () -> ratingList.stream()
-                                .map(ratingEngine -> constructRatingEngineSummary(ratingEngine, tenantId,
-                                        lastRefreshedDate, modelSummaryToBucketListMap))
-                                .collect(Collectors.toList()))
-                .join();
-        return result;
+        List<Callable<RatingEngineSummary>> callables = ratingList.stream().map(re -> //
+                (Callable<RatingEngineSummary>) () -> //
+                        constructRatingEngineSummary(re, tenantId, lastRefreshedDate, modelSummaryToBucketListMap)) //
+                .collect(Collectors.toList());
+
+        return ThreadPoolUtils.runCallablesInParallel(getTpForParallelStream(), callables, 30, 1);
     }
 
     @VisibleForTesting
@@ -95,8 +103,8 @@ public abstract class RatingEngineTemplate {
 
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
                 || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
-            Boolean completed = ratingEngineSummary.getScoringIterationId() != null ? true
-                    : ((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() != JobStatus.PENDING;
+            Boolean completed = ratingEngineSummary.getScoringIterationId() != null || //
+                    ((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() != JobStatus.PENDING;
             ratingEngineSummary.setCompleted(completed);
         } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             ratingEngineSummary.setCompleted(true);
@@ -124,7 +132,7 @@ public abstract class RatingEngineTemplate {
 
                     List<BucketMetadata> bucketMetadataList = null;
                     String modelSummaryId = ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId();
-                    if (modelSummaryToBucketListMap != null) {
+                    if (MapUtils.isNotEmpty(modelSummaryToBucketListMap)) {
                         bucketMetadataList = modelSummaryToBucketListMap.get(modelSummaryId);
                     }
                     if (CollectionUtils.isEmpty(bucketMetadataList)) {
@@ -179,5 +187,16 @@ public abstract class RatingEngineTemplate {
     Date findLastRefreshedDate(String tenantId) {
         DataFeed dataFeed = dataFeedService.getDefaultDataFeed(CustomerSpace.parse(tenantId).toString());
         return dataFeed.getLastPublished();
+    }
+
+    private ExecutorService getTpForParallelStream() {
+        if (tpForParallelStream == null) {
+            synchronized (this) {
+                if (tpForParallelStream == null) {
+                    tpForParallelStream = ThreadPoolUtils.getCachedThreadPool("re-template");
+                }
+            }
+        }
+        return tpForParallelStream;
     }
 }
