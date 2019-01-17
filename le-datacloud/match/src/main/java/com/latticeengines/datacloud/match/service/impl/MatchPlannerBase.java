@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -172,15 +173,23 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     public List<ColumnMetadata> parseEntityMetadata(MatchInput input) {
-        // For now, we only handle the Column Metadata case for a predefined
-        // column selection of ID.
-        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
+        switch (input.getPredefinedSelection()) {
+        case ID:
             ColumnMetadata atlasIdColumnMetadata = new ColumnMetadata();
             atlasIdColumnMetadata.setAttrName(InterfaceName.EntityId.name());
             atlasIdColumnMetadata.setJavaClass(String.class.getSimpleName());
             return Collections.singletonList(atlasIdColumnMetadata);
-        } else {
+        case Seed:
+            ColumnMetadata ldcIdCM = new ColumnMetadata();
+            ldcIdCM.setAttrName(InterfaceName.LatticeAccountId.name());
+            ldcIdCM.setJavaClass(String.class.getSimpleName());
+            ColumnMetadata accIdCM = new ColumnMetadata();
+            accIdCM.setAttrName(InterfaceName.AccountId.name());
+            accIdCM.setJavaClass(String.class.getSimpleName());
+            return Arrays.asList(ldcIdCM, accIdCM);
+        default:
             throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
+
         }
     }
 
@@ -345,8 +354,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
         parseRecordForLatticeAccountId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record);
-        // TODO(jwinter): Convert this from LookupId (aka. AccountId) to EntityId.
-        parseRecordForLookupId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record);
+        parseRecordForEntityId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record);
         profilingInputRecord(keyFields, inputRecord, input.getFields(), record);
 
         return record;
@@ -560,6 +568,27 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessages("Error when cleanup lookup id field: " + e.getMessage());
+            }
+        }
+    }
+
+    private void parseRecordForEntityId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+            InternalOutputRecord record) {
+        if (keyPositionMap.containsKey(MatchKey.EntityId)) {
+            List<Integer> idPosList = keyPositionMap.get(MatchKey.EntityId);
+            try {
+                String cleanId = null;
+                for (Integer idPos : idPosList) {
+                    String originalId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
+                    if (StringUtils.isNotEmpty(originalId)) {
+                        cleanId = StringStandardizationUtils.getStandardizedSystemId(originalId);
+                        break;
+                    }
+                }
+                record.setEntityId(cleanId);
+            } catch (Exception e) {
+                record.setFailed(true);
+                record.addErrorMessages("Error when cleanup lattice account id field: " + e.getMessage());
             }
         }
     }

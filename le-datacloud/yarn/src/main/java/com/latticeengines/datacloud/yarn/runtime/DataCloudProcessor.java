@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -8,14 +9,16 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.aspect.MatchStepAspect;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @Component("dataCloudProcessor")
@@ -23,16 +26,19 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
     private static final Logger logger = LoggerFactory.getLogger(DataCloudProcessor.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private MatchActorSystem matchActorSystem;
 
-    @Autowired
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
+
+    @Inject
     private ProcessorContext initialProcessorContext;
 
     @Resource(name = "bulkMatchProcessorExecutor")
@@ -46,6 +52,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         try {
             LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
             matchActorSystem.setBatchMode(true);
+            setAllocateModeFlag(jobConfiguration.getMatchInput());
 
             initialProcessorContext.initialize(this, jobConfiguration);
             if (initialProcessorContext.isUseRemoteDnB()) {
@@ -72,6 +79,21 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         }
 
         return null;
+    }
+
+    private void setAllocateModeFlag(MatchInput input) {
+        boolean allocateMode = OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())
+                && (input.isAllocateId() || input.isFetchOnly());
+        if (allocateMode) {
+            if (input.isAllocateId()) {
+                logger.info("Entity match is in Allocate mode which generates EntityId during match");
+            } else if (input.isFetchOnly()) {
+                logger.info(
+                        "Entity match is in FetchOnly mode "
+                                + "which looks up seed by EntityId in staging table or serving table (if no found in staging table)");
+            }
+            entityMatchConfigurationService.setIsAllocateMode(allocateMode);
+        }
     }
 
 }

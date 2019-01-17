@@ -24,7 +24,6 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -60,9 +59,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Inject
     private DomainCollectService domainCollectService;
-
-    @Inject
-    private EntityMatchConfigurationService entityMatchConfigurationService;
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
@@ -244,10 +240,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 // which is a Match Planner actor.
                 MatchTraveler matchTraveler = null;
                 if (OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
-                    // TODO (ZDD): Set here temporarily, otherwise
-                    // MatchActorSystemTestNG cannot test with allocateId mode.
-                    // Revisit later
-                    entityMatchConfigurationService.setIsAllocateMode(matchInput.isAllocateId());
                     matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), null);
                     matchTraveler.setInputDataRecord(matchRecord.getInput());
                     matchTraveler.setEntityKeyPositionMaps(matchRecord.getEntityKeyPositionMaps());
