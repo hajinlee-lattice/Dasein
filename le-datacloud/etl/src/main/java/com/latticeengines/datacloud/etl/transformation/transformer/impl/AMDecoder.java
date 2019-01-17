@@ -6,11 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +24,6 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
-import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
@@ -36,10 +39,10 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
     public static final String DATAFLOW_BEAN_NAME = "AMDecodeFlow";
     public static final String DATA_CLOUD_VERSION_NAME = "DataCloudVersion";
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceAttributeEntityMgr srcAttrEntityMgr;
 
     @Value("${datacloud.etl.am.max.decode.num:100}")
@@ -56,28 +59,6 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
     }
 
     @Override
-    protected boolean validateConfig(AMDecoderConfig config, List<String> sourceNames) {
-        String error = null;
-        if (config.getDecodeFields() == null) {
-            error = "Attributes to decode are not given.";
-            log.error(error);
-            RequestContext.logError(error);
-            return false;
-        }
-
-        if (config.getDecodeFields().length > maxDecodeNum) {
-            error = String.format(
-                    "Too many attributes are given. Number of given attributes is %d but the maximum is %d.",
-                    config.getDecodeFields().length, maxDecodeNum);
-            log.error(error);
-            RequestContext.logError(error);
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
     protected Class<? extends TransformerConfig> getConfigurationClass() {
         return AMDecoderConfig.class;
     }
@@ -90,8 +71,6 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
     @Override
     protected void updateParameters(AMDecoderParameters parameters, Source[] baseTemplates, Source targetTemplate,
                                     AMDecoderConfig configuration, List<String> baseVersions) {
-        parameters.setDecodeFields(configuration.getDecodeFields());
-        parameters.setRetainFields(configuration.getRetainFields());
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseTemplates[0], baseVersions.get(0));
         if (schema == null) {
             String avroGlob = TransformerUtils.avroPath(baseTemplates[0], baseVersions.get(0), hdfsPathBuilder);
@@ -109,6 +88,18 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
 
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes("AccountMasterDecoded",
                 "DECODE", TRANSFORMER_NAME, dataCloudVersion, false);
+        if (ArrayUtils.isNotEmpty(configuration.getDecodeFields())
+                && ArrayUtils.isNotEmpty(configuration.getRetainFields())) {
+            parameters.setDecodeFields(configuration.getDecodeFields());
+            parameters.setRetainFields(configuration.getRetainFields());
+        } else {
+            parameters.setDecodeAll(true);
+            List<String> decodeFields = srcAttrs.stream() //
+                    .filter(srcAttr -> StringUtils.isNotBlank(srcAttr.getArguments())) //
+                    .map(SourceAttribute::getAttribute).collect(Collectors.toList());
+            parameters.setDecodeFields(decodeFields.toArray(new String[decodeFields.size()]));
+        }
+
         Map<String, SourceAttribute> sourceAttributeMap = new HashMap<>();
         for (SourceAttribute attrib : srcAttrs) {
             sourceAttributeMap.put(attrib.getAttribute(), attrib);
