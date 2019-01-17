@@ -4,6 +4,7 @@ DANTE_URL=https://bis-awstest.lattice-engines.com
 ULYSSES_URL=https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com
 API_URL=https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com
 API_CON_URL=https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com
+TRAY_API_URL=https://jsonplaceholder.typicode.com
 COMPRESSED=false
 LOGGING=./server/log
 HTTP_PORT=3001

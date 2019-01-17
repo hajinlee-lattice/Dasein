@@ -53,6 +53,12 @@ module.exports = {
             remote_host: process.env.API_URL || "http://localhost:8081",
             remote_path: "/pls",
             type: "sse_pipe"
+        },
+        "/tray": {
+            local_path: "/tray",
+            remote_host: process.env.TRAY_API_URL || "http://localhost:8081",
+            remote_path: "",
+            type: "tray_pipe"
         }
     }
 };
