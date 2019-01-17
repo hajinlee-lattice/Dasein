@@ -48,4 +48,10 @@ public class DataUnitServiceImpl implements DataUnitService {
         entityMgr.deleteByName(tenantId, name, storageType);
     }
 
+    @Override
+    public DataUnit renameRedShiftTableName(DataUnit dataUnit, String tableName) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.renameRedShiftTableName(tenantId, dataUnit, tableName);
+    }
+
 }

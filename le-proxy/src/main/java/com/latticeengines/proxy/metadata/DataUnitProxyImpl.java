@@ -44,6 +44,20 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
         }
     }
 
+    @Override
+    public DataUnit renameRedShiftTableName(String customerSpace, DataUnit dataUnit, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/renameRedShiftTableName?tableName" +
+                        "={tableName}",
+                shortenCustomerSpace(customerSpace), tableName);
+        return post("Rename RedShift tableName", url, dataUnit, DataUnit.class);
+    }
+
+    @Override
+    public Boolean delete(String customerSpace, DataUnit dataUnit) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit", shortenCustomerSpace(customerSpace));
+        return put("delete DataUnit", url, dataUnit, Boolean.class);
+    }
+
     private List<DataUnit> getDataUnits(String customerSpace, String name, DataUnit.StorageType type) {
         String url = constructUrl("/customerspaces/{customerSpace}/dataunit/name/{name}", shortenCustomerSpace(customerSpace), name);
         if (type != null) {
