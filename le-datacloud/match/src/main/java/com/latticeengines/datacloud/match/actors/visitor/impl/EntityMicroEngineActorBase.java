@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.datacloud.match.util.EntityMatchUtils.newStandardizedTenant;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +24,6 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -212,12 +213,5 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         // see if we find any entity ID in the list
         Optional<String> entityId = response.getEntityIds().stream().filter(Objects::nonNull).findAny();
         return entityId.isPresent();
-    }
-
-    /*
-     * Create a new tenant instance with standardized tenantId
-     */
-    private Tenant newStandardizedTenant(@NotNull Tenant tenant) {
-        return new Tenant(CustomerSpace.parse(tenant.getId()).getTenantId());
     }
 }

@@ -1,13 +1,15 @@
 package com.latticeengines.datacloud.match.util;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-
-import java.util.Objects;
-import java.util.Optional;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
  * Utility functions for entity match
@@ -36,6 +38,19 @@ public class EntityMatchUtils {
                 .filter(entryInSeed -> !Objects.equals(entryInSeed.getSerializedValues(), entry.getSerializedValues()))
                 .findAny();
         return conflictEntry.isPresent();
+    }
+
+    /**
+     * Create a new {@link Tenant} with ID fields standardized
+     * 
+     * @param tenant
+     *            input tenant, must not be {@literal null} and contains non-null ID
+     * @return non null tenant with standardized ID field
+     */
+    public static Tenant newStandardizedTenant(@NotNull Tenant tenant) {
+        Preconditions.checkNotNull(tenant);
+        Preconditions.checkNotNull(tenant.getId());
+        return new Tenant(CustomerSpace.parse(tenant.getId()).getTenantId());
     }
 
     /**
