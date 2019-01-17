@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps;
 import java.util.List;
 import java.util.UUID;
 
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -114,7 +115,8 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     // TODO - enable when we have a way to simulate full/partial failure
     @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndCreatePlay();
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         play = testPlayCreationHelper.getPlay();
