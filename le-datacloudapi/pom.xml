@@ -9,9 +9,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-spring-boot-tomcat-parent</artifactId>
+        <artifactId>le-microservice-parent</artifactId>
         <version>4.14.0-SNAPSHOT</version>
-        <relativePath>../le-parent/spring-boot/tomcat</relativePath>
+        <relativePath>../le-microservice</relativePath>
     </parent>
 
     <properties>

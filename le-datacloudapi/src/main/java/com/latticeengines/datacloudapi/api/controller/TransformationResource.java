@@ -2,12 +2,14 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,10 +31,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/transformations")
 public class TransformationResource {
 
-    @Autowired
+    @Inject
     private SourceTransformationService sourceTransformationService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Scan all transformation progresses that can be proceeded. "
             + "url parameter podid is for testing purpose.")
@@ -44,7 +46,7 @@ public class TransformationResource {
         return sourceTransformationService.scan(hdfsPod);
     }
 
-    @RequestMapping(value = "internal", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("internal")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Trigger a new transformation for a source at its latest version. "
@@ -82,7 +84,7 @@ public class TransformationResource {
         }
     }
 
-    @RequestMapping(value = "pipeline", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("pipeline")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Trigger a new transformation for a pipelined transformations. ")
@@ -106,7 +108,7 @@ public class TransformationResource {
         }
     }
 
-    @RequestMapping(value = "pipelineconf", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("pipelineconf")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Get workflow configuration for a pipelined transformations. ")
@@ -125,7 +127,7 @@ public class TransformationResource {
         }
     }
 
-    @RequestMapping(value = "progress", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("progress")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Get the TransformationProgress.")
