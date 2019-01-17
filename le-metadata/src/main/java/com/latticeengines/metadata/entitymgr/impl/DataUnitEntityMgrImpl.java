@@ -113,6 +113,19 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return units;
     }
 
+    @Override
+    public DataUnit renameRedShiftTableName(String tenantId, DataUnit dataUnit, String tableName) {
+        DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, dataUnit.getName(),
+                dataUnit.getStorageType());
+        if (existing != null) {
+            dataUnit.setName(tableName);
+            existing.setDocument(dataUnit);
+            DataUnitEntity saved = repository.save(existing);
+            return saved.getDocument();
+        }
+        return null;
+    }
+
     private List<DataUnit> convertList(List<DataUnitEntity> entities) {
         List<DataUnit> units = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(entities)) {
