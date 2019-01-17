@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -41,6 +43,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
@@ -196,6 +199,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
         detail.setTransactionCount(currentCnts.get(BusinessEntity.Transaction));
+        detail.setProductCount(currentCnts.get(BusinessEntity.Product));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
@@ -216,6 +220,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         currentCnts.put(BusinessEntity.Contact, countInRedshift(BusinessEntity.Contact));
         currentCnts.put(BusinessEntity.Transaction,
                 countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedRawTransaction));
+        currentCnts.put(BusinessEntity.Product, countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedProduct));
 
         return currentCnts;
     }
@@ -235,38 +240,45 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         return orphanCnts;
     }
 
-    private long countRawEntitiesInHdfs(TableRoleInCollection tableRoleInCollection) {
+    private long countRawEntitiesInHdfs(TableRoleInCollection tableRole) {
         try {
-            String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                    tableRoleInCollection, inactive);
-            if (StringUtils.isBlank(rawTableName)) {
-                log.info(String.format("Cannot find table role %s in version %s",
-                        tableRoleInCollection.name(), inactive));
-                rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                        tableRoleInCollection, active);
-                if (StringUtils.isBlank(rawTableName)) {
-                    log.info(String.format("Cannot find table role %s in version %s",
-                            tableRoleInCollection.name(), active));
+            String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
+            if (StringUtils.isBlank(tableName)) {
+                log.info(String.format("Cannot find table role %s in version %s", tableRole.name(), inactive));
+                tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, active);
+                if (StringUtils.isBlank(tableName)) {
+                    log.info(String.format("Cannot find table role %s in version %s", tableRole.name(), active));
                     return 0L;
                 }
             }
-            Table rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
-            if (rawTable == null) {
-                log.error("Cannot find table " + rawTableName);
+            Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+            if (table == null) {
+                log.error("Cannot find table " + tableName);
                 return 0L;
             }
 
-            String hdfsPath = rawTable.getExtracts().get(0).getPath();
-            if (!hdfsPath.endsWith("*.avro")) {
-                if (hdfsPath.endsWith("/")) {
-                    hdfsPath += "*.avro";
-                } else {
-                    hdfsPath += "/*.avro";
+            Long result;
+            String hdfsPath = table.getExtracts().get(0).getPath();
+            if (tableRole == TableRoleInCollection.ConsolidatedProduct) {
+                log.info("Count products in HDFS " + hdfsPath);
+                Set<String> skus = new HashSet<>();
+                ProductUtils.loadProducts(yarnConfiguration, hdfsPath).stream()
+                        .filter(product -> product.getProductType().equals(ProductType.Bundle.name())
+                                || product.getProductType().equals(ProductType.Hierarchy.name()))
+                        .forEach(product -> skus.add(product.getProductId()));
+                result = (long) skus.size();
+            } else {
+                if (!hdfsPath.endsWith("*.avro")) {
+                    if (hdfsPath.endsWith("/")) {
+                        hdfsPath += "*.avro";
+                    } else {
+                        hdfsPath += "/*.avro";
+                    }
                 }
+                log.info("Count records in HDFS " + hdfsPath);
+                result = AvroUtils.count(yarnConfiguration, hdfsPath);
             }
-
-            Long result = AvroUtils.count(yarnConfiguration, hdfsPath);
-            log.info(String.format("Table role %s has %d entities.", tableRoleInCollection.name(), result));
+            log.info(String.format("Table role %s has %d entities.", tableRole.name(), result));
             return result;
         } catch (Exception ex) {
             log.error("Fail to count raw entities in table.", ex);
