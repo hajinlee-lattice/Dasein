@@ -43,6 +43,34 @@ angular.module('lp.import.wizard.customfields', [])
                 setDefaultIgnore();
             },0);
         }
+        vm.dateFormat = [
+            {value: 'MM/DD/YYYY'},
+            {value: 'MM-DD-YYYY'},
+            {value: 'MM.DD.YYYY'},
+            {value: 'DD/MM/YYYY'},
+            {value: 'DD-MM-YYYY'},
+            {value: 'DD.MM.YYYY'},
+            {value: 'YYYY/MM/DD'},
+            {value: 'YYYY-MM-DD'},
+            {value: 'YYYY.MM.DD'},
+            {value: 'MM/DD/YY'},
+            {value: 'MM-DD-YY'},
+            {value: 'MM.DD.YY'},
+            {value: 'DD/MM/YY'},
+            {value: 'DD-MM-YY'},
+            {value: 'DD.MM.YY'}
+        ];
+        vm.timeFormat = [
+            {value: '00:00:00 12H'},
+            {value: '00-00-00 12H'},
+            {value: '00 00 00 12H'},
+            {value: '00:00:00 24H'},
+            {value: '00-00-00 24H'},
+            {value: '00 00 00 24H'}
+        ];
+        vm.timeZone = [
+            {value: 'UTC-8 America/Los Angeles'}
+        ];
     };
 
     function setDefaultIgnore(){
@@ -115,7 +143,7 @@ angular.module('lp.import.wizard.customfields', [])
             return false;
         }
         return true;
-    }
+    };
 
     vm.init();
 });

@@ -1,83 +1,148 @@
 .import-customfields {
-    & > .header {
-        h2 {
-            background-image: url('/assets/images/ico-custom-fields-dark.png');
-            margin-bottom: 20px;
+  & > .header {
+    h2 {
+      background-image: url("/assets/images/ico-custom-fields-dark.png");
+      margin-bottom: 20px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+  }
+
+  .alert {
+    border: 0;
+    position: relative;
+    color: white;
+    background-color: #457eba;
+    padding: 5px 10px;
+    padding-left: 30px;
+    margin-bottom: 20px;
+    img {
+      margin-right: 10px;
+    }
+    &:after {
+      @include font-awesome-inline("\f0ce");
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+    }
+    &.updated {
+      background-color: #70bf4a;
+      &:after {
+        @include font-awesome-inline("\f00c");
+      }
+    }
+  }
+  .customfields {
+    width: 100%;
+    .customfield {
+      padding: 5px;
+      &:nth-child(1) {
+        font-weight: bold;
+        border-bottom: 2px solid #ddd;
+      }
+      &:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+      select {
+        width: auto;
+      }
+      .field {
+        @include flex-container;
+        & > li {
+          @include flex-item(0 1 auto);
+          @include text-ellipsis;
+          width: calc((100% - 80px) / 2);
+          &.ignore {
+            width: 90px;
+            label {
+              display: inline;
+            }
+          }
+          & > input {
+            vertical-align: middle;
+          }
+          &.date-options {
+            display: flex;
+            flex-wrap: wrap;
+            // border: 2px solid green;
+          }
         }
-        p {
-            margin-bottom: 20px;
+        & > .type {
+          display: flex;
+          // border: 1px solid red;
+          flex-wrap: wrap;
+          .time-zones {
+            padding-top: 0.5em;
+          }
         }
+      }
+      &.customfield-header {
+        .field {
+          & > li {
+            overflow: visible;
+            white-space: normal;
+          }
+        }
+      }
+    }
+  }
+  .le-info {
+    background-color: #467dba;
+  }
+  .grid-body {
+    &:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+  .le-grid .le-cell {
+    min-height: 20px;
+    height: 100%;
+    font-size: 100%;
+  }
+  .field-type {
+    // position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    select.select-type {
+      width: 100%;
+      max-width: 110px;
+    }
+    select.date-type {
+      margin-top: 0.75em;
     }
 
-    .alert {
-        border: 0;
-        position: relative;
-        color: white;
-        background-color: #457eba;
-        padding: 5px 10px;
-        padding-left: 30px;
-        margin-bottom: 20px;
-        img {
-            margin-right: 10px;
-        }
-        &:after {
-            @include font-awesome-inline("\f0ce");
-            position: absolute;
-            top: 50%;
-            left: 10px;
-            transform: translateY(-50%);
-        }
-        &.updated {
-            background-color: #70bf4a;
-            &:after {
-            @include font-awesome-inline("\f00c");
-            }
-        }
-    }
-    .customfields {
+    .date-options {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 0.4em;
+      flex-direction: column;
+
+      select {
+        margin-top: 0.4em;
+        margin-bottom: 0.4em;
+      }
+      .date-format-container {
         width: 100%;
-        .customfield {
-            padding: 5px;
-            &:nth-child(1) {
-                font-weight: bold;
-                border-bottom: 2px solid #ddd;
-            }
-            &:nth-child(even) {
-                background-color: rgba(0,0,0,.04);
-            }
-            select {
-                width: auto;
-            }
-            .field {
-                @include flex-container;
-                & > li {
-                    @include flex-item(0 1 auto);
-                    @include text-ellipsis;
-                    width: calc((100% - 80px) / 2);
-                    &.ignore {
-                        width: 90px;
-                        label {
-                            display: inline;
-                        }
-                    }
-                    & > input {
-                        vertical-align: middle;
-                    }
-                    &.DATE{
-                        display: inline-flex;
-                        
-                    }
-                }
-            }
-            &.customfield-header {
-                .field {
-                    & > li {
-                        overflow: visible;
-                        white-space: normal;
-                    }
-                }
-            }
+        display: flex;
+        .more-info {
+          position: absolute;
+          margin-top: 1em;
+          margin-left: 0.5em;
         }
-
+      }
     }
+  }
+  .container-flex {
+    width: 100%;
+    display: flex;
+    .more-info {
+      position: absolute;
+      margin-top: 0em;
+      margin-left: 0.5em;
+    }
+  }
 }
