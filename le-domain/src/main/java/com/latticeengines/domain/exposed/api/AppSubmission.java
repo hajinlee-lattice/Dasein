@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,8 +32,12 @@ public class AppSubmission {
 
     @JsonIgnore
     public void setIds(List<ApplicationId> appIds) {
-        for (ApplicationId appId : appIds) {
-            applicationIds.add(appId.toString());
+        if (CollectionUtils.isNotEmpty(appIds)) {
+            for (ApplicationId appId : appIds) {
+                if (appId != null) {
+                    applicationIds.add(appId.toString());
+                }
+            }
         }
     }
 }
