@@ -146,7 +146,6 @@ public class ModelingServiceImpl implements ModelingService {
                 .setTargetDir(targetDir)//
                 .setDbCreds(config.getCreds()) //
                 .setQueue(assignedQueue)//
-                .setNumMappers(32) //
                 .setCustomer(model.getCustomer())//
                 .setSplitColumn(StringUtils.join(config.getKeyCols(), ","))//
                 .setTable(config.getTable());
@@ -158,7 +157,7 @@ public class ModelingServiceImpl implements ModelingService {
                     .asList(columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()).split(",")));
         }
         String appId = sqoopProxy.importData(builder.build()).getApplicationIds().get(0);
-        return ConverterUtils.toApplicationId(appId);
+        return ApplicationId.fromString(appId);
 
     }
 
@@ -171,10 +170,9 @@ public class ModelingServiceImpl implements ModelingService {
                 .setSourceDir(config.getHdfsDirPath()) //
                 .setDbCreds(config.getCreds()) //
                 .setCustomer(config.getCustomer())//
-                .setNumMappers(32) //
                 .build();
         String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
-        return ConverterUtils.toApplicationId(appId);
+        return ApplicationId.fromString(appId);
     }
 
     @Override
