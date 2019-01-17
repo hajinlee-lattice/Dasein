@@ -4219,14 +4219,6 @@
         }, 
         {
             "name": "make_float", 
-            "output": "LE_EMPLOYEE_RANGE", 
-            "type": "FLOAT", 
-            "arguments": {
-                "column": "LE_EMPLOYEE_RANGE"
-            }
-        }, 
-        {
-            "name": "make_float", 
             "output": "PREMIUM_MARKETING_PRESCREEN", 
             "type": "FLOAT", 
             "arguments": {
@@ -6532,7 +6524,7 @@
         {
             "name": "replace_null_value_v2", 
             "output": "LE_EMPLOYEE_RANGE", 
-            "type": "FLOAT", 
+            "type": "STRING", 
             "arguments": {
                 "column": "LE_EMPLOYEE_RANGE"
             }

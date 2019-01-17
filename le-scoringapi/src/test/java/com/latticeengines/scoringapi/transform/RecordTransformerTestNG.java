@@ -25,6 +25,8 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -69,6 +71,8 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTes
  *
  */
 public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(RecordTransformerTestNG.class);
 
     private File modelExtractionDir;
 
@@ -141,7 +145,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         ScoreDerivation scoreDerivation = JsonUtils.deserialize(FileUtils.readFileToString( //
                 new File(scoreDerivationPath), Charset.defaultCharset()), ScoreDerivation.class);
 
-        System.out.println("Processing tenant " + tenantName);
+        log.info("Processing tenant " + tenantName);
         transformAndScore(dataToScorePath, dataComposition.transforms, pmmlXmlPath, scoreDerivation, expectedScoresPath,
                 keyColumn);
     }
@@ -177,14 +181,14 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         }
 
         while (outputQueue.size() + errorQueue.size() != i) {
-            System.out.println("Output queue size = " + outputQueue.size());
-            System.out.println("Error queue size = " + errorQueue.size());
+            log.info("Output queue size = " + outputQueue.size());
+            log.info("Error queue size = " + errorQueue.size());
             Thread.sleep(10000L);
         }
-        System.out.println("Number of errors = " + errorQueue.size());
+        log.info("Number of errors = " + errorQueue.size());
 
         for (QueueEntry<Double, Double> entry : errorQueue) {
-            System.out.println("Record id = " + entry.getKey() + " value = " + entry.getValue());
+            log.info("Record id = " + entry.getKey() + " value = " + entry.getValue());
         }
         Assert.assertTrue(errorQueue.size() < 7, "Number of errors " + errorQueue.size() + " is greater than threshold 7.");
     }
