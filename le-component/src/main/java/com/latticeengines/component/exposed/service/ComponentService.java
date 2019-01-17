@@ -15,4 +15,5 @@ public interface ComponentService {
 
     ComponentStatus getComponentStatus(String customerSpace);
 
+    boolean reset(String customerSpace);
 }

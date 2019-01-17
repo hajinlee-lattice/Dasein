@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.provision.impl;
 
 
+import java.util.List;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -18,9 +19,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cdlComponentService")
 public class CDLComponentServiceImpl extends ComponentServiceBase {
@@ -44,6 +48,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private DropBoxService dropBoxService;
+
+    @Inject
+    private RedshiftService redshiftService;
 
     public CDLComponentServiceImpl() {
         super(ComponentConstants.CDL);
@@ -95,5 +102,42 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     private void provisionDropBox(CustomerSpace customerSpace) {
         DropBox dropBox = dropBoxService.create();
         log.info("Created dropbox " + dropBox.getDropBox() + " for " + customerSpace.getTenantId());
+    }
+
+    @Override
+    public boolean reset(String customerSpace) {
+        log.info("Start reset CDL component for: " + customerSpace);
+        try {
+            CustomerSpace cs = CustomerSpace.parse(customerSpace);
+            Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
+            MultiTenantContext.setTenant(tenant);
+
+            DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
+            if (dataFeed != null) {
+                // delete redshift tables
+                List<DataUnit> dataUnits = dataUnitEntityMgr.findAllByTypeFromReader(
+                        customerSpace, DataUnit.StorageType.Redshift);
+                if (dataUnits != null) {
+                    for (DataUnit dataUnit : dataUnits) {
+                        redshiftService.dropTable(dataUnit.getName());
+                    }
+                }
+
+                // delete s3
+                destroy(customerSpace);
+
+                DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();
+                if (dataCollection != null) {
+                    dataCollectionEntityMgr.delete(dataCollection);
+                }
+
+                Thread.sleep(1000);
+                install(customerSpace, null);
+            }
+        } catch (Exception e) {
+            log.error(String.format("Reset CDL component for: %s failed. %s", customerSpace, e.toString()));
+            return false;
+        }
+        return true;
     }
 }
