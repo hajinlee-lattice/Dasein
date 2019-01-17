@@ -1,8 +1,13 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import cascading.tuple.Fields;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMDecodeFunction;
@@ -11,7 +16,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
-import org.springframework.stereotype.Component;
+
+import cascading.tuple.Fields;
 
 @Component(AMDecode.DATAFLOW_BEAN_NAME)
 public class AMDecode extends TransformationFlowBase<BasicTransformationConfiguration, AMDecoderParameters> {
@@ -28,7 +34,15 @@ public class AMDecode extends TransformationFlowBase<BasicTransformationConfigur
         Node node = addSource(parameters.getBaseTables().get(0));
         List<String> decodeAttributes = new ArrayList<>(parameters.getCodeBookLookup().keySet());
         List<String> encodeAttributes = new ArrayList<>(parameters.getCodeBookMap().keySet());
-        List<String> fieldsToRetain = new ArrayList<>(Arrays.asList(parameters.getRetainFields()));
+        List<String> fieldsToRetain = ArrayUtils.isEmpty(parameters.getRetainFields()) ? new ArrayList<>()
+                : new ArrayList<>(Arrays.asList(parameters.getRetainFields()));
+        if (parameters.isDecodeAll()) {
+            List<String> allFields = new ArrayList<>(node.getFieldNames());
+            fieldsToRetain = allFields.stream() //
+                    // Retain all plain attributes
+                    .filter(field -> !parameters.getCodeBookMap().containsKey(field)) //
+                    .collect(Collectors.toList());
+        }
         fieldsToRetain.addAll(encodeAttributes);
         node = node.retain(new FieldList(fieldsToRetain));
 
