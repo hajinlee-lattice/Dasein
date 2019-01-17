@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 public class RatingEngineServiceImplUnitTestNG {
 
@@ -46,6 +48,9 @@ public class RatingEngineServiceImplUnitTestNG {
 
     @Mock
     private RatingEngineEntityMgr ratingEngineEntityMgr;
+
+    @Mock
+    private BucketedScoreProxy bucketedScoreProxy;
 
     @InjectMocks
     @Spy
@@ -71,6 +76,8 @@ public class RatingEngineServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetAllRatingEngineSummaries() {
+        when(bucketedScoreProxy.getAllPublishedBucketMetadataByModelSummaryIdList(anyString(), anyList()))
+                .thenReturn(Collections.emptyMap());
         List<RatingEngineSummary> summaryList = ratingEngineService.getAllRatingEngineSummaries(
                 RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.toString(), true);
         Assert.assertEquals(summaryList.size(), 1);
