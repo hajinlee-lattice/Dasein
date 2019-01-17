@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -100,7 +101,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     @Override
     public List<String> getIds(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries) {
-        check(tenant, lookupEntries);
+        checkNotNull(tenant, lookupEntries);
         if (lookupEntries.isEmpty()) {
             return Collections.emptyList();
         }
@@ -108,7 +109,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // make sure required service are loaded properly
         lazyInitServices();
 
-        return getIdsInternal(tenant, lookupEntries);
+        Map<EntityLookupEntry, String> seedIdMap = getIdsInternal(tenant,
+                lookupEntries.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+        return generateResult(lookupEntries, seedIdMap);
     }
 
     @Override
@@ -122,7 +125,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     @Override
     public List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
-        check(tenant, seedIds);
+        checkNotNull(tenant, seedIds);
         checkNotNull(entity);
         if (seedIds.isEmpty()) {
             return Collections.emptyList();
@@ -131,7 +134,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // make sure required service are loaded properly
         lazyInitServices();
 
-        return getSeedsInternal(tenant, entity, seedIds);
+        Map<String, EntityRawSeed> resultMap = getSeedsInternal(tenant, entity,
+                seedIds.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+        return generateResult(seedIds, resultMap);
     }
 
     @Override
@@ -319,7 +324,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Retrieve list of seed IDs using input list of lookup entries.
      * Start from local cache -> staging table -> serving table and perform synchronization between layers.
      */
-    private List<String> getIdsInternal(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries) {
+    private Map<EntityLookupEntry, String> getIdsInternal(@NotNull Tenant tenant,
+            @NotNull List<EntityLookupEntry> lookupEntries) {
         String tenantId = tenant.getId();
         Set<EntityLookupEntry> uniqueEntries = new HashSet<>(lookupEntries);
         // retrieve seed IDs from cache
@@ -327,7 +333,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 tenantId, lookupEntries, lookupCache);
         if (results.size() == uniqueEntries.size()) {
             // have all the seed IDs
-            return generateResult(lookupEntries, results);
+            return results;
         }
 
         // get lookup entries that are not present in local cache and try staging layer
@@ -339,7 +345,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // populate in-memory cache
         putInCache(tenantId, missingResults, lookupCache);
 
-        return generateResult(lookupEntries, results);
+        return results;
     }
 
     /*
@@ -399,7 +405,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Retrieve list of raw seeds using input list of seed IDs.
      * Start from local cache -> staging table -> serving table and perform synchronization between layers.
      */
-    private List<EntityRawSeed> getSeedsInternal(
+    private Map<String, EntityRawSeed> getSeedsInternal(
             @NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
         // need entity here because seed ID does not contain this info (unlike lookup entry)
         String tenantId = tenant.getId();
@@ -408,7 +414,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         if (isAllocateMode()) {
             // in allocate mode, does not cache seed in-memory because seed will be updated and invalidating cache
             // for multiple processes will be difficult to do.
-            return generateResult(seedIds, getSeedsStaging(tenant, entity, uniqueSeedIds));
+            return getSeedsStaging(tenant, entity, uniqueSeedIds);
         }
 
         // NOTE in lookup mode
@@ -425,7 +431,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // populate in-memory cache
         putInCache(prefix, missingResults, seedCache);
 
-        return generateResult(seedIds, results);
+        return results;
     }
 
     /*
@@ -525,7 +531,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Null will be added to indicate no value is associated with respective key.
      */
     private <K, V> List<V> generateResult(@NotNull List<K> originalInputs, @NotNull Map<K, V> foundValues) {
-        return originalInputs.stream().map(foundValues::get).collect(Collectors.toList());
+        return originalInputs.stream().map(input -> input == null ? null : foundValues.get(input))
+                .collect(Collectors.toList());
     }
 
     /*
@@ -533,11 +540,6 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private String newId() {
         return RandomStringUtils.random(ENTITY_ID_LENGTH, ENTITY_ID_CHARS);
-    }
-
-    private void check(@NotNull Tenant tenant, @NotNull List<?> list) {
-        checkNotNull(tenant, list);
-        list.forEach(Preconditions::checkNotNull);
     }
 
     /*
