@@ -44,6 +44,8 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     @Inject
     private DataUnitProxy dataUnitProxy;
 
+    private final static String TABLE_PREFIX = "ToBeDeletedOn_";
+
     @Override
     public boolean removeUnusedTable() {
         List<SimpleDataFeed> allSimpleDataFeeds = dataFeedEntityMgr.getAllSimpleDataFeeds();
@@ -77,35 +79,38 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, activeVersion));
             tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, inactiveVersion));
             log.info("inuse tableNames:" + tableNames.toString());
-            // 2. get all tablename in this tenant_id on redshift
-            List<String> redshift_tableNames = getRedShiftTableName(tenant);
-            log.info("redshift tablename under tenant is :" + redshift_tableNames.toString());
-            // 3.drop table
-            dropTable(redshift_tableNames, new ArrayList<>(tableNames));
+            // 2.drop table
+            cleanupTable(tenant, new ArrayList<>(tableNames));
         } catch (Exception e) {
             log.error(e.toString());
         }
     }
 
-    private void dropTable(List<String> redshift_table, List<String> data_table) {
-        redshift_table.removeAll(data_table);
-        if (CollectionUtils.isEmpty(redshift_table)) {
-            return;
-        }
-        for (String simpleTable : redshift_table) {
-            log.info("drop table : " + simpleTable);
-            redshiftService.dropTable(simpleTable);
-        }
-    }
-
-    private List<String> getRedShiftTableName(Tenant tenant) {//remove those tableName which isn't in this tenant
+    private void cleanupTable(Tenant tenant, List<String> inuseTableName) {
         List<DataUnit> dataUnits = dataUnitProxy.getByStorageType(tenant.getId(), DataUnit.StorageType.Redshift);
-        Set<String> finalTableName = new HashSet<>();
         for (DataUnit dataUnit : dataUnits) {
             log.info("dataUnit = " + dataUnit.getName());
-            finalTableName.add(dataUnit.getName());
+            String tableName = dataUnit.getName();
+            if (!inuseTableName.contains(tableName)) {
+                if (tableName.startsWith(TABLE_PREFIX, 0)) {//delete prefix=ToBeDelete redshift tablename
+                    String timestamp = tableName.replace(TABLE_PREFIX, "");
+                    timestamp = timestamp.substring(0, timestamp.indexOf('_'));
+                    log.info("to be deleted redshift table timestamp is " + timestamp);
+                    int distance = (int) (((System.currentTimeMillis()/1000 - Long.valueOf(timestamp))/3600)/24);
+                    log.info("redshift table " + dataUnit.getName() + " distance is " + distance + " days");
+                    if (distance > 9) {
+                        log.info("need delete redshift tablename under tenant is :" + dataUnit.getName());
+                        dataUnitProxy.delete(tenant.getId(), dataUnit);
+                    }
+                } else {//rename redshiftname wait delete
+                    String new_tableName = TABLE_PREFIX + System.currentTimeMillis()/1000 + "_" + tableName;
+                    log.info("new table name is " + new_tableName);
+                    DataUnit renameDataUnit = dataUnitProxy.renameRedShiftTableName(tenant.getId(), dataUnit,
+                            new_tableName);
+                    log.info("after rename, dataUNit name is " + renameDataUnit.getName());
+                }
+            }
         }
-        return new ArrayList<>(finalTableName);
     }
 
 }

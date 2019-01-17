@@ -20,4 +20,6 @@ public interface DataUnitEntityMgr {
 
     List<DataUnit> deleteAllByName(String name);
 
+    DataUnit renameRedShiftTableName(String tenantId, DataUnit dataUnit, String tableName);
+
 }
