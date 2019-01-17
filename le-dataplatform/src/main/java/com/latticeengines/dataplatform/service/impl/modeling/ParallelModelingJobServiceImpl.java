@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
@@ -60,7 +60,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     private Boolean useEmr;
 
     @Inject
-    private VersionManager versionManager;
+    private ManifestService manifestService;
 
     @Inject
     private EMRCacheService emrCacheService;
@@ -89,13 +89,13 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier,
-                versionManager.getCurrentVersionInStack(stackName));
+                manifestService.getLedsVersion());
 
         Properties properties = new Properties();
         String inputDir = classifier.getModelHdfsDir() + "/" + classifier.getName();
         int mapperSize = Integer.parseInt(appMasterProperties.getProperty(PythonMRProperty.MAPPER_SIZE.name()));
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
-                versionManager.getCurrentVersionInStack(stackName)));
+                manifestService.getLedpStackVersion()));
         try {
             if (PythonMRJobType.PROFILING_JOB.jobType().equals(jobType)) {
                 setupProfilingMRConfig(properties, classifier, mapperSize, inputDir);
@@ -140,7 +140,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
                                                                                           // up
         String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier,
                 properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString(),
-                versionManager.getCurrentVersionInStack(stackName));
+                manifestService.getLedsVersion());
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
@@ -164,7 +164,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         }
         String cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingFiles,
                 properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString(),
-                versionManager.getCurrentVersionInStack(stackName));
+                manifestService.getLedsVersion());
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);

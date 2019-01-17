@@ -49,7 +49,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         fs.delete(new Path(customerBaseDir + "/Parallel_INTERNAL_ModelResourceDeploymentTestNG"), true);
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setScript("/app/dataplatform/scripts/algorithm/parallel_rf_train.py");
+        randomForestAlgorithm.setScript("/datascience/dataplatform/scripts/algorithm/parallel_rf_train.py");
         randomForestAlgorithm.setPriority(2);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
         randomForestAlgorithm.setSampleName("all");

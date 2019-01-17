@@ -47,7 +47,7 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
         model = getModel("Parallel_INTERNAL_DellAPJDeploymentTestNG");
         RandomForestAlgorithm randomForestAlgorithm = (RandomForestAlgorithm) model.getModelDefinition().getAlgorithms()
                 .get(0);
-        randomForestAlgorithm.setScript("/app/dataplatform/scripts/algorithm/parallel_rf_train.py");
+        randomForestAlgorithm.setScript("/datascience/dataplatform/scripts/algorithm/parallel_rf_train.py");
         model.setParallelEnabled(true);
     }
 

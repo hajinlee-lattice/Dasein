@@ -35,7 +35,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
@@ -54,8 +54,8 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     @Autowired
     protected JobService jobService;
 
-    @Autowired
-    protected VersionManager versionManager;
+    @Inject
+    protected ManifestService manifestService;
 
     @Autowired
     private YarnClientCustomizationService yarnClientCustomizationService;
@@ -65,9 +65,6 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     private MiniYARNCluster miniCluster;
 
     private MiniDFSCluster hdfsCluster;
-
-    @Value("${dataplatform.hdfs.stack}")
-    protected String stackName;
 
     @Inject
     private EMREnvService emrEnvService;
@@ -99,7 +96,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         }
     }
 
-    public void setupMiniCluster() throws IOException {
+    private void setupMiniCluster() throws IOException {
         miniclusterConfiguration = new YarnConfiguration();
         miniclusterConfiguration.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 2024);
         miniclusterConfiguration.setInt(YarnConfiguration.DEBUG_NM_DELETE_DELAY_SEC, 300);
@@ -138,27 +135,31 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     }
 
     protected void uploadArtifactsToHdfs() throws IOException {
-        String dpHdfsPath = String.format("/app/%s/dataplatform", versionManager.getCurrentVersionInStack(stackName));
+        String dpHdfsPath = String.format("%s/dataplatform", manifestService.getLedpPath());
         FileUtils.deleteDirectory(new File("dataplatform"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, dpHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "dataplatform", dpHdfsPath);
 
+        String dsHdfsPath = manifestService.getLedsPath();
+        FileUtils.deleteDirectory(new File("datascience"));
+        HdfsUtils.copyHdfsToLocal(yarnConfiguration, dsHdfsPath, ".");
+        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "datascience", dsHdfsPath);
+
         String log4jPath = String
-                .format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName));
+                .format("%s/conf/log4j.properties", manifestService.getLedpPath());
         FileUtils.deleteQuietly(new File("log4j.properties"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, log4jPath, ".");
         FileUtils.deleteQuietly(new File(".log4j.properties.crc"));
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "log4j.properties", log4jPath);
 
         log4jPath = String
-                .format("/app/%s/conf/log4j2-yarn.xml", versionManager.getCurrentVersionInStack(stackName));
+                .format("%s/conf/log4j2-yarn.xml", manifestService.getLedpPath());
         FileUtils.deleteQuietly(new File("log4j2-yarn.xml"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, log4jPath, ".");
         FileUtils.deleteQuietly(new File(".log4j2-yarn.xml.crc"));
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "log4j2-yarn.xml", log4jPath);
 
-        String lepropertiesPath = String.format("/app/%s/conf/latticeengines.properties",
-                versionManager.getCurrentVersionInStack(stackName));
+        String lepropertiesPath = String.format("%s/conf/latticeengines.properties", manifestService.getLedpPath());
         Properties properties = regenerateProperties(lepropertiesPath);
 
         FileUtils.deleteQuietly(new File("latticeengines.properties"));

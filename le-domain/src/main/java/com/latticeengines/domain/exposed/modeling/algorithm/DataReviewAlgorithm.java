@@ -14,11 +14,11 @@ public class DataReviewAlgorithm extends AlgorithmBase {
 
     public DataReviewAlgorithm() {
         setName("DATAREV");
-        setScript("/app/dataplatform/scripts/algorithm/data_rule.py");
+        setScript("/datascience/dataplatform/scripts/algorithm/data_rule.py");
         setAlgorithmProperties("");
-        setPipelineDriver("/app/dataplatform/scripts/rulepipeline.json");
-        setPipelineScript("/app/dataplatform/scripts/pipeline.py");
-        setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
+        setPipelineDriver("/datascience/dataplatform/scripts/rulepipeline.json");
+        setPipelineScript("/datascience/dataplatform/scripts/pipeline.py");
+        setPipelineLibScript("/datascience/dataplatform/scripts/lepipeline.tar.gz");
         setPipelineProperties(StringUtils.join(getPipelinePropertyArray(), " "));
     }
 

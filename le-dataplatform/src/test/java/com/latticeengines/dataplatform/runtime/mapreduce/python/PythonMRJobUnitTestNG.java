@@ -12,9 +12,9 @@ import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRJobType;
@@ -60,7 +60,27 @@ public class PythonMRJobUnitTestNG {
     @Test(groups = "unit")
     public void testMRJob() throws Exception {
         PythonMRJob customizer = new PythonMRJob(new Configuration());
-        customizer.setVersionManager(new VersionManager(""));
+        customizer.setManifestService(new ManifestService() {
+            @Override
+            public String getLedsVersion() {
+                return "1.0.1";
+            }
+
+            @Override
+            public String getLedsPath() {
+                return "/datascience/1.0.1";
+            }
+
+            @Override
+            public String getLedpStackVersion() {
+                return "1.0.1";
+            }
+
+            @Override
+            public String getLedpPath() {
+                return "/app/1.0.1";
+            }
+        });
         customizer.customize(job, property);
 
         Configuration conf = job.getConfiguration();
@@ -70,7 +90,7 @@ public class PythonMRJobUnitTestNG {
         assertNotNull(conf.get(MapReduceProperty.INPUT.name()));
         assertEquals(conf.get(MRPathFilter.INPUT_FILE_PATTERN), PythonMRJobType.CONFIG_FILE);
 
-        assertEquals(job.getCacheFiles().length, 13);
+        assertEquals(job.getCacheFiles().length, 12);
         assertEquals(job.getCacheArchives().length, 2);
         assertEquals(job.getInputFormatClass(), NLineInputFormat.class);
 

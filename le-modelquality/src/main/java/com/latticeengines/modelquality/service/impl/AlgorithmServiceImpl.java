@@ -18,7 +18,7 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
 
     @Override
     public Algorithm createLatestProductionAlgorithm() {
-        String version = getVersion();
+        String version = getLedsVersion();
         String algorithmName = "PRODUCTION-" + version.replace('/', '_');
         Algorithm algorithm = algorithmEntityMgr.findByName(algorithmName);
         if (algorithm != null) {
@@ -28,7 +28,7 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
         algorithm = new Algorithm();
         algorithm.setName(algorithmName);
         algorithm.setType(AlgorithmType.RANDOMFOREST);
-        String algorithmScript = String.format("/app/%s/dataplatform/scripts/algorithm/rf_train.py", version);
+        String algorithmScript = String.format("/datascience/%s/dataplatform/scripts/algorithm/rf_train.py", version);
         algorithm.setScript(algorithmScript);
 
         AlgorithmPropertyDef def = new AlgorithmPropertyDef("n_estimators");

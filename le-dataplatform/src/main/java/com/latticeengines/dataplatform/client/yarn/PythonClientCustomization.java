@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.client.yarn;
 
+import static com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRUtils.getScriptPathWithVersion;
+
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
@@ -51,6 +54,9 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
     @Inject
     private EMRCacheService emrCacheService;
+
+    @Inject
+    private ManifestService manifestService;
 
     public PythonClientCustomization() {
         super(null, null, null, null, null, null);
@@ -84,36 +90,32 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             String metadata = properties.getProperty(PythonContainerProperty.METADATA.name());
             Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
             log.info("Classifier in PythonContainerProperty is " + JsonUtils.pprint(classifier));
-            properties.put(PythonContainerProperty.TRAINING.name(),
-                    classifier.getTrainingDataHdfsPath());
+            properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
-            properties.put(PythonContainerProperty.PYTHONSCRIPT.name(),
-                    classifier.getPythonScriptHdfsPath());
-            String pipelineScript = classifier.getPythonPipelineScriptHdfsPath();
-            String pipelineLibScript = classifier.getPythonPipelineLibHdfsPath();
+            properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
+            properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
+            properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
+
+            String version = manifestService.getLedsVersion();
+            properties.put(PythonContainerProperty.VERSION.name(), version);
+            String pipelineDriverPath = getScriptPathWithVersion(classifier.getPipelineDriver(), version);
+            properties.put(PythonContainerProperty.PIPELINEDRIVER.name(), pipelineDriverPath);
+            String pythonScriptPath = getScriptPathWithVersion(classifier.getPythonScriptHdfsPath(), version);
+            properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), pythonScriptPath);
+            String pipelineScript = getScriptPathWithVersion(classifier.getPythonPipelineScriptHdfsPath(), version);
             properties.put(PythonContainerProperty.PYTHONPIPELINESCRIPT.name(), pipelineScript);
+            String pipelineLibScript = getScriptPathWithVersion(classifier.getPythonPipelineLibHdfsPath(), version);
             properties.put(PythonContainerProperty.PYTHONPIPELINELIBFQDN.name(), pipelineLibScript);
             String[] tokens = pipelineLibScript.split("/");
-            properties.put(PythonContainerProperty.PYTHONPIPELINELIB.name(),
-                    tokens[tokens.length - 1]);
-            properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
-            properties.put(PythonContainerProperty.DATAPROFILE.name(),
-                    classifier.getDataProfileHdfsPath());
-            properties.put(PythonContainerProperty.CONFIGMETADATA.name(),
-                    classifier.getConfigMetadataHdfsPath());
-            properties.put(PythonContainerProperty.PIPELINEDRIVER.name(),
-                    classifier.getPipelineDriver());
+            properties.put(PythonContainerProperty.PYTHONPIPELINELIB.name(), tokens[tokens.length - 1]);
 
-            properties.put(PythonContainerProperty.VERSION.name(),
-                    versionManager.getCurrentVersionInStack(stackName));
             setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
             File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
-            properties.put(PythonContainerProperty.CONDA_ENV.name(),
-                    emrEnvService.getLatticeCondaEnv());
+            properties.put(PythonContainerProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
             if (Boolean.TRUE.equals(useEmr)) {
                 properties.put(PythonContainerProperty.WEBHDFS_URL.name(),
                         emrCacheService.getWebHdfsUrl());

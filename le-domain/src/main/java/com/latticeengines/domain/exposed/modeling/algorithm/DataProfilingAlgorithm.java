@@ -9,8 +9,8 @@ public class DataProfilingAlgorithm extends AlgorithmBase {
 
     public DataProfilingAlgorithm() {
         setName("DP");
-        setScript("/app/dataplatform/scripts/algorithm/data_profile.py");
-        setPipelineScript("/app/dataplatform/scripts/pipeline.py");
-        setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
+        setScript("/datascience/dataplatform/scripts/algorithm/data_profile.py");
+        setPipelineScript("/datascience/dataplatform/scripts/pipeline.py");
+        setPipelineLibScript("/datascience/dataplatform/scripts/lepipeline.tar.gz");
     }
 }

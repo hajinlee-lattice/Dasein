@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -82,8 +82,8 @@ public class FileAggregatorUnitTestNG {
 
         ModelPickleAggregator aggregator = new ModelPickleAggregator();
         try {
-            aggregator.aggregate(new ArrayList<String>(), config, null);
-        } catch (Exception e) {
+            aggregator.aggregate(new ArrayList<>(), config, null);
+        } catch (Exception expected) {
             // ignore invoker exception
         }
         String metadataNew = FileUtils.readFileToString(new File(PythonMRUtils.METADATA_JSON_PATH),
@@ -97,18 +97,13 @@ public class FileAggregatorUnitTestNG {
     }
 
     public List<String> getFilesForDir(String parentDir, final String regex) {
-        File[] files = new File(parentDir).listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                Pattern p = Pattern.compile(regex);
-                Matcher matcher = p.matcher(name.toString());
-                return matcher.matches();
-            }
-
+        File[] files = new File(parentDir).listFiles((dir, name) -> {
+            Pattern p = Pattern.compile(regex);
+            Matcher matcher = p.matcher(name);
+            return matcher.matches();
         });
-
-        List<String> paths = new ArrayList<String>();
+        List<String> paths = new ArrayList<>();
+        Assert.assertNotNull(files);
         for (File file : files) {
             paths.add(file.getPath());
         }

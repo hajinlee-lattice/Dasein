@@ -16,7 +16,7 @@
         class="com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRJob">
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
-        <constructor-arg ref="versionManager" />
+        <constructor-arg ref="manifestService" />
         <constructor-arg ref="emrCacheService" />
         <constructor-arg value="${dataplatform.hdfs.stack}" />
         <constructor-arg value="${dataplatform.python.conda.env}" />

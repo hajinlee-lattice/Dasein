@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,12 +20,12 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.base.Joiner;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
@@ -46,9 +45,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Inject
     private Configuration yarnConfiguration;
-
-    @Inject
-    private VersionManager versionManager;
 
     @Inject
     private EMREnvService emrEnvService;
@@ -85,6 +81,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
+
+    @Inject
+    private ManifestService manifestService;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
@@ -153,8 +152,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         List<String> cacheFiles;
         try {
             syncModelsFromS3ToHdfs(tenant);
-            cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
-                    versionManager.getCurrentVersionInStack(stackName));
+            cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration, manifestService.getLedpStackVersion(), //
+                    manifestService.getLedsVersion());
             cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
                     scoringConfig.getModelGuids(), Boolean.TRUE));
         } catch (IOException e) {

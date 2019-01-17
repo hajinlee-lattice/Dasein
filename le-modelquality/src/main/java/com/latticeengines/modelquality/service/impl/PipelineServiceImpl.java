@@ -52,11 +52,11 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    private final String pipelineJson = "/app/%s/%s/dataplatform/scripts/pipeline.json";
+    private final String pipelineJson = "/datascience/%s/dataplatform/scripts/pipeline.json";
 
     @Override
     public Pipeline createLatestProductionPipeline() {
-        String version = getVersion();
+        String version = getLedsVersion();
         String pipelineName = "PRODUCTION-" + version.replace('/', '_');
         Pipeline pipeline = pipelineEntityMgr.findByName(pipelineName);
 
@@ -67,7 +67,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         pipeline = new Pipeline();
         pipeline.setName(pipelineName);
         pipeline.setDescription("Production pipeline version: " + pipeline.getName());
-        String pipelineJsonPath = String.format(pipelineJson, stackName, getActiveStack().get("ArtifactVersion"));
+        String pipelineJsonPath = String.format(pipelineJson, version);
         setPipelineProperties(pipeline, pipelineJsonPath);
 
         try {
@@ -186,7 +186,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     }
 
     private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
-        String version = getVersion();
+        String version = getLedsVersion();
         String pythonLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz", version);
         String pipelineScript = String.format("/app/%s/dataplatform/scripts/pipeline.py", version);
 
