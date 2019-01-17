@@ -26,7 +26,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -108,19 +107,26 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         // upsert product table
         dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(),
                 TableRoleInCollection.ConsolidatedProduct, inactive);
-        log.info(String.format("Upsert table %s to role %s, version %s.", table.getName(), TableRoleInCollection.ConsolidatedProduct, inactive));
-
-        // update data collection status
-        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        detail.setProductCount(Long.valueOf(String.valueOf(mergeReport.get("Merged_NumProductIds"))));
-        putObjectInContext(CDL_COLLECTION_STATUS, detail);
-        log.info("MergeProduct step: dataCollection Status is " + JsonUtils.serialize(detail));
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
+        log.info(String.format("Upsert table %s to role %s, version %s.",
+                table.getName(), TableRoleInCollection.ConsolidatedProduct, inactive));
 
         generateReport();
     }
 
     private void generateReport() {
+        // get product count in batch store
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedProduct, inactive);
+        String hdfsPath = table.getExtracts().get(0).getPath();
+        log.info(String.format("Count products in batch store. Tenant=%s. Version=%s. HDFSPath=%s",
+                customerSpace.toString(), inactive, hdfsPath));
+        Set<String> skus = new HashSet<>();  // only contains unique SKUs
+        ProductUtils.loadProducts(yarnConfiguration, hdfsPath).stream()
+                .filter(product -> product.getProductType().equals(ProductType.Bundle.name())
+                        || product.getProductType().equals(ProductType.Hierarchy.name()))
+                .forEach(product -> skus.add(product.getProductId()));
+
+        // update product report
         ObjectNode report = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
                 ObjectNode.class);
         JsonNode entitiesSummaryNode = report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
@@ -137,16 +143,15 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                     .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
         }
 
-        ((ObjectNode) consolidateSummaryNode).put(
-                ReportConstants.PRODUCT_ID, (Integer) mergeReport.get("Merged_NumProductIds"));
-        ((ObjectNode) consolidateSummaryNode).put(
-                ReportConstants.PRODUCT_HIERARCHY, (Integer) mergeReport.get("Merged_NumProductCategories"));
-        ((ObjectNode) consolidateSummaryNode).put(
-                ReportConstants.PRODUCT_BUNDLE, (Integer) mergeReport.get("Merged_NumProductBundles"));
-        ((ObjectNode) consolidateSummaryNode).put(
-                ReportConstants.ERROR_MESSAGE, (String) mergeReport.get("Merged_ErrorMessage"));
-        ((ObjectNode) consolidateSummaryNode).put(
-                ReportConstants.WARN_MESSAGE, (String) mergeReport.get("Merged_WarnMessage"));
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.PRODUCT_ID, skus.size());
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.PRODUCT_HIERARCHY,
+                (Integer) mergeReport.get("Merged_NumProductCategories"));
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.PRODUCT_BUNDLE,
+                (Integer) mergeReport.get("Merged_NumProductBundles"));
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.ERROR_MESSAGE,
+                (String) mergeReport.get("Merged_ErrorMessage"));
+        ((ObjectNode) consolidateSummaryNode).put(ReportConstants.WARN_MESSAGE,
+                (String) mergeReport.get("Merged_WarnMessage"));
 
         putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), report);
     }
