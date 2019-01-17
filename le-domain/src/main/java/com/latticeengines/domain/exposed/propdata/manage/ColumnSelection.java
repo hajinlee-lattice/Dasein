@@ -128,21 +128,29 @@ public class ColumnSelection {
         DerivedColumns("DerivedColumns"), //
         Model("Model"), //
         Segment("Segment"), //
-        ID("ID"), //
+        ID("ID"), // Shared in entity match
         RTS("RTS"),
 
         // CDL
         LookupId("LookupId"), //
         TalkingPoint("TalkingPoint"), //
-        CompanyProfile("CompanyProfile");
+        CompanyProfile("CompanyProfile"), //
+
+        // Entity Match
+        Seed("Seed"), // LatticeAccountId, AccountId from entity seed table
+        ;
 
         public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
                 ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.Model.getName(),
                 ColumnSelection.Predefined.TalkingPoint.getName(),
                 ColumnSelection.Predefined.CompanyProfile.getName() };
 
+        // For DataCloud match & CDL match (before M25)
         public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID,
-                Enrichment, Segment, TalkingPoint, CompanyProfile);
+                Enrichment, Segment, TalkingPoint, CompanyProfile, Seed);
+
+        // For entity match
+        public static final EnumSet<Predefined> entitySupportedSelections = EnumSet.of(ID, Seed);
 
         private static Map<String, Predefined> nameMap;
 

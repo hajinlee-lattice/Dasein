@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -33,6 +34,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMic
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
@@ -91,15 +93,22 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
 
-    private static final Tenant TENANT = new Tenant(MatchActorSystemTestNG.class.getSimpleName());
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
 
+    private static final Tenant TENANT = new Tenant(
+            MatchActorSystemTestNG.class.getSimpleName() + UUID.randomUUID().toString());
+
+    @BeforeClass(groups = "functional")
+    public void init() {
+        entityMatchConfigurationService.setIsAllocateMode(true);
+    }
 
     // Realtime and batch mode cannot run at same time. Must be prioritized
     @Test(groups = "functional", dataProvider = "actorSystemTestData", priority = 1, enabled = true)
     public void testActorSystemRealtimeMode(int numRequests, String decisionGraph, String expectedID, String domain,
             String duns) throws Exception {
         actorSystem.setBatchMode(false);
-        entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
         testActorSystem(numRequests, decisionGraph, expectedID, domain, duns);
     }
 
@@ -107,13 +116,13 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     public void testActorSystemBatchMode(int numRequests, String decisionGraph, String expectedID, String domain,
             String duns) throws Exception {
         actorSystem.setBatchMode(true);
-        entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
         testActorSystem(numRequests * 10, decisionGraph, expectedID, domain, duns);
     }
 
     private void testActorSystem(int numRequests, String decisionGraph, String expectedID, String domain, String duns)
             throws Exception {
         try {
+            entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
             Integer maxRetries = null;
             try {
                 DecisionGraph dg = matchDecisionGraphService.getDecisionGraph(decisionGraph);

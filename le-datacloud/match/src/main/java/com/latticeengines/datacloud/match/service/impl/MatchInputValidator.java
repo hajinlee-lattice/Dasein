@@ -164,6 +164,11 @@ public class MatchInputValidator {
                     }
                 }
             }
+            // For fetch-only mode, must have EntityId as match key
+            if (input.isFetchOnly() && (!keyMap.containsKey(MatchKey.EntityId)
+                    || CollectionUtils.isEmpty(keyMap.get(MatchKey.EntityId)))) {
+                throw new IllegalArgumentException("Fetch-only mode must provide EntityId match key");
+            }
         } else {
             // TODO(jwinter): Remove this constraint once we start supporting other entities.
             // For now, require that the map of EntityKeyMaps has a EntityKeyMap for Account Entity.
@@ -187,6 +192,10 @@ public class MatchInputValidator {
             throw new IllegalArgumentException("Entity Match cannot have union column selection set.");
         }
 
+        if (input.isAllocateId() && input.isFetchOnly()) {
+            throw new IllegalArgumentException("AllocateID mode and FetchOnly mode cannot be set at same time");
+        }
+
         // For Entity Match Allocated ID mode, predefined column selection must be "ID".  Otherwise, the predefined
         // column selection must be a valid value.
         if (input.isAllocateId()) {
@@ -195,7 +204,7 @@ public class MatchInputValidator {
                         "Entity Match Allocate ID mode only supports predefined column selection set to \"ID\".");
             }
         } else {
-            validatePredefinedSelection(input.getPredefinedSelection());
+            validatePredefinedSelection(input.getPredefinedSelection(), OperationalMode.ENTITY_MATCH);
         }
     }
 
@@ -289,28 +298,32 @@ public class MatchInputValidator {
                 && input.getUnionSelection() == null) {
             throw new IllegalArgumentException("Must specify predefined, custom, or union column selection.");
         } else if (input.getUnionSelection() != null) {
-            validateUnionSelection(input.getUnionSelection());
+            validateUnionSelection(input.getUnionSelection(), input.getOperationalMode());
         } else if (input.getCustomSelection() == null) {
-            validatePredefinedSelection(input.getPredefinedSelection());
+            validatePredefinedSelection(input.getPredefinedSelection(), input.getOperationalMode());
         }
     }
 
-    private static void validateUnionSelection(UnionSelection unionSelection) {
+    private static void validateUnionSelection(UnionSelection unionSelection, OperationalMode mode) {
         if (unionSelection.getPredefinedSelections().isEmpty()
                 && (unionSelection.getCustomSelection() == null || !unionSelection.getCustomSelection().isEmpty())) {
             throw new IllegalArgumentException(
                     "Must provide predefined or custom column selections in a union selection.");
         } else {
             for (Predefined predefined : unionSelection.getPredefinedSelections().keySet()) {
-                validatePredefinedSelection(predefined);
+                validatePredefinedSelection(predefined, mode);
             }
         }
     }
 
-    private static void validatePredefinedSelection(Predefined selection) {
-        if (!Predefined.supportedSelections.contains(selection)) {
+    private static void validatePredefinedSelection(Predefined selection, OperationalMode mode) {
+        if (!OperationalMode.ENTITY_MATCH.equals(mode) && !Predefined.supportedSelections.contains(selection)) {
             throw new UnsupportedOperationException(
                     "Only Predefined selection " + Predefined.supportedSelections + " are supported at this time.");
+        }
+        if (OperationalMode.ENTITY_MATCH.equals(mode) && !Predefined.entitySupportedSelections.contains(selection)) {
+            throw new UnsupportedOperationException("Only Predefined selection " + Predefined.entitySupportedSelections
+                    + " are supported for entity match at this time.");
         }
     }
 

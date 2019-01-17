@@ -218,12 +218,6 @@ public abstract class Traveler {
         if (!visitedHistory.containsKey(traversedActor)) {
             visitedHistory.put(traversedActor, new HashSet<String>());
         }
-        // TODO(ZDD): It is to avoid repeated traversing actor with same input
-        // data.
-        // After supporting repeated runs in decision graph, this logic need to
-        // revisit.
-        // For entity match, match traveler starts with null matchKeyTuple, need
-        // to revisit null handling
         visitedHistory.get(traversedActor)
                 .add(getInputData() == null ? "" : getInputData().toString());
     }

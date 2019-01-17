@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -23,8 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
-import javax.inject.Inject;
-
 @Component("matchStandardizationService")
 public class MatchStandardizationServiceImpl implements MatchStandardizationService {
 
@@ -39,6 +39,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     @Inject
     private NameLocationService nameLocationService;
 
+    @Override
     public void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                      Set<String> domainSet, boolean treatPublicDomainAsNormal,
                                      EntityMatchKeyRecord record) {
@@ -92,6 +93,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                 && StringUtils.isBlank(duns);
     }
 
+    @Override
     public void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                            Set<NameLocation> nameLocationSet, EntityMatchKeyRecord record) {
         try {
@@ -184,6 +186,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         return nameLocation;
     }
 
+    @Override
     public void parseRecordForDuns(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                    EntityMatchKeyRecord record) {
         if (keyPositionMap.containsKey(MatchKey.DUNS)) {
@@ -207,6 +210,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         }
     }
 
+    @Override
     public void parseRecordForSystemIds(List<Object> inputRecord, Map<MatchKey, List<String>> keyMap,
                                         Map<MatchKey, List<Integer>> keyPositionMap, MatchKeyTuple matchKeyTuple) {
         List<Pair<String, String>> systemIds = new ArrayList<>();

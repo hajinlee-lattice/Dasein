@@ -54,14 +54,6 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             output = initializeMatchOutput(input, columnSelection, metadatas);
         } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
             context.setCdlLookup(false);
-            // TODO: Currently copied from RealtimeEntityMatchPlanner
-            // Think more:
-            // 1. Based on current RealtimeEntityMatchPlanner, is it
-            // really necessary to separate RealtimeEntityMatchPlanner and
-            // RealtimeMatchPlanner? Looks like not too much difference and
-            // if-else still exists in shared methods
-            // 2. If Q1 is yes, probably create BulkEntityMatchPlanner too and
-            // create EntityMatchPlannerBase
             if (metadatas == null) {
                 metadatas = parseEntityMetadata(input);
             }

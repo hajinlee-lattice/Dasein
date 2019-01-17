@@ -268,4 +268,5 @@ public class InternalOutputRecord extends OutputRecord {
     public void setEntityKeyPositionMap(Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
         this.entityKeyPositionMaps = entityKeyPositionMaps;
     }
+
 }

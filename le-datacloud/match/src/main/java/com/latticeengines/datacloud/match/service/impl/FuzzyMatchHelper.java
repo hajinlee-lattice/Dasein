@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,16 +30,22 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
+import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 import scala.concurrent.Future;
 
@@ -63,7 +70,7 @@ public class FuzzyMatchHelper implements DbHelper {
     private CDLLookupService cdlLookupService;
 
     @Inject
-    private EntityMatchConfigurationService entityMatchConfigurationService;
+    private EntityMatchInternalService entityMatchInternalService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -92,7 +99,6 @@ public class FuzzyMatchHelper implements DbHelper {
     @MatchStep
     private void fetchInternal(MatchContext context, boolean isSync) {
         boolean fetchOnly = context.getInput().isFetchOnly();
-        setAllocateModeFlag(context);
         if (!fetchOnly) {
             try {
                 updateDecisionGraph(context.getInput());
@@ -113,21 +119,11 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
-    private void setAllocateModeFlag(MatchContext context) {
-        if (context == null || context.getInput() == null) {
-            return;
-        }
-
-        entityMatchConfigurationService.setIsAllocateMode(context.getInput().isAllocateId());
-    }
-
     private void preLookup(MatchContext context) {
         for (InternalOutputRecord record : context.getInternalResults()) {
             String lookupIdKey = record.getLookupIdKey();
             String lookupIdValue = record.getLookupIdValue();
             if (StringUtils.isNotBlank(lookupIdValue)) {
-                // DynamoDataUnit dynamoDataUnit =
-                // context.getCustomAccountDataUnit();
                 List<DynamoDataUnit> dynamoDataUnits = context.getCustomDataUnits();
                 Map<String, Object> customAccount = cdlLookupService.lookup(dynamoDataUnits, lookupIdKey,
                         lookupIdValue);
@@ -186,31 +182,78 @@ public class FuzzyMatchHelper implements DbHelper {
     @MatchStep
     @Override
     public void fetchMatchResult(MatchContext context) {
-        String dataCloudVersion = context.getInput().getDataCloudVersion();
-        boolean idOnly = context.isSeekingIdOnly();
-        if (!idOnly) {
-            List<String> ids = new ArrayList<>();
-            int notNullIds = 0;
-            for (InternalOutputRecord record : context.getInternalResults()) {
-                String latticeAccountId = record.getLatticeAccountId();
-                ids.add(latticeAccountId);
-                if (StringUtils.isNotEmpty(latticeAccountId)) {
-                    notNullIds++;
+        if (!context.isSeekingIdOnly()) {
+            if (OperationalMode.ENTITY_MATCH.equals(context.getInput().getOperationalMode())) {
+                fetchEntityMatchResult(context);
+            } else {
+                fetchLDCMatchResult(context);
+            }
+        }
+    }
+
+    private void fetchEntityMatchResult(MatchContext context) {
+        List<String> seedIds = context.getInternalResults().stream() //
+                .map(InternalOutputRecord::getEntityId) //
+                .collect(Collectors.toList());
+        Long startTime = System.currentTimeMillis();
+        Tenant tenant = new Tenant(CustomerSpace.parse(context.getInput().getTenant().getId()).getTenantId());
+        List<EntityRawSeed> seeds = entityMatchInternalService.get(tenant, context.getInput().getTargetEntity(),
+                seedIds);
+        int unmatch = 0;
+        for (int i = 0; i < context.getInternalResults().size(); i++) {
+            InternalOutputRecord record = context.getInternalResults().get(i);
+            EntityRawSeed seed = seeds.get(i);
+            if (seed == null) {
+                unmatch++;
+                continue;
+            }
+            // As long as EntityId exists, treat it as matched even if seed
+            // attributes are not (fully) populated
+            record.setMatched(true);
+            if (CollectionUtils.isNotEmpty(seed.getLookupEntries())) {
+                EntityLookupEntry lookupEntry = seed.getLookupEntries().stream() //
+                        .filter(entry -> EntityLookupEntry.Type.EXTERNAL_SYSTEM.equals(entry.getType())
+                                && InterfaceName.AccountId.name().equals(entry.getSerializedKeys())) //
+                        .findFirst() //
+                        .orElse(null);
+                if (lookupEntry != null) {
+                    record.getQueryResult().put(InterfaceName.AccountId.name(),
+                            lookupEntry.getSerializedValues());
                 }
             }
-            Long startTime = System.currentTimeMillis();
-            List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
-
-            for (int i = 0; i < ids.size(); i++) {
-                InternalOutputRecord record = context.getInternalResults().get(i);
-                LatticeAccount account = accounts.get(i);
-                record.setLatticeAccount(account);
+            if (MapUtils.isNotEmpty(seed.getAttributes())) {
+                String latticeAccountId = seed.getAttributes().get(InterfaceName.LatticeAccountId.name());
+                record.getQueryResult().put(InterfaceName.LatticeAccountId.name(), latticeAccountId);
+                record.setLatticeAccountId(latticeAccountId);
             }
+        }
+        log.info("Fetched records from entity seed table by entity id: Total={}, Unmatched={}, Duration={}",
+                context.getInternalResults().size(), unmatch, System.currentTimeMillis() - startTime);
+    }
 
-            if (notNullIds > 0) {
-                log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
-                        System.currentTimeMillis() - startTime, accounts.size()));
+    private void fetchLDCMatchResult(MatchContext context) {
+        String dataCloudVersion = context.getInput().getDataCloudVersion();
+        List<String> ids = new ArrayList<>();
+        int notNullIds = 0;
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            String latticeAccountId = record.getLatticeAccountId();
+            ids.add(latticeAccountId);
+            if (StringUtils.isNotEmpty(latticeAccountId)) {
+                notNullIds++;
             }
+        }
+        Long startTime = System.currentTimeMillis();
+        List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
+
+        for (int i = 0; i < ids.size(); i++) {
+            InternalOutputRecord record = context.getInternalResults().get(i);
+            LatticeAccount account = accounts.get(i);
+            record.setLatticeAccount(account);
+        }
+
+        if (notNullIds > 0) {
+            log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
+                    System.currentTimeMillis() - startTime, accounts.size()));
         }
     }
 
@@ -238,8 +281,12 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        boolean latticeAccountIdOnly = context.isSeekingIdOnly();
-        if (!latticeAccountIdOnly) {
+        if (!context.isSeekingIdOnly()
+                && !OperationalMode.ENTITY_MATCH.equals(context.getInput().getOperationalMode())) {
+            // FOR LDC match: Use record.latticeAccount to update
+            // record.queryResult
+            // For entity match: record.queryResult is already prepared in
+            // fetchEntityMatchResult(), so skip this part
             for (InternalOutputRecord record : context.getInternalResults()) {
                 updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
                         context.getInput().getDataCloudVersion());
