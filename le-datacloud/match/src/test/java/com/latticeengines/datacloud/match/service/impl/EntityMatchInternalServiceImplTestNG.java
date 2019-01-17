@@ -257,6 +257,42 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         cleanup(SEED_IDS);
     }
 
+    @Test(groups = "functional")
+    private void testNullLookupEntries() throws Exception {
+        entityMatchConfigurationService.setIsAllocateMode(false);
+        EntityLookupEntry[] lookupEntries = new EntityLookupEntry[] { DC_FACEBOOK_1, DUNS_1, SFDC_1, SFDC_2 };
+        List<String> expectedSeedIds = Arrays.asList(null, SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP);
+
+        cleanup(lookupEntries);
+        setupServing(DUNS_1, SFDC_2);
+        Thread.sleep(2000L);
+
+        List<String> seedIds = entityMatchInternalService.getIds(TEST_TENANT, Arrays.asList(lookupEntries));
+        Assert.assertEquals(seedIds, expectedSeedIds);
+
+        cleanup(lookupEntries);
+    }
+
+    @Test(groups = "functional")
+    private void testNullSeedIds() throws Exception {
+        entityMatchConfigurationService.setIsAllocateMode(false);
+        String seedId1 = "testNullSeedIds1";
+        String seedId2 = "testNullSeedIds2";
+
+        cleanup(Arrays.asList(seedId1, seedId2));
+        setupServing(newSeed(seedId1, "s1", "google.com", "facebook.com"), newSeed(seedId2, "s2", "netflix.com"));
+        Thread.sleep(2000L);
+
+        List<String> expectedSeedIds = Arrays.asList(null, null, seedId1, null, seedId2);
+        List<EntityRawSeed> seeds = entityMatchInternalService.get(TEST_TENANT, TEST_ENTITY, expectedSeedIds);
+        Assert.assertNotNull(seeds);
+        List<String> seedIds = seeds.stream().map(seed -> seed == null ? null : seed.getId())
+                .collect(Collectors.toList());
+        Assert.assertEquals(seedIds, expectedSeedIds);
+
+        cleanup(Arrays.asList(seedId1, seedId2));
+    }
+
     /*
      * allocate ID in parallel
      */
