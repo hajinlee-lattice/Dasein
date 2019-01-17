@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -35,20 +33,40 @@ public abstract class RatingEngineTemplate {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineTemplate.class);
 
+    private ForkJoinPool tpForParallelStream;
+
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
     @Inject
     private DataFeedService dataFeedService;
 
+    List<RatingEngineSummary> constructRatingEngineSummaries(List<RatingEngine> ratingList, String tenantId,
+            Date lastRefreshedDate) {
+        List<String> modelSummaryIds = ratingList.stream()
+                .map(ratingEngine -> ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
+                .collect(Collectors.toList());
+        Map<String, List<BucketMetadata>> modelSummaryToBucketListMap =
+                bucketedScoreProxy.getAllPublishedBucketMetadataByModelSummaryIdList(tenantId, modelSummaryIds);
+
+        List<RatingEngineSummary> result = tpForParallelStream
+                .submit(//
+                        () -> ratingList.stream()
+                                .map(ratingEngine -> constructRatingEngineSummary(ratingEngine, tenantId,
+                                        lastRefreshedDate, modelSummaryToBucketListMap))
+                                .collect(Collectors.toList()))
+                .join();
+        return result;
+    }
+
     @VisibleForTesting
     RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId) {
         Date lastRefreshedDate = findLastRefreshedDate(tenantId);
-        return constructRatingEngineSummary(ratingEngine, tenantId, lastRefreshedDate);
+        return constructRatingEngineSummary(ratingEngine, tenantId, lastRefreshedDate, null);
     }
 
-    RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId,
-            Date lastRefreshedDate) {
+    RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId, Date lastRefreshedDate,
+            Map<String, List<BucketMetadata>> modelSummaryToBucketListMap) {
         if (ratingEngine == null) {
             return null;
         }
@@ -78,10 +96,9 @@ public abstract class RatingEngineTemplate {
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
                 || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
             Boolean completed = ratingEngineSummary.getScoringIterationId() != null ? true
-                    : ((AIModel) ratingEngine.getLatestIteration())
-                            .getModelingJobStatus() != JobStatus.PENDING;
+                    : ((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() != JobStatus.PENDING;
             ratingEngineSummary.setCompleted(completed);
-        } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED){
+        } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             ratingEngineSummary.setCompleted(true);
         }
 
@@ -104,8 +121,16 @@ public abstract class RatingEngineTemplate {
                         && StringUtils.isNotEmpty(((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
                         && ((AIModel) ratingEngine.getPublishedIteration())
                                 .getModelingJobStatus() == JobStatus.COMPLETED) {
-                    List<BucketMetadata> bucketMetadataList = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(
-                            tenantId, ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
+
+                    List<BucketMetadata> bucketMetadataList = null;
+                    String modelSummaryId = ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId();
+                    if (modelSummaryToBucketListMap != null) {
+                        bucketMetadataList = modelSummaryToBucketListMap.get(modelSummaryId);
+                    }
+                    if (CollectionUtils.isEmpty(bucketMetadataList)) {
+                        bucketMetadataList =
+                                bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenantId, modelSummaryId);
+                    }
                     if (CollectionUtils.isEmpty(bucketMetadataList)) {
                         bucketMetadataList = setAndRetrievePublishedBucketsIfMissing(tenantId, ratingEngine);
                     }
@@ -133,8 +158,8 @@ public abstract class RatingEngineTemplate {
         validateAIRatingEngine(ratingEngine);
         if (isPublishedMetadataMissing(tenantId, ratingEngine)) {
             String modelSummaryId = ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId();
-            List<BucketMetadata> latestBuckets = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(tenantId,
-                    modelSummaryId);
+            List<BucketMetadata> latestBuckets =
+                    bucketedScoreProxy.getLatestABCDBucketsByModelGuid(tenantId, modelSummaryId);
             UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
             request.setBucketMetadataList(latestBuckets);
             request.setModelGuid(modelSummaryId);
@@ -147,7 +172,7 @@ public abstract class RatingEngineTemplate {
     protected void validateAIRatingEngine(RatingEngine ratingEngine) {
         if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
+                    new String[] {RatingEngineType.RULE_BASED.getRatingEngineTypeName()});
         }
     }
 

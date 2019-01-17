@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.lp.entitymgr.BucketMetadataEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
@@ -94,6 +91,16 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(String ratingEngineId) {
         return bucketMetadataEntityMgr.getAllPublishedBucketMetadatasForEngineFromReader(ratingEngineId);
+    }
+
+    @Override
+    public Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(
+            List<String> modelSummaryIdList) {
+        Map<String, List<BucketMetadata>> modelSummaryToBucketListMap = new HashMap<>();
+        for (String modelSummaryId : modelSummaryIdList) {
+            modelSummaryToBucketListMap.put(modelSummaryId, getPublishedBucketMetadataByModelGuid(modelSummaryId));
+        }
+        return modelSummaryToBucketListMap;
     }
 
     @Override
@@ -212,8 +219,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         action.setType(ActionType.RATING_ENGINE_CHANGE);
         action.setActionInitiator(userId);
         RatingEngineActionConfiguration actionConfiguration = new RatingEngineActionConfiguration();
-        actionConfiguration
-                .setSubType(RatingEngineActionConfiguration.SubType.AI_MODEL_BUCKET_CHANGE);
+        actionConfiguration.setSubType(RatingEngineActionConfiguration.SubType.AI_MODEL_BUCKET_CHANGE);
         actionConfiguration.setRatingEngineId(ratingEngineId);
         actionConfiguration.setModelId(modelGuid);
         action.setActionConfiguration(actionConfiguration);

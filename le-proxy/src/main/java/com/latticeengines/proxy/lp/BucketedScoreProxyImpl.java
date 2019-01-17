@@ -1,15 +1,15 @@
 package com.latticeengines.proxy.lp;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -66,19 +66,37 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
+    public Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(String customerSpace,
+            List<String> modelSummaryIdList) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/publishedbuckets/model",
+                shortenCustomerSpace(customerSpace));
+        List<String> params = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(modelSummaryIdList)) {
+            for (String id : modelSummaryIdList) {
+                params.add("model-id=" + id);
+            }
+        }
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+        Map<?, ?> map = get("get bucket metadata list for model ids", url, Map.class);
+        return parseIdToBucketsMap(map);
+    }
+
+    @Override
     public List<BucketMetadata> getPublishedBucketMetadataByModelGuid(String customerSpace, String modelSummaryId) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/bucketedscore/publishedbuckets/model/{modelSummaryId}",
-                shortenCustomerSpace(customerSpace), modelSummaryId);
+        String url =
+                constructUrl("/customerspaces/{customerSpace}/bucketedscore/publishedbuckets/model/{modelSummaryId}",
+                        shortenCustomerSpace(customerSpace), modelSummaryId);
         List<?> list = get("get up-to-date bucket metadata history for model", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
     @Override
     public List<BucketMetadata> getAllBucketsByEngineId(String customerSpace, String engineId) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/ratingengines/{ratingEngineId}",
-                shortenCustomerSpace(customerSpace), engineId);
+        String url =
+                constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/ratingengines/{ratingEngineId}",
+                        shortenCustomerSpace(customerSpace), engineId);
         return getList("get bucket metadata history for engine", url, BucketMetadata.class);
     }
 
@@ -110,6 +128,18 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
         if (MapUtils.isNotEmpty(map)) {
             Map<Long, List> listMap = JsonUtils.convertMap(map, Long.class, List.class);
             Map<Long, List<BucketMetadata>> result = new HashMap<>();
+            listMap.forEach((k, v) -> result.put(k, JsonUtils.convertList(v, BucketMetadata.class)));
+            return result;
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Map<String, List<BucketMetadata>> parseIdToBucketsMap(Map<?, ?> map) {
+        if (MapUtils.isNotEmpty(map)) {
+            Map<String, List> listMap = JsonUtils.convertMap(map, String.class, List.class);
+            Map<String, List<BucketMetadata>> result = new HashMap<>();
             listMap.forEach((k, v) -> result.put(k, JsonUtils.convertList(v, BucketMetadata.class)));
             return result;
         } else {
