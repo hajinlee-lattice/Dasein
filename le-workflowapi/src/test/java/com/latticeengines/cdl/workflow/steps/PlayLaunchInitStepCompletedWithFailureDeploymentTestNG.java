@@ -30,6 +30,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -110,7 +111,8 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
     // TODO - enable when we have a way to simulate full/partial failure
     @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndCreatePlay();
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         play = testPlayCreationHelper.getPlay();
