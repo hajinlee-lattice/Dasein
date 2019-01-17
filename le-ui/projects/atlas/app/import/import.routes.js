@@ -315,10 +315,12 @@ angular
                 'wizard_content@home.import.data': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/custom-fields-date.html'
                 }
             }
         })
+        //app/import/content/customfields/custom-fields-date.html
+        //app/import/content/customfields/customfields.component.html
         .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
             url: '/jobstatus',
             views: {
@@ -499,7 +501,7 @@ angular
                 'wizard_content@home.import.data': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/custom-fields-date.html'
                 }
             }
         })
