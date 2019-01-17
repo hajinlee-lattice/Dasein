@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchService;
@@ -69,6 +70,9 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
     @Inject
     private TestEntityMatchService testEntityMatchService;
 
+    @Inject
+    private EntityMatchConfigurationService entityMatchConfigurationService;
+
     @Test(groups = "functional")
     private void testAllocateAndLookup() {
         // prevent old data from affecting the test
@@ -117,8 +121,9 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
     }
 
     private MatchOutput matchAccount(List<Object> data, boolean isAllocateMode) {
+        entityMatchConfigurationService.setIsAllocateMode(isAllocateMode);
         String entity = BusinessEntity.Account.name();
-        MatchInput input = prepareEntityMatchInput(TEST_TENANT, entity, isAllocateMode,
+        MatchInput input = prepareEntityMatchInput(TEST_TENANT, entity,
                 Collections.singletonMap(entity, getEntityKeyMap(entity)), ACCOUNT_DECISION_GRAPH);
         input.setFields(Arrays.asList(FIELDS));
         input.setData(Collections.singletonList(data));
@@ -129,14 +134,12 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
      * helper to prepare basic MatchInput for entity match
      */
     private MatchInput prepareEntityMatchInput(@NotNull Tenant tenant, @NotNull String targetEntity,
-            boolean isAllocateMode, @NotNull Map<String, MatchInput.EntityKeyMap> entityKeyMaps,
-            @NotNull String decisionGraph) {
+            @NotNull Map<String, MatchInput.EntityKeyMap> entityKeyMaps, @NotNull String decisionGraph) {
         MatchInput input = new MatchInput();
 
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setTenant(tenant);
         input.setTargetEntity(targetEntity);
-        input.setAllocateId(isAllocateMode);
         // only support this predefined selection for now
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
         input.setEntityKeyMaps(entityKeyMaps);

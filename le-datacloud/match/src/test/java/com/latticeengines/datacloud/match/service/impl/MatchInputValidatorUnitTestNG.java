@@ -234,9 +234,9 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (UnsupportedOperationException e) {
             failed = true;
-            Assert.assertTrue(e.getMessage().contains(
-                    "Only Predefined selection [Enrichment, DerivedColumns, Model, Segment, ID, RTS, TalkingPoint, "
-                    + "CompanyProfile] are supported at this time."),
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Only Predefined selection [ID, Seed] are supported for entity match at this time."),
                     "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
             Assert.fail("Failed on wrong exception: " + e.getMessage());
@@ -246,7 +246,7 @@ public class MatchInputValidatorUnitTestNG {
 
         // EntityKeyMaps must be populated.
         failed = false;
-        input.setPredefinedSelection(Predefined.Segment);
+        input.setPredefinedSelection(Predefined.Seed);
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);

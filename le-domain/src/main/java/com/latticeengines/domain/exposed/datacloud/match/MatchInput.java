@@ -134,6 +134,10 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("PublicDomainAsNormalDomain")
     private boolean publicDomainAsNormalDomain;
 
+    // Must provide LatticeAccountId (datacloud match) or EntityId (entity
+    // match)
+    // Actor system will be skipped. Directly fetch datacloud/entity seed
+    // attributes based on ID provided
     @JsonProperty("FetchOnly")
     private boolean fetchOnly;
 
