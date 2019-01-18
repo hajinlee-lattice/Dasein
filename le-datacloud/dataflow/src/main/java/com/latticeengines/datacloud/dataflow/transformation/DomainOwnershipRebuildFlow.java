@@ -30,8 +30,6 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
     private final static String TREE_ROOT_DUNS = "TREE_ROOT_DUNS";
     private final static String REASON_TYPE = "REASON_TYPE";
     private final static String IS_NON_PROFITABLE = "IS_NON_PROFITABLE";
-    private final static String ORB_SEC_PRI_DOMAIN = "PrimaryDomain";
-    private final static String ORB_SRC_SEC_DOMAIN = "SecondaryDomain";
 
     @Override
     public String getDataFlowBeanName() {
@@ -52,26 +50,16 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
     public Node construct(TransformationFlowParameters parameters) {
         DomainOwnershipConfig config = getTransformerConfig(parameters);
         Node ams = addSource(parameters.getBaseTables().get(0));
-        Node orbSec = addSource(parameters.getBaseTables().get(1));
 
-        // Get all the (domain, duns) combination from AMSeed and OrbSecDom:
+        // Get all the (domain, duns) combination from AMSeed:
         // AMSeed: find every unique domain + duns
-        // OrbSecDom: join with AMSeed by AMSeed.domain = OrbSecDom.primarydomain,
-        //            then find every unique OrbSecDom.seconddomain + AMSeed.duns
         String expr = DataCloudConstants.AMS_ATTR_DUNS + " != null";
         Node amsWithDuns = ams.filter(expr, new FieldList(DataCloudConstants.AMS_ATTR_DUNS));
         Node amsDomDuns = amsWithDuns
                 .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS))
-                .renamePipe("amsDomDuns");
-        Node orbSecDomDuns = orbSec
-                .join(ORB_SEC_PRI_DOMAIN, amsDomDuns, DataCloudConstants.AMS_ATTR_DOMAIN, JoinType.INNER)
-                .retain(new FieldList(ORB_SRC_SEC_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS))
-                .rename(new FieldList(ORB_SRC_SEC_DOMAIN), new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN))
-                .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS));
-        Node domDuns = amsDomDuns //
-                .merge(orbSecDomDuns) //
                 .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS),
-                        1);
+                        1)
+                .renamePipe("amsDomDuns");
 
         // Construct a table of all the duns from ams with firmographic
         // attributes of root entry appended
@@ -79,7 +67,7 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
 
         // Construct a table of distinct (domain + rootduns) pairs with
         // firmographic attributes of root entry appended
-        Node domRootDunsWithFirmo = domDuns //
+        Node domRootDunsWithFirmo = amsDomDuns //
                 .join(DataCloudConstants.AMS_ATTR_DUNS, amsDunsWithRootFirmo, DataCloudConstants.AMS_ATTR_DUNS,
                         JoinType.INNER) //
                 .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS), 1);

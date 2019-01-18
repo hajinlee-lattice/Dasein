@@ -1,0 +1,307 @@
+package com.latticeengines.datacloud.etl.transformation.service.impl.ams;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedCleanByDomainOwner;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
+
+public class AmSeedCleanupUsingDomainOwnTableTestNG extends PipelineTransformationTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DomainOwnershipRebuildTestNG.class);
+
+    private static final String DOM_OWNERSHIP_TABLE = "DomainOwnershipTable";
+    private static final String ORB_SEC_CLEANED = "OrbSecCleaned";
+    private static final String AMS_CLEANED = "AmsCleaned";
+    private static final String DOMSRC_DNB = DataCloudConstants.DOMSRC_DNB;
+    private static final String DOMSRC_ORB = DataCloudConstants.DOMSRC_ORB;
+    private final static String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
+    private final static String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
+    private final static String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
+    private final static String REASON_TYPE = "REASON_TYPE";
+    private final static String IS_NON_PROFITABLE = "IS_NON_PROFITABLE";
+
+    private GeneralSource domOwnTable = new GeneralSource(DOM_OWNERSHIP_TABLE);
+    private GeneralSource orbSecClean = new GeneralSource(ORB_SEC_CLEANED);
+    private GeneralSource amsClean = new GeneralSource(AMS_CLEANED);
+    private GeneralSource ams = new GeneralSource("AccountMasterSeed");
+    private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
+    private GeneralSource source = amsClean;
+
+    @Test(groups = "pipeline1", enabled = true)
+    public void testTransformation() {
+        prepareDomOwnTable();
+        prepareAmSeed();
+        prepareOrbSeedSecCleaned();
+        prepareAlexaData();
+        TransformationProgress progress = createNewProgress();
+        progress = transformData(progress);
+        finish(progress);
+        confirmResultFile(progress);
+        cleanupProgressTables();
+    }
+
+    @Override
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
+        try {
+            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+            configuration.setName("AmSeedCleanup");
+            configuration.setVersion(targetVersion);
+
+            // -----------------
+            TransformationStepConfig step0 = new TransformationStepConfig();
+            List<String> cleanupAmSeedSrc = new ArrayList<String>();
+            cleanupAmSeedSrc.add(domOwnTable.getSourceName());
+            cleanupAmSeedSrc.add(ams.getSourceName());
+            cleanupAmSeedSrc.add(orbSecClean.getSourceName());
+            cleanupAmSeedSrc.add(alexa.getSourceName());
+            step0.setBaseSources(cleanupAmSeedSrc);
+            step0.setTransformer(AMSeedCleanByDomainOwner.TRANSFORMER_NAME);
+            String confParamStr1 = getDomOwnershipTableConfig();
+            step0.setConfiguration(confParamStr1);
+            step0.setTargetSource(amsClean.getSourceName());
+
+            // -----------
+            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            steps.add(step0);
+
+            configuration.setSteps(steps);
+            return configuration;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getDomOwnershipTableConfig() throws JsonProcessingException {
+        DomainOwnershipConfig conf = new DomainOwnershipConfig();
+        return JsonUtils.serialize(conf);
+    }
+
+    private void prepareDomOwnTable() {
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
+        schema.add(Pair.of(ROOT_DUNS, String.class));
+        schema.add(Pair.of(DUNS_TYPE, String.class));
+        schema.add(Pair.of(TREE_NUMBER, Integer.class));
+        schema.add(Pair.of(REASON_TYPE, String.class));
+        schema.add(Pair.of(IS_NON_PROFITABLE, String.class));
+        Object[][] data = new Object[][] {
+	        	// Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
+	    		// SINGLE TREE : not cleaned up
+	    		{ "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
+	    		{ "sbiDu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false"}, //
+	    		{ "karlDu.com", "DUNS24", "DU", 1, "SINGLE_TREE", "false"}, //
+	    		{ "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
+	    		{ "mongodbGu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
+	    		{ "mongodbDu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
+	    		// FRANCHISE : not cleaned up
+	    		{ "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
+	    		// OTHER : not cleaned up
+	    		{ "tesla.com", null, null, 3, "OTHER", "false" }, //
+	    		// Reasons : HIGHER_NUM_OF_LOC, HIGHER_SALES_VOLUME := Cleaned up
+	            { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //
+	            { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
+	            // Missing root DUNS entry case (in single or multiple trees)
+	            // rootDuns = DUNS900
+	            { "netsuite.com", null, null, 1, "MISSING_ROOT_DUNS", "false" }, //
+        };
+        uploadBaseSourceData(domOwnTable.getSourceName(), baseSourceVersion, schema, data);
+    }
+
+    private void prepareAlexaData() {
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_URL, String.class));
+        schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_RANK, Integer.class));
+        Object[][] data = new Object[][] { //
+                { "paypal.com", 700 }, { "rubrik.com", 701 }, { "sbiGu.com", 32 }, { "sbiDu.com", 36 },
+                { "karlDu.com", 326 }, { "netappGu.com", 24 }, { "amazonGu.com", 252 }, { "mongodbDu.com", 15 },
+                { "mongodbGu.com", 89 }, { "regalGoodWill.com", 21 }, { "goodWillOrg.com", 62 },
+                { "netappDuns1.com", 83 }, { "mongoDbDuns1.com", 11 }, { "worldwildlife.org", 87 },
+                { "wordwildlifeGu.org", 666 }, { "socialorg.com", 55 }, { "velocity.com", 44 },
+                { "karlDuns2.com", 101 }, { "netappDuns2.com", 102 }, { "unicef.org", 103 }, { "goodwill.com", 104 },
+                { "sbiDuns2.com", 105 }, { "amazon.com", 106 }, { "sbiDuns1.com", 107 }, { "tesla.com", 108 },
+                { "netappDu.com", 109 }, { "netsuite.com", 110 }, { "paypalHQ.com", 111 }, { "rubrik.com", 113 },
+                { "lyft.com", 114 }, { "intuit.com", 115 }, { "macys.com", 116 }, { "netappDuns3.com", 117 },
+                { "oldnavy.com", 118 }, { "oracle.com", 134 }, { "netapp.com", 23 } };
+        uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, schema, data);
+    }
+
+    private void prepareAmSeed() {
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_GU_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_DU_DUNS, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_SALES_VOL_US, Long.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_EMPLOYEE_TOTAL, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, Integer.class));
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY, String.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_ALEXA_RANK, Integer.class));
+        schema.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, String.class));
+        schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE, String.class));
+        Object[][] data = new Object[][] {
+        	// Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
+        	// Adding this entry present in single tree for ROOT_DUNS firmographic value computation : karlDuns2.com
+	        { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202, null, DOMSRC_DNB },
+	        { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203, null, DOMSRC_DNB },
+	        // Adding this entry to support FRANCHISE case : sbiDuns1.com
+            { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201, null, DOMSRC_DNB },
+	        { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, DOMSRC_DNB },
+	        { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205, null, DOMSRC_DNB },
+	        // Adding this entry to support mongodbDu.com case
+	        { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206, null, DOMSRC_DNB },
+	        // Case 2 : domains present in OwnershipTable : rootDuns match
+	        { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 215, null, DOMSRC_DNB },
+	        { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216, null, DOMSRC_DNB },
+	        // Case 3 : domains present in OwnershipTable : rootDuns doesn't match
+	        { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218, null, DOMSRC_DNB },
+	        { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223, null, DOMSRC_DNB },
+	        // Case 4 : domains present in OwnershipTable with reasons multiple large company, franchise, other
+	        { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225, null, DOMSRC_DNB },
+	        { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,"Manufacturing - Semiconductors", 226, null, DOMSRC_DNB },
+	        { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null, DOMSRC_DNB },
+	        { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228, null, DOMSRC_DNB },
+	        { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, DOMSRC_DNB },
+	        { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, DOMSRC_DNB },
+	        { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null, DOMSRC_DNB },
+	        // Case 5 : domain only entries
+	        { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233, null, DOMSRC_DNB },
+	        // Case 6 : duns only entries
+	        { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234, null, DOMSRC_DNB },
+	        // Case 7 : domains with missing ROOT_DUNS
+	        { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236, null, DOMSRC_DNB },};
+        uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, data);
+    }
+
+    private void prepareOrbSeedSecCleaned() {
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of(DataCloudConstants.ORBSEC_ATTR_PRIDOM, String.class));
+        schema.add(Pair.of(DataCloudConstants.ORBSEC_ATTR_SECDOM, String.class));
+        Object[][] data = new Object[][] {
+                // Schema: PrimaryDomain, SecondaryDomain
+
+                { "netappDuns1.com", "karlDuns2.com" }, { "netappDuns1.com", "craigslist.com" },
+                { "paypal.com", "rubrik.com" }, { "lyft.com", "airbnb.com" }, { "uber.com", "apple.com" },
+                { "intuit.com", "datos.com" }, { "macys.com", "target.com" }, { "netappDuns3.com", "dell.com" },
+                { "paypal.com", "sbiDuns1.com" }, { "oracle.com", "sap.com" } };
+        uploadBaseSourceData(orbSecClean.getSourceName(), baseSourceVersion, schema, data);
+    }
+
+    Object[][] amSeedCleanedUpValues = new Object[][] { //
+            // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
+            // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
+
+            // Case 1 : domains present in domainOwnershipTable with reason = SINGLE_TREE : result = domain not cleaned up
+            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, null, DOMSRC_DNB },
+            { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201, null, null, DOMSRC_DNB },
+            { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202, null, null, DOMSRC_DNB },
+            { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203, null, null, DOMSRC_DNB },
+            { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205, null, null, DOMSRC_DNB },
+            { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206, null, null, DOMSRC_DNB },
+            // Case 2 : domains present in OwnershipTable (rootDuns match) : result = domain not cleaned up
+
+            // karlDuns2.com domain record got removed due to orb adding domain
+            // netappDuns1.com (by comparing alexa rank) as per the condition
+            // for adding domains from orb
+            { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216,
+                    null, null, DOMSRC_DNB },
+            // Case 3 : domains present in OwnershipTable (rootDuns doesn't match) : result = domain cleaned up
+            { null, "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS10 with reason HIGHER_NUM_OF_LOC]",
+                    "N", DOMSRC_DNB },
+            { null, "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", null,
+                    "[Step=AMSeedCleanByDomainOwner,Code=CLEAN_DOM_BY_OWNER,Log=Owned by duns DUNS28 with reason HIGHER_SALES_VOLUME]",
+                    "N", DOMSRC_DNB },
+            // Case 4 : domains present in OwnershipTable with reasons multiple large company, franchise : result = not cleaned up
+            { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, null, DOMSRC_DNB },
+            { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, null, DOMSRC_DNB },
+            { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null, null, DOMSRC_DNB },
+            // Case 5 : domains present in OwnershipTabe with reason = MISSING_ROOT_DUNS : dont cleanup to avoid missing root duns
+            { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236, null, null, DOMSRC_DNB },
+            // Case 6 : domains present in domain only entries : not cleaned up
+            { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes",
+                    233, null, null, DOMSRC_DNB },
+            // Case 7 : duns only entries : not cleaned up
+            { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234,
+                    null, null, DOMSRC_DNB },
+            // Case 8 : added entries for orb cleanup for category 
+
+            // sbiDuns1.com domain record removed due to orb adding domain
+            // paypal.com (by comparing alexa rank) as per the condition
+            // for adding domains from orb
+            { "paypal.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 700, 
+                    	"[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
+                    DOMSRC_ORB},
+            { "paypal.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1, "Manufacturing - Semiconductors", 700,
+                        "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null, 
+                    DOMSRC_ORB },
+            { "paypal.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 700,
+                        "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
+                    DOMSRC_ORB },
+            { "paypal.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 700,
+                        "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
+                        DOMSRC_ORB },
+            { "netappDuns1.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 83,
+                    "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=karlDuns2.com is orb sec domain]", null,
+                    DOMSRC_ORB },};
+
+    @Override
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+        int rowCount = 0;
+        Map<String, Object[]> amSeedExpectedValues = new HashMap<>();
+        for (Object[] data : amSeedCleanedUpValues) {
+            amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
+        }
+        String[] expectedValueOrder = { //
+                DataCloudConstants.AMS_ATTR_DOMAIN, //
+                DataCloudConstants.AMS_ATTR_DUNS, //
+                DataCloudConstants.ATTR_GU_DUNS, //
+                DataCloudConstants.ATTR_DU_DUNS, //
+                DataCloudConstants.ATTR_SALES_VOL_US, //
+                DataCloudConstants.ATTR_EMPLOYEE_TOTAL, //
+                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, //
+                DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY, //
+                DataCloudConstants.ATTR_ALEXA_RANK, //
+                OperationLogUtils.DEFAULT_FIELD_NAME, //
+                DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, //
+                DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE };
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            log.info("record : " + record);
+            String domain = String.valueOf(record.get("Domain"));
+            String duns = String.valueOf(record.get("DUNS"));
+            Object[] expectedVal = amSeedExpectedValues.get(domain + duns);
+            for (int i = 0; i < expectedValueOrder.length; i++) {
+                Assert.assertTrue(isObjEquals(record.get(expectedValueOrder[i]), expectedVal[i]));
+            }
+            amSeedExpectedValues.remove(domain + duns);
+            rowCount++;
+        }
+        Assert.assertTrue(amSeedExpectedValues.size() == 0);
+        Assert.assertEquals(rowCount, 20);
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
+    }
+}
