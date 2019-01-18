@@ -59,21 +59,19 @@ public class PythonMRUtils {
     }
 
     public static String getScriptPathWithVersion(String script, String version) {
-        String afterPart = StringUtils.substringAfter(script, "/" + DS);
-        String expaned = "/" + DS + "/" + version + afterPart;
-        log.info(String.format("Expanded path %s to %s", script, expaned));
-        return expaned;
+        if (script.startsWith("/" + DS) && ! script.startsWith("/" + DS + "/" + version)) {
+            String afterPart = StringUtils.substringAfter(script, "/" + DS);
+            String expaned = "/" + DS + "/" + version + afterPart;
+            log.info(String.format("Expanded path %s to %s", script, expaned));
+            return expaned;
+        } else {
+            return script;
+        }
     }
 
     private static List<String> getScriptPathsWithVersion(List<String> paths, String version) {
         List<String> expandedPaths = new ArrayList<>();
-        paths.forEach(path -> {
-            if (path.startsWith("/" + DS + "/") && !path.startsWith("/" + DS + "/" + version)) {
-                expandedPaths.add(getScriptPathWithVersion(path, version));
-            } else {
-                expandedPaths.add(path);
-            }
-        });
+        paths.forEach(path -> expandedPaths.add(getScriptPathWithVersion(path, version)));
         log.info("paths: " + expandedPaths);
         return expandedPaths;
     }
