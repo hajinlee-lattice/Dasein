@@ -28,8 +28,6 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private List<String> scalingClusters;
 
-    private int minTaskNodes;
-
     private EMRService emrService;
 
     private EMRCacheService emrCacheService;
@@ -40,10 +38,6 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private void setScalingClusters(List<String> scalingClusters) {
         this.scalingClusters = scalingClusters;
-    }
-
-    public void setMinTaskNodes(int minTaskNodes) {
-        this.minTaskNodes = minTaskNodes;
     }
 
     private void setEmrService(EMRService emrService) {
@@ -64,7 +58,10 @@ class EMRScalingCallable implements Callable<Boolean> {
         try {
             if (CollectionUtils.isNotEmpty(scalingClusters)) {
                 List<Runnable> runnables = new ArrayList<>();
-                for (String pattern: scalingClusters) {
+                for (String segment: scalingClusters) {
+                    String[] tokens = segment.split("\\|");
+                    String pattern = tokens[0];
+                    int minTaskNodes = Integer.parseInt(tokens[1]);
                     List<ClusterSummary> clusterSummaries = clusterSummaryCache.get(pattern);
                     List<String> names = new ArrayList<>();
                     if (CollectionUtils.isNotEmpty(clusterSummaries)) {
@@ -76,8 +73,8 @@ class EMRScalingCallable implements Callable<Boolean> {
                                     minTaskNodes, emrService, emrCacheService, emrEnvService));
                         });
                     }
-                    log.info(String.format("Found %d clusters by pattern [%s]: %s", //
-                            CollectionUtils.size(names), pattern, names));
+                    log.info(String.format("Found %d clusters with %d min TASK nodes by pattern [%s]: %s", //
+                            CollectionUtils.size(names), minTaskNodes, pattern, names));
                 }
                 if (CollectionUtils.size(runnables) == 1) {
                     runnables.get(0).run();
@@ -120,8 +117,6 @@ class EMRScalingCallable implements Callable<Boolean> {
 
         private List<String> scalingClusters;
 
-        private int minTaskNodes;
-
         private EMRService emrService;
 
         private EMRCacheService emrCacheService;
@@ -132,11 +127,6 @@ class EMRScalingCallable implements Callable<Boolean> {
             if (StringUtils.isNotBlank(scalingClusters)) {
                 this.scalingClusters = Arrays.asList(scalingClusters.split(","));
             }
-            return this;
-        }
-
-        Builder minTaskNodes(int minTaskNodes) {
-            this.minTaskNodes = minTaskNodes;
             return this;
         }
 
@@ -158,7 +148,6 @@ class EMRScalingCallable implements Callable<Boolean> {
         EMRScalingCallable build() {
             EMRScalingCallable callable = new EMRScalingCallable();
             callable.setScalingClusters(scalingClusters);
-            callable.setMinTaskNodes(minTaskNodes);
             callable.setEmrService(emrService);
             callable.setEmrCacheService(emrCacheService);
             callable.setEmrEnvService(emrEnvService);
