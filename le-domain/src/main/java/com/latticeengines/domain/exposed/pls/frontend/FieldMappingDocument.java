@@ -21,6 +21,9 @@ public class FieldMappingDocument {
     @JsonProperty
     private List<String> requiredFields = new ArrayList<>();
 
+    @JsonProperty
+    private ExtraFieldMappingInfo extraFieldMappingInfo;
+
     public List<FieldMapping> getFieldMappings() {
         return this.fieldMappings;
     }
@@ -43,6 +46,14 @@ public class FieldMappingDocument {
 
     public void setRequiredFields(List<String> requiredFields) {
         this.requiredFields = requiredFields;
+    }
+
+    public ExtraFieldMappingInfo getExtraFieldMappingInfo() {
+        return extraFieldMappingInfo;
+    }
+
+    public void setExtraFieldMappingInfo(ExtraFieldMappingInfo extraFieldMappingInfo) {
+        this.extraFieldMappingInfo = extraFieldMappingInfo;
     }
 
     @JsonIgnore
