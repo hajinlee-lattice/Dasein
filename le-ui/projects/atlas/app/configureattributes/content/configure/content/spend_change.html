@@ -30,7 +30,7 @@
             ng-model="vm.options['SpendChange']['WITHIN']['Val']" 
             ng-change="vm.setOptions(form)"
             ng-disabled="!(vm.options['SpendChange']['WITHIN']['Period'])"
-            ng-options="option disable when option > vm.options['SpendChange']['BETWEEN']['Val'] for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
+            ng-options="option for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
                 <option value="" hidden disabled>Select</option>
         </select>
         <strong>
@@ -52,7 +52,7 @@
             ng-model="vm.options['SpendChange']['BETWEEN']['Val']" 
             ng-change="vm.setOptions(form)"
             ng-disabled="!(vm.options['SpendChange']['WITHIN']['Period'])"
-            ng-options="option disable when option < vm.options['SpendChange']['WITHIN']['Val'] for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
+            ng-options="option for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
                 <option value="" hidden disabled>Select</option>
         </select>
         <strong>
