@@ -1,6 +1,6 @@
 package com.latticeengines.camille.exposed.paths;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 
 public final class PathBuilder {
     public static Path buildPodsPath() {
-        return new Path(Arrays.asList(PathConstants.PODS));
+        return new Path(Collections.singletonList(PathConstants.PODS));
     }
 
     public static Path buildPodPath(String podId) {
