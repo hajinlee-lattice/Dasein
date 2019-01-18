@@ -30,9 +30,9 @@ public class Path implements Serializable {
         }
 
         if (rawPath.equals("/")) {
-            parts = new ArrayList<String>();
+            parts = new ArrayList<>();
         } else {
-            String path = rawPath.substring(1, rawPath.length());
+            String path = rawPath.substring(1);
             parts = Arrays.asList(path.split("/"));
         }
     }
@@ -71,8 +71,7 @@ public class Path implements Serializable {
         if (part.contains("/")) {
             return append(new Path(part));
         }
-        List<String> concat = new ArrayList<String>();
-        concat.addAll(this.parts);
+        List<String> concat = new ArrayList<>(this.parts);
         concat.add(part);
         return new Path(concat);
     }
@@ -81,21 +80,21 @@ public class Path implements Serializable {
         if (part.contains("/")) {
             return prefix(new Path(part));
         }
-        List<String> concat = new ArrayList<String>();
+        List<String> concat = new ArrayList<>();
         concat.add(part);
         concat.addAll(this.parts);
         return new Path(concat);
     }
 
     public Path append(Path path) {
-        List<String> concat = new ArrayList<String>();
+        List<String> concat = new ArrayList<>();
         concat.addAll(parts);
         concat.addAll(path.parts);
         return new Path(concat);
     }
 
     public Path prefix(Path path) {
-        List<String> concat = new ArrayList<String>();
+        List<String> concat = new ArrayList<>();
         concat.addAll(path.parts);
         concat.addAll(parts);
         return new Path(concat);
@@ -150,8 +149,7 @@ public class Path implements Serializable {
         if (isRoot()) {
             throw new IllegalArgumentException("Cannot return the parent of root path " + this);
         }
-        List<String> parentParts = new ArrayList<String>();
-        parentParts.addAll(parts.subList(0, parts.size() - 1));
+        List<String> parentParts = new ArrayList<>(parts.subList(0, parts.size() - 1));
         return new Path(parentParts);
     }
 
@@ -164,15 +162,15 @@ public class Path implements Serializable {
 
         int size = parts.size();
 
-        List<String> pathStrings = new ArrayList<String>(size);
+        List<String> pathStrings = new ArrayList<>(size);
         pathStrings.add(iter.next());
 
-        List<Path> out = new ArrayList<Path>(size);
-        out.add(new Path(new ArrayList<String>(pathStrings)));
+        List<Path> out = new ArrayList<>(size);
+        out.add(new Path(new ArrayList<>(pathStrings)));
 
         while (iter.nextIndex() < size - 1) {
             pathStrings.add(iter.next());
-            out.add(new Path(new ArrayList<String>(pathStrings)));
+            out.add(new Path(new ArrayList<>(pathStrings)));
         }
 
         return out;
@@ -200,17 +198,21 @@ public class Path implements Serializable {
 
     @Override
     public boolean equals(Object other) {
-        if (this == other)
+        if (this == other) {
             return true;
-        if (other == null)
+        }
+        if (other == null) {
             return false;
-        if (getClass() != other.getClass())
+        }
+        if (getClass() != other.getClass()) {
             return false;
+        }
 
         Path otherPath = (Path) other;
 
-        if (otherPath.parts.size() != parts.size())
+        if (otherPath.parts.size() != parts.size()) {
             return false;
+        }
 
         for (int i = 0; i < parts.size(); ++i) {
             String part = parts.get(i);
