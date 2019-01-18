@@ -6,11 +6,11 @@ import com.latticeengines.metadata.service.DataUnitRuntimeService;
 public class HdfsDataUnitService extends DataUnitRuntimeService<HdfsDataUnit> {
     @Override
     public Boolean delete(HdfsDataUnit dataUnit) {
-        throw new RuntimeException("HdfsDataUnitService can not support this method.");
+        throw new UnsupportedOperationException("HdfsDataUnitService can not support this method.");
     }
 
     @Override
     public Boolean renameTableName(HdfsDataUnit dataUnit, String tablename) {
-        throw new RuntimeException("HdfsDataUnitService can not support this method.");
+        throw new UnsupportedOperationException("HdfsDataUnitService can not support this method.");
     }
 }

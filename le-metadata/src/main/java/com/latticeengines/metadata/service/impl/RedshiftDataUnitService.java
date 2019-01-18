@@ -18,36 +18,21 @@ public class RedshiftDataUnitService extends DataUnitRuntimeService<RedshiftData
     private static final Logger log = LoggerFactory.getLogger(RedshiftDataUnitService.class);
 
     @Inject
-    private DataUnitService dataUnitService;
-
-    @Inject
     private RedshiftService redshiftService;
 
     @Override
     public Boolean delete(RedshiftDataUnit dataUnit) {
-        try {
-            log.info("delete RedshiftTable " + dataUnit.getName());
-            redshiftService.dropTable(dataUnit.getName());
-            log.info("delete RedshiftDataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
-            dataUnitService.deleteByNameAndStorageType(dataUnit.getName(), DataUnit.StorageType.Redshift);
-            return true;
-        }catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
+        log.info("delete RedshiftTable " + dataUnit.getName());
+        redshiftService.dropTable(dataUnit.getName());
+        log.info("delete RedshiftDataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
+        return true;
     }
 
     @Override
     public Boolean renameTableName(RedshiftDataUnit dataUnit, String tablename) {
-        try {
             String originTableName = dataUnit.getName();
             log.info("rename RedShift tableName " + originTableName + " to " + tablename + " under tenant " + dataUnit.getTenant());
             redshiftService.renameTable(originTableName, tablename);
-            dataUnitService.renameRedShiftTableName(dataUnit, tablename);
             return true;
-        }catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
     }
 }

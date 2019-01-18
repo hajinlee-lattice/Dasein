@@ -16,27 +16,18 @@ public class DynamoDataUnitService extends DataUnitRuntimeService<DynamoDataUnit
     private static final Logger log = LoggerFactory.getLogger(DynamoDataUnitService.class);
 
     @Inject
-    private DataUnitService dataUnitService;
-
-    @Inject
     private DynamoService dynamoService;
 
     @Override
     public Boolean delete(DynamoDataUnit dataUnit) {
-        try {
-            log.info("delete DynamoTable " + dataUnit.getName());
-            dynamoService.deleteTable(dataUnit.getName());
-            log.info("delete dynamoDataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
-            dataUnitService.deleteByNameAndStorageType(dataUnit.getName(), DataUnit.StorageType.Dynamo);
-            return true;
-        }catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
+        log.info("delete DynamoTable " + dataUnit.getName());
+        dynamoService.deleteTable(dataUnit.getName());
+        log.info("delete DynamoDataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
+        return true;
     }
 
     @Override
     public Boolean renameTableName(DynamoDataUnit dataUnit, String tablename) {
-        throw new RuntimeException("DynamoDataUnitService can not support this method.");
+        throw new UnsupportedOperationException("DynamoDataUnitService can not support this method.");
     }
 }

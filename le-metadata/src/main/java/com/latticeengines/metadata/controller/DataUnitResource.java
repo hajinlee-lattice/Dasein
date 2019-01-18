@@ -47,7 +47,15 @@ public class DataUnitResource {
                     String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
                             dataUnit.getClass()));
         }
-        return dataUnitRuntimeService.delete(dataUnit);
+        try {
+            dataUnitRuntimeService.delete(dataUnit);
+            dataUnitService.deleteByNameAndStorageType(dataUnit.getName(), dataUnit.getStorageType());
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
+
     }
 
     @PostMapping("/renameRedShiftTableName")
@@ -59,7 +67,14 @@ public class DataUnitResource {
                     String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
                             dataUnit.getClass()));
         }
-        return dataUnitRuntimeService.renameTableName(dataUnit, tableName);
+        try {
+            dataUnitRuntimeService.renameTableName(dataUnit, tableName);
+            dataUnitService.renameRedShiftTableName(dataUnit, tableName);
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
     }
 
     @GetMapping("/type/{type}")
