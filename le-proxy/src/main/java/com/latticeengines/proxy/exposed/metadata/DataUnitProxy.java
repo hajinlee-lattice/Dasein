@@ -12,7 +12,7 @@ public interface DataUnitProxy {
 
     DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type);
 
-    DataUnit renameRedShiftTableName(String customerSpace, DataUnit dataUnit, String tableName);
+    Boolean renameRedShiftTableName(String customerSpace, DataUnit dataUnit, String tableName);
 
     Boolean delete(String customerSpace, DataUnit dataUnit);
 
