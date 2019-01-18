@@ -177,7 +177,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private Status getInitialDataFeedStatus(Status status) {
-        if (status.equals(Status.ProcessAnalyzing)) {
+        if (status.equals(Status.ProcessAnalyzing) || status.equals(Status.Deleting)) {
             return Status.Active;
         } else {
             return status;
