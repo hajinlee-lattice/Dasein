@@ -67,8 +67,8 @@ public class BucketedScoreResource {
     @ResponseBody
     @ApiOperation(value = "Get all up-to-date ABCD Buckets info from list of by model GUID")
     public Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(
-            @PathVariable String customerSpace, @ApiParam(value = "List of model summary ids", required = true) //
-            @RequestParam(value = "model-summary-id", required = true) List<String> modelSummaryIdList) {
+            @PathVariable String customerSpace, @ApiParam(value = "List of model summary ids", required = false) //
+            @RequestParam(value = "model-summary-id", required = false) List<String> modelSummaryIdList) {
         return bucketedScoreService.getAllPublishedBucketMetadataByModelSummaryIdList(modelSummaryIdList);
     }
 

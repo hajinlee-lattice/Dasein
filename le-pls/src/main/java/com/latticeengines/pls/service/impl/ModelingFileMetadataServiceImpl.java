@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.ExtraFieldMappingInfo;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
@@ -106,19 +107,38 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         FieldMappingDocument fieldMappingFromSchemaRepo = getFieldMappingDocumentBestEffort(sourceFileName,
                 schemaInterpretation, null, withoutId);
+        generateExtraFieldMappingInfo(fieldMappingFromSchemaRepo, true);
         FieldMappingDocument resultDocument;
         if (dataFeedTask == null) {
             resultDocument = fieldMappingFromSchemaRepo;
         } else {
             Table templateTable = dataFeedTask.getImportTemplate();
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
-            resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo);
+            resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
+                    templateTable, SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId));
         }
         return resultDocument;
     }
 
+    private void generateExtraFieldMappingInfo(FieldMappingDocument fieldMappingDocument, boolean standard) {
+        if (fieldMappingDocument == null || CollectionUtils.isEmpty(fieldMappingDocument.getFieldMappings())) {
+            return;
+        }
+        ExtraFieldMappingInfo extraFieldMappingInfo = new ExtraFieldMappingInfo();
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (!standard && fieldMapping.isMappedToLatticeField()) {
+                extraFieldMappingInfo.addExistingMapping(fieldMapping);
+            } else {
+                if (StringUtils.isEmpty(fieldMapping.getMappedField())) {
+                    extraFieldMappingInfo.addNewMappings(fieldMapping);
+                }
+            }
+        }
+        fieldMappingDocument.setExtraFieldMappingInfo(extraFieldMappingInfo);
+    }
+
     private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
-            FieldMappingDocument standardMapping) {
+            FieldMappingDocument standardMapping, Table templateTable, Table standardTable) {
         Map<String, FieldMapping> standardMappingMap = new HashMap<>();
         for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
             standardMappingMap.put(fieldMapping.getUserField(), fieldMapping);
@@ -133,6 +153,36 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
             }
         }
+        // newMappings will be determined
+        generateExtraFieldMappingInfo(templateMapping, false);
+        // filter existingMappings
+        Map<String, Attribute> standardAttrs =
+                standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, attr -> attr));
+        templateMapping.getExtraFieldMappingInfo().setExistingMappings(
+                templateMapping.getExtraFieldMappingInfo().getExistingMappings().stream()
+                        .filter(fieldMapping -> !standardAttrs.containsKey(fieldMapping.getMappedField()))
+                        .collect(Collectors.toList()));
+        // add missedMappings
+        Map<String, Attribute> templateAttrs =
+                templateTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, attr -> attr));
+        Set<String> mappedAttr =
+                templateMapping.getFieldMappings().stream()
+                        .filter(fieldMapping -> StringUtils.isNotEmpty(fieldMapping.getMappedField()))
+                        .map(FieldMapping::getMappedField)
+                        .collect(Collectors.toSet());
+        Map<String, Attribute> missedAttrs = new HashMap<>();
+        templateAttrs.forEach((key, value) -> {
+            if (!mappedAttr.contains(key) && !standardAttrs.containsKey(key)) {
+                missedAttrs.put(key, value);
+            }
+        });
+        missedAttrs.forEach((key, value) -> {
+            FieldMapping fieldMapping = new FieldMapping();
+            fieldMapping.setUserField(value.getDisplayName());
+            fieldMapping.setMappedField(value.getName());
+            fieldMapping.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(value.getPhysicalDataType()));
+            templateMapping.getExtraFieldMappingInfo().addMissedMapping(fieldMapping);
+        });
         return templateMapping;
     }
 

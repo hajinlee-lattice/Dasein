@@ -3,11 +3,12 @@ package com.latticeengines.api.functionalframework;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
@@ -21,7 +22,6 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.api.exposed.exception.ModelingServiceRestException;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -33,14 +33,11 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate ignoreErrorRestTemplate = HttpClientUtils.newRestTemplate();
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private YarnClient defaultYarnClient;
-
-    @Autowired
-    protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -53,7 +50,7 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
     }
 
     @BeforeClass(groups = { "functional", "deployment" })
-    public void setupRunEnvironment() throws Exception {
+    public void setupRunEnvironment() {
         restTemplate.setErrorHandler(new ThrowExceptionResponseErrorHandler());
         ignoreErrorRestTemplate.setErrorHandler(new IgnoreErrorResponseErrorHandler());
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
@@ -86,14 +83,11 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
         @Override
         public boolean hasError(ClientHttpResponse response) throws IOException {
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return false;
-            }
-            return true;
+            return response.getStatusCode() != HttpStatus.OK;
         }
 
         @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
+        public void handleError(ClientHttpResponse response) {
         }
     }
 

@@ -98,13 +98,10 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
             return null;
         }
         String[] pkgNames = pkgStr.split(",");
-        if (pkgNames != null) {
-            return Arrays.stream(pkgNames).map(SoftwareLibrary::fromName).collect(Collectors.toList());
-        }
-        return null;
+        return Arrays.stream(pkgNames).map(SoftwareLibrary::fromName).collect(Collectors.toList());
     }
 
-    protected Collection<LocalResourcesFactoryBean.TransferEntry> appendModuleHdfsEntries(
+    private Collection<LocalResourcesFactoryBean.TransferEntry> appendModuleHdfsEntries(
             Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries, Collection<SoftwareLibrary> swlibs) {
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //

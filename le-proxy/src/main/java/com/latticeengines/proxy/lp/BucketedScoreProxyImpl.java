@@ -73,7 +73,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
         List<String> params = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(modelSummaryIdList)) {
             for (String id : modelSummaryIdList) {
-                params.add("model-id=" + id);
+                params.add("model-summary-id=" + id);
             }
         }
         if (!params.isEmpty()) {

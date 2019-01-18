@@ -7,6 +7,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -25,7 +27,6 @@ import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurat
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
@@ -57,7 +58,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
         fs.mkdirs(new Path(customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST"));
 
-        List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
+        List<CopyEntry> copyEntries = new ArrayList<>();
 
         String inputDir = ClassLoader.getSystemResource("com/latticeengines/api/controller/DELL_EVENT_TABLE_TEST")
                 .getPath();
@@ -80,27 +81,27 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
-                logisticRegressionAlgorithm }));
+        modelDef.addAlgorithms(Arrays.asList(decisionTreeAlgorithm, logisticRegressionAlgorithm));
 
         model = new Model();
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("DELL_EVENT_TABLE_TEST");
         model.setMetadataTable("EventMetadata");
-        model.setFeaturesList(Arrays.<String> asList(new String[] { "Column5", //
+        model.setFeaturesList(Arrays.asList( //
+                "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
                 "Column9", //
-                "Column10" }));
-        model.setTargetsList(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+                "Column10"));
+        model.setTargetsList(Collections.singletonList("Event_Latitude_Customer"));
         model.setCustomer("DELL");
-        model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
+        model.setKeyCols(Collections.singletonList("IDX"));
         model.setDataFormat("avro");
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
@@ -119,7 +120,8 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+                samplingConfig, AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -137,31 +139,34 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         config.setSamplePrefix("all");
         config.setTargets(model.getTargetsList());
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/profile", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "profile" })
-    public void submit() throws Exception {
+    @Test(groups = "functional", dependsOnMethods = { "profile" })
+    public void submit() {
         // reset throttle
         restTemplate.postForObject("http://localhost:8080/rest/resetThrottle", null, ThrottleSubmission.class);
         // submit
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(2, submission.getApplicationIds().size());
         String appId = submission.getApplicationIds().get(0);
         validateAppStatus(platformTestBase.getApplicationId(appId));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "submit" })
-    public void throttle() throws Exception {
+    public void throttle() {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(true);
         config.setJobRankCutoff(5);
         ThrottleSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/throttle", config,
-                ThrottleSubmission.class, new Object[] {});
+                ThrottleSubmission.class);
+        Assert.assertNotNull(submission);
         assertTrue(submission.isImmediate());
     }
 
@@ -180,9 +185,10 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         config.setCustomer("INTERNAL");
         config.setTable("iris");
         config.setMetadataTable("EventMetadata");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        config.setKeyCols(Collections.singletonList("ID"));
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId metadataLoadAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(metadataLoadAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -191,7 +197,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     private void validateAppStatus(ApplicationId appId) {
         JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getJobStatus/" + appId.toString(),
-                JobStatus.class, new HashMap<String, Object>());
+                JobStatus.class, new HashMap<>());
         assertNotNull(status);
         assertEquals(status.getId(), appId.toString());
     }

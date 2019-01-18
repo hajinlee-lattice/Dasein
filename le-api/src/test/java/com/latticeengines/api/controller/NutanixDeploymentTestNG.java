@@ -3,18 +3,18 @@ package com.latticeengines.api.controller;
 import static org.testng.Assert.assertEquals;
 
 import java.util.AbstractMap;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -22,7 +22,6 @@ import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
@@ -34,10 +33,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(NutanixDeploymentTestNG.class);
-
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${common.test.modeling.url}")
@@ -54,20 +50,20 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         this.model = produceAModel(modelDef);
     }
 
-    protected Model produceAModel(ModelDefinition modelDef) {
+    private Model produceAModel(ModelDefinition modelDef) {
         Model model = new Model();
         model.setModelDefinition(modelDef);
         model.setName("INTERNAL_NutanixDeploymentTestNG Random Forest Model on Depivoted Data");
         model.setTable("Q_EventTable_Nutanix");
         model.setMetadataTable("EventMetadata");
         model.setCustomer("INTERNAL_NutanixDeploymentTestNG");
-        model.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
+        model.setKeyCols(Collections.singletonList("Nutanix_EventTable_Clean"));
         model.setDataFormat("avro");
 
         return model;
     }
 
-    protected ModelDefinition produceModelDef() {
+    private ModelDefinition produceModelDef() {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
@@ -75,21 +71,23 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Logistic regression against all");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+        modelDef.addAlgorithms(Collections.singletonList(randomForestAlgorithm));
         return modelDef;
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
         StringList features = restTemplate.postForObject(modelingEndpointHost + "/rest/features", model,
-                StringList.class, new Object[] {});
-        return new AbstractMap.SimpleEntry<String, List<String>>("P1_Event", features.getElements());
+                StringList.class);
+        Assert.assertNotNull(features);
+        return new AbstractMap.SimpleEntry<>("P1_Event", features.getElements());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -104,7 +102,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer("INTERNAL_NutanixDeploymentTestNG");
         config.setTable("Q_EventTable_Nutanix");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
+        config.setKeyCols(Collections.singletonList("Nutanix_EventTable_Clean"));
         return config;
     }
 
@@ -128,7 +126,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setTable(this.model.getTable());
 
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+                samplingConfig, AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -143,21 +142,23 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
-        config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
+        config.setTargets(Collections.singletonList("P1_Event"));
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         this.model.setFeaturesList(targetAndFeatures.getValue());
-        this.model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
+        this.model.setTargetsList(Collections.singletonList(targetAndFeatures.getKey()));
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", this.model,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {

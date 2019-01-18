@@ -194,7 +194,9 @@ class Server {
 
     setProxies() {
         const options = this.options;
-
+        console.log('=============================================');
+        console.log('SET PROXIES ',options.config.proxies);
+        console.log('=============================================');
         for (let path in options.config.proxies) {
             const proxy = options.config.proxies[path];
             switch (proxy.type) {
@@ -225,6 +227,9 @@ class Server {
                         proxy.local_path,
                         proxy.remote_path
                     );
+                    break;
+                case 'tray_pipe':
+                    this.createTrayProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
                     break;
                 default:
                     // throw error invalid configuration?
@@ -401,6 +406,39 @@ class Server {
                 } catch (err) {
                     console.log(
                         chalk.red(DateUtil.getTimeStamp() + ":sseproxy>") + err
+                    );
+                }
+            });
+        }
+    }
+
+    createTrayProxy(API_URL, API_PATH, PATH) {
+        if (API_URL) {
+            (API_PATH = API_PATH || "/tray");
+            console.log(
+                chalk.white(">") + " TRAY PROXY",
+                API_PATH,
+                "\n\t" + API_URL + PATH
+            );
+            this.app.use(API_PATH, (req, res) => {
+                // urls heading to /sse/* will go to /pls/* with Auth token
+                const url = API_URL + PATH + req.url;
+
+                try {
+                    let r = request(url);
+
+                    if (req.query) {
+
+                        if (req.query.Method) {
+                            let method = req.query.Method;
+                            req.method = method || "GET";
+                        }
+                    }
+
+                    req.pipe(r).pipe(res);
+                } catch (err) {
+                    console.log(
+                        chalk.red(DateUtil.getTimeStamp() + ":TRAY PROXY") + err
                     );
                 }
             });
