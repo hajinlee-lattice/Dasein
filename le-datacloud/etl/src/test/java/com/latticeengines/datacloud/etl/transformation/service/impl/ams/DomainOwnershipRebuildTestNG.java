@@ -92,35 +92,44 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
         schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE, String.class));
         Object[][] data = new Object[][] {
                 // Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
-                	// Adding this entry present in single tree for ROOT_DUNS firmographic value computation : karlDuns2.com
+                	// Present in single tree for ROOT_DUNS = DUNS24 firmographic value computation : Case 3 karlDuns2.com and Case 4 sbiDuns1.com
                 { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202, null, DOMSRC_DNB },
-                { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203,
-                    null, DOMSRC_DNB },
-                	// Adding this entry to support FRANCHISE case : sbiDuns1.com
-                { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services", 201, null, null,
-                        DOMSRC_DNB },
-                { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null,
-                            DOMSRC_DNB },
-                { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null, 205, null, null,
-                                DOMSRC_DNB },
-                	// Adding this entry to support mongodbDu.com case
+                    // Present in single tree for ROOT_DUNS = DUNS28 firmographic value computation : Case 2 karlDuns2.com and Case 4 sbiDuns1.com
+                { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203, null, DOMSRC_DNB },
+                    // Present in single tree for ROOT_DUNS = DUNS10 firmographic value computation : Case 2 sbiDuns2.com and Case 4 sbiDuns1.com
+                { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, DOMSRC_DNB },
+                	// Adding this entry to support mongodbDu.com case : Case 4 sbiDuns1.com
                 { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206, null,
                                     DOMSRC_DNB },
-                // Case 2 : domains present in OwnershipTable : rootDuns match
+                // Case 2 : domains present in OwnershipTable : rootDuns match =
+                // we select root duns for domains present in multiple trees by
+                // comparing their firmographic values in following order (Sales
+                // Volume -> Total Employees -> Number of Locations) and by this
+                // process we have following entries win over other entries
+                // having same domain under other trees
+                
+                    // karlDuns2.com domain record with DUNS = DUNS28 wins due to reason = HIGHER_SALES_VOLUME
                 { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 215, null, DOMSRC_DNB },
+                    // sbiDuns2.com domain record with DUNS = DUNS10 wins due to reason = HIGHER_NUM_OF_LOC(same salesVolume and totalEmployees)
                 { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216, null, DOMSRC_DNB },
-                // Case 3 : domains present in OwnershipTable : rootDuns doesn't match
+                
+                // Case 3 : domains present in OwnershipTable : rootDuns doesn't
+                // match = these are the entries that will get cleaned up as same domain
+                // in other tree (other root duns) got selected as provided above
+                    // karlDuns2.com domain record with DUNS = DUNS24 loses due to lower sales volume
                 { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218, null, DOMSRC_DNB },
+                    // sbiDuns2.com domain record with DUNS = DUNS01 loses due to lower num of locations(same salesVolume and totalEmployees)
                 { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223, null, DOMSRC_DNB },
                 // Case 4 : domains present in OwnershipTable with reasons multiple large company, franchise, other
-                { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225, null,
-                        DOMSRC_DNB },
-                { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,
-                        "Manufacturing - Semiconductors", 226, null, DOMSRC_DNB },
-                { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null,
-                        DOMSRC_DNB },
-                { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228, null,
-                        DOMSRC_DNB },
+                    // Present in multiple trees causing reasonType = FRANCHISE
+                { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2,"Consumer Services", 225, null, DOMSRC_DNB },
+                { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,"Manufacturing - Semiconductors", 226, null, DOMSRC_DNB },
+                { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null, DOMSRC_DNB },
+                { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228, null, DOMSRC_DNB },
+                    // ReasonType = OTHER
+                    // Added reason_type = 'OTHER' for domains present in multiple trees having firmographics same in both trees. 
+                    // So, can't choose the tree, so will update ROOT_DUNS = null and DUNS_TYPE = null for such entries. 
+                    // So, such entries will not be cleaned up
                 { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, DOMSRC_DNB },
                 { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, DOMSRC_DNB },
                 { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null, DOMSRC_DNB },
@@ -131,6 +140,8 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
                 { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234, null,
                         DOMSRC_DNB },
                 // Case 7 : domains with missing ROOT_DUNS
+                // MISSING_ROOT_DUNS reason type = no record entry found with DUNS same as record's rootDuns
+                // Here, rootDuns = DUNS900 and there is no entry with DUNS = DUNS900 and hence reason type = MISSING_ROOT_DUNS
                 { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236, null, DOMSRC_DNB },};
         uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, data);
     }
@@ -139,11 +150,9 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
             // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
     		// SINGLE TREE : not cleaned up
     		{ "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
-    		{ "sbiDu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false"}, //
     		{ "karlDu.com", "DUNS24", "DU", 1, "SINGLE_TREE", "false"}, //
     		{ "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
     		{ "mongodbGu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
-    		{ "mongodbDu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
     		// FRANCHISE : not cleaned up
     		{ "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
     		// OTHER : not cleaned up
@@ -179,7 +188,7 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
             expectedData.remove(domain);
         }
         Assert.assertTrue(expectedData.size() == 0);
-        Assert.assertEquals(rowCount, 11);
+        Assert.assertEquals(rowCount, expectedDataValues.length);
     }
 
     @Override
