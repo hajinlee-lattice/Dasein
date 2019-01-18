@@ -1,25 +1,7 @@
-node_modules/**
-projects/atlas/node_modules/**
-projects/common/node_modules/**
-projects/dante/node_modules/**
-projects/insights/node_modules/**
-projects/login/node_modules/**
-projects/lp2/node_modules/**
-projects/lpi/node_modules/**
-projects/ng2/node_modules/**
-projects/prospectdiscovery/node_modules/**
-projects/tenantconsole/node_modules/**
-projects/uicomponents/node_modules/**
-projects/websocket/node_modules/**
+#NPM modules
+**/node_modules/**
 
-projects/atlas/dist/**
-projects/dante/.sass-cache/**
-projects/insights/dist/**
-projects/login/dist/**
-projects/lp2/.sass-cache/**
-projects/lp2/app/*.min.js
-projects/lp2/assets/styles/*.min.css
-projects/lp2/index.html
-projects/lpi/dist/**
-projects/tenantconsole/dist/**
+#Dist folders created during build
+**/dist/**
+**/.sass-cache/**
 .vscode/
