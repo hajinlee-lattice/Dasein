@@ -4,24 +4,24 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -33,19 +33,16 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 
 public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTestNG {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ModelResourceDeploymentTestNG.class);
-
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Value("${common.test.modeling.url}")
     protected String modelingEndpointHost;
 
-    Model model;
+    private Model model;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -70,21 +67,22 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(
-                new Algorithm[] { randomForestAlgorithm, logisticRegressionAlgorithm, decisionTreeAlgorithm }));
+        modelDef.addAlgorithms( //
+                Arrays.asList(randomForestAlgorithm, logisticRegressionAlgorithm, decisionTreeAlgorithm));
 
         model = new Model();
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("iris");
         model.setMetadataTable("EventMetadata");
-        model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
+        model.setFeaturesList(Arrays.asList( //
+                "SEPAL_LENGTH", //
                 "SEPAL_WIDTH", //
                 "PETAL_LENGTH", //
-                "PETAL_WIDTH" }));
-        model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
+                "PETAL_WIDTH"));
+        model.setTargetsList(Collections.singletonList("CATEGORY"));
         model.setCustomer("INTERNAL_ModelResourceDeploymentTestNG");
-        model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        model.setKeyCols(Collections.singletonList("ID"));
         model.setDataFormat("avro");
     }
 
@@ -92,7 +90,8 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -100,10 +99,11 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "load" })
-    public void loadAgain() throws Exception {
+    public void loadAgain() {
         LoadConfiguration config = getLoadConfig(model);
         Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject(modelingEndpointHost + "/rest/load",
-                config, HashMap.class, new Object[] {});
+                config, HashMap.class);
+        Assert.assertNotNull(errorResult);
         assertTrue(errorResult.containsKey("errorCode"));
     }
 
@@ -111,7 +111,8 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = getSampleConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+                samplingConfig, AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -122,16 +123,18 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     public void profile() throws Exception {
         DataProfileConfiguration config = getProfileConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(3, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {

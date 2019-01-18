@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 
 public class MySQLServerMetadataProvider extends MetadataProvider {
 
@@ -104,6 +103,9 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public String getConnectionUrl(String completeUrl) {
+        if (completeUrl.contains("useSSL=true")) {
+            completeUrl += "&useSSL=true";
+        }
         return StringUtils.substringBefore(completeUrl, "?user=");
     }
 

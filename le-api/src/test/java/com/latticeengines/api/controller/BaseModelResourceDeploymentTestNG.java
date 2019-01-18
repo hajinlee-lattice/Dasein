@@ -1,6 +1,6 @@
 package com.latticeengines.api.controller;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class BaseModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
-    protected LoadConfiguration getLoadConfig(Model model) {
+    LoadConfiguration getLoadConfig(Model model) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost) //
@@ -25,12 +25,12 @@ public class BaseModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer(model.getCustomer());
         config.setTable("iris");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        config.setKeyCols(Collections.singletonList("ID"));
         config.setMetadataTable("EventMetadata");
         return config;
     }
 
-    protected SamplingConfiguration getSampleConfig(Model model) {
+    SamplingConfiguration getSampleConfig(Model model) {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement s0 = new SamplingElement();
@@ -50,7 +50,7 @@ public class BaseModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         return samplingConfig;
     }
 
-    protected DataProfileConfiguration getProfileConfig(Model model) {
+    DataProfileConfiguration getProfileConfig(Model model) {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());

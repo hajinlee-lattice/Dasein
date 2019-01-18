@@ -1,9 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
-import java.io.File;
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +23,7 @@ public final class JacocoUtils {
     }
 
     public static boolean needToLocalizeJacoco() {
-        boolean jacocoEnabled = Boolean.valueOf(PropertyUtils.getProperty("yarn.jacoco.enabled"));
-        String agentFile = System.getenv("JACOCO_AGENT_FILE");
-        boolean envVarValid = StringUtils.isNotBlank(agentFile) && new File(agentFile).exists();
-        return jacocoEnabled && !envVarValid;
+        return Boolean.valueOf(PropertyUtils.getProperty("yarn.jacoco.enabled"));
     }
 
 }

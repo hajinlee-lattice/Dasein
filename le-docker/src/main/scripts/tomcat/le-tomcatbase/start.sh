@@ -69,7 +69,6 @@ fi
 if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
     echo "Java version: $(java -version 2>&1), enabling ZGC"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseZGC"
 else
     echo "Java version: $(java -version 2>&1), enabling G1GC"
@@ -88,7 +87,7 @@ export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.authentica
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export CATALINA_OPTS="${CATALINA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 
-if [[ "${DISABLE_JMXTRANS}" != "true" ]] && [[ -f "/var/lib/jmxtrans&&gent.jar" ]]; then
+if [[ "${DISABLE_JMXTRANS}" != "true" ]] && [[ -f "/var/lib/jmxtransa-gent.jar" ]]; then
     echo "Found jmxtrans-agent.jar, setting its java agent"
     export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
 fi
