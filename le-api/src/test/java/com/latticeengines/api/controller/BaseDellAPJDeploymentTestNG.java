@@ -1,10 +1,11 @@
 package com.latticeengines.api.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
@@ -16,17 +17,17 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 
 public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
 
-    protected Model getModel(String customer) {
+    Model getModel(String customer) {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
         randomForestAlgorithm.setSampleName("s0");
-        randomForestAlgorithm.setPipelineScript("/app/playmaker/evmodel/evpipeline.py");
-        randomForestAlgorithm.setPipelineLibScript("/app/playmaker/evmodel/evpipeline.tar.gz");
+        randomForestAlgorithm.setPipelineScript("/datascience/playmaker/evmodel/evpipeline.py");
+        randomForestAlgorithm.setPipelineLibScript("/datascience/playmaker/evmodel/evpipeline.tar.gz");
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+        modelDef.addAlgorithms(Collections.singletonList(randomForestAlgorithm));
 
         Model model = new Model();
         model.setModelDefinition(modelDef);
@@ -34,14 +35,14 @@ public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setTable("Play_11_TrainingSample_WithRevenue");
         model.setMetadataTable("Play_11_EventMetadata");
         model.setCustomer(customer);
-        model.setKeyCols(Arrays.<String> asList(new String[] { "AnalyticPurchaseState_ID" }));
+        model.setKeyCols(Collections.singletonList("AnalyticPurchaseState_ID"));
         model.setProvenanceProperties("EVModelColumns=__Revenue_0,__Revenue_1,__Revenue_2,__Revenue_3,__Revenue_4,__Revenue_5,__Revenue_6,__Revenue_7,__Revenue_8,__Revenue_9,__Revenue_10,__Revenue_11 DataLoader_Query=x DataLoader_TenantName=y DataLoader_Instance=z");
         model.setDataFormat("avro");
 
         return model;
     }
 
-    protected LoadConfiguration getLoadConfig(Model model) {
+    LoadConfiguration getLoadConfig(Model model) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
@@ -50,11 +51,11 @@ public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer(model.getCustomer());
         config.setTable("Play_11_TrainingSample_WithRevenue");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "AnalyticPurchaseState_ID" }));
+        config.setKeyCols(Collections.singletonList("AnalyticPurchaseState_ID"));
         return config;
     }
 
-    protected SamplingConfiguration getSampleConfig(Model model) {
+    SamplingConfiguration getSampleConfig(Model model) {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement s0 = new SamplingElement();
@@ -66,19 +67,19 @@ public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
         return samplingConfig;
     }
 
-    protected DataProfileConfiguration getProfileConfig(Model model) {
+    DataProfileConfiguration getProfileConfig(Model model) {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("s0");
-        config.setTargets(Arrays.<String> asList(new String[] { "Target" }));
+        config.setTargets(Collections.singletonList("Target"));
         config.setExcludeColumnList(getExcludeList());
         return config;
     }
 
-    List<String> getExcludeList() {
-        return Arrays.<String> asList(new String[] { "Ext_LEAccount_PD_FundingDateUpdated", //
+    private List<String> getExcludeList() {
+        return new ArrayList<>(Arrays.asList("Ext_LEAccount_PD_FundingDateUpdated", //
                 "Ext_LEAccount_PD_FundingDate", //
                 "AnalyticPurchaseState_ID", //
                 "Offset", //
@@ -92,7 +93,7 @@ public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
                 "Product_36_Units", //
                 "Product_62_Revenue", //
                 "Product_62_Units", //
-                "Train" });
+                "Train"));
     }
 
 }

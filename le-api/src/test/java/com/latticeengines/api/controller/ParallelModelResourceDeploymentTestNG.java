@@ -3,22 +3,23 @@ package com.latticeengines.api.controller;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -56,20 +57,21 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+        modelDef.addAlgorithms(Collections.singletonList(randomForestAlgorithm));
 
         model = new Model();
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("iris");
         model.setMetadataTable("EventMetadata");
-        model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
+        model.setFeaturesList(Arrays.asList( //
+                "SEPAL_LENGTH", //
                 "SEPAL_WIDTH", //
                 "PETAL_LENGTH", //
-                "PETAL_WIDTH" }));
-        model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
+                "PETAL_WIDTH"));
+        model.setTargetsList(Collections.singletonList("CATEGORY"));
         model.setCustomer("Parallel_INTERNAL_ModelResourceDeploymentTestNG");
-        model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        model.setKeyCols(Collections.singletonList("ID"));
         model.setDataFormat("avro");
     }
 
@@ -77,7 +79,8 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
     public void parallel_load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -89,7 +92,8 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         samplingConfig.setParallelEnabled(true);
 
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+                samplingConfig, AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -102,17 +106,19 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         config.setParallelEnabled(true);
 
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "parallel_profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "parallel_profile" })
     public void submit() throws Exception {
         model.setParallelEnabled(true);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {

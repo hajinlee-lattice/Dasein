@@ -99,7 +99,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
         randomForestAlgorithm.setSampleName("s0");
         randomForestAlgorithm.setAlgorithmProperties(randomForestAlgorithm.getAlgorithmProperties() + //
-                " features_threshold=" + String.valueOf(featuresThreshold));
+                " features_threshold=" + featuresThreshold);
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
@@ -163,7 +163,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Test(groups = "sqoop", enabled = false, expectedExceptions = LedpException.class)
-    public void loadBadTableInput() throws Exception {
+    public void loadBadTableInput() {
         LoadConfiguration loadConfig = getLoadConfig();
         loadConfig.setTable("SomeBogusTableName");
         modelingService.loadData(loadConfig);
@@ -184,7 +184,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
+    @Test(groups = "sqoop", dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
@@ -193,7 +193,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "load" })
+    @Test(groups = "sqoop", dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setRandomSeed(123456L);
@@ -218,7 +218,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "sqoop", dependsOnMethods = { "createSamples" })
     public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -233,7 +233,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "profileData" })
+    @Test(groups = "sqoop", dependsOnMethods = { "profileData" })
     public void reviewData() throws Exception {
         ModelReviewConfiguration config = new ModelReviewConfiguration();
         config.setCustomer(model.getCustomer());
@@ -247,7 +247,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "reviewData" })
+    @Test(groups = "sqoop", dependsOnMethods = { "reviewData" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);

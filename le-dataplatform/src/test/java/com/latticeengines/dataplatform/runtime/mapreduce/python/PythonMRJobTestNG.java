@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,18 +17,17 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FileAggregator;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
@@ -51,8 +51,8 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Autowired
-    private VersionManager versionManager;
+    @Inject
+    private ManifestService manifestService;
 
     private String customer = getClass().getSimpleName();
     private String localDir = "com/latticeengines/dataplatform/runtime/mapreduce/Q_EVENT_NUTANIX";
@@ -92,7 +92,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     private List<CopyEntry> copyFromLocalFiles() {
-        List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
+        List<CopyEntry> copyEntries = new ArrayList<>();
         String localPath = ClassLoader.getSystemResource(localDir).getPath();
 
         copyEntries.add(new CopyEntry("file:" + localPath + "/Q_EventTable_Nutanix.avsc", dataDir, false));
@@ -106,11 +106,11 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         return copyEntries;
     }
 
-    @Test(groups = { "functional" }, enabled = true)
+    @Test(groups = { "functional" })
     public void testProfiling() throws Exception {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-profile.json");
         setCustomer(classifier);
-        setVersion(classifier, versionManager.getCurrentVersionInStack(stackName));
+        setVersion(classifier, manifestService.getLedsVersion());
         int linesPerMap = createProfilingInputConfig(classifier.getFeatures(), profileDir);
         Properties properties = setupProperties(linesPerMap, profileDir, metadataDir,
                 PythonMRJobType.PROFILING_JOB.jobType());
@@ -152,9 +152,9 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     public void testModeling() throws Exception {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-learn.json");
         setCustomer(classifier);
-        setVersion(classifier, versionManager.getCurrentVersionInStack(stackName));
+        setVersion(classifier, manifestService.getLedsVersion());
         String modelInputDir = modelDir + "/modelName";
-        int linesPerMap = createModelingInputConfig(sampleDir, modelInputDir);
+        int linesPerMap = createModelingInputConfig(modelInputDir);
         Properties property = setupProperties(linesPerMap, modelInputDir, modelDir,
                 PythonMRJobType.MODELING_JOB.jobType());
 
@@ -166,23 +166,20 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     private Properties setupProperties(int linesPerMap, String hdfsInDir, String hdfsOutDir, String jobType) {
         Properties properties = new Properties();
 
-        String cacheFilePath = null;
-        if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
+        String cacheFilePath;
+        if (jobType.equals(PythonMRJobType.PROFILING_JOB.jobType())) {
             cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier,
-                    MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
-                            versionManager.getCurrentVersionInStack(stackName)),
-                    versionManager.getCurrentVersionInStack(stackName));
+                    MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, manifestService.getLedpStackVersion()), //
+                    manifestService.getLedsVersion());
         } else {
-            List<String> trainingSets = new ArrayList<String>();
+            List<String> trainingSets = new ArrayList<>();
             trainingSets.add(trainingSet);
             cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingSets,
-                    MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
-                            versionManager.getCurrentVersionInStack(stackName)),
-                    versionManager.getCurrentVersionInStack(stackName));
+                    MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, manifestService.getLedpStackVersion()), //
+                    manifestService.getLedsVersion());
         }
 
-        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier,
-                versionManager.getCurrentVersionInStack(stackName));
+        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, manifestService.getLedsVersion());
         String[] tokens = classifier.getPythonPipelineLibHdfsPath().split("/");
 
         properties.put(MapReduceProperty.INPUT.name(), hdfsInDir);
@@ -226,12 +223,12 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         return linesPerMap;
     }
 
-    private int createModelingInputConfig(String sampleDir, String modelDir) {
+    private int createModelingInputConfig(String modelDir) {
         int linesPerMap = 1;
         String modelConfig = PythonMRJobType.MODELING_JOB.configName();
 
         try {
-            List<String> content = new ArrayList<String>();
+            List<String> content = new ArrayList<>();
             for (int i = 0; i < NUM_MAPPER; i++) {
                 content.add(trainingSet);
             }

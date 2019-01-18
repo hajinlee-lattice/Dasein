@@ -3,18 +3,19 @@ package com.latticeengines.api.controller;
 import static org.testng.Assert.assertEquals;
 
 import java.util.AbstractMap;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -22,7 +23,6 @@ import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
@@ -56,7 +56,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+        modelDef.addAlgorithms(Collections.singletonList(randomForestAlgorithm));
 
         model = new Model();
         model.setModelDefinition(modelDef);
@@ -64,22 +64,24 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setTable("DataForScoring_Lattice");
         model.setMetadataTable("EventMetadata");
         model.setCustomer("INTERNAL_LatticeDeploymentTestNG");
-        model.setKeyCols(Arrays.<String> asList(new String[] { "LeadID" }));
+        model.setKeyCols(Collections.singletonList("LeadID"));
         model.setDataFormat("avro");
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
         StringList features = restTemplate.postForObject(modelingEndpointHost + "/rest/features", model,
-                StringList.class, new Object[] {});
-        return new AbstractMap.SimpleEntry<String, List<String>>("P1_Event", features.getElements());
+                StringList.class);
+        Assert.assertNotNull(features);
+        return new AbstractMap.SimpleEntry<>("P1_Event", features.getElements());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED, String.format("ApplicationId is %s", appId.toString()));
@@ -94,11 +96,11 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer("INTERNAL_LatticeDeploymentTestNG");
         config.setTable("DataForScoring_Lattice");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "LeadID" }));
+        config.setKeyCols(Collections.singletonList("LeadID"));
         return config;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
@@ -119,8 +121,10 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setTable(model.getTable());
 
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+                samplingConfig, AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
+        Assert.assertNotNull(submission);
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED, String.format("ApplicationId is %s", appId.toString()));
@@ -134,24 +138,26 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
-        config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
+        config.setTargets(Collections.singletonList("P1_Event"));
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED,
                 String.format("ApplicationId is %s", profileAppId.toString()));
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "submit");
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setFeaturesList(targetAndFeatures.getValue());
-        model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
+        model.setTargetsList(Collections.singletonList(targetAndFeatures.getKey()));
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+                AppSubmission.class);
+        Assert.assertNotNull(submission);
         assertEquals(1, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {
