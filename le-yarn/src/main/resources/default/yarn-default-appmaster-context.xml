@@ -15,7 +15,6 @@
 
     <import resource="classpath:common-am-env-context.xml" />
     <import resource="classpath:hadoop-config-context.xml" />
-    <import resource="classpath:common-component-context.xml"/>
 
     <yarn:environment>
         <yarn:classpath />

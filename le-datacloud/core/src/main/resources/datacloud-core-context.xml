@@ -11,7 +11,6 @@
     <context:component-scan base-package="com.latticeengines.ldc_collectiondb.entitymgr" />
 
     <import resource="classpath:db-context.xml" />
-    <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:hadoop-config-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
@@ -25,7 +24,7 @@
     <bean id="countryCodeDao" class="com.latticeengines.datacloud.core.dao.impl.CountryCodeDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-    
+
     <bean id="patchBookDao" class="com.latticeengines.datacloud.core.dao.impl.PatchBookDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
