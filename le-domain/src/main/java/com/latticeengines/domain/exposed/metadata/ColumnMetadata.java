@@ -108,6 +108,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("AssociatedDataRules")
     private List<String> AssociatedDataRules;
 
+    @JsonProperty("LastDataRefresh")
+    private String lastDataRefresh;
+
     // TODO: Attribute Customization should be migrated to new metadata
     // framework
     @Deprecated
@@ -632,6 +635,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setAssociatedDataRules(List<String> associatedDataRules) {
         AssociatedDataRules = associatedDataRules;
+    }
+
+    public String getLastDataRefresh() {
+        return lastDataRefresh;
+    }
+
+    public void setLastDataRefresh(String lastDataRefresh) {
+        this.lastDataRefresh = lastDataRefresh;
     }
 
     public ColumnMetadata clone() {

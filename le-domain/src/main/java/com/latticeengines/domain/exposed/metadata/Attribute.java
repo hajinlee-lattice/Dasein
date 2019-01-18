@@ -985,5 +985,19 @@ public class Attribute
         }
     }
 
+    public String getLastDataRefresh() {
+        Object raw = properties.get("LastDataRefresh");
+        if (raw == null) {
+            return null;
+        }
+
+        return raw.toString();
+    }
+
+    public void setLastDataRefresh(String lastDataRefresh) {
+        if (lastDataRefresh != null) {
+            properties.put("LastDataRefresh", lastDataRefresh);
+        }
+    }
 }
 
