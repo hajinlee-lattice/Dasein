@@ -254,11 +254,6 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.formOnChange();
         }
 
-        vm.getPurchasedBeforeValue = function(value) {
-            // vm.purchasedBeforePeriod = value;
-            // console.log('Value ',vm.purchasedBeforePeriod);
-        }
-
         vm.validateCrossSellForm = function(){
 
             var valid = true;

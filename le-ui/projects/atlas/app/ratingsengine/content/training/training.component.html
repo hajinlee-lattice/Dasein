@@ -67,13 +67,6 @@
                 </div>
 
                 <ul ng-if="$ctrl.engineType == 'cross_sell'" class="checkbox-list">
-                    <li ng-if="$ctrl.repeatPurchaseRemodel" class="form-group purchased-before-period">
-                        <p>
-                            Only sell to accounts that have not purchased the selected products in the last
-                            <input type="number" ng-model="$ctrl.purchasedBeforePeriod" class="form-control" min="0" ng-class="{'invalid': $ctrl.purchasedBeforePeriod == undefined || $ctrl.purchasedBeforePeriod == null || $ctrl.purchasedBeforePeriod < 0}">
-                            {{$ctrl.periodType|lowercase}}(s)
-                        </p>
-                    </li>
                     <li class="form-group">
                         <input 
                             type="checkbox"
@@ -212,8 +205,8 @@
 
 
                 <ul class="data" ng-if="$ctrl.engineType == 'cross_sell'">
-                    <li>
-                        <h3 class="training-data-set">Size of Training Data Set</h3>
+                    <li class="training-data-set">
+                        <h3>Effect on Modeling</h3>
                         <div class="stats-group">
                             <dl class="stats">
                                 <dt>Records Selected</dt>
@@ -232,8 +225,8 @@
                             </dl>
                         </div>
                     </li>
-                    <li>
-                        <h3 class="scoring-set">Scoring</h3>
+                    <li class="scoring-set">
+                        <h3>Effect on Scoring</h3>
                         <div class="stats-group">
                             <dl class="stats">
                                 <dt>Accounts to be scored</dt>
