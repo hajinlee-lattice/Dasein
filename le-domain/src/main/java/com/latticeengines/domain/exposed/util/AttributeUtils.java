@@ -292,6 +292,7 @@ public class AttributeUtils {
             metadata.setGroups(map);
         }
 
+        metadata.setLastDataRefresh(attr.getLastDataRefresh());
         metadata.setStatisticalType(StatisticalType.fromName(attr.getStatisticalType()));
         metadata.setDiscretizationStrategy(attr.getDisplayDiscretizationStrategy());
         metadata.setBitOffset(attr.getBitOffset());

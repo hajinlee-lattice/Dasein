@@ -41,6 +41,9 @@ public final class ColumnMetadataUtils {
         if (StringUtils.isNotBlank(overwriter.getDataLicense())) {
             overwritee.setDataLicense(overwriter.getDataLicense());
         }
+        if (StringUtils.isNotBlank(overwriter.getLastDataRefresh())) {
+            overwritee.setLastDataRefresh(overwriter.getLastDataRefresh());
+        }
         if (overwriter.getStatisticalType() != null) {
             overwritee.setStatisticalType(overwriter.getStatisticalType());
         }
