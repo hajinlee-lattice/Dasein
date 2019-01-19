@@ -2,7 +2,8 @@ package com.latticeengines.admin.swagger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -24,7 +25,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-    @Autowired
+    @Inject
     private VersionManager docVersionManager;
 
     @Bean

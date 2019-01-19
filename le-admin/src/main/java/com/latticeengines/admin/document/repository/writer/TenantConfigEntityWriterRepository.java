@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 public interface TenantConfigEntityWriterRepository extends AdminDocumentRepository<TenantConfigEntity> {
 
     TenantConfigEntity findByContractIdAndTenantId(String contract, String tenantId);
+
     @Transactional
     @Modifying
     void removeByContractIdAndTenantId(String contractId, String tenantId);

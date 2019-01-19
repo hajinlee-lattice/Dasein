@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,6 @@ import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.dynamicopts.MutableOptionsProvider;
 import com.latticeengines.admin.dynamicopts.OptionsProvider;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
@@ -26,14 +24,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class DynamicOptionsServiceImpl implements DynamicOptionsService {
 
     private static final Map<Path, OptionsProvider> optionMap = new ConcurrentHashMap<>();
-    @SuppressWarnings("unused")
-    private static final String VDB_SERVER_PATH = "/VisiDBServers";
 
     @Value("${admin.mount.rootpath}")
     private String mountRoot;
-
-    @Autowired
-    private DataStoreProvider dataStoreProvider;
 
     @PostConstruct
     private void registerProviders() {
@@ -44,10 +37,7 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         OptionsProvider productProvider = new EnumOptionsProvider(LatticeProduct.class);
 
         // register providers
-        Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
-        register(zkPath, dataStoreProvider);
-
-        zkPath = new Path(LatticeComponent.spaceConfigNode, "Topology");
+        Path zkPath = new Path(LatticeComponent.spaceConfigNode, "Topology");
         register(zkPath, topologyProvider);
 
         zkPath = new Path(LatticeComponent.spaceConfigNode, "Product");

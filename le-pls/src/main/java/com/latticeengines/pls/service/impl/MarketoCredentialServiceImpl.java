@@ -3,45 +3,39 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Enrichment;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 import com.latticeengines.domain.exposed.pls.MarketoMatchFieldName;
-import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
-import com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
-import com.microsoft.sqlserver.jdbc.StringUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("marketoCredentialService")
 public class MarketoCredentialServiceImpl implements MarketoCredentialService {
 
-    @Autowired
+    @Inject
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
 
-    @Autowired
+    @Inject
     private MarketoMatchFieldEntityMgr marketoMatchFieldEntityMgr;
 
-    @Autowired
-    private ScoringRequestConfigEntityManager scoringRequestConfigEntityMgr;
-    
-    @Autowired
+    @Inject
     private MarketoRestValidationService marketoRestValidationService;
 
-    @Autowired
+    @Inject
     private MarketoSoapService marketoSoapService;
 
     @Value("${pls.marketo.enrichment.webhook.url}")
@@ -70,9 +64,7 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
         List<MarketoMatchField> fields = enrichment.getMarketoMatchFields();
         Set<MarketoMatchFieldName> fieldNameSet = Sets.newHashSet(MarketoMatchFieldName.values());
         for (MarketoMatchField field : fields) {
-            if (fieldNameSet.contains(field.getMarketoMatchFieldName())) {
-                fieldNameSet.remove(field.getMarketoMatchFieldName());
-            }
+            fieldNameSet.remove(field.getMarketoMatchFieldName());
         }
         for (MarketoMatchFieldName missingFieldName : fieldNameSet) {
             MarketoMatchField newField = new MarketoMatchField();
@@ -111,7 +103,7 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     }
 
     private void validateRESTAndSOAPCredentials(MarketoCredential marketoCredential) {
-        boolean restValidationResult, soapValidationResult = false;
+        boolean restValidationResult, soapValidationResult;
         try {
             restValidationResult = marketoRestValidationService.validateMarketoRestCredentials(
                     marketoCredential.getRestIdentityEnpoint(), marketoCredential.getRestEndpoint(),
@@ -133,5 +125,5 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
             throw new LedpException(LedpCode.LEDP_18117, new String[] { "bad SOAP credentials" });
         }
     }
-    
+
 }

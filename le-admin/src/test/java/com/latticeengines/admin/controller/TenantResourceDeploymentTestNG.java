@@ -13,7 +13,6 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
-import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -36,7 +35,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Test(groups = "deployment", enabled = false)
     public void testCreateTenant() {
-        String fullTenantId = "LETest" + String.valueOf(System.currentTimeMillis());
+        String fullTenantId = "LETest" + System.currentTimeMillis();
         String url = getRestHostPort() + String.format("/admin/tenants/%s/V2?contractId=%s", fullTenantId, fullTenantId);
 
         TenantProperties tenantProperties = new TenantProperties();
@@ -64,11 +63,6 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         }
         plsConfig.setRootPath("/" + PLSComponent.componentName);
 
-        // Modeling
-        SerializableDocumentDirectory modelingConfig = serviceService
-                .getDefaultServiceConfig(ModelingComponent.componentName);
-        modelingConfig.setRootPath("/" + ModelingComponent.componentName);
-
         // DataCloud
         SerializableDocumentDirectory dataCloudConfig = serviceService
                 .getDefaultServiceConfig(DataCloudComponent.componentName);
@@ -81,10 +75,8 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
         configDirs.add(plsConfig);
-        configDirs.add(modelingConfig);
         configDirs.add(dataCloudConfig);
         configDirs.add(cdlConfig);
-
 
         TenantRegistration reg = new TenantRegistration();
         reg.setContractInfo(new ContractInfo(new ContractProperties(fullTenantId, "")));
