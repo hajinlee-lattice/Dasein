@@ -28,7 +28,7 @@
         <!-- maven versions -->
         <maven.jar.version>3.1.0</maven.jar.version>
         <maven.war.version>3.2.2</maven.war.version>
-        <maven.surefire.version>3.0.0-M1</maven.surefire.version>
+        <maven.surefire.version>3.0.0-M3</maven.surefire.version>
         <maven.shade.version>3.2.1</maven.shade.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
         <maven.assembly.version>3.1.0</maven.assembly.version>
@@ -53,7 +53,6 @@
         <javax.servlet.version>4.0.1</javax.servlet.version> <!-- implemented by tomcat -->
         <javax.jsp.version>2.3.3</javax.jsp.version> <!-- implemented by tomcat -->
         <javax.annonation.version>1.3.2</javax.annonation.version> <!-- compile on java 11 -->
-        <javax.jaxb.version>2.3.0</javax.jaxb.version> <!-- compile on java 11 -->
         <javax.ws.version>2.3.0</javax.ws.version> <!-- compile on java 11 -->
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
@@ -1199,7 +1198,6 @@
                 <artifactId>jaxws-api</artifactId>
                 <version>${javax.ws.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/com.sun.xml.ws/jaxws-ri -->
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-ri</artifactId>
@@ -1209,12 +1207,12 @@
             <dependency>
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
-                <version>${javax.jaxb.version}</version>
+                <version>${javax.ws.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-ri</artifactId>
-                <version>${javax.jaxb.version}</version>
+                <version>${javax.ws.version}</version>
                 <type>pom</type>
             </dependency>
 
@@ -2392,6 +2390,8 @@
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
+
+        <!-- jax ws/jaxb dependencies -->
         <dependency>
             <groupId>javax.xml.ws</groupId>
             <artifactId>jaxws-api</artifactId>
@@ -2405,7 +2405,6 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-ri -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-ri</artifactId>

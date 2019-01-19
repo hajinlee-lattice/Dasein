@@ -24,17 +24,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
-import com.latticeengines.admin.tenant.batonadapter.eai.EaiComponent;
-import com.latticeengines.admin.tenant.batonadapter.metadata.MetadataComponent;
-import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
-import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
-import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
-import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -56,8 +49,8 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
-    private final static String tenantName = "Global Test Tenant" + System.currentTimeMillis();
-    private final static Logger log = LoggerFactory.getLogger(LPIEndToEndDeploymentTestNG.class);
+    private static final String tenantName = "Global Test Tenant" + System.currentTimeMillis();
+    private static final Logger log = LoggerFactory.getLogger(LPIEndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
 
@@ -92,7 +85,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
      * In setup, orchestrateForInstall a full tenant.
      **/
     @BeforeClass(groups = "deployment", enabled = false)
-    public void setup() throws Exception {
+    public void setup() {
         tenantId = testContract + tenantId + System.currentTimeMillis();
         contractId = tenantId;
 
@@ -132,7 +125,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // BEGIN: Verify main test tenant
     // ==================================================
 
-    private void verifyInstall() throws Exception {
+    private void verifyInstall() {
         verifyZKState();
         verifyPLSMainTestTenantExists();
     }
@@ -144,7 +137,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         verifyHDFSFolderDeleted();
     }
 
-    private void verifyPLSMainTestTenantExists() throws Exception {
+    private void verifyPLSMainTestTenantExists() {
         verifyPLSTenantExists();
         verifyHDFSFolderExists();
     }
@@ -193,11 +186,6 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         }
         plsConfig.setRootPath("/" + PLSComponent.componentName);
 
-        // Modeling
-        SerializableDocumentDirectory modelingConfig = serviceService
-                .getDefaultServiceConfig(ModelingComponent.componentName);
-        modelingConfig.setRootPath("/" + ModelingComponent.componentName);
-
         // DataCloud
         SerializableDocumentDirectory dataCloudConfig = serviceService
                 .getDefaultServiceConfig(DataCloudComponent.componentName);
@@ -206,7 +194,6 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
         configDirs.add(plsConfig);
-        configDirs.add(modelingConfig);
         configDirs.add(dataCloudConfig);
 
         // Orchestrate tenant
@@ -218,7 +205,8 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         reg.setConfigDirectories(configDirs);
 
         String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
-        boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Assert.assertNotNull(created);
         Assert.assertTrue(created);
     }
 
@@ -237,13 +225,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
             if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
-                    || (plsSkipped && serviceName.equals(PLSComponent.componentName))
-                    || serviceName.equals(VisiDBDLComponent.componentName)
-                    || serviceName.equals(VisiDBTemplateComponent.componentName)
-                    || serviceName.equals(DLTemplateComponent.componentName)
-                    || serviceName.equals(BardJamsComponent.componentName)
-                    || serviceName.equals(EaiComponent.componentName)
-                    || serviceName.equals(MetadataComponent.componentName))) {
+                    || (plsSkipped && serviceName.equals(PLSComponent.componentName)))) {
                 lp3ServiceNames.add(serviceName);
             }
         }
@@ -289,14 +271,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
-            if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
-                    || serviceName.equals(VisiDBDLComponent.componentName)
-                    || serviceName.equals(VisiDBTemplateComponent.componentName)
-                    || serviceName.equals(DLTemplateComponent.componentName)
-                    || serviceName.equals(BardJamsComponent.componentName)
-                    || serviceName.equals(EaiComponent.componentName)
-                    || serviceName.equals(MetadataComponent.componentName)
-                    || serviceName.equals(ModelingComponent.componentName))) {
+            if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName))) {
                 lp3ServiceNames.add(serviceName);
             }
         }
@@ -356,7 +331,8 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelingHdfsPoint), "modeling path not exist!");
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not exist!");
         } catch (IOException e) {
-            // pass
+            log.warn("Error when verify the existence of hdfs paths", e);
+            e.printStackTrace();
         }
     }
 
@@ -369,6 +345,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                     "modeling path not deleted!");
             Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not deleted!");
         } catch (IOException e) {
+            log.warn("Error when verify the existence of hdfs paths", e);
             e.printStackTrace();
         }
     }

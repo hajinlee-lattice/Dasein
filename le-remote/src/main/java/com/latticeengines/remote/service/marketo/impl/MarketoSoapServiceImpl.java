@@ -48,11 +48,7 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
     @Override
     public boolean validateMarketoSoapCredentials(String soapEndPoint, String userId, String encryptionKey) {
         SuccessDescribeMObject lead = describeLeadObject(soapEndPoint, userId, encryptionKey);
-        if (lead.getResult().getMetadata().getFieldList().getFields().size() > 0) {
-            return true;
-        }
-
-        return false;
+        return lead.getResult().getMetadata().getFieldList().getFields().size() > 0;
     }
 
     @Override
