@@ -104,7 +104,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 return cm;
             });
         } else {
-            flux = Flux.<ColumnMetadata> empty().parallel();
+            flux = Flux.<ColumnMetadata>empty().parallel();
         }
         return flux;
     }

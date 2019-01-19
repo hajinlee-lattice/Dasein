@@ -33,7 +33,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null,
                 true);
         Assert.assertNotNull(lookupIdsMapping);
-        Assert.assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
+        Assert.assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";

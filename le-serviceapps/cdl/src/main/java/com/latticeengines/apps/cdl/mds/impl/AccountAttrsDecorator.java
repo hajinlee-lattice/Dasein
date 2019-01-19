@@ -54,7 +54,7 @@ public class AccountAttrsDecorator implements Decorator {
     }
 
     private ColumnMetadata filter(ColumnMetadata cm) {
-        return isCustomerAttr(cm) ? filterCustomerAttr(cm) : filterDCAttr(cm);
+        return isCustomerAttr(cm) ? filterCustomerAttr(cm) : filterLdcAttr(cm);
     }
 
     private ColumnMetadata filterCustomerAttr(ColumnMetadata cm) {
@@ -83,21 +83,32 @@ public class AccountAttrsDecorator implements Decorator {
         return cm;
     }
 
-    private ColumnMetadata filterDCAttr(ColumnMetadata cm) {
-        // Initial status for Export:
-        // enabled for Firmographics and premium
+    private ColumnMetadata filterLdcAttr(ColumnMetadata cm) {
+        // Internal enrich attrs
         if (!internalEnrichEnabled && Boolean.TRUE.equals(cm.getCanInternalEnrich())) {
             cm.disableGroup(Enrichment);
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
             cm.setCanEnrich(false);
-        } else if (Boolean.TRUE.equals(cm.getCanEnrich())
+            return cm;
+        }
+
+        // Set initial value of Export
+        if (Boolean.TRUE.equals(cm.getCanEnrich())
                 && (Category.FIRMOGRAPHICS.equals(cm.getCategory())
                 || StringUtils.isNotBlank(cm.getDataLicense()))) {
             cm.enableGroup(Enrichment);
         } else {
             cm.disableGroup(Enrichment);
         }
+
+        // Further tweak on can Enrich flag
+        if (!Boolean.TRUE.equals(cm.getCanEnrich())) {
+            cm.disableGroup(Enrichment);
+            cm.disableGroup(TalkingPoint);
+            cm.disableGroup(CompanyProfile);
+        }
+
         return cm;
     }
 
