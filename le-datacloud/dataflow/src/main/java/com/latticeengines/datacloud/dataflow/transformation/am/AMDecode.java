@@ -1,17 +1,19 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.am;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.TransformationFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMDecodeFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AMDecoderParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -36,7 +38,7 @@ public class AMDecode extends TransformationFlowBase<BasicTransformationConfigur
         List<String> encodeAttributes = new ArrayList<>(parameters.getCodeBookMap().keySet());
         List<String> fieldsToRetain = ArrayUtils.isEmpty(parameters.getRetainFields()) ? new ArrayList<>()
                 : new ArrayList<>(Arrays.asList(parameters.getRetainFields()));
-        if (parameters.isDecodeAll()) {
+        if (parameters.isDecodeAll() && CollectionUtils.isEmpty(fieldsToRetain)) {
             List<String> allFields = new ArrayList<>(node.getFieldNames());
             fieldsToRetain = allFields.stream() //
                     // Retain all plain attributes

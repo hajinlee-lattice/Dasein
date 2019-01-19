@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.am;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,11 +27,12 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMDecoder;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.am.AMDecoder;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMDecoderConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.am.AMDecoderConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
@@ -122,7 +123,7 @@ public class AMDecoderTestNG extends PipelineTransformationTestNGBase {
             step0.setBaseSources(baseSources);
             step0.setTransformer(AMDecoder.TRANSFORMER_NAME);
             step0.setTargetSource(testAMDecoded.getSourceName());
-            step0.setConfiguration(getAMDecoderConfig());
+            step0.setConfiguration(getAMDecoderConfig(false));
 
             // Decode sampled full am
             TransformationStepConfig step1 = new TransformationStepConfig();
@@ -131,7 +132,7 @@ public class AMDecoderTestNG extends PipelineTransformationTestNGBase {
             step1.setBaseSources(baseSources);
             step1.setTransformer(AMDecoder.TRANSFORMER_NAME);
             step1.setTargetSource(fullAMDecoded.getSourceName());
-            step1.setConfiguration(setDataFlowEngine("{}", "TEZ"));
+            step1.setConfiguration(setDataFlowEngine(getAMDecoderConfig(true), "TEZ"));
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<>();
@@ -147,10 +148,13 @@ public class AMDecoderTestNG extends PipelineTransformationTestNGBase {
         }
     }
 
-    private String getAMDecoderConfig() throws JsonProcessingException {
+    private String getAMDecoderConfig(boolean decodeAll) throws JsonProcessingException {
         AMDecoderConfig conf = new AMDecoderConfig();
-        conf.setRetainFields(retainedAttributes);
-        conf.setDecodeFields(decodedAttributes);
+        conf.setDecodeAll(decodeAll);
+        if (!conf.isDecodeAll()) {
+            conf.setRetainFields(retainedAttributes);
+            conf.setDecodeFields(decodedAttributes);
+        }
         return JsonUtils.serialize(conf);
     }
 
