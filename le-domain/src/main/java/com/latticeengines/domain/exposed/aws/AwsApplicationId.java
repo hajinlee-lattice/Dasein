@@ -63,8 +63,8 @@ public class AwsApplicationId extends ApplicationId {
         this.applicationId = "application_" + jobId + "_aws";
     }
 
-    public static boolean isAwsBatchJob(String jobId) {
-      return jobId.toLowerCase().matches("^application_" + UUID_PATTERN + "_aws$");
+    public static boolean isAwsBatchJob(String applicationId) {
+      return applicationId.toLowerCase().matches("^application_" + UUID_PATTERN + "_aws$");
     }
 
     public static String getAwsBatchJobId(String applicationId) {

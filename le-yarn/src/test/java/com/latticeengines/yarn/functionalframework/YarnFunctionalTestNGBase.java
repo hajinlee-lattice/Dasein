@@ -4,7 +4,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-yarn-context.xml" })
@@ -96,7 +96,7 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         waitTimeInMillis = waitTimeInMillis == null ? MAX_MILLIS_TO_WAIT : waitTimeInMillis;
         log.info(String.format("Waiting on %s for at most %dms.", applicationId, waitTimeInMillis));
 
-        FinalApplicationStatus status = null;
+        FinalApplicationStatus status;
         long start = System.currentTimeMillis();
 
         // break label for inner loop
@@ -127,11 +127,10 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     public ApplicationId getApplicationId(String appIdStr) {
-        String[] tokens = appIdStr.split("_");
-        TestApplicationId appId = new TestApplicationId();
-        appId.setClusterTimestamp(Long.parseLong(tokens[1]));
-        appId.setId(Integer.parseInt(tokens[2]));
-        appId.build();
-        return appId;
+        if (AwsApplicationId.isAwsBatchJob(appIdStr)) {
+            return ApplicationId.fromString(appIdStr);
+        } else {
+            return ApplicationId.fromString(appIdStr);
+        }
     }
 }
