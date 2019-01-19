@@ -94,15 +94,14 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_RANK, Integer.class));
         Object[][] data = new Object[][] { //
                 { "paypal.com", 700 }, { "sbiGu.com", 32 }, { "sbiDu.com", 36 },
-                { "karlDu.com", 326 }, { "netappGu.com", 24 }, { "amazonGu.com", 252 }, { "mongodbDu.com", 15 },
-                { "mongodbGu.com", 89 }, { "regalGoodWill.com", 21 }, { "goodWillOrg.com", 62 },
-                { "netappDuns1.com", 83 }, { "mongoDbDuns1.com", 11 }, { "worldwildlife.org", 87 },
-                { "wordwildlifeGu.org", 666 }, { "socialorg.com", 55 }, { "velocity.com", 44 },
-                { "karlDuns2.com", 101 }, { "netappDuns2.com", 102 }, { "unicef.org", 103 }, { "goodwill.com", 104 },
-                { "sbiDuns2.com", 105 }, { "amazon.com", 106 }, { "sbiDuns1.com", 107 }, { "tesla.com", 108 },
-                { "netappDu.com", 109 }, { "netsuite.com", 110 }, { "paypalHQ.com", 111 }, { "rubrik.com", 113 },
-                { "lyft.com", 114 }, { "intuit.com", 115 }, { "macys.com", 116 }, { "netappDuns3.com", 117 },
-                { "oldnavy.com", 118 }, { "oracle.com", 134 }, { "netapp.com", 23 } };
+                { "netappGu.com", 24 }, { "mongodbGu.com", 89 }, { "netappDuns1.com", 83 },
+                { "mongoDbDuns1.com", 11 }, { "worldwildlife.org", 87 },
+                { "wordwildlifeGu.org", 666 }, { "socialorg.com", 55 }, { "karlDuns2.com", 101 },
+                { "sbiDuns2.com", 105 }, { "sbiDuns1.com", 107 }, { "tesla.com", 108 },
+                { "netsuite.com", 110 }, { "lyft.com", 114 }, { "oldnavy.com", 118 },
+                { "oracle.com", 134 }, { "datos.io", null },
+                { "salesforce.com", null },
+                { "netapp.com", 23 }, { "emc.com", null } };
         uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, schema, data);
     }
 
@@ -119,10 +118,7 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             // SINGLE TREE : not cleaned up
             { "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
             { "sbiDu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false"}, //
-            { "karlDu.com", "DUNS24", "DU", 1, "SINGLE_TREE", "false"}, //
             { "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
-            { "mongodbGu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
-            { "mongodbDu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
             // FRANCHISE : not cleaned up
             { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
             // OTHER : not cleaned up
@@ -153,8 +149,10 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
                 { "sbiGu.com", "sbiDu.com" },
                 // PriRootDuns != null, SecRootDuns == null
                 { "netappGu.com", "paypal.com" },
-                // Different PriDomains with same SecDomain : retain based on which has higher alexa rank
-                { "sap.com", "oracle.com" }, { "sap.com", "netapp.com" } };
+                // Different PriDomains with same SecDomain : retain based on which has lower alexa rank
+                { "sap.com", "oracle.com" }, { "sap.com", "netapp.com" },
+                { "sap.com", "emc.com" }, { "data.com", "datos.io" },
+                { "data.com", "salesforce.com" } };
         uploadBaseSourceData(orbSec.getSourceName(), baseSourceVersion, schema, data);
     }
 
@@ -165,8 +163,9 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             { "lyft.com", "airbnb.com" },
             // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             { "sbiDu.com", "sbiGu.com" },
-            // Different PriDomains with same SecDomain : retain based on which has higher alexa rank
-            { "oracle.com", "sap.com"}
+            // Different PriDomains with same SecDomain : retain based on which has lower alexa rank
+            { "netapp.com", "sap.com" }, { "salesforce.com", "data.com" },
+            { "datos.io", "data.com" }
     };
 
 
@@ -180,7 +179,6 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
-            System.out.println("record : " + record);
             String priDomain = String.valueOf(record.get(0));
             String secDomain = String.valueOf(record.get(1));
             Object[] expected = expectedData.get(priDomain + secDomain);
@@ -189,8 +187,8 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             expectedData.remove(priDomain + secDomain);
             rowCount++;
         }
-        Assert.assertTrue(expectedData.size() == 0);
-        Assert.assertEquals(rowCount, 3);
+        Assert.assertTrue(expectedData.size() == 1);
+        Assert.assertEquals(rowCount, 4);
     }
 
     @Override

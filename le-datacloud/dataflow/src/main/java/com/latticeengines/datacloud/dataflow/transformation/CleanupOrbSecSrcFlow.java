@@ -62,11 +62,16 @@ public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<DomainOwnershipCo
                 .join(ORB_SRC_SEC_DOMAIN, domOwnershipTable, DataCloudConstants.AMS_ATTR_DOMAIN, JoinType.LEFT) //
                 .rename(new FieldList(ROOT_DUNS, DataCloudConstants.AMS_ATTR_DOMAIN),
                         new FieldList(SECONDARY_ROOT_DUNS, renameField(DataCloudConstants.AMS_ATTR_DOMAIN)));
-        String filterRootDuns = "((" + SECONDARY_ROOT_DUNS + " == null) || " + "((" + PRIMARY_ROOT_DUNS
-                + " != null) && (" + SECONDARY_ROOT_DUNS + " != null) && (" + PRIMARY_ROOT_DUNS + ".equals("
-                + SECONDARY_ROOT_DUNS + "))))";
+
+        // First condition is that secondary domain is not in accountMasterSeed.
+        // Second condition is that they belongs to the same rootDuns.
+        // This will ensure Franchises (primaryRootDuns = secRootDuns = null) are not cleaned up as well
+        String filterRootDuns = "(" + SECONDARY_ROOT_DUNS + " == null || " + "(" + PRIMARY_ROOT_DUNS
+                + " != null && " + SECONDARY_ROOT_DUNS + " != null && " + PRIMARY_ROOT_DUNS
+                + ".equals(" + SECONDARY_ROOT_DUNS + ")))";
         String filterRetainExp = RETAIN + ".equals(\"" + RETAIN_YES + "\")";
         FieldMetadata fms = new FieldMetadata(RETAIN, String.class);
+
         // Compare primRootDuns and secRootDuns only when domain is matched
         popPrimSecRootDuns = popPrimSecRootDuns //
                 .apply(filterRootDuns, new FieldList(PRIMARY_ROOT_DUNS, SECONDARY_ROOT_DUNS), fms) //

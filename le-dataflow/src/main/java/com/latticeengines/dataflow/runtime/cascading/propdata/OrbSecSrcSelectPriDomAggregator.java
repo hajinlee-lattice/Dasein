@@ -60,7 +60,7 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
         int alexaRankVal = arguments.getInteger(alexaRankField);
         String orbPriDomain = arguments.getString(orbPriDomainField);
         String orbSecDomain = arguments.getString(orbSecDomainField);
-        if (context.orbPriDomain == null || alexaRankVal > context.alexaRank) {
+        if (context.orbPriDomain == null || alexaRankVal < context.alexaRank) {
             context.orbPriDomain = orbPriDomain;
         }
         if (context.orbSecDomain == null) {
