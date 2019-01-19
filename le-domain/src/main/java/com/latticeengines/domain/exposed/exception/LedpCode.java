@@ -518,6 +518,7 @@ public enum LedpCode {
     LEDP_25039("HTTP Status: 500/503 DnB System Unavailable"), //
     LEDP_25040("HTTP Status: {0} {1}"), //
     LEDP_25041("Could not get transformation progress for rootOperationId: {0}"), //
+    LEDP_25042("Fail to publish entity seed & lookup entries."), //
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
     LEDP_26001("Data flow context does not have values for required properties: {0}"), //

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.datacloud.core.annotation.PodContextAware;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
+import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -32,6 +34,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -59,6 +63,9 @@ public class MatchResource {
 
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
+
+    @Inject
+    private EntityMatchInternalService entityInternalMatchService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -162,6 +169,42 @@ public class MatchResource {
             return bulkMatchService.status(rootuid.toUpperCase());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
+        }
+    }
+
+    @PostMapping(value = "/publishentity")
+    @ResponseBody
+    @ApiOperation(value = "Publish entity seed/lookup entries "
+            + "from source tenant (staging env) to dest tenant (staging/serving env). "
+            + "Only support small-scale publish (approx. <= 10K seeds).")
+    public EntityPublishStatistics publishEntity(@RequestBody EntityPublishRequest request) {
+        try {
+            validateEntityPublishRequest(request);
+            EntityPublishStatistics statistics = entityInternalMatchService.publishEntity(request.getEntity(),
+                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), null);
+            statistics.setRequest(request);
+            return statistics;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25042, e);
+        }
+    }
+
+    private void validateEntityPublishRequest(EntityPublishRequest request) {
+        if (StringUtils.isBlank(request.getEntity())) {
+            throw new IllegalArgumentException("Please provide entity");
+        }
+        if (request.getSrcTenant() == null || StringUtils.isBlank(request.getSrcTenant().getId())) {
+            throw new IllegalArgumentException("Please provide source tenant with valid tenant id");
+        }
+        if (request.getDestTenant() == null || StringUtils.isBlank(request.getDestTenant().getId())) {
+            throw new IllegalArgumentException("Please provide dest tenant with valid tenant id");
+        }
+        if (request.getDestEnv() == null) {
+            throw new IllegalArgumentException("Please provide valid dest environment");
+        }
+        if (request.getSrcTenant().getId().equals(request.getDestTenant().getId())
+                && EntityMatchEnvironment.STAGING == request.getDestEnv()) {
+            throw new IllegalArgumentException("Publish within staging env for same tenant is not allowed");
         }
     }
 

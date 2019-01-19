@@ -37,3 +37,6 @@ jacoco/
 **/dist/**
 **/.sass-cache/**
 **/.vscode/
+
+# tez
+*.dot

@@ -38,14 +38,15 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
-import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
-import com.amazonaws.services.dynamodbv2.xspec.ScanExpressionSpec;
+import com.amazonaws.services.dynamodbv2.xspec.QueryExpressionSpec;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -198,18 +199,20 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         shardIds = seedMap.keySet().toArray(shardIds);
         return Flux.just(shardIds).parallel().runOn(scheduler)
                 .map(k -> {
-                    ScanExpressionSpec xspec = new ExpressionSpecBuilder()
+                    QueryExpressionSpec xspec = new ExpressionSpecBuilder() //
                             .withCondition(S(ATTR_PARTITION_KEY)
-                                    .eq(getShardPartitionKey(tenant, getMatchVersion(env, tenant), entity, k)))
-                            .buildForScan();
+                                    .eq(getShardPartitionKey(tenant, getMatchVersion(env, tenant), entity, k))) //
+                            .buildForQuery();
                     PrimaryKey primaryKey = StringUtils.isEmpty(seedMap.get(k)) ? null : buildKey(env, tenant,
                             getMatchVersion(env, tenant), entity, seedMap.get(k));
-                    ScanSpec scanSpec = new ScanSpec()
-                            .withExpressionSpec(xspec)
-                            .withExclusiveStartKey(primaryKey)
+                    QuerySpec querySpec = new QuerySpec() //
+                            .withKeyConditionExpression(ATTR_PARTITION_KEY + " = :v_pk")
+                            .withValueMap(new ValueMap().withString(":v_pk",
+                                    getShardPartitionKey(tenant, getMatchVersion(env, tenant), entity, k)))
+                            .withExclusiveStartKey(primaryKey) //
                             .withMaxResultSize(maxResultSize);
                     List<Pair<Integer, Item>> result = new ArrayList<>();
-                    dynamoItemService.scan(getTableName(env), scanSpec)
+                    dynamoItemService.query(getTableName(env), querySpec)
                             .stream()
                             .filter(Objects::nonNull)
                             .forEach(item -> {
