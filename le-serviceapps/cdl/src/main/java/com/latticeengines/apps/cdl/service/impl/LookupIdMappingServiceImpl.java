@@ -13,20 +13,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
+import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("lookupIdMappingService")
 public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     private static final Logger log = LoggerFactory.getLogger(LookupIdMappingServiceImpl.class);
 
     @Inject
-    private CDLExternalSystemProxy cdlExternalSystemProxy;
+    private CDLExternalSystemService externalSystemService;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -57,9 +58,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
         LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
                 lookupIdsMap.getExternalSystemType());
-        if (existingLookupIdMap == null || !existingLookupIdMap.getIsRegistered()) {
-            return;
-        } else {
+        if (existingLookupIdMap != null && existingLookupIdMap.getIsRegistered()) {
             existingLookupIdMap.setIsRegistered(false);
             lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
         }
@@ -97,14 +96,14 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Override
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(CDLExternalSystemType externalSystemType) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
-        Map<String, List<CDLExternalSystemMapping>> result = null;
+        Map<String, List<CDLExternalSystemMapping>> result;
         try {
             if (externalSystemType == null) {
-                result = cdlExternalSystemProxy.getExternalSystemMap(space.toString());
+                result = externalSystemService.getExternalSystemMap(space.toString(), BusinessEntity.Account);
             } else {
                 result = new HashMap<>();
-                result.put(externalSystemType.name(),
-                        cdlExternalSystemProxy.getExternalSystemByType(space.toString(), externalSystemType));
+                result.put(externalSystemType.name(), externalSystemService.getExternalSystemByType( //
+                        space.toString(), externalSystemType, BusinessEntity.Account));
             }
         } catch (Exception ex) {
             result = new HashMap<>();
