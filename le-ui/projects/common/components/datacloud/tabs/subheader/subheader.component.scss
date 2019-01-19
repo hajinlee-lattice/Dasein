@@ -1,26 +1,25 @@
 div.explorer-subheader-tabs {
     position: relative;
-    height: 3em;
     line-height: 3em;
-    
+
     ul.subheader-tabs-links {
         display: inline-block;
-        
+
         li {
             display: inline-block;
             font-size: 18px;
             color: #222;
-            padding: 0 0.2em;
+            padding: 0 0.4em 0 0;
             -webkit-transition: none;
             -moz-transition: none;
             -ms-transition: none;
             transition: none;
-            
-            &.clickable, 
+
+            &.clickable,
             &[ng-click] {
                 cursor: pointer;
                 &:hover {
-                    color: #457EBA;
+                    color: #457eba;
                 }
             }
 
@@ -35,12 +34,12 @@ div.explorer-subheader-tabs {
     ul.subheader-tabs-buttons {
         // margin-right: 14px;
         float: right;
-        
+
         & > li {
             position: relative;
         }
 
-        .confirmation-title{
+        .confirmation-title {
             position: absolute;
             top: 2px;
             left: 0;
@@ -48,14 +47,14 @@ div.explorer-subheader-tabs {
             font-size: 0.9em;
             color: #222;
 
-            .confermation-ok{
+            .confermation-ok {
                 padding: 0.4em;
                 color: green;
-            }    
+            }
         }
 
         .export-button {
-            padding-right:0px;
+            padding-right: 0px;
         }
     }
 }

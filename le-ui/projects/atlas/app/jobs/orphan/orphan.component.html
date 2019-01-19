@@ -55,10 +55,10 @@
                 ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}"
             >
                 <div class="le-cell le-col-start-1 le-col-span-3">
-                    {{ orphan.startTimestamp | date: "MM/dd/yyyy h:mma" }}
+                    {{ orphan.startTimestamp | date: 'MM/dd/yyyy h:mma' }}
                 </div>
                 <div class="le-cell le-col-start-6 le-col-span-4">
-                    {{ orphan.inputs["ARTIFACT_TYPE"] || "--" }}
+                    {{ orphan.inputs['ARTIFACT_DISPLAY_NAME'] || '--' }}
                 </div>
                 <div class="le-cell le-col-start-8 le-col-span-3">
                     {{ orphan.user }}
