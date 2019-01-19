@@ -128,7 +128,7 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     public ApplicationId getApplicationId(String appIdStr) {
         if (AwsApplicationId.isAwsBatchJob(appIdStr)) {
-            return ApplicationId.fromString(appIdStr);
+            return AwsApplicationId.fromString(appIdStr);
         } else {
             return ApplicationId.fromString(appIdStr);
         }
