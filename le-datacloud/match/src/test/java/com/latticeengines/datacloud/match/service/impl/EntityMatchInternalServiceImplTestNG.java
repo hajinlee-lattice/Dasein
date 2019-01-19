@@ -78,7 +78,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
     private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
-    private static final Tenant TEST_TENANT = new Tenant("entity_match_internal_service_test_tenant_1");
+    private static final Tenant TEST_TENANT = new Tenant(
+            EntityMatchInternalServiceImplTestNG.class.getSimpleName() + UUID.randomUUID().toString());
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
     private static final String TEST_COUNTRY = "USA";
@@ -517,7 +518,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupLookupTable(EntityMatchEnvironment.STAGING, tenant1, lookupPairs);
         setupSeedTable(EntityMatchEnvironment.STAGING, tenant1, seeds);
 
-        // Lookup entries are shuffled ()
+        // Lookup entries are shuffled compared to seeds
         EntityRawSeed noiseSeed1 = newSeed(SEED_ID_1, "sfdc_1", "google.com");
         // All lookup entries will point to noiseSeed2 to test lookup entry
         // publish correctness
