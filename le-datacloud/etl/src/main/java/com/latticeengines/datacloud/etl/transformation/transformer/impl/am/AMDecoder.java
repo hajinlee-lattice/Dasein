@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.am;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_AM_DECODER;
 
@@ -24,11 +24,15 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AMDecoderParameters;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttributeTransformer;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMDecoderConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.am.AMDecoderConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 @Component(AMDecoder.TRANSFORMER_NAME)
@@ -69,6 +73,21 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
     }
 
     @Override
+    protected boolean validateConfig(AMDecoderConfig config, List<String> baseSources) {
+        String error = null;
+        if (config.isDecodeAll()) {
+            return true;
+        }
+        if (ArrayUtils.isEmpty(config.getDecodeFields())) {
+            error = "Please provide attributes to decode.";
+            log.error(error);
+            RequestContext.logError(error);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     protected void updateParameters(AMDecoderParameters parameters, Source[] baseTemplates, Source targetTemplate,
                                     AMDecoderConfig configuration, List<String> baseVersions) {
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseTemplates[0], baseVersions.get(0));
@@ -88,17 +107,28 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
 
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes("AccountMasterDecoded",
                 "DECODE", TRANSFORMER_NAME, dataCloudVersion, false);
-        if (ArrayUtils.isNotEmpty(configuration.getDecodeFields())
-                && ArrayUtils.isNotEmpty(configuration.getRetainFields())) {
+        if (!configuration.isDecodeAll()) {
             parameters.setDecodeFields(configuration.getDecodeFields());
-            parameters.setRetainFields(configuration.getRetainFields());
+            if (ArrayUtils.isEmpty(configuration.getRetainFields())) {
+                String[] retainFields = { //
+                        DataCloudConstants.LATTIC_ID, //
+                        DataCloudConstants.ATTR_LDC_DOMAIN, //
+                        DataCloudConstants.ATTR_LDC_DUNS, //
+                };
+                parameters.setRetainFields(retainFields);
+            } else {
+                parameters.setRetainFields(configuration.getRetainFields());
+            }
         } else {
-            parameters.setDecodeAll(true);
             List<String> decodeFields = srcAttrs.stream() //
                     .filter(srcAttr -> StringUtils.isNotBlank(srcAttr.getArguments())) //
                     .map(SourceAttribute::getAttribute).collect(Collectors.toList());
             parameters.setDecodeFields(decodeFields.toArray(new String[decodeFields.size()]));
+            // If configuration.getRetainFields() is empty, in dataflow
+            // AMDecode, all plain attributes will be retained
+            parameters.setRetainFields(configuration.getRetainFields());
         }
+        parameters.setDecodeAll(configuration.isDecodeAll());
 
         Map<String, SourceAttribute> sourceAttributeMap = new HashMap<>();
         for (SourceAttribute attrib : srcAttrs) {

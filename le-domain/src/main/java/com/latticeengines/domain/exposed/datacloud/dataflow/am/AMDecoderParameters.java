@@ -1,14 +1,19 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.datacloud.dataflow.am;
 
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 public class AMDecoderParameters extends TransformationFlowParameters {
     @JsonProperty("DecodeFields")
     private String[] decodeFields;
 
+    // Plain attributes to retain in target source
+    // If not provided for non-DecodeAll mode, retain LatticeID, LDC_Domain,
+    // LDC_DUNS by default
+    // If not provided for DecodeAll mode, retain all plain attributes
     @JsonProperty("RetainFields")
     private String[] retainFields;
 
@@ -18,8 +23,8 @@ public class AMDecoderParameters extends TransformationFlowParameters {
     @JsonProperty("CodeBookLookup")
     private Map<String, String> codeBookLookup; // decoded attr -> encoded attr
 
-    // AMDecoderConfig.DecodeFields & AMDecoderConfig.RetainFields are both
-    // empty. Decode all the am attributes and retain all the plain attributes
+    // If DecodeAll is true, will decode all the encoded attributes in AM
+    // Please set the flag CAUTIOUSLY. It could generate 7+TB data in hdfs
     @JsonProperty("DecodeAll")
     private boolean decodeAll;
 
