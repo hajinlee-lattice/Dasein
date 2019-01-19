@@ -45,9 +45,9 @@ import com.latticeengines.datacloud.match.service.EntityMatchConfigurationServic
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -216,18 +216,22 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @Override
-    public void publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant, @NotNull Tenant destTenant,
+    public EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
+            @NotNull Tenant destTenant,
             @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled) {
-        sourceTenant = new Tenant(CustomerSpace.parse(sourceTenant.getId()).getTenantId());
-        destTenant = new Tenant(CustomerSpace.parse(destTenant.getId()).getTenantId());
+        sourceTenant = EntityMatchUtils.newStandardizedTenant(sourceTenant);
+        destTenant = EntityMatchUtils.newStandardizedTenant(destTenant);
         EntityMatchEnvironment sourceEnv = EntityMatchEnvironment.STAGING;
         if (sourceTenant.getId().equals(destTenant.getId()) && sourceEnv == destEnv) {
-            return;
+            // return with default publish count as 0
+            return new EntityPublishStatistics();
         }
         if (destTTLEnabled == null) {
             destTTLEnabled = EntityMatchUtils.shouldSetTTL(destEnv);
         }
 
+        int seedCount = 0;
+        int lookupCount = 0;
         List<String> getSeedIds = new ArrayList<>();
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         do {
@@ -252,9 +256,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 }
                 entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled);
                 entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled);
+                seedCount += scanSeeds.size();
+                lookupCount += pairs.size();
             }
             scanSeeds.clear();
         } while (CollectionUtils.isNotEmpty(getSeedIds));
+        return new EntityPublishStatistics(seedCount, lookupCount);
     }
 
     @VisibleForTesting

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -121,6 +122,7 @@ public interface EntityMatchInternalService {
      *            If null, by default, true if destEnv is STAGING and false if
      *            destEnv is SERVING
      */
-    void publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant, @NotNull Tenant destTenant,
+    EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
+            @NotNull Tenant destTenant,
             @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled);
 }

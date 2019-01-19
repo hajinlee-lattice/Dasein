@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -55,9 +56,9 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
     }
 
     @Override
-    public String publishEntity(EntityPublishRequest request) {
+    public EntityPublishStatistics publishEntity(EntityPublishRequest request) {
         String url = constructUrl("/publishentity");
-        return postKryo("publish_entity", url, request, String.class);
+        return postKryo("publish_entity", url, request, EntityPublishStatistics.class);
     }
 
 }

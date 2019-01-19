@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -174,13 +175,15 @@ public class MatchResource {
     @PostMapping(value = "/publishentity")
     @ResponseBody
     @ApiOperation(value = "Publish entity seed/lookup entries "
-            + "from source tenant (staging env) to dest tenant (staging/serving env)")
-    public String publishEntity(@RequestBody EntityPublishRequest request) {
+            + "from source tenant (staging env) to dest tenant (staging/serving env). "
+            + "Only support small-scale publish (approx. <= 10K seeds).")
+    public EntityPublishStatistics publishEntity(@RequestBody EntityPublishRequest request) {
         try {
             validateEntityPublishRequest(request);
-            entityInternalMatchService.publishEntity(request.getEntity(), request.getSrcTenant(),
-                    request.getDestTenant(), request.getDestEnv(), null);
-            return "Success";
+            EntityPublishStatistics statistics = entityInternalMatchService.publishEntity(request.getEntity(),
+                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), null);
+            statistics.setRequest(request);
+            return statistics;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25042, e);
         }

@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.mockito.InjectMocks;
@@ -60,6 +61,7 @@ import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctional
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -128,14 +130,14 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Mockito.when(entityMatchInternalService.getMaxLookupCacheSize()).thenReturn(MAX_LOOKUP_CACHE_LIMIT);
         Mockito.when(entityMatchInternalService.getMaxSeedCacheWeight()).thenReturn(MAX_SEED_CACHE_LIMIT);
 
-        cleanup(null, TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
+        cleanup(TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
     }
 
     @AfterClass(groups = "functional")
     private void tearDownShared() throws Exception {
         entityMatchInternalService.shutdownAndAwaitTermination();
         // test entries are sync asynchronously, cleanup here just in case
-        cleanup(null, TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
+        cleanup(TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
     }
 
     @BeforeMethod(groups = "functional")
@@ -158,7 +160,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
     private void testLookupSeed(boolean isAllocateMode) throws Exception {
         entityMatchConfigurationService.setIsAllocateMode(isAllocateMode);
-        cleanup(null, TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
+        cleanup(TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
 
         setupServing(TEST_ENTRY_1, TEST_ENTRY_3);
         Thread.sleep(2000L);
@@ -196,7 +198,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     @Test(groups = "functional")
     private void testSeedAllocateMode() throws Exception {
         entityMatchConfigurationService.setIsAllocateMode(true);
-        cleanup(null, TEST_TENANT, SEED_IDS);
+        cleanup(TEST_TENANT, SEED_IDS);
         setupServing(TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
         Thread.sleep(2000L);
 
@@ -220,13 +222,13 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 .get(EntityMatchEnvironment.STAGING, TEST_TENANT, TEST_ENTITY, SEED_IDS);
         verifyEntityRawSeeds(resultsInStaging, SEED_ID_1, SEED_ID_2, SEED_ID_3, null, null);
 
-        cleanup(null, TEST_TENANT, SEED_IDS);
+        cleanup(TEST_TENANT, SEED_IDS);
     }
 
     @Test(groups = "functional")
     private void testSeedLookupMode() throws Exception {
         entityMatchConfigurationService.setIsAllocateMode(false);
-        cleanup(null, TEST_TENANT, SEED_IDS);
+        cleanup(TEST_TENANT, SEED_IDS);
         setupServing(TEST_SEED_1, TEST_SEED_2);
         Thread.sleep(2000L);
 
@@ -255,7 +257,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // nothing in staging
         resultsInStaging.forEach(Assert::assertNull);
 
-        cleanup(null, TEST_TENANT, SEED_IDS);
+        cleanup(TEST_TENANT, SEED_IDS);
     }
 
     @Test(groups = "functional")
@@ -264,14 +266,14 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         EntityLookupEntry[] lookupEntries = new EntityLookupEntry[] { DC_FACEBOOK_1, DUNS_1, SFDC_1, SFDC_2 };
         List<String> expectedSeedIds = Arrays.asList(null, SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP);
 
-        cleanup(null, TEST_TENANT, lookupEntries);
+        cleanup(TEST_TENANT, lookupEntries);
         setupServing(DUNS_1, SFDC_2);
         Thread.sleep(2000L);
 
         List<String> seedIds = entityMatchInternalService.getIds(TEST_TENANT, Arrays.asList(lookupEntries));
         Assert.assertEquals(seedIds, expectedSeedIds);
 
-        cleanup(null, TEST_TENANT, lookupEntries);
+        cleanup(TEST_TENANT, lookupEntries);
     }
 
     @Test(groups = "functional")
@@ -280,7 +282,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         String seedId1 = "testNullSeedIds1";
         String seedId2 = "testNullSeedIds2";
 
-        cleanup(null, TEST_TENANT, Arrays.asList(seedId1, seedId2));
+        cleanup(TEST_TENANT, Arrays.asList(seedId1, seedId2));
         setupServing(
                 newSeed(seedId1, "s1", "google.com", "facebook.com"),
                 newSeed(seedId2, "s2", "netflix.com"));
@@ -293,7 +295,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 .collect(Collectors.toList());
         Assert.assertEquals(seedIds, expectedSeedIds);
 
-        cleanup(null, TEST_TENANT, Arrays.asList(seedId1, seedId2));
+        cleanup(TEST_TENANT, Arrays.asList(seedId1, seedId2));
     }
 
     /*
@@ -463,7 +465,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     @Test(groups = "functional")
     private void testSeedCacheLimit() throws Exception {
         entityMatchConfigurationService.setIsAllocateMode(false); // use lookup mode so the test will be faster
-        cleanup(null, TEST_TENANT, SEED_IDS);
+        cleanup(TEST_TENANT, SEED_IDS);
         setupServing(TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
         Thread.sleep(2000L);
 
@@ -490,13 +492,20 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 Boolean.TRUE);
 
         // Prepare data:
-        // tenant 1 with seed & lookup entries to publish
-        // tenant 2 with noise seed & lookup entries to verify publish is tenant
-        // specific
-        List<EntityRawSeed> seeds = Arrays.asList(TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
+        // tenant 1 with seed & lookup entries to publish, no same lookup
+        // entries among different seeds
+        // tenant 2 with shuffled seed & lookup entries to verify publish is
+        // tenant specific, also have same lookup entries among different seeds
+        // to test lookup publish correctness (only publish lookup entries which
+        // actually point to seed)
+        EntityRawSeed seed1 = newSeed(SEED_ID_1, "sfdc_1", "google.com");
+        EntityRawSeed seed2 = newSeed(SEED_ID_2, null, "fb.com", "abc.com");
+        EntityRawSeed seed3 = newSeed(SEED_ID_3, "sfdc_3");
+        List<EntityRawSeed> seeds = Arrays.asList(seed1, seed2, seed3);
         List<String> seedIds = seeds.stream() //
                 .map(EntityRawSeed::getId) //
                 .collect(Collectors.toList());
+        // Pair<EntityLookupEntry, SeedId>
         List<Pair<EntityLookupEntry, String>> lookupPairs = seeds.stream() //
                 .flatMap(
                         seed -> seed.getLookupEntries().stream() //
@@ -508,17 +517,18 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupLookupTable(EntityMatchEnvironment.STAGING, tenant1, lookupPairs);
         setupSeedTable(EntityMatchEnvironment.STAGING, tenant1, seeds);
 
-        // Lookup entries are shuffled
-        EntityRawSeed noiseSeed1 = newSeed(SEED_ID_1, "sfdc_2", "fb.com");
-        EntityRawSeed noiseSeed2 = newSeed(SEED_ID_2, null, "google.com", "abc.com");
-        EntityRawSeed noiseSeed3 = newSeed(SEED_ID_3, "sfdc_1");
+        // Lookup entries are shuffled ()
+        EntityRawSeed noiseSeed1 = newSeed(SEED_ID_1, "sfdc_1", "google.com");
+        // All lookup entries will point to noiseSeed2 to test lookup entry
+        // publish correctness
+        EntityRawSeed noiseSeed2 = newSeed(SEED_ID_2, "sfdc_1", "google.com", "abc.com");
+        EntityRawSeed noiseSeed3 = newSeed(SEED_ID_3, null, "abc.com");
         List<EntityRawSeed> noiseSeeds = Arrays.asList(noiseSeed1, noiseSeed2, noiseSeed3);
         List<String> noiseSeedIds = noiseSeeds.stream() //
                 .map(EntityRawSeed::getId) //
                 .collect(Collectors.toList());
-        List<Pair<EntityLookupEntry, String>> noiseLookupPairs = noiseSeeds.stream() //
-                .flatMap(seed -> seed.getLookupEntries().stream() //
-                        .map(lookupEntry -> Pair.of(lookupEntry, seed.getId()))) //
+        List<Pair<EntityLookupEntry, String>> noiseLookupPairs = noiseSeed2.getLookupEntries().stream() //
+                .map(lookupEntry -> Pair.of(lookupEntry, SEED_ID_2)) //
                 .collect(Collectors.toList());
         List<EntityLookupEntry> noiseLookups = noiseLookupPairs.stream() //
                 .map(pair -> pair.getLeft()) //
@@ -530,8 +540,11 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // tenant)
         // Prepared data for tenant 1 & 2 in staging, and select tenant1's data
         // to publish to tenant3 in staging
-        entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant3, EntityMatchEnvironment.STAGING,
-                Boolean.TRUE);
+        EntityPublishStatistics stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant3,
+                EntityMatchEnvironment.STAGING, Boolean.TRUE);
+        Assert.assertEquals(stats.getSeedCount(), seeds.size());
+        // There are 5 possible lookup options in seeds
+        Assert.assertEquals(stats.getLookupCount(), 5);
         waitForAllLookupEntriesPopulated();
 
         seeds.forEach(seed -> {
@@ -548,8 +561,11 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Test pa publish (staging -> serving with same tenant)
         // Prepared data for tenant 1 & 2 in staging and select tenant1's data
         // to publish to tenant1 in serving
-        entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant1, EntityMatchEnvironment.SERVING,
+        stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant1, EntityMatchEnvironment.SERVING,
                 Boolean.TRUE);
+        Assert.assertEquals(stats.getSeedCount(), seeds.size());
+        // There are 5 possible lookup options in seeds
+        Assert.assertEquals(stats.getLookupCount(), 5);
         waitForAllLookupEntriesPopulated();
 
         seeds.forEach(seed -> {
@@ -562,16 +578,34 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         matchedSeeds = entityRawSeedService.get(EntityMatchEnvironment.SERVING, tenant1, TEST_ENTITY, seedIds);
         Assert.assertFalse(matchedSeeds.contains(null));
 
-        // Clean up data
-        cleanup(EntityMatchEnvironment.STAGING, tenant1, lookups.toArray(new EntityLookupEntry[lookups.size()]));
-        cleanup(EntityMatchEnvironment.SERVING, tenant1, lookups.toArray(new EntityLookupEntry[lookups.size()]));
-        cleanup(EntityMatchEnvironment.STAGING, tenant2, noiseLookups.toArray(new EntityLookupEntry[lookups.size()]));
-        cleanup(EntityMatchEnvironment.STAGING, tenant3, lookups.toArray(new EntityLookupEntry[lookups.size()]));
+        // Test seeds having same lookup entries but only lookup entries which
+        // actually point to seed are published
+        stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant2, tenant2, EntityMatchEnvironment.SERVING,
+                Boolean.TRUE);
+        Assert.assertEquals(stats.getSeedCount(), noiseSeeds.size());
+        // There are 3 possible lookup options in noiseSeeds
+        Assert.assertEquals(stats.getLookupCount(), 3);
+        waitForAllLookupEntriesPopulated();
 
-        cleanup(EntityMatchEnvironment.STAGING, tenant1, seedIds);
-        cleanup(EntityMatchEnvironment.SERVING, tenant1, seedIds);
-        cleanup(EntityMatchEnvironment.STAGING, tenant2, noiseSeedIds);
-        cleanup(EntityMatchEnvironment.STAGING, tenant3, seedIds);
+        noiseSeeds.forEach(seed -> {
+            if (CollectionUtils.isNotEmpty(seed.getLookupEntries())) {
+                List<String> matchedSeedIds = entityLookupEntryService.get(EntityMatchEnvironment.SERVING, tenant2,
+                        seed.getLookupEntries());
+                matchedSeedIds.forEach(seedId -> {
+                    Assert.assertEquals(seedId, SEED_ID_2);
+                });
+            }
+        });
+        matchedSeeds = entityRawSeedService.get(EntityMatchEnvironment.SERVING, tenant2, TEST_ENTITY, seedIds);
+        Assert.assertFalse(matchedSeeds.contains(null));
+
+        // Clean up data
+        cleanup(tenant1, lookups.toArray(new EntityLookupEntry[lookups.size()]));
+        cleanup(tenant2, noiseLookups.toArray(new EntityLookupEntry[noiseLookups.size()]));
+        cleanup(tenant3, lookups.toArray(new EntityLookupEntry[lookups.size()]));
+        cleanup(tenant1, seedIds);
+        cleanup(tenant2, noiseSeedIds);
+        cleanup(tenant3, seedIds);
     }
 
     // [ nAllocations, nThreads ]
@@ -749,28 +783,18 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         seed.getLookupEntries().forEach(entry -> entityLookupEntryService.delete(env, TEST_TENANT, entry));
     }
 
-    // Cleanup lookup entries in specified/all env
-    private void cleanup(EntityMatchEnvironment env, Tenant tenant, EntityLookupEntry... entries) {
-        if (env == null) {
-            Arrays.stream(entries).forEach(
-                    entry -> entityLookupEntryService.delete(EntityMatchEnvironment.STAGING, tenant, entry));
-            Arrays.stream(entries).forEach(
-                    entry -> entityLookupEntryService.delete(EntityMatchEnvironment.SERVING, tenant, entry));
-        } else {
-            Arrays.stream(entries).forEach(entry -> entityLookupEntryService.delete(env, tenant, entry));
-        }
+    // Cleanup lookup entries in all env
+    private void cleanup(Tenant tenant, EntityLookupEntry... entries) {
+        Arrays.stream(entries)
+                .forEach(entry -> entityLookupEntryService.delete(EntityMatchEnvironment.STAGING, tenant, entry));
+        Arrays.stream(entries)
+                .forEach(entry -> entityLookupEntryService.delete(EntityMatchEnvironment.SERVING, tenant, entry));
     }
 
     // Cleanup seeds in all env
-    private void cleanup(EntityMatchEnvironment env, Tenant tenant, List<String> seedIds) {
-        if (env == null) {
-            seedIds.forEach(
-                    id -> entityRawSeedService.delete(EntityMatchEnvironment.STAGING, tenant, TEST_ENTITY, id));
-            seedIds.forEach(
-                    id -> entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, TEST_ENTITY, id));
-        } else {
-            seedIds.forEach(id -> entityRawSeedService.delete(env, tenant, TEST_ENTITY, id));
-        }
+    private void cleanup(Tenant tenant, List<String> seedIds) {
+        seedIds.forEach(id -> entityRawSeedService.delete(EntityMatchEnvironment.STAGING, tenant, TEST_ENTITY, id));
+        seedIds.forEach(id -> entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, TEST_ENTITY, id));
     }
 
     // Setup lookup entries in specified env
