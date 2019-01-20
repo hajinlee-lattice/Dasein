@@ -490,4 +490,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         }
     }
 
+    protected String getSystemProperty(String key) {
+        return System.getProperty(key, System.getenv(key));
+    }
+
 }
