@@ -1,5 +1,7 @@
 package com.latticeengines.yarn.functionalframework;
 
+import javax.annotation.Resource;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -8,20 +10,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
-import org.springframework.yarn.test.context.YarnCluster;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-yarn-context.xml" })
@@ -34,10 +36,11 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     @Autowired
     protected Configuration yarnConfiguration;
 
+    @Resource(name = "awsBatchjobService")
+    protected AwsBatchJobService awsBatchJobService;
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBaseDir;
-
-    protected YarnCluster yarnCluster;
 
     protected YarnClient yarnClient;
 
@@ -62,19 +65,13 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     private YarnClient getYarnClient(String yarnClientName) {
-        ConfigurableApplicationContext context = null;
         try {
             if (StringUtils.isEmpty(yarnClientName)) {
                 throw new IllegalStateException("Yarn client name cannot be empty.");
             }
-            YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
-            return client;
+            return (YarnClient) applicationContext.getBean(yarnClientName);
         } catch (Throwable e) {
             log.error("Error while getting yarnClient for application " + yarnClientName, e);
-        } finally {
-            if (context != null) {
-                context.close();
-            }
         }
         return null;
     }
@@ -91,17 +88,26 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     public FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis,
             FinalApplicationStatus... applicationStatuses) throws Exception {
-        Assert.assertNotNull(yarnClient, "Yarn client must be set");
         Assert.assertNotNull(applicationId, "ApplicationId must not be null");
         waitTimeInMillis = waitTimeInMillis == null ? MAX_MILLIS_TO_WAIT : waitTimeInMillis;
         log.info(String.format("Waiting on %s for at most %dms.", applicationId, waitTimeInMillis));
+
+        boolean isAwsBatchJob = AwsApplicationId.isAwsBatchJob(applicationId);
+
+        if (!isAwsBatchJob) {
+            Assert.assertNotNull(yarnClient, "Yarn client must be set");
+        }
 
         FinalApplicationStatus status;
         long start = System.currentTimeMillis();
 
         // break label for inner loop
         done: do {
-            status = findStatus(yarnClient, applicationId);
+            if (isAwsBatchJob) {
+                status = getAwsBatchJobStatus(applicationId);
+            } else {
+                status = findStatus(yarnClient, applicationId);
+            }
             if (status == null) {
                 break;
             }
@@ -113,6 +119,15 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             Thread.sleep(5000);
         } while (System.currentTimeMillis() - start < waitTimeInMillis);
         return status;
+    }
+
+    private FinalApplicationStatus getAwsBatchJobStatus(String applicationId) {
+        JobStatus awsJobStatus = awsBatchJobService.getAwsBatchJobStatus(applicationId);
+        if (awsJobStatus != null) {
+            return awsJobStatus.getStatus();
+        } else {
+            return null;
+        }
     }
 
     protected FinalApplicationStatus findStatus(YarnClient client, String applicationId) {

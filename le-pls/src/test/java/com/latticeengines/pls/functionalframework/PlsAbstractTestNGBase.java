@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
@@ -54,6 +55,8 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String eloquaModelName = "PLSModel-Eloqua";
     protected static final String marketoModelName = "PLSModel";
     protected static final String modelIdPrefix = "ms__";
+    protected static final String modelAppId = "application_1547946911827_0123";
+    protected static final String modelJobId = ApplicationIdUtils.stripJobId(modelAppId);
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;

@@ -59,7 +59,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
         tenantId = mainTestTenant.getId();
         System.out.println("modelId is " + modelId);
         dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + UuidUtils.extractUuid(modelId)
-                + "/container_01/";
+                + "/" + modelJobId + "/";
         modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
         metadataDiagnosticsUrl = ClassLoader

@@ -13,11 +13,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.HdfsFileDownloader;
 import com.latticeengines.pls.service.impl.HdfsFileDownloaderImpl.DownloadBuilder;
 
-public class HdfsFileDownloadImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class HdfsFileDownloadImplTestNG extends PlsFunctionalTestNGBase {
 
     private static String CONTENTS = "contents";
     private String tenantId;
@@ -33,7 +33,7 @@ public class HdfsFileDownloadImplTestNG extends PlsFunctionalTestNGBaseDeprecate
     public void setup() throws Exception {
         tenantId = "tenantId";
         modelId = "ms__8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a-PLSModel";
-        String dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + modelId + "/container_01/";
+        String dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + modelId + "/" + modelJobId + "/";
         HdfsUtils.writeToFile(yarnConfiguration, dir + "file.txt", CONTENTS);
     }
 
