@@ -18,6 +18,8 @@ public class SamplingConfiguration {
     public static final String TRAINING_SET_PREFIX = "TrainingSet";
     public static final String TRAINING_ALL_PREFIX = "allTraining";
     public static final String TESTING_SET_PREFIX = "allTest";
+    private static final SamplingType DEFAULT_SAMPLING_TYPE = SamplingType.DEFAULT_SAMPLING;
+
     private List<SamplingElement> samplingElements = new ArrayList<SamplingElement>();
     @NotNull
     private String customer;
@@ -30,7 +32,6 @@ public class SamplingConfiguration {
     private int samplingRate = 100;
     private int trainingSetCount = 1;
     private Map<String, String> properties = new HashMap<String, String>();
-    private SamplingType samplingType = SamplingType.DEFAULT_SAMPLING;
     private List<SamplingElement> trainingElements = new ArrayList<SamplingElement>();
     private SamplingElement trainingAll = new SamplingElement(TRAINING_ALL_PREFIX);
     private SamplingElement testingElement = new SamplingElement(TESTING_SET_PREFIX);
@@ -38,6 +39,8 @@ public class SamplingConfiguration {
     private boolean parallelEnabled;
     private String hdfsDirPath;
     private Long randomSeed = -1L;
+    private SamplingType samplingType = SamplingType.STRATIFIED_SAMPLING;
+    private Map<String, Long> counterGroupResultMap;
 
     public void addSamplingElement(SamplingElement samplingElement) {
         samplingElements.add(samplingElement);
@@ -171,6 +174,9 @@ public class SamplingConfiguration {
 
     @JsonProperty("sampling_type")
     public SamplingType getSamplingType() {
+        // if(samplingType == null){
+        //
+        // }
         return samplingType;
     }
 
@@ -212,6 +218,16 @@ public class SamplingConfiguration {
     @JsonProperty(value = "random_seed", required = false)
     public void setRandomSeed(Long randomSeed) {
         this.randomSeed = randomSeed;
+    }
+
+    @JsonProperty(value = "event_count_map", required = false)
+    public Map<String, Long> getCounterGroupResultMap() {
+        return counterGroupResultMap;
+    }
+
+    @JsonProperty(value = "event_count_map", required = false)
+    public void setCounterGroupResultMap(Map<String, Long> counterGroupResultMap) {
+        this.counterGroupResultMap = counterGroupResultMap;
     }
 
 }

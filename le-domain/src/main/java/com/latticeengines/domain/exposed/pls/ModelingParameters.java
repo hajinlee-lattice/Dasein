@@ -8,6 +8,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 /**
@@ -59,6 +60,9 @@ public class ModelingParameters {
 
     @JsonProperty
     private CustomEventModelingType customEventModelingType = CustomEventModelingType.LPI;
+
+    @JsonProperty
+    private EntityType cdlEntityType;
 
     @JsonProperty
     private String aiModelId;
@@ -214,6 +218,14 @@ public class ModelingParameters {
 
     public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
         this.customEventModelingType = customEventModelingType;
+    }
+
+    public EntityType getCdlEntityType() {
+        return cdlEntityType;
+    }
+
+    public void setCdlEntityType(EntityType cdlEntityType) {
+        this.cdlEntityType = cdlEntityType;
     }
 
     public String getAiModelId() {

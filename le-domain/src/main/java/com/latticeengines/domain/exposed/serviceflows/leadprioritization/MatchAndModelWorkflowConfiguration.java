@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3S
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
@@ -280,6 +281,12 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
 
         public Builder dataRules(List<DataRule> dataRules) {
             modelWorkflowBuilder.dataRules(dataRules);
+            return this;
+        }
+
+        // FIX THIS... custom event wf needs to have event columns name
+        public Builder eventColumn(String eventColumn) {
+            modelWorkflowBuilder.setEventColumn(eventColumn);
             return this;
         }
 

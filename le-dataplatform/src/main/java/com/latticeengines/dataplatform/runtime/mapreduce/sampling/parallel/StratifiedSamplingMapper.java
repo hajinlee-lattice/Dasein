@@ -2,12 +2,14 @@ package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -42,8 +44,16 @@ public class StratifiedSamplingMapper extends Mapper<AvroKey<Record>, NullWritab
     private void setupSamplingTypeProperty(SamplingConfiguration sampleConfig) {
         targetColumnName = sampleConfig.getProperty(SamplingProperty.TARGET_COLUMN_NAME.name());
         String classDistributionString = sampleConfig.getProperty(SamplingProperty.CLASS_DISTRIBUTION.name());
+        Map<String, Long> counterGroupResultMap = sampleConfig.getCounterGroupResultMap();
+        if (MapUtils.isNotEmpty(counterGroupResultMap)) {
+            setupClassLabel(counterGroupResultMap);
+        } else {
+            setupClassLabel(classDistributionString);
+        }
+    }
 
-        setupClassLabel(classDistributionString);
+    private void setupClassLabel(Map<String, Long> counterGroupResultMap) {
+        classLabels = counterGroupResultMap.keySet();
     }
 
     private void setupClassLabel(String classDistributionString) {
@@ -56,8 +66,8 @@ public class StratifiedSamplingMapper extends Mapper<AvroKey<Record>, NullWritab
         }
     }
 
-    protected void map(AvroKey<Record> key, NullWritable value, Context context) throws IOException,
-            InterruptedException {
+    protected void map(AvroKey<Record> key, NullWritable value, Context context)
+            throws IOException, InterruptedException {
 
         Record record = key.datum();
         String classLabel = record.get(targetColumnName).toString();

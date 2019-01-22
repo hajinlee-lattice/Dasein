@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlMergeConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlSplitConfiguration;
@@ -22,6 +23,9 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
 
     @JsonProperty("customEventModelingType")
     private CustomEventModelingType customEventModelingType;
+
+    @JsonProperty("cdlEntityType")
+    private EntityType cdlEntityType = EntityType.Accounts;
 
     @Override
     public Collection<String> getSwpkgNames() {
@@ -37,6 +41,14 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
 
     public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
         this.customEventModelingType = customEventModelingType;
+    }
+
+    public EntityType getCdlEntityType() {
+        return cdlEntityType;
+    }
+
+    public void setCdlEntityType(EntityType cdlEntityType) {
+        this.cdlEntityType = cdlEntityType;
     }
 
     public static class Builder {
@@ -101,6 +113,11 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder modelingType(CustomEventModelingType customEventModelingType) {
             configuration.setCustomEventModelingType(customEventModelingType);
+            return this;
+        }
+
+        public Builder cdlEntityType(EntityType cdlEntityType) {
+            configuration.setCdlEntityType(cdlEntityType);
             return this;
         }
 

@@ -32,6 +32,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private String eventTableName;
 
+    private String eventColumn;
+
     private String productType;
 
     private String sourceSchemaInterpretation;
@@ -135,6 +137,14 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setEventTableName(String eventTableName) {
         this.eventTableName = eventTableName;
+    }
+
+    public String getEventColumn() {
+        return eventColumn;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 
     public String getProductType() {

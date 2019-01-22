@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.v2.api.records.Counter;
+import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,16 +28,20 @@ import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
+import com.latticeengines.domain.exposed.mapreduce.counters.WorkflowCounter;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.SamplingProperty;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.PipelineFactory;
@@ -50,10 +56,12 @@ import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 
 public class ModelingServiceExecutor {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelingServiceExecutor.class);
+
     // TODO externalize this as a step configuration property
     private static final int MAX_SECONDS_WAIT_FOR_MODELING = 60 * 60 * 24;
 
-    private static final Logger log = LoggerFactory.getLogger(ModelingServiceExecutor.class);
+    private static final String SAMPLING_COUNTER_GROUP_NAME = "ledp.sampling.counter";
 
     protected Builder builder;
 
@@ -130,6 +138,38 @@ public class ModelingServiceExecutor {
         waitForAppId(appId);
     }
 
+    public String eventCounter() throws Exception {
+        EventCounterConfiguration eventCounterConfig = new EventCounterConfiguration();
+        eventCounterConfig.setCustomer(builder.getCustomer());
+        eventCounterConfig.setTable(builder.getTable());
+        eventCounterConfig.setHdfsDirPath(builder.getHdfsDirToSample());
+        eventCounterConfig.setParallelEnabled(true);
+        eventCounterConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), builder.getEventColumn());
+        eventCounterConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(),
+                WorkflowCounter.SAMPLING_COUNTER_GROUP_NAME.name());
+
+        AppSubmission submission = modelProxy.createEventCounter(eventCounterConfig);
+        String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for eventCounter: %s", appId));
+        waitForAppId(appId);
+
+        if (builder.getCounterGroupResultMap() != null) {
+            Counters counters = jobProxy.getMRJobCounters(appId.toString());
+            CounterGroup counterGroup = counters.getAllCounterGroups()
+                    .get(WorkflowCounter.SAMPLING_COUNTER_GROUP_NAME.name());
+            Map<String, Counter> counterMap = counterGroup.getAllCounters();
+            final Map<String, Long> counterGroupResultMap = builder.getCounterGroupResultMap();
+
+            counterMap.keySet().stream().forEach(key -> {
+                Counter c = counterMap.get(key);
+                counterGroupResultMap.put(c.getName(), c.getValue());
+            });
+
+            log.info(String.format("eventCounter result: %s", JsonUtils.serialize(counterGroupResultMap)));
+        }
+        return appId;
+    }
+
     public String sample() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
@@ -141,8 +181,12 @@ public class ModelingServiceExecutor {
         samplingConfig.setTable(builder.getTable());
         samplingConfig.setHdfsDirPath(builder.getHdfsDirToSample());
         samplingConfig.setParallelEnabled(true);
-        SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
+        samplingConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(), SAMPLING_COUNTER_GROUP_NAME);
+        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), builder.getEventColumn());
 
+        samplingConfig.setCounterGroupResultMap(builder.getCounterGroupResultMap());
+        SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
+        log.info(String.format("Configuration for sampling: %s", JsonUtils.serialize(samplingConfig)));
         AppSubmission submission = modelProxy.createSamples(samplingConfig);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
@@ -477,6 +521,8 @@ public class ModelingServiceExecutor {
         private Map<String, String> runTimeParams;
         private String dataCloudVersion;
         private String moduleName;
+        private String eventColumn;
+        private Map<String, Long> counterGroupResultMap;
 
         public Builder() {
         }
@@ -681,6 +727,11 @@ public class ModelingServiceExecutor {
             return this;
         }
 
+        public Builder eventColumn(String eventColumn) {
+            this.setEventColumn(eventColumn);
+            return this;
+        }
+
         public Builder modelProxy(ModelProxy modelProxy) {
             this.setModelProxy(modelProxy);
             return this;
@@ -718,6 +769,11 @@ public class ModelingServiceExecutor {
 
         public Builder moduleName(String moduleName) {
             this.setModuleName(moduleName);
+            return this;
+        }
+
+        public Builder counterGroupResultMap(Map<String, Long> counterGroupResultMap) {
+            this.setCounterGroupResultMap(counterGroupResultMap);
             return this;
         }
 
@@ -1072,6 +1128,14 @@ public class ModelingServiceExecutor {
             return productType;
         }
 
+        public String getEventColumn() {
+            return eventColumn;
+        }
+
+        public void setEventColumn(String eventColumn) {
+            this.eventColumn = eventColumn;
+        }
+
         public ColumnSelection getCustomizedColumnSelection() {
             return customizedColumnSelection;
         }
@@ -1130,6 +1194,14 @@ public class ModelingServiceExecutor {
 
         public void setModuleName(String moduleName) {
             this.moduleName = moduleName;
+        }
+
+        public Map<String, Long> getCounterGroupResultMap() {
+            return counterGroupResultMap;
+        }
+
+        public void setCounterGroupResultMap(Map<String, Long> counterGroupResultMap) {
+            this.counterGroupResultMap = counterGroupResultMap;
         }
 
     }

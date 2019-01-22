@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapreduce.AvroMultipleOutputs;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -41,7 +43,6 @@ public class StratifiedSamplingReducer extends Reducer<Text, AvroValue<Record>, 
         Configuration config = context.getConfiguration();
         String sampleConfigStr = config.get(EventDataSamplingJob.LEDP_SAMPLE_CONFIG);
         SamplingConfiguration sampleConfig = JsonUtils.deserialize(sampleConfigStr, SamplingConfiguration.class);
-
         setupCommonSamplingProperty(sampleConfig);
         setupSamplingTypeProperty(sampleConfig);
 
@@ -58,23 +59,45 @@ public class StratifiedSamplingReducer extends Reducer<Text, AvroValue<Record>, 
     }
 
     private void setupSamplingTypeProperty(SamplingConfiguration sampleConfig) {
-        String classDistributionString = sampleConfig.getProperty(SamplingProperty.CLASS_DISTRIBUTION.name());
-        // classDistributionString format: "0=1234,1=4567"
-        String[] classLabelAndDistributions = classDistributionString.split(",");
-
-        sampleSize = new int[classLabelAndDistributions.length];
-        trainingSize = new int[classLabelAndDistributions.length];
-        sampleCount = new int[classLabelAndDistributions.length];
-
+        Map<String, Long> counterGroupResultMap = sampleConfig.getCounterGroupResultMap();
         classLabelToClassIndex = new HashMap<String, Integer>();
-        for (int i = 0; i < classLabelAndDistributions.length; i++) {
-            String[] result = classLabelAndDistributions[i].split("=");
-            String classLabel = result[0];
-            String classSize = result[1];
-            classLabelToClassIndex.put(classLabel, i);
-            sampleSize[i] = getIntegerSizeFromPercentage(Integer.parseInt(classSize), samplingRate);
-            trainingSize[i] = getIntegerSizeFromPercentage(sampleSize[i], trainingPercentage);
-            sampleCount[i] = 0;
+
+        if (MapUtils.isNotEmpty(counterGroupResultMap)) {
+            sampleSize = new int[counterGroupResultMap.size()];
+            trainingSize = new int[counterGroupResultMap.size()];
+            sampleCount = new int[counterGroupResultMap.size()];
+
+            Iterator<String> iterator = counterGroupResultMap.keySet().iterator();
+            int i = 0;
+
+            while (iterator.hasNext()) {
+                String classLabel = iterator.next();
+                Long classSize = counterGroupResultMap.get(classLabel);
+                classLabelToClassIndex.put(classLabel, i);
+                sampleSize[i] = getIntegerSizeFromPercentage(classSize.intValue(), samplingRate);
+                trainingSize[i] = getIntegerSizeFromPercentage(sampleSize[i], trainingPercentage);
+                sampleCount[i] = 0;
+                i++;
+            }
+
+        } else {
+            String classDistributionString = sampleConfig.getProperty(SamplingProperty.CLASS_DISTRIBUTION.name());
+            // classDistributionString format: "0=1234,1=4567"
+            String[] classLabelAndDistributions = classDistributionString.split(",");
+
+            sampleSize = new int[classLabelAndDistributions.length];
+            trainingSize = new int[classLabelAndDistributions.length];
+            sampleCount = new int[classLabelAndDistributions.length];
+
+            for (int i = 0; i < classLabelAndDistributions.length; i++) {
+                String[] result = classLabelAndDistributions[i].split("=");
+                String classLabel = result[0];
+                String classSize = result[1];
+                classLabelToClassIndex.put(classLabel, i);
+                sampleSize[i] = getIntegerSizeFromPercentage(Integer.parseInt(classSize), samplingRate);
+                trainingSize[i] = getIntegerSizeFromPercentage(sampleSize[i], trainingPercentage);
+                sampleCount[i] = 0;
+            }
         }
     }
 
@@ -83,8 +106,8 @@ public class StratifiedSamplingReducer extends Reducer<Text, AvroValue<Record>, 
     }
 
     @Override
-    protected void reduce(Text key, Iterable<AvroValue<Record>> values, Context context) throws IOException,
-            InterruptedException {
+    protected void reduce(Text key, Iterable<AvroValue<Record>> values, Context context)
+            throws IOException, InterruptedException {
         // Key format: classLabel-randomOrder
         // Ex.0-0.1234567891234567
         for (AvroValue<Record> value : values) {

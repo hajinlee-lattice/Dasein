@@ -22,6 +22,4 @@ public class StratifiedSamplingJobCustomizer extends SamplingJobCustomizerBase {
         job.setNumReduceTasks(1);
         job.setReducerClass(StratifiedSamplingReducer.class);
     }
-
-
 }

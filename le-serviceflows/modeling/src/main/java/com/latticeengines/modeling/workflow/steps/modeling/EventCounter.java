@@ -1,5 +1,6 @@
 package com.latticeengines.modeling.workflow.steps.modeling;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -15,22 +16,25 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
-@Component("sample")
+@Component("eventCounter")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class Sample extends BaseModelStep<ModelStepConfiguration> {
+public class EventCounter extends BaseModelStep<ModelStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(Sample.class);
+    private static final Logger log = LoggerFactory.getLogger(EventCounter.class);
 
     @Override
     public void execute() {
-        log.info("Inside Sample execute()");
-
+        log.info("Inside EventCounter execute()");
         Table eventTable = getEventTable();
         try {
-            sample(eventTable);
+            Map<String, Long> counterGroupResultMap = eventCounter(eventTable);
+            log.info(String.format("counterGroupResultMap = %s", JsonUtils.serialize(counterGroupResultMap)));
+            putObjectInContext(EVENT_COUNTER_MAP, counterGroupResultMap);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_28006, e, new String[] { eventTable.getName() });
+            throw new LedpException(LedpCode.LEDP_28030, e, new String[] { eventTable.getName() });
         }
+
+        // TODO - remove this
         putStringValueInContext(EXPORT_TABLE_NAME, eventTable.getName());
         String inputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
                 + eventTable.getName() + "/samples";
@@ -43,13 +47,13 @@ public class Sample extends BaseModelStep<ModelStepConfiguration> {
                 getStringValueFromContext(EXPORT_OUTPUT_PATH));
     }
 
-    private void sample(Table eventTable) throws Exception {
-        Map<String, Long> counterGroupResultMap = getMapObjectFromContext(EVENT_COUNTER_MAP, String.class, Long.class);
-        log.info(String.format("counterGroupResultMap = %s", JsonUtils.serialize(counterGroupResultMap)));
+    private Map<String, Long> eventCounter(Table eventTable) throws Exception {
+        Map<String, Long> counterGroupResultMap = new HashMap<>();
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
         bldr.counterGroupResultMap(counterGroupResultMap);
         ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
-        modelExecutor.sample();
+        modelExecutor.eventCounter();
+        return counterGroupResultMap;
     }
 
 }

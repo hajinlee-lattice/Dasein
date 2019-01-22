@@ -9,6 +9,7 @@ public enum SamplingProperty {
     // Stratified sampling
     TARGET_COLUMN_NAME, //
     CLASS_DISTRIBUTION, //
+    COUNTER_GROUP_NAME, //
 
     // Up sampling
     // TARGET_COLUMN_NAME

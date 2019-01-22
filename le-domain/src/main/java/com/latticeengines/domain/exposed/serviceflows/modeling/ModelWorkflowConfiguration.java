@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CdlModelWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -127,6 +128,12 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
 
         public Builder dataRules(List<DataRule> dataRules) {
             model.setDataRules(dataRules);
+            return this;
+        }
+        
+        // FIX THIS... custom event wf needs to have event columns name
+        public Builder setEventColumn(String eventColumn) {
+            model.setEventColumn(eventColumn);
             return this;
         }
 
