@@ -241,7 +241,6 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
                 .eventCounterConfig(samplingConfig);
         JobID jobId = testMRJob(EventCounterJob.class, properties, counterGroupName, counterGroupResultMap);
         assertTrue(jobId != null);
-        assertTrue(MapUtils.isNotEmpty(counterGroupResultMap));
     }
 
     private void checkFinalApplicationStatusSucceeded(SamplingConfiguration samplingConfig) throws Exception {
