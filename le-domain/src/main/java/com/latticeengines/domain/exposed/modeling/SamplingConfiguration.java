@@ -18,7 +18,6 @@ public class SamplingConfiguration {
     public static final String TRAINING_SET_PREFIX = "TrainingSet";
     public static final String TRAINING_ALL_PREFIX = "allTraining";
     public static final String TESTING_SET_PREFIX = "allTest";
-    private static final SamplingType DEFAULT_SAMPLING_TYPE = SamplingType.DEFAULT_SAMPLING;
 
     private List<SamplingElement> samplingElements = new ArrayList<SamplingElement>();
     @NotNull
@@ -174,9 +173,6 @@ public class SamplingConfiguration {
 
     @JsonProperty("sampling_type")
     public SamplingType getSamplingType() {
-        // if(samplingType == null){
-        //
-        // }
         return samplingType;
     }
 

@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -45,15 +44,11 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
 
     public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
     private static final String SAMPLE_JOB_TYPE = "parallelSamplingJob";
-    private final static String MODELING_SAMPLING_VERSION = "ModelingSamplingType";
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     @Inject
     private SamplingJobCustomizerFactory samplingJobCustomizerFactory;
-
-    // @Inject
-    // private BatonService batonService;
 
     public ParallelEventDataSamplingJob(Configuration config) {
         super(config);
@@ -188,27 +183,4 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
         }
         return 1;
     }
-    //
-    // private String getModelingProfilingVersion() {
-    // try {
-    // Camille camille = CamilleEnvironment.getCamille();
-    // CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-    // Path docPath =
-    // PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-    // customerSpace,
-    // CDLComponent.componentName);
-    // docPath = docPath.append(MODELING_SAMPLING_VERSION);
-    // return camille.get(docPath).getData();
-    // } catch (Exception ex) {
-    // log.error(String.format("Can not get tenant's modeling profining version
-    // from ZK, " //
-    // + "defaulting to %s", MODELING_PROFILING_V2), ex);
-    // return MODELING_PROFILING_V2;
-    // }
-    // }
-    //
-    // private FeatureFlagValueMap getFeatureFlagValueMap() {
-    // return
-    // batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
-    // }
 }

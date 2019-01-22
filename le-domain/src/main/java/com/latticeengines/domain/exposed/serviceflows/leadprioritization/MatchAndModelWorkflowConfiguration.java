@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3S
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
@@ -152,8 +151,8 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
                 List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
-            modelWorkflowBuilder.addProvenanceProperty(
-                    ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
+            modelWorkflowBuilder.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName,
+                    transformationGroup.getName());
             return this;
         }
 
@@ -211,8 +210,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public Builder treatPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
-            matchDataCloudWorkflowBuilder
-                    .treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
+            matchDataCloudWorkflowBuilder.treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             rtsBulkScoreWorkflowBuilder.treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
@@ -249,12 +247,9 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
          * @param predefinedColumnSelection
          * @return
          */
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
-                String selectionVersion) {
-            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
-                    selectionVersion);
-            rtsBulkScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection,
-                    selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            rtsBulkScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
@@ -284,7 +279,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             return this;
         }
 
-        // FIX THIS... custom event wf needs to have event columns name
         public Builder eventColumn(String eventColumn) {
             modelWorkflowBuilder.setEventColumn(eventColumn);
             return this;
@@ -353,8 +347,8 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public MatchAndModelWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("modelAndEmailWorkflow",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("modelAndEmailWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             export.setUsingDisplayName(Boolean.FALSE);
             computeLift.setScoreField(InterfaceName.Event.name());
             computeLift.setSaveBucketMetadata(Boolean.TRUE);

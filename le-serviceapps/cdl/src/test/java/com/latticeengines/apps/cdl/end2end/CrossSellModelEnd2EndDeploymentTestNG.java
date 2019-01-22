@@ -129,7 +129,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-//        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.EXPECTED_VALUE);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.EXPECTED_VALUE);
         setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
 
     }

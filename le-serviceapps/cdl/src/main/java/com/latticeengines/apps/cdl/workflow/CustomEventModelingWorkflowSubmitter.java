@@ -204,7 +204,6 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
-                // TODO check this
                 .eventColumn(InterfaceName.Target.name()) //
                 // TODO: legacy SQL based match engine configurations
                 .matchClientDocument(matchClientDocument) //

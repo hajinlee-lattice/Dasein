@@ -120,24 +120,6 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-
-//    @Test(groups = "new")//, dependsOnMethods = { "createSamples" })
-    public void create1() throws Exception {
-        List<ApplicationId> appIds = modelingService.submitModel(model);
-
-        for (ApplicationId appId : appIds) {
-            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-            JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
-            Assert.assertNotNull(jobStatus.getResultDirectory(), JsonUtils.serialize(jobStatus));
-            String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
-            String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
-            assertNotNull(modelContents);
-        }
-    }
-
-    
     @Test(groups = "sqoop", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();

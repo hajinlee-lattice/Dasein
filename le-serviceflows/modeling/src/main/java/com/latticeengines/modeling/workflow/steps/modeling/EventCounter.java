@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @Component("eventCounter")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -33,18 +32,6 @@ public class EventCounter extends BaseModelStep<ModelStepConfiguration> {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28030, e, new String[] { eventTable.getName() });
         }
-
-        // TODO - remove this
-        putStringValueInContext(EXPORT_TABLE_NAME, eventTable.getName());
-        String inputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
-                + eventTable.getName() + "/samples";
-        putStringValueInContext(EXPORT_INPUT_PATH, inputPath);
-
-        String outputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
-                + eventTable.getName() + "/csv_files/postMatchEventTable";
-        putStringValueInContext(EXPORT_OUTPUT_PATH, outputPath);
-        saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_EVENT_TABLE_EXPORT_PATH,
-                getStringValueFromContext(EXPORT_OUTPUT_PATH));
     }
 
     private Map<String, Long> eventCounter(Table eventTable) throws Exception {

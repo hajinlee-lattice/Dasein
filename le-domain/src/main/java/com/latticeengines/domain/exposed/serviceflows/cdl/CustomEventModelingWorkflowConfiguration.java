@@ -394,7 +394,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        // FIX THIS... custom event wf needs to have event columns name
         public Builder eventColumn(String eventColumn) {
             modelWorkflowBuilder.setEventColumn(eventColumn);
             return this;

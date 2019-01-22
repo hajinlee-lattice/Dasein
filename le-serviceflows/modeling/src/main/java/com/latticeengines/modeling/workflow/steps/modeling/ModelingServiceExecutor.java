@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.SamplingProperty;
+import com.latticeengines.domain.exposed.modeling.SamplingType;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.PipelineFactory;
@@ -183,7 +184,9 @@ public class ModelingServiceExecutor {
         samplingConfig.setParallelEnabled(true);
         samplingConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(), SAMPLING_COUNTER_GROUP_NAME);
         samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), builder.getEventColumn());
-
+        if (builder.getSamplingType() != null) {
+            samplingConfig.setSamplingType(builder.getSamplingType());
+        }
         samplingConfig.setCounterGroupResultMap(builder.getCounterGroupResultMap());
         SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
         log.info(String.format("Configuration for sampling: %s", JsonUtils.serialize(samplingConfig)));
@@ -523,6 +526,7 @@ public class ModelingServiceExecutor {
         private String moduleName;
         private String eventColumn;
         private Map<String, Long> counterGroupResultMap;
+        private SamplingType samplingType;
 
         public Builder() {
         }
@@ -802,6 +806,11 @@ public class ModelingServiceExecutor {
 
         public Builder setModelSummaryProvenance(ModelSummaryProvenance modelSummaryProvenance) {
             this.modelSummaryProvenance = modelSummaryProvenance;
+            return this;
+        }
+
+        public Builder samplingType(SamplingType samplingType) {
+            this.setSamplingType(samplingType);
             return this;
         }
 
@@ -1204,5 +1213,12 @@ public class ModelingServiceExecutor {
             this.counterGroupResultMap = counterGroupResultMap;
         }
 
+        public SamplingType getSamplingType() {
+            return samplingType;
+        }
+
+        public void setSamplingType(SamplingType samplingType) {
+            this.samplingType = samplingType;
+        }
     }
 }

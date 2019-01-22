@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -9,7 +8,6 @@ import java.util.Set;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -43,27 +41,12 @@ public class StratifiedSamplingMapper extends Mapper<AvroKey<Record>, NullWritab
 
     private void setupSamplingTypeProperty(SamplingConfiguration sampleConfig) {
         targetColumnName = sampleConfig.getProperty(SamplingProperty.TARGET_COLUMN_NAME.name());
-        String classDistributionString = sampleConfig.getProperty(SamplingProperty.CLASS_DISTRIBUTION.name());
         Map<String, Long> counterGroupResultMap = sampleConfig.getCounterGroupResultMap();
-        if (MapUtils.isNotEmpty(counterGroupResultMap)) {
-            setupClassLabel(counterGroupResultMap);
-        } else {
-            setupClassLabel(classDistributionString);
-        }
+        setupClassLabel(counterGroupResultMap);
     }
 
     private void setupClassLabel(Map<String, Long> counterGroupResultMap) {
         classLabels = counterGroupResultMap.keySet();
-    }
-
-    private void setupClassLabel(String classDistributionString) {
-        // classDistributionString format: "0=1234,1=4567"
-        String[] classLabelAndDistributions = classDistributionString.split(",");
-        classLabels = new HashSet<String>(classLabelAndDistributions.length);
-        for (String classLabelAndDistribution : classLabelAndDistributions) {
-            String[] result = classLabelAndDistribution.split("=");
-            classLabels.add(result[0]);
-        }
     }
 
     protected void map(AvroKey<Record> key, NullWritable value, Context context)

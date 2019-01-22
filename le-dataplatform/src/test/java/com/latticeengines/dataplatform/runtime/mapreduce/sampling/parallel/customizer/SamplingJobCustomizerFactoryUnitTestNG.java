@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel.cust
 
 import static org.testng.Assert.assertTrue;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -19,7 +20,9 @@ public class SamplingJobCustomizerFactoryUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetDefaultSamplingJobCustomizer() throws ClassNotFoundException {
-        samplingType = SamplingType.DEFAULT_SAMPLING;
+//        samplingType = SamplingType.DEFAULT_SAMPLING;
+        samplingType = SamplingType.valueOf("DEFAULT_SAMPLING");
+        Assert.assertEquals(samplingType, SamplingType.DEFAULT_SAMPLING);
         SamplingJobCustomizer samplingJobCustomizer = samplingJobCustomizerFactory.getCustomizer(samplingType);
         assertTrue(samplingJobCustomizer instanceof DefaultSamplingJobCustomizer);
     }

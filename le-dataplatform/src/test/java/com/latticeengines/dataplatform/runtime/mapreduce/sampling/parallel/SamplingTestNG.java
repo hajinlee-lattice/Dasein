@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ProxyUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
@@ -69,18 +68,6 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
     private String sampleDir;
 
     private SampleStat inputStat;
-
-    public static void main(String[] args) {
-        SamplingConfiguration samplingConfig = new SamplingConfiguration();
-        samplingConfig.setCustomer("abc");
-        samplingConfig.setTable("pqr");
-        samplingConfig.setParallelEnabled(true);
-        samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
-        samplingConfig.setProperty(SamplingProperty.CLASS_DISTRIBUTION.name(), "0=5496,1=4504");
-        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
-
-        System.out.println(JsonUtils.serialize(samplingConfig));
-    }
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
@@ -180,8 +167,11 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
     public void testStratifiedSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
-        samplingConfig.setProperty(SamplingProperty.CLASS_DISTRIBUTION.name(), "0=5496,1=4504");
         samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
+        Map<String, Long> counterGroupResultMap = new HashMap<>();
+        counterGroupResultMap.put("0", 5496L);
+        counterGroupResultMap.put("1", 4504L);
+        samplingConfig.setCounterGroupResultMap(counterGroupResultMap);
 
         checkFinalApplicationStatusSucceeded(samplingConfig);
         List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
@@ -251,6 +241,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
                 .eventCounterConfig(samplingConfig);
         JobID jobId = testMRJob(EventCounterJob.class, properties, counterGroupName, counterGroupResultMap);
         assertTrue(jobId != null);
+        assertTrue(MapUtils.isNotEmpty(counterGroupResultMap));
     }
 
     private void checkFinalApplicationStatusSucceeded(SamplingConfiguration samplingConfig) throws Exception {

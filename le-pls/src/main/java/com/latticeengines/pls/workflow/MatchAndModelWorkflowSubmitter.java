@@ -139,7 +139,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
-                // TODO check this
                 .eventColumn(InterfaceName.Target.name()) //
                 .userRefinedAttributes(userRefinedAttributes) //
                 .enableDebug(false) //
