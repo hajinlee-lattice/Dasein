@@ -381,8 +381,6 @@ angular.module('common.datacloud.query.results', [
         if (vm.topNClicked && (vm.topNCount <= 0 || vm.topNCount == null)){
             vm.showError = true;
             PlaybookWizardStore.setValidation('targets', false);
-        } else if(!vm.recommendationCounts.launched) {
-            PlaybookWizardStore.setValidation('targets', false);
         } else {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
@@ -584,7 +582,9 @@ angular.module('common.datacloud.query.results', [
         // vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
         //     sections.total += parseInt(count.count);
         // });
-        sections.total = vm.accountsCoverage.accountCount + vm.accountsCoverage.unscoredAccountCount;
+        //sections.total = vm.accountsCoverage.accountCount + vm.accountsCoverage.unscoredAccountCount;
+
+        sections.total = PlaybookWizardStore.currentPlay.targetSegment.accounts;
 
 
         // sections.unscored = (vm.launchUnscored ? vm.unscoredAccounts.total : 0);

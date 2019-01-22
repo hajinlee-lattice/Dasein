@@ -633,7 +633,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
 
             // unscored contacts
-            if (loadContactCount) {
+            if (hasContactTable && loadContactCount) {
                 unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
                 Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
                 coverageInfo.setUnscoredContactCount(unscoredContactCount);
