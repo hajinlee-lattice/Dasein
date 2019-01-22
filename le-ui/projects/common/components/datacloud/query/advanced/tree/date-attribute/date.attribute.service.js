@@ -96,7 +96,6 @@ angular
     };
 
     this.getVal = function(type, cmp, bkt, position) {
-      console.log("VAL ", type, cmp, bkt, position);
       switch (type) {
         case "Date":
           if (cmp !== "BETWEEN_DATE" || cmp === "BEFORE" || cmp === "AFTER") {

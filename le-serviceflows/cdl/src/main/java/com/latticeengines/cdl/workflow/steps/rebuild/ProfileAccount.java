@@ -91,9 +91,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private String masterSlimTableName;
     // The date that the Process/Analyze pipeline was run as a string.
     private String evaluationDateStr;
-    // The timestamp representing the beginnging of the day that the Process/Analyze pipeline was run.  Used for date
+    // The timestamp representing the beginning of the day that the Process/Analyze pipeline was run.  Used for date
     // attribute profiling.
     private long evaluationDateAsTimestamp;
+
+    private static final DateTimeFormatter REFRESH_DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy");
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -117,7 +119,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         LocalDate evaluationDate;
         if (!StringUtils.isBlank(evaluationDateStr)) {
             try {
-                evaluationDate = LocalDate.parse(evaluationDateStr, DateTimeFormatter.ISO_DATE);
+                evaluationDate = LocalDate.parse(evaluationDateStr, REFRESH_DATE_FORMATTER);
             } catch (DateTimeParseException e) {
                 log.error("Could not parse evaluation date string \"" + evaluationDateStr
                         + "\" from Period Proxy as an ISO formatted date");
@@ -126,12 +128,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 e.printStackTrace(new PrintWriter(sw));
                 log.error(sw.toString());
                 evaluationDate = LocalDate.now();
-                evaluationDateStr = evaluationDate.format(DateTimeFormatter.ISO_DATE);
+                evaluationDateStr = evaluationDate.format(REFRESH_DATE_FORMATTER);
             }
         } else {
             log.warn("Evaluation Date from Period Proxy is blank.  Profile Account will generate date");
             evaluationDate = LocalDate.now();
-            evaluationDateStr = evaluationDate.format(DateTimeFormatter.ISO_DATE);
+            evaluationDateStr = evaluationDate.format(REFRESH_DATE_FORMATTER);
         }
         evaluationDateAsTimestamp = evaluationDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
         log.info("Evaluation date for Profile Account date attributes: " + evaluationDateStr);
@@ -489,10 +491,9 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             } else if (masterAttrs.containsKey(attr0.getName())) {
                 attr = copyMasterAttr(masterAttrs, attr0);
                 if (LogicalDataType.Date.equals(attr0.getLogicalDataType())) {
-                    // TODO(jwinter): Fix the wording of this by asking Product.
-                    log.info("Setting secondary display name for date attribute: " + attr.getName() + " to "
+                    log.info("Setting last data refresh for date attribute: " + attr.getName() + " to "
                             + evaluationDateStr);
-                    attr.setSecondaryDisplayName("Day values relative to last processing time of " + evaluationDateStr);
+                    attr.setLastDataRefresh("Last Data Refresh: " + evaluationDateStr);
                 }
                 masterCount.incrementAndGet();
             }

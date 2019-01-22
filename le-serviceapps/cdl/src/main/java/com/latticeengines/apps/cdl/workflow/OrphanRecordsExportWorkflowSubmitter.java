@@ -72,7 +72,9 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         }
         log.info("Use artifact version=" + request.getArtifactVersion().name());
 
-        String targetPath = PathBuilder.buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace)).toString();
+        String targetPath = PathBuilder
+                .buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace))
+                .append(orphanRecordsType.getOrphanType()).toString();
         log.info("Use targetPath=" + targetPath);
 
         DataCollectionArtifact artifact = new DataCollectionArtifact();

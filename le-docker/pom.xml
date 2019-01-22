@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>docker</component-name>
-        <kafka.connect.docker.context>src/main/scripts/kafka/le-kafka-connect</kafka.connect.docker.context>
         <tomcat.docker.context>src/main/scripts/tomcat/le-tomcatbase</tomcat.docker.context>
         <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
         <saml.docker.context>src/main/scripts/tomcat/le-saml</saml.docker.context>
@@ -20,8 +19,6 @@
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
         <admin.docker.context>src/main/scripts/tomcat/le-admin</admin.docker.context>
         <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
-        <workflowapp.docker.context>src/main/scripts/workflowapp</workflowapp.docker.context>
-        <pythonapp.docker.context>src/main/scripts/pythonapp</pythonapp.docker.context>
 	<datascienceapp.docker.context>src/main/scripts/datascienceapp</datascienceapp.docker.context>
     </properties>
 
@@ -131,57 +128,7 @@
                                 <copy file="${project.basedir}/../le-playmaker/target/le-playmaker-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/playmaker.war"
                                       overwrite="true" />
-
-                                <!-- python app -->
-                                <copy file="${project.basedir}/../le-dataplatform/src/main/python/leframework/webhdfs.py"
-                                      tofile="${project.basedir}/${pythonapp.docker.context}/webhdfs.py"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsdataloader.py"
-                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsdataloader.py"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsgenerator.py"
-                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py"
-                                      overwrite="true"/>
-
-                                <!-- datascience app -->
-                                <copy file="${project.basedir}/../le-dataplatform/target/ledatascience.tar.gz"
-                                      tofile="${project.basedir}/${datascienceapp.docker.context}/ledatascience.tar.gz"
-                                      overwrite="true" />
                             </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>touch-workflow-app-jar</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>touch</executable>
-                            <workingDirectory>${project.basedir}/../le-workflowapi/target/</workingDirectory>
-                            <arguments>
-                                <argument>le-workflowapi-${project.version}-shaded.jar</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>build-docker-images</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>bash</executable>
-                            <workingDirectory>src/main/scripts</workingDirectory>
-                            <arguments>
-                                <argument>mvn_build.sh</argument>
-                            </arguments>
                         </configuration>
                     </execution>
                 </executions>

@@ -42,6 +42,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss";
     private static final String NUM_FILES = "NUM_FILES";
     private static final String NUM_RECORDS = "NUM_RECORDS";
+    private static final String MERGED_FILENAME_PREFIX = "MERGED_FILENAME_PREFIX";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -58,10 +59,14 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        // setup test tenant
         super.setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
         log.info("TenantId=" + MultiTenantContext.getTenant().getId());
+
+        // setup checkpoint
+        checkpointService.resumeCheckpoint(CHECK_POINT, 19);
     }
 
     @AfterClass(groups = "deployment")
@@ -70,8 +75,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", priority = 0)
-    public void testOrphanTransactionExport() throws Exception {
-        checkpointService.resumeCheckpoint(CHECK_POINT, 19);
+    public void testOrphanTransactionExport() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.TRANSACTION);
         log.info("OrphanRecordsExportRequest=" + JsonUtils.serialize(request));
@@ -82,9 +86,10 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         JobStatus status = waitForWorkflowStatus(appid.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
-        Map<String, Integer> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 5);
-        expectedResults.put(NUM_RECORDS, 18616);
+        Map<String, Object> expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 4);
+        expectedResults.put(NUM_RECORDS, 9308);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         verifyResults(expectedResults);
     }
 
@@ -100,9 +105,10 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         JobStatus status = waitForWorkflowStatus(appid.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
-        Map<String, Integer> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 5);
-        expectedResults.put(NUM_RECORDS, 6);
+        Map<String, Object> expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 4);
+        expectedResults.put(NUM_RECORDS, 3);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.CONTACT.getOrphanType());
         verifyResults(expectedResults);
     }
 
@@ -118,20 +124,22 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         JobStatus status = waitForWorkflowStatus(appid.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
-        Map<String, Integer> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 5);
-        expectedResults.put(NUM_RECORDS, 18);
+        Map<String, Object> expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 4);
+        expectedResults.put(NUM_RECORDS, 9);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType());
         verifyResults(expectedResults);
     }
 
-    private void verifyResults(Map<String, Integer> expectedResults) {
+    private void verifyResults(Map<String, Object> expectedResults) {
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         String dir = String.format("/Pods/Default/Contracts/%s/Tenants/%s/Spaces/Production/Data/Files/Exports",
                 tenantId, tenantId);
         try {
-            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir,".*.csv$");
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir,
+                    expectedResults.get(MERGED_FILENAME_PREFIX) + "_.*.csv$");
             Assert.assertNotNull(files);
-            Assert.assertEquals(files.size(), expectedResults.get(NUM_FILES).intValue());
+            Assert.assertEquals(files.size(), ((Integer) expectedResults.get(NUM_FILES)).intValue());
             int totalRecordNum = 0;
             for (String file : files) {
                 CSVParser parser = new CSVParser(
@@ -139,7 +147,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
                 List<CSVRecord> records = parser.getRecords();
                 totalRecordNum += records.size();
             }
-            Assert.assertEquals(totalRecordNum, expectedResults.get(NUM_RECORDS).intValue());
+            Assert.assertEquals(totalRecordNum, ((Integer) expectedResults.get(NUM_RECORDS)).intValue());
         } catch (IOException e) {
             e.printStackTrace();
         }

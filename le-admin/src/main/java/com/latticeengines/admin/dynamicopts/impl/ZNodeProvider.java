@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.zookeeper.ZooDefs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,7 @@ public class ZNodeProvider implements OptionsProvider, MutableOptionsProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ZNodeProvider.class);
 
-    public ZNodeProvider(Path path) {
+    ZNodeProvider(Path path) {
         this.zNodePath = path;
         this.camille = CamilleEnvironment.getCamille();
     }

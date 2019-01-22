@@ -45,7 +45,7 @@ if CATALINA_HOME is None or CATALINA_HOME == '':
 else:
     logger.info('CATALINA_HOME=%s' % CATALINA_HOME)
 
-LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
+LE_APPS = ['api', 'admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['ms-core', 'dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'cdl', 'lp']
 

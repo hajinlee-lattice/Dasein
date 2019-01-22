@@ -3,6 +3,7 @@ package com.latticeengines.pls.functionalframework;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -230,7 +231,7 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
             s2p1.setFundamentalType("");
             s2p1.setUncertaintyCoefficient(0.151911);
             summary2.addPredictor(s2p1);
-            summary2.setApplicationId("application_container_01");
+            summary2.setApplicationId(modelAppId);
             PredictorElement s2el1 = new PredictorElement();
             s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
             s2el1.setCorrelationSign(-1);

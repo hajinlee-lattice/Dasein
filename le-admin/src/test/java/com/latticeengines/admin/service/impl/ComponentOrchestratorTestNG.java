@@ -65,7 +65,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         component3.setDependencies(Collections.singleton(component5));
         component4.setDependencies(Collections.singleton(component5));
 
-        orchestrator = new ComponentOrchestrator(Arrays.asList((LatticeComponent) component1, component2, component3,
+        orchestrator = new ComponentOrchestrator(Arrays.asList(component1, component2, component3,
                 component4, component5, component6));
 
     }
@@ -76,11 +76,10 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void getServiceNames() throws Exception {
+    public void getServiceNames() {
         orchestrator = new ComponentOrchestrator(originalComponents);
-        for (String name : Arrays.asList("BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate",
-                "Modeling")) {
-            Assert.assertTrue(orchestrator.getServiceNames().contains(name));
+        for (String name : Arrays.asList("PLS", "Dante", "CDL", "DataCloud")) {
+            Assert.assertTrue(orchestrator.getServiceNames().contains(name), "Missing service " + name);
         }
     }
 

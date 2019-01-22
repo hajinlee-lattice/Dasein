@@ -105,7 +105,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.init = function () {
                     // console.log('INIT');
-                    vm.initVariables();
+                    setTimeout(() => {
+                        vm.initVariables();
+                    },0);
+                    
                 }
                 
                 vm.init();

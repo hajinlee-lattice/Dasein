@@ -91,7 +91,10 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         log.info("MergedFileName=" + mergedFileName);
 
         try {
-            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, mergeToPath, ".*.csv$");
+            String pathToLookFor = mergeToPath.substring(0, mergeToPath.lastIndexOf('/'));
+            String filePrefix = mergedFileName.substring(0, mergedFileName.lastIndexOf(".csv"));
+            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, pathToLookFor,
+                    filePrefix + "_.*.csv$");
             log.info("HDFS CSV files=" + JsonUtils.serialize(csvFiles));
             String localCsvFilesPath = "csvFiles";
             File localCsvDir = new File(localCsvFilesPath);

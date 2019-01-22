@@ -3,9 +3,10 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,7 +19,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private LookupIdMappingService lookupIdMappingLaunchService;
 
     @BeforeClass(groups = "functional")
@@ -29,11 +30,11 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testBasicOperations() {
         Assert.assertTrue(CollectionUtils.isNotEmpty(lookupIdMappingLaunchService.getAllCDLExternalSystemType()));
-        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdMappingLaunchService.getAllLookupIds(null)));
+//        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdMappingLaunchService.getAllLookupIds(null)));
         Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null,
                 true);
         Assert.assertNotNull(lookupIdsMapping);
-        Assert.assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
+        Assert.assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";
