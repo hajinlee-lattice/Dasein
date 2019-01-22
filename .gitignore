@@ -37,3 +37,4 @@ jacoco/
 **/dist/**
 **/.sass-cache/**
 **/.vscode/
+/le-ui/projects/lp2
