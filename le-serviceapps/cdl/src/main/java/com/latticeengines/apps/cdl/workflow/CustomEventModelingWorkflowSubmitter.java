@@ -184,6 +184,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .dataCloudVersion(getDataCloudVersion(parameters, flags)) //
                 .matchAccountIdColumn(InterfaceName.AccountId.name())
                 .modelingType(parameters.getCustomEventModelingType()) //
+                .cdlEntityType(parameters.getCdlEntityType()) //
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(schemaInterpretation) //
@@ -203,6 +204,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
+                .eventColumn(InterfaceName.Target.name()) //
                 // TODO: legacy SQL based match engine configurations
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //

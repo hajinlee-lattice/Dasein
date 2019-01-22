@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -145,15 +146,13 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, dsHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "datascience", dsHdfsPath);
 
-        String log4jPath = String
-                .format("%s/conf/log4j.properties", manifestService.getLedpPath());
+        String log4jPath = String.format("%s/conf/log4j.properties", manifestService.getLedpPath());
         FileUtils.deleteQuietly(new File("log4j.properties"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, log4jPath, ".");
         FileUtils.deleteQuietly(new File(".log4j.properties.crc"));
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "log4j.properties", log4jPath);
 
-        log4jPath = String
-                .format("%s/conf/log4j2-yarn.xml", manifestService.getLedpPath());
+        log4jPath = String.format("%s/conf/log4j2-yarn.xml", manifestService.getLedpPath());
         FileUtils.deleteQuietly(new File("log4j2-yarn.xml"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, log4jPath, ".");
         FileUtils.deleteQuietly(new File(".log4j2-yarn.xml.crc"));
@@ -186,8 +185,13 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
     public <T extends MRJobCustomizationBase> JobID testMRJob(Class<T> mrJobCustomizationClass, Properties properties)
             throws Exception {
+        return testMRJob(mrJobCustomizationClass, properties, null, null);
+    }
+
+    public <T extends MRJobCustomizationBase> JobID testMRJob(Class<T> mrJobCustomizationClass, Properties properties,
+            String counterGroupName, Map<String, Long> counterGroupResultMap) throws Exception {
         Job mrJob = createMRJob(mrJobCustomizationClass, properties);
-        return JobService.runMRJob(mrJob, "jobName", true);
+        return JobService.runMRJob(mrJob, "jobName", true, counterGroupName, counterGroupResultMap);
     }
 
     public <T extends MRJobCustomizationBase> Job createMRJob(Class<T> mrJobCustomizationClass, Properties properties)
@@ -213,7 +217,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     }
 
     public ApplicationId testYarnJob(String yarnClientName, Properties appMasterProperties,
-                                        Properties containerProperties) throws Exception {
+            Properties containerProperties) throws Exception {
         ((YarnClientCustomizationServiceImpl) yarnClientCustomizationService)
                 .setConfiguration(miniclusterConfiguration);
 

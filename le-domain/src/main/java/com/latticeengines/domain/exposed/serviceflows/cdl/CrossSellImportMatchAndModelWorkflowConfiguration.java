@@ -377,6 +377,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             cdlEventTable.setEventColumn(eventColumn);
             cdlEventTableTupleFilter.setEventColumn(eventColumn);
             dedupEventTable.setEventColumn(eventColumn);
+            cdlModelWorkflowBuilder.setEventColumn(eventColumn);
             return this;
         }
 

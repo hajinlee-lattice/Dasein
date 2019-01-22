@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.service.DispatchService;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
@@ -51,8 +52,18 @@ public class ParallelDispatchServiceImpl implements DispatchService {
     }
 
     @Override
+    public void customizeEventCounterConfig(EventCounterConfiguration config, boolean isParallelEnabled) {
+        getContainerDispatcher(isParallelEnabled).customizeEventCounterConfig(config, isParallelEnabled);
+    }
+
+    @Override
     public String getSampleJobName(boolean isParallelEnabled) {
         return getContainerDispatcher(isParallelEnabled).getSampleJobName(isParallelEnabled);
+    }
+
+    @Override
+    public String getEventCounterJobName(boolean isParallelEnabled) {
+        return getContainerDispatcher(isParallelEnabled).getEventCounterJobName(isParallelEnabled);
     }
 
     @Override

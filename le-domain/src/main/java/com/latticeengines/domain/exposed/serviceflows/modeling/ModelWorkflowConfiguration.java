@@ -130,6 +130,11 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
             return this;
         }
 
+        public Builder setEventColumn(String eventColumn) {
+            model.setEventColumn(eventColumn);
+            return this;
+        }
+
         public Builder isDefaultDataRules(boolean isDefaultDataRules) {
             model.setDefaultDataRuleConfiguration(isDefaultDataRules);
             return this;
