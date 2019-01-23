@@ -203,40 +203,62 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         MatchInput matchInput = new MatchInput();
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
+
+        // TODO(dzheng): Looks like this column selection is the same for both Entity and non-Entity Match, because
+        //     we are only getting the LDC or Entity ID at this point.
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
+
+        // TODO(dzheng): Should the public domain configuration be the same for both Entity and non-Entity Match?
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(false);
         matchInput.setDataCloudVersion(getDataCloudVersion());
-        // TODO(lming): This won't work for Entity Match case.  Need to set entityKeyMapList instead.
+        // TODO(dzheng): I feel it's a bit confusing to always set the KeyMap even for Entity Match.
         matchInput.setKeyMap(getMatchKeys());
-        matchInput.setSkipKeyResolution(false);
+
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
+
+        // TODO(dzheng): Is this used for Entity Match?  Seem like not.
         matchInput.setPartialMatchEnabled(true);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-        // TODO(lming): We should set the correct operational mode for other match cases here.
         if (configuration.isEntityMatchEnabled()) {
             matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
-            // TODO(lming): Allocate ID should be set appropriately.
+            matchInput.setSkipKeyResolution(true);
+            // TODO(dzheng): Is there a reason we would ever be in non-allocate mode here?
             matchInput.setAllocateId(true);
-            // TODO(lming): Is it safe to assume here that the target entity is always Account?
             matchInput.setTargetEntity(BusinessEntity.Account.name());
 
             EntityKeyMap entityKeyMap = new EntityKeyMap();
             entityKeyMap.setKeyMap(getMatchKeys());
-            // TODO(lming): Not sure how the System ID priority is supposed to get set up.  For now, copy from the
-            //     Key Map.
-            if (MapUtils.isNotEmpty(entityKeyMap.getKeyMap())
-                    && entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
-                entityKeyMap.setSystemIdPriority(entityKeyMap.getKeyMap().get(MatchKey.SystemId));
+            if (MapUtils.isNotEmpty(entityKeyMap.getKeyMap())) {
+                if (entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
+                    // This should not happen because nothing is setting SystemId.
+                    log.error("SystemId somehow set in KeyMap before MergeAccount!");
+                } else {
+                    // TODO(jwinter): Support other SystemIds in M28.
+                    // For now, we hard code the SystemID MatchKey and SystemId Priority List to contain only AccountId.
+                    List<String> systemIdList = Collections.singletonList(InterfaceName.AccountId.toString());
+                    entityKeyMap.getKeyMap().put(MatchKey.SystemId, systemIdList);
+                    entityKeyMap.setSystemIdPriority(systemIdList);
+                }
+            } else {
+                // TODO(dzheng): Should we handle this differently?
+                // For now, if the KeyMap we get is empty, we log a warning here and let it fail during match
+                // validation.
+                log.warn("KeyMap provided to MergeAccount is empty");
             }
+
             Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
             entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
             matchInput.setEntityKeyMaps(entityKeyMaps);
+        } else {
+            // TODO(dzheng): Is it worth setting the OperationalMode for the legacy code path?  We'd need to determine
+            //     if the code is running in CDL Lookup mode or LDC Match.  Or is it always LDC Match here?
+            // Non-Entity Match only configuration of MatchInput.
+            matchInput.setSkipKeyResolution(false);
         }
-        // TODO(lming): Need to set targetEntity and allocateId.
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }

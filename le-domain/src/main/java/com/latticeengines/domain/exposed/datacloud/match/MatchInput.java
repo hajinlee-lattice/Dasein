@@ -628,23 +628,12 @@ public class MatchInput implements Fact, Dimension {
 
     public static class EntityKeyMap {
 
-        @JsonProperty("BusinessEntity")
-        private String businessEntity;
-
         @JsonProperty("KeyMap")
         private Map<MatchKey, List<String>> keyMap;
 
         // The order of System IDs in this list matters and must match the order in the Key Map above.
         @JsonProperty("SystemIdPriority")
         private List<String> systemIdPriority;
-
-        public String getBusinessEntity() {
-            return businessEntity;
-        }
-
-        public void setBusinessEntity(String businessEntity) {
-            this.businessEntity = businessEntity;
-        }
 
         public Map<MatchKey, List<String>> getKeyMap() {
             return keyMap;

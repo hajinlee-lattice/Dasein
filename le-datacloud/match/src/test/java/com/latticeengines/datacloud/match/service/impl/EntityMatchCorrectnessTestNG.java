@@ -212,7 +212,6 @@ public class EntityMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNG
 
     private static MatchInput.EntityKeyMap getEntityKeyMap(@NotNull String entity) {
         MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
-        map.setBusinessEntity(entity);
         map.setSystemIdPriority(Arrays.asList(SYSTEM_ID_FIELDS));
         Map<MatchKey, List<String>> fieldMap = Arrays.stream(MATCH_KEY_FIELDS).collect(
                 Collectors.toMap(matchKey -> matchKey, matchKey -> Collections.singletonList(matchKey.name())));
