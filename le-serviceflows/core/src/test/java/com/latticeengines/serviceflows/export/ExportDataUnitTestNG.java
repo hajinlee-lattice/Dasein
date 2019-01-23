@@ -23,12 +23,9 @@ public class ExportDataUnitTestNG {
         List<String[]> oldRecords = getOldRecords();
 
         ExportData exportData = new ExportData();
-        System.out.println(Arrays.toString(exportData.toOrderedArray(displayNamePosMap)));
         oldRecords.forEach(record -> {
             String[] newRecord = exportData.generateNewRecord(record, displayNamePosMap.keySet().size(),
                     namePosMap, displayNamePosMap, attributeMap);
-            System.out.println("Record: " + Arrays.toString(record));
-            System.out.println("New record: " + Arrays.toString(newRecord));
             Assert.assertEquals(newRecord[3], "1/15/2019");
             Assert.assertEquals(newRecord[4], "1");
             Assert.assertEquals(newRecord[5], "100.0");
