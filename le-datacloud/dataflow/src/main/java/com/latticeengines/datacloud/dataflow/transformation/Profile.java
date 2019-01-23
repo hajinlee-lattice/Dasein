@@ -2,10 +2,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -56,12 +54,10 @@ public class Profile
 
         // Preparation
         List<String> numAttrs = new ArrayList<>();
-        Map<String, List<String>> numAttrsToDecode = new HashMap<>();// encoded
-                                                                     // attr ->
-                                                                     // {decoded
-                                                                     // attrs}
-        Map<String, String> decStrs = new HashMap<>(); // decode attr -> decode
-                                                       // strategy str
+        // encoded attr -> {decoded attrs}
+        Map<String, List<String>> numAttrsToDecode = new HashMap<>();
+        // decode attr -> decode strategy str
+        Map<String, String> decStrs = new HashMap<>();
         parseNumAttrs(numAttrs, numAttrsToDecode, decStrs);
         List<String> catAttrs = new ArrayList<>();
         parseCatAttrs(catAttrs);
@@ -101,7 +97,6 @@ public class Profile
 
     private void parseNumAttrs(List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
             Map<String, String> decStrs) {
-        Set<String> encAttrs = new HashSet<>();
         for (ProfileParameters.Attribute attr : config.getNumericAttrs()) {
             if (config.getCodeBookLookup().containsKey(attr.getAttr())) {
                 if (!numAttrsToDecode.containsKey(config.getCodeBookLookup().get(attr.getAttr()))) {
@@ -110,7 +105,6 @@ public class Profile
                 }
                 numAttrsToDecode.get(config.getCodeBookLookup().get(attr.getAttr()))
                         .add(attr.getAttr());
-                encAttrs.add(config.getCodeBookLookup().get(attr.getAttr()));
                 decStrs.put(attr.getAttr(), attr.getDecodeStrategy());
             } else {
                 numAttrs.add(attr.getAttr());
