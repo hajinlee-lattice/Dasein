@@ -100,7 +100,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
 
         Table table = metadataProxy.getTable(getCustomerSpace().toString(), tableName);
         String eventColumnName = InterfaceName.Target.name();
-        if (CollectionUtils.isNotEmpty(table.getAttributes(LogicalDataType.Event))) {
+        if (table != null && CollectionUtils.isNotEmpty(table.getAttributes(LogicalDataType.Event))) {
             eventColumnName = table.getAttributes(LogicalDataType.Event).get(0).getName();
         }
 
