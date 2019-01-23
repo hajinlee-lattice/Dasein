@@ -97,12 +97,13 @@ public class ProcessAnalyzeRequest {
         this.skipEntities = skipEntities;
     }
 
-    public Boolean getSkipAPS() {
+    public boolean isSkipAPS() {
         return skipAPS;
     }
 
-    public void setSkipAPS(Boolean skipAPS) {
+    public void setSkipAPS(boolean skipAPS) {
         this.skipAPS = skipAPS;
     }
+
 
 }
