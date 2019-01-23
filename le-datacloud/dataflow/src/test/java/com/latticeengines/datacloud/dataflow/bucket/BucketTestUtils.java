@@ -15,9 +15,10 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
-import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 
 public class BucketTestUtils {
@@ -42,6 +43,7 @@ public class BucketTestUtils {
     static final String ATTR_ENCODED = "Encoded";
     static final String ATTR_RELAY_STR = "RelayString";
     static final String ATTR_RELAY_INT = "RelayInteger";
+    static final String ATTR_NULL_INT = "NullInteger";
     static final String ATTR_EXTRA = "Extra";
     static final String ATTR_ROW_ID = "RowID";
     static final String ATTR_RENAMED_ROW_ID = "RenamedRowId";
@@ -66,7 +68,9 @@ public class BucketTestUtils {
         lowestBit.put(ATTR_ENCODED_1, 4);
         lowestBit.put(ATTR_ENCODED_2, 14);
         lowestBit.put(ATTR_ENCODED_3, 24);
+    }
 
+    static {
         numBits.put(ATTR_INTERVAL_INT, 3);
         numBits.put(ATTR_INTERVAL_DBL, 3);
         numBits.put(ATTR_CAT_STR, 3);
@@ -78,11 +82,15 @@ public class BucketTestUtils {
         numBits.put(ATTR_ENCODED_1, BOOLEAN_NUM_BITS);
         numBits.put(ATTR_ENCODED_2, BOOLEAN_NUM_BITS);
         numBits.put(ATTR_ENCODED_3, BOOLEAN_NUM_BITS);
+    }
 
+    static {
         encodeBitPos.put(ATTR_ENCODED_1, 3);
         encodeBitPos.put(ATTR_ENCODED_2, 1026);
         encodeBitPos.put(ATTR_ENCODED_3, 16);
+    }
 
+    static {
         encAttrs.put(ATTR_INTERVAL_INT, "EAttr1");
         encAttrs.put(ATTR_INTERVAL_DBL, "EAttr1");
         encAttrs.put(ATTR_CAT_STR, "EAttr2");
@@ -94,11 +102,13 @@ public class BucketTestUtils {
         encAttrs.put(ATTR_ENCODED_1, "EAttr3");
         encAttrs.put(ATTR_ENCODED_2, "EAttr3");
         encAttrs.put(ATTR_ENCODED_3, "EAttr3");
+    }
 
+    static {
         bktAlgos.put(ATTR_INTERVAL_INT, intervalBucket());
         bktAlgos.put(ATTR_INTERVAL_DBL, intervalBucket());
         bktAlgos.put(ATTR_CAT_STR, categoricalBucket());
-        bktAlgos.put(ATTR_CAT_MAP_STR, mapCateforicalBucket());
+        bktAlgos.put(ATTR_CAT_MAP_STR, mapCategoricalBucket());
         bktAlgos.put(ATTR_BOOLEAN_1, new BooleanBucket());
         bktAlgos.put(ATTR_BOOLEAN_2, new BooleanBucket());
         bktAlgos.put(ATTR_BOOLEAN_3, new BooleanBucket());
@@ -114,6 +124,7 @@ public class BucketTestUtils {
                 relayAttr(ATTR_RENAMED_ROW_ID, ATTR_ROW_ID), //
                 relayAttr(ATTR_RELAY_STR, ATTR_RELAY_STR), //
                 relayAttr(ATTR_RELAY_INT, ATTR_RELAY_INT), //
+                relayAttr(ATTR_NULL_INT, ATTR_NULL_INT), //
                 relayAttr(ATTR_EXTRA, ATTR_EXTRA), //
                 bktAttr(ATTR_INTERVAL_INT), //
                 bktAttr(ATTR_INTERVAL_DBL), //
@@ -136,6 +147,8 @@ public class BucketTestUtils {
         data[1] = srcAttr;
         if (ATTR_RELAY_INT.equals(attrName)) {
             data[6] = JsonUtils.serialize(intervalBucket());
+        } else if (ATTR_NULL_INT.equals(attrName)) {
+            data[6] = JsonUtils.serialize(nullDiscreteBucket());
         }
         return data;
     }
@@ -195,6 +208,10 @@ public class BucketTestUtils {
         return bktAttr;
     }
 
+    private static DiscreteBucket nullDiscreteBucket() {
+        return new DiscreteBucket();
+    }
+
     private static IntervalBucket intervalBucket() {
         IntervalBucket intervalBucket = new IntervalBucket();
         intervalBucket.setBoundaries(Arrays.asList(0, 10, 100));
@@ -207,7 +224,7 @@ public class BucketTestUtils {
         return categoricalBucket;
     }
 
-    private static CategoricalBucket mapCateforicalBucket() {
+    private static CategoricalBucket mapCategoricalBucket() {
         CategoricalBucket categoricalBucket = new CategoricalBucket();
         categoricalBucket.setCategories(Arrays.asList("Group1", "Group2", "Group3"));
         Map<String, List<String>> mapping = new HashMap<>();

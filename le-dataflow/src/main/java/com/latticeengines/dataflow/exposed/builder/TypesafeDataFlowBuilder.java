@@ -35,7 +35,12 @@ public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> exte
         } catch (Exception e) {
             throw new RuntimeException("Flow failed validations", e);
         }
-        log.info(String.format("Running flow with the following parameters: %s", JsonUtils.serialize(casted)));
+        String confStr = JsonUtils.serialize(casted);
+        if (confStr.length() < 2000) {
+            log.info(String.format("Running flow with the following parameters: %s", confStr));
+        } else {
+            log.info(String.format("Running flow with the following big parameters: %s (truncated)", confStr.substring(0, 2000)));
+        }
         return construct(casted);
     }
 

@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -185,6 +186,11 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
                 successPath = tableDir + SUCCESS_FLAG;
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+
+            Schema avroSchema = AvroUtils.constructSchema(tableName, schema);
+            String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName,
+                    CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "").toString();
+            HdfsUtils.writeToFile(yarnConfiguration, avscPath, avroSchema.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

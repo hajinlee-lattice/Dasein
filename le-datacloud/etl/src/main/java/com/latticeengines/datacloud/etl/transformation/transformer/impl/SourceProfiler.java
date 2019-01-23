@@ -7,11 +7,14 @@ import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PR
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -21,13 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -58,9 +61,9 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 /**
  * Basic knowledge:
- * config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH: 
+ * config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH:
  *      serve AccountMasterStatistics job
- * config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT: 
+ * config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT:
  *      serve ProfileAccount in PA job
  */
 @Component(TRANSFORMER_NAME)
@@ -83,23 +86,20 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Value("${datacloud.etl.profile.attrs:1000}")
     private int maxAttrs;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceAttributeEntityMgr srcAttrEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
-    private static final Set<Schema.Type> NUM_TYPES = new HashSet<>(Arrays
-            .asList(new Schema.Type[] { Schema.Type.INT, Schema.Type.LONG, Schema.Type.FLOAT, Schema.Type.DOUBLE }));
-    private static final Set<Schema.Type> BOOL_TYPES = new HashSet<>(
-            Arrays.asList(new Schema.Type[] { Schema.Type.BOOLEAN }));
-    private static final Set<Schema.Type> CAT_TYPES = new HashSet<>(
-            Arrays.asList(new Schema.Type[] { Schema.Type.STRING }));
-    private static final Set<Schema.Type> DATE_TYPES = new HashSet<>(Arrays
-            .asList(new Schema.Type[] { Schema.Type.LONG }));
+    private static final Set<Schema.Type> NUM_TYPES = Sets.newHashSet( //
+            Schema.Type.INT, Schema.Type.LONG, Schema.Type.FLOAT, Schema.Type.DOUBLE);
+    private static final Set<Schema.Type> BOOL_TYPES = Collections.singleton(Schema.Type.BOOLEAN);
+    private static final Set<Schema.Type> CAT_TYPES = Collections.singleton(Schema.Type.STRING);
+    private static final Set<Schema.Type> DATE_TYPES = Collections.singleton(Schema.Type.LONG);
 
     // List of Attributes classified as date attributes.
     private List<Attribute> dateAttrs;
@@ -128,17 +128,17 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return ProfileParameters.class;
     }
 
-    public List<Attribute> getDateAttrs() {
+    private List<Attribute> getDateAttrs() {
         return dateAttrs;
     }
 
-    public void setDateAttrs(List<Attribute> dateAttrs) {
+    private void setDateAttrs(List<Attribute> dateAttrs) {
         this.dateAttrs = dateAttrs;
     }
 
-    public List<Attribute> getAttrsToRetain() { return attrsToRetain; }
+    private List<Attribute> getAttrsToRetain() { return attrsToRetain; }
 
-    public void setAttrsToRetain(List<Attribute> attrsToRetain) { this.attrsToRetain = attrsToRetain; }
+    private void setAttrsToRetain(List<Attribute> attrsToRetain) { this.attrsToRetain = attrsToRetain; }
 
     /*
      * 1. Before dataflow executed, classify attributes in base source and
@@ -241,7 +241,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setMaxDiscrete(config.getMaxDiscrete());
     }
 
-    
+
     /* Classify an attribute belongs to which scenario: */
     /*- DataCloud ID attr: AccountMasterId */
     /*- Discard attr: attr will not show up in bucketed source */
@@ -264,18 +264,28 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
         log.info("Classifying attributes...");
         try {
-            // Parse configuration for attrs already encoded in the profiled source which need to decode
-            Map<String, List<ProfileParameters.Attribute>> encAttrsMap = new HashMap<>(); // encoded attr -> [decoded attrs] (Enabled in profiling)
-            Set<String> encAttrs = new HashSet<>(); // all encoded attrs (enabled/disabled in profiling)
-            Map<String, ProfileParameters.Attribute> decAttrsMap = new HashMap<>();  // decoded attr name -> decoded attr object
-            Map<String, String> decodeStrs = new HashMap<>();   // decoded attr -> decode strategy str
+            // Parse configuration for attrs already encoded in the profiled source
+            // which need to decode
+
+            // encoded attr -> [decoded attrs] (Enabled in profiling)
+            Map<String, List<ProfileParameters.Attribute>> encAttrsMap = new HashMap<>();
+
+            // all encoded attrs (enabled/disabled in profiling)
+            Set<String> encAttrs = new HashSet<>();
+
+            // decoded attr name -> decoded attr object
+            Map<String, ProfileParameters.Attribute> decAttrsMap = new HashMap<>();
+
+            // decoded attr -> decode strategy str
+            Map<String, String> decodeStrs = new HashMap<>();
             parseEncodedAttrsConfig(amAttrsConfig, encAttrsMap, encAttrs, decAttrsMap, decodeStrs);
+
             // Build BitCodeBook
             BitCodeBookUtils.constructCodeBookMap(paras.getCodeBookMap(), paras.getCodeBookLookup(), decodeStrs);
 
             // Parse flat attrs in the profiled source
             for (Field field : schema.getFields()) {
-                boolean readyForNext = false;
+                boolean readyForNext;
                 readyForNext = AttrClassifier.isIdAttr(field, paras);
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isAttrToDiscard(field, amAttrsConfig);
@@ -373,7 +383,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      * of bits, etc), but assigned bit position will change because DataCloud
      * encodes thousands of attrs into single encoded attrs, while here, every
      * encoded attr only has 64 bits
-     * 
+     *
      * @param amAttrsConfig:
      *            attr name -> profile argument
      * @param encAttrsMap:
@@ -389,8 +399,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      */
     private void parseEncodedAttrsConfig(Map<String, ProfileArgument> amAttrsConfig,
             Map<String, List<ProfileParameters.Attribute>> encAttrsMap, Set<String> encAttrs,
-            Map<String, ProfileParameters.Attribute> decAttrsMap, Map<String, String> decodeStrs)
-            throws JsonProcessingException, IOException {
+            Map<String, ProfileParameters.Attribute> decAttrsMap, Map<String, String> decodeStrs) {
         for (Map.Entry<String, ProfileArgument> amAttrConfig : amAttrsConfig.entrySet()) {
             if (!AttrClassifier.isEncodedAttr(amAttrConfig.getValue())) {
                 continue;
@@ -452,7 +461,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
             CategoricalBucket bucket = new CategoricalBucket();
             String[] valueDictArr = valueDict.split("\\|\\|");
-            bucket.setCategories(new ArrayList<String>(Arrays.asList(valueDictArr)));
+            bucket.setCategories(new ArrayList<>(Arrays.asList(valueDictArr)));
             return bucket;
         }
         if (IntervalBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
@@ -476,7 +485,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.getCatAttrs().forEach(catAttr -> catAttrsMap.put(catAttr.getAttr(), catAttr));
         for (GenericRecord record : records) {
             String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
-            boolean readyForNext = false;
+            boolean readyForNext;
             readyForNext = AttrClassifier.isNoBucketAttr(attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
                     paras, getAttrsToRetain(), numericAttrsMap, catAttrsMap);
             if (!readyForNext) {
@@ -535,14 +544,16 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         switch (config.getStage()) {
         case DataCloudConstants.PROFILE_STAGE_ENRICH:
             log.info(String.format(
-                    "%d numeric attrs(grouped into encode attrs and retain attrs), %d categorical attrs(grouped into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    "%d numeric attrs(grouped into encode attrs and retain attrs), "
+                            + "%d categorical attrs(grouped into encode attrs and retain attrs), "
+                            + "%d am attrs to encode, %d external attrs to encode, %d attrs to retain",
                     paras.getNumericAttrs().size(), paras.getCatAttrs().size(), amAttrsToEnc.size(),
-                    exAttrsToEnc.size(),
-                    getAttrsToRetain().size()));
+                    exAttrsToEnc.size(), getAttrsToRetain().size()));
             break;
         case DataCloudConstants.PROFILE_STAGE_SEGMENT:
             log.info(String.format(
-                    "%d numeric attrs, %d categorical attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    "%d numeric attrs, %d categorical attrs, "
+                            + "%d am attrs to encode, %d external attrs to encode, %d attrs to retain",
                     paras.getNumericAttrs().size(), paras.getCatAttrs().size(), amAttrsToEnc.size(),
                     exAttrsToEnc.size(), getAttrsToRetain().size()));
             break;
@@ -563,7 +574,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      * DecodeStrategy: original attr is encoded, to serve AccountMasterStatistics job. No need for ProfileAccount job in PA
      * EncAttr: if the attr needs to encode in bucket job, it's the encode attr name
      * LowestBit: if the attr needs to encode in bucket job, it's the lowest bit position of this attr in encode attr
-     * NumBits: if the attr needs to encode in bucket job, how many bits it needs 
+     * NumBits: if the attr needs to encode in bucket job, how many bits it needs
      * BktAlgo: serialized BucketAlgorithm
      */
     private List<Pair<String, Class<?>>> prepareColumns() {
@@ -691,9 +702,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     private String createEncodeAttrName(String encAttrPrefix, int encodedSeq) {
-        return encAttrPrefix + String.valueOf(encodedSeq);
+        return encAttrPrefix + encodedSeq;
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class ProfileArgument {
         @JsonProperty("IsProfile")
@@ -716,19 +727,19 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             return isProfile;
         }
 
-        public BitDecodeStrategy getDecodeStrategy() {
+        BitDecodeStrategy getDecodeStrategy() {
             return decodeStrategy;
         }
 
-        public String getBktAlgo() {
+        String getBktAlgo() {
             return bktAlgo;
         }
 
-        public Boolean isNoBucket() {
+        Boolean isNoBucket() {
             return noBucket;
         }
 
-        public Integer getNumBits() {
+        Integer getNumBits() {
             return numBits;
         }
     }
@@ -737,11 +748,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private static class AttrClassifier {
 
         private static boolean isEncodedAttr(ProfileArgument arg) {
-            if (arg.decodeStrategy == null) {
-                return false;
-            } else {
-                return true;
-            }
+            return arg.decodeStrategy != null;
         }
 
         private static boolean isProfileEnabled(ProfileArgument arg) {
@@ -774,8 +781,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isAttrNoBucket(Field field, Map<String, ProfileArgument> amAttrConfig,
-                List<Attribute> attrsToRetain)
-                throws JsonProcessingException, IOException {
+                List<Attribute> attrsToRetain) {
             if (!amAttrConfig.containsKey(field.name())) {
                 return false;
             }
