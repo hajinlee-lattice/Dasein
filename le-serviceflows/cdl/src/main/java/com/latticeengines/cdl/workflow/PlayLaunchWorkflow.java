@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.listeners.PlayLaunchWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.PlayLaunchInitStep;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
@@ -29,12 +30,16 @@ public class PlayLaunchWorkflow extends AbstractWorkflow<PlayLaunchWorkflowConfi
     @Inject
     private PlayLaunchExportFilesToS3Step playLaunchExportFilesToS3Step;
 
+    @Inject
+    private PlayLaunchWorkflowListener playLaunchWorkflowListener;
+
     @Override
     public Workflow defineWorkflow(PlayLaunchWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(playLaunchInitStep) //
-                //.next(playLaunchExportFileGeneratorStep)
-                //.next(playLaunchExportFilesToS3Step)
+                .next(playLaunchExportFileGeneratorStep)
+                .next(playLaunchExportFilesToS3Step)
+                .listener(playLaunchWorkflowListener)
                 .build();
     }
 }

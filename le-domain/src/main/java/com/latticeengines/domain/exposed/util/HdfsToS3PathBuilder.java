@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 
 public class HdfsToS3PathBuilder {
 
@@ -41,6 +42,7 @@ public class HdfsToS3PathBuilder {
 
     private String s3BucketDir = "://%s";
     private String s3AtlasDir = "://%s/%s/atlas";
+    private String s3AtlasIntegrationDir = "://%s/dropfolder/%s/atlas";
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
 
@@ -130,12 +132,17 @@ public class HdfsToS3PathBuilder {
         return String.format(protocol + s3AtlasDataDir, s3Bucket, tenantId);
     }
 
+    public String getS3AtlasIntegrationsDir(String s3Bucket, String dropboxName) {
+        return String.format(protocol + s3AtlasIntegrationDir, s3Bucket, dropboxName);
+    }
+
     public String getS3AtlasMetadataDir(String s3Bucket, String tenantId) {
         return String.format(protocol + s3AtlasMetadataDir, s3Bucket, tenantId);
     }
 
-    public String getS3AtlasFileExportsDir(String s3Bucket, String tenantId) {
-        return getS3AtlasFilesDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Exports";
+    public String getS3AtlasFileExportsDir(String s3Bucket, String dropboxName) {
+        return getS3AtlasIntegrationsDir(s3Bucket, dropboxName) + PATH_SEPARATOR + "Data" + PATH_SEPARATOR + "Files"
+                + PATH_SEPARATOR + "Exports";
     }
 
     public String getS3AtlasTablesDir(String s3Bucket, String tenantId) {
@@ -238,11 +245,12 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
-    public String convertAtlasFileExport(String inputExportFileDir, String pod, String tenantId, String s3Bucket) {
+    public String convertAtlasFileExport(String inputExportFileDir, String pod, String tenantId,
+            DropBoxSummary dropBoxSumamry, String s3Bucket) {
         StringBuilder builder = new StringBuilder();
         String hdfsExportsDir = getHdfsAtlasFileExportDir(pod, tenantId);
         if (inputExportFileDir.startsWith(hdfsExportsDir)) {
-            return builder.append(getS3AtlasFileExportsDir(s3Bucket, tenantId))
+            return builder.append(getS3AtlasFileExportsDir(s3Bucket, dropBoxSumamry.getDropBox()))
                     .append(inputExportFileDir.substring(hdfsExportsDir.length())).toString();
         }
         String fileName = FilenameUtils.getName(inputExportFileDir);

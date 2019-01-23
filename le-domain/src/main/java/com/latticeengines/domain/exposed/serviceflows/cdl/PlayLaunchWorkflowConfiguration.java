@@ -39,9 +39,9 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
         public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean enableExport) {
             boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch.getDestinationSysType());
             if (!canBeLaunchedToExternal) {
-                //exportFilesToS3Conf.setSkipStep(true);
-                //exportFileGeneratorConf.setSkipStep(true);
-                //return this;
+                exportFilesToS3Conf.setSkipStep(true);
+                exportFileGeneratorConf.setSkipStep(true);
+                return this;
             }
             exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
             exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());

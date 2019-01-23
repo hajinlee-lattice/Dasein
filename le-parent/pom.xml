@@ -2181,6 +2181,11 @@
                 <version>${spring.data.hdp.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-hadoop-store</artifactId>
+                <version>${spring.data.hdp.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
                 <version>${jackson.codehaus.version}</version>
@@ -2381,7 +2386,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
