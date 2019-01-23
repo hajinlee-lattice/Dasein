@@ -36,12 +36,12 @@ if [ $1 == dev ]; then
 elif [ $1 == devcluster ]; then
     hdfs_pod=QA
     zk_servers=10.41.1.116:2181,10.41.1.137:2181,10.41.1.138:2181
-    camille_zk_servers=qazklayer6.lattice.local,qazklayer7.lattice.local,qazklayer8.lattice.local
+    camille_zk_servers=10.141.1.6,10.141.101.104,10.141.201.211
     camille_zk_pod_id=QA
 elif [ $1 == qacluster ]; then
     hdfs_pod=QA
     zk_servers=10.41.1.116:2181,10.41.1.137:2181,10.41.1.138:2181
-    camille_zk_servers=qazklayer6.lattice.local,qazklayer7.lattice.local,qazklayer8.lattice.local
+    camille_zk_servers=10.141.1.6,10.141.101.104,10.141.201.211
     camille_zk_pod_id=QA
     repl_factor=3
 elif [ $1 == prodcluster ]; then
