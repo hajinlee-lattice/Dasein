@@ -232,9 +232,10 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Copy a model from current tenant to target tenant.")
     public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
-            @RequestParam(value = "targetTenantId") String targetTenantId) {
+            @RequestParam(value = "targetTenantId") String targetTenantId,
+            @RequestParam(value = "async", required = false) String async) {
         modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
-        modelCopyProxy.copyModel(MultiTenantContext.getShortTenantId(), targetTenantId, modelId);
+        modelCopyProxy.copyModel(MultiTenantContext.getShortTenantId(), targetTenantId, modelId, async);
         return ResponseDocument.successResponse(true);
     }
 

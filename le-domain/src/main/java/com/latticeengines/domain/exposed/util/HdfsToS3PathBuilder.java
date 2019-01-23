@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,7 +44,7 @@ public class HdfsToS3PathBuilder {
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
 
-    public HdfsToS3PathBuilder(){
+    public HdfsToS3PathBuilder() {
     }
 
     public HdfsToS3PathBuilder(String protocol) {
@@ -178,7 +180,7 @@ public class HdfsToS3PathBuilder {
     }
 
     public String getS3AnalyticsMetaDataTableDir(String s3Bucket, String tenantId, String eventTable,
-                                                 String eventColumn) {
+            String eventColumn) {
         return getS3AnalyticsDataDir(s3Bucket, tenantId) + PATH_SEPARATOR
                 + getMetadataTableFolderName(eventTable, eventColumn);
     }
@@ -261,6 +263,12 @@ public class HdfsToS3PathBuilder {
     }
 
     public String exploreS3FilePath(String filePath, String s3Bucket) {
+        try {
+            URI uri = new URI(filePath);
+            filePath = uri.getPath();
+        } catch (Exception ex) {
+            log.warn("Bad url=" + filePath);
+        }
         filePath = FilenameUtils.normalize(filePath);
         StringBuilder builder = new StringBuilder();
 
@@ -320,7 +328,7 @@ public class HdfsToS3PathBuilder {
     }
 
     // Some ad hoc methods
-    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String podId, String s3Bucket) {
+    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String s3Bucket) {
         try {
             String s3Path = exploreS3FilePath(path, s3Bucket);
             if (isGlob) {
@@ -337,6 +345,19 @@ public class HdfsToS3PathBuilder {
             log.warn("Could not get S3 path!", ex.getMessage());
         }
         return path;
+    }
+
+    public String getS3Dir(Configuration yarnConfiguration, String hdfsPath, String s3Bucket) throws IOException {
+        String hdfsDir = getFullPath(hdfsPath);
+        String s3Dir = exploreS3FilePath(hdfsDir, s3Bucket);
+        String original = hdfsPath;
+        if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
+            hdfsPath = exploreS3FilePath(hdfsPath, s3Bucket);
+            log.info("Use s3 path " + hdfsPath + " instead of the original hdfs path " + original);
+        } else {
+            log.info("Did not find data at s3 dir " + s3Dir + " fall back to original hfs path " + original);
+        }
+        return hdfsPath;
     }
 
     public List<String> toHdfsPaths(List<String> dirs) {

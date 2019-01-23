@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class PmmlModelCopyServiceImplTestNG extends LPFunctionalTestNGBase {
@@ -59,6 +60,9 @@ public class PmmlModelCopyServiceImplTestNG extends LPFunctionalTestNGBase {
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     private Tenant modelCopySourceTenant = new Tenant();
 
@@ -86,6 +90,10 @@ public class PmmlModelCopyServiceImplTestNG extends LPFunctionalTestNGBase {
 
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
+        String s3TargetCopyTarget = new HdfsToS3PathBuilder()
+                .exploreS3FilePath(customerBase + modelCopyTargetTenant.getId() + "/", s3Bucket);
+        HdfsUtils.rmdir(yarnConfiguration, s3TargetCopyTarget);
+
         HdfsUtils.rmdir(yarnConfiguration, PathBuilder
                 .buildMetadataPath(CamilleEnvironment.getPodId(), CustomerSpace.parse(modelCopySourceTenant.getId()))
                 .toString());

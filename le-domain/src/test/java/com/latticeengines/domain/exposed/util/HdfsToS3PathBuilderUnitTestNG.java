@@ -3,9 +3,6 @@ package com.latticeengines.domain.exposed.util;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class HdfsToS3PathBuilderUnitTestNG {
 
     @Test(groups = "unit")
@@ -188,6 +185,9 @@ public class HdfsToS3PathBuilderUnitTestNG {
                         "/Pods/pod2//Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export",
                         "bucket2"),
                 "s3n://bucket2/tenantId2/atlas/Metadata/Export");
+        Assert.assertEquals(builder.exploreS3FilePath(
+                "hdfs://localhost:50070/Pods/pod2//Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Metadata/Export",
+                "bucket2"), "s3n://bucket2/tenantId2/atlas/Metadata/Export");
     }
 
     @Test(groups = "unit")
