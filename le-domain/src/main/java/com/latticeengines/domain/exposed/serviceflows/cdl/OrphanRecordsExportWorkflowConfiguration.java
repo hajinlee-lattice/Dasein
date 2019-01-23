@@ -151,7 +151,7 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
         public OrphanRecordsExportWorkflowConfiguration build() {
             avroToCsvExport.setExportFormat(ExportFormat.CSV);
             avroToCsvExport.setExportDestination(ExportDestination.FILE);
-            avroToCsvExport.setUsingDisplayName(true);
+            avroToCsvExport.setUsingDisplayName(false);
 
             configuration.add(computeOrphans);
             configuration.add(avroToCsvExport);
