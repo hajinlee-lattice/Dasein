@@ -353,7 +353,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
-                .skipSteps(request.getSkipEntities(), request.getSkipAPS()) //
+                .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
                 .build();
     }
 
