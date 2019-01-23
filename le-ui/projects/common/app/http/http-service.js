@@ -94,9 +94,9 @@ const httpService = {
         observables.addObservable(observer.getName(), observable);
     },
 
-    post: (url, body, observer) => {
+    post: (url, body, observer, headers) => {
         let observable = Observable.create(obs => {
-            http.post(url, body)
+            http.post(url, body, { headers: headers ? headers : {} })
                 .then(response => {
                     let resp = new Response(
                         response,
@@ -135,9 +135,9 @@ const httpService = {
         }).subscribe(observer);
         observables.addObservable(observer.getName(), observable);
     },
-    put: (url, body, observer) => {
+    put: (url, body, observer, headers) => {
         let observable = Observable.create(obs => {
-            http.put(url, body)
+            http.put(url, body, { headers: headers ? headers : {} })
                 .then(response => {
                     let resp = new Response(
                         response,

@@ -229,7 +229,11 @@ class Server {
                     );
                     break;
                 case 'tray_pipe':
-                    this.createTrayProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
+                    this.createTrayProxy(
+                        proxy.remote_host,
+                        proxy.local_path,
+                        proxy.remote_path
+                    );
                     break;
                 default:
                     // throw error invalid configuration?
@@ -421,24 +425,26 @@ class Server {
                 "\n\t" + API_URL + PATH
             );
             this.app.use(API_PATH, (req, res) => {
-                // urls heading to /sse/* will go to /pls/* with Auth token
-                const url = API_URL + PATH + req.url;
-
                 try {
-                    let r = request(url);
+                    let authorization = (req.headers && req.headers.UserAccessToken) ?
+                            req.headers.UserAccessToken :
+                            "6cadf407-a686-41be-92e7-36e37c97c1e3";
 
-                    if (req.query) {
-
-                        if (req.query.Method) {
-                            let method = req.query.Method;
-                            req.method = method || "GET";
+                    const options = {
+                        url: API_URL + PATH,
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authorization}`
                         }
-                    }
+                    };
+
+                    let r = request(options);
 
                     req.pipe(r).pipe(res);
+
                 } catch (err) {
                     console.log(
-                        chalk.red(DateUtil.getTimeStamp() + ":TRAY PROXY") + err
+                        chalk.red(DateUtil.getTimeStamp() + ":TRAY PROXY ") + err
                     );
                 }
             });
