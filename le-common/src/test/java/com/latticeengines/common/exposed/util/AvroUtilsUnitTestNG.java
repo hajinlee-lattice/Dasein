@@ -6,9 +6,11 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -28,6 +30,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 public class AvroUtilsUnitTestNG {
 
@@ -192,17 +196,12 @@ public class AvroUtilsUnitTestNG {
         AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile, new RecommendationAvroToCsvTransformer());
 
         log.info("Created CSV File at: " + csvFile.getAbsolutePath());
-        /*
-        ObjectMapper om = new ObjectMapper();
-        try(FileInputStream fis = new FileInputStream(jsonFile)) {
-            JsonNode node = om.readTree(fis);
-            Assert.assertEquals(node.getNodeType(), JsonNodeType.ARRAY);
-            Assert.assertNotNull(node.get(0));
-            JsonNode firstRecommendationObject = node.get(0);
-            JsonNode contactList = firstRecommendationObject.get("CONTACTS");
-            Assert.assertEquals(contactList.getNodeType(), JsonNodeType.ARRAY);
+        int totalRows = 0;
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
+            assertEquals(csvRows.size(), 15);
         }
-        */
     }
 
     @Test(groups = "unit", dataProvider = "columnProvider")
