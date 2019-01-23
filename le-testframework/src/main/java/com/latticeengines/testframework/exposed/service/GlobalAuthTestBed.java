@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
@@ -41,6 +42,8 @@ public interface GlobalAuthTestBed {
     UserDocument loginAndAttach(String username, String password, Tenant tenant);
 
     UserDocument getCurrentUser();
+
+    FeatureFlagValueMap getFeatureFlags();
 
     void switchToSuperAdmin();
 

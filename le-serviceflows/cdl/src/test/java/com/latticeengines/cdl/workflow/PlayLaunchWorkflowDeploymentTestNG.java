@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -22,6 +24,9 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -78,6 +83,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String existingTenant = null;//"LETest1547165867101";
+        Map<String, Boolean> featureFlags = new HashMap<>();
+        featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
+        
         playLaunchConfig = new PlayLaunchConfig.Builder()
                 .existingTenant(existingTenant)
                 .mockRatingTable(false)
@@ -85,20 +93,23 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
                 .destinationSystemType(CDLExternalSystemType.MAP)
                 .destinationSystemId("Marketo_"+System.currentTimeMillis())
                 .topNCount(160L)
+                .featureFlags(featureFlags)
                 .build(); 
 
-        testPlayCreationHelper.setupTenantAndData();
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        super.deploymentTestBed = testPlayCreationHelper.getDeploymentTestBed();
 
+        FeatureFlagValueMap ffVMap = super.deploymentTestBed.getFeatureFlags();
+        log.info("Feature Flags for Tenant: " + ffVMap);
+        Assert.assertTrue(ffVMap.containsKey(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
+        Assert.assertTrue(ffVMap.get(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         dropboxSummary = dropBoxProxy.getDropBox(currentTestTenant().getId());
         assertNotNull(dropboxSummary);
         log.info("Tenant DropboxSummary: {}", JsonUtils.serialize(dropboxSummary));
         assertNotNull(dropboxSummary.getDropBox());
 
-        super.deploymentTestBed = testPlayCreationHelper.getDeploymentTestBed();
         defaultPlay = testPlayCreationHelper.getPlay();
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
-        
     }
 
     @Test(groups = "deployment")
