@@ -264,7 +264,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     // need to rename to avoid copy failure due to name conflict
                     String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
                     if (singleFile) {
-                        srcPath = getS3Path(srcPath);
+                        srcPath = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, srcPath, false,
+                                s3Bucket);
                         log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
                         if (existing.getExtracts().size() > 1) {
@@ -279,7 +280,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                                     new org.apache.hadoop.fs.Path(cloneTable, rename).toString()));
                         }
                     } else {
-                        srcPath = getS3Dir(srcPath);
+                        srcPath = new HdfsToS3PathBuilder().getS3Dir(yarnConfiguration, srcPath, s3Bucket);
                         log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyGlobToDirWithScheme(yarnConfiguration, srcPath, cloneTable, renameSuffix);
                     }
@@ -335,12 +336,17 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (copy.getExtracts().size() > 0) {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace,
                     existing.getNamespace());
-
-            Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, copy));
-            Path destPath = tablesPath.append(copy.getName());
-            log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
+            
+            String sourcePath = ExtractUtils.getSingleExtractPath(yarnConfiguration, copy, true, s3Bucket);
+            String destPath = tablesPath + "/" + copy.getName();
             try {
-                HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());
+                log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
+                HdfsUtils.mkdir(yarnConfiguration, destPath);
+                HdfsUtils.copyFiles(yarnConfiguration, sourcePath, destPath);
+                String s3DestPath = new HdfsToS3PathBuilder().exploreS3FilePath(destPath, s3Bucket);
+                log.info(String.format("Copying table data from %s to %s", sourcePath, s3DestPath));
+                HdfsUtils.mkdir(yarnConfiguration, s3DestPath);
+                HdfsUtils.copyFiles(yarnConfiguration, sourcePath, s3DestPath);
             } catch (Exception e) {
                 throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", sourcePath.toString(),
                         destPath.toString()), e);
@@ -474,31 +480,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(tableName)),
                     e);
         }
-    }
-
-    private String getS3Path(String hdfsPath) throws IOException {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
-        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, s3Bucket);
-        if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
-            hdfsPath = s3Path;
-        }
-        return hdfsPath;
-    }
-
-    private String getS3Dir(String hdfsPath) throws IOException {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
-        String hdfsDir = pathBuilder.getFullPath(hdfsPath);
-        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, s3Bucket);
-        String original = hdfsPath;
-        if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
-            hdfsPath = pathBuilder.exploreS3FilePath(hdfsPath, s3Bucket);
-            //TODO: temp log to be removed
-            log.info("Use s3 path " + hdfsPath + " instead of the original hdfs path " + original);
-        } else {
-            //TODO: temp log to be removed
-            log.info("Did not find data at s3 dir " + s3Dir + " fall back to original hfs path " + original);
-        }
-        return hdfsPath;
     }
 
 }

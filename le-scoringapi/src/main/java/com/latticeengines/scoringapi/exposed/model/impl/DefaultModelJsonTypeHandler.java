@@ -26,7 +26,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PrecisionUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -132,7 +131,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) {
         String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
-        return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, podId, s3Bucket);
+        return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, s3Bucket);
     }
 
     @Override

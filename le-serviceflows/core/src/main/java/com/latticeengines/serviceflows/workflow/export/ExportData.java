@@ -128,7 +128,8 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 List<String[]> records = csvReader.readAll();
                 log.info(String.format("There are %d rows in file %s.", records.size(), file.getName()));
                 String[] header = records.get(0);
-                boolean needRemapFieldNames = file.getName().toLowerCase().contains("orphan")
+                boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
+                        || file.getName().toLowerCase().contains("unmatched"))
                         && MapUtils.isNotEmpty(importedAttributes);
                 if (needRemapFieldNames) {
                     log.info("Remap field names.");

@@ -17,11 +17,11 @@ public class ModelCopyProxyImpl extends MicroserviceRestApiProxy implements Mode
     }
 
     @Override
-    public String copyModel(String sourceTenant, String targetTenant, String modelGuid) {
-        String url = constructUrl("/customerspaces/{customerSpace}/modelcopy",
-                shortenCustomerSpace(sourceTenant));
+    public String copyModel(String sourceTenant, String targetTenant, String modelGuid, String async) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modelcopy", shortenCustomerSpace(sourceTenant));
         CopyModelRequest request = new CopyModelRequest();
         request.setModelGuid(modelGuid);
+        request.setAsync(async);
         request.setTargetTenant(shortenCustomerSpace(targetTenant));
         return post("copy model", url, request, String.class);
     }
