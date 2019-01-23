@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.play;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -36,19 +38,6 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchExportFileGeneratorStep.class);
 
-    static final Function<GenericRecord, GenericRecord> RecommendationJsonFormatter = new Function<GenericRecord, GenericRecord>() {
-        @Override
-        public GenericRecord apply(GenericRecord rec) {
-            Object obj = rec.get("CONTACTS");
-            if (obj != null && StringUtils.isNotBlank(obj.toString())) {
-                obj = JsonUtils.deserialize(obj.toString(), new TypeReference<List<Map<String, String>>>() {
-                });
-                rec.put("CONTACTS", obj);
-            }
-            return rec;
-        }
-    };
-
     @Override
     public void execute() {
         PlayLaunchExportFilesGeneratorConfiguration config = getConfiguration();
@@ -57,23 +46,22 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
 
         String recAvroHdfsFilePath = getStringValueFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
 
-        File localJsonFile = new File(String.format("pl_rec_%s_%s_%s_%s.json", customerSpace.getTenantId(), playLaunchId,
+        File localCsvFile = new File(String.format("pl_rec_%s_%s_%s_%s.csv", customerSpace.getTenantId(), playLaunchId,
                 config.getDestinationSysType(), System.currentTimeMillis()));
-        log.info("Generating JSON File: {}", localJsonFile);
+        log.info("Generating JSON File: {}", localCsvFile);
         try {
-            AvroUtils.convertAvroToJSON(yarnConfiguration, new Path(recAvroHdfsFilePath), localJsonFile, RecommendationJsonFormatter);
-            //TODO:Jaya: Replace marketo with DestinationSystemName 
-            String namespace = String.format("%s.%s.%s.%s.%s.%s", config.getDestinationSysType(), "MARKETO", config.getDestinationOrgId(),
-                    config.getPlayName(), config.getPlayLaunchId(), DateTimeUtils.currentTimeAsString());
+            AvroUtils.convertAvroToCSV(yarnConfiguration, new Path(recAvroHdfsFilePath), localCsvFile, new RecommendationAvroToCsvTransformer());
+             
+            String namespace = buildNamespace(config);
             String path = PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), customerSpace, namespace).toString();
             path = path.endsWith("/") ? path : path + "/";
             
-            String recFilePathForMarketo = path += "Recommendations.json";
+            String recFilePathForMarketo = (path += String.format("Recommendations_%s.csv", DateTimeUtils.currentTimeAsString(new Date())));
 
             try {
-                HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localJsonFile.getAbsolutePath(), recFilePathForMarketo);
+                HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localCsvFile.getAbsolutePath(), recFilePathForMarketo);
             } finally {
-                FileUtils.deleteQuietly(localJsonFile);
+                FileUtils.deleteQuietly(localCsvFile);
             }
             log.info("Uploaded recommendation to HDFS File: %s", recFilePathForMarketo);
 
@@ -83,6 +71,12 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18213, e);
         }
+    }
+
+    public String buildNamespace(PlayLaunchExportFilesGeneratorConfiguration config) {
+        //TODO:Jaya: Replace MARKETO with DestinationSystemName
+        return String.format("%s.%s.%s.%s.%s", config.getDestinationSysType(), "MARKETO", config.getDestinationOrgId(),
+                config.getPlayName(), config.getPlayLaunchId());
     }
 
 }

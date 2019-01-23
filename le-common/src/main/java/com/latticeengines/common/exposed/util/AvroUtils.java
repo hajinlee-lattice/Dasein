@@ -1,10 +1,9 @@
 package com.latticeengines.common.exposed.util;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,11 +67,13 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StreamUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.transformer.AvroToCsvTransformer;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class AvroUtils {
 
@@ -877,10 +878,26 @@ public class AvroUtils {
         }
     }
 
+    public static void convertAvroToCSV(String avroFilePath, File csvFile, AvroToCsvTransformer avroToCsvTransformer)
+            throws IOException {
+        File avroFile = new File(avroFilePath);
+        try (FileReader<GenericRecord> reader = DataFileReader.openReader(avroFile,
+                new GenericDatumReader<GenericRecord>())) {
+            writeAvroToCsvFile(csvFile, reader, avroToCsvTransformer);
+        }
+    }
+
     public static void convertAvroToJSON(Configuration config, Path path, File jsonFile,
             Function<GenericRecord, GenericRecord> recProcessor) throws IOException {
         try (FileReader<GenericRecord> reader = getAvroFileReader(config, path)) {
             writeAvroToJsonFile(jsonFile, recProcessor, reader);
+        }
+    }
+
+    public static void convertAvroToCSV(Configuration config, Path path, File jsonFile,
+            AvroToCsvTransformer avroToCsvTransformer) throws IOException {
+        try (FileReader<GenericRecord> reader = getAvroFileReader(config, path)) {
+            writeAvroToCsvFile(jsonFile, reader, avroToCsvTransformer);
         }
     }
 
@@ -905,6 +922,29 @@ public class AvroUtils {
                 writer.write(bytes);
             }
             writer.write("]".getBytes());
+        }
+    }
+
+    public static void writeAvroToCsvFile(File csvFile, FileReader<GenericRecord> reader,
+            AvroToCsvTransformer avroToCsvTransformer) throws IOException, FileNotFoundException {
+        if (avroToCsvTransformer == null) {
+            throw new IllegalArgumentException("Cannot convert AVRO CSV. Provide CSV Transformer");
+        }
+        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile))) {
+            List<String> fieldNames = avroToCsvTransformer.getFieldNames(reader.getSchema());
+            System.out.println(fieldNames);
+            csvWriter.writeNext(fieldNames.toArray(new String[0]));
+            while (reader.hasNext()) {
+                GenericRecord currRecord = reader.next();
+                if (currRecord == null) {
+                    continue;
+                }
+
+                List<String[]> records = avroToCsvTransformer.getCsvConverterFunction().apply(currRecord);
+                if (records != null && records.size() > 0) {
+                    csvWriter.writeAll(records);
+                }
+            }
         }
     }
 
@@ -1310,5 +1350,4 @@ public class AvroUtils {
         }
         return column.matches("^[A-Za-z\\d][A-Za-z\\d\\_]*$");
     }
-
 }

@@ -22,7 +22,8 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
-        List<String> exportFiles = getListObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_EXPORT_FILES, String.class);
+        List<String> exportFiles = getListObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_EXPORT_FILES,
+                String.class);
         if (exportFiles == null || exportFiles.isEmpty()) {
             return;
         }
@@ -30,7 +31,8 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         exportFiles.stream().forEach(hdfsFilePath -> {
             ImportExportRequest request = new ImportExportRequest();
             request.srcPath = hdfsFilePath;
-            request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, s3Bucket);
+            request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, dropBoxSummary,
+                    exportS3Bucket);
             requests.add(request);
             // Collect all S3 FilePaths
             s3ExportFilePaths.add(request.tgtPath);
