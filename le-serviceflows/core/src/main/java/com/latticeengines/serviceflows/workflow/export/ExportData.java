@@ -42,7 +42,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(ExportData.class);
     private static final String MAPPED_FIELD_PREFIX = "user_";
     private static final String DATE_FORMAT = "M/d/yyyy";
-    private static final String TIME_ZONE = "America/Los_Angeles";
+    private static final String TIME_ZONE = "UTC";
 
     @Override
     public void execute() {
@@ -237,8 +237,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         return result;
     }
 
-    @VisibleForTesting
-    public String[] toOrderedArray(Map<String, Integer> positionMap) {
+    private String[] toOrderedArray(Map<String, Integer> positionMap) {
         String[] arr = new String[positionMap.size()];
         positionMap.forEach((field, index) -> arr[index] = field);
         return arr;
