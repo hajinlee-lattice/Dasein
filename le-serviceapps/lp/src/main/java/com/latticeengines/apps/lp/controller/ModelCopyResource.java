@@ -18,6 +18,7 @@ import com.latticeengines.apps.lp.service.ModelCopyService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CopyModelRequest;
 
 import io.swagger.annotations.Api;
@@ -46,15 +47,20 @@ public class ModelCopyResource {
             targetTenantId = sourceTenantId;
         }
         final String finalTargetTenantId = targetTenantId;
+        final Tenant sourceTenant = MultiTenantContext.getTenant();
         if ("true".equals(request.getAsync())) {
             log.info("Starting Aync model copy.");
-            workers = getWorkers();
-            workers.submit(() -> {
-                String newModelGuid = modelCopyService.copyModel(sourceTenantId, finalTargetTenantId,
-                        request.getModelGuid());
-                log.info(String.format(
-                        "Finished model copy, source model Id=%s, new model Id=%s, source tenant=%, target tenant=%s",
-                        request.getModelGuid(), newModelGuid, sourceTenantId, finalTargetTenantId));
+            getWorkers().submit(() -> {
+                try {
+                    MultiTenantContext.setTenant(sourceTenant);
+                    String newModelGuid = modelCopyService.copyModel(sourceTenantId, finalTargetTenantId,
+                            request.getModelGuid());
+                    log.info(String.format(
+                            "Finished model copy, source model Id=%s, new model Id=%s, source tenant=%s, target tenant=%s",
+                            request.getModelGuid(), newModelGuid, sourceTenantId, finalTargetTenantId));
+                } catch (Exception ex) {
+                    log.error("Failed to copy model in async mode!", ex);
+                }
             });
             return "";
         } else {
@@ -73,7 +79,7 @@ public class ModelCopyResource {
         if (workers == null) {
             synchronized (this) {
                 if (workers == null) {
-                    workers = ThreadPoolUtils.getFixedSizeThreadPool("modelCopy", 3);
+                    workers = ThreadPoolUtils.getCachedThreadPool("modelCopy");
                 }
             }
         }
