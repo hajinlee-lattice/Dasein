@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -24,6 +25,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.ReplaceModelRequest;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {
@@ -38,6 +40,9 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     @Override
     public boolean replaceModel(ReplaceModelRequest replaceModelRequest) {
@@ -84,6 +89,9 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
         String sourceEventTableName = sourceModelSummary.getEventTableName();
         String targetEventTableName = targetModelSummary.getEventTableName();
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        sourceCustomerRoot = builder.getS3PathWithGlob(yarnConfiguration, sourceCustomerRoot + "/", false, s3Bucket);
+        sourceCustomerRoot = StringUtils.removeEnd(sourceCustomerRoot, "/");
         copyDataComposition(sourceCustomerRoot, targetCustomerRoot, sourceEventTableName, targetEventTableName);
 
         String sourceModelRoot = sourceCustomerRoot + "/models/" + sourceEventTableName;
@@ -105,15 +113,30 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
         FileUtils.write(new File(sourceModelSummaryLocalPath), newModelSummary.toString(), "UTF-8", false);
 
-        String targetModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, targetModelRoot);
+        String targetModelSummaryPath = null;
+        boolean existingOnHdfs = HdfsUtils.fileExists(yarnConfiguration, targetModelRoot);
+        if (existingOnHdfs) {
+            targetModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, targetModelRoot);
+        } else {
+            String s3TargetModelDirPath = new HdfsToS3PathBuilder().exploreS3FilePath(targetModelRoot, s3Bucket);
+            targetModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, s3TargetModelDirPath);
+        }
         String targetModelDirPath = new Path(targetModelSummaryPath).getParent().getParent().toString();
         String targetModelFileName = getModelFileName(targetModelDirPath, false);
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/." + sourceModelFileName));
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/." + sourceModelFileName + ".crc"));
         FileUtils.write(new File(sourceModelLocalRoot + "/" + targetModelFileName), newModel.toString(), "UTF-8",
                 false);
-        copyModelingArtifacts(sourceModelLocalRoot, targetModelDirPath, targetModelFileName);
 
+        copyModelingArtifacts(sourceModelLocalRoot, targetModelDirPath, targetModelFileName);
+        if (existingOnHdfs) {
+            String s3TargetModelDirPath = builder.exploreS3FilePath(targetModelDirPath, s3Bucket);
+            copyModelingArtifacts(sourceModelLocalRoot, s3TargetModelDirPath, targetModelFileName);
+        } else {
+            targetModelDirPath = builder.stripProtocolAndBucket(targetModelDirPath);
+            targetModelDirPath = builder.toHdfsPath(targetModelDirPath);
+            copyModelingArtifacts(sourceModelLocalRoot, targetModelDirPath, targetModelFileName);
+        }
     }
 
     private void copyModelingArtifacts(String sourceModelLocalRoot, String targetModelDirPath,
@@ -166,15 +189,28 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
             String targetEventTableName) throws IOException {
         String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
                 sourceCustomerRoot + "/data/", sourceEventTableName);
+
         String targetStandardDataCompositonPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
                 targetCustomerRoot + "/data/", targetEventTableName);
+        replaceDataComposition(sourceStandardDataCompositionPath, targetStandardDataCompositonPath);
+        String s3TargetStandardDataCompositonPath = new HdfsToS3PathBuilder()
+                .exploreS3FilePath(targetStandardDataCompositonPath, s3Bucket);
+        replaceDataComposition(sourceStandardDataCompositionPath, s3TargetStandardDataCompositonPath);
+    }
 
-        if (!HdfsUtils.fileExists(yarnConfiguration, targetStandardDataCompositonPath + ".bak")) {
+    private void replaceDataComposition(String sourceStandardDataCompositionPath,
+            String targetStandardDataCompositonPath) throws IOException {
+        if (HdfsUtils.fileExists(yarnConfiguration, targetStandardDataCompositonPath)
+                && !HdfsUtils.fileExists(yarnConfiguration, targetStandardDataCompositonPath + ".bak")) {
             HdfsUtils.moveFile(yarnConfiguration, targetStandardDataCompositonPath,
                     targetStandardDataCompositonPath + ".bak");
         } else {
-            HdfsUtils.rmdir(yarnConfiguration, targetStandardDataCompositonPath);
+            if (HdfsUtils.fileExists(yarnConfiguration, targetStandardDataCompositonPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetStandardDataCompositonPath);
+            }
         }
+        log.info(String.format("Replacing hdfs data from %s to %s", sourceStandardDataCompositionPath,
+                targetStandardDataCompositonPath));
         HdfsUtils.copyFiles(yarnConfiguration, sourceStandardDataCompositionPath, targetStandardDataCompositonPath);
     }
 

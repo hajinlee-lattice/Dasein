@@ -1,11 +1,12 @@
 package com.latticeengines.apps.lp.service.impl;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,8 @@ import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 @Service("sourceFileService")
 public class SourceFileServiceImpl implements SourceFileService {
+
+    private static final Logger log = LoggerFactory.getLogger(SourceFileServiceImpl.class);
 
     @Inject
     private SourceFileEntityMgr sourceFileEntityMgr;
@@ -93,7 +96,8 @@ public class SourceFileServiceImpl implements SourceFileService {
     public void copySourceFile(CopySourceFileRequest request) {
         SourceFile originalSourceFile = findByName(request.getOriginalSourceFile());
         if (originalSourceFile != null) {
-            Tenant targetTenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(request.getTargetTenant()).toString());
+            Tenant targetTenant = tenantEntityMgr
+                    .findByTenantId(CustomerSpace.parse(request.getTargetTenant()).toString());
             if (targetTenant != null) {
                 copySourceFile(request.getTargetTable(), originalSourceFile, targetTenant);
             }
@@ -107,13 +111,18 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     private void copySourceFile(String tableName, SourceFile originalSourceFile, Tenant targetTenant) {
         String outputFileName = "file_" + tableName + ".csv";
-        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(targetTenant.getId())).toString()
+        String outputPath = PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(targetTenant.getId())).toString()
                 + "/" + outputFileName;
         try {
-            String srcFile = getS3Path(originalSourceFile.getTenant().getId(), originalSourceFile.getPath());
+            String srcFile = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration,
+                    originalSourceFile.getPath(), false, s3Bucket);
             if (!HdfsUtils.fileExists(yarnConfiguration, outputPath)) {
+                log.info(String.format("Copying source file from %s to %s", srcFile, outputPath));
                 HdfsUtils.copyFiles(yarnConfiguration, srcFile, outputPath);
+                String s3OutputPath = new HdfsToS3PathBuilder().exploreS3FilePath(outputPath, s3Bucket);
+                log.info(String.format("Copying source file from %s to %s", srcFile, s3OutputPath));
+                HdfsUtils.copyFiles(yarnConfiguration, srcFile, s3OutputPath);
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18118, e);
@@ -127,16 +136,5 @@ public class SourceFileServiceImpl implements SourceFileService {
         file.setState(originalSourceFile.getState());
         file.setTableName(tableName);
         sourceFileEntityMgr.create(file, targetTenant);
-    }
-
-    private String getS3Path(String customerSpace, String hdfsPath) throws IOException {
-        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
-        CustomerSpace space = CustomerSpace.parse(customerSpace);
-        String s3Path = pathBuilder.exploreS3FilePath(hdfsPath, s3Bucket);
-        if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
-            hdfsPath = s3Path;
-        }
-        return hdfsPath;
     }
 }

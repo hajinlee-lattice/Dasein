@@ -12,6 +12,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -35,11 +37,13 @@ import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component
 public abstract class ModelServiceBase implements ModelService {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelServiceBase.class);
     private static Map<ModelType, ModelService> registry = new HashMap<>();
 
     protected ModelServiceBase(ModelType modelType) {
@@ -63,6 +67,9 @@ public abstract class ModelServiceBase implements ModelService {
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     public static ModelService getModelService(String modelTypeStr) {
         if (modelTypeStr == null) {
@@ -93,23 +100,28 @@ public abstract class ModelServiceBase implements ModelService {
         String sourceCustomerRoot = customerBaseDir + sourceTenantId;
         String targetCustomerRoot = customerBaseDir + targetTenantId;
 
-        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory")){
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        sourceCustomerRoot = builder.getS3PathWithGlob(yarnConfiguration, sourceCustomerRoot + "/", false, s3Bucket);
+        sourceCustomerRoot = StringUtils.removeEnd(sourceCustomerRoot, "/");
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory")) {
             ModelingHdfsUtils.copyModelingDataDirectory(sourceCustomerRoot, targetCustomerRoot, eventTableName,
-                    cpEventTableName, yarnConfiguration);
+                    cpEventTableName, yarnConfiguration, s3Bucket);
         }
 
         String sourceModelRoot = sourceCustomerRoot + "/models/" + eventTableName + "/"
                 + UuidUtils.extractUuid(modelSummary.getId());
+        sourceModelRoot = builder.getS3PathWithGlob(yarnConfiguration, sourceModelRoot, false, s3Bucket);
         String sourceModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, sourceModelRoot);
         String uuid = UUID.randomUUID().toString();
         String sourceModelDirPath = new Path(sourceModelSummaryPath).getParent().getParent().toString();
         String sourceModelLocalRoot = new Path(sourceModelDirPath).getName();
         String modelSummaryLocalPath = sourceModelLocalRoot + "/enhancements/modelsummary.json";
 
-        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")){
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")) {
             FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
         }
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy hdfs to local")) {
+            log.info(String.format("Copying hdfs data from %s to %s", sourceModelDirPath, "."));
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, sourceModelDirPath, ".");
         }
 
@@ -130,7 +142,7 @@ public abstract class ModelServiceBase implements ModelService {
             CustomerSpace customerSpace = CustomerSpace.parse(targetTenantId);
             try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy artifacts in module")) {
                 newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration, module.getArtifacts(),
-                        customerSpace, newModuleName);
+                        customerSpace, newModuleName, s3Bucket);
             }
             for (Artifact artifact : newArtifactsMap.values()) {
                 metadataProxy.createArtifact(customerSpace.toString(), newModuleName, artifact.getName(), artifact);
@@ -141,9 +153,8 @@ public abstract class ModelServiceBase implements ModelService {
 
         JsonNode newModelSummary = null;
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Construct new model summary")) {
-            newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
-                    cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap,
-                    newModuleName, sourceFile);
+            newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId, cpTrainingTableName,
+                    cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap, newModuleName, sourceFile);
         }
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
@@ -164,11 +175,18 @@ public abstract class ModelServiceBase implements ModelService {
             FileUtils.write(new File(sourceModelLocalRoot + "/" + modelFileName), newModel.toString(), "UTF-8", false);
         }
 
+        String s3TargetModelRoot = builder.exploreS3FilePath(targetModelRoot, s3Bucket);
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: mkdir")) {
+            log.info(String.format("mkdir: %s", targetModelRoot));
+            log.info(String.format("mkdir: %s", s3TargetModelRoot));
             HdfsUtils.mkdir(yarnConfiguration, targetModelRoot);
+            HdfsUtils.mkdir(yarnConfiguration, s3TargetModelRoot);
         }
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy from local to hdfs")) {
+            log.info(String.format("Copying hdfs data from %s to %s", sourceModelLocalRoot, targetModelRoot));
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
+            log.info(String.format("Copying hdfs data from %s to %s", sourceModelLocalRoot, s3TargetModelRoot));
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, s3TargetModelRoot);
         }
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")) {
             FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
