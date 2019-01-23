@@ -42,6 +42,10 @@ public class WorkflowBuilder {
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {
             String namespace = step.getNamespace();
+            // skip step if the skipCompletedSteps is true
+            if (config.isSkipCompletedSteps()) {
+                step.getConfiguration().setSkipStep(true);
+            }
             // in case we need to repeatedly use exactly the same steps under one namespace
             if (set.add(step) && StringUtils.isNotEmpty(root)) {
                 namespace = root + "." + namespace;
@@ -64,6 +68,9 @@ public class WorkflowBuilder {
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {
             String namespace = step.getNamespace();
+            if (config.isSkipCompletedSteps()) {
+                step.getConfiguration().setSkipStep(true);
+            }
             if (set.add(step) && StringUtils.isNotEmpty(root)) {
                 namespace = root + "." + namespace;
             }

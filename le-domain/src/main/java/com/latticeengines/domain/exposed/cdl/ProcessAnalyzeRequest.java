@@ -35,6 +35,12 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("MaxRatingIteration")
     private Integer MaxRatingIterations;
 
+    @JsonProperty("SkipEntities")
+    private Set<BusinessEntity> skipEntities = new HashSet<>();
+
+    @JsonProperty("SkipAPS")
+    private boolean skipAPS = false;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
@@ -82,4 +88,21 @@ public class ProcessAnalyzeRequest {
     public void setMaxRatingIterations(Integer maxRatingIterations) {
         MaxRatingIterations = maxRatingIterations;
     }
+
+    public Set<BusinessEntity> getSkipEntities() {
+        return skipEntities;
+    }
+
+    public void setSkipEntities(Set<BusinessEntity> skipEntities) {
+        this.skipEntities = skipEntities;
+    }
+
+    public Boolean getSkipAPS() {
+        return skipAPS;
+    }
+
+    public void setSkipAPS(Boolean skipAPS) {
+        this.skipAPS = skipAPS;
+    }
+
 }
