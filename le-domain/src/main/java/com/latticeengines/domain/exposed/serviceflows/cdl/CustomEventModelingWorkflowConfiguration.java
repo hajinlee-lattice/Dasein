@@ -396,6 +396,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder eventColumn(String eventColumn) {
             modelWorkflowBuilder.setEventColumn(eventColumn);
+            generateAIRating.eventColumn(eventColumn);
             return this;
         }
 

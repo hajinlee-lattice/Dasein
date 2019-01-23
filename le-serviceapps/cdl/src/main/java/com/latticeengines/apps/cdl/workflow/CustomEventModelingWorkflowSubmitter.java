@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
@@ -140,6 +142,10 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
 
         Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
                 trainingTableName);
+        String eventColumnName = InterfaceName.Event.name();
+        if (CollectionUtils.isNotEmpty(trainingTable.getAttributes(LogicalDataType.Event))) {
+            eventColumnName = trainingTable.getAttributes(LogicalDataType.Event).get(0).getName();
+        }
 
         String moduleName = parameters.getModuleName();
         final String pivotFileName = parameters.getPivotFileName();
@@ -204,7 +210,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
-                .eventColumn(InterfaceName.Target.name()) //
+                .eventColumn(eventColumnName) //
                 // TODO: legacy SQL based match engine configurations
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
