@@ -13,6 +13,7 @@ import com.latticeengines.modeling.workflow.steps.RemediateDataRules;
 import com.latticeengines.modeling.workflow.steps.modeling.CreateModel;
 import com.latticeengines.modeling.workflow.steps.modeling.CreateNote;
 import com.latticeengines.modeling.workflow.steps.modeling.DownloadAndProcessModelSummaries;
+import com.latticeengines.modeling.workflow.steps.modeling.EventCounter;
 import com.latticeengines.modeling.workflow.steps.modeling.InvokeDataScienceAnalysis;
 import com.latticeengines.modeling.workflow.steps.modeling.Profile;
 import com.latticeengines.modeling.workflow.steps.modeling.ReviewModel;
@@ -28,6 +29,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> {
+
+    @Inject
+    private EventCounter eventCounter;
 
     @Inject
     private Sample sample;
@@ -71,6 +75,7 @@ public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> 
     @Override
     public Workflow defineWorkflow(ModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config)//
+                .next(eventCounter) //
                 .next(sample) //
                 .next(exportData) //
                 .next(setMatchSelection) //

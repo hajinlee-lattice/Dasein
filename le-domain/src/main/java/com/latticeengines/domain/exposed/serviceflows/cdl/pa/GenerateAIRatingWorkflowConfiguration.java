@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -223,8 +224,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public void eventColumn(String eventColumn) {
+            cdlEventTable.setEventColumn(eventColumn);
+        }
+
         public GenerateAIRatingWorkflowConfiguration build() {
-            setCdlEventTableConfig();
             setMatchConfig();
             setAddStandardAttributesConfig();
             recalculateExpectedRevenue.setSkipStep(!forceEVSteps);
@@ -247,10 +251,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             return configuration;
-        }
-
-        private void setCdlEventTableConfig() {
-            cdlEventTable.setEventColumn(InterfaceName.Target.name());
         }
 
         private void setAddStandardAttributesConfig() {
