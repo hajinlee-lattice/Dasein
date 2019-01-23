@@ -16,6 +16,9 @@ public class CopyModelRequest {
     @JsonProperty("ModelGUID")
     private String modelGuid;
 
+    @JsonProperty("Async")
+    private String async;
+
     public String getTargetTenant() {
         return targetTenant;
     }
@@ -31,4 +34,13 @@ public class CopyModelRequest {
     public void setModelGuid(String modelGuid) {
         this.modelGuid = modelGuid;
     }
+
+    public String getAsync() {
+        return async;
+    }
+
+    public void setAsync(String async) {
+        this.async = async;
+    }
+
 }

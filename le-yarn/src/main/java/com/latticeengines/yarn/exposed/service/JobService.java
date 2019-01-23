@@ -1,8 +1,12 @@
 package com.latticeengines.yarn.exposed.service;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -40,11 +44,26 @@ public interface JobService extends AwsBatchJobService {
 
     Counters getMRJobCounters(String applicationId);
 
-    static JobID runMRJob(org.apache.hadoop.mapreduce.Job job, String mrJobName, boolean waitForCompletion) throws Exception {
+    static JobID runMRJob(org.apache.hadoop.mapreduce.Job job, String mrJobName, boolean waitForCompletion)
+            throws Exception {
+        return runMRJob(job, mrJobName, waitForCompletion, null, null);
+    }
+
+    static JobID runMRJob(org.apache.hadoop.mapreduce.Job job, String mrJobName, boolean waitForCompletion,
+            String counterGroupName, Map<String, Long> counterGroupResultMap) throws Exception {
         JobRunner runner = new JobRunner();
         runner.setJob(job);
         runner.setWaitForCompletion(waitForCompletion);
         runner.call();
+        if (waitForCompletion //
+                && StringUtils.isNotBlank(counterGroupName) //
+                && counterGroupResultMap != null) {
+            Iterator<Counter> itr = job.getCounters().getGroup(counterGroupName).iterator();
+            while (itr.hasNext()) {
+                Counter c = itr.next();
+                counterGroupResultMap.put(c.getName(), c.getValue());
+            }
+        }
         return job.getJobID();
     }
 

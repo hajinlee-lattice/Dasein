@@ -128,14 +128,17 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 List<String[]> records = csvReader.readAll();
                 log.info(String.format("There are %d rows in file %s.", records.size(), file.getName()));
                 String[] header = records.get(0);
-                boolean needRemapFieldNames = file.getName().toLowerCase().contains("orphan")
+                boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
+                        || file.getName().toLowerCase().contains("unmatched"))
                         && MapUtils.isNotEmpty(importedAttributes);
                 if (needRemapFieldNames) {
                     log.info("Remap field names.");
                     Map<String, Integer> headerPosMap = buildPositionMap(Arrays.asList(header));
+                    log.info("Header positionMap=" + JsonUtils.serialize(headerPosMap));
                     List<String> displayNames = importedAttributes.entrySet().stream()
-                            .map(entry -> normalizeDisplayName(entry.getValue().getDisplayName()))
+                            .map(entry -> normalizeFieldName(entry.getValue().getDisplayName()))
                             .collect(Collectors.toList());
+                    log.info("DisplayName positionMap=" + JsonUtils.serialize(displayNames));
                     Map<String, Integer> displayNamePosMap = buildPositionMap(displayNames);
                     String[] displayNamesAsArr = toOrderedArray(displayNamePosMap);
                     if (!hasHeader) {
@@ -150,6 +153,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                         });
                     }
                 } else {
+                    log.info("Use field names as-is.");
                     if (!hasHeader) {
                         writer.writeNext(header);
                         hasHeader = true;
@@ -223,7 +227,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
             if (name.equalsIgnoreCase(InterfaceName.CustomTrxField.name())) {
                 Map<String, Object> customFields = JsonUtils.deserialize(data, Map.class);
                 customFields.forEach((rawFieldName, fieldValue) -> {
-                    String fieldName = normalizeDisplayName(rawFieldName);
+                    String fieldName = normalizeFieldName(rawFieldName);
                     if (displayNamePosMap.containsKey(fieldName)) {
                         result[displayNamePosMap.get(fieldName)] = String.valueOf(fieldValue);
                     }
@@ -240,7 +244,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         return arr;
     }
 
-    private String normalizeDisplayName(String displayName) {
+    private String normalizeFieldName(String displayName) {
         String result = displayName;
         if (result.startsWith(MAPPED_FIELD_PREFIX)) {
             result = result.substring(MAPPED_FIELD_PREFIX.length()).replace('_', ' ');

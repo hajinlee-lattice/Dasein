@@ -29,8 +29,11 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 public class ModelingHdfsUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelingHdfsUtils.class);
 
     public static String findModelSummaryPath(Configuration config, String dir) throws IOException {
         List<String> paths = HdfsUtils.getFilesForDirRecursive(config, dir, file -> {
@@ -93,20 +96,26 @@ public class ModelingHdfsUtils {
     }
 
     public static void copyModelingDataDirectory(String sourceCustomerRoot, String targetCustomerRoot,
-            String eventTableName, String cpEventTableName, Configuration yarnConfiguration) throws IOException {
+            String eventTableName, String cpEventTableName, Configuration yarnConfiguration, String s3Bucket)
+            throws IOException {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
         String targetDataRoot = targetCustomerRoot + "/data/" + cpEventTableName;
+
         if (HdfsUtils.fileExists(yarnConfiguration, sourceDataRoot)) {
             try (PerformanceTimer timer = new PerformanceTimer(
                     "Copy hdfs data: Copy modeling data directory - copy " + "files")) {
+                log.info(String.format("Copying modeling data from %s to %s", sourceDataRoot, targetDataRoot));
                 HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
+                String s3TargetDataRoot = new HdfsToS3PathBuilder().exploreS3FilePath(targetDataRoot, s3Bucket);
+                log.info(String.format("Copying modeling data from %s to %s", sourceDataRoot, s3TargetDataRoot));
+                HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, s3TargetDataRoot);
             }
 
             String sourceStandardDataCompositionPath = null;
             try (PerformanceTimer timer = new PerformanceTimer(
                     "Copy hdfs data: Copy modeling data directory - get " + "standard data composition")) {
-                sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataCompositionWithRegex(yarnConfiguration,
-                        sourceCustomerRoot + "/data/", eventTableName);
+                sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataCompositionWithRegex(
+                        yarnConfiguration, sourceCustomerRoot + "/data/", eventTableName);
 
                 Logger log = LoggerFactory.getLogger(ModelingHdfsUtils.class);
                 log.info("sourceStandardDataCompositionPath is: " + sourceStandardDataCompositionPath);
@@ -117,8 +126,17 @@ public class ModelingHdfsUtils {
 
             try (PerformanceTimer timer = new PerformanceTimer(
                     "Copy hdfs data: Copy modeling data directory - copy " + "files")) {
-                HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(),
-                        new Path(targetStandardDataCompositionPath).getParent().toString());
+                log.info(String.format("Copying modeling data from %s to %s", sourceStandardDataCompositionPath,
+                        targetStandardDataCompositionPath));
+                String sourceDataCompositionPath = new Path(sourceStandardDataCompositionPath).getParent().toString();
+                String targetDataCompositionPath = new Path(targetStandardDataCompositionPath).getParent().toString();
+                HdfsUtils.copyFiles(yarnConfiguration, sourceDataCompositionPath, targetDataCompositionPath);
+
+                String s3TargetDataCompositionPath = new HdfsToS3PathBuilder()
+                        .exploreS3FilePath(targetDataCompositionPath, s3Bucket);
+                log.info(String.format("Copying modeling data from %s to %s", sourceStandardDataCompositionPath,
+                        s3TargetDataCompositionPath));
+                HdfsUtils.copyFiles(yarnConfiguration, sourceDataCompositionPath, s3TargetDataCompositionPath);
             }
         }
     }
@@ -159,8 +177,10 @@ public class ModelingHdfsUtils {
     }
 
     public static String getEventTableNameFromHdfs(Configuration yarnConfiguration, String customerModelBaseDir,
-            String modelId) throws IOException {
+            String modelId, String s3Bucket) throws IOException {
         final String uuid = UuidUtils.extractUuid(modelId);
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        customerModelBaseDir = builder.exploreS3FilePath(customerModelBaseDir, s3Bucket);
         List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelBaseDir, file -> {
             return file.getPath().getName().equals(uuid);
         });
@@ -171,7 +191,8 @@ public class ModelingHdfsUtils {
     }
 
     public static Map<String, Artifact> copyArtifactsInModule(Configuration yarnConfiguration, List<Artifact> artifacts,
-            CustomerSpace customerSpace, String newModuleName) throws IllegalArgumentException, IOException {
+            CustomerSpace customerSpace, String newModuleName, String s3Bucket)
+            throws IllegalArgumentException, IOException {
         Map<String, Artifact> newArtifactsMap = new HashMap<>();
 
         for (Artifact artifact : artifacts) {
@@ -181,7 +202,13 @@ public class ModelingHdfsUtils {
                     customerSpace, newModuleName, artifactType);
             String hdfsPath = String.format("%s/%s.%s", path.toString(), artifact.getName(),
                     artifactType.getFileType());
-            HdfsUtils.copyFiles(yarnConfiguration, artifact.getPath(), hdfsPath);
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+            String sourcePath = builder.getS3PathWithGlob(yarnConfiguration, artifact.getPath(), false, s3Bucket);
+            log.info(String.format("Copying artifacts data from %s to %s", sourcePath, hdfsPath));
+            HdfsUtils.copyFiles(yarnConfiguration, sourcePath, hdfsPath);
+            String s3HdfsPath = builder.exploreS3FilePath(hdfsPath, s3Bucket);
+            log.info(String.format("Copying artifacts data from %s to %s", sourcePath, s3HdfsPath));
+            HdfsUtils.copyFiles(yarnConfiguration, sourcePath, s3HdfsPath);
             Artifact newArtifact = new Artifact();
             newArtifact.setPath(hdfsPath);
             newArtifact.setArtifactType(artifactType);

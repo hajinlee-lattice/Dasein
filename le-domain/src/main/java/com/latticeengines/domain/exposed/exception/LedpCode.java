@@ -577,6 +577,7 @@ public enum LedpCode {
     LEDP_28027("Problem reading data rules from {0}."), //
     LEDP_28028("Unsupported PMML version {0} detected. We only support {1}."), //
     LEDP_28029("Download model summary failed."), //
+    LEDP_28030("Problem in event counting: {0}."), //
 
     // le-dellebi
     LEDP_29000(

@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -70,7 +71,17 @@ public class ModelResource implements ModelInterface {
     @ApiOperation(value = "Create named samples to be used by profiling or modeling")
     public AppSubmission createSamples(@RequestBody SamplingConfiguration config) {
         AppSubmission submission = new AppSubmission(
-                Arrays.<ApplicationId>asList(modelingService.createSamples(config)));
+                Arrays.<ApplicationId> asList(modelingService.createSamples(config)));
+        return submission;
+    }
+
+    @Override
+    @RequestMapping(value = "/eventcounter", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create named event counter to be used by profiling or modeling")
+    public AppSubmission createEventCounter(@RequestBody EventCounterConfiguration config) {
+        AppSubmission submission = new AppSubmission(
+                Arrays.<ApplicationId> asList(modelingService.createEventCounter(config)));
         return submission;
     }
 
@@ -79,7 +90,7 @@ public class ModelResource implements ModelInterface {
     @ResponseBody
     @ApiOperation(value = "Load data from a database table")
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.loadData(config)));
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.loadData(config)));
         return submission;
     }
 
@@ -88,13 +99,12 @@ public class ModelResource implements ModelInterface {
     @ResponseBody
     @ApiOperation(value = "Export data from HDFS to a database table")
     public AppSubmission exportData(@RequestBody ExportConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.exportData(config)));
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.exportData(config)));
         return submission;
     }
 
     @Override
-    @RequestMapping(value = "/modelingjobs/{applicationId}", method = RequestMethod.GET,
-            headers = "Accept=application/json")
+    @RequestMapping(value = "/modelingjobs/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     public JobStatus getJobStatus(@PathVariable String applicationId) {
@@ -106,7 +116,8 @@ public class ModelResource implements ModelInterface {
     @ResponseBody
     @ApiOperation(value = "Profile data")
     public AppSubmission profile(@RequestBody DataProfileConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.profileData(config)));
+        AppSubmission submission = new AppSubmission(
+                Arrays.<ApplicationId> asList(modelingService.profileData(config)));
         return submission;
     }
 
@@ -115,7 +126,7 @@ public class ModelResource implements ModelInterface {
     @ResponseBody
     @ApiOperation(value = "Review data")
     public AppSubmission review(@RequestBody ModelReviewConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.reviewData(config)));
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.reviewData(config)));
         return submission;
     }
 

@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 public class PythonScriptModelCopyServiceImplTestNG extends LPFunctionalTestNGBase {
 
@@ -51,6 +52,9 @@ public class PythonScriptModelCopyServiceImplTestNG extends LPFunctionalTestNGBa
 
     @Autowired
     private SourceFileService sourceFileService;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     private Tenant modelCopySourceTenant = new Tenant();
 
@@ -78,22 +82,30 @@ public class PythonScriptModelCopyServiceImplTestNG extends LPFunctionalTestNGBa
 
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(modelCopySourceTenant.getId())).toString());
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(modelCopyTargetTenant.getId())).toString());
+        String s3TargetCopyTarget = new HdfsToS3PathBuilder()
+                .exploreS3FilePath(customerBase + modelCopyTargetTenant.getId() + "/", s3Bucket);
+        HdfsUtils.rmdir(yarnConfiguration, s3TargetCopyTarget);
 
-        String localPathBase = ClassLoader
-                .getSystemResource("modelcopyserviceimpl/pythonscriptmodel").getPath();
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(modelCopySourceTenant.getId()))
+                .toString());
+        String targetDataDir = PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(modelCopyTargetTenant.getId()))
+                .toString();
+        HdfsUtils.rmdir(yarnConfiguration, targetDataDir);
+        String s3TargetDataDir = new HdfsToS3PathBuilder().exploreS3FilePath(targetDataDir, s3Bucket);
+        HdfsUtils.rmdir(yarnConfiguration, s3TargetDataDir);
+
+        String localPathBase = ClassLoader.getSystemResource("modelcopyserviceimpl/pythonscriptmodel").getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
-                + modelCopySourceTenant.getId());
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models",
+                customerBase + modelCopySourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data",
                 customerBase + modelCopySourceTenant.getId());
 
-        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(modelCopySourceTenant.getId())).toString()
-                + "/" + outputFileName;
+        String outputPath = PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(modelCopySourceTenant.getId()))
+                .toString() + "/" + outputFileName;
         sourceFileLocalPath = "modelcopyserviceimpl/pythonscriptmodel/" + outputFileName;
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
                 outputPath);

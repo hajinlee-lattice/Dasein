@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
@@ -86,10 +89,15 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                 sourceFile != null ? sourceFile.getDisplayName() : cloneTableName);
 
+        Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                modelSummary.getEventTableName());
+        String eventColumnName = InterfaceName.Event.name();
+        if (CollectionUtils.isNotEmpty(eventTable.getAttributes(LogicalDataType.Event))) {
+            eventColumnName = eventTable.getAttributes(LogicalDataType.Event).get(0).getName();
+        }
+
         List<DataRule> dataRules = parameters.getDataRules();
         if (parameters.getDataRules() == null || parameters.getDataRules().isEmpty()) {
-            Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                    modelSummary.getEventTableName());
             dataRules = eventTable.getDataRules();
         }
 
@@ -138,6 +146,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
+                .eventColumn(eventColumnName) //
                 .userRefinedAttributes(userRefinedAttributes) //
                 .enableDebug(false) //
                 .enableLeadEnrichment(false) //

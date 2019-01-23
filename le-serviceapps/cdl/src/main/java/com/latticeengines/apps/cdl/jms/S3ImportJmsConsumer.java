@@ -4,10 +4,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +19,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.retry.support.RetryTemplate;
@@ -52,16 +53,19 @@ public class S3ImportJmsConsumer {
     private static final String NAME = "name";
     private static final String OBJECT = "object";
     private static final String KEY = "key";
+    private static final String REDIS_PREFIX = "S3ImportJmsConsumer_";
 
     private static Map<String, Integer> messageIdMap = new HashMap<>();
     private static Queue<String> messageIdQueue = new LinkedList<>();
-    private static LinkedHashMap<String, Long> keyMap;
 
     private static final String PS_SHARE = "PS_SHARE";
 
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -152,12 +156,13 @@ public class S3ImportJmsConsumer {
                 tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
                 if (shouldRun(tenantId)) {
                     synchronized (this) {
-                        if (keyMap.containsKey(key) && System.currentTimeMillis() - keyMap.get(key) <= idleFrame * 1000L) {
+                        if (redisTemplate.opsForValue().get(REDIS_PREFIX + key) != null) {
                             log.warn(String.format("Already processed file %s in less then %d seconds, skip import!",
                                     key, idleFrame));
                             return;
                         } else {
-                            keyMap.put(key, System.currentTimeMillis());
+                            redisTemplate.opsForValue().set(REDIS_PREFIX + key, System.currentTimeMillis(),
+                                    idleFrame, TimeUnit.SECONDS);
                             log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
                             submitApplication(tenantId, bucket, feedType, key);
                         }
@@ -189,12 +194,6 @@ public class S3ImportJmsConsumer {
             idleFrame = 60;
         }
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        keyMap = new LinkedHashMap<String, Long>() {
-            protected boolean removeEldestEntry(Map.Entry<String, Long> eldest)
-            {
-                return System.currentTimeMillis() - eldest.getValue() > idleFrame * 1000L;
-            }
-        };
     }
 
     @SuppressWarnings("unchecked")

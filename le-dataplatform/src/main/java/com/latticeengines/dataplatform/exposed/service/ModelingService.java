@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -22,6 +23,8 @@ public interface ModelingService {
     void resetThrottle();
 
     ApplicationId createSamples(SamplingConfiguration config);
+
+    ApplicationId createEventCounter(EventCounterConfiguration config);
 
     ApplicationId loadData(LoadConfiguration config);
 

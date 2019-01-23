@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
@@ -26,8 +27,17 @@ public class SingleContainerDispatchImpl implements DispatchService {
     }
 
     @Override
+    public void customizeEventCounterConfig(EventCounterConfiguration config, boolean isParallelEnabled) {
+    }
+
+    @Override
     public String getSampleJobName(boolean isParallelEnabled) {
         return "samplingJob";
+    }
+
+    @Override
+    public String getEventCounterJobName(boolean isParallelEnabled) {
+        return "eventCounterJob";
     }
 
     @Override

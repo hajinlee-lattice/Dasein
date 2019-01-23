@@ -86,7 +86,7 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
     private String outputFileName = "nonLatinInRows.csv";
 
-    @Test(groups = "deployment", dataProvider = "dataProvider", timeOut = 900000)
+    @Test(groups = "deployment", dataProvider = "dataProvider", timeOut = 2700000)
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
         cleanup();
@@ -122,6 +122,7 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
                         CustomerSpace.parse(tenant2.getId())).toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+
         ModelSummary model = modelSummaryService.getModelSummaryByModelId(ORIGINAL_MODELID);
         if (model != null) {
             modelSummaryService.delete(model);

@@ -4,6 +4,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -27,6 +28,8 @@ public interface ModelInterface {
     AppSubmission review(ModelReviewConfiguration config);
 
     AppSubmission profile(DataProfileConfiguration config);
+
+    AppSubmission createEventCounter(EventCounterConfiguration config);
 
     AppSubmission createSamples(SamplingConfiguration config);
 

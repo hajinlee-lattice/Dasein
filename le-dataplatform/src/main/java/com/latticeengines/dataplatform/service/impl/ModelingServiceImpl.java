@@ -59,6 +59,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
@@ -205,17 +206,50 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil
                 .getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
-        setContainerMemoryProperties(properties);
+        setContainerMemoryProperties(properties, samplingMapReduceMemorySize, "Sampling");
         return properties;
     }
 
-    private void setContainerMemoryProperties(Properties properties) {
-        String memSize = samplingMapReduceMemorySize + "";
-        log.info(String.format("Setting container mem size for sampling: %s", memSize));
+    private void setContainerMemoryProperties(Properties properties, int containerSize, String jobType) {
+        String memSize = containerSize + "";
+        log.info(String.format("Setting container mem size for %s: %s", jobType, memSize));
         properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), memSize);
         properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), memSize);
         properties.put("mapreduce.map.memory.mb", memSize);
         properties.put("mapreduce.reduce.memory.mb", memSize);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ApplicationId createEventCounter(EventCounterConfiguration config) {
+
+        Properties properties = eventCounterConfig(config);
+        return modelingJobService.submitMRJob(dispatchService.getEventCounterJobName(config.isParallelEnabled()),
+                properties);
+    }
+
+    public Properties eventCounterConfig(EventCounterConfiguration config) {
+        dispatchService.customizeEventCounterConfig(config, config.isParallelEnabled());
+
+        Model model = new Model();
+        model.setCustomer(config.getCustomer());
+        model.setTable(config.getTable());
+        setupModelProperties(model);
+        String inputDir = model.getDataHdfsPath();
+
+        if (config.getHdfsDirPath() != null) {
+            inputDir = config.getHdfsDirPath();
+        }
+        Properties properties = new Properties();
+        properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
+        properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+        properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil
+                .getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        setContainerMemoryProperties(properties, memory, "Event Counting");
+        return properties;
     }
 
     @Override

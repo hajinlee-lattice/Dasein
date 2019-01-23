@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.apps.cdl.service.impl.RatingModelServiceBase.getRatingModelService;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -15,8 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
@@ -86,6 +90,7 @@ import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
@@ -368,7 +373,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         copy.setRatingModelAttributes(original.getRatingModelAttributes());
         if (StringUtils.isNotBlank(original.getModelSummaryId())) {
             String tenantId = MultiTenantContext.getTenant().getId();
-            String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, original.getModelSummaryId());
+            String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, original.getModelSummaryId(),
+                    "false");
             modelSummaryProxy.setDownloadFlag(tenantId);
             copy.setModelSummaryId(replicatedModelGUID);
         }

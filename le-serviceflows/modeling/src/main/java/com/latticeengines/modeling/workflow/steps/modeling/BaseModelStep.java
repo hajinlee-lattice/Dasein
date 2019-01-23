@@ -207,6 +207,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .moduleName(configuration.getModuleName()) //
                 .productType(configuration.getProductType()) //
+                .eventColumn(configuration.getEventColumn()) //
                 .setModelSummaryProvenance(configuration.getModelSummaryProvenance()) //
                 .dataCloudVersion(configuration.getDataCloudVersion()) //
                 .runTimeParams(configuration.getRunTimeParams());
@@ -285,6 +286,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .yarnConfiguration(yarnConfiguration) //
                 .hdfsDirToSample(getHdfsDir(eventTable.getExtracts().get(0).getPath())) //
                 .table(eventTable.getName()) //
+                .eventColumn(modelStepConfiguration.getEventColumn()) //
                 .modelProxy(modelProxy) //
                 .jobProxy(jobProxy) //
                 .dataRules(dataRules) //
