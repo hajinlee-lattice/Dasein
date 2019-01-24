@@ -570,37 +570,33 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    //fieldMapping.setDateTimeFormatString("MM/DD/YY");
                     fieldMapping.setDateFormatString("MM/DD/YY");
                     fieldMapping.setTimeFormatString("");
                     fieldMapping.setTimezone("UTC");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date field mapping.");
+                    log.info("Setting Test Date field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    //fieldMapping.setDateTimeFormatString("YYYY-MM-DD");
                     fieldMapping.setDateFormatString("YYYY-MM-DD");
                     fieldMapping.setTimeFormatString(null);
                     fieldMapping.setTimezone("America/Los_Angeles");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date 2 field mapping.");
+                    log.info("Setting Test Date 2 field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 3")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    //fieldMapping.setDateTimeFormatString("DD.MM.YY 00:00:00 24H");
                     fieldMapping.setDateFormatString("DD.MM.YY");
                     fieldMapping.setTimeFormatString("00:00:00 24H");
                     fieldMapping.setTimezone("GMT+8");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date 3 field mapping.");
+                    log.info("Setting Test Date 3 field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 4")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    //fieldMapping.setDateTimeFormatString("MM/DD/YYYY 00-00-00 12H");
                     fieldMapping.setDateFormatString("MM/DD/YYYY");
                     fieldMapping.setTimeFormatString("00-00-00 12H");
                     fieldMapping.setTimezone("Asia/Kolkata");

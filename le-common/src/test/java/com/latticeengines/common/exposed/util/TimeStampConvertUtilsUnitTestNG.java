@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
+@SuppressWarnings("checkstyle:FileTabCharacter")
 public class TimeStampConvertUtilsUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtilsUnitTestNG.class);
 
@@ -174,7 +171,7 @@ public class TimeStampConvertUtilsUnitTestNG {
 
         // Test Case 15: Test case 13 again with leading and trailing whitespace in the formats strings.
         actualTime = TimeStampConvertUtils.convertToLong("4-3-2018 01:23:45 am",
-                "\t\tMM-DD-YYYY    ", "		\t \t00:00:00 12H  ", "XXX");
+                " \t \tMM-DD-YYYY    ", 	"			00:00:00 12H  ", "XXX");
         Assert.assertEquals(actualTime, 1522718625000L);
 
         // TODO(jwinter): Add support to handle empty date/time string.
