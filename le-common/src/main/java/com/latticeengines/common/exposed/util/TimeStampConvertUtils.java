@@ -217,7 +217,7 @@ public class TimeStampConvertUtils {
 
                 }
             } else {
-                log.error("User provided date format string is empty, using original convertToLong(date)");
+                log.warn("User provided date format string is empty, using original convertToLong(date)");
                 return convertToLong(dateTime);
             }
         } catch (Exception e) {
