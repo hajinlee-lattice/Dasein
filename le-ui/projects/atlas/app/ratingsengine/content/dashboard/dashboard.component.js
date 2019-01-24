@@ -222,6 +222,10 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
+    vm.activateIteration = function(iteration){
+        console.log(iteration);
+    }
+
     vm.initDataModel = function(){
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
