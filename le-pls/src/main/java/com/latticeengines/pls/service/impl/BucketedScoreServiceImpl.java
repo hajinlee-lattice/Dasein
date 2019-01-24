@@ -12,6 +12,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
@@ -57,6 +59,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
@@ -90,6 +95,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
         }
 
+        pivotAvroDirPath = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, pivotAvroDirPath, false,
+                s3Bucket);
         List<String> filePaths = HdfsUtils.getFilesForDir(yarnConfiguration, pivotAvroDirPath, ".*.avro");
         String pivotAvroFilePath = filePaths.get(0);
         List<GenericRecord> pivotedRecords = AvroUtils.getData(yarnConfiguration, new Path(pivotAvroFilePath));
