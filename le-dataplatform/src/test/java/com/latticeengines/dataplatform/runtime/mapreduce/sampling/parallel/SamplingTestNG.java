@@ -136,6 +136,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
     @Test(groups = { "functional" })
     public void testDefaultSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
+        samplingConfig.setSamplingType(SamplingType.DEFAULT_SAMPLING);
         checkFinalApplicationStatusSucceeded(samplingConfig);
         List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
                 HdfsFileFormat.AVRO_FILE);
@@ -146,7 +147,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testDefaultSampling" })
     public void testBootstrapSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.BOOTSTRAP_SAMPLING);
@@ -163,42 +164,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
-    public void testStratifiedSampling() throws Exception {
-        SamplingConfiguration samplingConfig = getSamplingConfig();
-        samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
-        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
-        Map<String, Long> counterGroupResultMap = new HashMap<>();
-        counterGroupResultMap.put("0", 5496L);
-        counterGroupResultMap.put("1", 4504L);
-        samplingConfig.setCounterGroupResultMap(counterGroupResultMap);
-
-        checkFinalApplicationStatusSucceeded(samplingConfig);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
-                HdfsFileFormat.AVRO_FILE);
-        assertEquals(samplingFiles.size(), trainingSet + 2);
-        List<SampleStat> sampleStats = getSampleStats(samplingFiles);
-        checkSampleClassDistribution(sampleStats, STRIGENT_ERROR_RANGE);
-        printSamplingStats(samplingConfig.getSamplingType(), sampleStats);
-        deleteSamples();
-    }
-
-    @Test(groups = { "functional" })
-    public void testEventCounter() throws Exception {
-        EventCounterConfiguration samplingConfig = getEventCounterConfiguration();
-        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
-        samplingConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(), COUNTER_GROUP_NAME);
-        Map<String, Long> counterGroupResultMap = new HashMap<>();
-        checkFinalApplicationStatusSucceeded(samplingConfig, COUNTER_GROUP_NAME, counterGroupResultMap);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
-                HdfsFileFormat.AVRO_FILE);
-        assertEquals(samplingFiles.size(), 0);
-        assertTrue(MapUtils.isNotEmpty(counterGroupResultMap));
-        assertEquals(counterGroupResultMap.get("0") * 1L, 5496L);
-        assertEquals(counterGroupResultMap.get("1") * 1L, 4504L);
-    }
-
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testBootstrapSampling" })
     public void testUpSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.UP_SAMPLING);
@@ -217,7 +183,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testUpSampling" })
     public void testDownSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.DOWN_SAMPLING);
@@ -231,6 +197,41 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         assertEquals(samplingFiles.size(), trainingSet + 2);
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkEvenClassDistribution(sampleStats, DEFAULT_ERROR_RANGE);
+        printSamplingStats(samplingConfig.getSamplingType(), sampleStats);
+        deleteSamples();
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = { "testDownSampling" })
+    public void testEventCounter() throws Exception {
+        EventCounterConfiguration samplingConfig = getEventCounterConfiguration();
+        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
+        samplingConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(), COUNTER_GROUP_NAME);
+        Map<String, Long> counterGroupResultMap = new HashMap<>();
+        checkFinalApplicationStatusSucceeded(samplingConfig, COUNTER_GROUP_NAME, counterGroupResultMap);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
+        assertEquals(samplingFiles.size(), 0);
+        assertTrue(MapUtils.isNotEmpty(counterGroupResultMap));
+        assertEquals(counterGroupResultMap.get("0") * 1L, 5496L);
+        assertEquals(counterGroupResultMap.get("1") * 1L, 4504L);
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = { "testEventCounter" })
+    public void testStratifiedSampling() throws Exception {
+        SamplingConfiguration samplingConfig = getSamplingConfig();
+        samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
+        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
+        Map<String, Long> counterGroupResultMap = new HashMap<>();
+        counterGroupResultMap.put("0", 5496L);
+        counterGroupResultMap.put("1", 4504L);
+        samplingConfig.setCounterGroupResultMap(counterGroupResultMap);
+
+        checkFinalApplicationStatusSucceeded(samplingConfig);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
+        assertEquals(samplingFiles.size(), trainingSet + 2);
+        List<SampleStat> sampleStats = getSampleStats(samplingFiles);
+        checkSampleClassDistribution(sampleStats, STRIGENT_ERROR_RANGE);
         printSamplingStats(samplingConfig.getSamplingType(), sampleStats);
         deleteSamples();
     }

@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -23,17 +25,26 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.SamplingProperty;
+import com.latticeengines.domain.exposed.modeling.SamplingType;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends DataPlatformFunctionalTestNGBase {
+    private static final String TARGET_COLUMN_NAME = "P1_Event";
+    public static final String COUNTER_GROUP_NAME = "Event_Counter_Group";
 
     @Autowired
     private ModelingService modelingService;
+
+    @Autowired
+    protected MetadataProxy metadataProxy;
 
     private Model model;
 
@@ -101,6 +112,8 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
 
     @Test(groups = "sqoop", dependsOnMethods = { "loadData" })
     public void createSamples() throws Exception {
+        runEventCounter();
+
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setRandomSeed(123456L);
         samplingConfig.setTrainingPercentage(80);
@@ -115,7 +128,29 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         samplingConfig.setParallelEnabled(true);
+
+        samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
+        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
+        Map<String, Long> counterGroupResultMap = new HashMap<>();
+        counterGroupResultMap.put("0", 50L);
+        counterGroupResultMap.put("1", 60L);
+        counterGroupResultMap.put("2", 50L);
+        samplingConfig.setCounterGroupResultMap(counterGroupResultMap);
+
         ApplicationId appId = modelingService.createSamples(samplingConfig);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
+    private void runEventCounter() throws Exception {
+        EventCounterConfiguration eventCounterConfig = new EventCounterConfiguration();
+        eventCounterConfig.setCustomer(getCustomer());
+        eventCounterConfig.setTable(model.getTable());
+        eventCounterConfig.setParallelEnabled(true);
+        eventCounterConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
+        eventCounterConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(), COUNTER_GROUP_NAME);
+
+        ApplicationId appId = modelingService.createEventCounter(eventCounterConfig);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
