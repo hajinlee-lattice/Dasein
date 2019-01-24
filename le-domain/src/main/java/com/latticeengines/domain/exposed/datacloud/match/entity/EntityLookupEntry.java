@@ -83,7 +83,8 @@ public class EntityLookupEntry {
         DUNS(0, 1, Mapping.MANY_TO_ONE),
         NAME_COUNTRY(0, 2, Mapping.MANY_TO_MANY);
 
-        private static final String DELIMITER = "_";
+        private static final String DELIMITER = "||";
+        private static final String DELIMITER_REGEX = "\\|\\|";
 
         public final Mapping mapping;
         private final int nKeys;
@@ -138,7 +139,7 @@ public class EntityLookupEntry {
             } else if (nArgs == 1) {
                 return new String[] { serializedArgs };
             }
-            String[] args = serializedArgs.split(DELIMITER);
+            String[] args = serializedArgs.split(DELIMITER_REGEX);
             check(nArgs, args);
             return args;
         }
