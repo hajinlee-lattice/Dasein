@@ -23,8 +23,18 @@ public class FieldMapping {
     private boolean mappedToLatticeField;
 
     // Represents the date/time format string provided by the user for a date attributes.  Eg. "MM/DD/YYYY 00:00:00"
+    //@JsonProperty
+    //private String dateTimeFormatString;
+
+    // Represents the date format string provided by the user for a date attributes.  Eg. "MM/DD/YYYY"
     @JsonProperty
-    private String dateTimeFormatString;
+    private String dateFormatString;
+
+    // Represents the time format string provided by the user for a date attributes.  Eg. "00:00:00 24H"
+    @JsonProperty
+    private String timeFormatString;
+
+
 
     // Represents the timezone to interpret date/time values provided by the user for a date attribute.
     @JsonProperty
@@ -70,12 +80,30 @@ public class FieldMapping {
         this.mappedToLatticeField = mappedToLatticeField;
     }
 
+    /*
     public String getDateTimeFormatString() {
         return this.dateTimeFormatString;
     }
 
     public void setDateTimeFormatString(String dateTimeFormatString) {
         this.dateTimeFormatString = dateTimeFormatString;
+    }
+    */
+
+    public String getDateFormatString() {
+        return this.dateFormatString;
+    }
+
+    public void setDateFormatString(String dateFormatString) {
+        this.dateFormatString = dateFormatString;
+    }
+
+    public String getTimeFormatString() {
+        return this.timeFormatString;
+    }
+
+    public void setTimeFormatString(String timeFormatString) {
+        this.timeFormatString = timeFormatString;
     }
 
     public String getTimezone() { return timezone; }

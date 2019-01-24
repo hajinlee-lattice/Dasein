@@ -157,20 +157,28 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE,
                         feedType);
 
-        String dateTimeFormatString1 = "DD/MM/YYYY";
+        //String dateTimeFormatString1 = "DD/MM/YYYY";
+        String dateFormatString1 = "DD/MM/YYYY";
+        String timeFormatString1 = null;
         String timezone1 = "America/New_York";
-        String dateTimeFormatString2 = "MM.DD.YY 00:00:00 24H";
+        //String dateTimeFormatString2 = "MM.DD.YY 00:00:00 24H";
+        String dateFormatString2 = "MM.DD.YY";
+        String timeFormatString2 = "00:00:00 24H";
         String timezone2 = "GMT+8";
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (mapping.getUserField().equals("TestDate1")) {
                 mapping.setFieldType(UserDefinedType.DATE);
                 mapping.setMappedToLatticeField(false);
-                mapping.setDateTimeFormatString(dateTimeFormatString1);
+                //mapping.setDateTimeFormatString(dateTimeFormatString1);
+                mapping.setDateFormatString(dateFormatString1);
+                mapping.setTimeFormatString(timeFormatString1);
                 mapping.setTimezone(timezone1);
             } else if (mapping.getUserField().equals("TestDate2")) {
                 mapping.setFieldType(UserDefinedType.DATE);
                 mapping.setMappedToLatticeField(false);
-                mapping.setDateTimeFormatString(dateTimeFormatString2);
+                //mapping.setDateTimeFormatString(dateTimeFormatString2);
+                mapping.setDateFormatString(dateFormatString2);
+                mapping.setTimeFormatString(timeFormatString2);
                 mapping.setTimezone(timezone2);
             }
         }
@@ -209,7 +217,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String fieldName1 = "user_TestDate1";
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
         Assert.assertEquals(schema.getField(fieldName1).schema().getTypes().get(0).getType(), Schema.Type.LONG);
-        Assert.assertEquals(schema.getField(fieldName1).getProp("DateTimeFormatString"), dateTimeFormatString1);
+        //Assert.assertEquals(schema.getField(fieldName1).getProp("DateTimeFormatString"), dateTimeFormatString1);
+        Assert.assertEquals(schema.getField(fieldName1).getProp("DateFormatString"), dateFormatString1);
+        Assert.assertEquals(schema.getField(fieldName1).getProp("TimeFormatString"), timeFormatString1);
         Assert.assertEquals(schema.getField(fieldName1).getProp("Timezone"), timezone1);
         // Check first three values of column.
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
@@ -229,7 +239,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         // Validate TestDate2
         String fieldName2 = "user_TestDate2";
         Assert.assertEquals(schema.getField(fieldName2).schema().getTypes().get(0).getType(), Schema.Type.LONG);
-        Assert.assertEquals(schema.getField(fieldName2).getProp("DateTimeFormatString"), dateTimeFormatString2);
+        //Assert.assertEquals(schema.getField(fieldName2).getProp("DateTimeFormatString"), dateTimeFormatString2);
+        Assert.assertEquals(schema.getField(fieldName2).getProp("DateFormatString"), dateFormatString2);
+        Assert.assertEquals(schema.getField(fieldName2).getProp("TimeFormatString"), timeFormatString2);
         Assert.assertEquals(schema.getField(fieldName2).getProp("Timezone"), timezone2);
         // Check first three values of column.
         long expected2a = computeTimestamp("1.2.18 1:1:1", true,

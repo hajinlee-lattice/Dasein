@@ -359,10 +359,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 return new Integer(parseStringToNumber(fieldCsvValue).intValue());
             case LONG:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
-                    LOG.info("Date value from csv: " + fieldCsvValue + " Date/Time Format: "
-                            + attr.getDateTimeFormatString() + " Timezone: " + attr.getTimezone());
-                    Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateTimeFormatString(),
-                            attr.getTimezone());
+                    LOG.info("Date value from csv: " + fieldCsvValue + " Date Format: " + attr.getDateFormatString()
+                            + " Time Format: " + attr.getTimeFormatString() + " Timezone: " + attr.getTimezone());
+                    Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
+                            attr.getTimeFormatString(), attr.getTimezone());
                     if (timestamp < 0) {
                         throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
                     }
