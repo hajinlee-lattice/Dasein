@@ -3,6 +3,8 @@ package com.latticeengines.aws.emr.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,8 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 public class EMRServiceImpl implements EMRService {
 
     private static final Logger log = LoggerFactory.getLogger(EMRServiceImpl.class);
+    private static final Map<String, String> masterIpCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> clusterIdCache = new ConcurrentHashMap<>();
 
     private AmazonElasticMapReduce emrClient;
 
@@ -59,25 +63,42 @@ public class EMRServiceImpl implements EMRService {
 
     @Override
     public String getMasterIp(String clusterId) {
-        String masterIp = null;
-        AmazonElasticMapReduce emr = getEmr();
-        if (StringUtils.isNotBlank(clusterId)) {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
-                    Collections.singleton(NoSuchEntityException.class));
-            DescribeClusterResult cluster = retryTemplate.execute(context -> //
-                    emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
-            String masterDNS = cluster.getCluster().getMasterPublicDnsName();
-            ListInstancesResult instances = retryTemplate.execute(context -> //
-                    emr.listInstances(new ListInstancesRequest().withClusterId(clusterId)));
-            for (Instance instance : instances.getInstances()) {
-                String instancePublicDNS = instance.getPublicDnsName();
-                String instancePrivateDNS = instance.getPrivateDnsName();
-                if (masterDNS.equals(instancePublicDNS) || masterDNS.equals(instancePrivateDNS)) {
-                    masterIp = instance.getPrivateIpAddress();
+        if (!masterIpCache.containsKey(clusterId)) {
+            synchronized (this) {
+                if (!masterIpCache.containsKey(clusterId)) {
+                    String masterIp = null;
+                    AmazonElasticMapReduce emr = getEmr();
+                    if (StringUtils.isNotBlank(clusterId)) {
+                        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, null, //
+                                Collections.singleton(NoSuchEntityException.class));
+                        DescribeClusterResult cluster = retryTemplate.execute(context -> {
+                            if (context.getRetryCount() > 0) {
+                                log.info("(Attempt=" + (context.getRetryCount() + 1) + ") describe cluster " + clusterId);
+                            }
+                            return emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId));
+                        });
+                        String masterDNS = cluster.getCluster().getMasterPublicDnsName();
+                        ListInstancesResult instances = retryTemplate.execute(context -> {
+                            if (context.getRetryCount() > 0) {
+                                log.info("(Attempt=" + (context.getRetryCount() + 1) + ") list instances in cluster " + clusterId);
+                            }
+                            return emr.listInstances(new ListInstancesRequest().withClusterId(clusterId));
+                        });
+                        for (Instance instance : instances.getInstances()) {
+                            String instancePublicDNS = instance.getPublicDnsName();
+                            String instancePrivateDNS = instance.getPrivateDnsName();
+                            if (masterDNS.equals(instancePublicDNS) || masterDNS.equals(instancePrivateDNS)) {
+                                masterIp = instance.getPrivateIpAddress();
+                            }
+                        }
+                    }
+                    if (StringUtils.isNotBlank(masterIp)) {
+                        masterIpCache.putIfAbsent(clusterId, masterIp);
+                    }
                 }
             }
         }
-        return masterIp;
+        return masterIpCache.get(clusterId);
     }
 
     @Override
@@ -146,14 +167,20 @@ public class EMRServiceImpl implements EMRService {
 
     @Override
     public String getClusterId(String clusterName) {
-        ListClustersResult clustersResult = listClusters();
-        for (ClusterSummary summary : clustersResult.getClusters()) {
-            if (summary.getName().endsWith(clusterName)) {
-                log.info("Found an EMR cluster named " + summary.getName());
-                return summary.getId();
+        if (!clusterIdCache.containsKey(clusterName)) {
+            synchronized (this) {
+                if (!clusterIdCache.containsKey(clusterName)) {
+                    ListClustersResult clustersResult = listClusters();
+                    for (ClusterSummary summary : clustersResult.getClusters()) {
+                        if (summary.getName().endsWith(clusterName)) {
+                            log.info("Found an EMR cluster named " + summary.getName());
+                            clusterIdCache.put(clusterName, summary.getId());
+                        }
+                    }
+                }
             }
         }
-        return null;
+        return clusterIdCache.get(clusterName);
     }
 
     public List<ClusterSummary> findClusters(Predicate<ClusterSummary> filter) {
