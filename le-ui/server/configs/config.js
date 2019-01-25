@@ -27,7 +27,7 @@ function getRoutes(app){
     var routes = '../routes/routes_'+app+'_';
     if(env_vars.COMPRESSED){
         routes = routes.concat('dist');
-    }else {
+    } else {
         routes = routes.concat('dev');
     }
    

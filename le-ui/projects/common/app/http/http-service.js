@@ -12,9 +12,6 @@ import Message, {
     WARNING
 } from '../utilities/message';
 
-//let http;
-
-let observables;
 /**
  *
  * @param {*} axiosObj
@@ -31,7 +28,7 @@ const init = () => {
     if (!window['http']) {
         console.log('init', window['http'], typeof window['http']);
         window['http'] = axios;
-        observables = new Observables();
+        window['observables'] = new Observables();
     }
 };
 
@@ -50,7 +47,7 @@ const httpService = {
         setParams(http.defaults.headers.common, headerObj);
     },
     unsubscribeObservable: observer => {
-        observables.removeObservable(observer.getName());
+        window['observables'].removeObservable(observer.getName());
     },
     get: (url, observer, headers) => {
         let observable = Observable.create(obs => {
@@ -91,7 +88,7 @@ const httpService = {
                     obs.complete();
                 });
         }).subscribe(observer);
-        observables.addObservable(observer.getName(), observable);
+        window['observables'].addObservable(observer.getName(), observable);
     },
 
     post: (url, body, observer, headers) => {
@@ -133,7 +130,7 @@ const httpService = {
                     obs.complete();
                 });
         }).subscribe(observer);
-        observables.addObservable(observer.getName(), observable);
+        window['observables'].addObservable(observer.getName(), observable);
     },
     put: (url, body, observer, headers) => {
         let observable = Observable.create(obs => {
@@ -172,7 +169,7 @@ const httpService = {
                     obs.complete();
                 });
         }).subscribe(observer);
-        observables.addObservable(observer.getName(), observable);
+        window['observables'].addObservable(observer.getName(), observable);
     }
 };
 init();

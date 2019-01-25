@@ -59,6 +59,12 @@ module.exports = {
             remote_host: process.env.TRAY_API_URL || "http://localhost:8081",
             remote_path: "",
             type: "tray_pipe"
+        },
+        "/zdsk": {
+            local_path: "/zdsk",
+            remote_host: process.env.TRAY_API_URL || "http://localhost:8081",
+            remote_path: "",
+            type: "zdsk_pipe"
         }
     }
 };

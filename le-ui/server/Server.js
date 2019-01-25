@@ -21,10 +21,9 @@ const chalk = require("chalk");
 const cors = require("cors");
 const wsproxy = require("http-proxy-middleware");
 const DateUtil = require("./utilities/DateUtil");
-/*
-const proxy     = require('express-http-proxy');
-*/
 const session = require("express-session");
+const jwt = require('jsonwebtoken');
+const uuid = require('uuid/v4');
 
 class Server {
     constructor(express, app, options) {
@@ -167,7 +166,7 @@ class Server {
 
             this.app.use(
                 morgan("dev", {
-                    skip: function(req, res) {
+                    skip: function (req, res) {
                         return res.statusCode < 400;
                     }
                 })
@@ -195,7 +194,7 @@ class Server {
     setProxies() {
         const options = this.options;
         console.log('=============================================');
-        console.log('SET PROXIES ',options.config.proxies);
+        console.log('SET PROXIES ', options.config.proxies);
         console.log('=============================================');
         for (let path in options.config.proxies) {
             const proxy = options.config.proxies[path];
@@ -230,6 +229,13 @@ class Server {
                     break;
                 case 'tray_pipe':
                     this.createTrayProxy(
+                        proxy.remote_host,
+                        proxy.local_path,
+                        proxy.remote_path
+                    );
+                    break;
+                case 'zdsk_pipe':
+                    this.createZendeskProxy(
                         proxy.remote_host,
                         proxy.local_path,
                         proxy.remote_path
@@ -310,7 +316,7 @@ class Server {
                     } catch (err) {
                         console.log(
                             chalk.red(DateUtil.getTimeStamp() + ":apiproxy>") +
-                                err
+                            err
                         );
                     }
                 });
@@ -427,8 +433,8 @@ class Server {
             this.app.use(API_PATH, (req, res) => {
                 try {
                     let authorization = (req.headers && req.headers.UserAccessToken) ?
-                            req.headers.UserAccessToken :
-                            "6cadf407-a686-41be-92e7-36e37c97c1e3";
+                        req.headers.UserAccessToken :
+                        "6cadf407-a686-41be-92e7-36e37c97c1e3";
 
                     const options = {
                         url: API_URL + PATH,
@@ -445,6 +451,33 @@ class Server {
                 } catch (err) {
                     console.log(
                         chalk.red(DateUtil.getTimeStamp() + ":TRAY PROXY ") + err
+                    );
+                }
+            });
+        }
+    }
+
+    createZendeskProxy(API_URL, API_PATH, PATH) {
+        if (API_URL) {
+            (API_PATH = API_PATH || "/zdsk");
+            console.log(
+                chalk.white(">") + " ZENDESK PROXY",
+                API_PATH,
+                "\n\t" + API_URL + PATH
+            );
+            this.app.use(API_PATH, (req, res) => {
+                try {
+                    var payload = {
+                        //name: 'Brian Rackle',
+                        //email: 'brackle@lattice-engines.com',
+                        iat: (new Date().getTime() / 1000),
+                        jti: uuid.v4()
+                    };
+                    var token = jwt.sign(payload, '52fb614cdedb5d2b1820db7bc01e9c64');
+                    res.send(token);
+                } catch (err) {
+                    console.log(
+                        chalk.red(DateUtil.getTimeStamp() + ":ZENDESK PROXY ") + err
                     );
                 }
             });
@@ -571,8 +604,8 @@ class Server {
             this.httpServer.listen(config.protocols.http, err => {
                 console.log(
                     chalk.green(config.TIMESTAMP + ">") +
-                        " LISTENING: http://localhost:" +
-                        config.protocols.http
+                    " LISTENING: http://localhost:" +
+                    config.protocols.http
                 );
 
                 cb(err, {
@@ -587,8 +620,8 @@ class Server {
             this.httpsServer.listen(config.protocols.https, err => {
                 console.log(
                     chalk.green(config.TIMESTAMP + ">") +
-                        " LISTENING: https://localhost:" +
-                        config.protocols.https
+                    " LISTENING: https://localhost:" +
+                    config.protocols.https
                 );
                 console.log("\n");
 
