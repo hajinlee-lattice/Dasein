@@ -79,17 +79,23 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
     private void setJobProperties(DataFlowConfiguration dataFlowConfig) {
         if (configuration.getJobProperties() == null) {
-            Properties jobProperties = new Properties();
+            Properties jobProperties = initJobProperties();
             int partitions = cascadingPartitions * scalingMultiplier;
             jobProperties.put("mapreduce.job.reduces", String.valueOf(partitions));
             jobProperties.put("mapred.reduce.tasks", String.valueOf(partitions));
-            jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
-            jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
+
             dataFlowConfig.setJobProperties(jobProperties);
             dataFlowConfig.setPartitions(partitions);
         } else {
             dataFlowConfig.setJobProperties(configuration.getJobProperties());
         }
+    }
+
+    protected Properties initJobProperties() {
+        Properties jobProperties = new Properties();
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
+        return jobProperties;
     }
 
     private List<DataFlowSource> createDataFlowSources(DataFlowParameters parameters) {
