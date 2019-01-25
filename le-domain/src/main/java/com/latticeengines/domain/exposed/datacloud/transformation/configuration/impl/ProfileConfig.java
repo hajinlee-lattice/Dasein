@@ -38,7 +38,7 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
                                      // not be encoded
 
     @JsonProperty("EvaluationDateAsTimestamp")
-    private long evaluationDateAsTimestamp; // Timestamp the PA job is run for use for Date Attribute profiling.
+    private long evaluationDateAsTimestamp = -1; // Timestamp the PA job is run for use for Date Attribute profiling.
 
     public ProfileConfig() {
 
@@ -79,9 +79,13 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
         this.minBucketSize = minBucketSize;
     }
 
-    public String getDataCloudVersion() { return dataCloudVersion; }
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
 
-    public void setDataCloudVersion(String dataCloudVersion) { this.dataCloudVersion = dataCloudVersion; }
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
 
     public Long getRandSeed() {
         return randSeed;
@@ -131,8 +135,12 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
         this.maxDiscrete = maxDiscrete;
     }
 
-    public long getEvaluationDateAsTimestamp() { return evaluationDateAsTimestamp; }
+    public long getEvaluationDateAsTimestamp() {
+        return evaluationDateAsTimestamp;
+    }
 
-    public void setEvaluationDateAsTimestamp(long evaluationDateAsTimestamp) { this.evaluationDateAsTimestamp = evaluationDateAsTimestamp; }
+    public void setEvaluationDateAsTimestamp(long evaluationDateAsTimestamp) {
+        this.evaluationDateAsTimestamp = evaluationDateAsTimestamp;
+    }
 
 }

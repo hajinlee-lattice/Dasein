@@ -6,6 +6,12 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +41,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportCon
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
@@ -43,8 +50,19 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     private static final Logger log = LoggerFactory.getLogger(ProfileStepBase.class);
 
+    // The date that the Process/Analyze pipeline was run as a string.
+    protected String evaluationDateStr = null;
+    // The timestamp representing the beginning of the day that the Process/Analyze pipeline was run.  Used for date
+    // attribute profiling.
+    protected Long evaluationDateAsTimestamp = null;
+    // The date format pattern desired by the UI for Last Data Refresh Attribute field.
+    private static final DateTimeFormatter REFRESH_DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    protected PeriodProxy periodProxy;
 
     @Inject
     protected MetadataProxy metadataProxy;
@@ -82,6 +100,9 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
+        if (evaluationDateAsTimestamp != null) {
+            conf.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);
+        }
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -219,6 +240,46 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     private String getInputPath(String tableName) {
         return metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+    }
+
+    protected void setEvaluationDateStrAndTimestamp() {
+        // Convert the evaluation date (generally the current date which is when the pipeline is running) to a
+        // timestamp.
+        evaluationDateStr = findEvaluationDate();
+        LocalDate evaluationDate;
+        if (!StringUtils.isBlank(evaluationDateStr)) {
+            try {
+                evaluationDate = LocalDate.parse(evaluationDateStr, REFRESH_DATE_FORMATTER);
+            } catch (DateTimeParseException e) {
+                log.error("Could not parse evaluation date string \"" + evaluationDateStr
+                        + "\" from Period Proxy as an ISO formatted date");
+                log.error("Error is: " + e.getLocalizedMessage());
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                log.error(sw.toString());
+                evaluationDate = LocalDate.now();
+                evaluationDateStr = evaluationDate.format(REFRESH_DATE_FORMATTER);
+            }
+        } else {
+            log.warn("Evaluation Date from Period Proxy is blank.  Profile Account will generate date");
+            evaluationDate = LocalDate.now();
+            evaluationDateStr = evaluationDate.format(REFRESH_DATE_FORMATTER);
+        }
+        evaluationDateAsTimestamp = evaluationDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
+        log.info("Evaluation date for Profile Account date attributes: " + evaluationDateStr);
+        log.info("Evaluation timestamp for Profile Account date attributes: " + evaluationDateAsTimestamp);
+    }
+
+    protected String findEvaluationDate() {
+        String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isBlank(evaluationDate)) {
+            log.error("Failed to find evaluation date from workflow context");
+            evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+            if (StringUtils.isBlank(evaluationDate)) {
+                log.error("Failed to get evaluation date from Period Proxy.");
+            }
+        }
+        return evaluationDate;
     }
 
 }

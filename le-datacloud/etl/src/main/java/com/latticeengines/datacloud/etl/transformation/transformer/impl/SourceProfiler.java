@@ -5,6 +5,8 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PROP_KEY;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -155,6 +157,13 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
             ProfileConfig config) {
         initProfileParameters(config, paras);
+        // Make sure the evaluation date is set to something.  If it isn't, then set it to the beginning of today
+        // at UTC.
+        if (config.getEvaluationDateAsTimestamp() == -1) {
+            long evalDate = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
+            config.setEvaluationDateAsTimestamp(evalDate);
+            log.warn("Evaluation Date not set before SourceProfiler, setting to " + evalDate);
+        }
         classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, paras);
     }
 
