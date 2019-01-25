@@ -2,6 +2,7 @@ import './accountids/accountids.component';
 import './calendar/calendar.component';
 import './contactids/contactids.component';
 import './customfields/customfields.component';
+import './customfields/date-options.component';
 import './jobstatus/jobstatus.component';
 import './latticefields/latticefields.component';
 import './producthierarchy/producthierarchy.component';
