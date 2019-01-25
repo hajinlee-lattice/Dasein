@@ -26,8 +26,8 @@ public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<DomainOwnershipCo
     private final static String ORB_SRC_SEC_DOMAIN = "SecondaryDomain";
     private final static String PRIMARY_ROOT_DUNS = "PRIMARY_ROOT_DUNS";
     private final static String SECONDARY_ROOT_DUNS = "SECONDARY_ROOT_DUNS";
-    private final static String RETAIN = "RETAIN";
-    private final static String RETAIN_YES = "true";
+    private final static String MISSING_ROOT_DUNS = "MISSING_ROOT_DUNS";
+    private final static String REASON_TYPE = "REASON_TYPE";
 
     @Override
     public String getDataFlowBeanName() {
@@ -63,19 +63,21 @@ public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<DomainOwnershipCo
                 .rename(new FieldList(ROOT_DUNS, DataCloudConstants.AMS_ATTR_DOMAIN),
                         new FieldList(SECONDARY_ROOT_DUNS, renameField(DataCloudConstants.AMS_ATTR_DOMAIN)));
 
-        // First condition is that secondary domain is not in accountMasterSeed.
-        // Second condition is that they belongs to the same rootDuns.
-        // This will ensure Franchises (primaryRootDuns = secRootDuns = null) are not cleaned up as well
-        String filterRootDuns = "(" + SECONDARY_ROOT_DUNS + " == null || " + "(" + PRIMARY_ROOT_DUNS
-                + " != null && " + SECONDARY_ROOT_DUNS + " != null && " + PRIMARY_ROOT_DUNS
-                + ".equals(" + SECONDARY_ROOT_DUNS + ")))";
-        String filterRetainExp = RETAIN + ".equals(\"" + RETAIN_YES + "\")";
-        FieldMetadata fms = new FieldMetadata(RETAIN, String.class);
+        // SEC_ROOT_DUNS = null case -> we will retain only with REASON_TYPE =
+        // MISSING_ROOT_DUNS or NULL (means doesn't exist in amSeed/domain
+        // ownership table). Other reason types ->
+        // FRANCHISE/MULTIPLE_LARGE_COMPANY/OTHER(firmographics same and hence
+        // cannot select) : we will not retain as it
+        // will add up unwanted domains. We dont consider case where primary
+        // root duns doesnt exist and secondary root duns for now.
+        String filterRootDuns = String.format(
+                "(%s == null && (%s == null || %s.equals(\"%s\"))) || (%s != null && %s != null && %s.equals(%s))",
+                SECONDARY_ROOT_DUNS, REASON_TYPE, REASON_TYPE, MISSING_ROOT_DUNS, PRIMARY_ROOT_DUNS,
+                SECONDARY_ROOT_DUNS, PRIMARY_ROOT_DUNS, SECONDARY_ROOT_DUNS);
 
         // Compare primRootDuns and secRootDuns only when domain is matched
         popPrimSecRootDuns = popPrimSecRootDuns //
-                .apply(filterRootDuns, new FieldList(PRIMARY_ROOT_DUNS, SECONDARY_ROOT_DUNS), fms) //
-                .filter(filterRetainExp, new FieldList(RETAIN)) //
+                .filter(filterRootDuns, new FieldList(PRIMARY_ROOT_DUNS, SECONDARY_ROOT_DUNS, REASON_TYPE)) //
                 .retain(new FieldList(orbSecSrc.getFieldNames()));
 
         // populate alexa rank for primary domains
@@ -84,7 +86,7 @@ public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<DomainOwnershipCo
                 .retain(new FieldList(ORB_SEC_PRI_DOMAIN, ORB_SRC_SEC_DOMAIN, DataCloudConstants.ALEXA_ATTR_RANK));
 
         // group by orbSecDom to check if more than one orbPriDomain pointing to same orbSecDomain
-        // and select one of them having higher alexa rank
+        // and select one of them having lower alexa rank
         OrbSecSrcSelectPriDomAggregator agg = new OrbSecSrcSelectPriDomAggregator(
                 new Fields(ORB_SEC_PRI_DOMAIN, ORB_SRC_SEC_DOMAIN), ORB_SEC_PRI_DOMAIN, //
                 ORB_SRC_SEC_DOMAIN, DataCloudConstants.ALEXA_ATTR_RANK);

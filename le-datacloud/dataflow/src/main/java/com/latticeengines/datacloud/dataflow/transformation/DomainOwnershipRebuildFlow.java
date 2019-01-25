@@ -69,8 +69,7 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
         // firmographic attributes of root entry appended
         Node domRootDunsWithFirmo = amsDomDuns //
                 .join(DataCloudConstants.AMS_ATTR_DUNS, amsDunsWithRootFirmo, DataCloudConstants.AMS_ATTR_DUNS,
-                        JoinType.INNER) //
-                .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS), 1);
+                        JoinType.INNER);
 
         Node domOwnershipTable = constructDomOwnershipTable(domRootDunsWithFirmo, config);
         return domOwnershipTable;

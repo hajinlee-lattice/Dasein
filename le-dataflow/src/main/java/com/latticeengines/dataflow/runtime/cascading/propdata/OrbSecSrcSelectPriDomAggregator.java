@@ -29,7 +29,7 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
     public static class Context extends BaseAggregator.Context {
         String orbPriDomain = null;
         String orbSecDomain = null;
-        int alexaRank = 0;
+        Integer alexaRank = null;
         Tuple result;
     }
 
@@ -57,11 +57,17 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        int alexaRankVal = arguments.getInteger(alexaRankField);
+        Integer alexaRankVal = (Integer) arguments.getObject(alexaRankField);
         String orbPriDomain = arguments.getString(orbPriDomainField);
         String orbSecDomain = arguments.getString(orbSecDomainField);
-        if (context.orbPriDomain == null || alexaRankVal < context.alexaRank) {
+        if (context.orbPriDomain == null
+                || (alexaRankVal != null && context.alexaRank == null)
+                || (alexaRankVal != null && context.alexaRank != null
+                        && alexaRankVal.intValue() < context.alexaRank.intValue())) {
             context.orbPriDomain = orbPriDomain;
+            if (alexaRankVal != null) {
+                context.alexaRank = alexaRankVal;
+            }
         }
         if (context.orbSecDomain == null) {
             context.orbSecDomain = orbSecDomain;

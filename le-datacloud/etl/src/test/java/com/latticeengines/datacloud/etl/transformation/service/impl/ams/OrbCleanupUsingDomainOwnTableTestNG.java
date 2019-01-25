@@ -93,15 +93,10 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_URL, String.class));
         schema.add(Pair.of(DataCloudConstants.ALEXA_ATTR_RANK, Integer.class));
         Object[][] data = new Object[][] { //
-                { "paypal.com", 700 }, { "sbiGu.com", 32 }, { "sbiDu.com", 36 },
-                { "netappGu.com", 24 }, { "mongodbGu.com", 89 }, { "netappDuns1.com", 83 },
-                { "mongoDbDuns1.com", 11 }, { "worldwildlife.org", 87 },
-                { "wordwildlifeGu.org", 666 }, { "socialorg.com", 55 }, { "karlDuns2.com", 101 },
-                { "sbiDuns2.com", 105 }, { "sbiDuns1.com", 107 }, { "tesla.com", 108 },
-                { "netsuite.com", 110 }, { "lyft.com", 114 }, { "oldnavy.com", 118 },
-                { "oracle.com", 134 }, { "datos.io", null },
-                { "salesforce.com", null },
-                { "netapp.com", 23 }, { "emc.com", null } };
+                { "paypal.com", 700 }, { "sbiDu.com", 36 },
+                { "netappDuns1.com", 83 }, { "karlDuns2.com", 101 }, { "lyft.com", 114 },
+                { "oldnavy.com", 118 }, { "oracle.com", 134 }, { "datos.io", null },
+                { "salesforce.com", null }, { "emc.com", null } };
         uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, schema, data);
     }
 
@@ -115,20 +110,16 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         schema.add(Pair.of(IS_NON_PROFITABLE, String.class));
         Object[][] data = new Object[][] {
          // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
-            // SINGLE TREE : not cleaned up
+            // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             { "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
             { "sbiDu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false"}, //
+            
+            // PriRootDuns != null, SecRootDuns == null
             { "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
-            // FRANCHISE : not cleaned up
-            { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
-            // OTHER : not cleaned up
-            { "tesla.com", null, null, 3, "OTHER", "false" }, //
-            // Reasons : HIGHER_NUM_OF_LOC, HIGHER_SALES_VOLUME := Cleaned up
+            
+            // PriRootDuns != null, SecRootDuns != null, PriRootDuns != SecRootDuns
             { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //
             { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
-            // Missing root DUNS entry case (in single or multiple trees)
-            // rootDuns = DUNS900
-            { "netsuite.com", null, null, 1, "MISSING_ROOT_DUNS", "false" }, //
         };
         uploadBaseSourceData(domOwnTable.getSourceName(), baseSourceVersion, schema, data);
     }
@@ -145,10 +136,9 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
                 { "sbiDuns2.com", "karlDuns2.com" },
                 // PriRootDuns != null, SecRootDuns == null
                 { "karlDuns2.com", "netappDuns1.com" }, { "karlDuns2.com", "oldnavy.com" },
+                { "netappGu.com", "paypal.com" },
                 // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
                 { "sbiGu.com", "sbiDu.com" },
-                // PriRootDuns != null, SecRootDuns == null
-                { "netappGu.com", "paypal.com" },
                 // Different PriDomains with same SecDomain : retain based on which has lower alexa rank
                 { "sap.com", "oracle.com" }, { "sap.com", "netapp.com" },
                 { "sap.com", "emc.com" }, { "data.com", "datos.io" },
@@ -156,7 +146,7 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         uploadBaseSourceData(orbSec.getSourceName(), baseSourceVersion, schema, data);
     }
 
-    Object[][] orbSecSrcCleanedupValues = new Object[][] { //
+    Object[][] orbSecSrcCleanedupDeterministicSet = new Object[][] { //
             // Schema: PrimaryDomain, SecondaryDomain
 
             // PriRootDuns == null, SecRootDuns == null
@@ -164,30 +154,44 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             { "sbiDu.com", "sbiGu.com" },
             // Different PriDomains with same SecDomain : retain based on which has lower alexa rank
-            { "netapp.com", "sap.com" }, { "salesforce.com", "data.com" },
-            { "datos.io", "data.com" }
+            { "oracle.com", "sap.com" },
     };
+
+    Object[][] orbSecSrcCleanedupNotDeterministicSet = new Object[][] { //
+            // Schema: PrimaryDomain, SecondaryDomain
+
+            // Diff PriDomains with same Sec Domain : with same alexa rank = so
+            // anyone will be retained
+            { "salesforce.com", "data.com" }, { "datos.io", "data.com" } };
 
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        Map<String, Object[]> expectedData = new HashMap<>();
-        for (Object[] data : orbSecSrcCleanedupValues) {
-            expectedData.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
+        Map<String, Object[]> expectedDeterministicSet = new HashMap<>();
+        for (Object[] data : orbSecSrcCleanedupDeterministicSet) {
+            expectedDeterministicSet.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
+        }
+        Map<String, Object[]> expectedNonDeterministicSet = new HashMap<>();
+        for (Object[] data : orbSecSrcCleanedupNotDeterministicSet) {
+            expectedNonDeterministicSet.put(String.valueOf(data[0]) + String.valueOf(data[1]),
+                    data);
         }
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
             String priDomain = String.valueOf(record.get(0));
             String secDomain = String.valueOf(record.get(1));
-            Object[] expected = expectedData.get(priDomain + secDomain);
+            Object[] expected = expectedDeterministicSet.get(priDomain + secDomain);
+            if (expected == null) {
+                expected = expectedNonDeterministicSet.get(priDomain + secDomain);
+            }
             Assert.assertTrue(isObjEquals(priDomain, expected[0]));
             Assert.assertTrue(isObjEquals(secDomain, expected[1]));
-            expectedData.remove(priDomain + secDomain);
+            expectedDeterministicSet.remove(priDomain + secDomain);
             rowCount++;
         }
-        Assert.assertTrue(expectedData.size() == 1);
+        Assert.assertTrue(expectedDeterministicSet.size() == 0);
         Assert.assertEquals(rowCount, 4);
     }
 
