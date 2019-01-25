@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -35,7 +37,9 @@ public class DiscreteBucket extends BucketAlgorithm {
     public List<String> generateLabelsInternal() {
         List<String> labels = new ArrayList<>();
         labels.add(null);
-        values.forEach(v -> labels.add(String.valueOf(v)));
+        if (CollectionUtils.isNotEmpty(values)) {
+            values.forEach(v -> labels.add(String.valueOf(v)));
+        }
         return labels;
     }
 
