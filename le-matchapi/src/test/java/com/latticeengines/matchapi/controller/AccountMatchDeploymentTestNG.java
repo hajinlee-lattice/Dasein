@@ -248,7 +248,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private Map<String, MatchInput.EntityKeyMap> prepareKeyMaps() {
         Map<String, MatchInput.EntityKeyMap> keyMaps = new HashMap<>();
         MatchInput.EntityKeyMap keyMap = new MatchInput.EntityKeyMap();
-        keyMap.setBusinessEntity(BusinessEntity.Account.name());
         Map<MatchKey, List<String>> map = MatchKeyUtils.resolveKeyMap(Arrays.asList(FIELDS));
         map.put(MatchKey.SystemId, Arrays.asList(InterfaceName.AccountId.name(), SFDC_ID));
         keyMap.setKeyMap(map);
@@ -261,7 +260,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private Map<String, MatchInput.EntityKeyMap> prepareKeyMapsFetchOnly() {
         Map<String, MatchInput.EntityKeyMap> keyMaps = new HashMap<>();
         MatchInput.EntityKeyMap keyMap = new MatchInput.EntityKeyMap();
-        keyMap.setBusinessEntity(BusinessEntity.Account.name());
         Map<MatchKey, List<String>> map = MatchKeyUtils.resolveKeyMap(Arrays.asList(FIELDS_FETCHONLY));
         map.put(MatchKey.EntityId, Arrays.asList(FIELDS_FETCHONLY));
         keyMap.setKeyMap(map);
