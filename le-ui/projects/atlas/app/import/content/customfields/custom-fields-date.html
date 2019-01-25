@@ -17,151 +17,86 @@
       Field(s) dropped by default: {{ vm.getNumberDroppedFields() }}
     </p>
   </div>
-  <div class="le-grid" ng-init="fieldMapping = fieldMapping || {}">
-    <div class="le-header le-row">
-      <div class="le-cell le-col-start-1 le-col-span-5">
-        <div class="container-flex">
-          <span>Custom Field</span>
-          <div>
-            <span class="more-info"
-              >&#105;
-              <div class="tooltip_">
-                <div class="cover">
-                  <p>
-                    Unmapped fields are shown here and will be treated as Custom
-                    Fields unless Ignored.
-                  </p>
-                </div>
-              </div>
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="le-cell le-col-start-6 le-col-span-5">
-        <div class="container-flex">
-          Type
-          <div>
-            <span class="more-info"
-              >&#105;
-              <div class="tooltip_">
-                <div class="cover">
-                  <p>
-                    Type is important for our databases to function correctly.
-                    If you aren't sure what to choose just leave it as "Text".
-                  </p>
-                </div>
-              </div>
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="le-cell le-col-start-11 le-col-span-1">
-        <div class="container-flex">
-          Ignore
-          <div>
-            <span class="more-info"
-              >&#105;
-              <div class="tooltip_">
-                <div class="cover">
-                  <p>
-                    Ignore will supress the field from appearing in the system,
-                    useful when you have excess columns in your CSV file.
-                  </p>
-                </div>
-              </div>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="grid-body le-row"
-      ng-repeat="field in vm.AvailableFields | filter: vm.filterStandardList as filtered"
-    >
-      <div class="le-cell le-col-start-1 le-col-span-5">
-        <span>{{ field.userField }}</span>
-      </div>
-      <div class="le-cell le-col-start-6 le-col-span-5">
-        <div class="field-type">
-          <select
-            ng-disabled="fieldMapping[field.userField].ignore === true"
-            class="form-control select-type"
-            ng-class=" fieldMapping[field.userField].fieldType == 'DATE' ? 'date-type' : ''"
-            name="columnType_{{ ::field.userField }}"
-            ng-model="fieldMapping[field.userField].fieldType"
-            ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
-            ng-change="vm.changeType(fieldMapping)"
-            value="{{ field.fieldType }}"
-          >
-            <option value="TEXT" selected>Text</option>
-            <option value="NUMBER">Number</option>
-            <option value="INTEGER">Integer</option>
-            <option value="BOOLEAN">Boolean</option>
-            <option value="DATE">Date</option>
-          </select>
-
-          <div
-            class="date-options"
-            ng-if="fieldMapping[field.userField].fieldType == 'DATE'"
-          >
-            <div class="date-format-container">
-              <select class="form-control">
-                <option
-                  ng-repeat="list in vm.dateFormat"
-                  value="{{ list.value }}"
-                  >{{ list.value }}</option
-                >
-              </select>
-              <div>
-                <span class="more-info"
-                  >&#105;
-                  <div class="tooltip_">
-                    <div class="cover">
-                      <p>
-                        Date Format is important for our database to map your
-                        data correctly. This is only valid for Date Type data.
-                      </p>
-                    </div>
+  <form name="form">
+    <div class="le-grid custom-fields-grid" ng-init="fieldMapping = fieldMapping || {}">
+      <div class="le-header le-row">
+        <div class="le-cell le-col-start-1 le-col-span-5">
+          <div class="container-flex">
+            <span>Custom Field</span>
+            <div>
+              <span class="more-info">&#105;
+                <div class="tooltip_">
+                  <div class="cover">
+                    <p>
+                      Unmapped fields are shown here and will be treated as Custom
+                      Fields unless Ignored.
+                    </p>
                   </div>
-                </span>
-              </div>
+                </div>
+              </span>
             </div>
-            <select class="form-control">
-              <option value="{{ list.value }}" class="default-value"
-                >(Time)</option
-              >
-              <option
-                ng-repeat="list in vm.timeFormat"
-                value="{{ list.value }}"
-                >{{ list.value }}</option
-              >
-            </select>
-
-            <div
-              ng-if="fieldMapping[field.userField].fieldType == 'DATE'"
-              class="time-zones"
-            >
-              <select class="form-control">
-                <option value="{{ list.value }}" class="">(Timezone)</option>
-                <option
-                  ng-repeat="list in vm.timeZone"
-                  value="{{ list.value }}"
-                  >{{ list.value }}</option
-                >
-              </select>
+          </div>
+        </div>
+        <div class="le-cell le-col-start-6 le-col-span-5">
+          <div class="container-flex">
+            Type
+            <div>
+              <span class="more-info">&#105;
+                <div class="tooltip_">
+                  <div class="cover">
+                    <p>
+                      Type is important for our databases to function correctly.
+                      If you aren't sure what to choose just leave it as "Text".
+                    </p>
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="le-cell le-col-start-11 le-col-span-1">
+          <div class="container-flex">
+            Ignore
+            <div>
+              <span class="more-info">&#105;
+                <div class="tooltip_">
+                  <div class="cover">
+                    <p>
+                      Ignore will supress the field from appearing in the system,
+                      useful when you have excess columns in your CSV file.
+                    </p>
+                  </div>
+                </div>
+              </span>
             </div>
           </div>
         </div>
       </div>
-      <div class="le-cell le-col-start-11 le-col-span-1">
-        <input
-          type="checkbox"
-          id="{{ field.userField }}"
-          ng-model="fieldMapping[field.userField].ignore"
-          ng-change="vm.changeIgnore(fieldMapping)"
-          ng-disabled="field.defaultIgnored === true"
-        />
+      <div class="grid-body le-row" ng-repeat="field in vm.AvailableFields | filter: vm.filterStandardList as filtered">
+        <div class="le-cell le-col-start-1 le-col-span-5">
+          <span>{{ field.userField }}</span>
+        </div>
+        <div class="le-cell le-col-start-6 le-col-span-6">
+          <div class="field-type">
+            <select ng-disabled="fieldMapping[field.userField].ignore === true" class="form-control select-type"
+              ng-class=" fieldMapping[field.userField].fieldType == 'DATE' ? 'date-type' : ''" name="columnType_{{ ::field.userField }}"
+              ng-model="fieldMapping[field.userField].fieldType" ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
+              ng-change="vm.changeType(fieldMapping)" value="{{ field.fieldType }}">
+              <option value="TEXT" selected>Text</option>
+              <option value="NUMBER">Number</option>
+              <option value="INTEGER">Integer</option>
+              <option value="BOOLEAN">Boolean</option>
+              <option value="DATE">Date</option>
+            </select>
+            <date-field-component ng-if="fieldMapping[field.userField].fieldType == 'DATE'" field="field" update-type="vm.changeSingleType(fieldMapping)"></date-field-component>
+           
+          </div>
+        </div>
+        <div class="le-cell le-col-start-12 le-col-span-1">
+          <input type="checkbox" id="{{ field.userField }}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"
+            ng-disabled="field.defaultIgnored === true" />
+        </div>
       </div>
     </div>
-  </div>
+  </form>
 </div>

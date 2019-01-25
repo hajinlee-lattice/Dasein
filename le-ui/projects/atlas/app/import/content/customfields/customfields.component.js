@@ -43,34 +43,6 @@ angular.module('lp.import.wizard.customfields', [])
                 setDefaultIgnore();
             },0);
         }
-        vm.dateFormat = [
-            {value: 'MM/DD/YYYY'},
-            {value: 'MM-DD-YYYY'},
-            {value: 'MM.DD.YYYY'},
-            {value: 'DD/MM/YYYY'},
-            {value: 'DD-MM-YYYY'},
-            {value: 'DD.MM.YYYY'},
-            {value: 'YYYY/MM/DD'},
-            {value: 'YYYY-MM-DD'},
-            {value: 'YYYY.MM.DD'},
-            {value: 'MM/DD/YY'},
-            {value: 'MM-DD-YY'},
-            {value: 'MM.DD.YY'},
-            {value: 'DD/MM/YY'},
-            {value: 'DD-MM-YY'},
-            {value: 'DD.MM.YY'}
-        ];
-        vm.timeFormat = [
-            {value: '00:00:00 12H'},
-            {value: '00-00-00 12H'},
-            {value: '00 00 00 12H'},
-            {value: '00:00:00 24H'},
-            {value: '00-00-00 24H'},
-            {value: '00 00 00 24H'}
-        ];
-        vm.timeZone = [
-            {value: 'UTC-8 America/Los Angeles'}
-        ];
     };
 
     function setDefaultIgnore(){
@@ -119,14 +91,17 @@ angular.module('lp.import.wizard.customfields', [])
         ImportWizardStore.setIgnore(ignoredFields);
     }
 
-    vm.changeType = function(fieldMapping) {
-        for(var i in fieldMapping) {
+    vm.changeType = function(fieldMappings) {
+        for(var i in fieldMappings) {
             var userField = i,
-                item = fieldMapping[userField];
-
-            ImportWizardStore.remapType(userField, item.fieldType);
-            ImportWizardStore.userFieldsType[userField] = item.fieldType;
+                item = fieldMappings[userField];
+            vm.changeSingleType(item);
         }
+    }
+    vm.changeSingleType = function(fieldMapping){
+        let userField = fieldMapping.userField;
+        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone});
+        ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
     }
 
     vm.getNumberDroppedFields = function(){
@@ -144,6 +119,5 @@ angular.module('lp.import.wizard.customfields', [])
         }
         return true;
     };
-
     vm.init();
 });

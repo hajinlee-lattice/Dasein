@@ -20,6 +20,7 @@ const States = $stateProvider => {
             pageTitle: 'Attribute Admin'
         },
         onEnter: (ReduxService, $state, $stateParams) => {
+            console.log($state.get('home.attributes'));
             ReduxService.connect(
                 'attributes',
                 actions,

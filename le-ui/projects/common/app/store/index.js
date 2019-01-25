@@ -39,6 +39,7 @@ angular
     .module("mainApp.core.redux", [ngRedux])
     .service("ReduxService", function($ngRedux) {
         this.connect = function(name, actions, reducer, context) {
+            console.log(name, context);
             if (!context.data) {
                 context.data = {};
             }

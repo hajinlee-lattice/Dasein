@@ -1,0 +1,31 @@
+<div class="date-options">
+    <div class="date-format-container">
+        <select class="form-control" ng-model="$ctrl.dateFormat" ng-change="$ctrl.changeDateFormat()" ng-disabled="$ctrl.field.ignore === true">
+            <option value="{{ list.value }}" class="default-value">(Date Format)</option>
+            <option ng-repeat="list in $ctrl.dateFormats" value="{{ list.value }}">{{ list.value }}</option>
+        </select>
+        <div>
+            <span class="more-info">&#105;
+                <div class="tooltip_">
+                    <div class="cover">
+                        <p>
+                            Date Format is important for our database to map your
+                            data correctly. This is only valid for Date Type data.
+                        </p>
+                    </div>
+                </div>
+            </span>
+        </div>
+    </div>
+    <select class="form-control" ng-model="$ctrl.timeFormat" ng-disabled="$ctrl.field.ignore === true" ng-change="$ctrl.changeTimeFormat()">
+        <option value="{{ list.value }}" class="default-value">(Time Format)</option>
+        <option ng-repeat="list in $ctrl.timeFormats" value="{{ list.value }}">{{ list.value }}</option>
+    </select>
+
+    <div class="time-zones">
+        <select class="form-control" ng-model="$ctrl.timezone" ng-disabled="$ctrl.field.ignore === true" ng-change="$ctrl.changeTimezone()">
+            <option value="{{ list.value }}" class="">(Timezone)</option>
+            <option ng-repeat="list in $ctrl.timeZones" value="{{ list.value }}">{{ list.value }}</option>
+        </select>
+    </div>
+</div>
