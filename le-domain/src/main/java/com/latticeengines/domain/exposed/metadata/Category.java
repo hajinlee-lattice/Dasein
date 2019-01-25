@@ -34,7 +34,8 @@ public enum Category {
     WEBSITE_KEYWORDS("Website Keywords", 11), //
     ACCOUNT_INFORMATION("Account Information", 12), //
     LEAD_INFORMATION("Lead Information", 13), //
-    DEFAULT("Default", 14);
+    DEFAULT("Default", 14), //
+    AI_INSIGHTS("AI Insights", 15);
 
     private static Map<String, Category> nameMap;
     private static Set<String> values;
@@ -51,7 +52,8 @@ public enum Category {
             ONLINE_PRESENCE, //
             TECHNOLOGY_PROFILE, //
             WEBSITE_KEYWORDS, //
-            WEBSITE_PROFILE //
+            WEBSITE_PROFILE, //
+            AI_INSIGHTS //
     );
 
     static {
@@ -100,6 +102,7 @@ public enum Category {
         return this.order;
     }
 
+    @Override
     public String toString() {
         return this.name;
     }
