@@ -140,7 +140,7 @@ public class ScoringMapperPredictUtil {
             DatumWriter userDatumWriter = null;
             DataFileWriter dataFileWriter = null;
             Schema schema = null;
-            boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.Id.name())
+            boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.InternalId.name())
                     || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
                     || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
             boolean cdl = false;
@@ -184,7 +184,8 @@ public class ScoringMapperPredictUtil {
             Map<String, List<Double>> revenues, boolean hasRevenue, Schema schema, String key, ScoreOutput result,
             int i, JsonNode model, ScoreNormalizer normalizer) {
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        if (uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())) {
+        if (uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+                || uniqueKeyColumn.equals(InterfaceName.InternalId.name())) {
             builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
         } else {
             builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
@@ -248,7 +249,7 @@ public class ScoringMapperPredictUtil {
             DatumWriter userDatumWriter = null;
             DataFileWriter dataFileWriter = null;
             Schema schema = null;
-            boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.Id.name())
+            boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.InternalId.name())
                     || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
                     || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
             if (hasUniqueKey) {
@@ -277,7 +278,8 @@ public class ScoringMapperPredictUtil {
                             modelInfoMap.get(uuid).getModelGuid(), key, rawScore);
                     if (hasUniqueKey) {
                         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
+                        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)
+                                || InterfaceName.InternalId.name().equals(uniqueKeyColumn)) {
                             builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
                         } else {
                             builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));

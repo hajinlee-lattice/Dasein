@@ -34,17 +34,19 @@ public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {
 
     private Attribute resolveIdAttr(Table eventTable) {
         Attribute id = null;
-        PrimaryKey primaryKey = eventTable.getPrimaryKey();
-        if (primaryKey == null) {
-            List<Attribute> idAttrs = eventTable.getAttributes(LogicalDataType.Id);
-            if (CollectionUtils.isEmpty(idAttrs)) {
-                idAttrs = eventTable.getAttributes(LogicalDataType.InternalId);
-            }
-            if (CollectionUtils.isNotEmpty(idAttrs)) {
-                id = idAttrs.get(0);
-            }
+        List<Attribute> idAttrs = eventTable.getAttributes(LogicalDataType.InternalId);
+        if (!CollectionUtils.isEmpty(idAttrs)) {
+            id = idAttrs.get(0);
         } else {
-            id = eventTable.getAttribute(primaryKey.getAttributes().get(0));
+            PrimaryKey primaryKey = eventTable.getPrimaryKey();
+            if (primaryKey == null) {
+                idAttrs = eventTable.getAttributes(LogicalDataType.Id);
+                if (CollectionUtils.isNotEmpty(idAttrs)) {
+                    id = idAttrs.get(0);
+                }
+            } else {
+                id = eventTable.getAttribute(primaryKey.getAttributes().get(0));
+            }
         }
         if (id == null) {
             throw new RuntimeException(String.format("Could not locate unique key to use to score table %s: %s",

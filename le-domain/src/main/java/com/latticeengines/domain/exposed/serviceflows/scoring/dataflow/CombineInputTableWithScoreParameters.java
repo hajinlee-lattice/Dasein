@@ -51,7 +51,7 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
             List<BucketMetadata> bucketMetadata) {
-        this(scoreResultsTable, trainingTable, bucketMetadata, null, InterfaceName.Id.name());
+        this(scoreResultsTable, trainingTable, bucketMetadata, null, InterfaceName.InternalId.name());
     }
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
