@@ -103,6 +103,7 @@
         "wp-components-testdev": "cd projects/common/ && npm run dev-test",
         "wpdeva": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"npm run wp-insightsdev\" \"node bin/devsetup env=a\"",
         "wpdevb": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"node bin/devsetup env=b\"",
+        "wpdevproduction": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"node bin/devsetup env=production\"",
         "dev-uicomponents": "concurrently \"npm run wp-components-testdev\" \"npm run wp-storybookdev\"",
         "build-dev-uicomponents": "cd projects/uicomponents/ && npm run build-uicomponents",
         "build-uicomponents": "cd projects/uicomponents/ && npm install && npm run build-uicomponents",
