@@ -365,12 +365,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsExportOrphanSuccessEmail() {
-        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenant.getName(), HOSTPORT, HOSTPORT, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("type export complet"));
 
-        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenant.getName(), HOSTPORT, HOSTPORT, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("type export complete"));

@@ -578,7 +578,8 @@ public class InternalResource extends InternalResourceBase {
                     log.info(String.format("URL=%s, result=%s", url, result));
                     switch (result) {
                         case "READY":
-                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, url, exportID, exportType);
+                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
+                                    exportID, exportType);
                             break;
                         case "GENERATING":
                             emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
