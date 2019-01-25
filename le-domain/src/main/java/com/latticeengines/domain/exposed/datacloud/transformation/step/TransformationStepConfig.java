@@ -50,6 +50,9 @@ public class TransformationStepConfig {
     @JsonProperty("StepType")
     private String stepType = SIMPLE;
 
+    @JsonProperty("NoInput")
+    private boolean noInput = false;
+
     @JsonIgnore
     private String configuration;
 
@@ -161,4 +164,11 @@ public class TransformationStepConfig {
         this.targetTable = targetTable;
     }
 
+    public boolean getNoInput() {
+        return noInput;
+    }
+
+    public void setNoInput(boolean noInput) {
+        this.noInput = noInput;
+    }
 }
