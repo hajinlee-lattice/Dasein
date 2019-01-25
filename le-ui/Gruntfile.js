@@ -371,7 +371,84 @@ module.exports = function(grunt) {
             }
         },
 
+        sass: {
+            options: {
+                sourcemap: 'auto',
+                style: 'compressed'
+            },
+            common: {
+                files: {
+                    '<%= dir.common %>/<%= dir.assets %>/lattice.css': [
+                        '<%= dir.common %>/<%= dir.assets %>/sass/lattice.scss'
+                    ]
+                }
+            },
+            login: {
+                files: {
+                    '<%= dir.login %>/<%= dir.assets %>/css/production.css': [
+                        '<%= dir.login %>/<%= dir.app %>/app.component.scss'
+                    ]
+                }
+            },
+            atlas: {
+                files: {
+                    '<%= dir.atlas %>/<%= dir.assets %>/styles/production.css': [
+                        '<%= dir.atlas %>/<%= dir.assets %>/styles/main.scss'
+                    ]
+                }
+            },
+            lpi: {
+                files: {
+                    '<%= dir.lpi %>/<%= dir.assets %>/styles/production.css': [
+                        '<%= dir.lpi %>/<%= dir.assets %>/styles/main.scss'
+                    ]
+                }
+            }
+        },
+
+        watch: {
+            common: {
+                files: [
+                    '<%= dir.common %>/<%= dir.assets %>/sass/*.scss',
+                    '<%= dir.common %>/<%= dir.components %>/**/*.scss'
+                ],
+                tasks: ['sass:common']
+            },
+            login: {
+                files: ['<%= dir.login %>/<%= dir.app %>/**/*.scss'],
+                tasks: ['sass:login']
+            },
+            atlas: {
+                files: [
+                    '<%= dir.atlas %>/<%= dir.app %>/**/*.scss',
+                    '<%= dir.atlas %>/<%= dir.assets %>/styles/**/*.scss'
+                ],
+                tasks: ['sass:atlas']
+            },
+            lpi: {
+                files: [
+                    '<%= dir.lpi %>/<%= dir.app %>/**/*.scss',
+                    '<%= dir.lpi %>/<%= dir.assets %>/styles/**/*.scss'
+                ],
+                tasks: ['sass:lpi']
+            }
+        },
+
         concurrent: {
+            sass: {
+                tasks: ['sass:common', 'sass:login', 'sass:atlas', 'sass:lpi']
+            },
+            watch: {
+                tasks: [
+                    'watch:common',
+                    'watch:login',
+                    'watch:atlas',
+                    'watch:lpi' /*, 'run:ng2'*/
+                ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            },
             devWatchAndServe: {
                 tasks: [['env:dev', 'run:node'], 'concurrent:watch'],
                 options: {
@@ -426,6 +503,8 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-run');
     grunt.loadNpmTasks('grunt-env');
 
@@ -434,10 +513,22 @@ module.exports = function(grunt) {
     grunt.registerTask('devb', ['env:devb', 'run:node']);
     grunt.registerTask('qa', ['env:qa', 'run:node']);
     grunt.registerTask('prod', ['env:production', 'run:node']);
-    grunt.registerTask('newdev', ['concurrent:devWatchAndServe']);
-    grunt.registerTask('newdevb', ['concurrent:devbWatchAndServe']);
-    grunt.registerTask('newdevb_bodc', ['concurrent:devbBodcWatchAndServe']);
-    grunt.registerTask('newlocal', ['concurrent:localWatchAndServe']);
+    grunt.registerTask('newdev', [
+        'concurrent:sass',
+        'concurrent:devWatchAndServe'
+    ]);
+    grunt.registerTask('newdevb', [
+        'concurrent:sass',
+        'concurrent:devbWatchAndServe'
+    ]);
+    grunt.registerTask('newdevb_bodc', [
+        'concurrent:sass',
+        'concurrent:devbBodcWatchAndServe'
+    ]);
+    grunt.registerTask('newlocal', [
+        'concurrent:sass',
+        'concurrent:localWatchAndServe'
+    ]);
     grunt.registerTask('qadev', ['concurrent:qaWatchAndServe']);
     grunt.registerTask('proddev', ['concurrent:prodWatchAndServe']);
     grunt.registerTask('production', ['env:production', 'run:node']);
