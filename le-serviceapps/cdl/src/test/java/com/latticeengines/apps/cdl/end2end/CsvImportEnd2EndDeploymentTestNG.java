@@ -106,6 +106,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.FILE.getName());
         HdfsUtils.rmdir(yarnConfiguration, dataFeedDir);
+        FileUtils.deleteDirectory(new File(downloadDir));
     }
 
     private void collectAvroFilesForEntity(BusinessEntity entity) throws IOException {
