@@ -208,9 +208,6 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         samplingConfig.setProperty(SamplingProperty.COUNTER_GROUP_NAME.name(), COUNTER_GROUP_NAME);
         Map<String, Long> counterGroupResultMap = new HashMap<>();
         checkFinalApplicationStatusSucceeded(samplingConfig, COUNTER_GROUP_NAME, counterGroupResultMap);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
-                HdfsFileFormat.AVRO_FILE);
-        assertEquals(samplingFiles.size(), 0);
         assertTrue(MapUtils.isNotEmpty(counterGroupResultMap));
         assertEquals(counterGroupResultMap.get("0") * 1L, 5496L);
         assertEquals(counterGroupResultMap.get("1") * 1L, 4504L);
