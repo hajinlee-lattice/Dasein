@@ -249,7 +249,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         LocalDate evaluationDate;
         if (!StringUtils.isBlank(evaluationDateStr)) {
             try {
-                evaluationDate = LocalDate.parse(evaluationDateStr, REFRESH_DATE_FORMATTER);
+                evaluationDate = LocalDate.parse(evaluationDateStr, DateTimeFormatter.ISO_DATE);
             } catch (DateTimeParseException e) {
                 log.error("Could not parse evaluation date string \"" + evaluationDateStr
                         + "\" from Period Proxy as an ISO formatted date");
