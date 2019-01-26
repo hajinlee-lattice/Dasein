@@ -96,7 +96,7 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
                 { "paypal.com", 700 }, { "sbiDu.com", 36 },
                 { "netappDuns1.com", 83 }, { "karlDuns2.com", 101 }, { "lyft.com", 114 },
                 { "oldnavy.com", 118 }, { "oracle.com", 134 }, { "datos.io", null },
-                { "salesforce.com", null }, { "emc.com", null } };
+                { "netapp.com", 150 }, { "emc.com", null } };
         uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, schema, data);
     }
 
@@ -114,8 +114,11 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             { "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
             { "sbiDu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false"}, //
             
-            // PriRootDuns != null, SecRootDuns == null
+            // PriRootDuns == null, SecRootDuns != null
             { "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
+            
+            // PriRootDuns != null, SecRootDuns == null
+            { "karlJr.com", null, null, 2, "MISSING_ROOT_DUNS", "false"}, //
             
             // PriRootDuns != null, SecRootDuns != null, PriRootDuns != SecRootDuns
             { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //
@@ -135,12 +138,20 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
                 // PriRootDuns != null, SecRootDuns != null, PriRootDuns != SecRootDuns
                 { "sbiDuns2.com", "karlDuns2.com" },
                 // PriRootDuns != null, SecRootDuns == null
+                { "tjmax.com", "sbiGu.com" },
+                { "karlJr.com", "sbiDu.com" },
+                // PriRootDuns == null, SecRootDuns != null
                 { "karlDuns2.com", "netappDuns1.com" }, { "karlDuns2.com", "oldnavy.com" },
                 { "netappGu.com", "paypal.com" },
                 // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
                 { "sbiGu.com", "sbiDu.com" },
                 // Different PriDomains with same SecDomain : retain based on which has lower alexa rank
+                // Alexa rank for oracle.com = 134 and netapp.com = 150. Here, oracle.com is retained
                 { "sap.com", "oracle.com" }, { "sap.com", "netapp.com" },
+                // PriDomains with null AlexaRank
+                // AlexaRank = null is worse than any number i.e any number wins
+                // over null as null is considered the lowest alexaRank
+                // 0 is considered the highest alexaRank
                 { "sap.com", "emc.com" }, { "data.com", "datos.io" },
                 { "data.com", "salesforce.com" } };
         uploadBaseSourceData(orbSec.getSourceName(), baseSourceVersion, schema, data);
@@ -153,6 +164,9 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             { "lyft.com", "airbnb.com" },
             // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             { "sbiDu.com", "sbiGu.com" },
+            // PriRootDuns != null, SecRootDuns == null
+            { "sbiGu.com", "tjmax.com"},
+            { "sbiDu.com", "karlJr.com" },
             // Different PriDomains with same SecDomain : retain based on which has lower alexa rank
             { "oracle.com", "sap.com" },
     };
@@ -180,6 +194,7 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
+            System.out.println("record : " + record);
             String priDomain = String.valueOf(record.get(0));
             String secDomain = String.valueOf(record.get(1));
             Object[] expected = expectedDeterministicSet.get(priDomain + secDomain);
@@ -192,7 +207,7 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
             rowCount++;
         }
         Assert.assertTrue(expectedDeterministicSet.size() == 0);
-        Assert.assertEquals(rowCount, 4);
+        Assert.assertEquals(rowCount, 6);
     }
 
     @Override

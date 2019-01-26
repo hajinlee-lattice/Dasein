@@ -4,6 +4,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
@@ -15,15 +16,10 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
 
     private static final long serialVersionUID = 3454191979161403133L;
     private String alexaRankField;
-    private String orbPriDomainField;
-    private String orbSecDomainField;
 
-    public OrbSecSrcSelectPriDomAggregator(Fields fieldDeclaration, String orbPriDomainField, String orbSecDomainField,
-            String alexaRankField) {
+    public OrbSecSrcSelectPriDomAggregator(Fields fieldDeclaration, String alexaRankField) {
         super(fieldDeclaration);
-        this.orbPriDomainField = orbPriDomainField;
         this.alexaRankField = alexaRankField;
-        this.orbSecDomainField = orbSecDomainField;
     }
 
     public static class Context extends BaseAggregator.Context {
@@ -35,7 +31,7 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
 
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
-        Object grpObj = group.getObject(orbSecDomainField);
+        Object grpObj = group.getObject(DataCloudConstants.ORBSEC_ATTR_SECDOM);
         if (grpObj == null) {
             return true;
         }
@@ -51,15 +47,14 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
     @Override
     protected Context initializeContext(TupleEntry group) {
         Context context = new Context();
-        context.orbSecDomain = group.getString(orbSecDomainField);
+        context.orbSecDomain = group.getString(DataCloudConstants.ORBSEC_ATTR_SECDOM);
         return context;
     }
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
         Integer alexaRankVal = (Integer) arguments.getObject(alexaRankField);
-        String orbPriDomain = arguments.getString(orbPriDomainField);
-        String orbSecDomain = arguments.getString(orbSecDomainField);
+        String orbPriDomain = arguments.getString(DataCloudConstants.ORBSEC_ATTR_PRIDOM);
         if (context.orbPriDomain == null
                 || (alexaRankVal != null && context.alexaRank == null)
                 || (alexaRankVal != null && context.alexaRank != null
@@ -68,9 +63,6 @@ public class OrbSecSrcSelectPriDomAggregator extends BaseAggregator<OrbSecSrcSel
             if (alexaRankVal != null) {
                 context.alexaRank = alexaRankVal;
             }
-        }
-        if (context.orbSecDomain == null) {
-            context.orbSecDomain = orbSecDomain;
         }
         return context;
     }

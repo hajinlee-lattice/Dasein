@@ -133,7 +133,7 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
                 // Case 3 : domains present in OwnershipTable with reasons
                 // multiple large company, franchise, other (domains present in
                 // multiple trees having firmographics same in all the trees)
-                    // Present in multiple trees causing reasonType = FRANCHISE
+                    // sbiDuns1.com is franchise and craigslist.com is multi-large companies
                 { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2,"Consumer Services", 225, null, DOMSRC_DNB },
                 { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,"Manufacturing - Semiconductors", 226, null, DOMSRC_DNB },
                 { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null, DOMSRC_DNB },

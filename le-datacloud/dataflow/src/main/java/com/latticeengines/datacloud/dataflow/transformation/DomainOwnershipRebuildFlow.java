@@ -23,13 +23,6 @@ import cascading.tuple.Fields;
 public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwnershipConfig> {
     public final static String DATAFLOW_BEAN_NAME = "DomainOwnershipRebuildFlow";
     public final static String TRANSFORMER_NAME = "FormDomOwnershipTableTransformer";
-    private final static String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
-    private final static String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
-    private final static String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
-
-    private final static String TREE_ROOT_DUNS = "TREE_ROOT_DUNS";
-    private final static String REASON_TYPE = "REASON_TYPE";
-    private final static String IS_NON_PROFITABLE = "IS_NON_PROFITABLE";
 
     @Override
     public String getDataFlowBeanName() {
@@ -57,8 +50,6 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
         Node amsWithDuns = ams.filter(expr, new FieldList(DataCloudConstants.AMS_ATTR_DUNS));
         Node amsDomDuns = amsWithDuns
                 .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS))
-                .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS),
-                        1)
                 .renamePipe("amsDomDuns");
 
         // Construct a table of all the duns from ams with firmographic
@@ -93,23 +84,28 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
                 .retain(new FieldList(fields));
 
         // Setting RootDuns and dunsType based on selection criteria
-        DomOwnerCalRootDunsFunction rootDunsFunc = new DomOwnerCalRootDunsFunction(new Fields(ROOT_DUNS, DUNS_TYPE));
+        DomOwnerCalRootDunsFunction rootDunsFunc = new DomOwnerCalRootDunsFunction(
+                new Fields(DomainOwnershipConfig.ROOT_DUNS, DomainOwnershipConfig.DUNS_TYPE));
         List<FieldMetadata> fms = new ArrayList<FieldMetadata>();
-        fms.add(new FieldMetadata(ROOT_DUNS, String.class));
-        fms.add(new FieldMetadata(DUNS_TYPE, String.class));
-        fields.add(ROOT_DUNS);
-        fields.add(DUNS_TYPE);
+        fms.add(new FieldMetadata(DomainOwnershipConfig.ROOT_DUNS, String.class));
+        fms.add(new FieldMetadata(DomainOwnershipConfig.DUNS_TYPE, String.class));
+        fields.add(DomainOwnershipConfig.ROOT_DUNS);
+        fields.add(DomainOwnershipConfig.DUNS_TYPE);
         Node amsFirmoWithRootDuns = amsFirmo //
                 .apply(rootDunsFunc,
                         new FieldList(DataCloudConstants.ATTR_GU_DUNS, DataCloudConstants.ATTR_DU_DUNS,
                                 DataCloudConstants.AMS_ATTR_DUNS),
                         fms, new FieldList(fields));
 
-        String expr = DataCloudConstants.AMS_ATTR_DUNS + ".equals(" + ROOT_DUNS + ")";
+        String expr = DataCloudConstants.AMS_ATTR_DUNS + ".equals("
+                + DomainOwnershipConfig.ROOT_DUNS + ")";
         Node rootOnlyFirmo = amsFirmoWithRootDuns
-                .filter(expr, new FieldList(DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS)) //
-                .rename(new FieldList(ROOT_DUNS), new FieldList(TREE_ROOT_DUNS)) //
-                .retain(new FieldList(TREE_ROOT_DUNS, //
+                .filter(expr,
+                        new FieldList(DataCloudConstants.AMS_ATTR_DUNS,
+                                DomainOwnershipConfig.ROOT_DUNS)) //
+                .rename(new FieldList(DomainOwnershipConfig.ROOT_DUNS),
+                        new FieldList(DomainOwnershipConfig.TREE_ROOT_DUNS)) //
+                .retain(new FieldList(DomainOwnershipConfig.TREE_ROOT_DUNS, //
                         DataCloudConstants.ATTR_SALES_VOL_US, //
                         DataCloudConstants.ATTR_EMPLOYEE_TOTAL, //
                         DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, //
@@ -117,11 +113,13 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
                 .renamePipe("RootOfTrees");
         fields.remove(DataCloudConstants.ATTR_GU_DUNS);
         fields.remove(DataCloudConstants.ATTR_DU_DUNS);
-        fields.add(TREE_ROOT_DUNS);
+        fields.add(DomainOwnershipConfig.TREE_ROOT_DUNS);
 
         Node amsWithRootFirmo = amsFirmoWithRootDuns //
-                .retain(DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS, DUNS_TYPE) //
-                .join(ROOT_DUNS, rootOnlyFirmo, TREE_ROOT_DUNS, JoinType.LEFT) //
+                .retain(DataCloudConstants.AMS_ATTR_DUNS, DomainOwnershipConfig.ROOT_DUNS,
+                        DomainOwnershipConfig.DUNS_TYPE) //
+                .join(DomainOwnershipConfig.ROOT_DUNS, rootOnlyFirmo,
+                        DomainOwnershipConfig.TREE_ROOT_DUNS, JoinType.LEFT) //
                 .retain(new FieldList(fields));
         return amsWithRootFirmo;
     }
@@ -129,14 +127,14 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
     private Node constructDomOwnershipTable(Node domDunsWithRootFirmo, DomainOwnershipConfig config) {
         DomOwnerConstructAggregator agg = new DomOwnerConstructAggregator(
                 new Fields(DataCloudConstants.AMS_ATTR_DOMAIN, //
-                        ROOT_DUNS, //
-                        DUNS_TYPE, //
-                        TREE_NUMBER, //
-                        REASON_TYPE, //
-                        IS_NON_PROFITABLE),
-                ROOT_DUNS, //
-                TREE_ROOT_DUNS, //
-                DUNS_TYPE, //
+                        DomainOwnershipConfig.ROOT_DUNS, //
+                        DomainOwnershipConfig.DUNS_TYPE, //
+                        DomainOwnershipConfig.TREE_NUMBER, //
+                        DomainOwnershipConfig.REASON_TYPE, //
+                        DomainOwnershipConfig.IS_NON_PROFITABLE),
+                DomainOwnershipConfig.ROOT_DUNS, //
+                DomainOwnershipConfig.TREE_ROOT_DUNS, //
+                DomainOwnershipConfig.DUNS_TYPE, //
                 config.getMultLargeCompThreshold(), //
                 config.getFranchiseThreshold());
 
@@ -152,11 +150,11 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwner
     private List<FieldMetadata> prepareFinalFms(DomainOwnershipConfig config) {
         return Arrays.asList(new FieldMetadata( //
                 DataCloudConstants.AMS_ATTR_DOMAIN, String.class), //
-                new FieldMetadata(ROOT_DUNS, String.class), //
-                new FieldMetadata(DUNS_TYPE, String.class), //
-                new FieldMetadata(TREE_NUMBER, Integer.class), //
-                new FieldMetadata(REASON_TYPE, String.class), //
-                new FieldMetadata(IS_NON_PROFITABLE, String.class) //
+                new FieldMetadata(DomainOwnershipConfig.ROOT_DUNS, String.class), //
+                new FieldMetadata(DomainOwnershipConfig.DUNS_TYPE, String.class), //
+                new FieldMetadata(DomainOwnershipConfig.TREE_NUMBER, Integer.class), //
+                new FieldMetadata(DomainOwnershipConfig.REASON_TYPE, String.class), //
+                new FieldMetadata(DomainOwnershipConfig.IS_NON_PROFITABLE, String.class) //
         );
     }
 

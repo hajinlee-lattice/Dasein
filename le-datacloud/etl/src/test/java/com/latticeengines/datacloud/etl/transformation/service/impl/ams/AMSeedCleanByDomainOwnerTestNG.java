@@ -29,20 +29,13 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
 
     private static final Logger log = LoggerFactory.getLogger(DomainOwnershipRebuildTestNG.class);
 
-    private static final String DOM_OWNERSHIP_TABLE = "DomainOwnershipTable";
-    private static final String ORB_SEC_CLEANED = "OrbSecCleaned";
-    private static final String AMS_CLEANED = "AmsCleaned";
     private static final String DOMSRC_DNB = DataCloudConstants.DOMSRC_DNB;
     private static final String DOMSRC_ORB = DataCloudConstants.DOMSRC_ORB;
-    private final static String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
-    private final static String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
-    private final static String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
-    private final static String REASON_TYPE = "REASON_TYPE";
-    private final static String IS_NON_PROFITABLE = "IS_NON_PROFITABLE";
 
-    private GeneralSource domOwnTable = new GeneralSource(DOM_OWNERSHIP_TABLE);
-    private GeneralSource orbSecClean = new GeneralSource(ORB_SEC_CLEANED);
-    private GeneralSource amsClean = new GeneralSource(AMS_CLEANED);
+    private GeneralSource domOwnTable = new GeneralSource(
+            DomainOwnershipConfig.DOM_OWNERSHIP_TABLE);
+    private GeneralSource orbSecClean = new GeneralSource(DomainOwnershipConfig.ORB_SEC_CLEANED);
+    private GeneralSource amsClean = new GeneralSource(DomainOwnershipConfig.AMS_CLEANED);
     private GeneralSource ams = new GeneralSource("AccountMasterSeed");
     private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
     private GeneralSource source = amsClean;
@@ -99,11 +92,11 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
     private void prepareDomOwnTable() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
-        schema.add(Pair.of(ROOT_DUNS, String.class));
-        schema.add(Pair.of(DUNS_TYPE, String.class));
-        schema.add(Pair.of(TREE_NUMBER, Integer.class));
-        schema.add(Pair.of(REASON_TYPE, String.class));
-        schema.add(Pair.of(IS_NON_PROFITABLE, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.ROOT_DUNS, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.DUNS_TYPE, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.TREE_NUMBER, Integer.class));
+        schema.add(Pair.of(DomainOwnershipConfig.REASON_TYPE, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.IS_NON_PROFITABLE, String.class));
         Object[][] data = new Object[][] {
 	        	// Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
 	    		// SINGLE TREE : not cleaned up
@@ -192,19 +185,19 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236,
                     null, DOMSRC_DNB },
             // Case 7 : 
-            // sbiDuns1.com domain record removed due to orb adding domain
-            // paypal.com (by comparing alexa rank) as per the condition
-            // for adding domains from orb
+            // sbiDuns1.com domain replaced with domain paypal.com. Update corresponding alexaRank.
             { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225, null, DOMSRC_DNB },
             { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,"Manufacturing - Semiconductors", 226, null, DOMSRC_DNB },
             { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology", 227, null, DOMSRC_DNB },
             { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 228, null, DOMSRC_DNB },
             // Case 8 :
-            // karlDuns2.com domain record got removed due to orb adding
-            // domain netappDuns1.com (by comparing alexa rank) as per the
-            // condition for adding domains from orb
-            { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 215, null,
+            // Domain only entry : karlDuns2.com domain record got replaced with domain netappDuns1.com. Update corresponding alexaRank.
+            { "karlDuns2.com", null, "DUNS28", null, 304500L, "2200", 1, "Media", 215, null,
                     DOMSRC_DNB },
+            // Case 9 :
+            // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain. 
+            // Primary domain already exists in AMSeed. The final result should not have duplicate domain + duns entries.
+            { "saavn.com", "DUNS37", "DUNS39", "DUNS90", 2812732L, "1313", 2, "Legal", 131, null, DOMSRC_DNB}
         };
         uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, data);
     }
@@ -221,7 +214,11 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                 // similar to that of secondary domain as the corresponding
                 // Secondary domain is present in amSeed
                 { "netappDuns1.com", "karlDuns2.com" }, 
-                { "paypal.com", "sbiDuns1.com" }, 
+                { "paypal.com", "sbiDuns1.com" },
+                
+                // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain. 
+                // Primary domain already exists in AMSeed. The final result should not have duplicate domain + duns entries.
+                { "sbiGu.com", "saavn.com" }, 
                 
                 // primary domain not added as corresponding secondary domain
                 // not present in amSeed
@@ -230,12 +227,10 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
         uploadBaseSourceData(orbSecClean.getSourceName(), baseSourceVersion, schema, data);
     }
 
-    Object[][] amSeedCleanedUpValues = new Object[][] { //
+    Object[][] amSeedCleanedUpDeterministicValues = new Object[][] { //
             // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
             // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
 
-            // Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
-            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, null, DOMSRC_DNB },
             // Case 2 : domains present in OwnershipTable : rootDuns match = not cleaned up
             { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216,
                     null, null, DOMSRC_DNB },
@@ -267,9 +262,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                     null, DOMSRC_DNB },
             // Case 7 :
 
-            // sbiDuns1.com domain record removed due to orb adding domain
-            // paypal.com (by comparing alexa rank) as per the condition
-            // for adding domains from orb
+            // sbiDuns1.com domain replaced with domain paypal.com. Update corresponding alexaRank.
             { "paypal.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 700, 
                     	"[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
                     DOMSRC_ORB},
@@ -283,19 +276,41 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                         "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
                         DOMSRC_ORB },
             // Case 8 :
-            // karlDuns2.com domain record got removed due to orb adding domain
-            // netappDuns1.com (by comparing alexa rank) as per the condition
-            // for adding domains from orb
-            { "netappDuns1.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 83,
+            // Domain only entry : karlDuns2.com domain record got replaced with domain netappDuns1.com. Update corresponding alexaRank.
+            { "netappDuns1.com", null, "DUNS28", null, 304500L, "2200", 1, "Media", 83,
                     "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=karlDuns2.com is orb sec domain]", null,
                     DOMSRC_ORB }, };
+
+    Object[][] amSeedCleanedupNonDeterministicValues = new Object[][] {
+            // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
+            // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
+
+            // Case 1 :
+            // Domains present in domain ownership table with SINGLE_TREE type :
+            // result = not cleaned up
+            // amSeed domain exists in OrbSec.SecondaryDomain, then this domain
+            // is replaced by OrbSec.PrimaryDomain.
+            // Primary domain already exists in AMSeed. The final result should
+            // not have duplicate domain + duns entries.
+            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production",
+                    200, null, null, DOMSRC_DNB },
+            { "sbiGu.com", "DUNS37", "DUNS39", "DUNS90", 2812732L, "1313", 2, "Legal", 32,
+                    "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=saavn.com is orb sec domain]",
+                    null, DOMSRC_ORB } };
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        Map<String, Object[]> amSeedExpectedValues = new HashMap<>();
-        for (Object[] data : amSeedCleanedUpValues) {
-            amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
+        int nonDeterministicRecCount = 0;
+        Map<String, Object[]> amSeedDeterministicExpectedValues = new HashMap<>();
+        for (Object[] data : amSeedCleanedUpDeterministicValues) {
+            amSeedDeterministicExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]),
+                    data);
+        }
+        Map<String, Object[]> amSeedNonDeterministicExpectedValues = new HashMap<>();
+        for (Object[] data : amSeedCleanedupNonDeterministicValues) {
+            amSeedNonDeterministicExpectedValues
+                    .put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
         }
         String[] expectedValueOrder = { //
                 DataCloudConstants.AMS_ATTR_DOMAIN, //
@@ -315,15 +330,20 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             log.info("record : " + record);
             String domain = String.valueOf(record.get("Domain"));
             String duns = String.valueOf(record.get("DUNS"));
-            Object[] expectedVal = amSeedExpectedValues.get(domain + duns);
+            Object[] expectedVal = amSeedDeterministicExpectedValues.get(domain + duns);
+            if (expectedVal == null) {
+                expectedVal = amSeedNonDeterministicExpectedValues.get(domain + duns);
+                nonDeterministicRecCount++;
+            }
             for (int i = 0; i < expectedValueOrder.length; i++) {
                 Assert.assertTrue(isObjEquals(record.get(expectedValueOrder[i]), expectedVal[i]));
             }
-            amSeedExpectedValues.remove(domain + duns);
+            amSeedDeterministicExpectedValues.remove(domain + duns);
             rowCount++;
         }
-        Assert.assertTrue(amSeedExpectedValues.size() == 0);
-        Assert.assertEquals(rowCount, amSeedCleanedUpValues.length);
+        Assert.assertTrue(amSeedDeterministicExpectedValues.size() == 0);
+        Assert.assertEquals(rowCount,
+                amSeedCleanedUpDeterministicValues.length + nonDeterministicRecCount);
     }
 
     @Override
