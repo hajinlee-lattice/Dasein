@@ -534,13 +534,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         case Account:
             modifyFieldMappingsForAccount(fieldMappingDocument);
             break;
+        case Contact:
+            modifyFieldMappingsForContact(fieldMappingDocument);
         default:
         }
     }
 
     private void modifyFieldMappingsForAccount(FieldMappingDocument fieldMappingDocument) {
         setExternalSystem(fieldMappingDocument.getFieldMappings());
-        setDateAttributes(fieldMappingDocument.getFieldMappings());
+        setAccountDateAttributes(fieldMappingDocument.getFieldMappings());
     }
 
     private void setExternalSystem(List<FieldMapping> fieldMappings) {
@@ -565,7 +567,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    private void setDateAttributes(List<FieldMapping> fieldMappings) {
+    private void setAccountDateAttributes(List<FieldMapping> fieldMappings) {
         for (FieldMapping fieldMapping : fieldMappings) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
@@ -576,7 +578,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date field mapping.");
+                    log.info("Setting Account Attribute 'Test Date' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("YYYY-MM-DD");
@@ -585,7 +587,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date 2 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 2' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 3")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("DD.MM.YY");
@@ -594,7 +596,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date 3 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 3' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 4")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("MM/DD/YYYY");
@@ -603,7 +605,37 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date 4 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 4' field mapping.");
+                }
+            }
+        }
+    }
+
+    private void modifyFieldMappingsForContact(FieldMappingDocument fieldMappingDocument) {
+        setContactDateAttributes(fieldMappingDocument.getFieldMappings());
+    }
+
+    private void setContactDateAttributes(List<FieldMapping> fieldMappings) {
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equalsIgnoreCase("Last_Communication_Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("DD-MMM-YY");
+                    fieldMapping.setTimeFormatString("00 00 00 24H");
+                    fieldMapping.setTimezone("Europe/Paris");
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.info("Setting Contact Attribute 'Last_Communication_Date' field mapping.");
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Renewal_Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("YYYY.MMM.DD");
+                    fieldMapping.setTimeFormatString(null);
+                    fieldMapping.setTimezone(null);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.info("Setting Contact Attribute 'Renewal_Date' field mapping.");
                 }
             }
         }
