@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DataIntegrationStatusMonitorMessage {
 
     @JsonProperty("tenantId")
-    private Long tenantId;
+    private String tenantId;
 
     @JsonProperty("workflowRequestId")
     private String workflowRequestId;
@@ -44,11 +44,11 @@ public class DataIntegrationStatusMonitorMessage {
     @JsonProperty("eventTime")
     private Date eventTime;
 
-    public Long getTenantId() {
+    public String getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(Long tenantId) {
+    public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
 

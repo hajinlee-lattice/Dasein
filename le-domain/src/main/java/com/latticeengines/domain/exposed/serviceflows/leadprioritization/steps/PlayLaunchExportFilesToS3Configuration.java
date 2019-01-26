@@ -8,6 +8,8 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     private String playLaunchId;
 
+    private String destinationOrgId;
+
     public String getPlayName() {
         return playName;
     }
@@ -22,6 +24,14 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     public void setPlayLaunchId(String playLaunchId) {
         this.playLaunchId = playLaunchId;
+    }
+
+    public String getDestinationOrgId() {
+        return destinationOrgId;
+    }
+
+    public void setDestinationOrgId(String destinationOrgId) {
+        this.destinationOrgId = destinationOrgId;
     }
 
 }
