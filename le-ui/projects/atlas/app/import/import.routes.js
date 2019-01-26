@@ -28,13 +28,14 @@ angular
                 var featureFlagsConfig = {};
                 featureFlagsConfig[flags.VDB_MIGRATION] = false;
                 featureFlagsConfig[flags.ENABLE_FILE_IMPORT] = true;
+                
+                AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.excludeExternalUser, featureFlagsConfig, 'home');
                 ReduxService.connect(
                     'fieldMappings',
                     actions,
                     reducer,
                     $state.get('home.import')
                 );
-                AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.excludeExternalUser, featureFlagsConfig, 'home');
             }],
             onExit: ['$state', function($state){
                 $state.get('home.import').data.redux.unsubscribe();
@@ -79,6 +80,13 @@ angular
                 type: null,
                 data: null
             },
+            resolve:{
+                DateSupport : function($state){
+                    let redux = $state.get('home.import').data.redux;
+                    // console.log('redux', redux);
+                    redux.fetchDateSupport();
+                }
+            },
             views: {
                 'main@': {
                     templateUrl: 'app/import/entry/entry.component.html'
@@ -88,7 +96,7 @@ angular
         })
         .state('home.import.entry.accounts', {
             url: '/accounts',
-            onEnter: function(ImportWizardStore){
+            onEnter: function($state, ImportWizardStore){
                 ImportWizardStore.fieldDocument = {};
             },
             params: {
