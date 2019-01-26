@@ -59,7 +59,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
     private DataIntegrationStatusMonitorMessage createDefaultStatusMessage(String workflowRequestId,
             String eventType) {
         DataIntegrationStatusMonitorMessage statusMessage = new DataIntegrationStatusMonitorMessage();
-        statusMessage.setTenantId(mainTestTenant.getPid());
+        statusMessage.setTenantId(mainTestTenant.getId());
         statusMessage.setWorkflowRequestId(workflowRequestId);
         statusMessage.setEntityId(ENTITY_NAME);
         statusMessage.setEntityName(ENTITY_NAME);

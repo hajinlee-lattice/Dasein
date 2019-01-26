@@ -9,6 +9,8 @@ const ExternalIntegrationService = () => {
 };
 export default ExternalIntegrationService;
 
+export const MARKETO_TAG = "MARKETO";
+
 const QUERIES = {
   users: {
     query: `query {
@@ -65,6 +67,28 @@ const QUERIES = {
           }
         }
       }`
+  },
+  authentications: {
+    query:
+      `query {
+        viewer {
+          authentications {
+            edges {
+              node {
+                id
+                name
+                service {
+                  id,
+                  name,
+                  icon,
+                  title,
+                  version
+                }
+              }
+            }
+          }
+        }
+      }`
   }
 }
 
@@ -72,17 +96,6 @@ class ExternalIntegrationServiceClass {
   constructor() {}
 
   constructObserver(observer) {
-    return new Observer(response => {
-        httpService.unsubscribeObservable(ok);
-        observer.next(response);
-    }, (error) =>{
-        httpService.unsubscribeObservable(ok);
-        observer.error(error);
-    });
-  }
-
-  getUsers(observer) {
-    // let query = ;
     let ok = new Observer(response => {
         httpService.unsubscribeObservable(ok);
         observer.next(response);
@@ -90,32 +103,109 @@ class ExternalIntegrationServiceClass {
         httpService.unsubscribeObservable(ok);
         observer.error(error);
     });
+    return ok;
+  }
+
+  /*
+    MASTER token
+  */
+  getUsers(observer) {
+    let ok = this.constructObserver(observer);
     httpService.post(URLS.trayUrl, QUERIES.users, ok);
   }
 
+  /*
+    MASTER token
+  */
+  getUser(userName, observer) {
+    let query = {
+      query: `query {
+        users (input: {name: "${userName}"}) {
+          edges {
+            node {
+              name
+              id
+              externalUserId
+            }
+          }
+        }
+      }`
+    };
+    let ok = this.constructObserver(observer);
+    httpService.post(URLS.trayUrl, query, ok);
+  }
+
+  /*
+    MASTER token
+  */
   getSolutions(observer) {
-    let ok = new Observer(response => {
-        httpService.unsubscribeObservable(ok);
-        observer.next(response);
-    }, (error) =>{
-        httpService.unsubscribeObservable(ok);
-        observer.error(error);
-    });
+    let ok = this.constructObserver(observer);
     httpService.post(URLS.trayUrl, QUERIES.solutions, ok);
   }
 
+  /*
+    MASTER token
+    Filter by tag (e.g. Marketo, Salesforce, etc.)
+  */
+  getSolutionsByTag(tag, observer) {
+    let query = {
+      query:
+        `query {
+            viewer {
+              solutions (criteria: {tags: "[${tag}]"}) {
+                edges {
+                  node {
+                    id
+                    title
+                    description
+                    tags
+                    customFields {
+                      key
+                      value
+                    }
+                  }
+                  cursor
+                }
+                pageInfo {
+                  endCursor
+                  hasNextPage
+                }
+              }
+            }
+          }`
+    };
+    let ok = this.constructObserver(observer);
+    httpService.post(URLS.trayUrl, QUERIES.solutions, ok);
+  }
+
+  /*
+    USER token
+  */
   getSolutionInstances(userAccessToken, observer) {
-    let ok = new Observer(response => {
-        httpService.unsubscribeObservable(ok);
-        observer.next(response);
-    }, (error) =>{
-        httpService.unsubscribeObservable(ok);
-        observer.error(error);
-    });
+    let ok = this.constructObserver(observer);
     httpService.post(URLS.trayUrl, QUERIES.solutionInstances, ok, userAccessToken ? {UserAccessToken: userAccessToken} : {});
   }
 
+  /*
+    USER token
+    https://tray.io/docs/embedded/processes-to-be-managed/importing-auths.html
+  */
+  getAuthentications(userAccessToken, observer) {
+    let ok = this.constructObserver(observer);
+    httpService.post(URLS.trayUrl, QUERIES.authentications, ok, userAccessToken ? {UserAccessToken: userAccessToken} : {});
+  }
 
+
+  /*
+    ----------
+    MUTATIONS
+    ----------
+  */
+
+
+  /*
+    MASTER token
+  */
   authorize(userId, observer) {
     let mutation = {
       query:
@@ -126,17 +216,14 @@ class ExternalIntegrationServiceClass {
           }
         }`
     };
-    let ok = new Observer(response => {
-        httpService.unsubscribeObservable(ok);
-        observer.next(response);
-    }, (error) =>{
-        httpService.unsubscribeObservable(ok);
-        observer.error(error);
-    });
+    let ok = this.constructObserver(observer);
     httpService.post(URLS.trayUrl, mutation, ok);
 
   }
 
+  /*
+    MASTER token
+  */
   generateAuthorizationCode(userId, observer) {
     let mutation = {
       query:
@@ -147,13 +234,25 @@ class ExternalIntegrationServiceClass {
           }
         }`
     };
-    let ok = new Observer(response => {
-        httpService.unsubscribeObservable(ok);
-        observer.next(response);
-    }, (error) =>{
-        httpService.unsubscribeObservable(ok);
-        observer.error(error);
-    });
+    let ok = this.constructObserver(observer);
+    httpService.post(URLS.trayUrl, mutation, ok);
+  }
+
+  /*
+    MASTER token
+    externalUserId and name should be dropbox id
+  */
+  createExternalUser(userName, observer) {
+    let mutation = {
+      query:
+        `mutation {
+          createExternalUser(input: {name: "${userName}", externalUserId: "${userName}"}) {
+            authorizationCode
+            clientMutationId
+          }
+        }`
+    };
+    let ok = this.constructObserver(observer);
     httpService.post(URLS.trayUrl, mutation, ok);
   }
 

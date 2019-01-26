@@ -89,8 +89,9 @@ public class DataIntegrationStatusMonitoringServiceImpl
     }
 
     @Override
-    public List<DataIntegrationStatusMonitor> getAllStatuses(Long tenantId) {
-        return dataIntegrationStatusMonitoringEntityMgr.getAllStatuses(tenantId);
+    public List<DataIntegrationStatusMonitor> getAllStatuses(String tenantId) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        return dataIntegrationStatusMonitoringEntityMgr.getAllStatuses(tenant.getPid());
     }
 
     private WorkflowStatusHandler getWorkflowStatusHandler(String type) {
@@ -146,7 +147,7 @@ public class DataIntegrationStatusMonitoringServiceImpl
         public DataIntegrationStatusMonitor handleWorkflowState(
                 DataIntegrationStatusMonitor statusMonitor,
                 DataIntegrationStatusMonitorMessage status) {
-            Tenant tenant = tenantEntityMgr.findByTenantPid(status.getTenantId());
+            Tenant tenant = tenantEntityMgr.findByTenantId(status.getTenantId());
 
             if (statusMonitor != null) {
                 throw new LedpException(LedpCode.LEDP_40047,
