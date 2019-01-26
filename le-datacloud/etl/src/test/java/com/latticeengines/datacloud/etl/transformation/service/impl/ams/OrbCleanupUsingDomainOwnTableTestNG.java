@@ -28,18 +28,10 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
 
     private static final Logger log = LoggerFactory.getLogger(OrbCleanupUsingDomainOwnTableTestNG.class);
 
-    private static final String DOM_OWNERSHIP_TABLE = "DomainOwnershipTable";
-    private static final String ORB_SEC_CLEANED = "OrbSecCleaned";
-
-    private final static String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
-    private final static String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
-    private final static String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
-    private final static String REASON_TYPE = "REASON_TYPE";
-    private final static String IS_NON_PROFITABLE = "IS_NON_PROFITABLE";
-
-    private GeneralSource domOwnTable = new GeneralSource(DOM_OWNERSHIP_TABLE);
+    private GeneralSource domOwnTable = new GeneralSource(
+            DomainOwnershipConfig.DOM_OWNERSHIP_TABLE);
     private GeneralSource orbSec = new GeneralSource("OrbCacheSeedSecondaryDomain");
-    private GeneralSource source = new GeneralSource(ORB_SEC_CLEANED);
+    private GeneralSource source = new GeneralSource(DomainOwnershipConfig.ORB_SEC_CLEANED);
     private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
 
     @Test(groups = "pipeline1", enabled = true)
@@ -103,11 +95,11 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
     private void prepareDomOwnTable() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
-        schema.add(Pair.of(ROOT_DUNS, String.class));
-        schema.add(Pair.of(DUNS_TYPE, String.class));
-        schema.add(Pair.of(TREE_NUMBER, Integer.class));
-        schema.add(Pair.of(REASON_TYPE, String.class));
-        schema.add(Pair.of(IS_NON_PROFITABLE, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.ROOT_DUNS, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.DUNS_TYPE, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.TREE_NUMBER, Integer.class));
+        schema.add(Pair.of(DomainOwnershipConfig.REASON_TYPE, String.class));
+        schema.add(Pair.of(DomainOwnershipConfig.IS_NON_PROFITABLE, String.class));
         Object[][] data = new Object[][] {
          // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
             // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
@@ -194,7 +186,6 @@ public class OrbCleanupUsingDomainOwnTableTestNG extends PipelineTransformationT
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
-            System.out.println("record : " + record);
             String priDomain = String.valueOf(record.get(0));
             String secDomain = String.valueOf(record.get(1));
             Object[] expected = expectedDeterministicSet.get(priDomain + secDomain);
