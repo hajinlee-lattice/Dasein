@@ -125,7 +125,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                 { "paypal.com", 700 }, { "sbiGu.com", 32 }, { "netappDuns1.com", 83 },
                 { "karlDuns2.com", 101 }, { "sbiDuns2.com", 105 }, { "sbiDuns1.com", 107 },
                 { "tesla.com", 108 }, { "netappDu.com", 109 }, { "netsuite.com", 110 },
-                { "oracle.com", 134 } };
+                { "oracle.com", 134 }, { "music.com", 11 } };
         uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, schema, data);
     }
 
@@ -197,6 +197,8 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             // Case 9 :
             // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain. 
             // Primary domain already exists in AMSeed. The final result should not have duplicate domain + duns entries.
+            { "music.com", "DUNS37", null, null, 24178781L, "2343", 2, "Media", 213, null,
+                        DOMSRC_DNB },
             { "saavn.com", "DUNS37", "DUNS39", "DUNS90", 2812732L, "1313", 2, "Legal", 131, null, DOMSRC_DNB}
         };
         uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, data);
@@ -218,7 +220,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                 
                 // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain. 
                 // Primary domain already exists in AMSeed. The final result should not have duplicate domain + duns entries.
-                { "sbiGu.com", "saavn.com" }, 
+                { "music.com", "saavn.com" },
                 
                 // primary domain not added as corresponding secondary domain
                 // not present in amSeed
@@ -230,8 +232,10 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
     Object[][] amSeedCleanedUpDeterministicValues = new Object[][] { //
             // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
             // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
-
-            // Case 2 : domains present in OwnershipTable : rootDuns match = not cleaned up
+            // Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
+            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, null, DOMSRC_DNB },
+        
+            // Case 2 : Domains present in OwnershipTable : rootDuns match = not cleaned up
             { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216,
                     null, null, DOMSRC_DNB },
             { "vlocityDuns2.com", "DUNS78", "DUNS77", "DUNS79", 40002499L, "4552", 2, "Media", 342,
@@ -292,9 +296,9 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             // is replaced by OrbSec.PrimaryDomain.
             // Primary domain already exists in AMSeed. The final result should
             // not have duplicate domain + duns entries.
-            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production",
-                    200, null, null, DOMSRC_DNB },
-            { "sbiGu.com", "DUNS37", "DUNS39", "DUNS90", 2812732L, "1313", 2, "Legal", 32,
+            { "music.com", "DUNS37", null, null, 24178781L, "2343", 2, "Media", 213, null,
+                    null, DOMSRC_DNB },
+            { "music.com", "DUNS37", "DUNS39", "DUNS90", 2812732L, "1313", 2, "Legal", 11,
                     "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=saavn.com is orb sec domain]",
                     null, DOMSRC_ORB } };
 
@@ -310,7 +314,8 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
         Map<String, Object[]> amSeedNonDeterministicExpectedValues = new HashMap<>();
         for (Object[] data : amSeedCleanedupNonDeterministicValues) {
             amSeedNonDeterministicExpectedValues
-                    .put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
+                    .put(String.valueOf(data[0]) + String.valueOf(data[1])
+                            + String.valueOf(data[2]), data);
         }
         String[] expectedValueOrder = { //
                 DataCloudConstants.AMS_ATTR_DOMAIN, //
@@ -332,7 +337,8 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             String duns = String.valueOf(record.get("DUNS"));
             Object[] expectedVal = amSeedDeterministicExpectedValues.get(domain + duns);
             if (expectedVal == null) {
-                expectedVal = amSeedNonDeterministicExpectedValues.get(domain + duns);
+                String guDuns = String.valueOf(record.get("GLOBAL_ULTIMATE_DUNS_NUMBER"));
+                expectedVal = amSeedNonDeterministicExpectedValues.get(domain + duns + guDuns);
                 nonDeterministicRecCount++;
             }
             for (int i = 0; i < expectedValueOrder.length; i++) {
