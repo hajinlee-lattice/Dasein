@@ -20,7 +20,7 @@
   <form name="form">
     <div class="le-grid custom-fields-grid" ng-init="fieldMapping = fieldMapping || {}">
       <div class="le-header le-row">
-        <div class="le-cell le-col-start-1 le-col-span-5">
+        <div class="le-cell le-col-span-5">
           <div class="container-flex">
             <span>Custom Field</span>
             <div>
@@ -37,7 +37,7 @@
             </div>
           </div>
         </div>
-        <div class="le-cell le-col-start-6 le-col-span-5">
+        <div class="le-cell le-col-span-5">
           <div class="container-flex">
             Type
             <div>
@@ -54,9 +54,16 @@
             </div>
           </div>
         </div>
-        <div class="le-cell le-col-start-11 le-col-span-1">
+        <div class="le-cell le-col-span-2">
           <div class="container-flex">
             Ignore
+            <input
+              type="checkbox"
+              name="ignore_all"
+              id="toggleIgnore"
+              ng-model="checked"
+              ng-change="vm.toggleIgnores(checked, fieldMapping)"
+            />
             <div>
               <span class="more-info">&#105;
                 <div class="tooltip_">
@@ -73,10 +80,10 @@
         </div>
       </div>
       <div class="grid-body le-row" ng-repeat="field in vm.AvailableFields | filter: vm.filterStandardList as filtered">
-        <div class="le-cell le-col-start-1 le-col-span-5">
+        <div class="le-cell le-col-span-5">
           <span>{{ field.userField }}</span>
         </div>
-        <div class="le-cell le-col-start-6 le-col-span-6">
+        <div class="le-cell le-col-span-5">
           <div class="field-type">
             <select ng-disabled="fieldMapping[field.userField].ignore === true" class="form-control select-type"
               ng-class=" fieldMapping[field.userField].fieldType == 'DATE' ? 'date-type' : ''" name="columnType_{{ ::field.userField }}"
@@ -88,11 +95,14 @@
               <option value="BOOLEAN">Boolean</option>
               <option value="DATE">Date</option>
             </select>
-            <date-field-component ng-if="fieldMapping[field.userField].fieldType == 'DATE'" field="field" update-type="vm.changeSingleType(fieldMapping)"></date-field-component>
+            <date-field-component ng-if="fieldMapping[field.userField].fieldType == 'DATE'" 
+                field="field" 
+                disabeld="fieldMapping[field.userField].ignore"
+                update-type="vm.changeSingleType(fieldMapping)"></date-field-component>
            
           </div>
         </div>
-        <div class="le-cell le-col-start-12 le-col-span-1">
+        <div class="le-cell le-col-span-2">
           <input type="checkbox" id="{{ field.userField }}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"
             ng-disabled="field.defaultIgnored === true" />
         </div>

@@ -1,6 +1,6 @@
 <div class="date-options">
     <div class="date-format-container">
-        <select class="form-control" ng-model="$ctrl.dateFormat" ng-change="$ctrl.changeDateFormat()" ng-disabled="$ctrl.field.ignore === true">
+        <select class="form-control" ng-model="$ctrl.dateFormat" ng-change="$ctrl.changeDateFormat()" ng-disabled="$ctrl.disabeld === true">
             <option value="{{ list }}" class="default-value">(Date Format)</option>
             <option ng-repeat="list in $ctrl.dateFormats" value="{{ list }}">{{ list }}</option>
         </select>
@@ -17,13 +17,13 @@
             </span>
         </div>
     </div>
-    <select class="form-control" ng-model="$ctrl.timeFormat" ng-disabled="$ctrl.field.ignore === true" ng-change="$ctrl.changeTimeFormat()">
+    <select class="form-control" ng-model="$ctrl.timeFormat" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.changeTimeFormat()">
         <option value="{{ list }}" class="default-value">(Time Format)</option>
         <option ng-repeat="list in $ctrl.timeFormats" value="{{ list }}">{{ list }}</option>
     </select>
 
     <div class="time-zones">
-        <select class="form-control" ng-model="$ctrl.timezone" ng-disabled="$ctrl.field.ignore === true" ng-change="$ctrl.changeTimezone()">
+        <select class="form-control" ng-model="$ctrl.timezone" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.changeTimezone()">
             <option value="{{ list }}" class="">(Timezone)</option>
             <option ng-repeat="list in $ctrl.timeZones" value="{{ list }}">{{ list }}</option>
         </select>
