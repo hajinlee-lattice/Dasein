@@ -64,7 +64,7 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
 
             String dataCloudVersion = getSystemProperty("MQ_DATACLOUD_VERSION");
             if (StringUtils.isBlank(dataCloudVersion)) {
-                dataCloudVersion = columnMetadataProxy.latestVersion().toString();
+                dataCloudVersion = columnMetadataProxy.latestVersion().getVersion();
             }
             logger.info("DataCloudVersion=" + dataCloudVersion);
             thisPropData.setDataCloudVersion(dataCloudVersion);
