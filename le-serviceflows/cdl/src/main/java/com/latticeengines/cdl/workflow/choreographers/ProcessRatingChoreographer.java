@@ -11,6 +11,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -39,6 +40,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.export.ImportGeneratingRatingFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component("processRatingChoreographer")
@@ -108,6 +110,11 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        Set<BusinessEntity> entities = step.getSetObjectFromContext(BaseWorkflowStep.PA_SKIP_ENTITIES,
+                BusinessEntity.class);
+        if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Rating)) {
+            return true;
+        }
         if (isPrepareStep(step)) {
             checkEnforcedRebuild(step);
             return false;

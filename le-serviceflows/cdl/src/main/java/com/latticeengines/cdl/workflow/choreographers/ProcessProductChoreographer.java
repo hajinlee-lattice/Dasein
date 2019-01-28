@@ -158,4 +158,9 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
         return step.name().equalsIgnoreCase(ProfileProductHierarchy.BEAN_NAME);
     }
 
+    @Override
+    protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        return false;
+    }
+
 }
