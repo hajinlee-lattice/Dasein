@@ -1,70 +1,44 @@
-const getDateFormat = (field) => {
-    let date = field.dateFormatString;
-    if (date == null) {
+export default class DateUtils {
+    static getDateFormat(field) {
+        let date = field.dateFormatString;
+        if (date == null) {
+            return '';
+        }
+        return date;
+    }
+    static setDateFormat(field, newFormat) {
+        field.dateFormatString = newFormat;
+    }
+
+    static getTimeFormat(field) {
+        let time = field.timeFormatString;
+        if (time == null) {
+            return '';
+        }
+        return time;
+    }
+
+    static getTimezone(field) {
+        if (field.timezone != null) {
+            return field.timezone;
+        }
         return '';
     }
-    return date;
-};
-
-const setDateFormat = (field, newFormat) => {
-    field.dateFormatString = newFormat;
-};
-
-const getTimeFormat = (field) => {
-    let time = field.timeFormatString;
-    if (time == null ) {
-        return '';
+    static setTimeFormat(field, newTimeFormat) {
+        let ret = newTimeFormat;
+        field.timeFormatString = ret.trim();
     }
-    return time;
-};
-
-const getTimezone = (field) => {
-    if (field.timezone != null) {
-        return field.timezone;
+    static setTimezone(field, newTimeZone) {
+        field.timezone = newTimeZone;
     }
-    return '';
-};
 
-const setTimeFormat = (field, newTimeFormat) => {
-    let ret = newTimeFormat;
-    field.timeFormatString = ret.trim();
-};
-const setTimezone = (field, newTimeZone) => {
-    field.timezone = newTimeZone;
-}
-
-const isOnlyDateMandatory = (fieldMappingsOriginal, field) => {
-    let userFieldName = field.userField;
-    let fieldType = field.fieldType;
-    let originalMapping = fieldMappingsOriginal.map[userFieldName];
-    if (originalMapping.fieldType == fieldType && fieldType == 'DATE') {
-        return isOnlyDate(originalMapping);
-    }
-    return true;
-}
-
-const isTimezoneMandatory = (fieldMappingOriginal, fieldMappingChanged) => {
-    if (isDateField(fieldMappingOriginal) && !isOnlyDate(fieldMappingChanged)) {
+    static isOnlyDateMandatory(fieldMappingsOriginal, field) {
+        let userFieldName = field.userField;
+        let fieldType = field.fieldType;
+        let originalMapping = fieldMappingsOriginal.map[userFieldName];
+        if (originalMapping.fieldType == fieldType && fieldType == 'DATE') {
+            return isOnlyDate(originalMapping);
+        }
         return true;
     }
-    return false;
 }
-
-
-const isOnlyDate = (fieldMappingOriginal) => {
-    let dateTime = fieldMappingOriginal.dateTimeFormatString;
-    if (dateTime == null || dateTime.indexOf(' ') < 0) {
-        return true;
-    }
-    return false;
-}
-const isDateField = (fieldMapping) => {
-    if (fieldMapping && fieldMapping.fieldType == "DATE") {
-        return true;
-    }
-    return false;
-}
-export {
-    isOnlyDateMandatory, isTimezoneMandatory, getDateFormat, setDateFormat, getTimeFormat, getTimezone,
-    setTimeFormat, setTimezone
-};

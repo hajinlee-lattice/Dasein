@@ -1,5 +1,4 @@
-import {isOnlyDateMandatory, getDateFormat, setDateFormat,
-    getTimeFormat, getTimezone, setTimeFormat, setTimezone} from '../../date-utils/date-utils';
+import DateUtils from '../../date-utils/date-utils.js';
     
 angular.module('lp.import.wizard.customfields')
 .component('dateFieldComponent', {
@@ -12,9 +11,9 @@ angular.module('lp.import.wizard.customfields')
     controller: function ($state, $ngRedux) {
         var vm = this;
         this.redux = $state.get('home.import').data.redux;
-        this.dateFormat = getDateFormat(this.field);
-        this.timeFormat = getTimeFormat(this.field);
-        this.timezone = getTimezone(this.field);
+        this.dateFormat = DateUtils.getDateFormat(this.field);
+        this.timeFormat = DateUtils.getTimeFormat(this.field);
+        this.timezone = DateUtils.getTimezone(this.field);
         this.dateFormats = this.redux.store.dateFormats;
         this.timeFormats = this.redux.store.timeFormats;
         this.timeZones = this.redux.store.timezones;
@@ -24,19 +23,19 @@ angular.module('lp.import.wizard.customfields')
         };
 
         this.changeDateFormat = () => {
-            setDateFormat(this.field, this.dateFormat); 
+            DateUtils.setDateFormat(this.field, this.dateFormat); 
             if(this.updateType){
                 this.updateType({fieldMapping: this.field});
             }
         };
         this.changeTimeFormat = () => {
-            setTimeFormat(this.field,this.timeFormat);
+            DateUtils.setTimeFormat(this.field,this.timeFormat);
             if(this.updateType){
                 this.updateType({fieldMapping: this.field});
             }
         }
         this.changeTimezone = () => {
-            setTimezone(this.field, this.timezone);
+            DateUtils.setTimezone(this.field, this.timezone);
             if(this.updateType){
                 this.updateType({fieldMapping: this.field});
             }
