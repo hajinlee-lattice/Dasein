@@ -375,4 +375,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     void setHasProductChange(boolean hasProductChange) {
         this.productChoreographer.hasChange = hasProductChange;
     }
+
+    @Override
+    protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        return false;
+    }
 }

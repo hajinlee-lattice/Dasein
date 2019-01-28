@@ -208,6 +208,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipSteps(Set<BusinessEntity> entities, boolean skipAPS) {
+            processStepConfiguration.setSkipEntities(entities);
+            awsPythonDataConfiguration.setSkipStep(skipAPS);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

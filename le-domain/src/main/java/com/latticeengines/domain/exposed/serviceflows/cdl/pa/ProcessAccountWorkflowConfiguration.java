@@ -61,6 +61,15 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipEntitties(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities)) {
+                if (entities.contains(BusinessEntity.Account)) {
+                    rebuildAccountWorkflowBuilder.build().setSkipCompletedSteps(true);
+                }
+            }
+            return this;
+        }
+
         public ProcessAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
@@ -71,4 +80,5 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return configuration;
         }
     }
+
 }

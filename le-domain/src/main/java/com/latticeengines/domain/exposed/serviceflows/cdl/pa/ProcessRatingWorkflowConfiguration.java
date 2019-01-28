@@ -112,6 +112,15 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder skipEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities)) {
+                if (entities.contains(BusinessEntity.Rating)) {
+                    configuration.setSkipCompletedSteps(true);
+                }
+            }
+            return this;
+        }
+
         public ProcessRatingWorkflowConfiguration build() {
             generateRatingWorfklow.uniqueKeyColumn(InterfaceName.__Composite_Key__.name());
             generateRatingWorfklow.matchGroupId(InterfaceName.AccountId.name());

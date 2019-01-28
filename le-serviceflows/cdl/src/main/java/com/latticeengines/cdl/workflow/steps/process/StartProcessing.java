@@ -119,6 +119,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
         putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
+        putObjectInContext(PA_SKIP_ENTITIES, configuration.getSkipEntities());
 
         setupDataCollectionStatus(evaluationDate);
 
