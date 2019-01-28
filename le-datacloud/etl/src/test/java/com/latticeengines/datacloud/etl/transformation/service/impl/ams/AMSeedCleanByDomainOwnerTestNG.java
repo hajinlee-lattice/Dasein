@@ -98,21 +98,22 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
         schema.add(Pair.of(DomainOwnershipConfig.REASON_TYPE, String.class));
         schema.add(Pair.of(DomainOwnershipConfig.IS_NON_PROFITABLE, String.class));
         Object[][] data = new Object[][] {
-	        	// Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
-	    		// SINGLE TREE : not cleaned up
-	    		{ "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
-	    		// FRANCHISE, MULTIPLE_LARGE_COMPANY : not cleaned up
-	    		{ "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
+                // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE,
+                // IS_NON_PROFITABLE SINGLE TREE : not cleaned up
+                { "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
+                // FRANCHISE, MULTIPLE_LARGE_COMPANY : not cleaned up
+                { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
                 { "craigslist.com", null, null, 2, "MULTIPLE_LARGE_COMPANY", "false" }, //
-	    		// OTHER : not cleaned up
-	    		{ "tesla.com", null, null, 3, "OTHER", "false" }, //
-	    		// Reasons : HIGHER_EMP_TOTAL, HIGHER_NUM_OF_LOC, HIGHER_SALES_VOLUME := Cleaned up
-	            { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //
-	            { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
+                // OTHER : not cleaned up
+                { "tesla.com", null, null, 3, "OTHER", "false" }, //
+                // Reasons : HIGHER_EMP_TOTAL, HIGHER_NUM_OF_LOC,
+                // HIGHER_SALES_VOLUME := Cleaned up
+                { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //
+                { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
                 { "vlocityDuns2.com", "DUNS77", "GU", 2, "HIGHER_EMP_TOTAL", "false" }, //
-	            // Missing root DUNS entry case (in single or multiple trees)
-	            // rootDuns = DUNS900
-	            { "netsuite.com", null, null, 1, "MISSING_ROOT_DUNS", "false" }, //
+                // Missing root DUNS entry case (in single or multiple trees)
+                // rootDuns = DUNS900
+                { "netsuite.com", null, null, 1, "MISSING_ROOT_DUNS", "false" }, //
         };
         uploadBaseSourceData(domOwnTable.getSourceName(), baseSourceVersion, schema, data);
     }
@@ -143,45 +144,54 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
         schema.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, String.class));
         schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE, String.class));
         Object[][] data = new Object[][] {
-        	// Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
-	        { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, DOMSRC_DNB },
-	        // Case 2 : domains present in OwnershipTable : rootDuns match
-	            // sbiDuns2.com domain record with DUNS = DUNS10 wins due to reason = HIGHER_NUM_OF_LOC(same salesVolume and totalEmployees)
-	        { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216, null, DOMSRC_DNB },
-	            // vlocityDuns2.com domain record with DUNS = DUNS78 wins due to reason = HIGHER_EMP_TOTAL(same salesVolume)
+                // Case 1 : Domains present in domain ownership table with
+                // SINGLE_TREE type : result = not cleaned up
+            { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, DOMSRC_DNB },
+                // Case 2 : domains present in OwnershipTable : rootDuns match
+                // sbiDuns2.com domain record with DUNS = DUNS10 wins due to
+                // reason = HIGHER_NUM_OF_LOC(same salesVolume and
+                // totalEmployees)
+            { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216, null, DOMSRC_DNB },
+                // vlocityDuns2.com domain record with DUNS = DUNS78 wins due to
+                // reason = HIGHER_EMP_TOTAL(same salesVolume)
             { "vlocityDuns2.com", "DUNS78", "DUNS77", "DUNS79", 40002499L, "4552", 2, "Media", 342, null, DOMSRC_DNB },
                 // domains present in OwnershipTable : rootDuns doesn't
                 // match = these are the entries that will get cleaned up as same domain
                 // in other tree (other root duns) got selected as provided above
-	        
-	            // karlDuns2.com domain record with DUNS = DUNS24 loses due to lower sales volume
-	        { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218, null, DOMSRC_DNB },
-	            // sbiDuns2.com domain record with DUNS = DUNS01 loses due to lower num of locations(same salesVolume and totalEmployees)
-	        { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223, null, DOMSRC_DNB },
-	            // vlocityDuns2.com domain record with DUNS = DUNS82 loses due to lower total employees(same root duns salesVolume)
+                // karlDuns2.com domain record with DUNS = DUNS24 loses due to
+                // lower sales volume
+            { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218, null, DOMSRC_DNB },
+                // sbiDuns2.com domain record with DUNS = DUNS01 loses due to
+                // lower num of locations(same salesVolume and totalEmployees)
+            { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223, null, DOMSRC_DNB },
+                // vlocityDuns2.com domain record with DUNS = DUNS82 loses due
+                // to lower total employees(same root duns salesVolume)
             { "vlocityDuns2.com", "DUNS88", "DUNS82", "DUNS80", 70002499L, "6552", 4, "Legal", 123, null, DOMSRC_DNB },
-	        
-            // Case 3 : domains present in OwnershipTable with reasons
-            // multiple large company, franchise, other
-	            // Present in multiple trees causing reasonType = MULTIPLE_LARGE_COMPANY
-	        { "craigslist.com", "DUNS07", "DUNS61", null, 6660405L, "23552", 2, "Legal", 31,
+                // Case 3 : domains present in OwnershipTable with reasons
+                // multiple large company, franchise, other
+                // Present in multiple trees causing reasonType = MULTIPLE_LARGE_COMPANY
+            { "craigslist.com", "DUNS07", "DUNS61", null, 6660405L, "23552", 2, "Legal", 31,
                 null, DOMSRC_DNB },
-	        { "craigslist.com", "DUNS03", null, "DUNS62", 5020405L, "2123", 2, "Media", 142,
+            { "craigslist.com", "DUNS03", null, "DUNS62", 5020405L, "2123", 2, "Media", 142,
                 null, DOMSRC_DNB },
-    	        // ReasonType = OTHER
+                // ReasonType = OTHER
                 // Added reason_type = 'OTHER' for domains present in multiple trees having firmographics same in both trees. 
                 // So, can't choose the tree, so will update ROOT_DUNS = null and DUNS_TYPE = null for such entries. 
                 // Such entries will not be cleaned up
-	        { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, DOMSRC_DNB },
-	        { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, DOMSRC_DNB },
-	        { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null, DOMSRC_DNB },
-            // Case 4 : domain only entries
-	        { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233, null, DOMSRC_DNB },
+            { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, DOMSRC_DNB },
+            { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, DOMSRC_DNB },
+            { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal", 231, null, DOMSRC_DNB },
+                // Case 4 : domain only entries
+            { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes", 233, null, DOMSRC_DNB },
             // Case 5 : duns only entries
-	        { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services", 234, null, DOMSRC_DNB },
+            { null, "DUNS43", "DUNS19", "DUNS43", 321932822L, "23019", 23, "Consumer Services",
+                        234, null, DOMSRC_DNB },
             // Case 6 : domains with missing ROOT_DUNS
-	        // MISSING_ROOT_DUNS reason type = no record entry found with DUNS same as record's rootDuns
-            // Here, rootDuns = DUNS900 and there is no entry with DUNS = DUNS900 and hence reason type = MISSING_ROOT_DUNS
+                // MISSING_ROOT_DUNS reason type = no record entry found with
+                // DUNS same as record's rootDuns.
+                // Here, rootDuns = DUNS900 and
+                // there is no entry with DUNS = DUNS900 and hence reason type =
+                // MISSING_ROOT_DUNS
             { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236,
                     null, DOMSRC_DNB },
             // Case 7 : 
@@ -267,9 +277,9 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             // Case 7 :
 
             // sbiDuns1.com domain replaced with domain paypal.com. Update corresponding alexaRank.
-            { "paypal.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 700, 
-                    	"[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
-                    DOMSRC_ORB},
+            { "paypal.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services",
+                    700,"[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]",
+                    null, DOMSRC_ORB },
             { "paypal.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1, "Manufacturing - Semiconductors", 700,
                         "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null, 
                     DOMSRC_ORB },
