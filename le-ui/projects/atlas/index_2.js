@@ -15,3 +15,4 @@ import 'atlas/jobs/jobs.index';
 import 'atlas/app';
 import './help.index';
 import './zendesk.index';
+import 'atlas/connectors/connectors.index';
