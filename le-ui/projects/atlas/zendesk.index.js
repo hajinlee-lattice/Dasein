@@ -3,7 +3,7 @@ import Observer from "../common/app/http/observer";
 
 var disable_zendesk = false;
 
-if (['app.lattice-engines.com'].indexOf(window.location.host) < 0) { // production
+if (['app.lattice-engines.com'].indexOf(window.location.host) < 0 && ['testapp.lattice-engines.com'].indexOf(window.location.host) < 0) { // production or qa
     disable_zendesk = true;
 }
 
