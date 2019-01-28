@@ -306,5 +306,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     protected abstract BusinessEntity mainEntity();
 
+    // used to skip subworkflow in pa
     protected abstract boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq);
 }
