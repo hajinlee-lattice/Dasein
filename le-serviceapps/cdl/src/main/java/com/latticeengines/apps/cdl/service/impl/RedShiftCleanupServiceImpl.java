@@ -108,7 +108,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                 } else {//rename redshiftname wait delete
                     String new_tableName = TABLE_PREFIX + df.format(new Date()) + "_" + tableName;
                     log.info("new table name is " + new_tableName);
-                    dataUnitProxy.renameRedShiftTableName(tenant.getId(), dataUnit,
+                    dataUnitProxy.renameTableName(tenant.getId(), dataUnit,
                             new_tableName);
                 }
             }

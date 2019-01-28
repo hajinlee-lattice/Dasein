@@ -45,8 +45,8 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
-    public Boolean renameRedShiftTableName(String customerSpace, DataUnit dataUnit, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/renameRedShiftTableName?tableName" +
+    public Boolean renameTableName(String customerSpace, DataUnit dataUnit, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/renameTableName?tableName" +
                         "={tableName}",
                 shortenCustomerSpace(customerSpace), tableName);
         return post("Rename RedShift tableName", url, dataUnit, Boolean.class);

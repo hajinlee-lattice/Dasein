@@ -4,15 +4,21 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
+import com.latticeengines.metadata.service.DataUnitRuntimeService;
 import com.latticeengines.metadata.service.DataUnitService;
 
 @Service("dataUnitService")
 public class DataUnitServiceImpl implements DataUnitService {
+
+    private static final Logger log = LoggerFactory.getLogger(DataUnitServiceImpl.class);
 
     @Inject
     private DataUnitEntityMgr entityMgr;
@@ -49,9 +55,56 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
-    public DataUnit renameRedShiftTableName(DataUnit dataUnit, String tableName) {
+    public boolean delete(DataUnit dataUnit) {
+        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
+        if (dataUnitRuntimeService == null) {
+            throw new RuntimeException(
+                    String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
+                            dataUnit.getClass()));
+        }
+        try {
+            dataUnitRuntimeService.delete(dataUnit);
+            deleteByNameAndStorageType(dataUnit.getName(), dataUnit.getStorageType());
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean renameTableName(DataUnit dataUnit, String tableName) {
+        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
+        if (dataUnitRuntimeService == null) {
+            throw new RuntimeException(
+                    String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
+                            dataUnit.getClass()));
+        }
+        try {
+            dataUnitRuntimeService.renameTableName(dataUnit, tableName);
+            String tenantId = MultiTenantContext.getShortTenantId();
+            entityMgr.renameTableName(tenantId, dataUnit, tableName);
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean cleanupByTenant() {
         String tenantId = MultiTenantContext.getShortTenantId();
-        return entityMgr.renameRedShiftTableName(tenantId, dataUnit, tableName);
+        List<DataUnit> dataUnits = entityMgr.findAll(tenantId);
+        if (!CollectionUtils.isEmpty(dataUnits)) {
+            for (DataUnit dataUnit : dataUnits) {
+                try {
+                    delete(dataUnit);
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            }
+        }
+        return true;
     }
 
 }
