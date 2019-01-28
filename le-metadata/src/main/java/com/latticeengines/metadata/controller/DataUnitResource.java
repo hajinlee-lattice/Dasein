@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.metadata.service.DataUnitRuntimeService;
 import com.latticeengines.metadata.service.DataUnitService;
 
 import io.swagger.annotations.Api;
@@ -27,8 +26,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/dataunit")
 public class DataUnitResource {
-
-    private static final Logger log = LoggerFactory.getLogger(DataUnitResource.class);
 
     @Inject
     private DataUnitService dataUnitService;
@@ -41,40 +38,13 @@ public class DataUnitResource {
 
     @PutMapping("/delete")
     public Boolean delete(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
-        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
-        if (dataUnitRuntimeService == null) {
-            throw new RuntimeException(
-                    String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
-                            dataUnit.getClass()));
-        }
-        try {
-            dataUnitRuntimeService.delete(dataUnit);
-            dataUnitService.deleteByNameAndStorageType(dataUnit.getName(), dataUnit.getStorageType());
-            return true;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
-
+        return dataUnitService.delete(dataUnit);
     }
 
-    @PostMapping("/renameRedShiftTableName")
-    public Boolean renameRedShiftTableName(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
+    @PostMapping("/renameTableName")
+    public Boolean renameTableName(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
                                             @RequestParam(name="tableName") String tableName) {
-        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
-        if (dataUnitRuntimeService == null) {
-            throw new RuntimeException(
-                    String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
-                            dataUnit.getClass()));
-        }
-        try {
-            dataUnitRuntimeService.renameTableName(dataUnit, tableName);
-            dataUnitService.renameRedShiftTableName(dataUnit, tableName);
-            return true;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
+        return dataUnitService.renameTableName(dataUnit, tableName);
     }
 
     @GetMapping("/type/{type}")

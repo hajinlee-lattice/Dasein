@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
-import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("RedshiftDataUnitService")

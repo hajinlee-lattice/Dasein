@@ -17,6 +17,8 @@ public interface DataUnitRepository extends MultiTenantDocumentRepository<DataUn
 
     List<DataUnitEntity> findByTenantIdAndName(String tenantId, String name);
 
+    List<DataUnitEntity> findByTenantId(String tenantId);
+
     DataUnitEntity findByTenantIdAndNameAndStorageType(String tenantId, String name, DataUnit.StorageType storageType);
 
 }

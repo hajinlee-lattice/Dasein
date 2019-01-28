@@ -54,6 +54,12 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         }
     }
 
+    @Override
+    public List<DataUnit> findAll(String tenantId) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantId(tenantId);
+        return convertList(entities);
+    }
+
     private DataUnit createNewDataUnit(String tenantId, DataUnit dataUnit) {
         DataUnitEntity newEntity = new DataUnitEntity();
         newEntity.setTenantId(tenantId);
@@ -114,7 +120,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
-    public DataUnit renameRedShiftTableName(String tenantId, DataUnit dataUnit, String tableName) {
+    public DataUnit renameTableName(String tenantId, DataUnit dataUnit, String tableName) {
         DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, dataUnit.getName(),
                 dataUnit.getStorageType());
         if (existing != null) {
