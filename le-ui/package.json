@@ -39,7 +39,8 @@
         "https": "^1.0.0",
         "morgan": "1.9.1",
         "node-sass": "^4.11.0",
-        "request": "^2.69.0"
+        "request": "^2.69.0",
+        "jsonwebtoken": "^8.4.0"
     },
     "scripts": {
         "install": "npm run InstallDev",
@@ -118,7 +119,5 @@
         "wpbuilddev": "concurrently \"npm run wp-loginbuilddev\" \"npm run wp-atlasbuilddev\" \"npm run wp-lpibuilddev\" \"npm run wp-insightsbuilddev\"",
         "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-atlasprod\" \"npm run wp-lpiprod\" \"npm run wp-insightsbuild\""
     },
-    "devDependencies": {
-        "jsonwebtoken": "^8.4.0"
-    }
+    "devDependencies": {}
 }
