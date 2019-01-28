@@ -1,4 +1,3 @@
-import {isOnlyDateMandatory, isTimezoneMandatory} from './date-utils/date-utils';
 /**
  * Account:[
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}
@@ -157,10 +156,4 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
             });
         }
     };
-
-    this.isOnlyDateMandatory = (originlMappings) => {
-
-    }
-
-
 });
