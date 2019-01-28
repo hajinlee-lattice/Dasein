@@ -51,7 +51,7 @@ public class TransformationStepConfig {
     private String stepType = SIMPLE;
 
     @JsonProperty("NoInput")
-    private boolean noInput = false;
+    private Boolean noInput = false;
 
     @JsonIgnore
     private String configuration;
