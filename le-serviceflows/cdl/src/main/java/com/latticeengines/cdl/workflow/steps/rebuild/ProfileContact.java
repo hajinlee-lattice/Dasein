@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
@@ -33,6 +34,12 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
     private static final Logger log = LoggerFactory.getLogger(ProfileContact.class);
 
     private List<String> dedupFields = ImmutableList.of(InterfaceName.AccountId.name());
+
+    @Override
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
+        setEvaluationDateStrAndTimestamp();
+    }
 
     @Override
     protected TableRoleInCollection profileTableRole() {
@@ -83,6 +90,11 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
             Attribute attr = copyMasterAttr(masterAttrs, attr0);
             if (masterAttrs.containsKey(attr0.getName())) {
                 attr = copyMasterAttr(masterAttrs, attr0);
+                if (LogicalDataType.Date.equals(attr0.getLogicalDataType())) {
+                    log.info("Setting last data refresh for contact date attribute: " + attr.getName() + " to "
+                            + evaluationDateStr);
+                    attr.setLastDataRefresh("Last Data Refresh: " + evaluationDateStr);
+                }
                 masterCount.incrementAndGet();
             }
             attr.setCategory(Category.CONTACT_ATTRIBUTES);
