@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
+import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cdlComponentService")
@@ -38,7 +39,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
     @Inject
-    private DataUnitEntityMgr dataUnitEntityMgr;
+    private DataUnitService dataUnitService;
 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
@@ -88,7 +89,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
             String tenantId = cs.getTenantId();
             attrConfigEntityMgr.cleanupTenant(tenantId);
-            dataUnitEntityMgr.cleanupTenant(tenantId);
+            dataUnitService.cleanupByTenant();
             Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
             MultiTenantContext.setTenant(tenant);
             dropBoxService.delete();
@@ -115,8 +116,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
             if (dataFeed != null) {
                 // delete redshift tables
-                List<DataUnit> dataUnits = dataUnitEntityMgr.findAllByTypeFromReader(
-                        customerSpace, DataUnit.StorageType.Redshift);
+                List<DataUnit> dataUnits = dataUnitService.findAllByType(DataUnit.StorageType.Redshift);
                 if (dataUnits != null) {
                     for (DataUnit dataUnit : dataUnits) {
                         redshiftService.dropTable(dataUnit.getName());
