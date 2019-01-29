@@ -706,7 +706,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             }
 
             List<String> baseSourceNames = step.getBaseSources();
-            if (!Boolean.TRUE.equals(step.getNoInput()) && ((baseSourceNames == null) || (baseSourceNames.size() == 0))
+            if (!step.getNoInput() && ((baseSourceNames == null) || (baseSourceNames.size() == 0))
                     && ((inputSteps == null) || (inputSteps.size() == 0))) {
                 error = String.format("Step %s does not have any input source specified", currentStep);
                 log.error(error);
