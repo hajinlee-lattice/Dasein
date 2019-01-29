@@ -60,6 +60,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         String playLaunchId = config.getPlayLaunchId();
         String externalSystemId = config.getDestinationOrgId();
         s3ExportFilePaths.stream().forEach(exportPath -> {
+            String dropFolderPath = exportPath.substring(exportPath.indexOf("dropfolder"));
             Map<String, MessageAttributeValue> messageAttributes = new HashMap<String, MessageAttributeValue>();
             // TODO: Replace with destination org type
             messageAttributes.put(ExternalIntegrationMessageAttribute.TARGET_SYSTEMS.getName(),
@@ -76,13 +77,12 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
             messageAttributes.put(ExternalIntegrationMessageAttribute.EXTERNAL_SYSTEM_ID.getName(),
                     new MessageAttributeValue().withDataType(STRING).withStringValue(externalSystemId));
             messageAttributes.put(ExternalIntegrationMessageAttribute.SOURCE_FILE.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue(exportPath));
+                    new MessageAttributeValue().withDataType(STRING).withStringValue(dropFolderPath));
 
             try {
                 log.info(String.format("Publishing play launch id %s to destination org id %s ", playLaunchId,
                         externalSystemId));
-                snsService.publishToTopic("ExportDataTopic", exportPath.substring(exportPath.indexOf("dropfolder")),
-                        messageAttributes);
+                snsService.publishToTopic("ExportDataTopic", dropFolderPath, messageAttributes);
             } catch (Exception e) {
                 log.info(e.getMessage());
             }
