@@ -183,7 +183,8 @@ public class StatsCubeUtilsUnitTestNG {
 
                 // Account Attributes (aka "My Attributes") that are date attribute types are allowed to be in the
                 // TopN Tree as long as they are not system attributes.
-                if (!Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                if (!(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                        || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory()))
                         || StatsCubeUtils.isSystemAttribute(topAttr.getEntity(), cm)) {
                     Assert.assertNotEquals(cm.getFundamentalType(), FundamentalType.DATE);
                     Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Timestamp);
