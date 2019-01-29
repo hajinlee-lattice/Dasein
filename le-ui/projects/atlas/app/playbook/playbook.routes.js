@@ -890,12 +890,14 @@ angular
                     var deferred = $q.defer();
 
                     SfdcStore.getOrgs().then(function (result) {
-                        var orgs = result.CRM || [];
-
-                        if (featureflags.LaunchPlayToMapSystem && result.MAP) {
-                            orgs = orgs.concat(result.MAP);
+                        let orgs = [];
+                        let keys = Object.keys(result);
+                        if(keys){
+                            keys.forEach((key) => {
+                                let ret = result[key] || [];
+                                orgs = orgs.concat(ret)
+                            });
                         }
-
                         deferred.resolve(orgs);
                     });
 
