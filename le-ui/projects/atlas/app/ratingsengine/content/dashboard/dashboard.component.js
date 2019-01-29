@@ -327,6 +327,8 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
         }
+
+        console.log(vm.dashboard);
     }
 
     vm.init = function() {
