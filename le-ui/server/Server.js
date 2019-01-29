@@ -468,8 +468,8 @@ class Server {
             this.app.use(API_PATH, (req, res) => {
                 try {
                     var payload = {
-                        //name: 'Brian Rackle',
-                        //email: 'brackle@lattice-engines.com',
+                        name: req.query.name,
+                        email: req.query.email,
                         iat: (new Date().getTime() / 1000),
                         jti: uuid.v4()
                     };
