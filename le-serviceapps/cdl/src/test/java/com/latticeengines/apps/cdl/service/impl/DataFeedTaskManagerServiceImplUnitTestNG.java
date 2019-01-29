@@ -97,18 +97,22 @@ public class DataFeedTaskManagerServiceImplUnitTestNG {
 
         DataFeedTaskManagerServiceImpl dataFeedTaskManagerService = Mockito.mock(DataFeedTaskManagerServiceImpl.class);
         ReflectionTestUtils.setField(dataFeedTaskManagerService, "s3Service", s3Service);
+        String initialS3FilePath = "dropfolder/vjcrdj9s/Templates/AccountData/tinatest012302.csv";
         try {
-            dataFeedTaskManagerService.validateS3File(dataFeedTask, importConfig, customerSpace, emailInfo);
+            dataFeedTaskManagerService.validateS3File(dataFeedTask, importConfig, customerSpace, emailInfo,
+                    initialS3FilePath);
         } catch (Exception e) {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18188);
         }
         try {
-            dataFeedTaskManagerService.validateS3File(dataFeedTask, importConfig, customerSpace, emailInfo);
+            dataFeedTaskManagerService.validateS3File(dataFeedTask, importConfig, customerSpace, emailInfo,
+                    initialS3FilePath);
         } catch (Exception e) {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18208);
         }
         try {
-            dataFeedTaskManagerService.validateS3File(dataFeedTask, importConfig, customerSpace, emailInfo);
+            dataFeedTaskManagerService.validateS3File(dataFeedTask, importConfig, customerSpace, emailInfo,
+                    initialS3FilePath);
         } catch (Exception e) {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40043);
         }

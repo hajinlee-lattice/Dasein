@@ -6,6 +6,8 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -102,4 +104,25 @@ public interface EntityMatchInternalService {
      *            seed ID to cleanup
      */
     void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
+
+    /**
+     * Publish seed/lookup data from source tenant (staging env) to dest tenant
+     * (staging/serving env)
+     *
+     * Current use case:
+     *
+     * STAGING -> SERVING env with same tenant in PA publish
+     * STAGING -> STAGING env with different tenant in checkpoint save/restore
+     *
+     * @param entity
+     * @param sourceTenant
+     * @param destTenant
+     * @param destEnv
+     * @param destTTLEnabled:
+     *            If null, by default, true if destEnv is STAGING and false if
+     *            destEnv is SERVING
+     */
+    EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
+            @NotNull Tenant destTenant,
+            @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled);
 }

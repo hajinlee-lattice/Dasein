@@ -4,8 +4,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    
-    <import resource="classpath:api-context.xml"/>
     <import resource="classpath:common-testclient-env-context.xml"/>
+    <import resource="classpath:api-context.xml"/>
+    <import resource="classpath:yarn-context.xml"/>
 
 </beans>

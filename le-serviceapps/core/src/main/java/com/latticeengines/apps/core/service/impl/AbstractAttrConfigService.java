@@ -60,6 +60,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigService.class);
 
+    static final long DEFAULT_LIMIT = 500L;
+
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
@@ -73,7 +75,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
 
-    public static final long DEFAULT_LIMIT = 500L;
     private static ExecutorService workers;
 
     @Override

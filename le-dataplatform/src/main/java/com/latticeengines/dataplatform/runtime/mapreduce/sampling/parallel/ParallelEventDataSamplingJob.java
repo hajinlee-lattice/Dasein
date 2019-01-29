@@ -3,6 +3,8 @@ package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
@@ -19,7 +21,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.util.ToolRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -46,7 +47,7 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
-    @Autowired
+    @Inject
     private SamplingJobCustomizerFactory samplingJobCustomizerFactory;
 
     public ParallelEventDataSamplingJob(Configuration config) {
@@ -153,7 +154,6 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
         for (SamplingElement samplingElement : samplingElements) {
             AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName(), AvroKeyOutputFormat.class, schema);
         }
-
         SamplingType samplingType = samplingConfig.getSamplingType();
         SamplingJobCustomizer samplingJobCustomizer = samplingJobCustomizerFactory.getCustomizer(samplingType);
         samplingJobCustomizer.customizeJob(job, samplingConfig);

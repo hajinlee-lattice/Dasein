@@ -1,12 +1,9 @@
 package com.latticeengines.security.provider.globalauth;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -18,19 +15,19 @@ import com.latticeengines.security.provider.AbstractAuthenticationTokenFilter;
 
 public class RestGlobalAuthenticationFilter extends AbstractAuthenticationTokenFilter {
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException, IOException, ServletException {
+            throws AuthenticationException {
 
         String ticket = request.getHeader(Constants.AUTHORIZATION);
         detectSessionCacheDirtiness(request);
         if (ticket == null) {
             throw new BadCredentialsException("Unauthorized.");
         }
-        TicketAuthenticationToken authRequest = null;
+        TicketAuthenticationToken authRequest;
         try {
             authRequest = new TicketAuthenticationToken(null, ticket);
         } catch (IllegalArgumentException e) {

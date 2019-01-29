@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.service.DataUnitService;
-import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 import io.swagger.annotations.Api;
 
@@ -28,36 +27,24 @@ import io.swagger.annotations.Api;
 @RequestMapping("/customerspaces/{customerSpace}/dataunit")
 public class DataUnitResource {
 
-    private static final Logger log = LoggerFactory.getLogger(DataUnitResource.class);
-
     @Inject
     private DataUnitService dataUnitService;
 
-    @Inject
-    private RedshiftService redshiftService;
-
     @PostMapping("")
     public DataUnit create(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
+
         return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
     }
 
-    @PutMapping("")
+    @PutMapping("/delete")
     public Boolean delete(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
-        log.info("delete RedshiftTable " + dataUnit.getName());
-        redshiftService.dropTable(dataUnit.getName());
-        log.info("delete dataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
-        dataUnitService.deleteByNameAndStorageType(dataUnit.getName(), dataUnit.getStorageType());
-        return Boolean.TRUE;
+        return dataUnitService.delete(dataUnit);
     }
 
-    @PostMapping("/renameRedShiftTableName")
-    public DataUnit renameRedShiftTableName(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
+    @PostMapping("/renameTableName")
+    public Boolean renameTableName(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
                                             @RequestParam(name="tableName") String tableName) {
-        String originTableName = dataUnit.getName();
-        log.info("rename RedShift tableName " + originTableName + " to " + tableName + " under tenant " + dataUnit.getTenant());
-        DataUnit renameDataUnit = dataUnitService.renameRedShiftTableName(dataUnit, tableName);
-        redshiftService.renameTable(originTableName, renameDataUnit.getName());
-        return renameDataUnit;
+        return dataUnitService.renameTableName(dataUnit, tableName);
     }
 
     @GetMapping("/type/{type}")

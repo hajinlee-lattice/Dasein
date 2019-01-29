@@ -69,7 +69,7 @@ angular
         .state('home.jobs.status', {
             url: '/status',
             params: {
-                pageIcon: 'ico-cog',
+                pageIcon: 'ico-jobs',
                 pageTitle: 'Jobs',
                 jobCreationSuccess: null
             },
@@ -89,7 +89,7 @@ angular
         .state('home.jobs.data', {
             url: '/status/data',
             params: {
-                pageIcon: 'ico-cog',
+                pageIcon: 'ico-jobs',
                 pageTitle: 'Jobs',
                 jobCreationSuccess: null
             },
@@ -117,7 +117,7 @@ angular
         .state('home.jobs.export', {
             url: '/status/export',
             params: {
-                pageIcon: 'ico-cog',
+                pageIcon: 'ico-jobs',
                 pageTitle: 'Jobs',
                 jobCreationSuccess: null
             },
@@ -147,7 +147,7 @@ angular
         .state('home.jobs.summary', {
             url: '/:jobId/summary',
             params: {
-                pageIcon: 'ico-cog',
+                pageIcon: 'ico-jobs',
                 pageTitle: 'View Report'
             },
             resolve: {
@@ -173,7 +173,7 @@ angular
         .state('home.jobs.status.ready', {
             url: '/ready/:jobId',
             params: {
-                pageIcon: 'ico-cog',
+                pageIcon: 'ico-jobs',
                 pageTitle: 'View Report'
             },
             views: {
@@ -189,7 +189,7 @@ angular
         .state('home.jobs.status.csv', {
             url: '/csv/:jobId',
             params: {
-                pageIcon: 'ico-cog',
+                pageIcon: 'ico-jobs',
                 pageTitle: 'View Report'
             },
             resolve: {

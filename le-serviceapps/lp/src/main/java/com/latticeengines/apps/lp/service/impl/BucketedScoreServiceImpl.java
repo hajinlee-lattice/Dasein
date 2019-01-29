@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +98,10 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     public Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(
             List<String> modelSummaryIdList) {
         Map<String, List<BucketMetadata>> modelSummaryToBucketListMap = new HashMap<>();
-        for (String modelSummaryId : modelSummaryIdList) {
-            modelSummaryToBucketListMap.put(modelSummaryId, getPublishedBucketMetadataByModelGuid(modelSummaryId));
+        if (CollectionUtils.isNotEmpty(modelSummaryIdList)) {
+            for (String modelSummaryId : modelSummaryIdList) {
+                modelSummaryToBucketListMap.put(modelSummaryId, getPublishedBucketMetadataByModelGuid(modelSummaryId));
+            }
         }
         return modelSummaryToBucketListMap;
     }

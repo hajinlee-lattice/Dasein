@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataIntegrationStatusMonitoringService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
-import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,7 +49,7 @@ public class DataIntegrationMonitoringResource {
     @ApiOperation(value = "Get all workflow statuses for a given tenant.")
     @NoCustomerSpace
     public List<DataIntegrationStatusMonitor> getAllStatuses(
-            @RequestParam(value = "tenantId", required = true) Long tenantId) {
+            @RequestParam(value = "tenantId", required = true) String tenantId) {
         return dataIntegrationMonitoringService.getAllStatuses(tenantId);
     }
 }

@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
@@ -220,6 +221,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder cdlEntityType(EntityType cdlEntityType) {
+            customEventMatchWorkflowConfigurationBuilder.cdlEntityType(cdlEntityType);
+            return this;
+        }
+
         public Builder targetTableName(String targetTableName) {
             modelWorkflowBuilder.targetTableName(targetTableName);
             return this;
@@ -385,6 +391,12 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder dataRules(List<DataRule> dataRules) {
             modelWorkflowBuilder.dataRules(dataRules);
+            return this;
+        }
+
+        public Builder eventColumn(String eventColumn) {
+            modelWorkflowBuilder.setEventColumn(eventColumn);
+            generateAIRating.eventColumn(eventColumn);
             return this;
         }
 

@@ -24,19 +24,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TimeStampConvertUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
-    // Regular expression for date portion of user defined format.
-    public static final String dateRegexStr = "((DD|MM|MMM|YYYY)[-/.](DD|MM|MMM)[-/.](DD|MM|YYYY|YY))";
-    // Regular expression for time portion of user defined format.
-    public static final String timeRegexStr =
-            "00:00:00 12H|00-00-00 12H|00 00 00 12H|00:00:00 24H|00-00-00 24H|00 00 00 24H";
-    // Regular expression pattern for full user defined format.
-    public static final Pattern dateTimePattern = Pattern.compile(dateRegexStr + "\\s*(" + timeRegexStr + ")?");
     // Mapping from user defined date format to Java 8 date/time library format.
     private static final Map<String, String> userToJavaDateFormatMap = new HashMap<>();
     // Mapping from user defined time format to Java 8 date/time library format.
@@ -148,47 +139,64 @@ public class TimeStampConvertUtils {
         }
     }
 
-    // Enhanced date/time conversion which requires user defined date/time format string and optional timezone.
-    // If no timezone is provided, UTC is assumed.
-    public static long convertToLong(String dateTime, String dateTimeFormatString, String timezone) {
-        log.debug(" Date is: " + dateTime + "  Format is: " + dateTimeFormatString + "  Timezone: " + timezone);
+    // Enhanced date/time conversion which requires user defined date format and time format strings and optional
+    // timezone.  If no timezone is provided, UTC is assumed.
+    public static long convertToLong(String dateTime, String dateFormatString, String timeFormatString,
+                                     String timezone) {
+        log.debug(" Date is: " + dateTime + "  Date Format is: " + dateFormatString
+                + "  Time Format is: " + timeFormatString + "  Timezone: " + timezone);
+
         try {
-            if (StringUtils.isNotEmpty(dateTimeFormatString)) {
-                // Match the pattern string against the regular expression of acceptable date time formats.
-                Matcher dateTimeMatcher = dateTimePattern.matcher(dateTimeFormatString);
+            // Check if a date format string is provided which allows the usage of LocalDateTime from Java 8.
+            if (StringUtils.isNotEmpty(dateFormatString)) {
+                dateFormatString = dateFormatString.trim();
 
-                // For the user defined date/time format to be valid, it must match the pattern, the match must have
-                // 5 groups, and the first group must match a key in the user to Java 8 date format map.
-                LocalDateTime localDateTime;
-                if (dateTimeMatcher.matches() && dateTimeMatcher.groupCount() == 5 &&
-                        userToJavaDateFormatMap.containsKey(dateTimeMatcher.group(1))) {
-                    log.debug(" Found user defined date format: " + dateTimeMatcher.group(1));
-                    log.debug(" Found user defined time format: " + dateTimeMatcher.group(5));
+                // Check if the date format string is in the set of accepted formats.
+                if (userToJavaDateFormatMap.containsKey(dateFormatString)) {
+                    LocalDateTime localDateTime = null;
+                    boolean foundValidTimeFormat = false;
+                    log.debug("Found user defined date format: " + dateFormatString);
+                    String javaDateFormatStr = userToJavaDateFormatMap.get(dateFormatString);
 
-                    String javaDateFormatStr = userToJavaDateFormatMap.get(dateTimeMatcher.group(1));
+                    // If the time format string is not empty, make sure it matches an accepted format.
+                    if (StringUtils.isNotEmpty(timeFormatString)) {
+                        timeFormatString = timeFormatString.trim();
 
-                    // Check if the 5th group is non-null, non-empty and matches a key in the user to Java 8 time format
-                    // map.  If so, the date/time format contains both a date and time.
-                    if (dateTimeMatcher.group(5) != null && !dateTimeMatcher.group(5).isEmpty() &&
-                            userToJavaTimeFormatMap.containsKey(dateTimeMatcher.group(5))) {
-                        String javaTimeFormatStr = userToJavaTimeFormatMap.get(dateTimeMatcher.group(5));
-                        log.debug(" Java date/time format string is: "+ javaDateFormatStr + " " + javaTimeFormatStr);
+                        if (userToJavaTimeFormatMap.containsKey(timeFormatString)) {
+                            foundValidTimeFormat = true;
+                            log.debug(" Found user defined time format: " + timeFormatString);
+                            String javaTimeFormatStr = userToJavaTimeFormatMap.get(timeFormatString);
+                            log.debug(" Java date/time format string is: " + javaDateFormatStr + " "
+                                    + javaTimeFormatStr);
 
-                        // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
-                        dateTime = dateTime.replaceAll("([aA])([mM])", "AM").replaceAll("([pP])([mM])", "PM");
-                        // Parse the provided date/time value using a DateTimeFormatter with combined date and time
-                        // components.
-                        localDateTime = LocalDateTime.parse(dateTime,
-                                java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr + " "
-                                        + javaTimeFormatStr));
+                            // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
+                            dateTime = dateTime.replaceAll("([aA])([mM])", "AM")
+                                    .replaceAll("([pP])([mM])", "PM");
+                            // Parse the provided date/time value using a DateTimeFormatter with combined date and time
+                            // components.
+                            localDateTime = LocalDateTime.parse(dateTime,
+                                    java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr + " "
+                                            + javaTimeFormatStr));
+                        } else {
+                            // If the time format string is not supported, log an error since the pattern string is not
+                            // valid.
+                            log.error("User provided time format could not be processed: " + timeFormatString);
+                            // TODO(jwinter): Consider throwing an error for unrecognized time format pattern from user.
+                        }
                     } else {
-                        log.debug(" Java date only format string is: "+ javaDateFormatStr);
-                        // If the user did not provide a time component in the format, assume the time is the start of
-                        // day on the given date.  Parse the date value provided using DateTimeFormatter with only a
-                        // date component.
+                        // If a time format string was not provided, log that and use only the date format.
+                        log.info("Time format string was empty.  Using on date format.");
+                    }
+
+                    // If a time format was not provided or not acceptable, use the date format only and assume the
+                    // time is the start of the day.
+                    if (!foundValidTimeFormat) {
+                        log.debug(" Java date only format string is: " + javaDateFormatStr);
+                        // Parse the date value provided using DateTimeFormatter with only a date component.
                         localDateTime = LocalDate.parse(dateTime,
                                 java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
                     }
+
 
                     // Process timezone.
                     ZoneId zoneId = ZoneId.of("UTC");
@@ -202,17 +210,16 @@ public class TimeStampConvertUtils {
                     return timestamp;
                 } else {
                     // If the date string is not supported, throw an error since the pattern string is not valid.
-                    log.error("User provided data/time format could not be processed: " + dateTimeFormatString);
+                    log.error("User provided data format could not be processed: " + dateFormatString);
                     log.error("Defaulting to using original convertToLong(date)");
-                    // TODO(jwinter): Return some kind of error for unrecognized date/time format pattern from user.
+                    // TODO(jwinter): Consider throwing an error for unrecognized date format pattern from user.
                     return convertToLong(dateTime);
 
                 }
             } else {
-                log.error("User provided date/time format string is empty, using original convertToLong(date)");
+                log.warn("User provided date format string is empty, using original convertToLong(date)");
                 return convertToLong(dateTime);
             }
-
         } catch (Exception e) {
             /* Possible Errors
             java.time.format.DateTimeParseException:
@@ -252,8 +259,7 @@ public class TimeStampConvertUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Use UTC timezone for conversions.
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String date = sdf.format(new Date(timeStamp));
-        return date;
+        return sdf.format(new Date(timeStamp));
     }
 
     public static String[] getAvailableTimeZoneIDs() {

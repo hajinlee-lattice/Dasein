@@ -586,7 +586,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             if (!hasContactTable) {
                 log.info("Contact Table is not available for Tenant: {}", tenant.getId());
             }
-            if ((loadContactCount || loadContactsCountByBucket)) {
+            if (hasContactTable && (loadContactCount || loadContactsCountByBucket)) {
                 try {
                     // If user requests for ContactCount by bucket, we can
                     // compute the total count.
@@ -633,7 +633,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
 
             // unscored contacts
-            if (loadContactCount) {
+            if (hasContactTable && loadContactCount) {
                 unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
                 Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
                 coverageInfo.setUnscoredContactCount(unscoredContactCount);

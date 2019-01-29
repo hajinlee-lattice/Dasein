@@ -227,6 +227,16 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCAttrs() {
+        testLDCFirmographics();
+        testLDCGrowthTrends();
+        testLDCOnlinePresence();
+        testLDCWebsiteProfile();
+        testLDCIntent();
+        testLDCTechProfile();
+        testLDCWebsiteKeywords();
+    }
+
+    private void testLDCFirmographics() {
         checkAndVerifyCategory(Category.FIRMOGRAPHICS, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -241,7 +251,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             verifyFlags(config, Category.FIRMOGRAPHICS, partition, initialState, flags);
             return true;
         });
+    }
 
+    private void testLDCGrowthTrends() {
         checkAndVerifyCategory(Category.GROWTH_TRENDS, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -256,7 +268,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             verifyFlags(config, Category.GROWTH_TRENDS, partition, initialState, flags);
             return true;
         });
+    }
 
+    private void testLDCOnlinePresence() {
         checkAndVerifyCategory(Category.ONLINE_PRESENCE, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -271,7 +285,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             verifyFlags(config, Category.ONLINE_PRESENCE, partition, initialState, flags);
             return true;
         });
+    }
 
+    private void testLDCWebsiteProfile() {
         checkAndVerifyCategory(Category.WEBSITE_PROFILE, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -286,7 +302,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             verifyFlags(config, Category.WEBSITE_PROFILE, partition, initialState, flags);
             return true;
         });
+    }
 
+    private void testLDCIntent() {
         checkAndVerifyCategory(Category.INTENT, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -301,7 +319,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             verifyFlags(config, Category.INTENT, partition, initialState, flags);
             return true;
         });
+    }
 
+    private void testLDCTechProfile() {
         checkAndVerifyCategory(Category.TECHNOLOGY_PROFILE, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -316,7 +336,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             verifyFlags(config, Category.TECHNOLOGY_PROFILE, partition, initialState, flags);
             return true;
         });
+    }
 
+    private void testLDCWebsiteKeywords() {
         checkAndVerifyCategory(Category.WEBSITE_KEYWORDS, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
@@ -360,6 +382,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             // deprecated attrs are inactive and cannot change
             state = AttrState.Inactive;
             flags[0] = false;
+            // deprecated attrs are not enabled for Export
+            flags[3] = false;
         }
         if (AttrState.Inactive.equals(state)) {
             // cannot change usage for inactive attributes
@@ -457,7 +481,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             boolean expectedChg) {
         boolean enabled = Boolean.TRUE.equals(attrConfig.getPropertyFinalValue(property, Boolean.class));
         Assert.assertEquals(enabled, expectedValue,
-                String.format("%s should be enabled for %s usage", logPrefix, property));
+                String.format("%s enabled for %s usage", logPrefix, property));
         boolean chg = attrConfig.getProperty(property).isAllowCustomization();
         Assert.assertEquals(chg, expectedChg, String.format("%s allow change %s usage", logPrefix, property));
     }

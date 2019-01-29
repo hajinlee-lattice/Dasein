@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.EventCounterConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -68,6 +69,12 @@ public class ModelProxy extends MicroserviceRestApiProxy implements ModelInterfa
     public AppSubmission profile(DataProfileConfiguration config) {
         String url = constructUrl("/profiles");
         return post("profile", url, config, AppSubmission.class);
+    }
+
+    @Override
+    public AppSubmission createEventCounter(EventCounterConfiguration config) {
+        String url = constructUrl("/eventcounter");
+        return post("eventCounter", url, config, AppSubmission.class);
     }
 
     @Override

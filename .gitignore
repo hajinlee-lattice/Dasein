@@ -30,3 +30,15 @@ python_model_workspace/
 # jacoco output
 jacoco/
 *.exec
+
+#npm modules
+**/node_modules/**
+#Folder/files created during build process
+**/dist/**
+**/.sass-cache/**
+**/.vscode/
+
+# tez
+*.dot
+
+/le-ui.tar.gz

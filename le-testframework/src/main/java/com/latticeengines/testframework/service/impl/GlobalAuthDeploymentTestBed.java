@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -454,6 +455,14 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     @Override
     public Tenant getTenantBasedOnId(String tenantId) {
         return tenantService.findByTenantId(tenantId);
+    }
+
+    @Override
+    public FeatureFlagValueMap getFeatureFlags() {
+        FeatureFlagValueMap map = getRestTemplate().getForObject(
+                plsApiHostPort + "/pls/tenant/featureflags", FeatureFlagValueMap.class);
+        
+        return map;
     }
 
 }

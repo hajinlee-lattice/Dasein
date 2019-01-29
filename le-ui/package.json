@@ -39,7 +39,8 @@
         "https": "^1.0.0",
         "morgan": "1.9.1",
         "node-sass": "^4.11.0",
-        "request": "^2.69.0"
+        "request": "^2.69.0",
+        "jsonwebtoken": "^8.4.0"
     },
     "scripts": {
         "install": "npm run InstallDev",
@@ -103,6 +104,7 @@
         "wp-components-testdev": "cd projects/common/ && npm run dev-test",
         "wpdeva": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"npm run wp-insightsdev\" \"node bin/devsetup env=a\"",
         "wpdevb": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"node bin/devsetup env=b\"",
+        "wpdevproduction": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-lpidev\" \"node bin/devsetup env=production\"",
         "dev-uicomponents": "concurrently \"npm run wp-components-testdev\" \"npm run wp-storybookdev\"",
         "build-dev-uicomponents": "cd projects/uicomponents/ && npm run build-uicomponents",
         "build-uicomponents": "cd projects/uicomponents/ && npm install && npm run build-uicomponents",
@@ -116,5 +118,6 @@
         "nodeproductiondev": "node bin/devsetup env=proddev",
         "wpbuilddev": "concurrently \"npm run wp-loginbuilddev\" \"npm run wp-atlasbuilddev\" \"npm run wp-lpibuilddev\" \"npm run wp-insightsbuilddev\"",
         "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-atlasprod\" \"npm run wp-lpiprod\" \"npm run wp-insightsbuild\""
-    }
+    },
+    "devDependencies": {}
 }

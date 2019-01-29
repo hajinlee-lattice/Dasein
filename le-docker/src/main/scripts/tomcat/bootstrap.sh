@@ -9,7 +9,6 @@ NETWORK="${NETWORK:=lenet}"
 SERVICE="lp"
 
 source ../functions.sh
-# teardown_simple_service ${SERVICE} ${CLUSTER}
 
 #docker run -d --net host \
 #    --name ${CLUSTER}_${SERVICE} \

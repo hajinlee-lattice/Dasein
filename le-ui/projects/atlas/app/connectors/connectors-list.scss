@@ -1,0 +1,28 @@
+
+.le-connectors{
+    padding: 1em 0;
+    &.white-background{
+        background-color: white;
+    }
+    & .connectors-list{
+        padding: 2em 0;
+    }
+    .le-connector{
+        max-width: 160px;
+        height: 100%;
+        margin: 0 2px;
+        // border: 1px solid green;
+        cursor: pointer;
+        
+        .le-card-body{
+            font-size: 12px;
+            & > p {
+                display: inline-flex;
+                justify-content: space-around;
+            }
+        }
+        &.selected{
+
+        }
+    }
+} 

@@ -18,13 +18,11 @@ rest_port=8081
 partitions=100
 
 hadoop_conf_dir=/usr/hdp/current/hadoop-client/etc/hadoop
-#s3_access_key=AKIAIOGWTLKPB2N266OQ
-#s3_secret_key=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
 
 s3_access_key=bi0mpJJNxiYpEka5C6JO4ofA43zqN8j2DOdjzBK7RLkC0BCc3fYYA7HFzohW9BsMO/IEe1eKqoKw2N6ZvEyc+Q==
 s3_secret_key=bi0mpJJNxiYpEka5C6JO4o3n7vwNDkLYDbYIZ/UK9740iB0hI1GvrK0duaGVVenRGxa7sRLjMLjM0JQQfiGYLAJqncA1VGkUFkccVsa4sPE=
-#s3_local_dir=/var/log/etl/history
-s3_local_dir=""
+s3_local_dir=/var/log/etl/history
+#s3_local_dir=""
 
 
 if [ $1 == dev ]; then
@@ -38,12 +36,12 @@ if [ $1 == dev ]; then
 elif [ $1 == devcluster ]; then
     hdfs_pod=QA
     zk_servers=10.41.1.116:2181,10.41.1.137:2181,10.41.1.138:2181
-    camille_zk_servers=qazklayer1.lattice.local,qazklayer4.lattice.local,qazklayer5.lattice.local
+    camille_zk_servers=10.141.1.6,10.141.101.104,10.141.201.211
     camille_zk_pod_id=QA
 elif [ $1 == qacluster ]; then
     hdfs_pod=QA
     zk_servers=10.41.1.116:2181,10.41.1.137:2181,10.41.1.138:2181
-    camille_zk_servers=qazklayer1.lattice.local,qazklayer4.lattice.local,qazklayer5.lattice.local
+    camille_zk_servers=10.141.1.6,10.141.101.104,10.141.201.211
     camille_zk_pod_id=QA
     repl_factor=3
 elif [ $1 == prodcluster ]; then

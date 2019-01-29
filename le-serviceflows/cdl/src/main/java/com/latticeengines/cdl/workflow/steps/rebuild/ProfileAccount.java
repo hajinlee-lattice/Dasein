@@ -8,12 +8,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -89,11 +83,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
     private String accountFeaturesTablePrefix = "AccountFeatures";
     private String masterSlimTableName;
-    // The date that the Process/Analyze pipeline was run as a string.
-    private String evaluationDateStr;
-    // The timestamp representing the beginnging of the day that the Process/Analyze pipeline was run.  Used for date
-    // attribute profiling.
-    private long evaluationDateAsTimestamp;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -111,31 +100,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         super.initializeConfiguration();
         masterSlimTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.AccountBatchSlim, inactive);
-        // Convert the evaluation date (generally the current date which is when the pipeline is running) to a
-        // timestamp.
-        evaluationDateStr = findEvaluationDate();
-        LocalDate evaluationDate;
-        if (!StringUtils.isBlank(evaluationDateStr)) {
-            try {
-                evaluationDate = LocalDate.parse(evaluationDateStr, DateTimeFormatter.ISO_DATE);
-            } catch (DateTimeParseException e) {
-                log.error("Could not parse evaluation date string \"" + evaluationDateStr
-                        + "\" from Period Proxy as an ISO formatted date");
-                log.error("Error is: " + e.getLocalizedMessage());
-                StringWriter sw = new StringWriter();
-                e.printStackTrace(new PrintWriter(sw));
-                log.error(sw.toString());
-                evaluationDate = LocalDate.now();
-                evaluationDateStr = evaluationDate.format(DateTimeFormatter.ISO_DATE);
-            }
-        } else {
-            log.warn("Evaluation Date from Period Proxy is blank.  Profile Account will generate date");
-            evaluationDate = LocalDate.now();
-            evaluationDateStr = evaluationDate.format(DateTimeFormatter.ISO_DATE);
-        }
-        evaluationDateAsTimestamp = evaluationDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
-        log.info("Evaluation date for Profile Account date attributes: " + evaluationDateStr);
-        log.info("Evaluation timestamp for Profile Account date attributes: " + evaluationDateAsTimestamp);
+        setEvaluationDateStrAndTimestamp();
     }
 
     @Override
@@ -470,29 +435,17 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         table.getAttributes().forEach(attr0 -> {
             Attribute attr = attr0;
             if (InterfaceName.LatticeAccountId.name().equals(attr0.getName())) {
-                attr.setInterfaceName(InterfaceName.LatticeAccountId);
-                attr.setDisplayName(latticeIdCm.getDisplayName());
-                attr.setDescription(latticeIdCm.getDescription());
-                attr.setFundamentalType(FundamentalType.NUMERIC);
-                attr.setCategory(latticeIdCm.getCategory());
-                attr.setGroupsViaList(latticeIdCm.getEnabledGroups());
+                setupLatticeAccountIdAttr(latticeIdCm, attr);
                 dcCount.incrementAndGet();
             } else if (amColMap.containsKey(attr0.getName())) {
-                ColumnMetadata cm = amColMap.get(attr.getName());
-                attr.setDisplayName(removeNonAscII(cm.getDisplayName()));
-                attr.setDescription(removeNonAscII(cm.getDescription()));
-                attr.setSubcategory(removeNonAscII(cm.getSubcategory()));
-                attr.setFundamentalType(cm.getFundamentalType());
-                attr.setCategory(cm.getCategory());
-                attr.setGroupsViaList(cm.getEnabledGroups());
+                setupAmColMapAttr(amColMap, attr);
                 dcCount.incrementAndGet();
             } else if (masterAttrs.containsKey(attr0.getName())) {
                 attr = copyMasterAttr(masterAttrs, attr0);
                 if (LogicalDataType.Date.equals(attr0.getLogicalDataType())) {
-                    // TODO(jwinter): Fix the wording of this by asking Product.
-                    log.info("Setting secondary display name for date attribute: " + attr.getName() + " to "
+                    log.info("Setting last data refresh for profile date attribute: " + attr.getName() + " to "
                             + evaluationDateStr);
-                    attr.setSecondaryDisplayName("Day values relative to last processing time of " + evaluationDateStr);
+                    attr.setLastDataRefresh("Last Data Refresh: " + evaluationDateStr);
                 }
                 masterCount.incrementAndGet();
             }
@@ -509,6 +462,25 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         log.info("Enriched " + dcCount.get() + " attributes using data cloud metadata.");
         log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
         log.info("BucketedAccount table has " + table.getAttributes().size() + " attributes in total.");
+    }
+
+    void setupLatticeAccountIdAttr(ColumnMetadata latticeIdCm, Attribute attr) {
+        attr.setInterfaceName(InterfaceName.LatticeAccountId);
+        attr.setDisplayName(latticeIdCm.getDisplayName());
+        attr.setDescription(latticeIdCm.getDescription());
+        attr.setFundamentalType(FundamentalType.NUMERIC);
+        attr.setCategory(latticeIdCm.getCategory());
+        attr.setGroupsViaList(latticeIdCm.getEnabledGroups());
+    }
+
+    void setupAmColMapAttr(Map<String, ColumnMetadata> amColMap, Attribute attr) {
+        ColumnMetadata cm = amColMap.get(attr.getName());
+        attr.setDisplayName(removeNonAscII(cm.getDisplayName()));
+        attr.setDescription(removeNonAscII(cm.getDescription()));
+        attr.setSubcategory(removeNonAscII(cm.getSubcategory()));
+        attr.setFundamentalType(cm.getFundamentalType());
+        attr.setCategory(cm.getCategory());
+        attr.setGroupsViaList(cm.getEnabledGroups());
     }
 
     private String removeNonAscII(String str) {

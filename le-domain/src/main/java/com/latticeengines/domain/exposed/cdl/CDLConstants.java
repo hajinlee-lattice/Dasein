@@ -9,4 +9,5 @@ public class CDLConstants {
     public static final String ORG_ID = "orgId";
     public static final String ORG_NAME = "orgName";
     public static final String EXTERNAL_SYSTEM_TYPE = "externalSystemType";
+    public static final String EXTERNAL_SYSTEM_NAME = "externalSystemName";
 }

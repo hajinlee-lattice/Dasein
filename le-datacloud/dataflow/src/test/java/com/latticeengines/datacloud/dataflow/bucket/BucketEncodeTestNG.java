@@ -12,6 +12,7 @@ import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_3;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_INTERVAL_DBL;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_INTERVAL_INT;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_NULL_INT;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RELAY_INT;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RELAY_STR;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RENAMED_ROW_ID;
@@ -56,6 +57,7 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of(ATTR_ROW_ID, Long.class), //
                 Pair.of(ATTR_RELAY_STR, String.class), //
                 Pair.of(ATTR_RELAY_INT, Integer.class), //
+                Pair.of(ATTR_NULL_INT, Integer.class), //
                 Pair.of(ATTR_INTERVAL_INT, Integer.class), //
                 Pair.of(ATTR_INTERVAL_DBL, Double.class), //
                 Pair.of(ATTR_CAT_STR, String.class), //
@@ -68,7 +70,7 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of(ATTR_ENCODED_3, String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1L, "String1", 1, 1, 11.0, "Value2", "Group3A", "Y", "0", 1, true, createEncodedString(), "Yes" } };
+                { 1L, "String1", 1, null, 1, 11.0, "Value2", "Group3A", "Y", "0", 1, true, createEncodedString(), "Yes" } };
         uploadDataToSharedAvroInput(data, fields);
 
         List<Pair<String, Class<?>>> fields2 = BucketEncodeUtils.profileCols();

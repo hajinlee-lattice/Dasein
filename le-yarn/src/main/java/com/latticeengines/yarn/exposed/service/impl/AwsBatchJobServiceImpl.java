@@ -26,7 +26,6 @@ import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
@@ -46,9 +45,6 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
 
     @Inject
     private JobServiceHelper jobServiceHelper;
-
-    @Inject
-    private ManifestService manifestService;
 
     @Value("${hadoop.fs.web.defaultFS}")
     String webHdfs;

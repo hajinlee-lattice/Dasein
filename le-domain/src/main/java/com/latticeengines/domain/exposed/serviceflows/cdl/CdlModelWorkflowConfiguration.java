@@ -204,6 +204,11 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
             return this;
         }
 
+        public Builder setEventColumn(String eventColumn) {
+            model.setEventColumn(eventColumn);
+            return this;
+        }
+
         public CdlModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);
@@ -214,8 +219,7 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
             configuration.add(model);
             configuration.add(export);
             log.info(String.format("Build configuration (type %s) for model workflow: %s",
-                    CdlModelWorkflowConfiguration.class.getSimpleName(),
-                    JsonUtils.serialize(configuration)));
+                    CdlModelWorkflowConfiguration.class.getSimpleName(), JsonUtils.serialize(configuration)));
             return configuration;
         }
 

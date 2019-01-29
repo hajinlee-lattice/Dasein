@@ -21,7 +21,7 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private String modelType;
 
-    private String idColumnName = InterfaceName.Id.name();
+    private String idColumnName = InterfaceName.InternalId.name();
 
     public String getModelId() {
         return modelId;

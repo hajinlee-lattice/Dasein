@@ -955,8 +955,8 @@ public class Attribute
         return AttributeUtils.toColumnMetadata(this);
     }
 
-    public String getDateTimeFormatString() {
-        Object raw = properties.get("DateTimeFormatString");
+    public String getDateFormatString() {
+        Object raw = properties.get("DateFormatString");
         if (raw == null) {
             return null;
         }
@@ -964,9 +964,24 @@ public class Attribute
         return raw.toString();
     }
 
-    public void setDateTimeFormatString(String dateTimeFormatString) {
-        if (dateTimeFormatString != null) {
-            properties.put("DateTimeFormatString", dateTimeFormatString);
+    public void setDateFormatString(String dateFormatString) {
+        if (dateFormatString != null) {
+            properties.put("DateFormatString", dateFormatString);
+        }
+    }
+
+    public String getTimeFormatString() {
+        Object raw = properties.get("TimeFormatString");
+        if (raw == null) {
+            return null;
+        }
+
+        return raw.toString();
+    }
+
+    public void setTimeFormatString(String timeFormatString) {
+        if (timeFormatString != null) {
+            properties.put("TimeFormatString", timeFormatString);
         }
     }
 
@@ -985,5 +1000,19 @@ public class Attribute
         }
     }
 
+    public String getLastDataRefresh() {
+        Object raw = properties.get("LastDataRefresh");
+        if (raw == null) {
+            return null;
+        }
+
+        return raw.toString();
+    }
+
+    public void setLastDataRefresh(String lastDataRefresh) {
+        if (lastDataRefresh != null) {
+            properties.put("LastDataRefresh", lastDataRefresh);
+        }
+    }
 }
 

@@ -96,6 +96,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DATA_RULES = "DATA_RULES";
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
+    protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
 
     // CDL
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
@@ -121,6 +122,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
     protected static final String PA_TIMESTAMP = "PA_TIMESTAMP";
+    public static final String PA_SKIP_ENTITIES = "PA_SKIP_ENTITIES";
     protected static final String CLEANUP_TIMESTAMP = "CLEANUP_TIMESTAMP";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";

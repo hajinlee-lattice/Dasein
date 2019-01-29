@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.servlet.ServletOutputStream;
@@ -109,11 +110,11 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
         List<ModelSummary> summaries = modelSummaryProxy.findAllValid(TENANT_ID);
         ModelSummary summary = summaries.get(0);
         modelId = summary.getId();
-        String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/container_01/";
+        String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/" + modelJobId + "/";
         fileFolder = dir;
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua-token.json");
-        fileContents = IOUtils.toString(modelSummaryUrl);
+        fileContents = IOUtils.toString(modelSummaryUrl, StandardCharsets.UTF_8);
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
@@ -244,7 +245,8 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
 
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvier() {
-        return new Object[][] { { MediaType.APPLICATION_JSON, "modelsummary.json" }, //
+        return new Object[][] { //
+                { MediaType.APPLICATION_JSON, "modelsummary.json" }, //
                 { MediaType.APPLICATION_JSON, "diagnostics.json" }, //
                 { "application/csv", ".*_model.csv" }, //
                 { "application/csv", ".*_readoutsample.csv" }, //
@@ -252,7 +254,8 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
                 { "application/csv", ".*_explorer.csv" }, //
                 { "application/csv", "rf_model.txt" }, //
                 { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Training.*.csv" }, //
-                { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Test.*.csv" } };
+                { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Test.*.csv" } //
+        };
     }
 
     @DataProvider(name = "dataFileProviderNotFound")

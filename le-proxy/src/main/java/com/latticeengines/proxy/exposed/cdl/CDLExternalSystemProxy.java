@@ -40,7 +40,6 @@ public class CDLExternalSystemProxy extends MicroserviceRestApiProxy implements 
         return JsonUtils.convertList(res, CDLExternalSystemMapping.class);
     }
 
-    @SuppressWarnings("rawtypes")
     public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/map", shortenCustomerSpace(customerSpace));
         Map<?, ?> res = get("Get external system mapping map", url, Map.class);

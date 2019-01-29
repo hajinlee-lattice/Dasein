@@ -85,8 +85,8 @@ public class DateTimeUtils {
         return result;
     }
 
-    public static String currentTimeAsString() {
-        return filePathDateFormat.format(new Date());
+    public static String currentTimeAsString(Date date) {
+        return filePathDateFormat.format(date);
     }
 
     public static Integer dateToDayPeriod(String dateString) {

@@ -515,19 +515,20 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         String fullTableName = TableUtils.getFullTableName(batchStore.name(), pipelineVersion);
         table.setName(fullTableName);
         table.setDisplayName(fullTableName);
-        String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();
+        String dataTablePath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();
+        String hdfsPath = dataTablePath + "/" + fullTableName;
         try {
-            HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + fullTableName + "/" + pipelineVersion);
-            log.info(String.format("Initialized merged product table %s/%s/%s", hdfsPath, fullTableName, pipelineVersion));
+            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+            log.info("Initialized merged product table " + hdfsPath);
         } catch (Exception exc) {
-            log.error(String.format("Failed to initialize merged product table %s/%s/%s", hdfsPath, fullTableName, pipelineVersion));
+            log.error("Failed to initialize merged product table " + hdfsPath);
             throw new RuntimeException("Failed to create merged product table.");
         }
         Extract extract = new Extract();
         extract.setExtractionTimestamp(System.currentTimeMillis());
         extract.setName("extract_target");
         extract.setProcessedRecords(1L);
-        extract.setPath(hdfsPath + "/" + fullTableName + "/" + pipelineVersion + "/*.avro");
+        extract.setPath(hdfsPath + "/*.avro");
         table.setExtracts(Collections.singletonList(extract));
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
 

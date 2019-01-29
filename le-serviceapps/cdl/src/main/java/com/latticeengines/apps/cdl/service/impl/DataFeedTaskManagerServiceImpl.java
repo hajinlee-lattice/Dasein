@@ -347,7 +347,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
         }
-        String filePath = importConfig.getS3FilePath();
+        String initialS3Path = importConfig.getS3FilePath();
         String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(),
                 dataFeedTask.getEntity(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setS3FilePath(newFilePath);
@@ -356,14 +356,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(), importConfig.getS3FileName(),
                 dataFeedTask, new Date());
         // validate
-        validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo);
+        validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo, initialS3Path);
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
         csvImportFileInfo.setFileUploadInitiator(DEFAULT_S3_USER);
         csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
-        csvImportFileInfo.setReportFilePath(filePath);
+        csvImportFileInfo.setReportFilePath(initialS3Path);
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
                 JsonUtils.serialize(importConfig), csvImportFileInfo, true, emailInfo, new WorkflowPidWrapper(-1L));
@@ -426,9 +426,21 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
     }
 
+    /**
+     * 
+     * @param dataFeedTask
+     * @param importConfig
+     * @param customerSpace
+     * @param emailInfo
+     * @param initialS3FilePath
+     *            initialS3FilePath is the key which user to upload file to S3
+     *            by aws command, add it for following workflow step as the
+     *            filePath in importConfig is dynamic which lead to wrong link
+     *            when downloading file
+     */
     @VisibleForTesting
     void validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
-                                String customerSpace, S3ImportEmailInfo emailInfo) {
+            String customerSpace, S3ImportEmailInfo emailInfo, String initialS3FilePath) {
         Table template = dataFeedTask.getImportTemplate();
         String s3Bucket = importConfig.getS3Bucket();
         String s3FilePath = importConfig.getS3FilePath();
@@ -489,7 +501,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
             cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
-                    DEFAULT_S3_USER, importConfig, e.getErrorDetails());
+                    DEFAULT_S3_USER, importConfig, e.getErrorDetails(), initialS3FilePath);
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         } catch (IOException e) {
@@ -499,7 +511,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             emailInfo.setErrorMsg(e.getMessage());
             ErrorDetails details = new ErrorDetails(LedpCode.LEDP_00002, e.getMessage(), ExceptionUtils.getStackTrace(e));
             cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
-                    DEFAULT_S3_USER, importConfig, details);
+                    DEFAULT_S3_USER, importConfig, details, initialS3FilePath);
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             log.error(e.getMessage());
             throw e;
@@ -509,7 +521,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             emailInfo.setErrorMsg(e.getMessage());
             ErrorDetails details = new ErrorDetails(LedpCode.LEDP_00002, e.getMessage(), ExceptionUtils.getStackTrace(e));
             cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
-                    DEFAULT_S3_USER, importConfig, details);
+                    DEFAULT_S3_USER, importConfig, details, initialS3FilePath);
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         }

@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -43,8 +44,10 @@ import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -210,6 +213,55 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // all environments
         entityRawSeedService.delete(EntityMatchEnvironment.STAGING, tenant, entity, seedId);
         entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId);
+    }
+
+    @Override
+    public EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
+            @NotNull Tenant destTenant,
+            @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled) {
+        sourceTenant = EntityMatchUtils.newStandardizedTenant(sourceTenant);
+        destTenant = EntityMatchUtils.newStandardizedTenant(destTenant);
+        EntityMatchEnvironment sourceEnv = EntityMatchEnvironment.STAGING;
+        if (sourceTenant.getId().equals(destTenant.getId()) && sourceEnv == destEnv) {
+            // return with default publish count as 0
+            return new EntityPublishStatistics();
+        }
+        if (destTTLEnabled == null) {
+            destTTLEnabled = EntityMatchUtils.shouldSetTTL(destEnv);
+        }
+
+        int seedCount = 0;
+        int lookupCount = 0;
+        List<String> getSeedIds = new ArrayList<>();
+        List<EntityRawSeed> scanSeeds = new ArrayList<>();
+        do {
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(sourceEnv, sourceTenant, entity,
+                    getSeedIds, 1000);
+            getSeedIds.clear();
+            if (MapUtils.isNotEmpty(seeds)) {
+                for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
+                    getSeedIds.add(entry.getValue().get(entry.getValue().size() - 1).getId());
+                    scanSeeds.addAll(entry.getValue());
+                }
+                List<Pair<EntityLookupEntry, String>> pairs = new ArrayList<>();
+                for (EntityRawSeed seed : scanSeeds) {
+                    List<String> seedIds = entityLookupEntryService.get(sourceEnv, sourceTenant,
+                            seed.getLookupEntries());
+                    for (int i = 0; i < seedIds.size(); i++) {
+                        if (seedIds.get(i).equals(seed.getId())) {
+                            pairs.add(Pair.of(seed.getLookupEntries().get(i), seedIds.get(i)));
+                        }
+                    }
+
+                }
+                entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled);
+                entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled);
+                seedCount += scanSeeds.size();
+                lookupCount += pairs.size();
+            }
+            scanSeeds.clear();
+        } while (CollectionUtils.isNotEmpty(getSeedIds));
+        return new EntityPublishStatistics(seedCount, lookupCount);
     }
 
     @VisibleForTesting

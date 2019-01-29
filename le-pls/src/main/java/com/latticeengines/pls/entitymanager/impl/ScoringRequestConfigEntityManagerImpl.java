@@ -119,7 +119,7 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(ScoringRequestConfig scoringRequestConfig) {
-        
+
         ScoringRequestConfig existingConfig = this.findByField("configId", scoringRequestConfig.getConfigId());
         if (existingConfig == null) {
             LOG.warn(String.format("Could not retrieve ScoringRequestConfig: %s, for Tenant: %s", scoringRequestConfig, MultiTenantContext.getTenant()));

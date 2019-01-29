@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.Dedup
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -94,6 +97,13 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
         String tableName = getTableName(parameters);
+
+        Table table = metadataProxy.getTable(getCustomerSpace().toString(), tableName);
+        String eventColumnName = InterfaceName.Target.name();
+        if (table != null && CollectionUtils.isNotEmpty(table.getAttributes(LogicalDataType.Event))) {
+            eventColumnName = table.getAttributes(LogicalDataType.Event).get(0).getName();
+        }
+
         String targetTableName = tableName + "_TargetTable";
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         CrossSellImportMatchAndModelWorkflowConfiguration.Builder builder = new CrossSellImportMatchAndModelWorkflowConfiguration.Builder()
@@ -141,7 +151,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .crossSellModel(true) //
                 .setUniqueKeyColumn(InterfaceName.__Composite_Key__.name()) //
                 .cdlMultiModel(true) //
-                .setEventColumn(InterfaceName.Target.name()) //
+                .setEventColumn(eventColumnName) //
                 .idColumnName(InterfaceName.AnalyticPurchaseState_ID.name()) //
                 .matchGroupId(InterfaceName.AccountId.name()) //
                 .setExpectedValue(parameters.isExpectedValue()) //

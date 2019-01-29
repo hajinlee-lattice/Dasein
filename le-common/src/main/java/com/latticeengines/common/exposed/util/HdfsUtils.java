@@ -556,7 +556,7 @@ public class HdfsUtils {
                 return false;
             }
         }
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, src)) {
             return fs.rename(new Path(src), new Path(dst));
         }
     }

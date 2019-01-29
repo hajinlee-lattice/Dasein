@@ -1,36 +1,42 @@
 package com.latticeengines.cdl.workflow;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.lang3.StringUtils;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
@@ -39,25 +45,35 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchWorkflowDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
-    @Autowired
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
+    @Inject
     RecommendationService recommendationService;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.export.s3.bucket}")
+    protected String exportS3Bucket;
 
     String randId = UUID.randomUUID().toString();
 
     private Play defaultPlay;
-
     private PlayLaunch defaultPlayLaunch;
 
     PlayLaunchConfig playLaunchConfig = null;
+
+    DropBoxSummary dropboxSummary = null;
 
     @Override
     public Tenant currentTestTenant() {
@@ -67,6 +83,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String existingTenant = null;//"LETest1547165867101";
+        Map<String, Boolean> featureFlags = new HashMap<>();
+        featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
+        
         playLaunchConfig = new PlayLaunchConfig.Builder()
                 .existingTenant(existingTenant)
                 .mockRatingTable(false)
@@ -74,42 +93,23 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
                 .destinationSystemType(CDLExternalSystemType.MAP)
                 .destinationSystemId("Marketo_"+System.currentTimeMillis())
                 .topNCount(160L)
+                .featureFlags(featureFlags)
                 .build(); 
 
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
-
         super.deploymentTestBed = testPlayCreationHelper.getDeploymentTestBed();
-        
+
+        FeatureFlagValueMap ffVMap = super.deploymentTestBed.getFeatureFlags();
+        log.info("Feature Flags for Tenant: " + ffVMap);
+        Assert.assertTrue(ffVMap.containsKey(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
+        Assert.assertTrue(ffVMap.get(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
+        dropboxSummary = dropBoxProxy.getDropBox(currentTestTenant().getId());
+        assertNotNull(dropboxSummary);
+        log.info("Tenant DropboxSummary: {}", JsonUtils.serialize(dropboxSummary));
+        assertNotNull(dropboxSummary.getDropBox());
+
         defaultPlay = testPlayCreationHelper.getPlay();
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
-    }
-
-    //@Test(groups = "deployment")
-    public void testYarnConfiguration() {
-        String recAvroHdfsFilePath = "/Pods/Default/Contracts/LETest1547168631346/Tenants/LETest1547168631346/Spaces/Production/Data/Tables/1547168906968/avro/launch__ccb0e070-3907-4b4a-b4f0-ba31fc52480c.avro";
-
-        Function<GenericRecord, GenericRecord> RecommendationJsonFormatter = new Function<GenericRecord, GenericRecord>() {
-            @Override
-            public GenericRecord apply(GenericRecord rec) {
-                Object obj = rec.get("CONTACTS");
-                if (obj != null && StringUtils.isNotBlank(obj.toString())) {
-                    obj = JsonUtils.deserialize(obj.toString(), new TypeReference<List<Map<String, String>>>() {
-                    });
-                    rec.put("CONTACTS", obj);
-                }
-                return rec;
-            }
-        };
-        try {
-            File localJsonFile = Files.createTempFile("tempfile", ".json").toFile();
-            log.info("Generating JSON File: {}", localJsonFile);
-            FileSystem fs = new Path(recAvroHdfsFilePath).getFileSystem(yarnConfiguration);
-            log.info("FileSystem: " + JsonUtils.serialize(yarnConfiguration));
-            log.info("FileSystem: " + fs.getCanonicalServiceName() + " "+fs.getName() + " " + fs.getScheme() + " " + fs.getHomeDirectory() + " " + fs.getUri() + " " + JsonUtils.serialize(fs.getConf())) ;
-            AvroUtils.convertAvroToJSON(yarnConfiguration, new Path(recAvroHdfsFilePath), localJsonFile, RecommendationJsonFormatter);
-        } catch(Exception e) {
-            
-        }
     }
 
     @Test(groups = "deployment")
@@ -124,9 +124,42 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "testPlayLaunchWorkflow")
+    public void testVerifyAndCleanupUploadedS3File() {
+        String dropboxFolderName = dropboxSummary.getDropBox();
+
+        // Create PlayLaunchExportFilesGeneratorConfiguration Config
+        PlayLaunchExportFilesGeneratorConfiguration config = new PlayLaunchExportFilesGeneratorConfiguration();
+        config.setPlayName(defaultPlay.getName());
+        config.setPlayLaunchId(defaultPlayLaunch.getId());
+        config.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
+        config.setDestinationSysType(playLaunchConfig.getDestinationSystemType());
+
+        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
+        sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));
+        String s3FolderPath = sb.substring(sb.indexOf(exportS3Bucket)+exportS3Bucket.length());
+
+        log.info("Verifying S3 Folder Path " + s3FolderPath);
+        // Get S3 Files for this PlayLaunch Config
+        List<S3ObjectSummary> s3Objects = s3Service.listObjects(exportS3Bucket, s3FolderPath);
+        assertNotNull(s3Objects);
+        assertEquals(s3Objects.size(), 1);
+        assertTrue(s3Objects.get(0).getKey().contains("Recommendations"));
+
+        log.info("Cleaning up S3 path " + s3FolderPath);
+        try {
+            s3Service.cleanupPrefix(exportS3Bucket, s3FolderPath);
+            s3Service.cleanupPrefix(exportS3Bucket, dropboxFolderName);
+        } catch (Exception ex) {
+            // Ignore the file deletion error
+            log.error("Error while cleaning up dropbox files ", ex);
+        }
+    }
+
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
-        
     }
 
 }

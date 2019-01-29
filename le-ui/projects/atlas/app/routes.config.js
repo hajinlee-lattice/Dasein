@@ -169,7 +169,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                                 modelId: $stateParams.modelId,
                                 viewingIteration: false
                             },
-                            displayName = 'Dashboard';
+                            displayName = 'View Model';
 
                         BackStore.setBackLabel(displayName);
                         BackStore.setBackState(backState);
@@ -280,32 +280,145 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             url: '/attributes',
             params: {
                 pageIcon: 'ico-attributes',
-                pageTitle: 'Attributes'
+                pageTitle: 'View Iteration',
+                gotoNonemptyCategory: true
+            },
+            resolve: {
+                Enrichments: [
+                    '$q',
+                    'DataCloudStore',
+                    'ApiHost',
+                    function($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getAllEnrichmentsConcurrently().then(
+                            function(result) {
+                                deferred.resolve(result);
+                            }
+                        );
+
+                        return deferred.promise;
+                    }
+                ],
+                EnrichmentTopAttributes: [
+                    '$q',
+                    'DataCloudStore',
+                    'ApiHost',
+                    function($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getAllTopAttributes().then(function(
+                            result
+                        ) {
+                            deferred.resolve(
+                                result['Categories'] || result || {}
+                            );
+                        });
+
+                        return deferred.promise;
+                    }
+                ],
+                EnrichmentPremiumSelectMaximum: [
+                    '$q',
+                    'DataCloudStore',
+                    'ApiHost',
+                    function($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getPremiumSelectMaximum().then(function(
+                            result
+                        ) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }
+                ],
+                EnrichmentSelectMaximum: [
+                    '$q',
+                    'DataCloudStore',
+                    function($q, DataCloudStore) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.getSelectMaximum().then(function(
+                            result
+                        ) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }
+                ],
+                // below resolves are needed. Do not removed
+                // override at child state when needed
+                LookupResponse: [
+                    function() {
+                        return { attributes: null };
+                    }
+                ],
+                QueryRestriction: [
+                    function() {
+                        return null;
+                    }
+                ],
+                CurrentConfiguration: [
+                    function() {
+                        return null;
+                    }
+                ],
+                // end duplicates
+                RatingsEngineModels: [
+                    function() {
+                        return null;
+                    }
+                ]
             },
             views: {
                 'main@': {
-                    controller: function(
-                        $scope,
-                        $stateParams,
-                        $compile,
-                        $rootScope,
-                        Model,
-                        ModelStore,
-                        RatingEngine,
-                        StateHistory
-                    ) {
-                        $scope.data = ModelStore.data;
-                        $compile(
-                            $('#modelDetailContainer').html(
-                                '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
-                            )
-                        )($scope);
-                    },
-                    template:
-                        '<div id="modelDetailContainer" class="model-details"></div>'
+                    controller: 'DataCloudController',
+                    controllerAs: 'vm',
+                    templateUrl:
+                        '/components/datacloud/explorer/explorer.component.html'
+                },
+                'subsummary@': {
+                    controller: 'SubHeaderTabsController',
+                    controllerAs: 'vm',
+                    templateUrl:
+                        '/components/datacloud/tabs/subheader/subheader.component.html'
                 }
             }
         })
+        // .state('home.model.attributes', {
+        //     url: '/attributes',
+        //     params: {
+        //         pageIcon: 'ico-attributes',
+        //         pageTitle: 'Attributes'
+        //     },
+        //     views: {
+        //         'main@': {
+        //             controller: function(
+        //                 $scope,
+        //                 $compile,
+        //                 ModelStore
+        //             ) {
+        //                 $scope.data = ModelStore.data;
+        //                 $compile(
+        //                     $('#modelDetailContainer').html(
+        //                         '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
+        //                     )
+        //                 )($scope);
+        //             },
+        //             template:
+        //                 '<div id="modelDetailContainer" class="model-details"></div>'
+        //         }
+        //     }
+        // })
         .state('home.model.performance', {
             url: '/performance',
             params: {

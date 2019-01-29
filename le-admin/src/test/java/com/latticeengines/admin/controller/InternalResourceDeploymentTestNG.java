@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,7 +20,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -42,13 +42,14 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
-    @Autowired
+
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private ServiceService serviceService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private String email = "lpl@lattice-engines.com";
@@ -58,7 +59,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
      * In setup, orchestrateForInstall a full tenant.
      **/
     @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
+    public void setup() {
         TestTenantId = TestContractId;
 
         loginAD();
@@ -74,8 +75,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         cleanup();
     }
 
-    public void provisionTestTenants() throws Exception
-    {
+    private void provisionTestTenants() {
 
         // TenantInfo
         TenantProperties tenantProperties = new TenantProperties();
@@ -104,14 +104,9 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         }
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
-        SerializableDocumentDirectory modelingConfig = serviceService
-                .getDefaultServiceConfig(ModelingComponent.componentName);
-        modelingConfig.setRootPath("/" + ModelingComponent.componentName);
-
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
         configDirs.add(PLSconfig);
-        configDirs.add(modelingConfig);
 
         // Orchestrate tenant
         TenantRegistration reg = new TenantRegistration();
@@ -122,7 +117,8 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         reg.setConfigDirectories(configDirs);
 
         String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), TestTenantId, TestContractId);
-        boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Boolean created = restTemplate.postForObject(url, reg, Boolean.class);
+        Assert.assertNotNull(created);
         Assert.assertTrue(created);
 
     }
@@ -160,7 +156,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
 
         GlobalAuthUser userAfterAdd = userService.findByEmailNoJoin(email);
         Assert.assertNotNull(userAfterAdd);
-        Assert.assertEquals(true, userService.inTenant(tenant, userName));
+        Assert.assertTrue(userService.inTenant(tenant, userName));
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
@@ -171,14 +167,14 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
 
         GlobalAuthUser userAfterDeactive = userService.findByEmailNoJoin(email);
         Assert.assertNotNull(userAfterDeactive);
-        Assert.assertEquals(false, userAfterDeactive.getIsActive());
-        Assert.assertEquals(false, userService.inTenant(tenant, userName));
-
+        Assert.assertFalse(userAfterDeactive.getIsActive());
+        Assert.assertFalse(userService.inTenant(tenant, userName));
     }
 
     /**
-     * ================================================== BEGIN: Tenant clean up
-     * methods ==================================================
+     * ==================================================
+     * BEGIN: Tenant clean up methods
+     * ==================================================
      */
     public void cleanup() throws Exception {
         try {
@@ -188,9 +184,4 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
             log.error("clean up tenant error!");
         }
     }
-
-    /**
-     * ================================================== END: Tenant clean up
-     * methods ==================================================
-     */
 }

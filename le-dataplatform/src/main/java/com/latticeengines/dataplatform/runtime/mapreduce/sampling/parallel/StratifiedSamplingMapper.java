@@ -1,7 +1,7 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.sampling.parallel;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -41,23 +41,16 @@ public class StratifiedSamplingMapper extends Mapper<AvroKey<Record>, NullWritab
 
     private void setupSamplingTypeProperty(SamplingConfiguration sampleConfig) {
         targetColumnName = sampleConfig.getProperty(SamplingProperty.TARGET_COLUMN_NAME.name());
-        String classDistributionString = sampleConfig.getProperty(SamplingProperty.CLASS_DISTRIBUTION.name());
-
-        setupClassLabel(classDistributionString);
+        Map<String, Long> counterGroupResultMap = sampleConfig.getCounterGroupResultMap();
+        setupClassLabel(counterGroupResultMap);
     }
 
-    private void setupClassLabel(String classDistributionString) {
-        // classDistributionString format: "0=1234,1=4567"
-        String[] classLabelAndDistributions = classDistributionString.split(",");
-        classLabels = new HashSet<String>(classLabelAndDistributions.length);
-        for (String classLabelAndDistribution : classLabelAndDistributions) {
-            String[] result = classLabelAndDistribution.split("=");
-            classLabels.add(result[0]);
-        }
+    private void setupClassLabel(Map<String, Long> counterGroupResultMap) {
+        classLabels = counterGroupResultMap.keySet();
     }
 
-    protected void map(AvroKey<Record> key, NullWritable value, Context context) throws IOException,
-            InterruptedException {
+    protected void map(AvroKey<Record> key, NullWritable value, Context context)
+            throws IOException, InterruptedException {
 
         Record record = key.datum();
         String classLabel = record.get(targetColumnName).toString();

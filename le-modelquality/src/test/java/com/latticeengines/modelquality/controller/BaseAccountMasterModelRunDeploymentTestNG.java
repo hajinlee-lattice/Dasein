@@ -3,6 +3,8 @@ package com.latticeengines.modelquality.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -15,6 +17,7 @@ import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
@@ -25,6 +28,9 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
 
     @Value("${modelquality.test.tenant:Model_Quality_Test_DnB}")
     protected String tenantName;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     protected List<String> namedModelRunEntityNames = new ArrayList<>();
     protected List<String> namedAnalyticPipelineEntityNames = new ArrayList<>();
@@ -47,17 +53,18 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
                     "s3n://latticeengines-test-artifacts/le-modelquality/end2end/csv/1/" + csvFile);
             thisDataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
-            if (datasetAlreadyExists != null)
+            if (datasetAlreadyExists != null) {
                 dataSetEntityMgr.delete(datasetAlreadyExists);
+            }
             modelQualityProxy.createDataSet(thisDataset);
             allDatasetNames.add(thisDataset.getName());
 
             PropData thisPropData = modelQualityProxy.getPropDataConfigByName(propData.getName());
             thisPropData.setName("ModelQualityDeploymentTest-AccountMaster");
 
-            String dataCloudVersion = System.getProperty("MQ_DATACLOUD_VERSION");
+            String dataCloudVersion = getSystemProperty("MQ_DATACLOUD_VERSION");
             if (StringUtils.isBlank(dataCloudVersion)) {
-                dataCloudVersion = "2.0.5";
+                dataCloudVersion = columnMetadataProxy.latestVersion().getVersion();
             }
             logger.info("DataCloudVersion=" + dataCloudVersion);
             thisPropData.setDataCloudVersion(dataCloudVersion);
@@ -84,7 +91,7 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
         }
     }
 
-    protected void deleteLocalEntities() {
+    void deleteLocalEntities() {
         for (String name : namedModelRunEntityNames) {
             ModelRun modelRun = modelRunEntityMgr.findByName(name);
             if (modelRun != null) {

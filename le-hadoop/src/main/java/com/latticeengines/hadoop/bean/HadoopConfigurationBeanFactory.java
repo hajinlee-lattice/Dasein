@@ -10,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
 
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 public abstract class HadoopConfigurationBeanFactory<T extends Configuration> implements FactoryBean<T> {
@@ -42,9 +40,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     public T getObject() {
         T configuration;
         if (shouldUseEmr()) {
-            RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate( //
-                    5, 5000L, 2.0D, null);
-            String masterIp = retryTemplate.execute(context -> emrCacheService.getMasterIp(clusterName));
+            String masterIp = emrCacheService.getMasterIp(clusterName);
             if (StringUtils.isBlank(masterIp)) {
                 throw new RuntimeException("Cannot find the master IP for main EMR cluster.");
             }

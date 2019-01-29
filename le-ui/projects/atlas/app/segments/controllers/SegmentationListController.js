@@ -1,10 +1,11 @@
 angular.module('lp.segments', [
     'common.modal',
-    'lp.tile.edit'
+    'lp.tile.edit',
+    'le.connectors'
 ])
 .controller('SegmentationListController', function ($q, $scope, $rootScope, $element, $state, $stateParams,
     SegmentsList, Enrichments, Cube, Modal, Banner, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
-    DataCloudStore, LookupResponse, LookupStore, PercentStore, QueryTreeDateAttributeStore, AttrConfigStore
+    DataCloudStore, LookupResponse, LookupStore, PercentStore, QueryTreeDateAttributeStore, FeatureFlagService
 ) {
     var vm = this;
 
@@ -340,6 +341,11 @@ angular.module('lp.segments', [
         });
 
         return attrs;
+    };
+    
+    vm.connectorsEnabled = () => {
+        let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
+        return connectorsEnabled;
     };
 
     function createOrUpdateSegment(segment) {

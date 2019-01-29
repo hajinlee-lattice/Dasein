@@ -1,11 +1,10 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -21,6 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -48,8 +48,6 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
     @Autowired
     private List<DataSource> datasources;
 
-    private RatingEngine ratingEngine;
-
     private DataSourceStatusThread dsStatusThread;
 
     @BeforeClass(groups = "functional")
@@ -67,7 +65,7 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
     }
 
     protected RatingEngine createRatingEngine() {
-        ratingEngine = new RatingEngine();
+        RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
@@ -90,21 +88,21 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
         ActionContext.remove();
     }
 
-    public RatingEngine testCreation() {
+    private RatingEngine testCreation() {
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(createRatingEngine());
         Assert.assertNotNull(createdRatingEngine);
         log.info("Rating Engine created {} - {}", createdRatingEngine.getId(), createdRatingEngine.getDisplayName());
         return createdRatingEngine;
     }
 
-    public void testFind() {
+    private void testFind() {
         List<RatingEngine> ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);
         log.info("Rating Engine Listing: {} ", ratingEngineList.size());
-        ratingEngineList = ratingEngineEntityMgr.findAllDeleted();
+        ratingEngineEntityMgr.findAllDeleted();
     }
 
-    public void testFindById(String id) {
+    private void testFindById(String id) {
         RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(ratingEngine.getId(), id);
@@ -120,33 +118,21 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testWithMultipleThreads() {
-        ExecutorService executor = Executors.newFixedThreadPool(TEST_THREAD_POOL_SIZE);
-        long startTime = System.currentTimeMillis();
+        ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("re-load-test", TEST_THREAD_POOL_SIZE);
+        List<Runnable> runnables = new ArrayList<>();
         for (int jobIndex = 0; jobIndex < TEST_THREADS; jobIndex++) {
-            executor.execute(new RunnableTest(this, MultiTenantContext.getTenant(), jobIndex + 1));
+            runnables.add(new RunnableTest(this, MultiTenantContext.getTenant(), jobIndex + 1));
         }
-        log.info("Submited threads: {} ", TEST_THREADS);
-        try {
-            executor.shutdown();
-            if (executor.awaitTermination(1, TimeUnit.MINUTES)) {
-                log.info("Executed all tasks in time");
-            } else {
-                log.info("Took longer than expected to complete. So terminated threadpool");
-            }
-            long endTime = System.currentTimeMillis();
-            log.info("Total time to complete: {}. For Total Threads:{}, PoolSize:{} ", (endTime - startTime),
-                    TEST_THREADS, TEST_THREAD_POOL_SIZE);
-        } catch (InterruptedException e) {
-            log.error("Error: ", e);
-        }
+        log.info("Going to submited {} threads: {} ", TEST_THREADS);
+        ThreadPoolUtils.runRunnablesInParallel(executor, runnables, 10, 1);
     }
 
     public class RunnableTest implements Runnable {
-        RatingEngineLoadTestingTestNG ret = null;
-        Tenant tenant = null;
-        int count;
+        final RatingEngineLoadTestingTestNG ret;
+        final Tenant tenant;
+        final int count;
 
-        public RunnableTest(RatingEngineLoadTestingTestNG ret, Tenant tenant, int index) {
+        RunnableTest(RatingEngineLoadTestingTestNG ret, Tenant tenant, int index) {
             this.ret = ret;
             this.tenant = tenant;
             this.count = index;
@@ -168,10 +154,10 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
     }
 
     public class DataSourceStatusThread extends Thread {
-        List<? extends DataSource> dsList = null;
+        final List<? extends DataSource> dsList;
         volatile boolean interrupted = false;
 
-        public DataSourceStatusThread(List<DataSource> datasources) {
+        DataSourceStatusThread(List<DataSource> datasources) {
             this.dsList = datasources;
         }
 
@@ -182,15 +168,16 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
                 return;
             }
 
-            for (DataSource cpds : dsList) {
-                // log.info("Connection Pool Initial Config: {}", (cpds
-                // instanceof ComboPooledDataSource) ?
-                // ((ComboPooledDataSource)cpds).toString(true) :
-                // cpds.toString());
-            }
+//            for (DataSource cpds : dsList) {
+//                 log.info("Connection Pool Initial Config: {}", (cpds
+//                 instanceof ComboPooledDataSource) ?
+//                 ((ComboPooledDataSource)cpds).toString(true) :
+//                 cpds.toString());
+//            }
+
             try {
-                while (true && !interrupted) {
-                    StringBuffer sb = new StringBuffer("");
+                while (!interrupted) {
+                    StringBuilder sb = new StringBuilder();
 
                     sb.append(String.format("\n %35s %10s %10s %10s %10s %10s %10s %10s %10s %10s", "DataSource Name",
                             "Max Conns", "Allocated", "In Use", "Idle", "Orphaned", "Failed CO", "Failed CI",
@@ -211,12 +198,12 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
                                     cpds.getNumFailedCheckinsDefaultUser(), cpds.getNumHelperThreads(),
                                     cpds.getThreadPoolNumTasksPending()));
                         } catch (SQLException e) {
-                            sb.append("Exception:" + e.getMessage());
+                            sb.append("Exception:").append(e.getMessage());
                         }
 
                     }
                     log.info("Connection Pool Status: {}", sb.toString());
-                    Long sleepTime = 500L;
+                    long sleepTime = 500L;
                     log.info("*** Sleeping for {} secs. {}", sleepTime, interrupted);
                     Thread.sleep(sleepTime);
                     log.info("*** After Sleeping . {}", interrupted);

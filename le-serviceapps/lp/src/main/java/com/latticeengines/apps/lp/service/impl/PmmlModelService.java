@@ -41,6 +41,9 @@ public class PmmlModelService extends ModelServiceBase {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
     protected PmmlModelService() {
         super(ModelType.PMML);
     }
@@ -104,7 +107,7 @@ public class PmmlModelService extends ModelServiceBase {
             String eventTableName = modelSummary.getEventTableName();
             if (StringUtils.isEmpty(eventTableName)) {
                 eventTableName = ModelingHdfsUtils.getEventTableNameFromHdfs(yarnConfiguration,
-                        customerBaseDir + sourceTenantId + "/models", modelSummary.getId());
+                        customerBaseDir + sourceTenantId + "/models", modelSummary.getId(), s3Bucket);
             }
             String cpEventTable = "copy_PMML" + UUID.randomUUID().toString();
 

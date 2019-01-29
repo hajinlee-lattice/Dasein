@@ -1,13 +1,9 @@
 package com.latticeengines.admin.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
-import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
-import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
@@ -32,13 +26,16 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Components.ComponentsMap;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Components.ComponentsMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "internal_service_resource", description = "REST service resource for internal operations")
 @RestController
@@ -53,12 +50,6 @@ public class InternalResource {
 
     @Autowired
     private DynamicOptionsService dynamicOptionsService;
-
-    @Autowired
-    private DataStoreProvider dataStoreProvider;
-
-    @Autowired
-    private PermStoreProvider permStoreProvider;
 
     @Autowired
     private UserService userService;
@@ -108,19 +99,13 @@ public class InternalResource {
     @ResponseBody
     @ApiOperation(value = "Get files of a tenant in datastore")
     public List<String> getTenantFoldersInDatastore(@PathVariable String option, @PathVariable String tenantId) {
-        File dir = dataStoreProvider.getTenantFolder(option, tenantId);
-        if (dir.exists()) {
-            return Arrays.asList(dir.list());
-        } else {
-            return new ArrayList<>();
-        }
+        return new ArrayList<>();
     }
 
     @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant from datastore")
     public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId) {
-        dataStoreProvider.deleteTenantFolder(server, tenantId);
         return true;
     }
 
@@ -139,7 +124,7 @@ public class InternalResource {
     @ApiOperation(value = "Get file names in permstore")
     public Boolean hasVDBInPermstore(@PathVariable String option, @PathVariable String server,
             @PathVariable String tenant) {
-        return permStoreProvider.getVDBFolder(option, server.toUpperCase(), tenant).exists();
+        return Boolean.FALSE;
     }
 
     @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -147,8 +132,7 @@ public class InternalResource {
     @ApiOperation(value = "Delete file in permstore")
     public Boolean deleteVDBInPermstore(@PathVariable String option, @PathVariable String server,
             @PathVariable String tenant) {
-        permStoreProvider.deleteVDBFolder(option, server.toUpperCase(), tenant);
-        return true;
+        return Boolean.TRUE;
     }
 
     private boolean existingDefaultIsValid(String serverName, SelectableConfigurationField patch) {

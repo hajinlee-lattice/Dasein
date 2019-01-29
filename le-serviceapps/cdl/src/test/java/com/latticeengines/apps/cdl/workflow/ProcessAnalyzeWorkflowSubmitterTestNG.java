@@ -194,7 +194,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
                                                                                                            // action,
                                                                                                            // not
                                                                                                            // inherited
-                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L) }, };
+                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L, 8L) }, };
     }
 
     private List<Action> newTypedActions(ActionType... types) {

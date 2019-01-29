@@ -30,6 +30,7 @@ angular
         }
       };
       this.getValues = function(subType){
+        // console.log('READ VALUES ', this.bucketrestriction.bkt.Fltr);
         var ret = QueryTreeService.getValues(this.bucketrestriction, this.type, subType);
         switch (ret.length) {
             case 0: {

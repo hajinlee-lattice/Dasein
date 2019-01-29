@@ -518,6 +518,7 @@ public enum LedpCode {
     LEDP_25039("HTTP Status: 500/503 DnB System Unavailable"), //
     LEDP_25040("HTTP Status: {0} {1}"), //
     LEDP_25041("Could not get transformation progress for rootOperationId: {0}"), //
+    LEDP_25042("Fail to publish entity seed & lookup entries."), //
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
     LEDP_26001("Data flow context does not have values for required properties: {0}"), //
@@ -576,6 +577,7 @@ public enum LedpCode {
     LEDP_28027("Problem reading data rules from {0}."), //
     LEDP_28028("Unsupported PMML version {0} detected. We only support {1}."), //
     LEDP_28029("Download model summary failed."), //
+    LEDP_28030("Problem in event counting: {0}."), //
 
     // le-dellebi
     LEDP_29000(
@@ -791,6 +793,10 @@ public enum LedpCode {
             + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."),
     LEDP_40047("Invalid state transition from {0} to {1}"), //
     LEDP_40048("Workflow status handler does not exist for event type {0}"),
+    LEDP_40049("Cannot create External System Authentication as LookupMap is empty"),
+    LEDP_40050("Cannot create External System Authentication as LookupMap with Id {0} doesnot exists"),
+    LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"),
+    LEDP_40052("Could not find External System Authentication ID: {0}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

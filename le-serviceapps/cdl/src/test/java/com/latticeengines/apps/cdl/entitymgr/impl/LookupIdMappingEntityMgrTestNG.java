@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
@@ -43,7 +44,9 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     public void testCreate() {
         lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         lookupIdMap.setOrgId(orgId);
+        lookupIdMap.setOrgName(orgName);
         lookupIdMap.setOrgName(orgName);
         lookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
         Assert.assertNotNull(lookupIdMap);
@@ -53,6 +56,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(lookupIdMap.getCreated());
         Assert.assertNotNull(lookupIdMap.getUpdated());
         Assert.assertEquals(lookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
+        Assert.assertEquals(lookupIdMap.getExternalSystemName(), CDLExternalSystemName.Salesforce);
         Assert.assertEquals(lookupIdMap.getOrgId(), orgId);
         Assert.assertEquals(lookupIdMap.getOrgName(), orgName);
         Assert.assertEquals(lookupIdMap.getIsRegistered(), Boolean.TRUE);
@@ -74,6 +78,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(extractedLookupIdMap.getCreated());
         Assert.assertNotNull(extractedLookupIdMap.getUpdated());
         Assert.assertEquals(extractedLookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
+        Assert.assertEquals(extractedLookupIdMap.getExternalSystemName(), CDLExternalSystemName.Salesforce);
         Assert.assertEquals(extractedLookupIdMap.getOrgId(), orgId);
         Assert.assertEquals(extractedLookupIdMap.getOrgName(), orgName);
     }
@@ -95,6 +100,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     public void testCreateAnother() {
         LookupIdMap anotherLookupIdMap = new LookupIdMap();
         anotherLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        anotherLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         anotherLookupIdMap.setOrgId(orgId + "_different");
         anotherLookupIdMap.setOrgName(orgName);
         Assert.assertNotNull(lookupIdMappingEntityMgr.createExternalSystem(anotherLookupIdMap));
@@ -137,6 +143,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(extractedLookupIdMap2.getCreated());
         Assert.assertNotNull(extractedLookupIdMap2.getUpdated());
         Assert.assertEquals(extractedLookupIdMap2.getExternalSystemType(), CDLExternalSystemType.CRM);
+        Assert.assertEquals(extractedLookupIdMap2.getExternalSystemName(), CDLExternalSystemName.Salesforce);
         Assert.assertEquals(extractedLookupIdMap2.getOrgId(), orgId);
         Assert.assertEquals(extractedLookupIdMap2.getOrgName(), orgName);
         Assert.assertEquals(extractedLookupIdMap2.getIsRegistered(), Boolean.FALSE);

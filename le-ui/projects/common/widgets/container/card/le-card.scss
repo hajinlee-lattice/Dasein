@@ -1,0 +1,33 @@
+@import '../../colors.scss';
+
+
+.le-card{
+    
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    max-width: 450px;
+    border: 1px solid $white-gold;
+    padding: 0.5em;
+    max-width: 250px;
+
+    &.selected{
+        background-color: $saphire;
+        color: $pearl-white;
+    }
+    .le-card-body{
+        margin-top: 1em;
+        &.content-centered{
+            display: inline-flex;
+            justify-content: space-around;
+        }
+    }
+    // .le-header{
+    //     border-bottom: 1px solid $silver;
+    //     align-items: center;
+    // }
+    // .le-footer{
+    //     border-top: 1px solid $silver;
+    //     align-items: center;
+    // }
+}

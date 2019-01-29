@@ -1,5 +1,3 @@
-console.log('### INIT ###');
-
 import { HTTPFactory } from '../../common/app/http/http-service';
 import { MessagingFactory } from '../../common/app/utilities/messaging-service';
 import StateHistory from './history.service.js';
@@ -9,14 +7,14 @@ import MainController from './app.controller.js';
 import HTTP from './http.interceptor.js';
 import Utils from './common.utils.js';
 
-var mainApp = angular
+angular
     .module('mainApp', [
         'ngRoute',
         'ui.router',
         'ui.bootstrap',
+        'oc.lazyLoad',
         'angulartics',
         'angulartics.mixpanel',
-
         'common.modules',
         'common.modal',
         'common.banner',
@@ -24,15 +22,11 @@ var mainApp = angular
         'common.exceptions',
         'common.attributes',
         'common.datacloud',
-
         'lp.navigation',
         'lp.widgets',
         'lp.jobs',
-        //'lp.campaigns',
-        //'lp.campaigns.models',
         'lp.segments',
         'lp.ratingsengine',
-        //'lp.models.list',
         'lp.models.review',
         'lp.models.ratings',
         'lp.notes',

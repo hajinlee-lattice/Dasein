@@ -158,8 +158,13 @@ public class TestPlayCreationHelper {
     }
 
     public void setupTenantAndData() {
+        setupTenantAndData(null);
+    }
+
+    public void setupTenantAndData(PlayLaunchConfig plConfig) {
         log.info("Creating new Tenant");
-        tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
+        Map<String, Boolean> featureFlags = plConfig != null ? plConfig.getFeatureFlags() : null;
+        tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG, featureFlags);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier, 3);
         postInitializeTenantCreation(tenantIdentifier);
@@ -234,7 +239,7 @@ public class TestPlayCreationHelper {
         if (StringUtils.isNotBlank(playLaunchConfig.getExistingTenant())) {
             useExistingTenant(playLaunchConfig.getExistingTenant());
         } else {
-            setupTenantAndData();
+            setupTenantAndData(playLaunchConfig);
         }
         setupPlayTestEnv();
         if (playLaunchConfig.isMockRatingTable()) {

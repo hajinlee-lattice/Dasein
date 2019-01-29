@@ -8,6 +8,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIE
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -41,6 +42,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected boolean hasImports = false;
     protected boolean hasManyUpdate = false;
     protected boolean jobImpacted = false;
+    protected boolean skipWorkflow = false;
 
     boolean rebuild = false;
     boolean update = false;
@@ -97,6 +99,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
                 log.info(msg + ", because not in reset mode.");
                 return true;
             }
+        }
+
+        if (skipsStepInSubWorkflow(step, seq)) {
+            log.info(msg + " is in skipped workflow");
+            return true;
+
         }
 
         return false;
@@ -298,4 +306,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     protected abstract BusinessEntity mainEntity();
 
+    // used to skip subworkflow in pa
+    protected abstract boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq);
 }

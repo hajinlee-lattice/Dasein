@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,22 +94,22 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             log.info("dataUnit = " + dataUnit.getName());
             String tableName = dataUnit.getName();
             if (!inuseTableName.contains(tableName)) {
+                SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                 if (tableName.startsWith(TABLE_PREFIX, 0)) {//delete prefix=ToBeDelete redshift tablename
                     String timestamp = tableName.replace(TABLE_PREFIX, "");
                     timestamp = timestamp.substring(0, timestamp.indexOf('_'));
                     log.info("to be deleted redshift table timestamp is " + timestamp);
-                    int distance = (int) (((System.currentTimeMillis()/1000 - Long.valueOf(timestamp))/3600)/24);
+                    int distance = (int) (Long.valueOf(df.format(new Date())) - Long.valueOf(timestamp));
                     log.info("redshift table " + dataUnit.getName() + " distance is " + distance + " days");
                     if (distance > 9) {
                         log.info("need delete redshift tablename under tenant is :" + dataUnit.getName());
                         dataUnitProxy.delete(tenant.getId(), dataUnit);
                     }
                 } else {//rename redshiftname wait delete
-                    String new_tableName = TABLE_PREFIX + System.currentTimeMillis()/1000 + "_" + tableName;
+                    String new_tableName = TABLE_PREFIX + df.format(new Date()) + "_" + tableName;
                     log.info("new table name is " + new_tableName);
-                    DataUnit renameDataUnit = dataUnitProxy.renameRedShiftTableName(tenant.getId(), dataUnit,
+                    dataUnitProxy.renameTableName(tenant.getId(), dataUnit,
                             new_tableName);
-                    log.info("after rename, dataUNit name is " + renameDataUnit.getName());
                 }
             }
         }

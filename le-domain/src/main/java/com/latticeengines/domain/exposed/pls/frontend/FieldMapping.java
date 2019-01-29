@@ -1,10 +1,14 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FieldMapping {
 
     @JsonProperty
@@ -22,9 +26,13 @@ public class FieldMapping {
     @JsonProperty
     private boolean mappedToLatticeField;
 
-    // Represents the date/time format string provided by the user for a date attributes.  Eg. "MM/DD/YYYY 00:00:00"
+    // Represents the date format string provided by the user for a date attributes.  Eg. "MM/DD/YYYY"
     @JsonProperty
-    private String dateTimeFormatString;
+    private String dateFormatString;
+
+    // Represents the time format string provided by the user for a date attributes.  Eg. "00:00:00 24H"
+    @JsonProperty
+    private String timeFormatString;
 
     // Represents the timezone to interpret date/time values provided by the user for a date attribute.
     @JsonProperty
@@ -70,12 +78,20 @@ public class FieldMapping {
         this.mappedToLatticeField = mappedToLatticeField;
     }
 
-    public String getDateTimeFormatString() {
-        return this.dateTimeFormatString;
+    public String getDateFormatString() {
+        return this.dateFormatString;
     }
 
-    public void setDateTimeFormatString(String dateTimeFormatString) {
-        this.dateTimeFormatString = dateTimeFormatString;
+    public void setDateFormatString(String dateFormatString) {
+        this.dateFormatString = dateFormatString;
+    }
+
+    public String getTimeFormatString() {
+        return this.timeFormatString;
+    }
+
+    public void setTimeFormatString(String timeFormatString) {
+        this.timeFormatString = timeFormatString;
     }
 
     public String getTimezone() { return timezone; }

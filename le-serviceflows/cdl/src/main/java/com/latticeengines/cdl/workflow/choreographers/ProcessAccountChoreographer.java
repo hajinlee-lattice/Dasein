@@ -2,8 +2,11 @@ package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,6 +21,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
@@ -105,6 +109,21 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         rebuildNotForDataCloudChange = super.shouldRebuild();
         rebuildNotForDataCloudChange = rebuildNotForDataCloudChange || (hasAttrLifeCycleChange && !reset);
         return rebuildNotForDataCloudChange || (dataCloudChanged && !reset);
+    }
+
+    @Override
+    protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        Set<BusinessEntity> entities = step.getSetObjectFromContext(BaseWorkflowStep.PA_SKIP_ENTITIES,
+                BusinessEntity.class);
+        boolean skip = CollectionUtils.isNotEmpty(entities) && entities.contains(mainEntity());
+        if (skip == true) {
+            AbstractWorkflow<?> workflow = rebuildWorkflow();
+            String namespace = getStepNamespace(seq);
+            return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
+                    || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
+
+        }
+        return false;
     }
 
 }

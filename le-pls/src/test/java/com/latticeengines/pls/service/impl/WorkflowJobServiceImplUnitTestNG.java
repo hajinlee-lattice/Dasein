@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -34,6 +36,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
@@ -86,7 +89,11 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplUnitTestNG.class);
 
-    private Long[] jobIds = { 123L, 456L };
+    private Long[] jobIds = {123L, 456L};
+    private Long TS_2019_01_21 = 1548028800000L;
+    private Long TS_2019_01_20 = 1547942400000L;
+    private Long TS_2019_01_19 = 1547856000000L;
+    private Long TS_2019_01_18 = 1547769600000L;
 
     private static final String INITIATOR = "test@lattice-engines.com";
 
@@ -140,7 +147,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "unit", dependsOnMethods = { "testExpandActions" })
+    @Test(groups = "unit", dependsOnMethods = {"testExpandActions"})
     public void testGenerateUnstartedProcessAnalyzeJob() {
         // Auto Schedule is off
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(false);
@@ -178,7 +185,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertTrue(job.getStartTimestamp().after(now));
     }
 
-    @Test(groups = "unit", dependsOnMethods = { "testGenerateUnstartedProcessAnalyzeJob" })
+    @Test(groups = "unit", dependsOnMethods = {"testGenerateUnstartedProcessAnalyzeJob"})
     public void updateStartTimeStampAndForJob() {
         DateTime nextInvokeDate = new DateTime().plusDays(1).withTimeAtStartOfDay();
 
@@ -268,6 +275,97 @@ public class WorkflowJobServiceImplUnitTestNG {
         job1.setJobType("bulkmatchworkflow");
         workflowJobService.updateJobWithSubJobsIfIsPnA(job1);
         Assert.assertNull(job1.getSubJobs());
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateOrphanJobsByPA() {
+        List<Job> jobList = prepareJobList();
+        workflowJobService.updateExpiredOrphanJobs(jobList);
+        jobList.forEach(job -> {
+            if (job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)) {
+                Assert.assertEquals(job.getInputs().get("EXPORT_ID"), WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED);
+            }
+        });
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateOrphanJobsWithoutPA() {
+        List<Job> jobList = prepareJobList();
+        jobList.removeIf(job -> job.getJobType().equals(WorkflowJobServiceImpl.PA_JOB_TYPE));
+        jobList.removeIf(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
+                && job.getStartTimestamp().compareTo(new Date(TS_2019_01_20)) == 0);
+        workflowJobService.updateExpiredOrphanJobs(jobList);
+        jobList.forEach(job -> {
+            if (job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)) {
+                Assert.assertNotEquals(job.getInputs().get("EXPORT_ID"), WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED);
+            }
+        });
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateOrphanJobsBySameOrphanType() {
+        List<Job> jobList = prepareJobList();
+        Job paJob = jobList.get(1);
+        paJob.setStartTimestamp(new Date(TS_2019_01_19));
+        jobList.set(1, paJob);
+        workflowJobService.updateExpiredOrphanJobs(jobList);
+        Assert.assertEquals(jobList.stream()
+                .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
+                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME").equals(OrphanRecordsType.TRANSACTION.getDisplayName())
+                        && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
+                .count(), 1);
+        Assert.assertEquals(jobList.stream()
+                .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
+                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME").equals(OrphanRecordsType.CONTACT.getDisplayName())
+                        && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
+                .count(), 1);
+        Assert.assertEquals(jobList.stream()
+                .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
+                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME").equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getDisplayName())
+                        && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
+                .count(), 1);
+    }
+
+    private List<Job> prepareJobList() {
+        List<Job> jobList = new ArrayList<>();
+        Job pa1 = createProcessAnalyzeJob(1L);
+        Job pa2 = createProcessAnalyzeJob(2L);
+        pa1.setStartTimestamp(new Date(TS_2019_01_18));
+        pa2.setStartTimestamp(new Date(TS_2019_01_21));
+        jobList.add(pa1);
+        jobList.add(pa2);
+
+        Job trx1 = createOrphanJob(TS_2019_01_19, OrphanRecordsType.TRANSACTION);
+        Job trx2 = createOrphanJob(TS_2019_01_20, OrphanRecordsType.TRANSACTION);
+        jobList.add(trx1);
+        jobList.add(trx2);
+
+        Job contact1 = createOrphanJob(TS_2019_01_19, OrphanRecordsType.CONTACT);
+        Job contact2 = createOrphanJob(TS_2019_01_20, OrphanRecordsType.CONTACT);
+        jobList.add(contact1);
+        jobList.add(contact2);
+
+        Job acct1 = createOrphanJob(TS_2019_01_19, OrphanRecordsType.UNMATCHED_ACCOUNT);
+        Job acct2 = createOrphanJob(TS_2019_01_20, OrphanRecordsType.UNMATCHED_ACCOUNT);
+        jobList.add(acct1);
+        jobList.add(acct2);
+
+        return jobList;
+    }
+
+    private Job createOrphanJob(Long startTimestamp, OrphanRecordsType artifactType) {
+        Job job = new Job();
+        job.setId(new Random().nextLong());
+        job.setName(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE);
+        job.setDescription(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE);
+        job.setJobType(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE);
+        job.setStartTimestamp(new Date(startTimestamp));
+        job.setJobStatus(JobStatus.COMPLETED);
+        Map<String, String> inputContext = new HashMap<>();
+        inputContext.put("ARTIFACT_DISPLAY_NAME", artifactType.getDisplayName());
+        inputContext.put("EXPORT_ID", UUID.randomUUID().toString());
+        job.setInputs(inputContext);
+        return job;
     }
 
     private void mockWorkflowProxy() {

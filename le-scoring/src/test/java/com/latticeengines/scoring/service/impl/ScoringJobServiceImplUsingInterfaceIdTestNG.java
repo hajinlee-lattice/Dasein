@@ -76,7 +76,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         List<String> lines = IOUtils.readLines(is, "UTF-8");
         for (String line : lines) {
             String[] arr = line.split(",");
-            scores.put(arr[0], Double.valueOf(arr[1]));
+            scores.put(arr[0], Double.valueOf(arr[2]));
         }
     }
 
@@ -87,7 +87,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         scoringConfig.setSourceDataDir(dataPath);
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Collections.singletonList("ms__" + uuid + "-PLS_model"));
-        scoringConfig.setUniqueKeyColumn(InterfaceName.Id.name());
+        scoringConfig.setUniqueKeyColumn(InterfaceName.InternalId.name());
         scoringConfig.setModelIdFromRecord(false);
         ApplicationId appId = scoringJobService.score(scoringConfig);
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -97,15 +97,15 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, files);
         for (GenericRecord record : records) {
-            assertNotNull(record.get(InterfaceName.Id.name()));
+            assertNotNull(record.get(InterfaceName.InternalId.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             assertNotNull(record.get(ScoreResultField.RawScore.name()));
-            if (scores.containsKey(record.get(InterfaceName.Id.name()).toString())) {
+            if (scores.containsKey(record.get(InterfaceName.InternalId.name()).toString())) {
                 assertNotNull(record.get(ScoreResultField.Percentile.displayName));
-                assertTrue(Math.abs(scores.get(record.get(InterfaceName.Id.name()).toString())
+                assertTrue(Math.abs(scores.get(record.get(InterfaceName.InternalId.name()).toString())
                         - ((Double) (record.get(ScoreResultField.RawScore.name())))) < 0.000001);
             } else {
-                throw new Exception("missing id: " + record.get(InterfaceName.Id.name()));
+                throw new Exception("missing id: " + record.get(InterfaceName.InternalId.name()));
             }
 
         }

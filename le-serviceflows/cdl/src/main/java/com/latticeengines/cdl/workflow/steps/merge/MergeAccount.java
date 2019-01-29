@@ -207,36 +207,42 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(false);
         matchInput.setDataCloudVersion(getDataCloudVersion());
-        // TODO(lming): This won't work for Entity Match case.  Need to set entityKeyMapList instead.
-        matchInput.setKeyMap(getMatchKeys());
-        matchInput.setSkipKeyResolution(false);
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
-        matchInput.setPartialMatchEnabled(true);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-        // TODO(lming): We should set the correct operational mode for other match cases here.
         if (configuration.isEntityMatchEnabled()) {
             matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
-            // TODO(lming): Allocate ID should be set appropriately.
+            matchInput.setSkipKeyResolution(true);
             matchInput.setAllocateId(true);
-            // TODO(lming): Is it safe to assume here that the target entity is always Account?
             matchInput.setTargetEntity(BusinessEntity.Account.name());
 
             EntityKeyMap entityKeyMap = new EntityKeyMap();
             entityKeyMap.setKeyMap(getMatchKeys());
-            // TODO(lming): Not sure how the System ID priority is supposed to get set up.  For now, copy from the
-            //     Key Map.
-            if (MapUtils.isNotEmpty(entityKeyMap.getKeyMap())
-                    && entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
-                entityKeyMap.setSystemIdPriority(entityKeyMap.getKeyMap().get(MatchKey.SystemId));
+            if (MapUtils.isNotEmpty(entityKeyMap.getKeyMap())) {
+                if (entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
+                    // This should not happen because nothing is setting SystemId.
+                    log.error("SystemId somehow set in KeyMap before MergeAccount!");
+                } else {
+                    // TODO(jwinter): Support other SystemIds in M28.
+                    // For now, we hard code the SystemID MatchKey and SystemId Priority List to contain only AccountId.
+                    List<String> systemIdList = Collections.singletonList(InterfaceName.AccountId.toString());
+                    entityKeyMap.getKeyMap().put(MatchKey.SystemId, systemIdList);
+                    entityKeyMap.setSystemIdPriority(systemIdList);
+                }
             }
+
             Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
             entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
             matchInput.setEntityKeyMaps(entityKeyMaps);
+        } else {
+            // Non-Entity Match only configuration of MatchInput.
+            matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
+            matchInput.setSkipKeyResolution(false);
+            matchInput.setKeyMap(getMatchKeys());
+            matchInput.setPartialMatchEnabled(true);
         }
-        // TODO(lming): Need to set targetEntity and allocateId.
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }

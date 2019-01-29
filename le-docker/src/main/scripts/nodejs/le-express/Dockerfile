@@ -8,6 +8,7 @@ EXPOSE 3000 3002
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD le-ui.tar.gz /opt/node
+
 COPY start.sh /start.sh
 
 CMD ["bash", "/start.sh"]
