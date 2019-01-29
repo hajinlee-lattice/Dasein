@@ -22,11 +22,17 @@
             <div class="data" ng-if="(IsRatingEngine && !viewingIteration) || IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
-                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
+                    <h4 class="text-ellipsis">
+                        {{ segmentName }}
+                        <span ng-if="!IsRuleBased || !IsCustomEvent">
+                            ({{ segmentAccounts | number }})
+                        </span>
+                    </h4>
                 </div>
                 <div class="stats stats-group">
-                    <h3>Accounts</h3>
-                    <h4>{{ totalAccounts | number }}</h4>
+                    <h3>Scorable Accounts</h3>
+                    <span ng-if="!scorableAccounts" class="fa fa-spinner fa-pulse fa-fw"></span>
+                    <h4 ng-if="scorableAccounts">{{ scorableAccounts | number }}</h4>
                 </div>
                 <div class="stats stats-group" ng-if="!IsRuleBased">
                     <h3>Iterations Created</h3>
@@ -94,61 +100,7 @@
                     </dl>
                 </div>
             </div>
-
-
-            <!-- LPI Model Details -->
-            <div class="data" ng-if="!IsRatingEngine && !IsRuleBased">
-                <div class="stats stats-group">
-                    <h3>Overview</h3>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
-                        <dd id="detail-status">{{::status}}</dd>
-                    </dl>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
-                        <dd id="detail-created">{{::createdDate}}</dd>
-                    </dl>
-                </div>
-                <div class="stats stats-group" ng-if="!IsPmml">
-                    <h3>{{::modelTypeLabel}}</h3>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_DETAILS_TOTAL_LEADS_LABEL')}}</dt>
-                        <dd id="detail-total-leads">{{::totalLeads}}</dd>
-                    </dl>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_DETAILS_TEST_SET_LABEL')}}</dt>
-                        <dd id="detail-test-leads">{{::testSet}}</dd>
-                    </dl>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_DETAILS_TRAINING_SET_LABEL')}}</dt>
-                        <dd id="detail-train-leads">{{::trainingSet}}</dd>
-                    </dl>
-                </div>
-
-                <div class="stats stats-group" ng-if="!IsPmml">
-                    <h3>{{::ResourceUtility.getString('MODEL_DETAILS_CONVERSIONS_TITLE')}}</h3>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_DETAILS_SUCCESS_EVENTS_LABEL')}}</dt>
-                        <dd id="detail-conversions">{{::totalSuccessEvents}}</dd>
-                    </dl>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_DETAILS_CONVERSION_RATE_LABEL')}}</dt>
-                        <dd id="detail-conversion-rate">{{::conversionRate}}%</dd>
-                    </dl>
-                </div>
-                <div class="stats stats-group" ng-if="!IsPmml">
-                    <h3>{{::ResourceUtility.getString('MODEL_DETAILS_ATTRIBUTES_TITLE')}}</h3>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_TILE_EXTERNAL_LABEL')}}</dt>
-                        <dd id="detail-external-attributes">{{::externalAttributes}}</dd>
-                    </dl>
-                    <dl>
-                        <dt>{{::ResourceUtility.getString('MODEL_TILE_INTERNAL_LABEL')}}</dt>
-                        <dd id="detail-internal-attributes">{{::internalAttributes}}</dd>
-                    </dl>
-                </div>
-            </div>
-
+            
         </div>
     </div>
 

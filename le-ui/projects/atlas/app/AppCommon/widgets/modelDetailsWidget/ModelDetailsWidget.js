@@ -17,9 +17,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
     if (data === undefined) {
 
-        var ratingEngine = $scope.RatingEngine;
-        var dashboard = ModelStore.getDashboardData();
+        var ratingEngine = $scope.RatingEngine,
+            dashboard = ModelStore.getDashboardData();
 
+        $scope.IsRuleBased = ratingEngine.type == 'RULE_BASED' ? true : false;
+        $scope.IsCustomEvent = ratingEngine.type == 'CUSTOM_EVENT' ? true : false;
         $scope.IsRatingEngine = true;
         $scope.viewingIteration = false;
         $scope.type = ratingEngine.type;
@@ -27,19 +29,9 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.createdBy = ratingEngine.createdBy;
         $scope.created = ratingEngine.created;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
+        $scope.segmentName = ratingEngine.segment ? ratingEngine.segment.display_name : 'No segment selected'; 
 
-
-
-        if (ratingEngine.segment) {
-            $scope.segmentName = ratingEngine.segment.display_name;
-            $scope.totalAccounts = ratingEngine.segment.accounts;
-        } else {
-            $scope.segmentName = 'No segment selected';
-            $scope.totalAccounts = '0';
-        }
-
-        $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
-        $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
+        
         if($scope.IsRuleBased || $scope.IsCustomEvent) {
             if($scope.IsRuleBased) {
                 $scope.typeContext = 'rule';
@@ -47,11 +39,21 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.typeContext = 'AI';
             }
             $scope.modelingStrategy = ratingEngine.type;
+            $scope.scorableAccounts = ratingEngine.segment ? ratingEngine.segment.accounts : 0;
         } else {
             var type = ratingEngine.type.toLowerCase();
             $scope.typeContext = 'AI';
-
             $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
+            $scope.segmentAccounts = ratingEngine.segment.accounts;
+
+            if (ratingEngine.segment) {
+                RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
+                    console.log(result);
+                    $scope.scorableAccounts = result;
+                });
+            } else {
+                $scope.scorableAccounts = 0;
+            }
         }
 
         if($scope.typeContext == 'AI'){
@@ -109,9 +111,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         if($scope.IsRatingEngine){
             var engineId = $stateParams.rating_id,
-                ratingEngine = RatingsEngineStore.getRatingEngine();
+                ratingEngine = RatingsEngineStore.getRatingEngine(),
+                type = ratingEngine.type.toLowerCase();
 
-            var type = ratingEngine.type.toLowerCase();
+            $scope.IsRuleBased = ratingEngine.type == 'RULE_BASED' ? true : false;
+            $scope.IsCustomEvent = ratingEngine.type == 'CUSTOM_EVENT' ? true : false;
 
             $scope.$on('statusChange', function(event, args) {
                 $scope.activeStatus = args.activeStatus;
@@ -125,8 +129,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $scope.createdBy = ratingEngine.createdBy;
             $scope.created = ratingEngine.created;
 
-            $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
-            $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
             if($scope.IsRuleBased || $scope.IsCustomEvent) {
                 if($scope.IsRuleBased) {
                     $scope.typeContext = 'rule';
@@ -134,11 +136,20 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                     $scope.typeContext = 'AI';
                 }
                 $scope.modelingStrategy = ratingEngine.type;
+                $scope.scorableAccounts = ratingEngine.segment ? ratingEngine.segment.accounts : 0;
             } else {
                 var type = ratingEngine.type.toLowerCase();
                 $scope.typeContext = 'AI';
-
                 $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
+                $scope.segmentAccounts = ratingEngine.segment.accounts;
+
+                if (ratingEngine.segment) {
+                    RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
+                        $scope.scorableAccounts = result;
+                    });
+                } else {
+                    $scope.scorableAccounts = 0;
+                }
             }
 
             if($scope.typeContext == 'AI'){
@@ -174,13 +185,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
             $scope.activeStatus = ratingEngine.status;
 
-            if(ratingEngine.segment) {
-                $scope.segmentName = ratingEngine.segment.display_name;
-                $scope.totalAccounts = ratingEngine.segment.accounts;    
-            } else {
-                $scope.segmentName = 'No segment selected';
-                $scope.totalAccounts = '0';
-            }
+            $scope.segmentName = ratingEngine.segment ? ratingEngine.segment.display_name : 'No segment selected'; 
         
         }
 

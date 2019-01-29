@@ -508,6 +508,16 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.getScorableAccounts = function(ratingEngine, engineId, iterationId) {
+        var deferred = $q.defer();
+
+        RatingsEngineService.getScorableAccounts(ratingEngine, engineId, iterationId).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
+
     this.getSegmentsCounts = function(segmentIds){
         var deferred = $q.defer();
         
@@ -1090,6 +1100,33 @@ angular.module('lp.ratingsengine')
         }).then(
             function onSuccess(response) {
                 result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
+    this.getScorableAccounts = function(ratingEngine, engineId, iterationId) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'POST',
+            url: '/pls/ratingengines/' + engineId + '/ratingmodels/' + iterationId + '/modelingquery/count',
+            data: ratingEngine,
+            params: {
+                querytype: 'TARGET'
+            },
+            cache: true
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
                 deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
