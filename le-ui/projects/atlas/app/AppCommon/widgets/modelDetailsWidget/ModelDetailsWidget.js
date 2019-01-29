@@ -30,7 +30,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.created = ratingEngine.created;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
         $scope.segmentName = ratingEngine.segment ? ratingEngine.segment.display_name : 'No segment selected'; 
-
+        $scope.modelHealthScore = data.ModelDetails.RocScore;
         
         if($scope.IsRuleBased || $scope.IsCustomEvent) {
             if($scope.IsRuleBased) {
@@ -122,6 +122,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.activeIteration = args.activeIteration;
             });
 
+            $scope.modelHealthScore = data.ModelDetails.RocScore;
             $scope.totalIterations = dashboard.iterations.length;
             $scope.externalAttributeCount = data.ExternalAttributes.total;
             $scope.internalAttributeCount = data.InternalAttributes.total;
