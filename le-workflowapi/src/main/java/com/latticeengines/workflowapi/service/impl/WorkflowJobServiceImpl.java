@@ -263,9 +263,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         // update the status
         if (CollectionUtils.isNotEmpty(jobStatuses) && CollectionUtils.isNotEmpty(workflowJobs)) {
             Set<String> jobStatusSet = jobStatuses.stream().map(String::toUpperCase).collect(Collectors.toSet());
-            workflowJobs = workflowJobs.stream().filter(workflowJob -> {
-                return workflowJob.getStatus() == null || jobStatusSet.contains(workflowJob.getStatus().toUpperCase());
-            }).collect(Collectors.toList());
+            workflowJobs = workflowJobs.stream()
+                    .filter(workflowJob -> workflowJob.getStatus() == null
+                            || jobStatusSet.contains(workflowJob.getStatus().toUpperCase()))
+                    .collect(Collectors.toList());
         }
 
         return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
@@ -320,8 +321,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.warn("checkLastUpdateTime returned empty list for Workflow Job with ID: " + workflowId);
             return null;
         }
-        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId, true);
-        return jobExecution;
+        return leJobExecutionRetriever.getJobExecution(workflowId, true);
     }
 
     @WithCustomerSpace
@@ -336,9 +336,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.warn("checkLastUpdateTime returned empty list for Workflow Job with PID: " + workflowPid);
             return null;
         }
-        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
+        return leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
                 true);
-        return jobExecution;
     }
 
     @WithCustomerSpace
@@ -353,9 +352,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.warn("checkLastUpdateTime returned empty list for Application ID: " + applicationId);
             return null;
         }
-        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
+        return leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
                 true);
-        return jobExecution;
     }
 
     @WithCustomerSpace
@@ -370,8 +368,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.warn("checkLastUpdateTime returned empty list for Workflow Job with ID: " + workflowId);
             return null;
         }
-        ExecutionContext executionContext = leJobExecutionRetriever.getExecutionContext(workflowId);
-        return executionContext;
+        return leJobExecutionRetriever.getExecutionContext(workflowId);
     }
 
     @WithCustomerSpace
@@ -386,8 +383,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.warn("checkLastUpdateTime returned empty list for Workflow Job with PID: " + workflowPid);
             return null;
         }
-        ExecutionContext executionContext = leJobExecutionRetriever.getExecutionContext(workflowJob.getWorkflowId());
-        return executionContext;
+        return leJobExecutionRetriever.getExecutionContext(workflowJob.getWorkflowId());
     }
 
     @WithCustomerSpace
@@ -402,8 +398,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.warn("checkLastUpdateTime returned empty list for Application ID: " + applicationId);
             return null;
         }
-        ExecutionContext executionContext = leJobExecutionRetriever.getExecutionContext(workflowJob.getWorkflowId());
-        return executionContext;
+        return leJobExecutionRetriever.getExecutionContext(workflowJob.getWorkflowId());
     }
 
     @Override
@@ -615,8 +610,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
 
             if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
-                log.info(String.format("WorkflowJob is in terminated status: %s. Skip checking lastUpdatedTime. "
-                        + "WorkflowId=%s", workflowJob.getStatus(), workflowJob.getWorkflowId()));
+                log.debug(String.format(
+                        "WorkflowJob is in terminated status: %s. Skip checking lastUpdatedTime. WorkflowId=%s",
+                        workflowJob.getStatus(), workflowJob.getWorkflowId()));
                 continue;
             }
 
