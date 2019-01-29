@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
@@ -16,25 +17,36 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public class CipherUtils {
+    private static final Logger log = LoggerFactory.getLogger(CipherUtils.class);
+
     public static final String ENCRYPTED = "encrypted";
 
     // Encryption uses AES algorithm to generate 128-bit hash code
     private static final String CIPHER_METHOD = "AES";
     private static final String CIPHER_OPTS = CIPHER_METHOD + "/CBC/PKCS5Padding";
 
+    // env variable and system property names
+    private static final String ENV_SECRET_KEY = "LE_SECRET_KEY";
+    private static final String PROP_SECRET_KEY = "com.latticeengines.secret.key";
+    private static final String ENV_SALT_HINT = "LE_SALT_HINT";
+    private static final String PROP_SALT_HINT = "com.latticeengines.secret.salthint";
+
     // Secret key used for both encryption and decryption
-    private static final String KEY = "I03TMIIUftFUUI7bV0zFBw==";
+    // TODO remove default value once everything is configured properly
+    private static final String KEY = getSecret(ENV_SECRET_KEY, PROP_SECRET_KEY, "I03TMIIUftFUUI7bV0zFBw==");
 
     // When seen this key, means the message is salted
-    private static final String SALT_HINT_STR = "bi0mpJJNxiYpEka5C6JO4g==";
+    // TODO remove default value once everything is configured properly
+    private static final String SALT_HINT_STR = getSecret(ENV_SALT_HINT, PROP_SALT_HINT, "bi0mpJJNxiYpEka5C6JO4g==");
     private static final byte[] SALT_HINT_BYTES = Base64.decodeBase64(SALT_HINT_STR);
 
     private static final String CHARSET_UTF8 = "UTF-8";
-
-    // Required by CBC block-chaining mode
-    private static IvParameterSpec ivspec = new IvParameterSpec(new byte[16]);
 
     public static String encrypt(final String str) {
         try {
@@ -86,14 +98,56 @@ public class CipherUtils {
         }
     }
 
+    /*
+     * return required secrets in system property string
+     */
+    public static String getSecretPropertyStr() {
+        return String.format("%s %s", propertyStr(PROP_SECRET_KEY, KEY), propertyStr(PROP_SALT_HINT, SALT_HINT_STR));
+    }
+
+    private static String propertyStr(@NotNull String propertyName, @NotNull String propertyValue) {
+        return String.format("-D%s=%s", propertyName, propertyValue);
+    }
+
+    /*
+     * helper to retrieve secret (from system property & env variable)
+     */
+    private static String getSecret(@NotNull String envName, @NotNull String propName, String defaultValue) {
+        // FIXME remove these logs once everything is configured properly
+        // try system property first and then env variable
+        if (System.getProperty(propName) != null) {
+            log.info("Secret property [{}] is configured in system property", propName);
+            return System.getProperty(propName);
+        } else if (System.getenv(envName) != null) {
+            log.info("Secret property [{}] is configured in environment variable", envName);
+            return System.getenv(envName);
+        }
+
+        log.warn("Secret property [prop={}, env={}] is not configured", propName, envName);
+        return defaultValue;
+    }
+
     private static String decryptWithEmptySalt(final String str) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
+            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), getLegacyIVSpec(str));
             return new String(cipher.doFinal(Base64.decodeBase64(str)), CHARSET_UTF8);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /*
+     * Basically just return the legacy IVSpec instantiated using empty 16-byte
+     * array. Just make it looks like not hard-coded.
+     */
+    private static IvParameterSpec getLegacyIVSpec(@NotNull final String str) throws Exception {
+        byte[] bytes = new byte[16];
+        new SecureRandom().nextBytes(bytes);
+        if (str != null) {
+            Arrays.fill(bytes, (byte) 0);
+        }
+        return new IvParameterSpec(bytes);
     }
 
     private static String extractHint(byte[] bytes) {
@@ -105,7 +159,7 @@ public class CipherUtils {
     public static String encryptBase58(final String str) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-            cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
+            cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), getLegacyIVSpec(str));
             return Base58.encode(cipher.doFinal(str.getBytes(CHARSET_UTF8)));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -115,7 +169,7 @@ public class CipherUtils {
     public static String decryptBase58(final String str) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
+            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), getLegacyIVSpec(str));
             return new String(cipher.doFinal(Base58.decode(str)), CHARSET_UTF8);
         } catch (Exception e) {
             throw new RuntimeException(e);
