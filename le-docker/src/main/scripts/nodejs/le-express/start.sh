@@ -47,5 +47,6 @@ sed -i "/export LOGGING=/d" ${APP_ROOT}/ENV_VARS
 source ${APP_ROOT}/ENV_VARS
 
 cd ${APP_ROOT}
+npm install ecdsa-sig-formatter
 npm install debug
 node app.js

@@ -40,3 +40,5 @@ jacoco/
 
 # tez
 *.dot
+
+/le-ui.tar.gz
