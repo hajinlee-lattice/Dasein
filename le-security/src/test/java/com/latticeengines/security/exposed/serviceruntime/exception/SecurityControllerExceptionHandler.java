@@ -39,7 +39,7 @@ public class SecurityControllerExceptionHandler extends FrontEndFacingExceptionH
 
     private boolean isDropboxCall() {
         HttpServletRequest request = getCurrentRequest();
-        if (StringUtils.isNotEmpty(request.getRequestURI())) {
+        if (request != null && StringUtils.isNotEmpty(request.getRequestURI())) {
             return request.getRequestURI().equals("/pls/dropbox") && request.getMethod().equalsIgnoreCase("GET");
         }
         return false;

@@ -92,7 +92,9 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
         schema.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE, String.class));
         Object[][] data = new Object[][] {
                 // Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
-                	// Present in single tree for ROOT_DUNS = DUNS24 firmographic value computation : Case 2 karlDuns2.com and Case 3 sbiDuns1.com
+                // Present in single tree for ROOT_DUNS = DUNS24 firmographic
+                // value computation : Case 2 karlDuns2.com and Case 3
+                // sbiDuns1.com
                 { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting", 202, null, DOMSRC_DNB },
                     // Present in single tree for ROOT_DUNS = DUNS28 firmographic value computation : Case 2 karlDuns2.com and Case 3 sbiDuns1.com
                 { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing", 203, null, DOMSRC_DNB },
@@ -100,9 +102,9 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
                 { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, DOMSRC_DNB },
                     // Present in single tree for ROOT_DUNS = DUNS77 firmographic value computation : Case 2 vlocityDuns2.com
                 { "vlocityGu.com", "DUNS77", "DUNS77", null, 9250040L, "9432", 13, "Legal", 131, null, DOMSRC_DNB},
-                    // Present in single tree for ROOT_DUNS = DUNS82 firmographic value computation : Case 2 vlocityDuns2.com
+                // Present in single tree for ROOT_DUNS = DUNS82 firmographic value computation : Case 2 vlocityDuns2.com
                 { "rakutenGu.com", "DUNS82", "DUNS82", null, 9250040L, "7482", 11, "Media", 111, null, DOMSRC_DNB},
-                	// Adding this entry to support mongodbDu.com case : Case 3 sbiDuns1.com
+                // Adding this entry to support mongodbDu.com case : Case 3 sbiDuns1.com
                 { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal", 206, null, DOMSRC_DNB },
                     // Adding this entry to support craigslist.com : Case 3 : craigslist.com 
                 { "craigsGu.com", "DUNS61", "DUNS61", null, 5020405000L, "4324", 23, "Media", 111, null, DOMSRC_DNB},
@@ -164,21 +166,20 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
     }
 
     Object[][] expectedDataValues = new Object[][] { //
-            // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
-    		// SINGLE TREE : not cleaned up
-    		{ "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
-    		{ "karlDu.com", "DUNS24", "DU", 1, "SINGLE_TREE", "false"}, //
-    		{ "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
-    		{ "mongodbGu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
+            // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE SINGLE TREE : not cleaned up
+            { "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
+            { "karlDu.com", "DUNS24", "DU", 1, "SINGLE_TREE", "false" }, //
+            { "netappGu.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
+            { "mongodbGu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
             { "vlocityGu.com", "DUNS77", "GU", 1, "SINGLE_TREE", "false" }, //
             { "rakutenGu.com", "DUNS82", "GU", 1, "SINGLE_TREE", "false" }, //
             { "craigsGu.com", "DUNS61", "GU", 1, "SINGLE_TREE", "false" }, //
             { "craigsDu.com", "DUNS62", "DU", 1, "SINGLE_TREE", "false" }, //
             // FRANCHISE, MULTIPLE_LARGE_COMPANY : not cleaned up
-    		{ "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
+            { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
             { "craigslist.com", null, null, 2, "MULTIPLE_LARGE_COMPANY", "false" }, //
-    		// OTHER : not cleaned up
-    		{ "tesla.com", null, null, 3, "OTHER", "false" }, //
+            // OTHER : not cleaned up
+            { "tesla.com", null, null, 3, "OTHER", "false" }, //
             // Reasons : HIGHER_NUM_OF_LOC, HIGHER_SALES_VOLUME,
             // HIGHER_EMP_TOTAL := Cleaned up
             { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //

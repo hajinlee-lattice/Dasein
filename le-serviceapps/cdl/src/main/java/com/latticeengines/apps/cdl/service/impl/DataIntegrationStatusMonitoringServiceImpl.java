@@ -147,7 +147,7 @@ public class DataIntegrationStatusMonitoringServiceImpl
         public DataIntegrationStatusMonitor handleWorkflowState(
                 DataIntegrationStatusMonitor statusMonitor,
                 DataIntegrationStatusMonitorMessage status) {
-            Tenant tenant = tenantEntityMgr.findByTenantId(status.getTenantId());
+            Tenant tenant = tenantEntityMgr.findByTenantName(status.getTenantId());
 
             if (statusMonitor != null) {
                 throw new LedpException(LedpCode.LEDP_40047,

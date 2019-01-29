@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @DirtiesContext
 @ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})
@@ -154,6 +155,26 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
                 new Timestamp(System.currentTimeMillis()));
         Assert.assertNotNull(workers);
+
+    }
+
+    @Test(groups = "testCollection")
+    public void testCollection() throws Exception {
+
+        List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
+        collectionDBService.addNewDomains(domains, VendorConfig.VENDOR_BUILTWITH, UUID.randomUUID().toString().toUpperCase());
+        boolean finished = false;
+        while (!finished) {
+            finished = collectionDBService.collect();
+            Thread.sleep(15000);
+        }
+
+    }
+
+    @Test(groups = "testIngestion")
+    public void testIngestion() throws Exception {
+
+        collectionDBService.ingest();
 
     }
 

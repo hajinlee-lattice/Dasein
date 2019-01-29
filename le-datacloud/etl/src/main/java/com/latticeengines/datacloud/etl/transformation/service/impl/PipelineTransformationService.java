@@ -676,8 +676,10 @@ public class PipelineTransformationService extends AbstractTransformationService
             return null;
         }
 
+        //log.info("start checking transformation step configs:");
         int currentStep = 0;
         for (TransformationStepConfig step : steps) {
+            //log.info(JsonUtils.serialize(step));
             Transformer transformer = transformerService.findTransformerByName(step.getTransformer());
             if (transformer == null) {
                 error = String.format("Transformer %s does not exist", step.getTransformer());
@@ -704,7 +706,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             }
 
             List<String> baseSourceNames = step.getBaseSources();
-            if (((baseSourceNames == null) || (baseSourceNames.size() == 0))
+            if (!step.getNoInput() && ((baseSourceNames == null) || (baseSourceNames.size() == 0))
                     && ((inputSteps == null) || (inputSteps.size() == 0))) {
                 error = String.format("Step %s does not have any input source specified", currentStep);
                 log.error(error);
@@ -755,24 +757,26 @@ public class PipelineTransformationService extends AbstractTransformationService
 
             String config = step.getConfiguration();
             List<String> sourceNames;
-            if (inputSteps == null) {
-                sourceNames = baseSourceNames;
-            } else {
-                sourceNames = new ArrayList<String>();
-                for (int i = 0; i < inputSteps.size(); i++) {
-                    sourceNames.add(getTempSourceName(pipelineName, version, i, request.getKeepTemp()));
-                }
-                if (baseSourceNames != null) {
-                    for (String sourceName : baseSourceNames) {
-                        sourceNames.add(sourceName);
+            if (!step.getNoInput()) {
+                if (inputSteps == null) {
+                    sourceNames = baseSourceNames;
+                } else {
+                    sourceNames = new ArrayList<String>();
+                    for (int i = 0; i < inputSteps.size(); i++) {
+                        sourceNames.add(getTempSourceName(pipelineName, version, i, request.getKeepTemp()));
+                    }
+                    if (baseSourceNames != null) {
+                        for (String sourceName : baseSourceNames) {
+                            sourceNames.add(sourceName);
+                        }
                     }
                 }
-            }
-            if (!transformer.validateConfig(config, sourceNames)) {
-                error = String.format("Invalid configuration for step %s", currentStep);
-                log.error(error);
-                RequestContext.logError(error);
-                return null;
+                if (!transformer.validateConfig(config, sourceNames)) {
+                    error = String.format("Invalid configuration for step %s", currentStep);
+                    log.error(error);
+                    RequestContext.logError(error);
+                    return null;
+                }
             }
             currentStep++;
         }

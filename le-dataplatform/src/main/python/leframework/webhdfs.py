@@ -59,6 +59,13 @@ class WebHDFS(object):
 
 
     def mkdir(self, path):
+        try:
+            self.mkdirSingle(path)
+        except Exception as ex:
+            logger.warn("Error (%s) when calling mkdir, and retry." % (str(ex)))
+            self.mkdirSingle(path)
+    
+    def mkdirSingle(self, path):
         if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s" % (path))
 
@@ -73,6 +80,13 @@ class WebHDFS(object):
 
 
     def rmdir(self, path):
+        try:
+            self.rmdirSingle(path)
+        except Exception as ex:
+            logger.warn("Error (%s) when calling rmdir, and retry." % (str(ex)))
+            self.rmdirSingle(path)
+    
+    def rmdirSingle(self, path):
         if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s" % (path))
 
@@ -87,6 +101,13 @@ class WebHDFS(object):
 
 
     def copyFromLocal(self, source_path, target_path, replication=3):
+        try:
+            return self.copyFromLocalSingle(source_path, target_path, replication)
+        except Exception as ex:
+            logger.warn("Error (%s) when calling copyFromLocal, and retry." % (str(ex)))
+            return self.copyFromLocalSingle(source_path, target_path, replication)
+            
+    def copyFromLocalSingle(self, source_path, target_path, replication=3):
         if os.path.isabs(target_path) == False:
             raise Exception("Only absolute paths supported: %s" % (target_path))
 
@@ -120,6 +141,13 @@ class WebHDFS(object):
 
 
     def copyToLocal(self, source_path, target_path):
+        try:
+            return self.copyToLocalSingle(source_path, target_path)
+        except Exception as ex:
+            logger.warn("Error (%s) when calling copyToLocal, and retry." % (str(ex)))
+            return self.copyToLocalSingle(source_path, target_path)
+    
+    def copyToLocalSingle(self, source_path, target_path):
         if os.path.isabs(source_path) == False:
             raise Exception("Only absolute paths supported: %s" % (source_path))
         url_path = WEBHDFS_CONTEXT_ROOT + source_path + '?op=OPEN&overwrite=true&user.name=' + self.username
@@ -169,6 +197,13 @@ class WebHDFS(object):
 
 
     def listdir(self, path):
+        try:
+            return self.listdirSingle(path)
+        except Exception as ex:
+            logger.warn("Error (%s) when calling listdir, and retry." % (str(ex)))
+            return self.listdirSingle(path)
+             
+    def listdirSingle(self, path):
         if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s" % (path))
 

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.InputStream;
+import java.sql.SQLSyntaxErrorException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +78,7 @@ public class ConsolidateCollectionTestNG extends PipelineTransformationTestNGBas
         int rowCount = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            System.out.println(record);
+            //System.out.println(record);
             rowCount++;
         }
         // Assert.assertEquals(rowCount, 999);
