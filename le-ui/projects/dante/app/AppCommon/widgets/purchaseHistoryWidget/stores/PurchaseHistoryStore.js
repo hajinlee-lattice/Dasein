@@ -54,6 +54,7 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.stores.PurchaseH
             accountPurchaseHistory = results[3].resultObj;
             self.danteProductHierarchy = productHierarchy;
             self.danteProductHierarchy = PurchaseHistoryService.mapProductHierarchyToId(self.danteProductHierarchy);
+            self.firstTransactionDate = accountPurchaseHistory.FirstTransactionDate ? accountPurchaseHistory.FirstTransactionDate * 1000 : -1;
             self.finalTransactionDate = accountPurchaseHistory.FinalTransactionDate ? accountPurchaseHistory.FinalTransactionDate * 1000 : -1;
 
             self.productTree = PurchaseHistoryService.createProductTree(self.danteProductHierarchy);
@@ -106,15 +107,25 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.stores.PurchaseH
                 momentFinalDate = moment();
             }
 
+            var momentFirstDate;
+            if (self.firstTransactionDate > -1 && self.firstTransactionDate < new Date().getTime()) {
+                momentFirstDate = moment(self.firstTransactionDate);
+            } else { 
+                // Fall back to periodStartDate if firstTransactionDate is not available
+                momentFirstDate = moment(self.productTree.periodStartDate);
+            }
+
             self.endPeriodId = momentFinalDate.format(momentFormat);
             self.startPeriodId = momentFinalDate.add(-11, 'months').format(momentFormat);
 
-            self.periodStartDatePeriodId = moment(self.productTree.periodStartDate).format(momentFormat);
+            self.periodEndDatePeriodId = self.endPeriodId;
+            self.periodStartDatePeriodId = momentFirstDate.format(momentFormat);
             if (PurchaseHistoryUtility.periodIdComparator(self.startPeriodId, self.periodStartDatePeriodId) < 0) {
                 self.startPeriodId = self.periodStartDatePeriodId;
             }
 
-            self.periodEndDatePeriodId = self.endPeriodId;
+            console.log(self.periodEndDatePeriodId);
+            console.log(self.periodStartDatePeriodId);
 
             self.setPeriodRange();
             self.setSelectedPeriodsTree();
