@@ -91,19 +91,16 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             //TransformationStepConfig slimInputs = createSlimInputs(Collections.singletonList(mergeStep));
             TransformationStepConfig match = match(Collections.singletonList(mergeStep));
 
-            // TODO(dzheng): Do we need to ensure the next step only runs for Entity Match?
             TransformationStepConfig fetchOnlyMatch = null;
             //TransformationStepConfig slimDiff = null;
             //TransformationStepConfig mergeMatch = null;
             TransformationStepConfig upsertMaster;
 
             if (configuration.isEntityMatchEnabled()) {
-                // TODO(dzheng): Does Fetch Only Match need both mergeStep and matchStep as input steps?
-                fetchOnlyMatch = fetchOnlyMatch(Arrays.asList(mergeStep, matchStep));
+                fetchOnlyMatch = fetchOnlyMatch(Collections.singletonList(matchStep));
                 //slimDiff = createSlimTable(Collections.singletonList(fetchOnlyMatchStep), diffTablePrefix);
-                //mergeMatch = mergeMatch(Arrays.asList(mergeStep, matchStep, fetchOnlyMatchStep));
-                // TODO(dzheng): Does Upsert Master need the results of both matchStep and fetchOnlyMatchStep?
-                upsertMaster = mergeMaster(Arrays.asList(matchStep, fetchOnlyMatchStep));
+                //mergeMatch = mergeMatch(Arrays.asList(mergeStep, fetchOnlyMatchStep));
+                upsertMaster = mergeMaster(Collections.singletonList(fetchOnlyMatchStep));
             } else {
                 //slimDiff = createSlimTable(Collections.singletonList(matchStep), diffTablePrefix);
                 //mergeMatch = mergeMatch(Arrays.asList(mergeStep, matchStep));
