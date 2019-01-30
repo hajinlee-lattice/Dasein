@@ -1,6 +1,6 @@
 import React, { Component } from "common/react-vendor";
 
-import { getRouter } from "./react-routing";
+import ConnectorsRoutes  from "./react-routing";
 
 export default class ProfilesComponent extends Component {
 
@@ -12,7 +12,7 @@ export default class ProfilesComponent extends Component {
     }
 
     componentDidMount() {
-        this.router = getRouter();
+        this.router = ConnectorsRoutes.getRouter();
         this.setState({nameConnector : this.router.stateService.params.nameConnector});
     }
     

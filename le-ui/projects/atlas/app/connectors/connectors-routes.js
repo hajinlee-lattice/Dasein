@@ -1,6 +1,6 @@
 import './connectors-list.component';
 import './profiles.component';
-import {clean } from "./react-routing";
+import ConnectorsRoutes from "./react-routing";
 angular
 .module('le.connectors', ['le.connectors.list', 'le.connectors.profile'
 ])
@@ -12,7 +12,7 @@ angular
             onEnter: function(){
             },
             onExit: () => {
-                clean();
+                ConnectorsRoutes.clean();
             },
             params: {
                 tenantName: { dynamic: true, value: '' },
@@ -28,7 +28,6 @@ angular
                     component: 'profilesContainerComponent'
                 }
             }
-            // redirectTo: 'home.import.entry.accounts'
         });
         
 });
