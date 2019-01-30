@@ -29,11 +29,12 @@ public interface EaiYarnService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace.toString());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getEaiQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.MEMORY.name(), "4096");
 
         Properties containerProperties = new Properties();
         containerProperties.put(ImportProperty.EAICONFIG, eaiJobConfig.toString());
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "128");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         JacocoUtils.setJacoco(containerProperties, "eai");
