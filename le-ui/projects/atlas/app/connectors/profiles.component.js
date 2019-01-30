@@ -1,6 +1,6 @@
 import React, { Component } from "common/react-vendor";
 
-import ConnectorsRoutes  from "./react-routing";
+import ConnectorsRoutes  from "./connectors-routing";
 
 export default class ProfilesComponent extends Component {
 

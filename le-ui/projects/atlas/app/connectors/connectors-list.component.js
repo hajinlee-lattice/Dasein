@@ -5,7 +5,7 @@ import LeVPanel from 'common/widgets/container/le-v-panel';
 import LeHPanel from 'common/widgets/container/le-h-panel';
 import { CENTER, LEFT } from 'common/widgets/container/le-alignments';
 import Connector from './connector.component';
-import ConnectorsRoutes from "./react-routing";
+import ConnectorsRoutes from "./connectors-routing";
 export class ConnectorList extends Component {
     constructor(props) {
         super(props);

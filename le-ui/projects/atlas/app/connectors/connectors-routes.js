@@ -1,6 +1,6 @@
 import './connectors-list.component';
 import './profiles.component';
-import ConnectorsRoutes from "./react-routing";
+import ConnectorsRoutes from "./connectors-routing";
 angular
 .module('le.connectors', ['le.connectors.list', 'le.connectors.profile'
 ])
@@ -12,7 +12,7 @@ angular
             onEnter: function(){
             },
             onExit: () => {
-                ConnectorsRoutes.clean();
+                ConnectorsRoutes.clearRouter();
             },
             params: {
                 tenantName: { dynamic: true, value: '' },
