@@ -4,7 +4,7 @@ import ConnectorsRoutes from "./connectors-routing";
 angular
 .module('le.connectors', ['le.connectors.list', 'le.connectors.profile'
 ])
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider) {
     $stateProvider
 
         .state('home.connectors', {
