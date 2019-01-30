@@ -1,10 +1,10 @@
 import './connectors-list.component';
 import './profiles.component';
-import {clean } from "./react-routing";
+import ConnectorsRoutes from "./connectors-routing";
 angular
 .module('le.connectors', ['le.connectors.list', 'le.connectors.profile'
 ])
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider) {
     $stateProvider
 
         .state('home.connectors', {
@@ -12,7 +12,7 @@ angular
             onEnter: function(){
             },
             onExit: () => {
-                clean();
+                ConnectorsRoutes.clearRouter();
             },
             params: {
                 tenantName: { dynamic: true, value: '' },
@@ -28,7 +28,6 @@ angular
                     component: 'profilesContainerComponent'
                 }
             }
-            // redirectTo: 'home.import.entry.accounts'
         });
         
 });
