@@ -22,9 +22,11 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +46,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -79,6 +83,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -114,6 +119,15 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private ModelSummary copiedModelSummary;
     private ModelSummary clonedModelSummary;
     private ModelSummary replacedModelSummary;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customerS3Bucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Inject
+    protected Configuration yarnConfiguration;
 
     @BeforeClass(groups = { "deployment.lp", "precheckin" })
     public void setup() throws Exception {
@@ -435,9 +449,30 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("Finished retrieveErrorsFile");
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummary")
+    @Test(groups = "deployment.lp", enabled = true, timeOut = 3600000, dependsOnMethods = "retrieveModelSummary")
     public void copyModel() {
+        cleanCustomerData(firstTenant.getId());
         copyModel(originalModelSummary.getId(), secondTenant.getId());
+    }
+
+    private void cleanCustomerData(String tenantId) {
+        try {
+            String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(protocol);
+            CustomerSpace space = CustomerSpace.parse(tenantId);
+            String podId = CamilleEnvironment.getPodId();
+            String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());
+            String hdfsDataDir = builder.getHdfsAtlasTablesDir(podId, space.getTenantId());
+
+            String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, customerS3Bucket);
+            System.out.println("HDFS Path=" + hdfsDataDir);
+            System.out.println("S3 Path=" + s3DataDir);
+            HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
+            HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+            throw new RuntimeException(ex);
+        }
     }
 
     void copyModel(String originalModelId, String targetTenantId) {
@@ -569,6 +604,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "scoreTrainingDataOfClonedModel" })
     public void replaceModel() {
         log.info("Replacing the cloned model with original model ...");
+        cleanCustomerData(firstTenant.getId());
         testBed.switchToSuperAdmin(firstTenant);
         ResponseDocument response = restTemplate.postForObject(
                 String.format("%s/pls/models/replacemodel/%s?targetTenantId=%s&targetModelId=%s", getRestAPIHostPort(),

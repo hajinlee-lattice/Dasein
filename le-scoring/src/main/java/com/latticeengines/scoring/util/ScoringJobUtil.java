@@ -49,15 +49,14 @@ public class ScoringJobUtil {
     private static List<String> getModelFiles(Configuration yarnConfiguration, String hdfsDir) {
         List<String> modelFilePaths;
         try {
-            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, hdfsDir,
-                    fileStatus -> {
-                        if (fileStatus == null) {
-                            return false;
-                        }
-                        Pattern p = Pattern.compile(".*model" + ScoringDaemonService.JSON_SUFFIX);
-                        Matcher matcher = p.matcher(fileStatus.getPath().getName());
-                        return matcher.matches();
-                    });
+            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, hdfsDir, fileStatus -> {
+                if (fileStatus == null) {
+                    return false;
+                }
+                Pattern p = Pattern.compile(".*model" + ScoringDaemonService.JSON_SUFFIX);
+                Matcher matcher = p.matcher(fileStatus.getPath().getName());
+                return matcher.matches();
+            });
         } catch (Exception e) {
             throw new RuntimeException("Failed to check model.json in " + hdfsDir, e);
         }
@@ -110,7 +109,9 @@ public class ScoringJobUtil {
         Attribute id = new Attribute();
         id.setName(uniqueKeyColumn);
         id.setDisplayName(uniqueKeyColumn);
-        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
+
+        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)
+                || InterfaceName.InternalId.name().equals(uniqueKeyColumn)) {
             id.setPhysicalDataType(Type.LONG.name());
         } else {
             id.setPhysicalDataType(Type.STRING.name());
@@ -167,8 +168,8 @@ public class ScoringJobUtil {
         return attribute;
     }
 
-    public static List<String> getCacheFiles(Configuration yarnConfiguration, String ledpStackVersion, String ledsVersion)
-            throws IOException {
+    public static List<String> getCacheFiles(Configuration yarnConfiguration, String ledpStackVersion,
+            String ledsVersion) throws IOException {
         String appDir = "/app/";
         String jarDependencyPath = "/scoring/lib";
         String log4jXmlPath = "/conf/log4j2-yarn.xml";

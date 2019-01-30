@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
+import com.latticeengines.metadata.service.DataUnitService;
 
 @Component
 public class CDLComponentManagerImpl implements CDLComponentManager {
@@ -33,7 +34,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
     @Inject
-    private DataUnitEntityMgr dataUnitEntityMgr;
+    private DataUnitService dataUnitService;
 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
@@ -67,7 +68,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     public void discardTenant(String customerSpace) {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         attrConfigEntityMgr.cleanupTenant(tenantId);
-        dataUnitEntityMgr.cleanupTenant(tenantId);
+        dataUnitService.cleanupByTenant();
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         MultiTenantContext.setTenant(tenant);
         dropBoxService.delete();

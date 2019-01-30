@@ -10,6 +10,7 @@ public enum ScoreResultField {
     RawScore(Type.DOUBLE.name(), "RawScore", Double.class.getSimpleName()), //
     Rating(Type.STRING.name(), InterfaceName.Rating.name(), String.class.getSimpleName()), //
     ModelId(Type.STRING.name(), "Model_GUID", String.class.getSimpleName()), //
+    InternalId(Type.STRING.name(), InterfaceName.InternalId.name(), Long.class.getSimpleName()), //
     Probability(Type.DOUBLE.name(), InterfaceName.Probability.name(), Double.class.getSimpleName()), //
     NormalizedScore(Type.DOUBLE.name(), InterfaceName.NormalizedScore.name(),
             Double.class.getSimpleName()), //

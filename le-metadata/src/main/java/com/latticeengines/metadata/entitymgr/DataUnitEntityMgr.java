@@ -8,6 +8,8 @@ public interface DataUnitEntityMgr {
 
     DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit);
 
+    List<DataUnit> findAll(String tenantId);
+
     List<DataUnit> findByNameFromReader(String tenantId, String name);
 
     List<DataUnit> findAllByTypeFromReader(String tenantId, DataUnit.StorageType storageType);
@@ -20,6 +22,6 @@ public interface DataUnitEntityMgr {
 
     List<DataUnit> deleteAllByName(String name);
 
-    DataUnit renameRedShiftTableName(String tenantId, DataUnit dataUnit, String tableName);
+    DataUnit renameTableName(String tenantId, DataUnit dataUnit, String tableName);
 
 }

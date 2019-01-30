@@ -23,6 +23,7 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.math.IntMath;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -236,6 +237,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "-Dlog4j2.debug", //
                 "-Dlog4j.configurationFile=log4j2-yarn.xml", //
                 "-DLOG4J_DEBUG_DIR=<LOG_DIR>", //
+                CipherUtils.getSecretPropertyStr(), // secrets
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
                 getXmxSetting(appMasterProperties, true), //

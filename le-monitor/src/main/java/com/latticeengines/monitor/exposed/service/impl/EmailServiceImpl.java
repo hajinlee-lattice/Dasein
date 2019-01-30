@@ -717,15 +717,18 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsExportOrphanRecordsSuccessEmail(User user, String url, String exportID, String type) {
+    public void sendPlsExportOrphanRecordsSuccessEmail(User user, String tenantName, String hostport, String url,
+                                                       String exportID, String type) {
         try {
             log.info(String.format("Sending %s export complete email to %s started.", type, user.getEmail()));
             EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_SUCCESS);
-            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{firstName}}", user.getFirstName());
+            builder.replaceToken("{{tenantName}}", tenantName);
             builder.replaceToken("{{downloadLink}}", url);
             builder.replaceToken("{{exportID}}", exportID);
             builder.replaceToken("{{exportType}}", type);
             builder.replaceToken("{{url}}", url);
+            builder.replaceToken("{{loginURL}}", hostport);
             builder.replaceToken("{{requestType}}", type);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-orphan-instructions.png",

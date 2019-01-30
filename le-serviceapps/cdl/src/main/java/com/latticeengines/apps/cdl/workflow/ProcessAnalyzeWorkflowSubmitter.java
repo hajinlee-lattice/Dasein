@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -274,9 +273,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 return false;
             }
 
-            // not inherit import and system actions
-            return !ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
-                    && !ActionType.getDataCloudRelatedTypes().contains(action.getType());
+            // not inherit system actions
+            return !ActionType.getDataCloudRelatedTypes().contains(action.getType());
         }).collect(Collectors.toList());
     }
 
@@ -355,6 +353,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
                 .build();
     }
 

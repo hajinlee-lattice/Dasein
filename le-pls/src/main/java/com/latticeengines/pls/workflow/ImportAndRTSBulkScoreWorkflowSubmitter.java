@@ -151,8 +151,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
-                .idColumnName(ModelType.PMML.getModelType().equals(modelType) ? InterfaceName.InternalId.name()
-                        : InterfaceName.Id.name()) //
+                .idColumnName(InterfaceName.InternalId.name()) //
                 .build();
     }
 }

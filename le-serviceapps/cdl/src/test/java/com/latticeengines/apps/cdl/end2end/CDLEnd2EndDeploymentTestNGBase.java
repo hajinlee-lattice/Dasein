@@ -148,7 +148,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_VDB_VERSION = "2";
 
     protected static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
-    protected static final String S3_CSV_VERSION = "4";
+    protected static final String S3_CSV_VERSION = "5";
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "4";
@@ -534,13 +534,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         case Account:
             modifyFieldMappingsForAccount(fieldMappingDocument);
             break;
+        case Contact:
+            modifyFieldMappingsForContact(fieldMappingDocument);
         default:
         }
     }
 
     private void modifyFieldMappingsForAccount(FieldMappingDocument fieldMappingDocument) {
         setExternalSystem(fieldMappingDocument.getFieldMappings());
-        setDateAttributes(fieldMappingDocument.getFieldMappings());
+        setAccountDateAttributes(fieldMappingDocument.getFieldMappings());
     }
 
     private void setExternalSystem(List<FieldMapping> fieldMappings) {
@@ -565,41 +567,75 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    private void setDateAttributes(List<FieldMapping> fieldMappings) {
+    private void setAccountDateAttributes(List<FieldMapping> fieldMappings) {
         for (FieldMapping fieldMapping : fieldMappings) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    fieldMapping.setDateTimeFormatString("MM/DD/YY");
+                    fieldMapping.setDateFormatString("MM/DD/YY");
+                    fieldMapping.setTimeFormatString("");
                     fieldMapping.setTimezone("UTC");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date field mapping.");
+                    log.info("Setting Account Attribute 'Test Date' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    fieldMapping.setDateTimeFormatString("YYYY-MM-DD");
+                    fieldMapping.setDateFormatString("YYYY-MM-DD");
+                    fieldMapping.setTimeFormatString(null);
                     fieldMapping.setTimezone("America/Los_Angeles");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date 2 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 2' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 3")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    fieldMapping.setDateTimeFormatString("DD.MM.YY 00:00:00 24H");
+                    fieldMapping.setDateFormatString("DD.MM.YY");
+                    fieldMapping.setTimeFormatString("00:00:00 24H");
                     fieldMapping.setTimezone("GMT+8");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date 3 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 3' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 4")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
-                    fieldMapping.setDateTimeFormatString("MM/DD/YYYY 00-00-00 12H");
+                    fieldMapping.setDateFormatString("MM/DD/YYYY");
+                    fieldMapping.setTimeFormatString("00-00-00 12H");
                     fieldMapping.setTimezone("Asia/Kolkata");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.error("$JAW$ Setting Test Date 4 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 4' field mapping.");
+                }
+            }
+        }
+    }
+
+    private void modifyFieldMappingsForContact(FieldMappingDocument fieldMappingDocument) {
+        setContactDateAttributes(fieldMappingDocument.getFieldMappings());
+    }
+
+    private void setContactDateAttributes(List<FieldMapping> fieldMappings) {
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equalsIgnoreCase("Last_Communication_Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("DD-MMM-YY");
+                    fieldMapping.setTimeFormatString("00 00 00 24H");
+                    fieldMapping.setTimezone("Europe/Paris");
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.info("Setting Contact Attribute 'Last_Communication_Date' field mapping.");
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Renewal_Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("YYYY.MMM.DD");
+                    fieldMapping.setTimeFormatString(null);
+                    fieldMapping.setTimezone(null);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.info("Setting Contact Attribute 'Renewal_Date' field mapping.");
                 }
             }
         }

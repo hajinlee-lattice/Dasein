@@ -32,8 +32,12 @@ public class CipherUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testBackwardCompatibility() throws Exception {
+        // NOTE these two are using legacy IV spec, using these to make sure we can
+        // still decrypt old cipher texts
         Assert.assertEquals(CipherUtils.decrypt("hjl5F8+oM0X9tBVaI56E6Q=="), "Lattice123");
         Assert.assertEquals(CipherUtils.decrypt("KPpl2JWz+k79LWvYIKz6cA=="), "welcome");
+        // encoded using legacy IV spec, make sure it still works
+        Assert.assertEquals(CipherUtils.decryptBase58("7DnDQMq5qbUb4JzjkKroyM"), "hello");
     }
 
     @Test(groups = "unit")

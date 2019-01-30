@@ -550,7 +550,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String getS3PathIfNeeded(String path, boolean isGlob) {
-        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, path, isGlob, podId, s3Bucket);
+        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, path, isGlob, s3Bucket);
     }
 
     private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, //

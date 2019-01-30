@@ -7,6 +7,7 @@ import java.util.Date;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     private static final String INPUT_ROOT = "/atlas/rawinput";
     private static final String RETRY = "/retry";
     private static final String IN_PROGRESS = "/inprogress";
+    private static final String BACKUP = "/backup";
     private static final String COMPLETED = "/completed";
     private static final String SUCCEEDED = "/succeeded";
     private static final String FAILED = "/failed";
@@ -70,15 +72,17 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     }
 
     @Override
-    public String startImport(String tenantId, String entity, String sourceBucket, String sourceKey) {
+    public Pair<String, String> startImport(String tenantId, String entity, String sourceBucket, String sourceKey) {
         initialize(tenantId);
         String date = dateFormat.format(new Date());
         String prefix = String.valueOf(System.currentTimeMillis() / 1000L) + "-" + entity;
         String path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/" + prefix + "/";
+        String backupPath = tenantId + INPUT_ROOT + BACKUP + "/" + date + "/" + prefix + "/";
         if (!s3Service.objectExist(s3Bucket, path)) {
             s3Service.createFolder(s3Bucket, path);
         }
         String target = path + getFileName(sourceKey);
+        String backupTarget = backupPath + getFileName(sourceKey);
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AmazonS3Exception.class), null);
         retry.execute(context -> {
@@ -87,9 +91,10 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
                         context.getRetryCount() + 1, sourceBucket, sourceKey, s3Bucket, target));
             }
             s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, target);
+            s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, backupTarget);
             return true;
         });
-        return target;
+        return Pair.of(target, backupTarget);
     }
 
     private String getFileName(String key) {

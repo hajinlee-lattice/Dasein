@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 
 public class HdfsToS3PathBuilder {
 
@@ -39,10 +42,11 @@ public class HdfsToS3PathBuilder {
 
     private String s3BucketDir = "://%s";
     private String s3AtlasDir = "://%s/%s/atlas";
+    private String s3AtlasIntegrationDir = "://%s/dropfolder/%s/atlas";
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
 
-    public HdfsToS3PathBuilder(){
+    public HdfsToS3PathBuilder() {
     }
 
     public HdfsToS3PathBuilder(String protocol) {
@@ -128,12 +132,17 @@ public class HdfsToS3PathBuilder {
         return String.format(protocol + s3AtlasDataDir, s3Bucket, tenantId);
     }
 
+    public String getS3AtlasIntegrationsDir(String s3Bucket, String dropboxName) {
+        return String.format(protocol + s3AtlasIntegrationDir, s3Bucket, dropboxName);
+    }
+
     public String getS3AtlasMetadataDir(String s3Bucket, String tenantId) {
         return String.format(protocol + s3AtlasMetadataDir, s3Bucket, tenantId);
     }
 
-    public String getS3AtlasFileExportsDir(String s3Bucket, String tenantId) {
-        return getS3AtlasFilesDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Exports";
+    public String getS3AtlasFileExportsDir(String s3Bucket, String dropboxName) {
+        return getS3AtlasIntegrationsDir(s3Bucket, dropboxName) + PATH_SEPARATOR + "Data" + PATH_SEPARATOR + "Files"
+                + PATH_SEPARATOR + "Exports";
     }
 
     public String getS3AtlasTablesDir(String s3Bucket, String tenantId) {
@@ -178,7 +187,7 @@ public class HdfsToS3PathBuilder {
     }
 
     public String getS3AnalyticsMetaDataTableDir(String s3Bucket, String tenantId, String eventTable,
-                                                 String eventColumn) {
+            String eventColumn) {
         return getS3AnalyticsDataDir(s3Bucket, tenantId) + PATH_SEPARATOR
                 + getMetadataTableFolderName(eventTable, eventColumn);
     }
@@ -236,11 +245,12 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
-    public String convertAtlasFileExport(String inputExportFileDir, String pod, String tenantId, String s3Bucket) {
+    public String convertAtlasFileExport(String inputExportFileDir, String pod, String tenantId,
+            DropBoxSummary dropBoxSumamry, String s3Bucket) {
         StringBuilder builder = new StringBuilder();
         String hdfsExportsDir = getHdfsAtlasFileExportDir(pod, tenantId);
         if (inputExportFileDir.startsWith(hdfsExportsDir)) {
-            return builder.append(getS3AtlasFileExportsDir(s3Bucket, tenantId))
+            return builder.append(getS3AtlasFileExportsDir(s3Bucket, dropBoxSumamry.getDropBox()))
                     .append(inputExportFileDir.substring(hdfsExportsDir.length())).toString();
         }
         String fileName = FilenameUtils.getName(inputExportFileDir);
@@ -261,6 +271,12 @@ public class HdfsToS3PathBuilder {
     }
 
     public String exploreS3FilePath(String filePath, String s3Bucket) {
+        try {
+            URI uri = new URI(filePath);
+            filePath = uri.getPath();
+        } catch (Exception ex) {
+            log.warn("Bad url=" + filePath);
+        }
         filePath = FilenameUtils.normalize(filePath);
         StringBuilder builder = new StringBuilder();
 
@@ -320,7 +336,7 @@ public class HdfsToS3PathBuilder {
     }
 
     // Some ad hoc methods
-    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String podId, String s3Bucket) {
+    public String getS3PathWithGlob(Configuration yarnConfiguration, String path, boolean isGlob, String s3Bucket) {
         try {
             String s3Path = exploreS3FilePath(path, s3Bucket);
             if (isGlob) {
@@ -337,6 +353,19 @@ public class HdfsToS3PathBuilder {
             log.warn("Could not get S3 path!", ex.getMessage());
         }
         return path;
+    }
+
+    public String getS3Dir(Configuration yarnConfiguration, String hdfsPath, String s3Bucket) throws IOException {
+        String hdfsDir = getFullPath(hdfsPath);
+        String s3Dir = exploreS3FilePath(hdfsDir, s3Bucket);
+        String original = hdfsPath;
+        if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
+            hdfsPath = exploreS3FilePath(hdfsPath, s3Bucket);
+            log.info("Use s3 path " + hdfsPath + " instead of the original hdfs path " + original);
+        } else {
+            log.info("Did not find data at s3 dir " + s3Dir + " fall back to original hfs path " + original);
+        }
+        return hdfsPath;
     }
 
     public List<String> toHdfsPaths(List<String> dirs) {

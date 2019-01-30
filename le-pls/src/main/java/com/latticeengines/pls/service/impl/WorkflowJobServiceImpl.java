@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -64,16 +66,18 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
+    static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
+    static final String ORPHAN_JOB_TYPE = "orphanRecordsExportWorkflow";
+    static final String ORPHAN_ARTIFACT_EXPIRED = "ORPHAN_ARTIFACT_EXPIRED";
 
     public static final String CDLNote = "Scheduled at %s.";
     // Special workflow id for unstarted ProcessAnalyze workflow
     public static final Long UNSTARTED_PROCESS_ANALYZE_ID = 0L;
-
-    private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
-    private static final String[] NON_DISPLAYED_JOB_TYPE_VALUES = new String[] { //
+    private static final String[] NON_DISPLAYED_JOB_TYPE_VALUES = new String[]{ //
             "bulkmatchworkflow", //
             "consolidateandpublishworkflow", //
-            "profileandpublishworkflow" };
+            "profileandpublishworkflow"};
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
@@ -173,7 +177,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return job;
     }
 
-    List<Action> getActions(List<Long> actionPids) {
+    private List<Action> getActions(List<Long> actionPids) {
         String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.getActionsByPids(tenantId, actionPids);
     }
@@ -196,7 +200,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     List<Long> getActionIdsForJob(Job job) {
         String actionIdsStr = job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS);
         if (StringUtils.isEmpty(actionIdsStr)) {
-            throw new LedpException(LedpCode.LEDP_18172, new String[] { job.getId().toString() });
+            throw new LedpException(LedpCode.LEDP_18172, new String[]{job.getId().toString()});
         }
         List<Object> listObj = JsonUtils.deserialize(actionIdsStr, List.class);
         return JsonUtils.convertList(listObj, Long.class);
@@ -246,7 +250,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public String generateCSVReport(String jobId) {
         Job job = this.find(jobId, true);
         if (job == null || job.getJobStatus() != JobStatus.COMPLETED
-                || !job.getJobType().equals("processAnalyzeWorkflow")) {
+                || !job.getJobType().equals(PA_JOB_TYPE)) {
             throw new LedpException(LedpCode.LEDP_18184);
         }
         List<Job> subjobs = job.getSubJobs();
@@ -261,13 +265,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             ObjectMapper om = JsonUtils.getObjectMapper();
             ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
             ObjectNode entitiesSummaryNode = (ObjectNode) jsonReport.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
-            String[] reportConstants = { ReportConstants.NEW, ReportConstants.UPDATE, ReportConstants.DELETE,
-                    ReportConstants.UNMATCH, "REPLACE" };
-            BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
-                    BusinessEntity.Transaction };
+            String[] reportConstants = {ReportConstants.NEW, ReportConstants.UPDATE, ReportConstants.DELETE,
+                    ReportConstants.UNMATCH, "REPLACE"};
+            BusinessEntity[] entities = {BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
+                    BusinessEntity.Transaction};
 
             for (String reportConstant : reportConstants) {
-                sb.append(StringUtils.capitalize(reportConstant.toLowerCase()) + columnDelimiter);
+                sb.append(StringUtils.capitalize(reportConstant.toLowerCase())).append(columnDelimiter);
                 for (BusinessEntity entity : entities) {
                     ObjectNode entityNode = (ObjectNode) entitiesSummaryNode.get(entity.name());
                     ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
@@ -293,14 +297,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
             for (Job subjob : subjobs) {
                 SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mma");
-                sb.append(df.format(subjob.getStartTimestamp()) + columnDelimiter);
+                sb.append(df.format(subjob.getStartTimestamp())).append(columnDelimiter);
                 String sourceDisplayName = subjob.getInputs() != null
                         ? subjob.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME) : null;
                 if (sourceDisplayName != null) {
-                    sb.append(
-                            getActionType(subjob.getJobType()) + sourceDisplayName.replace(",", "-") + columnDelimiter);
+                    sb.append(getActionType(subjob.getJobType()))
+                            .append(sourceDisplayName.replace(",", "-"))
+                            .append(columnDelimiter);
                 } else {
-                    sb.append(subjob.getName() + columnDelimiter);
+                    sb.append(subjob.getName()).append(columnDelimiter);
                 }
                 ObjectNode subjobPayload;
                 if (subjob.getReports() != null) {
@@ -309,10 +314,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     subjobPayload = null;
                 }
 
-                sb.append(getValidation(subjob.getJobStatus(), subjobPayload) + columnDelimiter);
-                sb.append(getRecordsFound(subjobPayload, getImpactedBusinessEntity(subjob)) + columnDelimiter);
-                sb.append(getPayloadValue(subjobPayload, "total_failed_rows") + columnDelimiter);
-                sb.append(getPayloadValue(subjobPayload, "imported_rows") + columnDelimiter);
+                sb.append(getValidation(subjob.getJobStatus(), subjobPayload)).append(columnDelimiter);
+                sb.append(getRecordsFound(subjobPayload, getImpactedBusinessEntity(subjob))).append(columnDelimiter);
+                sb.append(getPayloadValue(subjobPayload, "total_failed_rows")).append(columnDelimiter);
+                sb.append(getPayloadValue(subjobPayload, "imported_rows")).append(columnDelimiter);
                 sb.append(subjob.getUser());
                 sb.append("\n");
             }
@@ -321,7 +326,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 sb.append("\n\n\nSystem Actions\n");
                 ArrayNode systemActions = (ArrayNode) jsonReport.get(ReportPurpose.SYSTEM_ACTIONS.getKey());
                 for (int i = 0; i < systemActions.size(); i++) {
-                    sb.append(systemActions.get(i).toString() + "\n");
+                    sb.append(systemActions.get(i).toString()).append("\n");
                 }
             }
 
@@ -357,29 +362,29 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private String getValidation(JobStatus jobStatus, ObjectNode subjobPayload) {
         switch (jobStatus) {
-        case PENDING:
-        case RUNNING:
-            return "In Progress";
-        case COMPLETED:
-            if (subjobPayload != null && subjobPayload.has("total_rows")
-                    && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
-                return "Partial Success";
-            } else {
-                return "Success";
-            }
-        default:
-            return jobStatus.getName();
+            case PENDING:
+            case RUNNING:
+                return "In Progress";
+            case COMPLETED:
+                if (subjobPayload != null && subjobPayload.has("total_rows")
+                        && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
+                    return "Partial Success";
+                } else {
+                    return "Success";
+                }
+            default:
+                return jobStatus.getName();
         }
     }
 
     private String getActionType(String jobType) {
         switch (jobType) {
-        case "cdlDataFeedImportWorkflow":
-            return ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName() + ": ";
-        case "cdlOperationWorkflow":
-            return ActionType.CDL_OPERATION_WORKFLOW.getDisplayName() + ": ";
-        default:
-            return jobType;
+            case "cdlDataFeedImportWorkflow":
+                return ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName() + ": ";
+            case "cdlOperationWorkflow":
+                return ActionType.CDL_OPERATION_WORKFLOW.getDisplayName() + ": ";
+            default:
+                return jobType;
         }
     }
 
@@ -387,15 +392,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     Job generateUnstartedProcessAnalyzeJob(boolean expandChildrenJobs) {
         Job job = new Job();
         job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
-        job.setName("processAnalyzeWorkflow");
+        job.setName(PA_JOB_TYPE);
         job.setJobStatus(JobStatus.READY);
-        job.setJobType("processAnalyzeWorkflow");
+        job.setJobType(PA_JOB_TYPE);
         String tenantId = MultiTenantContext.getShortTenantId();
         List<Action> actions = actionProxy.getActionsByOwnerId(tenantId, null);
         updateStartTimeStampAndForJob(job);
         if (CollectionUtils.isNotEmpty(actions)) {
             Map<String, String> unfinishedInputContext = new HashMap<>();
-            List<Long> unfinishedActionIds = actions.stream().filter(action -> isVisibleAction(action))
+            List<Long> unfinishedActionIds = actions.stream()
+                    .filter(action -> isVisibleAction(action))
                     .map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
@@ -409,7 +415,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private Boolean isVisibleAction(Action action) {
         return action.getActionConfiguration() == null
                 || (action.getActionConfiguration() != null && action.getActionConfiguration().isHiddenFromUI() != null
-                        && !action.getActionConfiguration().isHiddenFromUI());
+                && !action.getActionConfiguration().isHiddenFromUI());
     }
 
     @VisibleForTesting
@@ -549,6 +555,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
 
+        updateExpiredOrphanJobs(jobs);
+
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
@@ -561,8 +569,59 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @VisibleForTesting
+    void updateExpiredOrphanJobs(List<Job> jobs) {
+        Optional<Job> latestPAJob = jobs.stream()
+                .filter(job -> job.getJobType().equals(PA_JOB_TYPE))
+                .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
+        Optional<Job> latestOrphanTrxJob = jobs.stream()
+                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
+                        .equals(OrphanRecordsType.TRANSACTION.getDisplayName()))
+                .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
+        Optional<Job> latestOrphanContactJob = jobs.stream()
+                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
+                        .equals(OrphanRecordsType.CONTACT.getDisplayName()))
+                .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
+        Optional<Job> latestUnmatchedAccountJob = jobs.stream()
+                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
+                        .equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getDisplayName()))
+                .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
+
+        for (Job job : jobs) {
+            if (job.getJobType().equals(ORPHAN_JOB_TYPE)) {
+                // check by PA job
+                if (latestPAJob.isPresent()
+                        && latestPAJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
+                    job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
+                }
+
+                // check by the same orphan types
+                if (latestOrphanTrxJob.isPresent()
+                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
+                        .equals(OrphanRecordsType.TRANSACTION.getDisplayName())
+                        && latestOrphanTrxJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
+                    job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
+                }
+
+                if (latestOrphanContactJob.isPresent()
+                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
+                        .equals(OrphanRecordsType.CONTACT.getDisplayName())
+                        && latestOrphanContactJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
+                    job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
+                }
+
+                if (latestUnmatchedAccountJob.isPresent()
+                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
+                        .equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getDisplayName())
+                        && latestUnmatchedAccountJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
+                    job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
     void updateJobWithSubJobsIfIsPnA(Job job) {
-        if (job.getJobType().equals("processAnalyzeWorkflow")) {
+        if (job.getJobType().equals(PA_JOB_TYPE)) {
             List<Long> actionPids = getActionIdsForJob(job);
             if (CollectionUtils.isNotEmpty(actionPids)) {
                 List<Action> actions = getActions(actionPids);
@@ -591,7 +650,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     private void updateJobWithRatingEngineSummaryInfo(Job job, boolean useMap,
-            Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries) {
+                                                      Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries) {
         String ratingId = null;
         if (job.getJobType() != null && (job.getJobType().equals("customEventModelingWorkflow")
                 || job.getJobType().equals("crossSellImportMatchAndModelWorkflow"))) {
@@ -628,7 +687,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     private void updateJobWithModelSummaryInfo(Job job, boolean useMap,
-            Map<String, ModelSummary> modelIdToModelSummaries) {
+                                               Map<String, ModelSummary> modelIdToModelSummaries) {
         String modelId = null;
         if (job.getInputs() != null && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
             modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
@@ -639,7 +698,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return;
         }
 
-        ModelSummary modelSummary = null;
+        ModelSummary modelSummary;
         if (useMap) {
             modelSummary = modelIdToModelSummaries.get(modelId);
         } else {
@@ -691,7 +750,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails,
-            Boolean hasParentId, Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
+                              Boolean hasParentId, Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
         List<Job> jobs = workflowProxy.getJobs(jobIds, types, jobStatuses, includeDetails,
                 MultiTenantContext.getCustomerSpace().toString());
         if (jobs == null) {

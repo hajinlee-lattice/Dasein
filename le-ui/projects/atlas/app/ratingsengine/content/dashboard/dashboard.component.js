@@ -222,6 +222,10 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
+    vm.activateIteration = function(iteration){
+        console.log(iteration);
+    }
+
     vm.initDataModel = function(){
         vm.relatedItems = [];
         Object.keys(vm.dashboard.dependencies).forEach(function(type) {
@@ -323,6 +327,8 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
         }
+
+        console.log(vm.dashboard);
     }
 
     vm.init = function() {

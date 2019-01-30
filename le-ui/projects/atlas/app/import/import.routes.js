@@ -1,4 +1,5 @@
 import './import.utils';
+import { actions, reducer } from './import.redux';
 angular
 .module('lp.import', [
     'common.wizard',
@@ -15,19 +16,29 @@ angular
     'lp.import.wizard.producthierarchyids',
     'lp.import.wizard.producthierarchy',
     'lp.import.utils',
-    'mainApp.core.utilities.AuthorizationUtility'
+    'mainApp.core.utilities.AuthorizationUtility',
+    'mainApp.core.redux'
 ])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.import', {
             url: '/import',
-            onEnter: ['AuthorizationUtility', 'FeatureFlagService', function(AuthorizationUtility, FeatureFlagService) {
+            onEnter: ['$state', 'AuthorizationUtility', 'FeatureFlagService', 'ReduxService', function($state, AuthorizationUtility, FeatureFlagService, ReduxService) {
                 var flags = FeatureFlagService.Flags();
                 var featureFlagsConfig = {};
                 featureFlagsConfig[flags.VDB_MIGRATION] = false;
                 featureFlagsConfig[flags.ENABLE_FILE_IMPORT] = true;
-
+                
                 AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.excludeExternalUser, featureFlagsConfig, 'home');
+                ReduxService.connect(
+                    'fieldMappings',
+                    actions,
+                    reducer,
+                    $state.get('home.import')
+                );
+            }],
+            onExit: ['$state', function($state){
+                $state.get('home.import').data.redux.unsubscribe();
             }],
             redirectTo: 'home.import.entry.accounts'
         })
@@ -69,6 +80,13 @@ angular
                 type: null,
                 data: null
             },
+            resolve:{
+                DateSupport : function($state){
+                    let redux = $state.get('home.import').data.redux;
+                    // console.log('redux', redux);
+                    redux.fetchDateSupport();
+                }
+            },
             views: {
                 'main@': {
                     templateUrl: 'app/import/entry/entry.component.html'
@@ -78,7 +96,7 @@ angular
         })
         .state('home.import.entry.accounts', {
             url: '/accounts',
-            onEnter: function(ImportWizardStore){
+            onEnter: function($state, ImportWizardStore){
                 ImportWizardStore.fieldDocument = {};
             },
             params: {

@@ -4,13 +4,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.dynamo.DynamoService;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
-import com.latticeengines.metadata.service.DataUnitService;
 
+@Component("DynamoDataUnitService")
 public class DynamoDataUnitService extends DataUnitRuntimeService<DynamoDataUnit> {
 
     private static final Logger log = LoggerFactory.getLogger(DynamoDataUnitService.class);

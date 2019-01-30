@@ -96,4 +96,9 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
         return commonRebuild || (hasAttrLifeCycleChange && !reset);
     }
 
+    @Override
+    protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        return false;
+    }
+
 }

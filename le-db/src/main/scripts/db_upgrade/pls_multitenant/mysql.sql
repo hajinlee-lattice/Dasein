@@ -14,6 +14,18 @@ CREATE PROCEDURE `UpdatePLSTables`()
   ADD COLUMN `CANCELED` BIT(1) NULL DEFAULT b'0' COMMENT '0 Default 1 cancel' AFTER `FK_TENANT_ID`;
   ALTER TABLE `PLS_MultiTenant`.`ACTION`
   CHANGE COLUMN `CANCELED` `ACTION_STATUS` VARCHAR(20) NULL DEFAULT 'ACTIVE' ;
+  ALTER TABLE `PLS_MultiTenant`.`LOOKUP_ID_MAP` ADD COLUMN `EXT_SYS_NAME` varchar(255);
+  create table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` (`PID` bigint not null auto_increment, `CREATED` datetime not null, 
+    `ID` varchar(255) not null, `TRAY_AUTHENTICATION_ID` varchar(255), `UPDATED` datetime not null, 
+    `FK_LOOKUP_ID_MAP` bigint not null, `FK_TENANT_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
+  alter table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` add constraint `FK_EXTERNALSYSTEMAUTHENTICATION_FKLOOKUPIDMAP_LOOKUPIDMAP` 
+    foreign key (`FK_LOOKUP_ID_MAP`) references `PLS_MultiTenant`.`LOOKUP_ID_MAP` (`PID`) on delete cascade;
+  alter table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` add constraint `FK_EXTERNALSYSTEMAUTHENTICATION_FKTENANTID_TENANT` 
+    foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
+
+  ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `SOURCE_FILE` VARCHAR(4096);
+    
+  ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `ERROR_FILE` VARCHAR(4096);
   END;
 //
 DELIMITER;

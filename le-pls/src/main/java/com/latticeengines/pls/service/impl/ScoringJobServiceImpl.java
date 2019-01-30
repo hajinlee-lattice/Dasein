@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -141,7 +142,12 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
 
-            List<String> pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            List<String> pathsWithQuote = null;
+            try {
+                pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            } catch (Exception ex) {
+                log.info("There's no Quote Protection file on HDFS!");
+            }
             if (CollectionUtils.isEmpty(pathsWithQuote)) {
                 InputStream inputStream = getResultStreamFromS3(hdfsDir, filePrefix);
                 if (inputStream == null) {

@@ -261,16 +261,6 @@ public class PlayLaunchProcessor {
         if (!export(playLaunchContext, avroPath)) {
             throw new LedpException(LedpCode.LEDP_18168);
         }
-        //TODO: Move to cleanup Listener
-        try {
-            HdfsUtils.rmdir(yarnConfiguration, //
-                    avroPath.substring(0, avroPath.lastIndexOf("/avro")));
-        } catch (Exception ex) {
-            log.error(
-                    "Ignoring error while deleting dir: " //
-                            + avroPath.substring(0, avroPath.lastIndexOf("/avro")), //
-                    ex);
-        }
 
         return recAvroHdfsFilePath;
     }

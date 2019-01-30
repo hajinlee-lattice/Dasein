@@ -358,22 +358,24 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             servingStore = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(),
                     inactive);
         } catch (Exception ex) {
-            log.error("Fail to look for serving store for entity " + entity.name(), ex);
-            return 0L;
+            throw new RuntimeException("Fail to look for serving store for entity " + entity.name(), ex);
         }
         if (StringUtils.isBlank(servingStore)) {
-            log.info("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
+            log.info(String.format("Cannot find serving store for entity %s with version %s",
+                    entity.name(), inactive.name()));
             return 0L;
         }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
+        final int NUM_RETRIES = 3;
         int retries = 0;
-        while (retries < 3) {
+        while (retries < NUM_RETRIES) {
             try {
                 return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
             } catch (Exception ex) {
-                log.error("Exception in getting count from serving store for entity " + entity.name() + " with version "
-                        + inactive.name(), ex);
+                log.error(String.format(
+                        "Retries=%d of %d. Exception in getting count from serving store for entity %s with version %s",
+                        retries + 1, NUM_RETRIES, entity.name(), inactive.name()), ex);
                 retries++;
                 try {
                     Thread.sleep(2000);
@@ -382,9 +384,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 }
             }
         }
-        log.error("Fail to get count from serving store for entity " + entity.name() + " with version "
-                + inactive.name());
-        return 0L;
+        throw new RuntimeException(String.format("Fail to get count from serving store for entity %s with version %s.",
+                entity.name(), inactive.name()));
     }
 
     private Map<BusinessEntity, Long> getDeletedCount() {

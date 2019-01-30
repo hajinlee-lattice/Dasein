@@ -6,9 +6,11 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -17,6 +19,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -25,9 +29,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 public class AvroUtilsUnitTestNG {
 
+    private static Logger log = LoggerFactory.getLogger(AvroUtilsUnitTestNG.class);
+    
     @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void combineSchemas() throws Exception {
@@ -152,7 +161,7 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void convertAvroToJSON() throws IOException {
+    public void convertRecommendationsAvroToJSON() throws IOException {
         URL avroUrl = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
         File jsonFile = File.createTempFile("RecommendationsTest_", ".json");
         AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile, new Function<GenericRecord, GenericRecord>() {
@@ -167,6 +176,7 @@ public class AvroUtilsUnitTestNG {
             }
         });
 
+        log.info("Created JON File at: " + jsonFile.getAbsolutePath());
         ObjectMapper om = new ObjectMapper();
         try(FileInputStream fis = new FileInputStream(jsonFile)) {
             JsonNode node = om.readTree(fis);
@@ -175,6 +185,22 @@ public class AvroUtilsUnitTestNG {
             JsonNode firstRecommendationObject = node.get(0);
             JsonNode contactList = firstRecommendationObject.get("CONTACTS");
             Assert.assertEquals(contactList.getNodeType(), JsonNodeType.ARRAY);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void convertRecommendationsAvroToCSV() throws IOException {
+        URL avroUrl = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
+        File csvFile = File.createTempFile("RecommendationsTest_", ".csv");
+
+        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile, new RecommendationAvroToCsvTransformer());
+
+        log.info("Created CSV File at: " + csvFile.getAbsolutePath());
+        int totalRows = 0;
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
+            assertEquals(csvRows.size(), 15);
         }
     }
 

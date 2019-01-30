@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
@@ -54,11 +56,17 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
     @Resource(name = "distCpConfiguration")
     protected Configuration distCpConfiguration;
 
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
+
+    @Value("${aws.customer.export.s3.bucket}")
+    protected String exportS3Bucket;
 
     @Inject
     private EMREnvService emrEnvService;
@@ -75,6 +83,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
     private String queueName;
     protected String customer;
     protected String tenantId;
+    protected DropBoxSummary dropBoxSummary;
     protected HdfsToS3PathBuilder pathBuilder;
 
     @Override
@@ -85,6 +94,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         customer = configuration.getCustomerSpace().toString();
         tenantId = configuration.getCustomerSpace().getTenantId();
         pathBuilder = new HdfsToS3PathBuilder();
+        dropBoxSummary = dropBoxProxy.getDropBox(configuration.getCustomerSpace().toString());
         if (Boolean.TRUE.equals(useEmr)) {
             pathBuilder.setProtocol("s3a");
         }

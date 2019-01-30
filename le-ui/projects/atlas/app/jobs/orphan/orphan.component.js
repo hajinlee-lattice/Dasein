@@ -185,9 +185,14 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
 
         vm.isExpired = function(job) {
             var currentTime = Date.now();
-            return 'EXPIRE_BY_UTC_TIMESTAMP' in job.inputs
-                ? currentTime > job.inputs['EXPIRE_BY_UTC_TIMESTAMP']
-                : false;
+            var isExpiredId =
+                job.inputs['EXPORT_ID'] == 'ORPHAN_ARTIFACT_EXPIRED';
+            var isExpiredTime =
+                'EXPIRE_BY_UTC_TIMESTAMP' in job.inputs
+                    ? currentTime > job.inputs['EXPIRE_BY_UTC_TIMESTAMP']
+                    : false;
+
+            return isExpiredId || isExpiredTime;
         };
 
         vm.downloadOrphanExport = function(exportId) {

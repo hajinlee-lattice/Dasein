@@ -53,6 +53,8 @@
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'" -->
                         Create Campaign
                     </button>
+
+                    
                 </div>
             </div>
             <div class="content">
@@ -201,7 +203,10 @@
                     </bar-chart>
                 </div>
                 <div ng-if="!vm.isRulesBased">
-                    <h3>Creation History ({{ vm.dashboard.iterations.length }})</h3>
+                    <h3>
+                        Creation History ({{ vm.dashboard.iterations.length }})
+                        <!-- <button>View All</button> -->
+                    </h3>
                     <table class="creation-history">
                         <thead>
                             <tr>
@@ -215,65 +220,60 @@
                                         </div>
                                     </span>
                                 </th>
-                                <th>Created</th>
-                                <th>User</th>
-                                <th>Scoring</th>
                                 <th>&nbsp;</th>
-                                <th>Action</th>
+                                <th>Creation Status</th>
+                                <th>&nbsp;</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration'">
+                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5" ng-class="{active: vm.isIterationActive(iteration.id) &&
+                                        vm.statusIsActive}">
                             <!-- <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"> -->
-                                <td>{{ iteration.iteration }}</td>
-                                <td>{{ iteration.created | date }}</td>
-                                <td class="text-ellipsis">{{ iteration.createdBy }}</td>
-                                <td class="green-text">
-                                    <span ng-if="
-                                        vm.isIterationActive(iteration.id) &&
-                                        vm.statusIsActive">ACTIVE</span>
+                                <td>
+                                    <p>{{ iteration.iteration }}</p>
                                 </td>
                                 <td>
-                                    <span 
-                                        ng-if="iteration.modelingJobStatus === 'Completed'" 
-                                        class="ico ico-check show-tooltip delay top">
-                                        <div class="tooltip_ small">
-                                            <div class="cover">
-                                                <p>Completed</p>
-                                            </div>
-                                        </div>
+                                    <p 
+                                        class="green-text" 
+                                        ng-if="vm.isIterationActive(iteration.id) && vm.statusIsActive">
+                                        Scoring <br/>Active
+                                    </p>
+                                    <button
+                                        class="button"
+                                        ng-if="!vm.isIterationActive(iteration.id) && (iteration.modelingJobStatus != 'Failed' || iteration.modelingJobStatus != 'Pending' || iteration.modelingJobStatus != 'Running')"
+                                        ng-click="vm.remodel(iteration)">
+                                        Activate
+                                    </button>
+                                </td>
+                                <td 
+                                    ng-class="{
+                                        completed: iteration.modelingJobStatus === 'Completed',
+                                        failed: iteration.modelingJobStatus === 'Failed',
+                                        running: iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'
+                                    }">                                    
+                                    <span ng-if="iteration.modelingJobStatus === 'Completed'">
+                                        Successfully created 
                                     </span>
-                                    <span 
-                                        ng-if="iteration.modelingJobStatus === 'Failed'" 
-                                        class="ico ico-warning show-tooltip delay top">
-                                        <div class="tooltip_ small">
-                                            <div class="cover">
-                                                <p>Failed</p>
-                                            </div>
-                                        </div>
+                                    <span ng-if="iteration.modelingJobStatus === 'Failed'">
+                                        Failed 
                                     </span>
-                                    <span 
-                                        ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'" 
-                                        class="fa fa-clock-o show-tooltip delay top">
-                                        <div class="tooltip_ small">
-                                            <div class="cover">
-                                                <p>{{ iteration.modelingJobStatus }}</p>
-                                            </div>
-                                        </div>
+                                    <span
+                                        ng-if="iteration.modelingJobStatus != 'Pending' || iteration.modelingJobStatus != 'Running'">
+                                        {{ iteration.created | date }}
                                     </span>
+
+                                    <span ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'">
+                                        Creating
+                                    </span>
+
                                 </td>
                                 <td>
-                                    
                                     <button 
                                         class="button link-button" 
                                         ng-click="vm.viewIteration(iteration)"
                                         ng-if="
                                             iteration.modelingJobStatus === 'Completed' && 
-                                            iteration.modelSummaryId">View</button>
-                                    <button 
-                                        class="button link-button" 
-                                        ng-click="vm.remodel(iteration)"
-                                        ng-if="iteration.modelingJobStatus == 'Completed'">Remodel</button>
+                                            iteration.modelSummaryId">View Model</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -289,7 +289,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="item in vm.relatedItems">
+                            <tr ng-repeat="item in vm.relatedItems | limitTo: 5">
                                 <td>{{ item.type }}</td>
                                 <td>{{ item.name }}</td>
                             </tr>

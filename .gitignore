@@ -3,7 +3,7 @@
 *.project
 *.pydevproject
 .settings/
-
+*.factorypath
 # Intellij
 .idea/
 *.iml
@@ -40,3 +40,5 @@ jacoco/
 
 # tez
 *.dot
+
+/le-ui.tar.gz

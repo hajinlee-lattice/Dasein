@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -73,8 +74,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
 
     @Override
     public String getClusterId(String clusterName) {
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5);
-        return retryTemplate.execute(context -> _impl.getClusterIdFromAWS(clusterName));
+        return _impl.getClusterIdFromAWS(clusterName);
     }
 
     @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", unless="#result == null")
@@ -89,28 +89,34 @@ public class EMRCacheServiceImpl implements EMRCacheService {
             clusterId = "";
         }
         if (StringUtils.isBlank(clusterId)) {
-            clusterId = emrService.getClusterId(clusterName);
+            try (PerformanceTimer timer = new PerformanceTimer("Got the cluster id for " + clusterName)) {
+                log.info("Getting the cluster id for " + clusterName);
+                clusterId = emrService.getClusterId(clusterName);
+            }
         }
-        return clusterId;
+        return StringUtils.isNotBlank(clusterId) ? clusterId : null;
     }
 
     @Override
     @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)", unless="#result == null")
     public String getMasterIp(String clusterName) {
-        String masterIp = "";
+        String masterIp = null;
         try {
             if (StringUtils.isNotBlank(consul)) {
                 masterIp = getMasterIpFromConsul(clusterName);
             }
         } catch (Exception e) {
             log.info("Failed to get master ip for " + clusterName + " from consul.", e);
-            masterIp = "";
+            masterIp = null;
         }
         if (StringUtils.isBlank(masterIp)) {
-            String clusterId = getClusterId(clusterName);
-            masterIp = emrService.getMasterIp(clusterId);
+            try (PerformanceTimer timer = new PerformanceTimer("Got the master ip for " + clusterName)) {
+                log.info("Getting the master ip for " + clusterName);
+                String clusterId = getClusterId(clusterName);
+                masterIp = emrService.getMasterIp(clusterId);
+            }
         }
-        return masterIp;
+        return StringUtils.isNotBlank(masterIp) ? masterIp : null;
     }
 
     private String getClusterIdFromConsul(String clusterName) {

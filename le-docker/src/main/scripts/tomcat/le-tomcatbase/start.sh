@@ -104,8 +104,6 @@ chmod a+w /var/log/ledp
 
 chown -R tomcat:tomcat ${CATALINA_HOME}
 
-ulimit -n 4096
-
 if [[ "${ENABLE_JACOCO}" == "true" ]]; then
     pid=0
     export CATALINA_PID=/var/run/tomcat

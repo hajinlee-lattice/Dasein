@@ -1,3 +1,4 @@
+
 angular.module('lp.import')
 .service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils){
     var ImportWizardStore = this;
@@ -710,7 +711,7 @@ angular.module('lp.import')
         this.calendar = calendar;
     };
 })
-.service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils) {
+.service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils, ReduxService) {
 
 	   this.GetSchemaToLatticeFields = function(csvFileName, entity, feedType) {
 	        var deferred = $q.defer();
@@ -781,7 +782,9 @@ angular.module('lp.import')
                     'schema': schema
                 }
             }
-
+            // var tmp = $state.get('home.import').data.redux;
+            // tmp.fetch(FileName, entity, feedType, source);
+            // console.log(tmp);
 	        $http({
 	            method: 'POST',
 	            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings',
@@ -793,7 +796,7 @@ angular.module('lp.import')
 	            if (data == null || !data.Success) {
 	                if (data && data.Errors.length > 0) {
 	                    var errors = data.Errors.join('\n');
-	                }
+                    }
 	                var result = {
 	                    Success: false,
 	                    ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
@@ -804,7 +807,10 @@ angular.module('lp.import')
 	                    Success: true,
 	                    ResultErrors: data.Errors,
 	                    Result: data.Result
-	                };
+                    };
+                    let redux = $state.get('home.import').data.redux;
+                    redux.setInitialMapping(ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings));
+                    // ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings);
 	            }
 
 	            deferred.resolve(result);
@@ -904,9 +910,6 @@ angular.module('lp.import')
                     var result = response.data;
                     if (result != null && result !== "") {
                         result = response.data;
-
-                        console.log(result);
-
                         deferred.resolve(result);
                     } else {
                         // var errors = result.Errors;

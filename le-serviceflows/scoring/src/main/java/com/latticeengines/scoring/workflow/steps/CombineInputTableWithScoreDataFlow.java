@@ -54,6 +54,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
             setCdlMultiModelParams(params);
         }
         configuration.setDataFlowParams(params);
+        configuration.setJobProperties(initJobProperties());
     }
 
     private void setCdlMultiModelParams(CombineInputTableWithScoreParameters params) {

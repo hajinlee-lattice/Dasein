@@ -96,11 +96,16 @@
       background-color: rgba(0, 0, 0, 0.04);
     }
   }
+ 
   .le-grid .le-cell {
     min-height: 20px;
     height: 100%;
     font-size: 100%;
+    width: 100%;
   }
+    .custom-fields-grid{
+      width: 100%;
+    }
   .field-type {
     // position: absolute;
     display: flex;
@@ -124,6 +129,7 @@
       select {
         margin-top: 0.4em;
         margin-bottom: 0.4em;
+        max-width: 170px;
       }
       .date-format-container {
         width: 100%;

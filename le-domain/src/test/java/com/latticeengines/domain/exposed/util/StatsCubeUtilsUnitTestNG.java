@@ -181,9 +181,10 @@ public class StatsCubeUtilsUnitTestNG {
                 AttributeLookup attributeLookup = new AttributeLookup(topAttr.getEntity(), topAttr.getAttribute());
                 ColumnMetadata cm = consolidatedCmMap.get(attributeLookup);
 
-                // Account Attributes (aka "My Attributes") that are date attribute types are allowed to be in the
-                // TopN Tree as long as they are not system attributes.
-                if (!Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                // Account Attributes (aka "My Attributes") and Contact Attributes that are date attribute types are
+                // allowed to be in the TopN Tree as long as they are not system attributes.
+                if (!(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                        || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory()))
                         || StatsCubeUtils.isSystemAttribute(topAttr.getEntity(), cm)) {
                     Assert.assertNotEquals(cm.getFundamentalType(), FundamentalType.DATE);
                     Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Timestamp);

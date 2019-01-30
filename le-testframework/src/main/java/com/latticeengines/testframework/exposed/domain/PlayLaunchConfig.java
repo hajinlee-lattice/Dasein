@@ -1,5 +1,6 @@
 package com.latticeengines.testframework.exposed.domain;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -26,6 +27,8 @@ public class PlayLaunchConfig {
     private boolean excludeItemsWithoutSalesforceId;
 
     private boolean playLaunchDryRun;
+
+    private Map<String, Boolean> featureFlags;
 
     private PlayLaunchConfig() {
         testPlayCrud = true;
@@ -85,6 +88,11 @@ public class PlayLaunchConfig {
             return this;
         }
 
+        public Builder featureFlags(Map<String, Boolean> featureFlags) {
+            playLaunchConfig.featureFlags = featureFlags;
+            return this;
+        }
+
         public PlayLaunchConfig build() {
             return playLaunchConfig;
         }
@@ -130,4 +138,7 @@ public class PlayLaunchConfig {
         return playLaunchDryRun;
     }
 
+    public Map<String, Boolean> getFeatureFlags() {
+        return featureFlags;
+    }
 }

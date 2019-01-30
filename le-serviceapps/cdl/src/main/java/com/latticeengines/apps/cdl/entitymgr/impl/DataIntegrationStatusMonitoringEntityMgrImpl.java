@@ -12,7 +12,6 @@ import com.latticeengines.apps.cdl.dao.DataIntegrationStatusMonitoringDao;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.DataIntegrationStatusMonitoringWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
@@ -63,8 +62,8 @@ public class DataIntegrationStatusMonitoringEntityMgrImpl
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public List<DataIntegrationStatusMonitor> getAllStatuses(Long tenantId) {
-        return dataIntegrationStatusMonitoringDao.findAllByField("FK_TENANT_ID", tenantId);
+    public List<DataIntegrationStatusMonitor> getAllStatuses(Long tenantPid) {
+        return dataIntegrationStatusMonitoringDao.findAllByField("FK_TENANT_ID", tenantPid);
     }
 
 }

@@ -3,8 +3,8 @@
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}
  * ]
  */
-angular.module('lp.import.utils', [])
-.service('ImportUtils', function(){
+angular.module('lp.import.utils', ['mainApp.core.redux'])
+.service('ImportUtils', function(ReduxService){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
     var latticeSchema = {};
@@ -61,6 +61,7 @@ angular.module('lp.import.utils', [])
     function cleanSchema(){
         latticeSchema = {};
     }
+    
     /**
      * It sets the entities and all the fields associated with it
      */
@@ -72,7 +73,20 @@ angular.module('lp.import.utils', [])
         });
         // console.log('Schema ', latticeSchema);
     };
-
+    
+    this.getOriginalMapping = (entity, fieldMappingsApi) => {
+        // clearInitialMapping();
+        let originalMapping = {fieldMappings: {entity: '', list: [], map: {}}};
+        let keys = Object.keys(fieldMappingsApi);
+        originalMapping.fieldMappings.entity = entity;
+        keys.forEach((key) => {
+            let userField = fieldMappingsApi[key].userField;
+            originalMapping.fieldMappings.list.push(fieldMappingsApi[key]);
+            originalMapping.fieldMappings.map[userField] = fieldMappingsApi[key];
+        });
+        // console.log('ORIGINAL MAPPING ==> ',originalMapping);
+        return originalMapping;
+    }
 
     this.isFieldInSchema = function(entity, fieldName, fieldsMapped){
         var inschema = false;
@@ -92,16 +106,30 @@ angular.module('lp.import.utils', [])
         });
     };
 
-    function updateUserFieldType(fieldsMapped, userFieldName, newType){
+    function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj){
         fieldsMapped.forEach(function(fieldMapped){
             if(fieldMapped.userField == userFieldName){
-                fieldMapped.fieldType = newType;
+                fieldMapped.fieldType = newTypeObj.type;
+                updateFieldDate(fieldMapped, newTypeObj);
                 return;
             }
         });
     }
 
+    function updateFieldDate(fieldMapped, newTypeObj) {
+        if(fieldMapped.fieldType !== 'DATE'){
+            fieldMapped.dateFormatString = null;
+            fieldMapped.timeFormatString = null
+            fieldMapped.timezone = null;
+        }else{
+            fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+            fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+            fieldMapped.timezone = newTypeObj.timezone;
+        }
+    }
+
     function setMapping(entity, savedObj, fieldsMapped){
+        // let originalMapping = fieldsMapping ? fieldsMapping : {};
         var keysMapped = Object.keys(fieldsMapped);
         keysMapped.forEach(function(mapped){
             if(savedObj.mappedField === fieldsMapped[mapped].mappedField && 
@@ -118,7 +146,7 @@ angular.module('lp.import.utils', [])
             }
         });
     }
-   
+    
     this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
             var keysSaved = Object.keys(savedObj);
@@ -127,9 +155,5 @@ angular.module('lp.import.utils', [])
                 setMapping(entity, savedObj[keySaved], fieldsMapping);
             });
         }
-
-        // console.log(fieldsMapping);
     };
-
-
 });

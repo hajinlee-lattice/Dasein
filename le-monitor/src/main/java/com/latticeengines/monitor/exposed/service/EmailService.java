@@ -80,7 +80,8 @@ public interface EmailService {
 
     void sendPlsExportOrphanRecordsRunningEmail(User user, String exportID, String type);
 
-    void sendPlsExportOrphanRecordsSuccessEmail(User user, String url, String exportID, String type);
+    void sendPlsExportOrphanRecordsSuccessEmail(User user, String tenantName, String hostport, String url,
+                                                String exportID, String type);
 
     void sendCDLProcessAnalyzeCompletionEmail(User user, Tenant tenant, String appPublicUrl);
 

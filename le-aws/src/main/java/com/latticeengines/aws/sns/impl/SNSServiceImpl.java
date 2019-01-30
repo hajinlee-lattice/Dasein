@@ -6,12 +6,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import org.apache.commons.lang3.StringUtils;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -57,9 +56,9 @@ public class SNSServiceImpl implements SNSService {
     }
 
     @Override
-    public PublishResult publishToTopic(String queueName, String message,
+    public PublishResult publishToTopic(String topicName, String message,
             Map<String, MessageAttributeValue> messageAttributes) throws Exception {
-        String topicArn = getTopicArnByName(queueName);
+        String topicArn = getTopicArnByName(topicName);
         if (StringUtils.isEmpty(topicArn) || StringUtils.isEmpty(message)) {
             throw new Exception(
                     String.format("TopicArn and/or message is invalid: %s, %s", topicArn, message));

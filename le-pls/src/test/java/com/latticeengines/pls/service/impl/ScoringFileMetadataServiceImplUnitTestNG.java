@@ -70,7 +70,37 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
                 .getSystemResource(
                         "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedfieldmapping.json")
                 .getPath()));
-        Assert.assertEquals(fieldMappingDocument.getFieldMappings().toString(), expected);
+        List<?> expectedRaw = JsonUtils.deserialize(expected, List.class);
+        List<FieldMapping> expectedMappings = JsonUtils.convertList(expectedRaw, FieldMapping.class);
+        Assert.assertEquals(fieldMappingDocument.getFieldMappings().size(), expectedMappings.size());
+        for (int i = 0; i < expectedMappings.size(); i++) {
+            Assert.assertTrue(mappingEqual(expectedMappings.get(i), fieldMappingDocument.getFieldMappings().get(i)));
+        }
+    }
+
+    private boolean mappingEqual(FieldMapping left, FieldMapping right) {
+        boolean result = left.isMappedToLatticeField() == right.isMappedToLatticeField();
+        if (!result) {
+            return false;
+        }
+        if (left.getMappedField() == null && right.getMappedField() == null) {
+            result = true;
+        } else if (left.getMappedField() != null && right.getMappedField() != null) {
+            result = left.getMappedField().equals(right.getMappedField());
+        } else {
+            return false;
+        }
+        if (!result) {
+            return false;
+        }
+        if (left.getUserField() == null && right.getUserField() == null) {
+            return true;
+        } else if (left.getUserField() != null && right.getUserField() != null) {
+            result = left.getUserField().equals(right.getUserField());
+        } else {
+            return false;
+        }
+        return result;
     }
 
     @Test(groups = "unit")
@@ -89,7 +119,13 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
                 .getSystemResource(
                         "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedfieldmappingPLS_7102.json")
                 .getPath()));
-        Assert.assertEquals(fieldMappingDocument.getFieldMappings().toString(), expected);
+
+        List<?> expectedRaw = JsonUtils.deserialize(expected, List.class);
+        List<FieldMapping> expectedMappings = JsonUtils.convertList(expectedRaw, FieldMapping.class);
+        Assert.assertEquals(fieldMappingDocument.getFieldMappings().size(), expectedMappings.size());
+        for (int i = 0; i < expectedMappings.size(); i++) {
+            Assert.assertTrue(mappingEqual(expectedMappings.get(i), fieldMappingDocument.getFieldMappings().get(i)));
+        }
 
         ModelMetadataService modelMetadataService = Mockito.mock(ModelMetadataService.class);
         attrs = JsonUtils.convertList(list, Attribute.class);

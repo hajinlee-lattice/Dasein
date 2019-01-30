@@ -1,35 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_ALGO;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -64,10 +34,38 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_ALGO;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
 
 @SuppressWarnings("deprecation")
 public class StatsCubeUtils {
@@ -246,7 +244,8 @@ public class StatsCubeUtils {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
-        // Date buckets are cumulative.  Hence, the "within" comparison type is used which covers the day boundary
+        // Date buckets are cumulative. Hence, the "within" comparison type is used
+        // which covers the day boundary
         // forward to the current time.
         List<Integer> dayBoundaries = algo.getDayBoundaries();
         Integer dayBound = bktId == dayBoundaries.size() + 1 ? null : dayBoundaries.get(bktId - 1);
@@ -484,7 +483,8 @@ public class StatsCubeUtils {
     }
 
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
-        // Hide Date Attributes not in category Account Attributes (aka "My Attributes") and all system attributes.
+        // Hide Date Attributes not in category Account Attributes (aka "My Attributes")
+        // and all system attributes.
         return ((isDateAttribute(cm) && !Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()))
                 || isSystemAttribute(entity, cm));
     }
@@ -582,7 +582,9 @@ public class StatsCubeUtils {
                 List<ColumnMetadata> cmList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(cmMap.get(key))) {
                     cmMap.get(key).forEach(cm -> {
-                        if (cm.isEnabledFor(selectedGroup)) {
+                        if (selectedGroup != null && cm.isEnabledFor(selectedGroup)) {
+                            cmList.add(cm);
+                        } else {
                             cmList.add(cm);
                         }
                     });
