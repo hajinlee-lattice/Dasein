@@ -471,7 +471,8 @@ class Server {
                         name: req.query.name,
                         email: req.query.email,
                         iat: (new Date().getTime() / 1000),
-                        jti: uuid.v4()
+                        external_id: req.query.email,
+                        exp: (new Date().getTime() / 1000) + 420
                     };
                     var token = jwt.sign(payload, '52fb614cdedb5d2b1820db7bc01e9c64');
                     res.send(token);
