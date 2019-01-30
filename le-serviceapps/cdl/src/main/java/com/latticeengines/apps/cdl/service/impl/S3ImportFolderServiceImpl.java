@@ -70,11 +70,16 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     }
 
     @Override
-    public String startImport(String tenantId, String entity, String sourceBucket, String sourceKey) {
+    public String startImport(String tenantId, String entity, String sourceBucket, String sourceKey, boolean state) {
         initialize(tenantId);
         String date = dateFormat.format(new Date());
         String prefix = String.valueOf(System.currentTimeMillis() / 1000L) + "-" + entity;
-        String path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/" + prefix + "/";
+        String path = "";
+        if (state) {
+            path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/" + prefix + "/";
+        } else {
+            path = tenantId + INPUT_ROOT + "/" + date + "/" + prefix + "/";
+        }
         if (!s3Service.objectExist(s3Bucket, path)) {
             s3Service.createFolder(s3Bucket, path);
         }
