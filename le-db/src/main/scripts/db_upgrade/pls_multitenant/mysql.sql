@@ -22,6 +22,10 @@ CREATE PROCEDURE `UpdatePLSTables`()
     foreign key (`FK_LOOKUP_ID_MAP`) references `PLS_MultiTenant`.`LOOKUP_ID_MAP` (`PID`) on delete cascade;
   alter table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` add constraint `FK_EXTERNALSYSTEMAUTHENTICATION_FKTENANTID_TENANT` 
     foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
+
+  ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `SOURCE_FILE` VARCHAR(4096);
+    
+  ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `ERROR_FILE` VARCHAR(4096);
   END;
 //
 DELIMITER;
