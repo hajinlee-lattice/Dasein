@@ -1,5 +1,15 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,19 +21,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.security.HasTenantId;
+import javax.persistence.Transient;
+import java.util.List;
 
 @Entity
 @Table(name = "PREDICTOR_ELEMENT")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@JsonIgnoreProperties(ignoreUnknown = true, value = { "hibernateLazyInitializer", "handler",
+        "created" })
 public class PredictorElement implements HasPid, HasName, HasTenantId {
 
     private String name;
@@ -35,12 +40,14 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     private Double upperExclusive;
     private Double uncertaintyCoefficient;
     private String values;
+    private List<String> valuesList;
     private Boolean visible;
     private Predictor predictor;
     private Long tenantId;
 
     @Override
     @Column(name = "NAME", nullable = false)
+    @JsonProperty("Name")
     public String getName() {
         return name;
     }
@@ -55,6 +62,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     @Override
+    @JsonIgnore
     public Long getPid() {
         return pid;
     }
@@ -65,6 +73,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     }
 
     @Column(name = "CORRELATION_SIGN", nullable = false)
+    @JsonProperty("CorrelationSign")
     public Integer getCorrelationSign() {
         return correlationSign;
     }
@@ -74,6 +83,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     }
 
     @Column(name = "COUNT", nullable = false)
+    @JsonProperty("Count")
     public Long getCount() {
         return count;
     }
@@ -83,6 +93,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     }
 
     @Column(name = "LIFT", nullable = false)
+    @JsonProperty("Lift")
     public Double getLift() {
         return lift;
     }
@@ -92,6 +103,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     }
 
     @Column(name = "LOWER_INCLUSIVE", nullable = true)
+    @JsonProperty("LowerInclusive")
     public Double getLowerInclusive() {
         return lowerInclusive;
     }
@@ -101,6 +113,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     }
 
     @Column(name = "UPPER_EXCLUSIVE", nullable = true)
+    @JsonProperty("UpperExclusive")
     public Double getUpperExclusive() {
         return upperExclusive;
     }
@@ -110,6 +123,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     }
 
     @Column(name = "UNCERTAINTY_COEFF", nullable = false)
+    @JsonProperty("UncertaintyCoefficient")
     public Double getUncertaintyCoefficient() {
         return uncertaintyCoefficient;
     }
@@ -128,7 +142,18 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
         this.values = values;
     }
 
+    @Transient
+    @JsonProperty("Values")
+    public List<String> getValuesList() {
+        return valuesList;
+    }
+
+    public void setValuesList(List<String> valuesList) {
+        this.valuesList = valuesList;
+    }
+
     @Column(name = "VISIBLE", nullable = false)
+    @JsonProperty("IsVisible")
     public Boolean getVisible() {
         return visible;
     }

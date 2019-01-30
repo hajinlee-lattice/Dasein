@@ -1,29 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.apps.cdl.annotation.Action;
 import com.latticeengines.apps.cdl.service.RatingEngineDashboardService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
@@ -34,10 +10,12 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -55,9 +33,30 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Api(value = "ratingengine", description = "REST resource for rating engine")
 @RestController
@@ -331,10 +330,11 @@ public class RatingEngineResource {
         return updatedRatingModel;
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
-    public Map<String, List<ColumnMetadata>> getIterationMetadata(
+    @Deprecated
+    public Map<String, List<ColumnMetadata>> getIterationAttributes(
             @PathVariable String customerSpace, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId, //
             @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
@@ -349,7 +349,74 @@ public class RatingEngineResource {
                 }
             }).collect(Collectors.toList());
         }
-        return ratingEngineService.getIterationMetadata(ratingEngineId, ratingModelId, stores);
+        return ratingEngineService.getIterationAttributes(customerSpace, ratingEngineId,
+                ratingModelId, stores);
+
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
+    public List<ColumnMetadata> getIterationMetadata(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
+        List<CustomEventModelingConfig.DataStore> stores = null;
+        if (StringUtils.isNotEmpty(dataStores)) {
+            stores = Arrays.asList(dataStores.split(",")).stream().map(x -> {
+                if (EnumUtils.isValidEnum(CustomEventModelingConfig.DataStore.class, x)) {
+                    return CustomEventModelingConfig.DataStore.valueOf(x);
+                } else {
+                    throw new LedpException(LedpCode.LEDP_32000,
+                            new String[] { "Invalid DataStore " + x });
+                }
+            }).collect(Collectors.toList());
+        }
+        return ratingEngineService.getIterationMetadata(customerSpace, ratingEngineId,
+                ratingModelId, stores);
+
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/cube", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
+    public Map<String, StatsCube> getIterationMetadataCube(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
+        List<CustomEventModelingConfig.DataStore> stores = null;
+        if (StringUtils.isNotEmpty(dataStores)) {
+            stores = Arrays.asList(dataStores.split(",")).stream().map(x -> {
+                if (EnumUtils.isValidEnum(CustomEventModelingConfig.DataStore.class, x)) {
+                    return CustomEventModelingConfig.DataStore.valueOf(x);
+                } else {
+                    throw new LedpException(LedpCode.LEDP_32000,
+                            new String[] { "Invalid DataStore " + x });
+                }
+            }).collect(Collectors.toList());
+        }
+        return ratingEngineService.getIterationMetadataCube(customerSpace, ratingEngineId,
+                ratingModelId, stores);
+
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/topn", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get Metadata for a given AIModel's iteration and data stores")
+    public TopNTree getIterationMetadataTopN(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
+        List<CustomEventModelingConfig.DataStore> stores = null;
+        if (StringUtils.isNotEmpty(dataStores)) {
+            stores = Arrays.asList(dataStores.split(",")).stream().map(x -> {
+                if (EnumUtils.isValidEnum(CustomEventModelingConfig.DataStore.class, x)) {
+                    return CustomEventModelingConfig.DataStore.valueOf(x);
+                } else {
+                    throw new LedpException(LedpCode.LEDP_32000,
+                            new String[] { "Invalid DataStore " + x });
+                }
+            }).collect(Collectors.toList());
+        }
+        return ratingEngineService.getIterationMetadataTopN(customerSpace, ratingEngineId,
+                ratingModelId, stores);
 
     }
 
