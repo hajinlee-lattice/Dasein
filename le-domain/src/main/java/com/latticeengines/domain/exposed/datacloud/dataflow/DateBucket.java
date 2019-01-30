@@ -46,7 +46,7 @@ public class DateBucket extends BucketAlgorithm  {
     @JsonProperty("ever")
     private String everLabel;
 
-    // Timestamp used as base value from which to evaluation all bucket boundaries.
+    // Timestamp (in milliseconds) used as base value from which to evaluation all bucket boundaries.
     @JsonProperty("curTimestamp")
     private long curTimestamp;
 
