@@ -6,6 +6,7 @@ import org.apache.avro.Schema;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
 
 public interface RedshiftService {
     void loadTableFromAvroInS3(String tableName, String s3bucket, String avroS3Prefix, String jsonPathS3Prefix);
@@ -35,4 +36,6 @@ public interface RedshiftService {
     boolean hasTable(String tableName);
 
     List<String> getTables(String prefix);
+
+    void unloadTable(String tableName, String s3bucket, String s3Prefix, RedshiftUnloadParams unloader);
 }

@@ -17,4 +17,6 @@ public interface EntityQueryService {
     Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version,
             String sqlUser);
 
+    String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
+
 }

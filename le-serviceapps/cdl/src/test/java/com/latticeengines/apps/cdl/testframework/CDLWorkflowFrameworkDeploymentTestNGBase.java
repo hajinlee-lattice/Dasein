@@ -24,7 +24,7 @@ public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkfl
         setupTestEnvironment(LatticeProduct.CG);
     }
 
-    protected void setupTestEnvironment(LatticeProduct product) throws Exception {
+    protected void setupTestEnvironment(LatticeProduct product) {
         testBed.bootstrapForProduct(product);
         mainTestTenant = testBed.getMainTestTenant();
         mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
