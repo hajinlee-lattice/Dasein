@@ -5,11 +5,13 @@ import LeVPanel from 'common/widgets/container/le-v-panel';
 import LeHPanel from 'common/widgets/container/le-h-panel';
 import { CENTER, LEFT } from 'common/widgets/container/le-alignments';
 import Connector from './connector.component';
+import {getRouter } from "./react-routing";
 export class ConnectorList extends Component {
     constructor(props) {
         super(props);
+        console.log('THE PROPS ', props);
         this.clickHandler = this.clickHandler.bind(this);
-        this.state = { connectorSelected: '' };
+        this.state = { connectorSelected: this.props.ConnectorsService.test()};
         this.connectors = [
             {
                 name: 'salesforce',
@@ -20,13 +22,21 @@ export class ConnectorList extends Component {
                 config: { img: '/atlas/assets/images/logo_marketo_2.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Marketo' }
             }
         ];
-    }
-    clickHandler(name) {
-        console.log('Connector ', name)
-        this.setState({ connectorSelected: name });
 
     }
+    componentDidMount() {
+        this.router = getRouter();
+        this.router.stateService.go('profiles',{ nameConnector: this.state.connectorSelected});
+    }
+    clickHandler(name) {
+        this.setState({ connectorSelected: name });
+        let nameConnector = name;
+        this.router.stateService.go('profiles', {tenantName: 'M21BugBash1', nameConnector: nameConnector});
+
+    }
+    com
     getConnectros() {
+        console.log('STATE', this.state);
         let connectors = this.connectors.map((obj, index) => {
             return (
                 <Connector
@@ -58,7 +68,22 @@ export class ConnectorList extends Component {
 
 angular
     .module("le.connectors.list", [])
+    .service('ConnectorsService', function($state){
+        let ConnectorsService = this;
+        this.test = function(){
+            console.log('Test', $state.router.locationConfig.$location.$$hash);
+            let hash = $state.router.locationConfig.$location.$$hash;
+            console.log(hash);
+            let selected = '';
+            if(hash != ''){
+                let hashArray = hash.split('/');
+                console.log('ARRAY ', hashArray[1]);
+                selected = hashArray[1];
+            }
+            return selected;
+        };
+    })
     .component(
         "connectorListComponent",
-        react2angular(ConnectorList, [], ["$state"])
+        react2angular(ConnectorList, [], ['$state', 'ConnectorsService'])
     );

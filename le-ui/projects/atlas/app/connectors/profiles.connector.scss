@@ -1,0 +1,13 @@
+@import 'common/widgets/colors.scss';
+
+.main-panel{
+    background-color: $pearl-white;
+    display: flex;
+    justify-content: space-around;
+}
+.connector-profile-container{
+    // background-color: $pearl-white;
+    height: 100%;
+    width: 100%;
+    max-width: 1300px;
+}

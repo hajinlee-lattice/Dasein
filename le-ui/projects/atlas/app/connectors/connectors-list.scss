@@ -1,9 +1,9 @@
-
+@import 'common/widgets/colors.scss';
 .le-connectors{
     margin-top: 1px;
     padding: 1em 0;
     &.white-background{
-        background-color: white;
+        background-color: $pearl-white;
     }
     & .connectors-list{
         padding: 2em 0;
