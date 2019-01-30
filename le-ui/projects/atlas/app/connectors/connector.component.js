@@ -6,7 +6,6 @@ import {CENTER} from 'common/widgets/container/le-alignments';
 export default class Connector extends Component {
     constructor(props) {
         super(props);
-        console.log('Connector', this.props.config);
         this.connectorClickHandler = this.connectorClickHandler.bind(this);
     }
     connectorClickHandler(){
