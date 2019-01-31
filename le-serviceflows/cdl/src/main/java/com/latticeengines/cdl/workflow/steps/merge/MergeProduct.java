@@ -69,6 +69,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
 
         Table inputTable = metadataProxy.getTable(
                 customerSpace.toString(), TableUtils.getFullTableName(mergedBatchStoreName, pipelineVersion));
+        isDataQuotaLimit(inputTable);
         List<Product> inputProducts = ProductUtils.loadProducts(
                 yarnConfiguration, inputTable.getExtracts().get(0).getPath());
 

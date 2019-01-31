@@ -44,6 +44,13 @@ public class ProcessProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder dataQuotaLimit(Long dataQuotaLimit) {
+            processProductStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
+            updateProductWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
+            rebuildProductWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
+            return this;
+        }
+
         public ProcessProductWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processProductWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

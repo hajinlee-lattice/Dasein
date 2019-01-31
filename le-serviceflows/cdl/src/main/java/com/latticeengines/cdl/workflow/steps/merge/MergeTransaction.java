@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
@@ -77,6 +79,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     @Override
     protected void onPostTransformationCompleted() {
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
+        Table table = metadataProxy.getTable(
+                customerSpace.toString(), diffTableName);
+        isDataQuotaLimit(table);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
@@ -391,6 +396,21 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         detail.setMinTxnDate(newEarliest);
         log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
+    }
+
+    private void isDataQuotaLimit(Table table) {
+        List<Extract> extracts = table.getExtracts();
+        if (!CollectionUtils.isEmpty(extracts)) {
+            Long dataCount = 0L;
+            for (Extract extract : extracts) {
+                dataCount = dataCount + extract.getProcessedRecords();
+                log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
+                if (configuration.getDataQuotaLimit() <= dataCount)
+                    throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+                            ", The data you uploaded has exceeded the limit.");
+            }
+            log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+        }
     }
 
 }
