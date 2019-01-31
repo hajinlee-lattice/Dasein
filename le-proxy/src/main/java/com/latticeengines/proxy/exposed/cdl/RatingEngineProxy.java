@@ -348,7 +348,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public String modelRatingEngine(String customerSpace, String ratingEngineId,
-            String ratingModelId, Map<String, List<ColumnMetadata>> attributes, String userEmail) {
+            String ratingModelId, List<ColumnMetadata> attributes, String userEmail) {
         String url = constructUrl(URL_PREFIX
                 + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model?useremail={userEmail}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, userEmail);

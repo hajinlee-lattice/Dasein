@@ -91,7 +91,7 @@ public interface RatingEngineService {
             DataCollection.Version version);
 
     String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel,
-            Map<String, List<ColumnMetadata>> userEditedAttributes, String userEmail);
+            List<ColumnMetadata> userEditedAttributes, String userEmail);
 
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 
