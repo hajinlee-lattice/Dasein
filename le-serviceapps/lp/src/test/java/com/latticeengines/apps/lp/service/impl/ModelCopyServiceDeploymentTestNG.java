@@ -89,6 +89,16 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     @Test(groups = "deployment", dataProvider = "dataProvider", timeOut = 2700000)
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
+
+        // FIXME following logs are for debugging test failure, remove these later.
+        String s3Path = yarnConfiguration.get("fs.s3.buffer.dir");
+        log.info("fs.s3.buffer.dir={}", s3Path);
+        if (s3Path != null) {
+            File file = new File(s3Path);
+            log.info("PathExists = {}, TotalSpace = {}, FreeSpace = {}", file.exists(), file.getTotalSpace(),
+                    file.getFreeSpace());
+        }
+
         cleanup();
         setupHdfs();
         MultiTenantContext.setTenant(tenant1);
