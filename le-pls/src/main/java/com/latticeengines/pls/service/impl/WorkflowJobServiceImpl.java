@@ -453,10 +453,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @VisibleForTesting
     List<Job> expandActions(List<Action> actions) {
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Expand actions...actions=%s", actions));
+            log.debug(String.format("Expand actions=%s", JsonUtils.serialize(actions)));
         }
 
-        log.info(String.format("Expanding %d actions", actions.size()));
+        log.debug(String.format("Expanding %d actions", actions.size()));
 
         List<Job> jobList = new ArrayList<>();
         List<String> workflowJobPids = new ArrayList<>();
@@ -486,8 +486,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobList.add(job);
             }
         }
-        log.info("workflowJobPids:" + workflowJobPids.toString());
-        log.info("canceled_workflowJobPids:" + canceled_workflowJobPids.toString());
+        log.info("workflowJobPids: " + workflowJobPids.toString());
+        log.info("canceled_workflowJobPids: " + canceled_workflowJobPids.toString());
 
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
             List<Job> workflowJobs = workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
