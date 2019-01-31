@@ -144,7 +144,7 @@ public class TimeStampConvertUtils {
     // timezone.  If no timezone is provided, UTC is assumed.
     public static long convertToLong(String dateTime, String dateFormatString, String timeFormatString,
                                      String timezone) {
-        log.error(" Date is: " + dateTime + "  Date Format is: " + dateFormatString
+        log.debug(" Date is: " + dateTime + "  Date Format is: " + dateFormatString
                 + "  Time Format is: " + timeFormatString + "  Timezone: " + timezone);
 
         // Remove excessive whitespace from the date/time value.  First trim the beginning and end.
@@ -188,6 +188,8 @@ public class TimeStampConvertUtils {
                                 // When parsing date and time doesn't work, try just parsing out a date from the value
                                 // as a backup plan.
                                 try {
+                                    log.warn("Could not parse date/time from: " + dateTime
+                                                    + ".  Trying to parse only date");
                                     localDateTime = LocalDate.parse(dateTime,
                                             java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
                                 } catch (DateTimeParseException e2) {
@@ -218,6 +220,7 @@ public class TimeStampConvertUtils {
                             localDateTime = LocalDate.parse(dateTime,
                                     java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
                         } catch (DateTimeParseException e) {
+                            log.warn("Could not parse date from: " + dateTime + ".  Trying to strip time component");
                             // When parsing a date doesn't work, try cutting off extra characters from the date/time
                             // string which might represent a time.
                             String dateWithTimeStripped = dateTime.replaceFirst("(\\s+\\S+)", "");
