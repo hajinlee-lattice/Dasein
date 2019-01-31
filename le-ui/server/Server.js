@@ -21,7 +21,7 @@ const chalk = require("chalk");
 const cors = require("cors");
 const wsproxy = require("http-proxy-middleware");
 const DateUtil = require("./utilities/DateUtil");
-const session = require("express-session");
+// const session = require("express-session");
 const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
 
@@ -119,19 +119,19 @@ class Server {
 
         // default cookie behavior - httpOnly for googles approval
         // note: i dont think we have any apps that use cookies :D
-        this.app.use(
-            session({
-                //name: 'sessionId',
-                secret: "LEs3Cur1ty",
-                resave: false,
-                saveUnitialized: false,
-                cookie: {
-                    httpOnly: true,
-                    secure: true,
-                    expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
-                }
-            })
-        );
+        // this.app.use(
+        //     session({
+        //         //name: 'sessionId',
+        //         secret: "LEs3Cur1ty",
+        //         resave: false,
+        //         saveUnitialized: false,
+        //         cookie: {
+        //             httpOnly: true,
+        //             secure: true,
+        //             expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+        //         }
+        //     })
+        // );
     }
 
     startLogging(log_path) {
