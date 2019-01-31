@@ -247,8 +247,7 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
 
     private void cleanupS3(String customSpace, List<TableRoleInCollection> roles,
                                  List<DataCollection.Version> versions) {
-        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         try {
             versions.forEach(version -> {
                 roles.forEach(role -> {

@@ -49,8 +49,8 @@ public class HdfsToS3PathBuilder {
     public HdfsToS3PathBuilder() {
     }
 
-    public HdfsToS3PathBuilder(String protocol) {
-        this.protocol = protocol;
+    public HdfsToS3PathBuilder(Boolean useEmr) {
+        this.protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
     }
 
     // Hdfs Atlas
@@ -403,6 +403,10 @@ public class HdfsToS3PathBuilder {
         } else {
             return s3Path;
         }
+    }
+
+    public String getProtocol() {
+        return protocol;
     }
 
     public void setProtocol(String protocol) {

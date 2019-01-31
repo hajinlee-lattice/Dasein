@@ -457,8 +457,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     private void cleanCustomerData(String tenantId) {
         try {
-            String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(protocol);
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
             CustomerSpace space = CustomerSpace.parse(tenantId);
             String podId = CamilleEnvironment.getPodId();
             String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());

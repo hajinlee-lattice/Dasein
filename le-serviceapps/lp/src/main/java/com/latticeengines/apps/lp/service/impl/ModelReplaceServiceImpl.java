@@ -44,6 +44,9 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Override
     public boolean replaceModel(ReplaceModelRequest replaceModelRequest) {
         String sourceTenantId = CustomerSpace.parse(replaceModelRequest.getSourceTenant()).toString();
@@ -89,7 +92,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
         String sourceEventTableName = sourceModelSummary.getEventTableName();
         String targetEventTableName = targetModelSummary.getEventTableName();
-        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
         sourceCustomerRoot = builder.getS3PathWithGlob(yarnConfiguration, sourceCustomerRoot + "/", false, s3Bucket);
         sourceCustomerRoot = StringUtils.removeEnd(sourceCustomerRoot, "/");
         copyDataComposition(sourceCustomerRoot, targetCustomerRoot, sourceEventTableName, targetEventTableName);
@@ -118,7 +121,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
         if (existingOnHdfs) {
             targetModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, targetModelRoot);
         } else {
-            String s3TargetModelDirPath = new HdfsToS3PathBuilder().exploreS3FilePath(targetModelRoot, s3Bucket);
+            String s3TargetModelDirPath = new HdfsToS3PathBuilder(useEmr).exploreS3FilePath(targetModelRoot, s3Bucket);
             targetModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, s3TargetModelDirPath);
         }
         String targetModelDirPath = new Path(targetModelSummaryPath).getParent().getParent().toString();
@@ -193,7 +196,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
         String targetStandardDataCompositonPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
                 targetCustomerRoot + "/data/", targetEventTableName);
         replaceDataComposition(sourceStandardDataCompositionPath, targetStandardDataCompositonPath);
-        String s3TargetStandardDataCompositonPath = new HdfsToS3PathBuilder()
+        String s3TargetStandardDataCompositonPath = new HdfsToS3PathBuilder(useEmr)
                 .exploreS3FilePath(targetStandardDataCompositonPath, s3Bucket);
         replaceDataComposition(sourceStandardDataCompositionPath, s3TargetStandardDataCompositonPath);
     }

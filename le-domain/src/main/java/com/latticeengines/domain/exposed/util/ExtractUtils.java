@@ -20,11 +20,11 @@ public class ExtractUtils {
      * tied to a table.
      */
     public static String getSingleExtractPath(Configuration yarnConfiguration, Table table) {
-        return getSingleExtractPath(yarnConfiguration, table, false, null);
+        return getSingleExtractPath(yarnConfiguration, table, false, null, false);
     }
 
     public static String getSingleExtractPath(Configuration yarnConfiguration, Table table, boolean withScheme,
-            String s3Bucket) {
+            String s3Bucket, Boolean useEmr) {
         if (table.getExtracts().size() == 0) {
             throw new RuntimeException(String.format("Expected at least one extract in table %s", table.getName()));
         }
@@ -46,7 +46,8 @@ public class ExtractUtils {
                         srcPath += "*.avro";
                     }
                 }
-                String s3Dir = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, srcPath, true, s3Bucket);
+                String s3Dir = new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration, srcPath, true,
+                        s3Bucket);
                 matches = HdfsUtils.getFilesByGlobWithScheme(yarnConfiguration, s3Dir, true);
             }
         } catch (IOException e) {

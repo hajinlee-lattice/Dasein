@@ -98,6 +98,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Table entity) {
@@ -264,7 +267,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     // need to rename to avoid copy failure due to name conflict
                     String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
                     if (singleFile) {
-                        srcPath = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, srcPath, false,
+                        srcPath = new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration, srcPath, false,
                                 s3Bucket);
                         log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
@@ -280,7 +283,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                                     new org.apache.hadoop.fs.Path(cloneTable, rename).toString()));
                         }
                     } else {
-                        srcPath = new HdfsToS3PathBuilder().getS3Dir(yarnConfiguration, srcPath, s3Bucket);
+                        srcPath = new HdfsToS3PathBuilder(useEmr).getS3Dir(yarnConfiguration, srcPath, s3Bucket);
                         log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyGlobToDirWithScheme(yarnConfiguration, srcPath, cloneTable, renameSuffix);
                     }
@@ -337,13 +340,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace,
                     existing.getNamespace());
             
-            String sourcePath = ExtractUtils.getSingleExtractPath(yarnConfiguration, copy, true, s3Bucket);
+            String sourcePath = ExtractUtils.getSingleExtractPath(yarnConfiguration, copy, true, s3Bucket, useEmr);
             String destPath = tablesPath + "/" + copy.getName();
             try {
                 log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
                 HdfsUtils.mkdir(yarnConfiguration, destPath);
                 HdfsUtils.copyFiles(yarnConfiguration, sourcePath, destPath);
-                String s3DestPath = new HdfsToS3PathBuilder().exploreS3FilePath(destPath, s3Bucket);
+                String s3DestPath = new HdfsToS3PathBuilder(useEmr).exploreS3FilePath(destPath, s3Bucket);
                 log.info(String.format("Copying table data from %s to %s", sourcePath, s3DestPath));
                 HdfsUtils.mkdir(yarnConfiguration, s3DestPath);
                 HdfsUtils.copyFiles(yarnConfiguration, sourcePath, s3DestPath);

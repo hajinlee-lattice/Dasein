@@ -96,7 +96,8 @@ public class ModelingHdfsUtils {
     }
 
     public static void copyModelingDataDirectory(String sourceCustomerRoot, String targetCustomerRoot,
-            String eventTableName, String cpEventTableName, Configuration yarnConfiguration, String s3Bucket)
+            String eventTableName, String cpEventTableName, Configuration yarnConfiguration, String s3Bucket,
+            Boolean useEmr)
             throws IOException {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
         String targetDataRoot = targetCustomerRoot + "/data/" + cpEventTableName;
@@ -106,7 +107,7 @@ public class ModelingHdfsUtils {
                     "Copy hdfs data: Copy modeling data directory - copy " + "files")) {
                 log.info(String.format("Copying modeling data from %s to %s", sourceDataRoot, targetDataRoot));
                 HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
-                String s3TargetDataRoot = new HdfsToS3PathBuilder().exploreS3FilePath(targetDataRoot, s3Bucket);
+                String s3TargetDataRoot = new HdfsToS3PathBuilder(useEmr).exploreS3FilePath(targetDataRoot, s3Bucket);
                 log.info(String.format("Copying modeling data from %s to %s", sourceDataRoot, s3TargetDataRoot));
                 HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, s3TargetDataRoot);
             }
@@ -132,7 +133,7 @@ public class ModelingHdfsUtils {
                 String targetDataCompositionPath = new Path(targetStandardDataCompositionPath).getParent().toString();
                 HdfsUtils.copyFiles(yarnConfiguration, sourceDataCompositionPath, targetDataCompositionPath);
 
-                String s3TargetDataCompositionPath = new HdfsToS3PathBuilder()
+                String s3TargetDataCompositionPath = new HdfsToS3PathBuilder(useEmr)
                         .exploreS3FilePath(targetDataCompositionPath, s3Bucket);
                 log.info(String.format("Copying modeling data from %s to %s", sourceStandardDataCompositionPath,
                         s3TargetDataCompositionPath));
@@ -177,9 +178,9 @@ public class ModelingHdfsUtils {
     }
 
     public static String getEventTableNameFromHdfs(Configuration yarnConfiguration, String customerModelBaseDir,
-            String modelId, String s3Bucket) throws IOException {
+            String modelId, String s3Bucket, Boolean useEmr) throws IOException {
         final String uuid = UuidUtils.extractUuid(modelId);
-        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
         customerModelBaseDir = builder.exploreS3FilePath(customerModelBaseDir, s3Bucket);
         List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelBaseDir, file -> {
             return file.getPath().getName().equals(uuid);
@@ -191,7 +192,7 @@ public class ModelingHdfsUtils {
     }
 
     public static Map<String, Artifact> copyArtifactsInModule(Configuration yarnConfiguration, List<Artifact> artifacts,
-            CustomerSpace customerSpace, String newModuleName, String s3Bucket)
+            CustomerSpace customerSpace, String newModuleName, String s3Bucket, Boolean useEmr)
             throws IllegalArgumentException, IOException {
         Map<String, Artifact> newArtifactsMap = new HashMap<>();
 
@@ -202,7 +203,7 @@ public class ModelingHdfsUtils {
                     customerSpace, newModuleName, artifactType);
             String hdfsPath = String.format("%s/%s.%s", path.toString(), artifact.getName(),
                     artifactType.getFileType());
-            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
             String sourcePath = builder.getS3PathWithGlob(yarnConfiguration, artifact.getPath(), false, s3Bucket);
             log.info(String.format("Copying artifacts data from %s to %s", sourcePath, hdfsPath));
             HdfsUtils.copyFiles(yarnConfiguration, sourcePath, hdfsPath);
