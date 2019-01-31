@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -146,6 +147,11 @@ public class TimeStampConvertUtils {
         log.debug(" Date is: " + dateTime + "  Date Format is: " + dateFormatString
                 + "  Time Format is: " + timeFormatString + "  Timezone: " + timezone);
 
+        // Remove excessive whitespace from the date/time value.  First trim the beginning and end.
+        dateTime = dateTime.trim();
+        // Now turn any whitespace larger than one space into exactly one space.
+        dateTime = dateTime.replaceFirst("(\\s\\s+)", " ");
+
         try {
             // Check if a date format string is provided which allows the usage of LocalDateTime from Java 8.
             if (StringUtils.isNotEmpty(dateFormatString)) {
@@ -174,14 +180,31 @@ public class TimeStampConvertUtils {
                                     .replaceAll("([pP])([mM])", "PM");
                             // Parse the provided date/time value using a DateTimeFormatter with combined date and time
                             // components.
-                            localDateTime = LocalDateTime.parse(dateTime,
-                                    java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr + " "
-                                            + javaTimeFormatStr));
+                            try {
+                                localDateTime = LocalDateTime.parse(dateTime,
+                                        java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr + " "
+                                                + javaTimeFormatStr));
+                            } catch (DateTimeParseException e) {
+                                // When parsing date and time doesn't work, try just parsing out a date from the value
+                                // as a backup plan.
+                                try {
+                                    log.warn("Could not parse date/time from: " + dateTime
+                                                    + ".  Trying to parse only date");
+                                    localDateTime = LocalDate.parse(dateTime,
+                                            java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
+                                } catch (DateTimeParseException e2) {
+                                    throw new IllegalArgumentException(
+                                            "Date/time value (" + dateTime + ") could not be parsed by format string: " +
+                                                    dateFormatString + " " + timeFormatString + "\nException was: " +
+                                                    e.toString());
+                                }
+                            }
                         } else {
                             // If the time format string is not supported, log an error since the pattern string is not
                             // valid.
-                            log.error("User provided time format could not be processed: " + timeFormatString);
-                            // TODO(jwinter): Consider throwing an error for unrecognized time format pattern from user.
+                            log.error("User provided time format is not supported: " + timeFormatString);
+                            throw new IllegalArgumentException("User provided time format is not supported: "
+                                    + timeFormatString);
                         }
                     } else {
                         // If a time format string was not provided, log that and use only the date format.
@@ -193,10 +216,25 @@ public class TimeStampConvertUtils {
                     if (!foundValidTimeFormat) {
                         log.debug(" Java date only format string is: " + javaDateFormatStr);
                         // Parse the date value provided using DateTimeFormatter with only a date component.
-                        localDateTime = LocalDate.parse(dateTime,
-                                java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
+                        try {
+                            localDateTime = LocalDate.parse(dateTime,
+                                    java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
+                        } catch (DateTimeParseException e) {
+                            log.warn("Could not parse date from: " + dateTime + ".  Trying to strip time component");
+                            // When parsing a date doesn't work, try cutting off extra characters from the date/time
+                            // string which might represent a time.
+                            String dateWithTimeStripped = dateTime.replaceFirst("(\\s+\\S+)", "");
+                            log.error("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                            try {
+                                localDateTime = LocalDate.parse(dateWithTimeStripped,
+                                        java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
+                            } catch (DateTimeParseException e2) {
+                                throw new IllegalArgumentException("Date value (" + dateTime +
+                                        ") could not be parsed by " + "format string: " + dateFormatString +
+                                        "\nException was: " + e.toString());
+                            }
+                        }
                     }
-
 
                     // Process timezone.
                     ZoneId zoneId = ZoneId.of("UTC");
@@ -210,11 +248,9 @@ public class TimeStampConvertUtils {
                     return timestamp;
                 } else {
                     // If the date string is not supported, throw an error since the pattern string is not valid.
-                    log.error("User provided data format could not be processed: " + dateFormatString);
-                    log.error("Defaulting to using original convertToLong(date)");
-                    // TODO(jwinter): Consider throwing an error for unrecognized date format pattern from user.
-                    return convertToLong(dateTime);
-
+                    log.error("User provided data format is not supported: " + dateFormatString);
+                    throw new IllegalArgumentException("User provided data format is not supported: " +
+                            dateFormatString);
                 }
             } else {
                 log.warn("User provided date format string is empty, using original convertToLong(date)");
@@ -222,7 +258,6 @@ public class TimeStampConvertUtils {
             }
         } catch (Exception e) {
             /* Possible Errors
-            java.time.format.DateTimeParseException:
             java.lang.IllegalArgumentException
             java.lang.IllegalStateException
              */
@@ -232,9 +267,7 @@ public class TimeStampConvertUtils {
             //StringWriter sw = new StringWriter();
             //e.printStackTrace(new PrintWriter(sw));
             //log.error("Stack Trace is:\n" + sw.toString());
-
-            log.error("Using original convertToLong(date)");
-            return convertToLong(dateTime);
+            throw e;
         }
     }
 
