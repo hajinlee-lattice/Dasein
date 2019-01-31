@@ -320,17 +320,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         return createTableRoleMap(tableRoleNames,tableMap);
     }
-    public Map<TableRoleInCollection, Map<Version, List<Table>>> createTableRoleMap(Map<TableRoleInCollection, Map<Version, List<String>>> tableRoleNames, Map<String,Table> tableMap){
+
+    private Map<TableRoleInCollection, Map<Version, List<Table>>> createTableRoleMap(
+            Map<TableRoleInCollection, Map<Version, List<String>>> tableRoleNames, Map<String,Table> tableMap) {
         Map<TableRoleInCollection, Map<Version, List<Table>>> tableRoleMap = new HashMap<>();
-        for (Map.Entry<TableRoleInCollection, Map<Version, List<String>>> entry:tableRoleNames.entrySet()){
+        for (Map.Entry<TableRoleInCollection, Map<Version, List<String>>> entry:tableRoleNames.entrySet()) {
             TableRoleInCollection tableRole = entry.getKey();
             if (!tableRoleMap.containsKey(tableRole)){
                 tableRoleMap.put(tableRole,new HashMap<>());
             }
             Map<Version,List<String>> verTNameMap = tableRoleNames.get(tableRole);
-            for (DataCollection.Version version:verTNameMap.keySet()){
+            for (DataCollection.Version version:verTNameMap.keySet()) {
                 tableRoleMap.get(tableRole).put(version,new ArrayList<>());
-                for (String tableName:verTNameMap.get(version)){
+                for (String tableName:verTNameMap.get(version)) {
                     tableRoleMap.get(tableRole).get(version).add(tableMap.get(tableName));
                 }
             }
@@ -623,12 +625,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info(String.format("Download data collection artifact. Version=%s, ExportId=%s",
                 activeVersion, exportId));
-        List<DataCollectionArtifact> artifacts =
-                getArtifacts(customerSpace, DataCollectionArtifact.Status.READY, activeVersion)
-                .stream()
-                .filter(artifact -> {
-                    return artifact.getUrl().contains(exportId);
-                }).collect(Collectors.toList());
+        List<DataCollectionArtifact> artifacts = getArtifacts(customerSpace, DataCollectionArtifact.Status.READY,
+                activeVersion).stream()
+                .filter(artifact -> artifact.getUrl().contains(exportId))
+                .collect(Collectors.toList());
         if (artifacts.isEmpty()) {
             log.info(String.format(
                     "No artifact available for downloading. Tenant=%s, ExportId=%s.", customerSpace, exportId));
@@ -637,6 +637,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         DataCollectionArtifact artifact = artifacts.get(0);
         String artifactKey = getArtifactKey(customerSpace, exportId, artifact.getName());
+        log.info("S3 artifactKey=" + artifactKey);
         InputStream inputStream = s3Service.readObjectAsStream(s3Bucket, artifactKey);
         try {
             if (inputStream != null) {
@@ -652,8 +653,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     private String getArtifactKey(String customerSpace, String exportId, String artifactName) {
-        return String.format("%s/atlas/Data/Files/Exports/%s/%s.csv", customerSpace, exportId, artifactName)
-                .replace("//", "/");
+        return String.format("%s/atlas/Data/Files/Exports/%s/%s/%s.csv",
+                customerSpace, artifactName, exportId, artifactName).replace("//", "/");
     }
 
     private TableRoleInCollection getTableRoleFromStore(BusinessEntity entity, BusinessEntity.DataStore dataStore) {
