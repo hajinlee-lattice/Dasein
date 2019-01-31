@@ -1,4 +1,8 @@
 @import 'common/widgets/colors.scss';
+connector-list-component{
+    display: flex;
+    flex: 1;
+}
 .le-connectors{
     margin-top: 1px;
     padding: 1em 0;

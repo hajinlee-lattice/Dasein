@@ -1,13 +1,21 @@
 @import 'common/widgets/colors.scss';
 
+profiles-container-component{
+    display: flex;
+    height: 100%;
+}
 .main-panel{
     background-color: $pearl-white;
     display: flex;
+    flex:1;
     justify-content: space-around;
 }
 .connector-profile-container{
-    // background-color: $pearl-white;
     height: 100%;
     width: 100%;
     max-width: 1300px;
+    .loading-container{
+        display: flex;
+        justify-content: center;
+    }
 }

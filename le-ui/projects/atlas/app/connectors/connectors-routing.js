@@ -6,10 +6,11 @@ import {
 } from "common/react-vendor";
 import {profiles } from "./states";
 
+const routerName = 'connectorsReactRouter';
 // window['reactrouter'] =var router;
 const ConnectorsRoutes = {
     getRouter() {
-        let router = window['connectorsReactRouter'];
+        let router = window[routerName];
         if (!router || router == null) {
             router = new UIRouterReact();
             console.log(router);
@@ -38,13 +39,13 @@ const ConnectorsRoutes = {
                 // console.log("Nav Error", err);
                 // Do something if transition errors
             });
-            window['connectorsReactRouter'] = router
+            window[routerName] = router
         }
     
         return router;
     },
     clearRouter() {
-        window['connectorsReactRouter'] = null;
+        window[routerName] = null;
     }
 };
 export default ConnectorsRoutes;
