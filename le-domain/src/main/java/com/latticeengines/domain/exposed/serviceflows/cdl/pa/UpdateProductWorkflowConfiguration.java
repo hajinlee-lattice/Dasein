@@ -48,6 +48,11 @@ public class UpdateProductWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder dataQuotaLimit(Long dataQuotaLimit) {
+            processProductStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
+            return this;
+        }
+
         public UpdateProductWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateProductWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

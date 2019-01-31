@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -73,6 +74,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
+
+    @Value("${cdl.account.dataquota.limit}")
+    private Long accountDataQuotaLimit;
+
+    @Value("${cdl.contact.dataquota.limit}")
+    private Long contactDataQuotaLimit;
+
+    @Value("${cdl.product.dataquota.limit}")
+    private Long productDataQuotaLimit;
+
+    @Value("${cdl.transaction.dataquota.limit}")
+    private Long transactionDataQuotaLimit;
 
     private final DataCollectionProxy dataCollectionProxy;
 
@@ -326,7 +339,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
                 .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
-
+        getDataQuotaLimit(CustomerSpace.parse(customerSpace), CDLComponent.componentName);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -353,6 +366,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .dataQuotaLimit(accountDataQuotaLimit, BusinessEntity.Account)//put dataQuotaLimit into
+                // stepConfiguration
+                .dataQuotaLimit(contactDataQuotaLimit, BusinessEntity.Contact)
+                .dataQuotaLimit(productDataQuotaLimit, BusinessEntity.Product)
+                .dataQuotaLimit(transactionDataQuotaLimit, BusinessEntity.Transaction)
                 .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
                 .build();
     }
@@ -402,6 +420,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    private void getDataQuotaLimit(CustomerSpace customerSpace, String componentName) {
+        Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
+                componentName, BusinessEntity.Account);
+        accountDataQuotaLimit = accountDataLimit!=null? accountDataLimit : accountDataQuotaLimit;
+        Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
+        contactDataQuotaLimit = contactDataLimit!=null? contactDataLimit : contactDataQuotaLimit;
+        Long productDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Product);
+        productDataQuotaLimit = productDataLimit!=null? productDataLimit : productDataQuotaLimit;
+        Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                BusinessEntity.Transaction);
+        transactionDataQuotaLimit = transactionDataLimit!=null? transactionDataLimit : transactionDataQuotaLimit;
     }
 
 }

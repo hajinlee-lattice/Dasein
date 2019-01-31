@@ -26,6 +26,8 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     public abstract BusinessEntity getMainEntity();
 
+    public abstract Long getDataQuotaLimit();
+
     public Boolean getRebuild() {
         return rebuild;
     }
