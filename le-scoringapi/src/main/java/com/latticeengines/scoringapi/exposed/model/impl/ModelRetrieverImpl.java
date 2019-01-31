@@ -141,6 +141,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     private String localModelJsonCacheDirIdentifier;
 
     @PostConstruct
@@ -533,7 +536,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 throw new LedpException(LedpCode.LEDP_31000, new String[] { globPath });
             }
             String modelJsonPath = files.get(0);
-            modelJsonPath = new HdfsToS3PathBuilder().toHdfsPath(modelJsonPath);
+            modelJsonPath = new HdfsToS3PathBuilder(useEmr).toHdfsPath(modelJsonPath);
             modelJsonPath = getS3PathIfNeeded(modelJsonPath, false);
             is = fs.open(new Path(modelJsonPath));
             ObjectMapper om = new ObjectMapper();
@@ -550,7 +553,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String getS3PathIfNeeded(String path, boolean isGlob) {
-        return new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, path, isGlob, s3Bucket);
+        return new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration, path, isGlob, s3Bucket);
     }
 
     private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, //

@@ -63,6 +63,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreProxy
@@ -95,7 +98,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
         }
 
-        pivotAvroDirPath = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration, pivotAvroDirPath, false,
+        pivotAvroDirPath = new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration, pivotAvroDirPath, false,
                 s3Bucket);
         List<String> filePaths = HdfsUtils.getFilesForDir(yarnConfiguration, pivotAvroDirPath, ".*.avro");
         String pivotAvroFilePath = filePaths.get(0);
