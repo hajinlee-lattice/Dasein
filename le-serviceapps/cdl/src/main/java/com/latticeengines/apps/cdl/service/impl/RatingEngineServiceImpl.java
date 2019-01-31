@@ -722,20 +722,24 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, Map<String, List<ColumnMetadata>> userRefinedColumnMetadata,
-            String userEmail) {
+            AIModel aiModel, List<ColumnMetadata> userRefinedColumnMetadata, String userEmail) {
         validateForModeling(customerSpace, ratingEngine, aiModel);
         ApplicationId jobId = aiModel.getModelingYarnJobId();
         if (jobId != null) {
             return jobId.toString();
         }
+
+        if (CollectionUtils.isEmpty(userRefinedColumnMetadata)
+                && aiModel.getDerivedFromRatingModel() != null) {
+            userRefinedColumnMetadata = getIterationMetadata(customerSpace, ratingEngine.getId(),
+                    aiModel.getDerivedFromRatingModel(), null);
+        }
+
         Map<String, ColumnMetadata> userRefinedAttributes = null;
 
-        if (MapUtils.isNotEmpty(userRefinedColumnMetadata)) {
-            userRefinedAttributes = Flux.fromIterable(userRefinedColumnMetadata.values()) //
-                    .flatMap(Flux::fromIterable) //
-                    .collect(HashMap<String, ColumnMetadata>::new,
-                            (map, cm) -> map.put(cm.getAttrName(), cm)) //
+        if (CollectionUtils.isNotEmpty(userRefinedColumnMetadata)) {
+            userRefinedAttributes = Flux.fromIterable(userRefinedColumnMetadata) //
+                    .collectMap(ColumnMetadata::getAttrName) //
                     .block();
         }
 

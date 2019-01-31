@@ -372,8 +372,8 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/topn", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get TopNTree for a given AIModel's iteration and data stores")
-    public TopNTree getIterationMetadataTopN(@PathVariable String customerSpace,
-            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+    public TopNTree getIterationMetadataTopN(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId, //
             @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingEngineProxy.getIterationMetadataTopN(tenant.getId(), ratingEngineId,
@@ -517,7 +517,7 @@ public class RatingEngineResource {
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String ratingEngineModel(@PathVariable String ratingEngineId,
             @PathVariable String ratingModelId,
-            @RequestBody(required = false) Map<String, List<ColumnMetadata>> attributes) {
+            @RequestBody(required = false) List<ColumnMetadata> attributes) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId,

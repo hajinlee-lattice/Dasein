@@ -530,7 +530,7 @@ public class RatingEngineResource {
     public String modelRatingEngine(@PathVariable String customerSpace, //
             @PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
-            @RequestBody(required = false) Map<String, List<ColumnMetadata>> attributes, //
+            @RequestBody(required = false) List<ColumnMetadata> attributes, //
             @RequestParam(value = "useremail", required = true) String userEmail) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
