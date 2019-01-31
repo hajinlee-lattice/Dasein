@@ -22,6 +22,9 @@ public class EntityPublishRequest {
     @JsonProperty("DestEnv")
     private EntityMatchEnvironment destEnv;
 
+    @JsonProperty("DestTTLEnabled")
+    private Boolean destTTLEnabled;
+
     public String getEntity() {
         return entity;
     }
@@ -54,4 +57,11 @@ public class EntityPublishRequest {
         this.destEnv = destEnv;
     }
 
+    public Boolean getDestTTLEnabled() {
+        return destTTLEnabled;
+    }
+
+    public void setDestTTLEnabled(Boolean destTTLEnabled) {
+        this.destTTLEnabled = destTTLEnabled;
+    }
 }
