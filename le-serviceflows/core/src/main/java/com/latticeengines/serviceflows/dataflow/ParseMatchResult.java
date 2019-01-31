@@ -52,7 +52,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         List<String> matchFields = resultNode.getFieldNames();
 
         String joinKey = null;
-        if (parameters.joinInternalId) {
+        if (!parameters.joinInternalId) {
             if (StringUtils.isNotBlank(parameters.matchGroupId)) {
                 joinKey = parameters.matchGroupId;
             } else if (matchFields.contains(InterfaceName.InternalId.name())) {
