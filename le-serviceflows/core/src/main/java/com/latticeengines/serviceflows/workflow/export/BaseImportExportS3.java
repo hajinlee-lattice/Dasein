@@ -93,11 +93,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
 
         customer = configuration.getCustomerSpace().toString();
         tenantId = configuration.getCustomerSpace().getTenantId();
-        pathBuilder = new HdfsToS3PathBuilder();
+        pathBuilder = new HdfsToS3PathBuilder(useEmr);
         dropBoxSummary = dropBoxProxy.getDropBox(configuration.getCustomerSpace().toString());
-        if (Boolean.TRUE.equals(useEmr)) {
-            pathBuilder.setProtocol("s3a");
-        }
     }
 
     @Override

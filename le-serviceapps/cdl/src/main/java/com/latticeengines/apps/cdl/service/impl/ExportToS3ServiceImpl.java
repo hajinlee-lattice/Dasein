@@ -92,10 +92,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
             queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
         }
         queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
-        pathBuilder = new HdfsToS3PathBuilder();
-        if (Boolean.TRUE.equals(useEmr)) {
-            pathBuilder.setProtocol("s3a");
-        }
+        pathBuilder = new HdfsToS3PathBuilder(useEmr);
     }
 
     @Override

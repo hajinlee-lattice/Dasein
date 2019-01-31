@@ -104,8 +104,7 @@ public class FeatureImportanceUtil {
     }
 
     private String getS3Path(String customerSpace, String featureImportanceFilePath) throws IOException {
-        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         String s3Path = pathBuilder.exploreS3FilePath(featureImportanceFilePath, s3Bucket);
         if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {

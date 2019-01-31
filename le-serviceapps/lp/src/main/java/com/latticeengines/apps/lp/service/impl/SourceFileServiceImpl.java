@@ -115,12 +115,12 @@ public class SourceFileServiceImpl implements SourceFileService {
                 .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(targetTenant.getId())).toString()
                 + "/" + outputFileName;
         try {
-            String srcFile = new HdfsToS3PathBuilder().getS3PathWithGlob(yarnConfiguration,
+            String srcFile = new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration,
                     originalSourceFile.getPath(), false, s3Bucket);
             if (!HdfsUtils.fileExists(yarnConfiguration, outputPath)) {
                 log.info(String.format("Copying source file from %s to %s", srcFile, outputPath));
                 HdfsUtils.copyFiles(yarnConfiguration, srcFile, outputPath);
-                String s3OutputPath = new HdfsToS3PathBuilder().exploreS3FilePath(outputPath, s3Bucket);
+                String s3OutputPath = new HdfsToS3PathBuilder(useEmr).exploreS3FilePath(outputPath, s3Bucket);
                 log.info(String.format("Copying source file from %s to %s", srcFile, s3OutputPath));
                 HdfsUtils.copyFiles(yarnConfiguration, srcFile, s3OutputPath);
             }
