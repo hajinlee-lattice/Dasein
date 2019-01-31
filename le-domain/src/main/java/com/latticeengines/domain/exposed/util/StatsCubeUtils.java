@@ -483,10 +483,12 @@ public class StatsCubeUtils {
     }
 
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
-        // Hide Date Attributes not in category Account Attributes (aka "My Attributes")
-        // and all system attributes.
-        return ((isDateAttribute(cm) && !Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()))
-                || isSystemAttribute(entity, cm));
+        // Hide Date Attributes not in category Account Attributes (aka "My Attributes") or Contact Attributes.
+        // Also hide all system attributes.
+        return (isDateAttribute(cm) &&
+                !(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
+                        || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory())))
+                || isSystemAttribute(entity, cm);
     }
 
     public static boolean isDateAttribute(ColumnMetadata cm) {
