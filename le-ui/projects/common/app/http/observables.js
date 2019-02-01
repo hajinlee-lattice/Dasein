@@ -14,4 +14,8 @@ export default class Observables {
             delete this.observables[name];
         }
     }
+
+    getObservables(){
+        return this.observables;
+    }
 }
