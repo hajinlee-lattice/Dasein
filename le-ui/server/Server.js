@@ -430,6 +430,11 @@ class Server {
                 API_PATH,
                 "\n\t" + API_URL + PATH
             );
+            console.log('API PATH ',API_PATH);
+            // this.app.post('/tray/users', (req, res) => {
+
+            // })
+            
             this.app.use(API_PATH, (req, res) => {
                 try {
                     let authorization = (req.headers && req.headers.UserAccessToken) ?

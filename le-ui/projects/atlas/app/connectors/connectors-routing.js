@@ -4,7 +4,7 @@ import {
     hashLocationPlugin,
     pushStateLocationPlugin
 } from "common/react-vendor";
-import {profiles } from "./states";
+import {profiles, profilesConnector } from "./states";
 
 const routerName = 'connectorsReactRouter';
 // window['reactrouter'] =var router;
@@ -19,7 +19,7 @@ const ConnectorsRoutes = {
             router.plugin(hashLocationPlugin);
             // router.plugin(pushStateLocationPlugin);
             // Register each state
-            const states = [profiles];
+            const states = [profiles, profilesConnector];
             states.forEach(state => router.stateRegistry.register(state));
     
             // Set initial and fallback states

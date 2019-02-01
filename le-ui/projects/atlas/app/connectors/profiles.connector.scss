@@ -18,4 +18,15 @@ profiles-container-component{
         display: flex;
         justify-content: center;
     }
+
+    .profile-tile{
+        margin: 20px 20px;
+        border: 1px solid rgb(227, 225, 225);
+        width: 260px;
+        min-width: 200px;
+        max-width: 350px;
+        min-height: 350px;
+        max-height: 350px;
+
+    }
 }

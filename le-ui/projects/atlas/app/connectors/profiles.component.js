@@ -3,15 +3,20 @@ import ConnectorsRoutes from "./connectors-routing";
 
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
-import ConnectorsService, {trayAPI} from './connectors.service';
-import ExternalIntegrationService from "./externalintegration.service"
+import LeTile from 'common/widgets/container/tile/le-tile';
+import LeTileHeader from 'common/widgets/container/tile/le-tile-header';
+import LeTileBody from 'common/widgets/container/tile/le-tile-body';
+import LeMenu from 'common/widgets/menu/le-menu';
+import LeHPanel from 'common/widgets/container/le-h-panel';
+import ConnectorsService, { trayAPI, User } from './connectors.service';
 export default class ProfilesComponent extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             nameConnector: '',
-            userValidate: true
+            loading: false,
+            connectors: []
         }
 
     }
@@ -24,56 +29,76 @@ export default class ProfilesComponent extends Component {
         );
 
     }
-    getProfileUI(){
-        return (<div>{this.state.nameConnector}</div>);
+
+    getProfileUI(profileObj) {
+        console.log('THE OBJ', profileObj);
+        return (
+            <LeTile classNames="profile-tile">
+                <LeTileHeader>
+                    <span className="le-tile-title">{profileObj.orgName}</span>
+                    <LeMenu classNames="personalMenu" image="fa fa-ellipsis-v" name="main">
+
+                    </LeMenu>
+                </LeTileHeader>
+                <LeTileBody>
+                    <p>The description here</p>
+                    <span>The body</span>
+                </LeTileBody>
+            </LeTile>
+        );
     }
+    getProfilesUI() {
+        console.log('CREATING ', this.state.connectors);
+        if (this.state.connectors && this.state.connectors.length > 0) {
+            let systems = Object.keys(this.state.connectors).map(
+                (obj, index) => {
+
+                    return (
+                        <div key={index}>{this.getProfileUI(this.state.connectors[obj])}</div>
+                    );
+                }
+            );
+            return systems;
+        } else {
+            return null;
+        }
+    }
+    // getProfilesUI(){
+    //     return (<div>
+    //         {this.getProfileUI()}
+    //     </div>);
+    // }
     getProfiles() {
-        if (this.state.userValidate === true && this.state.nameConnector != '' || (this.state.userValidate === false && this.state.nameConnector == '')) {
-            return this.getProfileUI();
-        } 
-        if(this.state.userValidate === false && this.state.nameConnector != '') {
-            this.validateUser();
+        if (this.state.loading === false) {
+            return this.getProfilesUI();
+        }
+        if (this.state.loading === true) {
+            // this.validateUser();
             return this.getLoading();
         }
     }
 
     componentDidMount() {
+        console.log('PROFILE TRY');
         this.router = ConnectorsRoutes.getRouter();
-        this.externalIntegrationService = new ExternalIntegrationService();
-        this.setState({ nameConnector: this.router.stateService.params.nameConnector, userValidate:false });
-    }
-
-    validateUser(){
-        let userName = 'Lattice-Jaya-POC-4';//'k9adsbgl';
-        let observer = new Observer(
-            response => {
-                httpService.printObservables();
-                console.log('HEY ', response);
-                if(response.data.users.edges.length > 0){
-                    this.setState({userValidate: true});
-                    httpService.unsubscribeObservable(observer);
-                    httpService.printObservables();
-                }else{
-                    this.createUser(userName, observer);
-                }
-            },
-            error => {
-                console.error('ERROR ', error);
-                this.setState({userValidate: true});
-            }
+        // this.setState({ nameConnector: this.router.stateService.params.nameConnector, loading: true });
+        // httpService.get()
+        httpService.get(
+            "/pls/lookup-id-mapping",
+            new Observer(response => {
+                let connectors = response.data.CRM;
+                connectors = connectors.concat(response.data.MAP);
+                this.setState({ nameConnector: this.router.stateService.params.nameConnector, loading: false, connectors: connectors });
+                console.log("BACK HERE ", response);
+            })
         );
-        let query = ConnectorsService.getUserQuery(userName);
-        // httpService.post(trayAPI, query, observer);
-        httpService.postGraphQl(trayAPI, query, observer);
-    }
-    createUser(userName, observer){
-
-
     }
 
     render() {
         return (
-            <div>{this.getProfiles()}</div>
+            <LeHPanel hstretch={"true"} wrap>
+                {this.getProfiles()}
+            </LeHPanel>
         );
     }
 }

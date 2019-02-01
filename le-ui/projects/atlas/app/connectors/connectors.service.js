@@ -28,6 +28,32 @@ const ConnectorsService = {
         return {
             query: q
         }
+    },
+    getUserInfo(edges){
+        if(edges && edges.length > 0){
+            return new User(edges[0].node.name, edges[0].node.id, edges[0].node.externalUserId);
+        }else{
+            return new User();
+        }
+
     }
 };
 export default ConnectorsService;
+
+export class User{
+    constructor(name='', id='', externalId=''){
+        this.name = name,
+        this.id = id;
+        this.externalId = externalId;
+    }
+    getName(){
+        return this.name;
+    }
+    getId() {
+        return this.id;
+    }
+    getExternalId() {
+        return this.externalId;
+    }
+    
+}
