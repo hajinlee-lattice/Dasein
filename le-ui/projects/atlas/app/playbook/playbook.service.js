@@ -306,7 +306,8 @@ angular.module('lp.playbook')
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
-                launchUnscored: PlaybookWizardStore.getLaunchUnscored()
+                launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
+                excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems()
             },
             saveOnly = opts.saveOnly || false,
             lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),

@@ -72,8 +72,8 @@
                         <label ng-if="$ctrl.nullCount != $ctrl.totalCount">
                             <input 
                                 type="checkbox" 
-                                ng-model="excludeItemsWithoutSalesforceId"
-                                ng-change="$ctrl.setExcludeItems(excludeItemsWithoutSalesforceId)">
+                                ng-model="$ctrl.excludeItemsWithoutSalesforceId"
+                                ng-change="$ctrl.setExcludeItems($ctrl.excludeItemsWithoutSalesforceId)">
                                 Remove all recommendations with blank Account ID
                         </label>
                     </div>

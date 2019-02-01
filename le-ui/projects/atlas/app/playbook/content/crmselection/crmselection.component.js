@@ -20,8 +20,13 @@ angular.module('lp.playbook.wizard.crmselection', [])
         vm.$onInit = function() {
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
-            $scope.excludeItemsWithoutSalesforceId = false;
-            vm.setExcludeItems(false);
+
+            if (PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch != null){
+                vm.excludeItemsWithoutSalesforceId = PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId;
+            } else {
+                vm.excludeItemsWithoutSalesforceId = false;
+            }
+            vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
 
             PlaybookWizardStore.setValidation('crmselection', false);
             if(vm.orgs){
@@ -49,7 +54,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     }
                 }
             }
-
         }
 
         vm.setExcludeItems = function(excludeItemsWithoutSalesforceId) {
@@ -107,8 +111,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.nullCount = null;
             vm.totalCount = null;
 
-            $scope.excludeItemsWithoutSalesforceId = false;
-            vm.setExcludeItems(false);
+            vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
             PlaybookWizardStore.setValidation('crmselection', false);
 
             if(vm.stored && vm.stored.crm_selection) {
