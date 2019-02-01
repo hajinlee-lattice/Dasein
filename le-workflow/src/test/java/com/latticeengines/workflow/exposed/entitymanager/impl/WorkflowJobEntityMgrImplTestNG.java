@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -82,6 +83,16 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         }
 
         workflowJobEntityMgr.deleteAll();
+    }
+
+    @Test(groups = "functional")
+    private void testEmptyInputIds() {
+        List<WorkflowJob> emptyJobs = Collections.emptyList();
+        // make sure the method can guard against empty/null input list
+        Assert.assertEquals(workflowJobEntityMgr.findByWorkflowIds(Collections.emptyList()), emptyJobs);
+        Assert.assertEquals(workflowJobEntityMgr.findByWorkflowIds(null), emptyJobs);
+        Assert.assertEquals(workflowJobEntityMgr.findByWorkflowPids(Collections.emptyList()), emptyJobs);
+        Assert.assertEquals(workflowJobEntityMgr.findByWorkflowPids(null), emptyJobs);
     }
 
     @Test(groups = "functional")
