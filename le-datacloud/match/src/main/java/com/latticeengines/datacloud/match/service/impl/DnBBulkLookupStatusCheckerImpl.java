@@ -178,8 +178,8 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
             }
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            log.error(String.format("LedpException in DnB batch status checking: %s %s",
-                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            log.error("LedpException in DnB batch status checking: {} {}", ledpEx.getCode().name(),
+                    ledpEx.getCode().getMessage());
             switch (ledpEx.getCode()) {
             case LEDP_25027:
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {

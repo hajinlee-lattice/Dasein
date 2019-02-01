@@ -63,6 +63,9 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             String token = dnBAuthenticationService.requestToken(keyType);
             String url = constructUrl(context, apiType);
             HttpEntity<String> entity = constructEntity(context, token);
+            if (keyType == DnBKeyType.BATCH) {
+                log.info("Submitting request {} with token {}", url, token);
+            }
             String response = sendRequest(url, entity, apiType);
             parseResponse(response, context, apiType);
         } catch (Exception ex) {
