@@ -1,29 +1,47 @@
 @import 'common/widgets/colors.scss';
-.le-connectors{
+connector-list-component{
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    // border: 1px solid red;
+    background-color: $pearl-white;
     margin-top: 1px;
-    padding: 1em 0;
-    &.white-background{
-        background-color: $pearl-white;
+    .connectors-title{
+        padding: 1ßem 0;
     }
-    & .connectors-list{
-        padding: 2em 0;
-    }
-    .le-connector{
-        max-width: 160px;
-        height: 100%;
-        margin: 0 2px;
-        // border: 1px solid green;
-        cursor: pointer;
-        
-        .le-card-body{
-            font-size: 12px;
-            & > p {
-                display: inline-flex;
-                justify-content: space-around;
+
+    .connectors-list{
+        margin: 3em 0;
+        // border: 1px solid yellow;
+            .le-connector{
+            max-width: 160px;
+            height: 100%;
+            margin: 0 2px;
+            // border: 1px solid green;
+            cursor: pointer;
+            
+            .le-card-body{
+                font-size: 12px;
+                & > p {
+                    display: inline-flex;
+                    justify-content: space-around;
+                }
+            }
+            &.selected{
+
             }
         }
-        &.selected{
-
-        }
     }
-} 
+    .le-connectors{
+        margin-top: 1px;
+        padding: 1em 0;
+        // border: 1px solid green;
+        width: 100%;
+        max-width: 1300px;
+        height: 100%;
+        &.white-background{
+            background-color: $pearl-white;
+        }
+    } 
+}
+
