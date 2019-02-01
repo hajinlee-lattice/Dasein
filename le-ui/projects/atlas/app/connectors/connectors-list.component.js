@@ -3,7 +3,7 @@ import React, { Component, react2angular } from "common/react-vendor";
 import './connectors-list.scss';
 import LeVPanel from 'common/widgets/container/le-v-panel';
 import LeHPanel from 'common/widgets/container/le-h-panel';
-import {LeToolBar, HORIZONTAL } from 'common/widgets/toolbar/le-toolbar';
+import { LeToolBar, HORIZONTAL } from 'common/widgets/toolbar/le-toolbar';
 import LeButton from "common/widgets/buttons/le-button";
 import { CENTER, LEFT } from 'common/widgets/container/le-alignments';
 import Connector from './connector.component';
@@ -84,7 +84,7 @@ export class ConnectorList extends Component {
                     name={obj.name}
                     config={obj.config}
                     clickHandler={this.clickHandler}
-                    classNames={`${this.state.connectorSelected == obj.name ? 'selected' : ''}`}
+                    classNames={`${"le-connector"} ${this.state.connectorSelected == obj.name ? 'selected' : ''}`}
                 />
             );
         });
@@ -93,23 +93,24 @@ export class ConnectorList extends Component {
 
     render() {
         return (
-            <LeVPanel vstretch={"true"} hstretch={"true"} classesName="le-connectors white-background">
+            <div className="main-panel">
+                {/* // <LeVPanel vstretch={"true"} hstretch={"false"} classesName="le-connectors white-background"> */}
 
-                <LeHPanel hstretch={"true"} halignment={CENTER}>
-                    <h2>Select one of our many application connectors</h2>
-                </LeHPanel>
+                    <LeHPanel hstretch={"true"} halignment={CENTER}>
+                        <h2 className="connectors-title">Select one of our many application connectors</h2>
+                    </LeHPanel>
 
-                <LeHPanel hstretch={"true"} halignment={LEFT} classesName="connectors-list">
-                    {this.getConnectros()}
-                </LeHPanel>
-                <LeToolBar direction={HORIZONTAL}>
+                    <LeHPanel hstretch={"true"} halignment={LEFT} classesName="connectors-list">
+                        {this.getConnectros()}
+                    </LeHPanel>
+                    <LeToolBar direction={HORIZONTAL}>
                         <div className="right">
                             <LeButton
                                 name="credentials"
                                 config={{
                                     label: "Create",
                                     classNames: "gray-button"
-                                  }}
+                                }}
                                 callback={() => {
                                     // httpService.get(
                                     //     "/pls/lookup-id-mapping",
@@ -120,8 +121,9 @@ export class ConnectorList extends Component {
                                 }}
                             />
                         </div>
-                </LeToolBar>
-            </LeVPanel >
+                    </LeToolBar>
+                {/* // </LeVPanel > */}
+            </div>
         );
     }
 }

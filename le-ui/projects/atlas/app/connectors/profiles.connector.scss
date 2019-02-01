@@ -2,18 +2,27 @@
 
 profiles-container-component{
     display: flex;
+    flex:1;
+    justify-content: center;
     height: 100%;
+    background-color: $pearl-white;
+    // border: 1px solid red;
 }
 .main-panel{
-    background-color: $pearl-white;
+    width: 100%;
+    max-width: 1300px;
     display: flex;
-    flex:1;
-    justify-content: space-around;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 1px;
+
 }
 .connector-profile-container{
     height: 100%;
     width: 100%;
     max-width: 1300px;
+    margin-top: 2em;
+    // border: 1px solid green;
     .loading-container{
         display: flex;
         justify-content: center;
@@ -21,7 +30,7 @@ profiles-container-component{
 
     .profile-tile{
         margin: 20px 20px;
-        border: 1px solid rgb(227, 225, 225);
+        // border: 1px solid rgb(227, 225, 225);
         width: 260px;
         min-width: 200px;
         max-width: 350px;

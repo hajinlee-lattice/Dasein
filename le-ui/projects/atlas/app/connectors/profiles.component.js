@@ -96,7 +96,7 @@ export default class ProfilesComponent extends Component {
 
     render() {
         return (
-            <LeHPanel hstretch={"true"} wrap>
+            <LeHPanel hstretch={"false"} wrap>
                 {this.getProfiles()}
             </LeHPanel>
         );
