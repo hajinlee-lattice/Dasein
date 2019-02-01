@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +54,8 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     private static final Logger log = LoggerFactory
             .getLogger(ModelCopyServiceDeploymentTestNG.class);
     private static final String ORIGINAL_MODELID = "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork";
+    private static final String S3N_TMP_DIR_KEY = "fs.s3.buffer.dir";
+    private static final String S3N_TMP_DIR_VALUE = Paths.get("./s3n_tmp").toAbsolutePath().normalize().toString();
 
     @Inject
     private Configuration yarnConfiguration;
@@ -90,14 +93,13 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
 
-        // FIXME following logs are for debugging test failure, remove these later.
-        String s3Path = yarnConfiguration.get("fs.s3.buffer.dir");
-        log.info("fs.s3.buffer.dir={}", s3Path);
-        if (s3Path != null) {
-            File file = new File(s3Path);
-            log.info("PathExists = {}, TotalSpace = {}, FreeSpace = {}", file.exists(), file.getTotalSpace(),
-                    file.getFreeSpace());
-        }
+        // set tmp directory and make sure the directory exists
+        File tmpDir = new File(S3N_TMP_DIR_VALUE);
+        FileUtils.deleteQuietly(tmpDir);
+        FileUtils.forceMkdir(tmpDir);
+        String s3nTmpPath = yarnConfiguration.get(S3N_TMP_DIR_KEY);
+        yarnConfiguration.set(S3N_TMP_DIR_KEY, S3N_TMP_DIR_VALUE);
+        log.info("Setting tmp directory for s3n connector to {}", yarnConfiguration.get(S3N_TMP_DIR_KEY));
 
         cleanup();
         setupHdfs();
@@ -107,6 +109,11 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
         setupTables();
         testModelCopy();
         cleanup();
+
+        // restore tmp directory path for s3n and cleanup
+        log.info("Restoring tmp directory for s3n connector back to {}", s3nTmpPath);
+        yarnConfiguration.set(S3N_TMP_DIR_KEY, s3nTmpPath);
+        FileUtils.deleteQuietly(tmpDir);
     }
 
     private void waitToDownloadModel(String modelId) throws InterruptedException {
