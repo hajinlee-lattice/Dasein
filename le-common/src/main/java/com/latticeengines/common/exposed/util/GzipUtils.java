@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -22,7 +23,7 @@ public class GzipUtils {
         }
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             try (GzipCompressorOutputStream gzip = new GzipCompressorOutputStream(baos)) {
-                gzip.write(str.getBytes("UTF-8"));
+                gzip.write(str.getBytes(StandardCharsets.UTF_8));
                 gzip.close();
                 return baos.toByteArray();
             }
@@ -82,8 +83,7 @@ public class GzipUtils {
 
     public static InputStream decompressStream(InputStream stream) {
         try {
-            GzipCompressorInputStream zipStream = new GzipCompressorInputStream(stream);
-            return zipStream;
+            return new GzipCompressorInputStream(stream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

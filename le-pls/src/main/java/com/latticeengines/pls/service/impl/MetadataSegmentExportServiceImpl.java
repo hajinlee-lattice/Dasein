@@ -6,7 +6,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -39,6 +38,8 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportService {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentExportServiceImpl.class);
+
+    private static final String MIME_APPLICATION_CSV = "application/csv";
 
     @Inject
     private Configuration yarnConfiguration;
@@ -153,7 +154,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                 String filePath = getExportedFilePath(metadataSegmentExport);
                 response.setHeader("Content-Encoding", "gzip");
                 CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(
-                        MediaType.APPLICATION_OCTET_STREAM, filePath, metadataSegmentExport.getFileName());
+                        MIME_APPLICATION_CSV, filePath, metadataSegmentExport.getFileName());
                 downloader.downloadFile(request, response);
             } catch (Exception ex) {
                 log.error("Could not download result of export job: " + exportId, ex);
