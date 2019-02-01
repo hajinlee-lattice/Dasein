@@ -91,13 +91,12 @@ angular.module('lp.import.wizard.customfields', [])
         ImportWizardStore.setIgnore(ignoredFields);
     }
 
-    vm.changeType = function(fieldMappings, field) {
+    vm.changeType = function(fieldMappings) {
         for(var i in fieldMappings) {
             var userField = i,
                 item = fieldMappings[userField];
+            vm.changeSingleType(item);
         }
-        field.fieldType = fieldMappings[field.userField].fieldType
-        vm.changeSingleType(field);
     }
     vm.changeSingleType = function(fieldMapping){
         let userField = fieldMapping.userField;
