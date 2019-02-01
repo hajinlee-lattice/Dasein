@@ -75,8 +75,9 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
     }
 
     @Test(groups = "deployment")
-    public void testCleanupByTenant() {
+    public void testCleanupByTenant() throws InterruptedException {
         prepareTestData();
+        Thread.sleep(2000L);
         Assert.assertTrue(dataUnitService.cleanupByTenant());
         Assert.assertFalse(dynamoService.hasTable(dynamoTablename));
         Assert.assertTrue(CollectionUtils.isEmpty(s3Service.getFilesForDir(s3Bucket, s3Key)));
