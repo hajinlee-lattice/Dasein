@@ -81,6 +81,7 @@ public class PurchaseHistoryResource {
                 throw new LedpException(LedpCode.LEDP_39001,
                         new String[] { crmAccountId, customerSpace });
             } else {
+<<<<<<< Updated upstream
                 String accountId = accountData.getData().get(0).get(InterfaceName.AccountId.name())
                         .toString();
                 List<PeriodTransaction> periodTransactions = periodTransactionProxy
@@ -91,6 +92,46 @@ public class PurchaseHistoryResource {
                         Collections.singletonList(purchaseHistoryDanteFormatter.format(crmAccountId,
                                 DEFAULT_SPEND_ANALYTICS_START_DATE, JsonUtils.convertList(
                                         periodTransactions, PeriodTransaction.class))));
+||||||| merged common ancestors
+                String accountId = accountData.getData().get(0).get(InterfaceName.AccountId.name()).toString();
+                List<PeriodTransaction> periodTransactions = periodTransactionProxy.getPeriodTransactionsByAccountId(
+                        customerSpace, accountId, defaultPeriodName, ProductType.Spending);
+                List<String> maxAndMinTransactionDates = periodTransactionProxy
+                        .getFinalAndFirstTransactionDate(customerSpace);
+                BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
+                LocalDate startDate;
+                if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+                    startDate = DEFAULT_START_DATE;
+                } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+                    startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                            DEFAULT_START_YEAR);
+                } else {
+                    startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                            DEFAULT_START_YEAR);
+                }
+                return new FrontEndResponse<>(Collections.singletonList(purchaseHistoryDanteFormatter.format(
+                        crmAccountId, startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
+=======
+                String accountId = accountData.getData().get(0).get(InterfaceName.AccountId.name()).toString();
+                List<PeriodTransaction> periodTransactions = periodTransactionProxy.getPeriodTransactionsByAccountId(
+                        customerSpace, accountId, defaultPeriodName, ProductType.Spending);
+                List<String> maxAndMinTransactionDates = periodTransactionProxy
+                        .getFinalAndFirstTransactionDate(customerSpace);
+                BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
+                LocalDate startDate;
+                if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+                    startDate = DEFAULT_START_DATE;
+                } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+                    startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                            DEFAULT_START_YEAR);
+                } else {
+                    startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                            DEFAULT_START_YEAR);
+                }
+                return new FrontEndResponse<>(Collections.singletonList(purchaseHistoryDanteFormatter.format(
+                        crmAccountId, startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class),
+                        maxAndMinTransactionDates.get(0), maxAndMinTransactionDates.get(1))));
+>>>>>>> Stashed changes
             }
         } catch (LedpException le) {
             log.error("Failed to populate purchase history for account: " + crmAccountId, le);
@@ -125,11 +166,49 @@ public class PurchaseHistoryResource {
 
         try {
             List<PeriodTransaction> periodTransactions = periodTransactionProxy
+<<<<<<< Updated upstream
                     .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment,
                             defaultPeriodName);
             return new FrontEndResponse<>(Collections.singletonList(purchaseHistoryDanteFormatter
                     .format(spendAnalyticsSegment, DEFAULT_SPEND_ANALYTICS_START_DATE,
                             JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
+||||||| merged common ancestors
+                    .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment, defaultPeriodName);
+
+            BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
+            LocalDate startDate;
+            if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+                startDate = DEFAULT_START_DATE;
+            } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+                startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                        DEFAULT_START_YEAR);
+            } else {
+                startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                        DEFAULT_START_YEAR);
+            }
+            return new FrontEndResponse<>(
+                    Collections.singletonList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment, startDate,
+                            JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
+=======
+                    .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment, defaultPeriodName);
+            List<String> maxAndMinTransactionDates = periodTransactionProxy
+                    .getFinalAndFirstTransactionDate(customerSpace);
+            BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
+            LocalDate startDate;
+            if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+                startDate = DEFAULT_START_DATE;
+            } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+                startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                        DEFAULT_START_YEAR);
+            } else {
+                startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                        DEFAULT_START_YEAR);
+            }
+            return new FrontEndResponse<>(
+                    Collections.singletonList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment, startDate,
+                            JsonUtils.convertList(periodTransactions, PeriodTransaction.class),
+                            maxAndMinTransactionDates.get(0), maxAndMinTransactionDates.get(1))));
+>>>>>>> Stashed changes
         } catch (LedpException le) {
             log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment,
                     le);

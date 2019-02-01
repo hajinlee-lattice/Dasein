@@ -2,6 +2,7 @@ package com.latticeengines.objectapi.service.impl;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -188,6 +189,18 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     @VisibleForTesting
     void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
+    }
+
+    @Override
+    public List<String> getFinalAndFirstTransactionDate() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        String transactionTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Transaction);
+        log.info(String.format("Get Transaction Table %s for %s", transactionTableName, tenant.getId()));
+        String query = MessageFormat.format("SELECT max ({0}) as max, min ({0}) as min FROM {1}",
+                InterfaceName.TransactionDate, transactionTableName);
+        log.info("query for getFinalTransactionDate " + query);
+        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+        return Arrays.asList((String) retList.get(0).get("max"), (String) retList.get(0).get("min"));
     }
 
 }
