@@ -239,6 +239,11 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         /**
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
