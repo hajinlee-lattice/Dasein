@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Service("zKConfigService")
 public class ZKConfigServiceImpl implements ZKConfigService {
@@ -133,5 +134,38 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
         }
         return Integer.parseInt(maxPremiumLeadEnrichmentAttributes);
+    }
+
+    @Override
+    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity) {
+        try {
+            Long dataQuotaLimit = null;
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    componentName);
+            Path entityDataQuotaPath = null;
+            switch (businessEntity) {
+                case Account:
+                    entityDataQuotaPath = path.append("AccountQuotaLimit");
+                    break;
+                case Contact:
+                    entityDataQuotaPath = path.append("ContactQuotaLimit");
+                    break;
+                case Product:
+                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
+                    break;
+                case Transaction:
+                    entityDataQuotaPath = path.append("TransactionQuotaLimit");
+                    break;
+                default:
+                    break;
+            }
+            Camille camille = CamilleEnvironment.getCamille();
+            if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {
+                dataQuotaLimit = Long.valueOf(camille.get(entityDataQuotaPath).getData());
+            }
+            return dataQuotaLimit;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get DataQuotaLimit from ZK for " + customerSpace.getTenantId(), e);
+        }
     }
 }

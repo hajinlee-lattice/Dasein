@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -74,6 +75,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
 
+    @Value("${cdl.account.dataquota.limit:5000000}")
+    private Long defaultAccountQuotaLimit;
+
+    @Value("${cdl.contact.dataquota.limit:10000000}")
+    private Long defaultContactQuotaLimit;
+
+    @Value("${cdl.product.dataquota.limit:200}")
+    private Long defaultProductQuotaLimit;
+
+    @Value("${cdl.transaction.dataquota.limit:20000000}")
+    private Long defaultTransactionQuotaLimit;
+
     private final DataCollectionProxy dataCollectionProxy;
 
     private final DataFeedProxy dataFeedProxy;
@@ -90,8 +103,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService, ZKConfigService zkConfigService) {
+                                           WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
+                                           BatonService batonService, ZKConfigService zkConfigService) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
@@ -201,8 +214,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
                 ? Collections.emptyList()
                 : importAndDeleteJobs.stream().filter(
-                        job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
-                        .map(Job::getPid).collect(Collectors.toList());
+                job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
+                .map(Job::getPid).collect(Collectors.toList());
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
 
@@ -242,7 +255,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Action> actions = actionService.findByOwnerId(null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         List<Long> canceledActionPids = actions.stream()
-                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getOwnerId()== null && action.getActionStatus() == ActionStatus.CANCELED)
+                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getOwnerId() == null && action.getActionStatus() == ActionStatus.CANCELED)
                 .map(Action::getPid).collect(Collectors.toList());
         return canceledActionPids;
     }
@@ -287,7 +300,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
-            List<Long> completedImportAndDeleteJobPids) {
+                                     List<Long> completedImportAndDeleteJobPids) {
         boolean isComplete = true; // by default every action is valid
         if (selectedTypes.contains(action.getType())) {
             // special check if is selected type
@@ -310,8 +323,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
-            ProcessAnalyzeRequest request, List<Long> actionIds, Status status, String currentDataCloudBuildNumber,
-            long workflowPid) {
+                                                                      ProcessAnalyzeRequest request, List<Long> actionIds, Status status, String currentDataCloudBuildNumber,
+                                                                      long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
 
@@ -326,7 +339,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
                 .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
-
+        getDataQuotaLimit(CustomerSpace.parse(customerSpace), CDLComponent.componentName);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -340,7 +353,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchYarnQueue(scoringQueue) //
-                .inputProperties(ImmutableMap.<String, String> builder() //
+                .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
@@ -353,6 +366,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)//put dataQuotaLimit into
+                // stepConfiguration
+                .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
+                .dataQuotaLimit(defaultProductQuotaLimit, BusinessEntity.Product)
+                .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
                 .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
                 .build();
     }
@@ -402,6 +420,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    private void getDataQuotaLimit(CustomerSpace customerSpace, String componentName) {
+        Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
+                componentName, BusinessEntity.Account);
+        defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
+        Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
+        defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
+        Long productDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Product);
+        defaultProductQuotaLimit = productDataLimit != null ? productDataLimit : defaultProductQuotaLimit;
+        Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                BusinessEntity.Transaction);
+        defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
     }
 
 }

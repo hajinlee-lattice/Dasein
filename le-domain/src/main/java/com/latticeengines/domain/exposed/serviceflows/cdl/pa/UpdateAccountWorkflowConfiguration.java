@@ -42,6 +42,11 @@ public class UpdateAccountWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder dataQuotaLimit(Long dataQuotaLimit) {
+            processAccountStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
+            return this;
+        }
+
         public UpdateAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

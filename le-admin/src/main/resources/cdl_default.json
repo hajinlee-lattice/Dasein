@@ -10,6 +10,22 @@
       "Data": -1
     },
     {
+      "Node": "AccountQuotaLimit",
+      "Data": 5000000
+    },
+    {
+      "Node": "ContactQuotaLimit",
+      "Data": 10000000
+    },
+    {
+      "Node": "ProductBundlesQuotaLimit",
+      "Data": 200
+    },
+    {
+      "Node": "TransactionQuotaLimit",
+      "Data": 20000000
+    },
+    {
       "Node": "DefaultAPSRollupPeriod",
       "Data": "Business Quarter"
     },
