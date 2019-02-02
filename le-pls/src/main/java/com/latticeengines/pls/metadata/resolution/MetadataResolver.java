@@ -525,8 +525,10 @@ public class MetadataResolver {
             }
         }
         MutablePair<String, String> result = distinguishDateAndTime(columnFields);
-        formatForDateAndTime.setLeft(result.getLeft());
-        formatForDateAndTime.setRight(result.getRight());
+        if (result != null) {
+            formatForDateAndTime.setLeft(result.getLeft());
+            formatForDateAndTime.setRight(result.getRight());
+        }
         return true;
     }
 
