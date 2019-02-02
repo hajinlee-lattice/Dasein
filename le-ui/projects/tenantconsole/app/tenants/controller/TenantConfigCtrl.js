@@ -167,11 +167,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 }
             });
         }
-        modifyComponentsAccordingToType()
+        modifyComponentsAccordingToType();
     };
 
    function modifyComponentsAccordingToType() {
-    	 if ($scope.tenantInfo.properties.tenantType == "CUSTOMER" || $scope.tenantInfo.properties.tenantType == "STAGING") {
+    	 if ($scope.tenantInfo.properties.tenantType === "CUSTOMER" || $scope.tenantInfo.properties.tenantType === "STAGING") {
          	$scope.components = $scope.componentsWithoutGA_Dev;
          } else {
         	 $scope.components = $scope.componentsWithGA_Dev;
@@ -272,9 +272,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                                 $scope.loading = false;
                                 $scope.componentsWithGA_Dev = angular.copy($scope.components);
                                 _.each($scope.components, function (component) {
-                             		if (component.Component == "PLS") {
+                             		if (component.Component === "PLS") {
                      	                _.each(component.Nodes, function(node) {
-                     	                	if (node.Node == "SuperAdminEmails") {
+                     	                	if (node.Node === "SuperAdminEmails") {
                      	                		var superAdminEmails = node.Data;
                      	                		node.Data = node.Data.replace("\"ga_dev@lattice-engines.com\",", "").replace(",\"ga_dev@lattice-engines.com\"", "").replace("\"ga_dev@lattice-engines.com\"", "");
                      	                    }
