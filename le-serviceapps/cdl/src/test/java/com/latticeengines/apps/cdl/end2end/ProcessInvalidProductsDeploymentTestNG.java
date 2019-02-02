@@ -39,13 +39,6 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
         verifyProcess(DataCollection.Version.Green);
     }
 
-    @Test(groups = "deployment", priority = 3)
-    public void testVDBProductMissingProductName() throws Exception {
-        importData(7, "ProductVDB_MissingProductName");
-        processAnalyze();
-        verifyProcess(DataCollection.Version.Blue);
-    }
-
     private void importData(int fileIndex, String datafeedType) throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Product, fileIndex, datafeedType);
