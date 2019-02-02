@@ -126,7 +126,6 @@ public class PurchaseHistoryResource {
                     purchaseHistoryDanteFormatter.format(spendAnalyticsSegment, DEFAULT_SPEND_ANALYTICS_START_DATE,
                             JsonUtils.convertList(periodTransactions, PeriodTransaction.class),
                             maxAndMinTransactionDates.get(0), maxAndMinTransactionDates.get(1))));
-
         } catch (LedpException le) {
             log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, le);
             return new FrontEndResponse<>(le.getErrorDetails());
