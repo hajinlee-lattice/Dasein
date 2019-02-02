@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -55,7 +56,9 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
             .getLogger(ModelCopyServiceDeploymentTestNG.class);
     private static final String ORIGINAL_MODELID = "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork";
     private static final String S3N_TMP_DIR_KEY = "fs.s3.buffer.dir";
-    private static final String S3N_TMP_DIR_VALUE = Paths.get("./s3n_tmp").toAbsolutePath().normalize().toString();
+    private static final String S3A_TMP_DIR_KEY = "fs.s3a.buffer.dir";
+    private static final String S3_CONNECTOR_TMP_DIR_VALUE = Paths.get("./s3_buffer_tmp").toAbsolutePath().normalize()
+            .toString();
 
     @Inject
     private Configuration yarnConfiguration;
@@ -93,14 +96,7 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
 
-        // set tmp directory and make sure the directory exists
-        File tmpDir = new File(S3N_TMP_DIR_VALUE);
-        FileUtils.deleteQuietly(tmpDir);
-        FileUtils.forceMkdir(tmpDir);
-        String s3nTmpPath = yarnConfiguration.get(S3N_TMP_DIR_KEY);
-        yarnConfiguration.set(S3N_TMP_DIR_KEY, S3N_TMP_DIR_VALUE);
-        log.info("Setting tmp directory for s3n connector to {}", yarnConfiguration.get(S3N_TMP_DIR_KEY));
-
+        Pair<String, String> s3ConnectorTmpPath = setupTmpDir();
         cleanup();
         setupHdfs();
         MultiTenantContext.setTenant(tenant1);
@@ -109,11 +105,34 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
         setupTables();
         testModelCopy();
         cleanup();
+        cleanupTmpDir(s3ConnectorTmpPath);
+    }
 
-        // restore tmp directory path for s3n and cleanup
-        log.info("Restoring tmp directory for s3n connector back to {}", s3nTmpPath);
-        yarnConfiguration.set(S3N_TMP_DIR_KEY, s3nTmpPath);
+    /*
+     * set tmp directory for s3 connector and make sure the directory exists
+     */
+    private Pair<String, String> setupTmpDir() throws Exception {
+        File tmpDir = new File(S3_CONNECTOR_TMP_DIR_VALUE);
         FileUtils.deleteQuietly(tmpDir);
+        FileUtils.forceMkdir(tmpDir);
+        // perserve the old value so that we can recover
+        String s3nOldValue = yarnConfiguration.get(S3N_TMP_DIR_KEY);
+        String s3aOldValue = yarnConfiguration.get(S3A_TMP_DIR_KEY);
+        yarnConfiguration.set(S3N_TMP_DIR_KEY, S3_CONNECTOR_TMP_DIR_VALUE);
+        yarnConfiguration.set(S3A_TMP_DIR_KEY, S3_CONNECTOR_TMP_DIR_VALUE);
+        log.info("Setting tmp directory for s3 connector to {}", S3_CONNECTOR_TMP_DIR_VALUE);
+        return Pair.of(s3nOldValue, s3aOldValue);
+    }
+
+    /*
+     * restore tmp directory path for s3n and cleanup
+     */
+    private void cleanupTmpDir(Pair<String, String> oldPaths) throws Exception {
+        log.info("Restoring tmp directory for s3n connector back to {}, s3a back to {}", oldPaths.getLeft(),
+                oldPaths.getRight());
+        yarnConfiguration.set(S3N_TMP_DIR_KEY, oldPaths.getLeft());
+        yarnConfiguration.set(S3A_TMP_DIR_KEY, oldPaths.getRight());
+        FileUtils.deleteQuietly(new File(S3_CONNECTOR_TMP_DIR_VALUE));
     }
 
     private void waitToDownloadModel(String modelId) throws InterruptedException {
