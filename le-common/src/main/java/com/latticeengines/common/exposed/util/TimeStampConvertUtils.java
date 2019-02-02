@@ -5,6 +5,7 @@ import com.joestelmach.natty.Parser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -17,9 +18,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,14 +31,24 @@ import java.util.TimeZone;
 public class TimeStampConvertUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
+    // linked hash map to use inserted order as priority at field mapping phase
     // Mapping from user defined date format to Java 8 date/time library format.
-    private static final Map<String, String> userToJavaDateFormatMap = new HashMap<>();
+    private static final Map<String, String> userToJavaDateFormatMap = new LinkedHashMap<>();
     // Mapping from user defined time format to Java 8 date/time library format.
-    private static final Map<String, String> userToJavaTimeFormatMap = new HashMap<>();
+    private static final Map<String, String> userToJavaTimeFormatMap = new LinkedHashMap<>();
 
     public static final Set<String> SUPPORTED_DATE_FORMAT = new HashSet<>();
 
     public static final Set<String> SUPPORTED_TIME_FORMAT = new HashSet<>();
+
+    // joda Time date/time formatter
+    public static final DateTimeFormatter DATE_TIME_FORMATTER;
+
+
+    // represent all legal date time format in system which generated according
+    // to date format and time format
+    public static final List<String> SUPPORTED_DATE_TIME_FORMAT = new ArrayList<>();
+    public static final List<DateTimeFormatter> SUPPORTED_DATE_TIME_FORMATERS = new ArrayList<>();
 
     // Set up static mappings from user defined date and time format to Java 8 formats.
     static {
@@ -81,6 +93,23 @@ public class TimeStampConvertUtils {
 
         SUPPORTED_DATE_FORMAT.addAll(userToJavaDateFormatMap.keySet());
         SUPPORTED_TIME_FORMAT.addAll(userToJavaTimeFormatMap.keySet());
+
+        // Construct all supported date time pattern in system
+        for (String dateFormat : userToJavaDateFormatMap.values()) {
+            for (String timeFormat : userToJavaTimeFormatMap.values()) {
+                SUPPORTED_DATE_TIME_FORMAT.add(String.format("%s %s", dateFormat, timeFormat));
+            }
+        }
+        SUPPORTED_DATE_TIME_FORMAT.addAll(userToJavaDateFormatMap.values());
+
+        DateTimeParser[] parsers = new DateTimeParser[SUPPORTED_DATE_TIME_FORMAT.size()];
+        int index = 0;
+        for (String format : TimeStampConvertUtils.SUPPORTED_DATE_TIME_FORMAT) {
+            parsers[index++] = DateTimeFormat.forPattern(format.trim()).getParser();
+            SUPPORTED_DATE_TIME_FORMATERS.add(DateTimeFormat.forPattern(format.trim()));
+        }
+        DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
+
     }
 
     // Joda Time date/time formatter for simple original converter.  Only handles dates without times.
@@ -297,5 +326,24 @@ public class TimeStampConvertUtils {
 
     public static String[] getAvailableTimeZoneIDs() {
         return TimeZone.getAvailableIDs();
+    }
+
+    /*
+     * write this method due to bug in SUPPORTED_DATE_TIME_FORMATER, I put 210
+     * formats to SUPPORTED_DATE_TIME_FORMATER,while it can't parse value whose
+     * format locate in last 30 positions
+     */
+    public static DateTime parseDateTime(String value) {
+        DateTime dateTime = null;
+        for (DateTimeFormatter formatter : SUPPORTED_DATE_TIME_FORMATERS) {
+            try {
+                dateTime = formatter.parseDateTime(value);
+            } catch (Exception e) {
+            }
+            if (dateTime != null) {
+                break;
+            }
+        }
+        return dateTime;
     }
 }

@@ -64,6 +64,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.isValid = {valid: true};
     $scope.selectedProductNames=[];
     $scope.selectedProducts=[];
+    $scope.hasGa_Dev = false;
+    $scope.componentsWithoutGA_Dev = [];
+    $scope.componentsWithGA_Dev = [];
 
 
     if ($scope.new) {
@@ -164,8 +167,17 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 }
             });
         }
+        modifyComponentsAccordingToType()
     };
 
+   function modifyComponentsAccordingToType() {
+    	 if ($scope.tenantInfo.properties.tenantType == "CUSTOMER" || $scope.tenantInfo.properties.tenantType == "STAGING") {
+         	$scope.components = $scope.componentsWithoutGA_Dev;
+         } else {
+        	 $scope.components = $scope.componentsWithGA_Dev;
+         }
+         console.log($scope.components);
+    }
     function setAutoSchedulingFlagValue() {
         return $scope.tenantInfo.properties.tenantType === "CUSTOMER" &&
                                     $scope.selectedProductNames.length === 2 && $scope.selectedProductNames.indexOf("Lead Prioritization 3.0") >= 0 &&
@@ -258,6 +270,19 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                             }
                             if ($scope.defaultConfigScaned === $scope.services.length) {
                                 $scope.loading = false;
+                                $scope.componentsWithGA_Dev = angular.copy($scope.components);
+                                _.each($scope.components, function (component) {
+                             		if (component.Component == "PLS") {
+                     	                _.each(component.Nodes, function(node) {
+                     	                	if (node.Node == "SuperAdminEmails") {
+                     	                		var superAdminEmails = node.Data;
+                     	                		node.Data = node.Data.replace("\"ga_dev@lattice-engines.com\",", "").replace(",\"ga_dev@lattice-engines.com\"", "").replace("\"ga_dev@lattice-engines.com\"", "");
+                     	                    }
+                     	                });
+                             		}
+                                 });
+                                $scope.componentsWithoutGA_Dev =  angular.copy($scope.components);
+                                modifyComponentsAccordingToType();
                                 if ($state.current.name !== "TENANT.CONFIG") {
                                     $timeout(function () {
                                         $rootScope.$broadcast("UPDATE_DERIVED");
