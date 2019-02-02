@@ -2,29 +2,35 @@ package com.latticeengines.pls.metadata.resolution;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -80,7 +86,7 @@ public class MetadataResolver {
 
         result.metadata = metadata;
         result.fieldMappings = new ArrayList<>();
-        if(cdlResolve) {
+        if (cdlResolve) {
             calculateHelperCDL();
         } else {
             calculateHelper();
@@ -220,7 +226,9 @@ public class MetadataResolver {
                 knownColumn.setUserField(attribute.getDisplayName());
                 knownColumn.setMappedField(attribute.getName());
                 knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+
                 knownColumn.setMappedToLatticeField(true);
+
                 result.fieldMappings.add(knownColumn);
                 headerFields.remove(attribute.getDisplayName());
             } else {
@@ -231,8 +239,8 @@ public class MetadataResolver {
                     if (isUserFieldMatchWithAttribute(header, attribute)) {
                         attribute.setDisplayName(header);
                         headerIterator.remove();
-
                         knownColumn.setUserField(header);
+
                         knownColumn.setMappedField(attribute.getName());
                         knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                         knownColumn.setMappedToLatticeField(true);
@@ -247,7 +255,7 @@ public class MetadataResolver {
             FieldMapping unknownColumn = new FieldMapping();
 
             unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
-            unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
+            unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
             unknownColumn.setMappedToLatticeField(false);
 
             result.fieldMappings.add(unknownColumn);
@@ -302,7 +310,7 @@ public class MetadataResolver {
             FieldMapping unknownColumn = new FieldMapping();
 
             unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
-            unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
+            unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
             unknownColumn.setMappedToLatticeField(false);
 
             result.fieldMappings.add(unknownColumn);
@@ -368,14 +376,17 @@ public class MetadataResolver {
 
         String fieldType;
         if (fieldMapping.getFieldType() == null) {
-            fieldType = getFieldTypeFromColumnContent(fieldMapping.getUserField()).getAvroType().toString().toLowerCase();
+            fieldType = getFieldTypeFromColumnContent(fieldMapping).getAvroType().toString()
+                    .toLowerCase();
         } else {
             fieldType = fieldMapping.getFieldType().getAvroType().toString().toLowerCase();
         }
         if (cdlResolve) {
-            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
+            attribute.setName(
+                    ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
         } else {
-            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getUserField()));
+            attribute
+                    .setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getUserField()));
         }
         attribute.setPhysicalDataType(fieldType);
         attribute.setDisplayName(fieldMapping.getUserField());
@@ -384,8 +395,8 @@ public class MetadataResolver {
         attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));
         attribute.setStatisticalType(getStatisticalTypeFromFieldType(fieldType));
         attribute.setNullable(true);
-        attribute.setLogicalDataType(
-                fieldMapping.getFieldType() == UserDefinedType.DATE ? LogicalDataType.Date : attribute.getLogicalDataType());
+        attribute.setLogicalDataType(fieldMapping.getFieldType() == UserDefinedType.DATE ? LogicalDataType.Date
+                : attribute.getLogicalDataType());
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
         attribute.setDateFormatString(fieldMapping.getDateFormatString());
         attribute.setTimeFormatString(fieldMapping.getTimeFormatString());
@@ -456,9 +467,7 @@ public class MetadataResolver {
         return statisticalType;
     }
 
-    private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
-        UserDefinedType fundamentalType = null;
-
+    private List<String> getColumnFieldsByHeader(String columnHeaderName) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         List<String> columnFields = null;
         try {
@@ -476,6 +485,15 @@ public class MetadataResolver {
                 throw new RuntimeException("Problem when closing the pool", e);
             }
         }
+        return columnFields;
+    }
+
+    private UserDefinedType getFieldTypeFromColumnContent(FieldMapping fieldMapping) {
+        String columnHeaderName = fieldMapping.getUserField();
+        UserDefinedType fundamentalType = null;
+
+        List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
+        MutablePair<String, String> formatForDateAndTime = new MutablePair<String, String>();
         if (columnFields.isEmpty()) {
             fundamentalType = UserDefinedType.TEXT;
         } else if (isBooleanTypeColumn(columnFields)) {
@@ -484,35 +502,71 @@ public class MetadataResolver {
             fundamentalType = UserDefinedType.INTEGER;
         } else if (isDoubleTypeColumn(columnFields)) {
             fundamentalType = UserDefinedType.NUMBER;
-        } else if (isDateTypeColumn(columnFields)) {
+        } else if (isDateTypeColumn(columnFields, formatForDateAndTime)) {
             fundamentalType = UserDefinedType.DATE;
         } else {
             fundamentalType = UserDefinedType.TEXT;
         }
 
+        if (fundamentalType == UserDefinedType.DATE) {
+            fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
+            fieldMapping.setTimeFormatString(formatForDateAndTime.getRight());
+        }
         return fundamentalType;
     }
 
     @VisibleForTesting
-    boolean isDateTypeColumn(List<String> columnFields) {
-        String[] supportedDateFormat = { "MM/dd/yyyy", "YYYY-MM-DD", "YYYY-MM-DD'T'HH:mm:ss.sssZ" };
+    boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
-            Date date = null;
-            for (String format : supportedDateFormat) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat(format);
-                    date = sdf.parse(columnField);
-                    if (date != null) {
-                        break;
-                    }
-                } catch (ParseException ex) {
-                }
-            }
-            if (date == null) {
+            DateTime dateTime = null;
+            dateTime = TimeStampConvertUtils.parseDateTime(columnField);
+            if (dateTime == null) {
                 return false;
             }
         }
+        MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+        formatForDateAndTime.setLeft(result.getLeft());
+        formatForDateAndTime.setRight(result.getRight());
         return true;
+    }
+
+    @VisibleForTesting
+    MutablePair<String, String> distinguishDateAndTime(List<String> columnFields) {
+        List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_DATE_TIME_FORMAT;
+        Map<String, Integer> hitMap = new HashMap<String, Integer>();
+        // iterate every value, generate number for supported format
+        for (String columnField : columnFields) {
+            for (String format : supportedDateTimeFormat) {
+                DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
+                DateTime date = null;
+                try {
+                    date = dtf.parseDateTime(columnField);
+                } catch (Exception e) {
+                }
+                if (date != null) {
+                    hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+                }
+            }
+        }
+        if (MapUtils.isEmpty(hitMap)) {
+            return null;
+        }
+        // sort according to the occurrence times, then priority order defined
+        // in supported data time list
+        List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(hitMap.entrySet());
+        Collections.sort(entries,
+                (entry1, entry2) -> entry1.getValue().equals(entry2.getValue())
+                        ? Integer.compare(supportedDateTimeFormat.indexOf(entry1.getKey()),
+                                supportedDateTimeFormat.indexOf(entry2.getKey()))
+                        : entry2.getValue().compareTo(entry1.getValue()));
+        String expectedFormat = entries.get(0).getKey();
+        int index = expectedFormat.indexOf(" ");
+        if (index == -1) {
+            return new MutablePair<String, String>(expectedFormat, null);
+        } else {
+            return new MutablePair<String, String>(expectedFormat.substring(0, index),
+                    expectedFormat.substring(index + 1));
+        }
     }
 
     @VisibleForTesting
