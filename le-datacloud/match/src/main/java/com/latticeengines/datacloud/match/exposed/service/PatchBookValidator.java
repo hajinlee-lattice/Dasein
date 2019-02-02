@@ -3,11 +3,12 @@ package com.latticeengines.datacloud.match.exposed.service;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Validator for {@link PatchBook} entries
@@ -24,6 +25,10 @@ public interface PatchBookValidator {
      * Error Messages for conflict in patchItems in patchBook
      */
     static final String CONFLICT_IN_PATCH_ITEM = "Conflict exists in provided patch items for match keys : ";
+
+    static final String ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR = "Provided attribute is not from correct source : ";
+
+    static final String ENCODED_ATTRS_NOT_SUPPORTED = "Encoded Attributes not supported : ";
 
     /**
      * Validate a list of {@link PatchBook} under specified DataCloud version. Only entries with the given type and

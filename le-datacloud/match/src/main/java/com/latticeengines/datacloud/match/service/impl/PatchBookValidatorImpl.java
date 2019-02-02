@@ -25,6 +25,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
@@ -32,6 +33,7 @@ import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
 import reactor.core.publisher.ParallelFlux;
@@ -45,6 +47,10 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     @Inject
     private CountryCodeService countryCodeService;
+
+    @Autowired
+    @Qualifier("sourceAttributeEntityMgr")
+    private SourceAttributeEntityMgr sourceAttributeEntityMgr;
 
     @Override
     public Pair<Integer, List<PatchBookValidationError>> validate(
@@ -234,8 +240,126 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<PatchBookValidationError> errors = new ArrayList<>();
         errors.addAll(PatchBookUtils.validateDuplicateMatchKey(books));
         errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
-        // TODO add other specific check for attribute patch book entries here
+        errors.addAll(enhancementOfAttributePatchApi(books, dataCloudVersion));
         return errors;
+    }
+
+    /*
+     * Enhancement of Attribute Patch Validation API based on domain / duns
+     * based sources
+     */
+    List<PatchBookValidationError> enhancementOfAttributePatchApi(@NotNull List<PatchBook> books, @NotNull String dataCloudVersion) {
+        /* HardCoding domain and duns based sources */
+        Set<String> domainBasedSources = new HashSet<>();
+        Set<String> dunsBasedSources = new HashSet<>();
+        String domBasedSources[] = { "AlexaMostRecent", "Bombora30DayAgg", "BomboraSurgePivoted", "BuiltWithPivoted",
+                "BuiltWithTechIndicators", "FeaturePivoted", "HGDataPivoted", "HGDataTechIndicators", "HPANewPivoted",
+                "OrbIntelligenceMostRecent", "SemrushMostRecent" };
+        domainBasedSources.addAll(Arrays.asList(domBasedSources));
+        dunsBasedSources.add("DnBCacheSeed");
+        /* extract attributes based on domain and duns based source */
+        List<SourceAttribute> sourceAttributes = sourceAttributeEntityMgr.getAttributes("AccountMaster", "MapStage",
+                "mapAttribute", null, false);
+        Set<String> attrNamesForDomBasedSources = new HashSet<>();
+        Set<String> attrNamesForDunsBasedSources = new HashSet<>();
+        for (SourceAttribute srcAttr : sourceAttributes) {
+            String argument = srcAttr.getArguments();
+            String attribute = srcAttr.getAttribute();
+            String[] argArray = argument.split(",");
+            String source = argArray[argArray.length - 1].split(":")[1];
+            // populate set of attribute names for domain based sources
+            if (domainBasedSources.contains(source)) {
+                attrNamesForDomBasedSources.add(attribute);
+            }
+            // populate set of attribute names for duns based sources
+            if (dunsBasedSources.contains(source)) {
+                attrNamesForDunsBasedSources.add(attribute);
+            }
+        }
+        List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
+        // Iterate through the patchItems to check patch item attribute is from domain based source or duns based source
+        for(PatchBook book : books) {
+            boolean domMatchKeyPresent = false;
+            boolean dunsMatchKeyPresent = false;
+            boolean domSrcErrPresent = false;
+            boolean dunsSrcErrPresent = false;
+            boolean encoded = false;
+            List<String> domBasedSrcAbsentAttrs = new ArrayList<>();
+            List<String> dunsBasedSrcAbsentAttrs = new ArrayList<>();
+            List<String> encodedAttrs = new ArrayList<>();
+            Map<String, Object> patchItems = book.getPatchItems();
+            // domain Match Key Present
+            if (!StringUtils.isEmpty(book.getDomain())) {
+                domMatchKeyPresent = true;
+            }
+            // duns Match Key Present
+            if (!StringUtils.isEmpty(book.getDuns())) {
+                dunsMatchKeyPresent = true;
+            }
+            for (Map.Entry<String, Object> patchedItem : patchItems.entrySet()) {
+                String patchAttr = patchedItem.getKey();
+                if (domMatchKeyPresent) {
+                    if (!attrNamesForDomBasedSources.contains(patchAttr)) {
+                        // Error : since domain match key is present and patch
+                        // attrName should be one of the attr names for domain
+                        // based sources
+                        domSrcErrPresent = true;
+                        domBasedSrcAbsentAttrs.add(patchAttr);
+                    }
+                }
+                if (dunsMatchKeyPresent) {
+                    if (!attrNamesForDunsBasedSources.contains(patchAttr)) {
+                        // Error : since duns match key is present and patch
+                        // attrName should be one of the attr names for duns
+                        // based sources
+                        dunsSrcErrPresent = true;
+                        dunsBasedSrcAbsentAttrs.add(patchAttr);
+                    }
+                }
+                // Doesn't support patching for encoded attributes
+                AccountMasterColumn amCol = columnEntityMgr.findById(patchAttr, dataCloudVersion);
+                if (amCol.getDecodeStrategy() != null) {
+                    encoded = true;
+                    encodedAttrs.add(patchAttr);
+                }
+            }
+            PatchBookValidationError error = reportErrorsForAttrPatchValidator(domSrcErrPresent,
+                    dunsMatchKeyPresent,
+                    dunsSrcErrPresent, domMatchKeyPresent, domBasedSrcAbsentAttrs,
+                    dunsBasedSrcAbsentAttrs, encodedAttrs, book.getPid(), encoded);
+            if (error.getMessage() != null) {
+                patchBookValidErrorList.add(error);
+            }
+        }
+        return patchBookValidErrorList;
+    }
+
+    private PatchBookValidationError reportErrorsForAttrPatchValidator(
+            boolean domSrcErrPresent, boolean dunsMatchKeyPresent, boolean dunsSrcErrPresent,
+            boolean domMatchKeyPresent, List<String> domBasedSrcAbsentAttrs,
+            List<String> dunsBasedSrcAbsentAttrs, List<String> encodedAttrs, Long pid,
+            boolean encoded) {
+        List<Long> pids = new ArrayList<>();
+        PatchBookValidationError error = new PatchBookValidationError();
+        if (domSrcErrPresent && !dunsMatchKeyPresent) {
+            error.setMessage(
+                    ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR + domBasedSrcAbsentAttrs.toString()); 
+            domSrcErrPresent = false;
+            pids.add(pid);
+        }
+        if (dunsSrcErrPresent && !domMatchKeyPresent) {
+            error.setMessage(
+                    ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR + dunsBasedSrcAbsentAttrs.toString());
+            dunsSrcErrPresent = false;
+            pids.add(pid);
+        }
+        if (encoded && !domSrcErrPresent && !dunsSrcErrPresent) {
+            error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
+        }
+        if (pids.size() > 0) {
+            error.setPatchBookIds(pids);
+        }
+        return error;
     }
 
     private List<PatchBookValidationError> validateLookupPatchBook(

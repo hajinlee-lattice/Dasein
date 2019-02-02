@@ -248,6 +248,102 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
         };
     }
 
+    @Test(groups = "functional", dataProvider = "patchBookMatchKeyDomainDunsSrc")
+    private void testPatchBookMatchKeyDomainDunsSrc(PatchBook[] books, String dataCloudVersion,
+            PatchBookValidationError[] expectedErrors) {
+        List<PatchBookValidationError> errors = validator //
+                .enhancementOfAttributePatchApi(Arrays.asList(books), dataCloudVersion);
+        Assert.assertNotNull(errors);
+        Assert.assertEquals(errors.size(), expectedErrors.length);
+
+        List<PatchBookValidationError> expectedErrorList = Arrays.stream(expectedErrors).collect(Collectors.toList());
+        errors.forEach(error -> verifyValidationError(error, expectedErrorList));
+        // all expected errors are matched
+        Assert.assertTrue(expectedErrorList.isEmpty());
+    }
+
+    @DataProvider(name = "patchBookMatchKeyDomainDunsSrc")
+    private Object[][] patchBookMatchKeyDomainDunsSrc() {
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("AlexaAUPageViews", "100");
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("AlexaUSRank", "10");
+        Map<String, Object> map3 = new HashMap<>();
+        map3.put("bemfab", "1");
+        map3.put("DnB_CITY_CODE", "1111");
+        Map<String, Object> map4 = new HashMap<>();
+        map4.put("BmbrSurge_2in1PCs_BuckScore", "test_value");
+        return new Object[][] { {
+                new PatchBook[] {
+                        // no conflict
+                        TestPatchBookUtils //
+                                .newPatchBook(1L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("abc.com") //
+                                                        .withDuns("123456789") //
+                                                        .build(),
+                                        map1),
+                        // conflict with domain
+                        TestPatchBookUtils //
+                                .newPatchBook(2L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("def.com") //
+                                                        .withDuns("323232322") //
+                                                        .build(),
+                                        map1),
+                        TestPatchBookUtils //
+                                .newPatchBook(3L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("def.com") //
+                                                        .build(),
+                                        map2),
+                        // conflict with duns
+                        TestPatchBookUtils //
+                                .newPatchBook(4L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("ghi.com") //
+                                                        .withDuns("111111111") //
+                                                        .build(),
+                                        map1),
+                        TestPatchBookUtils //
+                                .newPatchBook(5L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("111111111") //
+                                                        .build(),
+                                        map2),
+                        TestPatchBookUtils //
+                                .newPatchBook(6L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("abc.com") //
+                                                        .withCountry("USA") //
+                                                        .build(),
+                                        map3),
+                        TestPatchBookUtils //
+                                .newPatchBook(7L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("lmn.com") //
+                                                        .withCountry("USA") //
+                                                        .build(),
+                                        map4) },
+                "2.0.16",
+                new PatchBookValidationError[] {
+                        newError(PatchBookValidator.ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR
+                                + "[AlexaUSRank]", 3L),
+                        newError(PatchBookValidator.ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR
+                                + "[AlexaUSRank]", 5L),
+                        newError(PatchBookValidator.ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR
+                                + "[bemfab, DnB_CITY_CODE]", 6L),
+                        newError(PatchBookValidator.ENCODED_ATTRS_NOT_SUPPORTED
+                                + "[BmbrSurge_2in1PCs_BuckScore]", 7L) }, } };
+    }
+
     private Object[][] provideLookupPatchBookValidationTestData() {
         return new Object[][] {
                 // Case #1: Duplicate match keys (standardized to the same value)
