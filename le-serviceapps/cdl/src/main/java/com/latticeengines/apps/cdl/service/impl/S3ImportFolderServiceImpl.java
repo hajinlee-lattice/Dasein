@@ -49,6 +49,9 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
         if (!s3Service.objectExist(s3Bucket, tenantId + INPUT_ROOT + "/")) {
             s3Service.createFolder(s3Bucket, tenantId + INPUT_ROOT + "/");
         }
+        if (!s3Service.objectExist(s3Bucket, tenantId + INPUT_ROOT + BACKUP + "/")) {
+            s3Service.createFolder(s3Bucket, tenantId + INPUT_ROOT + BACKUP + "/");
+        }
         if (!s3Service.objectExist(s3Bucket, tenantId + INPUT_ROOT + IN_PROGRESS + "/")) {
             s3Service.createFolder(s3Bucket, tenantId + INPUT_ROOT + IN_PROGRESS + "/");
         }
@@ -80,6 +83,9 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
         String backupPath = tenantId + INPUT_ROOT + BACKUP + "/" + date + "/" + prefix + "/";
         if (!s3Service.objectExist(s3Bucket, path)) {
             s3Service.createFolder(s3Bucket, path);
+        }
+        if (!s3Service.objectExist(s3Bucket, backupPath)) {
+            s3Service.createFolder(s3Bucket, backupPath);
         }
         String target = path + getFileName(sourceKey);
         String backupTarget = backupPath + getFileName(sourceKey);
