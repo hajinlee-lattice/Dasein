@@ -34,9 +34,10 @@ class ArgumentParser(object):
         dataSchema = json.loads(dataSchemaJsonData)
         self.configMetadata = None
         try:
-            configMetadataJson = open(self.stripPath(self.metadataSchema["config_metadata"])).read()
-            self.configMetadata = json.loads(configMetadataJson)
-            logger.debug("JSON config metadata schema %s" % configMetadataJson)
+            if (self.stripPath(self.metadataSchema["config_metadata"])).endswith(".avsc"):
+                configMetadataJson = open(self.stripPath(self.metadataSchema["config_metadata"])).read()
+                self.configMetadata = json.loads(configMetadataJson)
+                logger.debug("JSON config metadata schema %s" % configMetadataJson)
         except Exception, e:
             logger.warn("Errors loading config metadata:" + str(e))
 
