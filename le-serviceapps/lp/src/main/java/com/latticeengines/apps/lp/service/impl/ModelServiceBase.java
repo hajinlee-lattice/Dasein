@@ -189,7 +189,7 @@ public abstract class ModelServiceBase implements ModelService {
             log.info(String.format("Copying hdfs data from %s to %s", sourceModelLocalRoot, targetModelRoot));
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
             log.info(String.format("Copying hdfs data from %s to %s", sourceModelLocalRoot, s3TargetModelRoot));
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, s3TargetModelRoot);
+            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, sourceModelLocalRoot, s3TargetModelRoot);
         }
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")) {
             FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
