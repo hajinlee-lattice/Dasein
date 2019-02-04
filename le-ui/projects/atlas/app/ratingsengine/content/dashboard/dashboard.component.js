@@ -3,7 +3,7 @@ angular.module('lp.ratingsengine.dashboard', [
 ])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce,
-    RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
+    RatingsEngineStore, RatingsEngineService, Modal,
     Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
     var vm = this,
@@ -240,6 +240,9 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         });
 
+        RatingsEngineStore.setIterations(vm.dashboard.iterations);
+        RatingsEngineStore.setUsedBy(vm.relatedItems);
+
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
@@ -273,8 +276,7 @@ angular.module('lp.ratingsengine.dashboard', [
                         vm.activeIterations.push(iteration);
                     }
                 });
-                vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;
-                
+                vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;   
             }
             var type = vm.ratingEngine.type.toLowerCase();
 
@@ -328,12 +330,47 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         }
 
-        console.log(vm.dashboard);
+        vm.testDropdownIterations = [
+            {
+              id: 0,
+              title: 'Apple',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 1,
+              title: 'Orange',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 2,
+              title: 'Grape',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 3,
+              title: 'Pomegranate',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 4,
+              title: 'Strawberry',
+              selected: false,
+              key: 'fruit'
+            }
+          ];
+
+        // console.log(vm.dashboard);
     }
 
     vm.init = function() {
         vm.initDataModel();
     }
+
+
 
     vm.isIterationActive = function(iterationId){
         if(vm.ratingEngine.scoring_iteration != null) {
@@ -413,14 +450,17 @@ angular.module('lp.ratingsengine.dashboard', [
     };
 
     vm.remodel = function(iteration){
-        var engineId = vm.ratingEngine.id,
-            modelId = iteration.id;
 
-        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-            AtlasRemodelStore.setRemodelIteration(result);
-            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-            $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
-        });
+        console.log(iteration);
+
+        // var engineId = vm.ratingEngine.id,
+        //     modelId = iteration.id;
+
+        // RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+        //     AtlasRemodelStore.setRemodelIteration(result);
+        //     RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+        //     $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
+        // });
     }
 
     vm.viewIteration = function(iteration){

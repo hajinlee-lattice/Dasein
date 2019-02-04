@@ -96,6 +96,9 @@
         color: #c7c7c7;
         font-size: 11px;
         float: right;
+        &.link {
+            color: #467dba;
+        }
     }
     .creation-history {
         margin-bottom: 0;
@@ -133,8 +136,10 @@
                         }
                     }
                     &:nth-child(2) {
-                        max-width: 40px;
-                        button {
+                        max-width: 26px;
+                        font-size: 12px;
+                        vertical-align: top;
+                        .button {
                             visibility: hidden;
                             line-height: 1;
                             padding: 5px 7px;
@@ -153,8 +158,34 @@
                             background-image: url("data:image/svg+xml;utf8,<svg width='16px' height='14px' viewBox='0 0 16 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><g id='3rd-iteration' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g id='create-play-copy-9' transform='translate(-1152.000000, -542.000000)' fill='%23D22128'><path d='M1160.07496,554.185103 C1159.66016,554.185103 1159.32169,553.831981 1159.32169,553.424961 C1159.32169,553.004931 1159.66016,552.652738 1160.07496,552.652738 C1160.48976,552.652738 1160.83834,553.004931 1160.83834,553.424961 C1160.83834,553.831981 1160.48976,554.185103 1160.07496,554.185103 Z M1160.77304,546.723071 L1160.57622,551.825688 L1159.58382,551.825688 L1159.37688,546.723071 L1160.77304,546.723071 Z M1159.99954,542.5395 L1152.5,555.6645 L1167.5,555.6645 L1159.99954,542.5395 Z' id='Fill-16'></path></g></g></svg>");
                         }
                         &.running {
-                            background-image: url("/assets/ajax-loader.gif");
-                            background-size: 14px;
+                            padding-left: 0;
+                            span {
+                                span {
+                                    &:first-of-type {
+                                        position: relative;
+                                        display: inline-block;
+                                        width: 14px;
+                                        height: 14px; 
+                                        -webkit-animation: fa-spin 1s infinite linear;
+                                        animation: fa-spin 1s infinite linear;
+                                        &:before {
+                                            color: #ed5200;
+                                            content: "\f110";
+                                            font-family: FontAwesome;
+                                            font-size: 14px;
+                                            line-height: 1;
+                                            font-style: normal;
+                                            font-weight: normal;
+                                            text-decoration: inherit;
+                                            position: absolute;
+                                            top: 0; 
+                                        }
+                                    }
+                                    &:last-of-type {
+                                        padding-left: 2px
+                                    }
+                                }
+                            }
                         }
                     }
                     &:last-of-type {
@@ -209,7 +240,9 @@
                                 background-image: url("data:image/svg+xml;utf8,<svg width='16px' height='14px' viewBox='0 0 16 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><g id='3rd-iteration' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g id='create-play-copy-9' transform='translate(-1152.000000, -542.000000)' fill='%23ffffff'><path d='M1160.07496,554.185103 C1159.66016,554.185103 1159.32169,553.831981 1159.32169,553.424961 C1159.32169,553.004931 1159.66016,552.652738 1160.07496,552.652738 C1160.48976,552.652738 1160.83834,553.004931 1160.83834,553.424961 C1160.83834,553.831981 1160.48976,554.185103 1160.07496,554.185103 Z M1160.77304,546.723071 L1160.57622,551.825688 L1159.58382,551.825688 L1159.37688,546.723071 L1160.77304,546.723071 Z M1159.99954,542.5395 L1152.5,555.6645 L1167.5,555.6645 L1159.99954,542.5395 Z' id='Fill-16'></path></g></g></svg>");
                             }
                             &.running {
-                                background-image: url("/assets/ajax-loader.gif");
+                                span span:first-of-type:before {
+                                    color: #fff;
+                                }
                             }
                         }
                         &:last-of-type {
