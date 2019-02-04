@@ -8,7 +8,7 @@ class LeTile extends Component {
     render() {
 
         return (
-            <div className={`"le-tile" ${this.props.classNames ? this.props.classNames : ''}`}>
+            <div className={`${"le-tile"} ${this.props.classNames ? this.props.classNames : ''}`}>
                 {this.props.children}
             </div>
         );
