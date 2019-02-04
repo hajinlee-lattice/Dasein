@@ -929,7 +929,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME",
-                        "TRANSACTION TIME")) //
+                        "TRANSACTION TIME", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
                 .required() //

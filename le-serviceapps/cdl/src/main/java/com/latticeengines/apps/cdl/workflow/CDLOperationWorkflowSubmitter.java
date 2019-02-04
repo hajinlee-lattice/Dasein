@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +63,9 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Value("${cdl.modeling.workflow.mem.mb}")
+    protected int workflowMemMb;
 
     private String executionId;
 
@@ -182,6 +186,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 .filePath(filePath) //
                 .tableName(tableName) //
                 .businessEntity(businessEntity)
+                .workflowContainerMem(workflowMemMb) //
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //

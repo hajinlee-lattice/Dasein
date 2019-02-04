@@ -12,6 +12,7 @@ angular
         'ngRoute',
         'ui.router',
         'ui.bootstrap',
+        'oc.lazyLoad',
         'angulartics',
         'angulartics.mixpanel',
         'common.modules',

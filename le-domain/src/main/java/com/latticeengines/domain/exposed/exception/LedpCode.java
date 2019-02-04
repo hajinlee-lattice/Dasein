@@ -797,6 +797,7 @@ public enum LedpCode {
     LEDP_40050("Cannot create External System Authentication as LookupMap with Id {0} doesnot exists"),
     LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"),
     LEDP_40052("Could not find External System Authentication ID: {0}"),
+    LEDP_40053("Unable to parse ModelSummary payload for Iteration {0} of Model {1}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

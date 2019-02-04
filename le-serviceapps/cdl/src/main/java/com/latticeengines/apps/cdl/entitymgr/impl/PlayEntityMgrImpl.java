@@ -18,6 +18,7 @@ import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.PlayGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayRepository;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -52,6 +54,9 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Inject
     private SegmentEntityMgr segmentEntityMgr;
+
+    @Inject
+    private PlayGroupEntityMgr playGroupEntityMgr;
 
     @Resource(name = "playWriterRepository")
     private PlayRepository playWriterRepository;
@@ -106,6 +111,10 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (play.getRatingEngine() != null) {
             play.setRatingEngine(findRatingEngine(play));
         }
+        if (play.getPlayGroups() != null) {
+            play.setPlayGroups(findPlayGroups(play));
+
+        }
         if (play.getTargetSegment() == null) {
             throw new LedpException(LedpCode.LEDP_18206);
         } else {
@@ -118,8 +127,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         }
         // TODO: Remove in M24
         if (play.getDisplayName() == null) {
-            play.setDisplayName(
-                    String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
+            play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
         }
         if (play.getName() == null) {
             play.setName(play.generateNameStr());
@@ -145,6 +153,25 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         return segmentEntityMgr.findByName(segmentName);
     }
 
+    private Set<PlayGroup> findPlayGroups(Play plays) {
+        if (plays.getPlayGroups() == null) {
+            throw new NullPointerException("No Play Group in Play");
+        }
+        Set<PlayGroup> playGroups = new HashSet<PlayGroup>();
+        for (PlayGroup playGroup : plays.getPlayGroups()) {
+            String playGroupId = playGroup.getId();
+            if (playGroupId == null) {
+                throw new NullPointerException("Play Group Id cannot be null.");
+            }
+            PlayGroup existingPlayGroup = playGroupEntityMgr.findById(playGroupId);
+            if (existingPlayGroup == null) {
+                throw new NullPointerException("No PlayGroup found for given ID");
+            }
+            playGroups.add(existingPlayGroup);
+        }
+        return playGroups;
+    }
+
     private void updateExistingPlay(Play existingPlay, Play play) {
         if (play.getDisplayName() != null) {
             existingPlay.setDisplayName(play.getDisplayName());
@@ -164,8 +191,10 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (play.getIsCleanupDone() != null) {
             existingPlay.setIsCleanupDone(play.getIsCleanupDone());
         }
-        if (play.getPlayType() != null
-                && !play.getPlayType().getId().equals(existingPlay.getPlayType().getId())) {
+        if (play.getPlayGroups() != null) {
+            existingPlay.setPlayGroups(findPlayGroups(play));
+        }
+        if (play.getPlayType() != null && !play.getPlayType().getId().equals(existingPlay.getPlayType().getId())) {
             existingPlay.setPlayType(play.getPlayType());
         }
         existingPlay.setUpdatedBy(play.getUpdatedBy());
@@ -185,8 +214,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine,
-            List<PlayStatus> statusList) {
+    public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList) {
         return playWriterRepository.findByRatingEngineAndPlayStatusIn(ratingEngine, statusList);
     }
 
@@ -201,8 +229,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     public void deleteByName(String name, Boolean hardDelete) {
         Play play = getPlayByName(name, true);
         if (play == null) {
-            throw new NullPointerException(
-                    String.format("Play with name %s cannot be found", name));
+            throw new NullPointerException(String.format("Play with name %s cannot be found", name));
         }
         playDao.deleteByPid(play.getPid(), hardDelete == Boolean.TRUE);
     }

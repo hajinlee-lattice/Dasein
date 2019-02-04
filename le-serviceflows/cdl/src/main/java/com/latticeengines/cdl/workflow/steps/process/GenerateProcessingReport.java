@@ -361,8 +361,9 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             throw new RuntimeException("Fail to look for serving store for entity " + entity.name(), ex);
         }
         if (StringUtils.isBlank(servingStore)) {
-            throw new RuntimeException(String.format("Cannot find serving store for entity %s with version %s",
+            log.info(String.format("Cannot find serving store for entity %s with version %s",
                     entity.name(), inactive.name()));
+            return 0L;
         }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);

@@ -9,9 +9,9 @@ class LeCardImg extends Component {
     render() {
 
         return (
-            <Aux>
-                <img src={this.props.src} className={`${this.props.classNames ? this.props.classNames : ""}`}/>
-            </Aux>
+            <div className="le-card-image-container">
+                <img src={this.props.src} className={`${"le-card-image"} ${this.props.classNames ? this.props.classNames : ""}`}/>
+            </div>
         );
     }
 }

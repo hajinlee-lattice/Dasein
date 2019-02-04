@@ -29,6 +29,8 @@ public interface GlobalAuthTestBed {
 
     Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product, Map<String, Boolean> featureFlagMap);
 
+    Tenant bootstrapForProduct(LatticeProduct product, String jsonFileName);
+
     List<Tenant> getTestTenants();
 
     Tenant addExtraTestTenant(String tenantName);

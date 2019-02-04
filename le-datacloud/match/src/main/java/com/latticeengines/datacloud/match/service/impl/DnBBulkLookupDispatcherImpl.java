@@ -83,14 +83,27 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     @Override
     public DnBBatchMatchContext sendRequest(DnBBatchMatchContext batchContext) {
         for (int i = 0; i < retries; i++) {
+            // Don't actually acquire quota because submission might not be
+            // successful. Only check quota availability
             RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size(),
-                    false);
+                    true);
             if (!rlAcq.isAllowed()) {
                 logRateLimitingRejection(rlAcq, DnBAPIType.BATCH_DISPATCH);
                 batchContext.setDnbCode(DnBReturnCode.RATE_LIMITING);
                 return batchContext;
             }
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_DISPATCH);
+            if (batchContext.getDnbCode() == DnBReturnCode.SUBMITTED) {
+                // After request is successfully submitted, log the used quota.
+                // Has potential issue that probably during 2 calls of
+                // acquireDnBBulkRequest, maybe another job logs its quota and
+                // we reach the upper limit of quota. Then quota of this request
+                // is not logged.
+                // Not a serious issue. We don't need to control DnB quota usage
+                // very accurately. If exceeding quota limit, DnB will simply
+                // fail the request.
+                rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size(), false);
+            }
             if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
                 log.info("Sent batched request to dnb bulk match api, status=" + batchContext.getDnbCode() + " size="
                         + batchContext.getContexts().size() + " timestamp=" + batchContext.getTimestamp()

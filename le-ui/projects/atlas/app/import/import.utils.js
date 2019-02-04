@@ -129,7 +129,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     }
 
     function setMapping(entity, savedObj, fieldsMapped){
-        originalMapping = fieldsMapping ? fieldsMapping : {};
+        // let originalMapping = fieldsMapping ? fieldsMapping : {};
         var keysMapped = Object.keys(fieldsMapped);
         keysMapped.forEach(function(mapped){
             if(savedObj.mappedField === fieldsMapped[mapped].mappedField && 

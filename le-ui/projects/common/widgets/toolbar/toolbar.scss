@@ -6,6 +6,8 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    width: 100%;
+    
     &.vertical{
         margin-top: 0;
         flex-direction: column;

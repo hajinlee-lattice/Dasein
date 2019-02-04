@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -79,10 +79,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Inject
     private ImportFromS3Service importFromS3Service;
 
-    @Inject
-    private S3Service s3Service;
-
-    private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Override
     public List<Job> getJobs(String modelId) {
@@ -141,7 +139,12 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
 
-            List<String> pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            List<String> pathsWithQuote = null;
+            try {
+                pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            } catch (Exception ex) {
+                log.info("There's no Quote Protection file on HDFS!");
+            }
             if (CollectionUtils.isEmpty(pathsWithQuote)) {
                 InputStream inputStream = getResultStreamFromS3(hdfsDir, filePrefix);
                 if (inputStream == null) {
@@ -195,6 +198,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private InputStream getResultStreamFromS3(String hdfsDir, String filePrefix) {
+
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+
         String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, "bucket");
         if (s3Dir.endsWith("/Exports")) {
             s3Dir = StringUtils.substringBeforeLast(s3Dir, "/");

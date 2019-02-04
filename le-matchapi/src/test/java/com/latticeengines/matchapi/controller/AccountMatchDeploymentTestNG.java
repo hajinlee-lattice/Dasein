@@ -324,10 +324,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                     : record.get(InterfaceName.EntityId.name()).toString();
             if (resultEntityId.equals(entityId)) {
                 Assert.assertNotNull(record.get(InterfaceName.LatticeAccountId.name()));
-                Assert.assertEquals(record.get(InterfaceName.AccountId.name()).toString(), "acc_id");
             } else {
                 Assert.assertNull(record.get(InterfaceName.LatticeAccountId.name()));
-                Assert.assertNull(record.get(InterfaceName.AccountId.name()));
             }
         }
         Assert.assertEquals(count, dataFetchOnly.length);

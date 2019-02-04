@@ -120,7 +120,7 @@ class ExternalIntegrationServiceClass {
   getUser(userName, observer) {
     let query = {
       query: `query {
-        users (input: {name: "${userName}"}) {
+        users (criteria: {name: "${userName}"}) {
           edges {
             node {
               name

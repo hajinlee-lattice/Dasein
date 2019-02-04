@@ -88,7 +88,7 @@
             <select ng-disabled="fieldMapping[field.userField].ignore === true" class="form-control select-type"
               ng-class=" fieldMapping[field.userField].fieldType == 'DATE' ? 'date-type' : ''" name="columnType_{{ ::field.userField }}"
               ng-model="fieldMapping[field.userField].fieldType" ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
-              ng-change="vm.changeType(fieldMapping)" value="{{ field.fieldType }}">
+              ng-change="vm.changeType(fieldMapping, field)" value="{{ field.fieldType }}">
               <option value="TEXT" selected>Text</option>
               <option value="NUMBER">Number</option>
               <option value="INTEGER">Integer</option>

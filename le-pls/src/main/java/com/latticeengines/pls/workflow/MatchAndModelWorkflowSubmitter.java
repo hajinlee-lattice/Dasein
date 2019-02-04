@@ -9,6 +9,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -55,6 +56,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Value("${pls.modeling.workflow.mem.mb}")
+    protected int workflowMemMb;
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchAndModelWorkflowSubmitter.class);
@@ -153,6 +157,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .setScoreTestFile(false) //
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
+                .workflowContainerMem(workflowMemMb) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

@@ -1,7 +1,9 @@
 package com.latticeengines.workflow.entitymanager.impl;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.dao.WorkflowJobDao;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
@@ -64,6 +66,9 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds) {
+        if (CollectionUtils.isEmpty(workflowIds)) {
+            return Collections.emptyList();
+        }
         return workflowJobDao.findByWorkflowIds(workflowIds);
     }
 
@@ -90,6 +95,9 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids) {
+        if (CollectionUtils.isEmpty(workflowPids)) {
+            return Collections.emptyList();
+        }
         return workflowJobDao.findByWorkflowPids(workflowPids);
     }
 

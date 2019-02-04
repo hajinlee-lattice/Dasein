@@ -19,4 +19,6 @@ public interface PeriodTransactionProxy {
     List<ProductHierarchy> getProductHierarchy(String customerSpace, DataCollection.Version version);
 
     DataPage getAllSpendAnalyticsSegments(String customerSpace);
+
+    List<String> getFinalAndFirstTransactionDate(String customerSpace);
 }

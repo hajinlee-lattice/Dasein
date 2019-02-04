@@ -4,14 +4,12 @@ import Response from './response';
 import Error from './error';
 import Observables from './observables';
 import Message, {
-    MODAL,
     BANNER,
-    NOTIFICATION,
     ERROR,
-    INFO,
-    WARNING
 } from '../utilities/message';
 
+const httpName = 'http';
+const observablesName = 'observables';
 /**
  *
  * @param {*} axiosObj
@@ -25,10 +23,10 @@ const setParams = (axiosObj, obj) => {
     }
 };
 const init = () => {
-    if (!window['http']) {
-        console.log('init', window['http'], typeof window['http']);
-        window['http'] = axios;
-        window['observables'] = new Observables();
+    if (!window[httpName]) {
+        console.log('init', window[httpName], typeof window[httpName]);
+        window[httpName] = axios;
+        window[observablesName] = new Observables();
     }
 };
 
@@ -37,7 +35,10 @@ const init = () => {
  */
 const httpService = {
     constructor: () => {
-        var http = window['http'];
+        var http = window[httpName];
+    },
+    printObservables: () => {
+        console.log('OBSERVABLES ',window[observablesName].getObservables());
     },
     /**
      * Set up headeer for all the requests
@@ -47,7 +48,7 @@ const httpService = {
         setParams(http.defaults.headers.common, headerObj);
     },
     unsubscribeObservable: observer => {
-        window['observables'].removeObservable(observer.getName());
+        window[observablesName].removeObservable(observer.getName());
     },
     get: (url, observer, headers) => {
         let observable = Observable.create(obs => {
@@ -88,7 +89,7 @@ const httpService = {
                     obs.complete();
                 });
         }).subscribe(observer);
-        window['observables'].addObservable(observer.getName(), observable);
+        window[observablesName].addObservable(observer.getName(), observable);
     },
 
     post: (url, body, observer, headers) => {
@@ -130,7 +131,7 @@ const httpService = {
                     obs.complete();
                 });
         }).subscribe(observer);
-        window['observables'].addObservable(observer.getName(), observable);
+        window[observablesName].addObservable(observer.getName(), observable);
     },
     put: (url, body, observer, headers) => {
         let observable = Observable.create(obs => {
@@ -169,7 +170,7 @@ const httpService = {
                     obs.complete();
                 });
         }).subscribe(observer);
-        window['observables'].addObservable(observer.getName(), observable);
+        window[observablesName].addObservable(observer.getName(), observable);
     }
 };
 init();

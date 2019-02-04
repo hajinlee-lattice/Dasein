@@ -22,6 +22,34 @@ CREATE PROCEDURE `UpdatePLSTables`()
     foreign key (`FK_LOOKUP_ID_MAP`) references `PLS_MultiTenant`.`LOOKUP_ID_MAP` (`PID`) on delete cascade;
   alter table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` add constraint `FK_EXTERNALSYSTEMAUTHENTICATION_FKTENANTID_TENANT` 
     foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
+
+  ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `SOURCE_FILE` VARCHAR(4096);
+    
+  ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `ERROR_FILE` VARCHAR(4096);
+  
+  create table `PLS_MultiTenant`.`PLAY_GROUP` (
+    `PID` bigint not null auto_increment, 
+    `CREATED` datetime not null, 
+    `CREATED_BY` varchar(255) not null, 
+    `DISPLAY_NAME` varchar(255) not null, 
+    `ID` varchar(255) not null, 
+    `TENANT_ID` bigint not null, 
+    `UPDATED` datetime not null, 
+    `UPDATED_BY` varchar(255) not null, 
+    `FK_TENANT_ID` bigint not null, 
+    primary key (`PID`)) 
+    engine=InnoDB;
+    
+  create table `PLS_MultiTenant`.`PLAY_PLAY_GROUP` (
+    `FK_PLAY_ID` bigint not null, 
+    `FK_PLAY_GROUP_ID` bigint not null, 
+    primary key (`FK_PLAY_ID`, `FK_PLAY_GROUP_ID`)) 
+    engine=InnoDB;
+    
+  alter table `PLAY_GROUP` add constraint `FK_PLAYGROUP_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
+  alter table `PLAY_PLAY_GROUP` add constraint `FK_PLAYPLAYGROUP_FKPLAYGROUPID_PLAYGROUP` foreign key (`FK_PLAY_GROUP_ID`) references `PLAY_GROUP` (`PID`) on delete cascade;
+  alter table `PLAY_PLAY_GROUP` add constraint `FK_PLAYPLAYGROUP_FKPLAYID_PLAY` foreign key (`FK_PLAY_ID`) references `PLAY` (`PID`) on delete cascade;
+  
   END;
 //
 DELIMITER;

@@ -161,6 +161,15 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public Tenant bootstrapForProduct(LatticeProduct product, String jsonFileName) {
+        loginAD();
+        Tenant tenant = bootstrapViaTenantConsoleByFileName(jsonFileName);
+        involvedDL = (LatticeProduct.LPA.equals(product));
+        involvedZK = false;
+        return tenant;
+    }
+
+    @Override
     public void cleanupDlZk() {
         if (involvedZK) {
             cleanupTenantsInZK();
@@ -304,6 +313,19 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 overwriteFeatureFlag(tenant, featureFlagId, featureFlagMap.get(featureFlagId));
             }
         }
+        return tenant;
+    }
+
+    private Tenant bootstrapViaTenantConsoleByFileName(String jsonFileName) {
+        Tenant tenant = addBuiltInTestTenant();
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+        try {
+            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName, null);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to provision tenant via tenant console.", e);
+        }
+        testCustomerSpaces.add(customerSpace.toString());
+        waitForTenantConsoleInstallation(CustomerSpace.parse(tenant.getId()));
         return tenant;
     }
 

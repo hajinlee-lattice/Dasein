@@ -46,7 +46,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
 public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = true;
     private static final String EXISTING_TENANT = "JLM1540406334891";
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
@@ -101,7 +102,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     /**
      * This test is part of CD pipeline and Trunk Health
      */
-    @Test(groups = { "end2end", "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
+    @Test(groups = { "end2end",
+            "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
     public void end2endCDLStyleCustomEventReModelTest() {
         moveCustomerDataToS3();
         runCustomEventRemodel(testType);
@@ -109,8 +111,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     private void moveCustomerDataToS3() {
         try {
-            String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(protocol);
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
             CustomerSpace space = CustomerSpace.parse(mainTestTenant.getId());
             String podId = CamilleEnvironment.getPodId();
             String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());
@@ -119,9 +120,10 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             String s3DataDir = builder.exploreS3FilePath(hdfsDataDir, customerS3Bucket);
             System.out.println("HDFS Path=" + hdfsDataDir);
             System.out.println("S3 Path=" + s3DataDir);
-            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*", s3DataDir, "");
-            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/AnalyticPurchaseState*", s3DataDir,
-                    "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*",
+                    s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
+                    hdfsDataDir + "/AnalyticPurchaseState*", s3DataDir, "");
             HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
             HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
         } catch (Exception ex) {
@@ -153,29 +155,33 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     private void runCustomEventModel(CustomEventModelingType type) {
         log.info("Starting Custom Event modeling ...");
-        RatingEngine testRatingEngine = type == CustomEventModelingType.CDL ? cdlCERatingEngine : lpiCERatingEngine;
+        RatingEngine testRatingEngine = type == CustomEventModelingType.CDL ? cdlCERatingEngine
+                : lpiCERatingEngine;
         RatingModel testAIModel = type == CustomEventModelingType.CDL ? cdlCEAIModel : lpiCEAIModel;
-        Assert.assertTrue(ratingEngineProxy.validateForModeling(mainTestTenant.getId(), testAIModel.getId(),
-                testRatingEngine.getId(), testRatingEngine));
+        Assert.assertTrue(ratingEngineProxy.validateForModeling(mainTestTenant.getId(),
+                testAIModel.getId(), testRatingEngine.getId(), testRatingEngine));
         verifyBucketMetadataNotGenerated(testRatingEngine);
-        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
-                testRatingEngine.getId(), testAIModel.getId(), null, "ga_dev@lattice-engines.com");
+        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(
+                mainTestTenant.getId(), testRatingEngine.getId(), testAIModel.getId(), null,
+                "ga_dev@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-        testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
+        testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(),
+                testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         testAIModel = ratingEngineProxy.getRatingModel(mainCustomerSpace, testRatingEngine.getId(),
                 testAIModel.getId());
         Assert.assertEquals(((AIModel) testAIModel).getModelingJobStatus(), completedStatus);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         verifyBucketMetadataGenerated(testRatingEngine);
-        Assert.assertEquals(
-                ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
+        Assert.assertEquals(ratingEngineProxy
+                .getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
     }
 
     private void runCustomEventRemodel(CustomEventModelingType type) {
         log.info("Starting Custom Event remodeling ...");
-        RatingEngine testRatingEngine = type == CustomEventModelingType.CDL ? cdlCERatingEngine : lpiCERatingEngine;
+        RatingEngine testRatingEngine = type == CustomEventModelingType.CDL ? cdlCERatingEngine
+                : lpiCERatingEngine;
         AIModel testAIModel = type == CustomEventModelingType.CDL ? cdlCEAIModel : lpiCEAIModel;
         AIModel testCERemodel = new AIModel();
         testCERemodel.setRatingEngine(testRatingEngine);
@@ -185,38 +191,43 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 testRatingEngine.getId(), testCERemodel);
 
         Assert.assertNotEquals(
-                ((CustomEventModelingConfig) testAIModel.getAdvancedModelingConfig()).getSourceFileName(),
-                ((CustomEventModelingConfig) testCERemodel.getAdvancedModelingConfig()).getSourceFileName());
-        testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
+                ((CustomEventModelingConfig) testAIModel.getAdvancedModelingConfig())
+                        .getSourceFileName(),
+                ((CustomEventModelingConfig) testCERemodel.getAdvancedModelingConfig())
+                        .getSourceFileName());
+        testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(),
+                testRatingEngine.getId());
         Assert.assertEquals(testRatingEngine.getLatestIteration().getId(), testCERemodel.getId());
 
-        Map<String, List<ColumnMetadata>> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
+        List<ColumnMetadata> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), "CDL,DataCloud");
         Assert.assertNotNull(attrs);
 
         verifyBucketMetadataGenerated(testRatingEngine);
-        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
-                testRatingEngine.getId(), testCERemodel.getId(), refineAttributes(attrs), "some@email.com");
-        log.info(String.format("Remodel workflow application id is %s", modelingWorkflowApplicationId));
+        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(
+                mainTestTenant.getId(), testRatingEngine.getId(), testCERemodel.getId(),
+                refineAttributes(attrs), "some@email.com");
+        log.info(String.format("Remodel workflow application id is %s",
+                modelingWorkflowApplicationId));
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        testCERemodel = (AIModel) ratingEngineProxy.getRatingModel(mainCustomerSpace, testRatingEngine.getId(),
-                testCERemodel.getId());
+        testCERemodel = (AIModel) ratingEngineProxy.getRatingModel(mainCustomerSpace,
+                testRatingEngine.getId(), testCERemodel.getId());
         Assert.assertEquals(testCERemodel.getModelingJobStatus(), completedStatus);
-        Assert.assertEquals(
-                ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
+        Assert.assertEquals(ratingEngineProxy
+                .getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
         verifyBucketMetadataGeneratedAfterRemodel(testRatingEngine);
 
-        attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testRatingEngine.getId(),
-                testCERemodel.getId(), "CDL,DataCloud");
+        attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
+                testRatingEngine.getId(), testCERemodel.getId(), "CDL,DataCloud");
         Assert.assertNotNull(attrs);
         verifyRefinedAttributes(attrs);
     }
 
-    private void verifyRefinedAttributes(Map<String, List<ColumnMetadata>> attrs) {
+    private void verifyRefinedAttributes(List<ColumnMetadata> attrs) {
         for (String refinedAttribute : refinedAttributes.keySet()) {
-            ColumnMetadata cm = attrs.get(refinedAttributes.get(refinedAttribute).getName()).stream()
+            ColumnMetadata cm = attrs.stream()
                     .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
             Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
             Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE,
@@ -224,21 +235,20 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         }
     }
 
-    private Map<String, List<ColumnMetadata>> refineAttributes(Map<String, List<ColumnMetadata>> attrs) {
+    private List<ColumnMetadata> refineAttributes(List<ColumnMetadata> attrs) {
         int noOfAttributesToRefine = 3;
-        for (List<ColumnMetadata> attrList : attrs.values()) {
-            for (ColumnMetadata attr : attrList) {
-                if (attr.getImportanceOrdering() != null) {
-                    refinedAttributes.put(attr.getAttrName(), attr.getCategory());
-                    attr.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
-                    noOfAttributesToRefine--;
-                    log.info("Refined Attr: " + attr.getAttrName());
-                }
-                if (noOfAttributesToRefine == 0) {
-                    return attrs;
-                }
+        for (ColumnMetadata attr : attrs) {
+            if (attr.getImportanceOrdering() != null) {
+                refinedAttributes.put(attr.getAttrName(), attr.getCategory());
+                attr.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
+                noOfAttributesToRefine--;
+                log.info("Refined Attr: " + attr.getAttrName());
+            }
+            if (noOfAttributesToRefine == 0) {
+                return attrs;
             }
         }
+
         return attrs;
     }
 
@@ -279,11 +289,13 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private void setupSourceFile(CustomEventModelingType type) {
         Resource csvResource = new ClassPathResource("end2end/csv/CustomEventModelTest.csv",
                 Thread.currentThread().getContextClassLoader());
-        SchemaInterpretation schemaInterpretation = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account
+        SchemaInterpretation schemaInterpretation = type == CustomEventModelingType.CDL
+                ? SchemaInterpretation.Account
                 : SchemaInterpretation.SalesforceAccount;
-        String entity = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account.name() : null;
-        testSourceFile = fileUploadProxy.uploadFile(getSourceFileName(type), false, testSourceFileName,
-                schemaInterpretation, entity, csvResource);
+        String entity = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account.name()
+                : null;
+        testSourceFile = fileUploadProxy.uploadFile(getSourceFileName(type), false,
+                testSourceFileName, schemaInterpretation, entity, csvResource);
 
         FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(getSourceFileName(type),
                 schemaInterpretation.name());
@@ -321,20 +333,23 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         if (type == CustomEventModelingType.CDL) {
             setupTestSegment();
         } else {
-            Assert.assertNull(testSegment, "Non-null test segment provided for LPI Style Custom Event Model");
+            Assert.assertNull(testSegment,
+                    "Non-null test segment provided for LPI Style Custom Event Model");
         }
         setupSourceFile(type);
 
-        RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CUSTOM_EVENT, testSegment);
-        RatingEngine testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
-                ratingEngine);
+        RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CUSTOM_EVENT,
+                testSegment);
+        RatingEngine testRatingEngine = ratingEngineProxy
+                .createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
 
         AIModel testAIModel = (AIModel) testRatingEngine.getLatestIteration();
         configureCustomEventModel(testAIModel, getSourceFileName(type), type);
-        CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
+        CustomEventModelingConfig advancedConf = CustomEventModelingConfig
+                .getAdvancedModelingConfig(testAIModel);
         advancedConf.setSourceFileName(testSourceFile.getName());
-        testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
-                testAIModel.getId(), testAIModel);
+        testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(),
+                testRatingEngine.getId(), testAIModel.getId(), testAIModel);
 
         if (type == CustomEventModelingType.CDL) {
             cdlCERatingEngine = testRatingEngine;

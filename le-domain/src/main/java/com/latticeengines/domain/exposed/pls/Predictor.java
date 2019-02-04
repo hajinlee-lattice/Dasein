@@ -1,7 +1,17 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -15,22 +25,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.security.HasTenantId;
+import javax.persistence.Transient;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "PREDICTOR")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@JsonIgnoreProperties(ignoreUnknown = true, value = { "hibernateLazyInitializer", "handler",
+        "created" })
 public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predictor> {
 
     private Long pid;
@@ -85,14 +89,25 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     }
 
     @Column(name = "APPROVED_USAGE", nullable = true)
-    @JsonProperty("ApprovedUsage")
     public String getApprovedUsage() {
         return approvedUsage;
     }
 
-    @JsonProperty("ApprovedUsage")
     public void setApprovedUsage(String approvedUsage) {
         this.approvedUsage = approvedUsage;
+    }
+
+    @Transient
+    @JsonProperty("ApprovedUsage")
+    public List<String> getApprovedUsageList() {
+        return Collections.singletonList(this.approvedUsage);
+    }
+
+    @JsonProperty("ApprovedUsage")
+    public void setApprovedUsageList(List<String> approvedUsageList) {
+        this.approvedUsage = CollectionUtils.isNotEmpty(approvedUsageList)
+                ? approvedUsageList.get(0)
+                : "None";
     }
 
     @Column(name = "CATEGORY")
@@ -142,6 +157,7 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "predictor")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("Elements")
     public List<PredictorElement> getPredictorElements() {
         return predictorElements;
     }
@@ -187,10 +203,12 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     @Override
     public int compareTo(Predictor predictor) {
         // descending order
-        return ObjectUtils.compare(
-                predictor != null && predictor.getUncertaintyCoefficient() != null
-                        ? predictor.getUncertaintyCoefficient() : null,
-                uncertaintyCoefficient != null ? uncertaintyCoefficient : null);
+        return ObjectUtils
+                .compare(
+                        predictor != null && predictor.getUncertaintyCoefficient() != null
+                                ? predictor.getUncertaintyCoefficient()
+                                : null,
+                        uncertaintyCoefficient != null ? uncertaintyCoefficient : null);
     }
 
     @Column(name = "RF_FEATURE_IMPORTANCE", nullable = true)

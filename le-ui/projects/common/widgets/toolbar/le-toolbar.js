@@ -5,13 +5,11 @@ export const VERTICAL = 'vertical';
 export const HORIZONTAL = 'horizontal';
 
 
-const LeToolBar = (props) => {
+export const LeToolBar = (props) => {
     const classes = `${props.direction ? props.direction: ''} le-tool-bar`;
     return(
-        <div className={classes}>
+        <ul className={classes}>
             {props.children}
-        </div>
+        </ul>
     );
 }
-
-export { LeToolBar };

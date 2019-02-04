@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.IngestionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkEntityMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CommitEntityMatchWorkflowConfiguration;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
         @Type(value = BulkMatchWorkflowConfiguration.class, name = "BulkMatchWorkflowConfiguration"),
+        @Type(value = BulkEntityMatchWorkflowConfiguration.class, name = "BulkEntityMatchWorkflowConfiguration"),
         @Type(value = CascadingBulkMatchWorkflowConfiguration.class, name = "CascadingBulkMatchWorkflowConfiguration"),
         @Type(value = IngestionWorkflowConfiguration.class, name = "IngestionWorkflowConfiguration"),
         @Type(value = PublishWorkflowConfiguration.class, name = "PublishWorkflowConfiguration"),

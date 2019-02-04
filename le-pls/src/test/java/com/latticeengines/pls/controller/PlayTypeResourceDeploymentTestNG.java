@@ -3,9 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -93,8 +90,8 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         playProxy.deletePlayTypeById(tenant.getId(), playType.getId());
         List<PlayType> playTypeList = playProxy.getPlayTypes(tenant.getId());
         Assert.assertNotNull(playTypeList);
-        List<PlayType> playTypes = playTypeList.stream().filter(pt -> pt.getId().equals(playType.getId()))
-                .collect(Collectors.toList());
+        List<PlayType> playTypes =
+                playTypeList.stream().filter(pt -> pt.getId().equals(playType.getId())).collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEmpty(playTypes));
     }
 

@@ -306,7 +306,8 @@ angular.module('lp.playbook')
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
-                launchUnscored: PlaybookWizardStore.getLaunchUnscored()
+                launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
+                excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems()
             },
             saveOnly = opts.saveOnly || false,
             lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),
@@ -949,10 +950,8 @@ angular.module('lp.playbook')
             destinationOrgId = opts.destinationOrgId,
             destinationSysType = opts.destinationSysType,
             destinationAccountId = opts.destinationAccountId,
-            excludeItems = opts.excludeItems;
+            excludeItems = opts.excludeItems,
             launchUnscored = opts.launchUnscored;
-
-return false;
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',

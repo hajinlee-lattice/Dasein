@@ -347,23 +347,26 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
         }
-        String initialS3Path = importConfig.getS3FilePath();
-        String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(),
+
+        // startImport to generate unique path to resolve file overwrite issue
+        Pair<String, String> targetPair = s3ImportFolderService.startImport(customerSpace.getTenantId(),
                 dataFeedTask.getEntity(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
-        importConfig.setS3FilePath(newFilePath);
+        String filePath = targetPair.getLeft();
+        String backupPath = targetPair.getRight();
+        importConfig.setS3FilePath(filePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
 
         S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(), importConfig.getS3FileName(),
                 dataFeedTask, new Date());
         // validate
-        validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo, initialS3Path);
+        validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo, backupPath);
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
         csvImportFileInfo.setFileUploadInitiator(DEFAULT_S3_USER);
         csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
-        csvImportFileInfo.setReportFilePath(initialS3Path);
+        csvImportFileInfo.setReportFilePath(backupPath);
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
                 JsonUtils.serialize(importConfig), csvImportFileInfo, true, emailInfo, new WorkflowPidWrapper(-1L));

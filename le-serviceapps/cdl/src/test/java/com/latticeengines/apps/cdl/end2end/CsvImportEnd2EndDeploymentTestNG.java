@@ -81,6 +81,9 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
             importData(BusinessEntity.Product, "ProductBundles.csv", "ProductBundle");
             importData(BusinessEntity.Product, "ProductHierarchies.csv", "ProductHierarchy");
             importData(BusinessEntity.Product, "ProductVDB.csv", "ProductVDB");
+            importData(BusinessEntity.Product, "ProductBundle_MissingProductBundle.csv", "ProductBundle");
+            importData(BusinessEntity.Product, "ProductHierarchies_MissingCategory.csv", "ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductHierarchies_MissingFamily.csv", "ProductHierarchy");
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {

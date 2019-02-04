@@ -13,6 +13,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.BulkEntityMatchRequest;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
@@ -179,6 +180,20 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return false;
         }
         return responseDoc.isSuccess();
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId submitBulkEntityMatch(String customerSpace, BulkEntityMatchRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/match/entity/bulk", customerSpace);
+        ResponseDocument<String> res = post("bulkEntityMatch", url, request, ResponseDocument.class);
+        if (res == null) {
+            return null;
+        }
+        if (res.isSuccess()) {
+            return StringUtils.isNotBlank(res.getResult()) ? ApplicationId.fromString(res.getResult()) : null;
+        } else {
+            throw new RuntimeException("Fail to submit bulk entity match job, errors = " + res.getErrors());
+        }
     }
 
     public ApplicationId submitOrphanRecordsExport(String customerSpace, OrphanRecordsExportRequest request) {
