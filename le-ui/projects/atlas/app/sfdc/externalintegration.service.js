@@ -116,6 +116,8 @@ class ExternalIntegrationServiceClass {
 
   /*
     MASTER token
+    id: tray ==> for api
+    name: dropbox
   */
   getUser(userName, observer) {
     let query = {
@@ -142,6 +144,16 @@ class ExternalIntegrationServiceClass {
     let ok = this.constructObserver(observer);
     httpService.post(URLS.trayUrl, QUERIES.solutions, ok);
   }
+
+  /**
+   * 
+   *  Create Process:
+   *  1. Get solutions by tag = Marketo
+   *      => node.id ==> solution id
+   *  2. Create instance based on the solution id 1. ==> solution instance id
+   *  3. Get generateAuthorizationCode ==> tocken used in iframe
+   *  3. Create the popup iframe
+   */
 
   /*
     MASTER token

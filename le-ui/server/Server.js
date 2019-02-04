@@ -22,8 +22,10 @@ const cors = require("cors");
 const wsproxy = require("http-proxy-middleware");
 const DateUtil = require("./utilities/DateUtil");
 // const session = require("express-session");
+const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
+var TrayRouter = require('./apis/tray_routes');
 
 class Server {
     constructor(express, app, options) {
@@ -95,6 +97,7 @@ class Server {
         options.routes ? this.setAppRoutes(options.routes) : null;
         this.setProxies();
         this.setDefaultRoutes(options.config.NODE_ENV);
+        // this.setOtherRoutes(options.config.NODE_ENV);
     }
 
     setCors() {
@@ -423,37 +426,10 @@ class Server {
     }
 
     createTrayProxy(API_URL, API_PATH, PATH) {
-        if (API_URL) {
-            (API_PATH = API_PATH || "/tray");
-            console.log(
-                chalk.white(">") + " TRAY PROXY",
-                API_PATH,
-                "\n\t" + API_URL + PATH
-            );
-            this.app.use(API_PATH, (req, res) => {
-                try {
-                    let authorization = (req.headers && req.headers.UserAccessToken) ?
-                        req.headers.UserAccessToken :
-                        "6cadf407-a686-41be-92e7-36e37c97c1e3";
-
-                    const options = {
-                        url: API_URL + PATH,
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${authorization}`
-                        }
-                    };
-
-                    let r = request(options);
-
-                    req.pipe(r).pipe(res);
-
-                } catch (err) {
-                    console.log(
-                        chalk.red(DateUtil.getTimeStamp() + ":TRAY PROXY ") + err
-                    );
-                }
-            });
+        if(API_URL){
+            console.log('TRAY PROXY <======================');
+            var router = new TrayRouter(this.express, this.app, bodyParser, chalk,  API_URL, PATH, request, this.options.config.proxies).createRoutes();
+            this.app.use('/tray', router);
         }
     }
 
@@ -591,6 +567,11 @@ class Server {
             });
         });
     }
+    // setOtherRoutes(NODE_ENV) {
+    //     var router = new TrayRouter(this.express).createRoutes();
+    //     this.app.use('/tray', router);
+    //     // this.otherRoutes(this.app, {});
+    // }
 
     start(cb) {
         const options = this.options;
