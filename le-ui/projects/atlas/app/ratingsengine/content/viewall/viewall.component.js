@@ -19,6 +19,7 @@ class ViewAllComponent extends Component {
 
     let data = []
     let tableHeader = []
+    let tableColumns = []
     switch (this.props.$state.params.type) {
       case "iterations":
         data = this.props.RatingsEngineStore.getIterations();
@@ -37,11 +38,44 @@ class ViewAllComponent extends Component {
               name: "CreationStatus",
               displayName: "Creation Status",
               sortable: false
+          }
+        ];
+        tableColumns = [
+          {
+              colSpan: 1,
+              template: cell => {
+                if (cell.props.rowData) {
+                  return (
+                    cell.props.rowData.iteration
+                  )
+                } else {
+                  return null;
+                }
+              }
           },
           {
-              name: "Status",
-              displayName: "",
-              sortable: false
+              colSpan: 1,
+              template: cell => {
+                if (cell.props.rowData) {
+                  return (
+                    ''
+                  )
+                } else {
+                  return null;
+                }
+              }
+          },
+          {
+              colSpan: 10,
+              template: cell => {
+                if (cell.props.rowData) {
+                  return (
+                    cell.props.rowData.modelingJobStatus
+                  )
+                } else {
+                  return null;
+                }
+              }
           }
         ];
         break;
@@ -60,6 +94,32 @@ class ViewAllComponent extends Component {
               sortable: false
           }
         ];
+        tableColumns = [
+          {
+              colSpan: 2,
+              template: cell => {
+                if (cell.props.rowData) {
+                  return (
+                    cell.props.rowData.type
+                  )
+                } else {
+                  return null;
+                }
+              }
+          },
+          {
+              colSpan: 10,
+              template: cell => {
+                if (cell.props.rowData) {
+                  return (
+                    cell.props.rowData.name
+                  )
+                } else {
+                  return null;
+                }
+              }
+          }
+        ];
         break;
     }
 
@@ -68,7 +128,8 @@ class ViewAllComponent extends Component {
         showEmpty: false,
         showLoading: false,
         data: data,
-        tableHeader: tableHeader
+        tableHeader: tableHeader,
+        tableColumns: tableColumns
     };
   }
 
@@ -76,114 +137,7 @@ class ViewAllComponent extends Component {
       let config = {
           name: "viewall",
           header: this.state.tableHeader,
-          columns: [
-              {
-                  colSpan: 2,
-                  template: cell => {
-                      if (!cell.state.saving && !cell.state.editing) {
-                          if (cell.props.rowData.Exist) {
-                              return (
-                                  <EditControl
-                                      icon="fa fa-pencil-square-o"
-                                      title="Edit Name"
-                                      toogleEdit={cell.toogleEdit}
-                                      classes="initially-hidden"
-                                  />
-                              );
-                          } else {
-                              return null;
-                          }
-                      }
-                      if (cell.state.editing && !cell.state.saving) {
-                          if (cell.props.rowData.Exist) {
-                              return (
-                                  <EditorText
-                                      initialValue={
-                                          cell.props.rowData.TemplateName
-                                      }
-                                      cell={cell}
-                                      applyChanges={
-                                          this.saveTemplateNameHandler
-                                      }
-                                      cancel={cell.cancelHandler}
-                                  />
-                              );
-                          } else {
-                              return null;
-                          }
-                      }
-                  }
-              },
-              {
-                  colSpan: 2
-              },
-              {
-                  colSpan: 3,
-                  template: cell => {
-                      if (cell.props.rowData.Exist) {
-                          return (
-                              <CopyComponent
-                                  title="Copy Link"
-                                  data={
-                                      cell.props.rowData[cell.props.colName]
-                                  }
-                                  callback={() => {
-                                      messageService.sendMessage(
-                                          new Message(
-                                              null,
-                                              NOTIFICATION,
-                                              "success",
-                                              "",
-                                              "Copied to Clipboard"
-                                          )
-                                      );
-                                  }}
-                              />
-                          );
-                      } else {
-                          return null;
-                      }
-                  }
-              },
-              {
-                  colSpan: 2,
-                  mask: value => {
-                      var options = {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit"
-                      };
-                      var formatted = new Date(value);
-                      console.log(
-                          `grid formatted: ${formatted} value: ${value} options: ${options}`
-                      );
-                      var buh = "err";
-                      try {
-                          buh = formatted.toLocaleDateString(
-                              "en-US",
-                              options
-                          );
-                      } catch (e) {
-                          console.log(e);
-                      }
-
-                      return buh;
-                  }
-              },
-              {
-                  colSpan: 3,
-                  template: cell => {
-                      return (
-                          <TemplatesRowActions
-                              rowData={cell.props.rowData}
-                              callback={this.actionCallbackHandler}
-                          />
-                      );
-                  }
-              }
-          ]
+          columns: this.state.tableColumns
       };
 
       return config;
