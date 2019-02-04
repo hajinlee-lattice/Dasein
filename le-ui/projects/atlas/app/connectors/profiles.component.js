@@ -8,7 +8,9 @@ import LeTileHeader from 'common/widgets/container/tile/le-tile-header';
 import LeTileBody from 'common/widgets/container/tile/le-tile-body';
 import LeMenu from 'common/widgets/menu/le-menu';
 import LeHPanel from 'common/widgets/container/le-h-panel';
-import ConnectorsService, { trayAPI, User } from './connectors.service';
+import Aux from "common/widgets/hoc/_Aux";
+import {SPACEBETWEEN} from "common/widgets/container/le-alignments";
+// import ConnectorsService, { trayAPI, User } from './connectors.service';
 export default class ProfilesComponent extends Component {
 
     constructor(props) {
@@ -54,7 +56,7 @@ export default class ProfilesComponent extends Component {
                 (obj, index) => {
 
                     return (
-                        <div key={index}>{this.getProfileUI(this.state.connectors[obj])}</div>
+                        <Aux>{this.getProfileUI(this.state.connectors[obj])}</Aux>
                     );
                 }
             );
@@ -96,7 +98,7 @@ export default class ProfilesComponent extends Component {
 
     render() {
         return (
-            <LeHPanel hstretch={"false"} wrap>
+            <LeHPanel classesName="profiles" hstretch={"true"} wrap halignment={SPACEBETWEEN}>
                 {this.getProfiles()}
             </LeHPanel>
         );
