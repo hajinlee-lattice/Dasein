@@ -69,23 +69,16 @@ angular.module('lp.models.ratings', [
                 }
             });
 
-
-
             vm.currentConfiguration = angular.copy(vm.dashboard.summary.bucketMetadata);
 
-            // Set active iteration (default value for iteration select menu) 
-            // and working buckets (vm.workingBuckets is what drives the chart data)
+            // $state.toggleRatings is true when the user uses the Iteration dropdown menu on the Ratings screen.
+            // Selecting an iteration from the dropdown sets the active iteration, or vm.activeIteration
+            // and gets the corresponding working buckets (vm.workingBuckets and vm.ratingsSummary are what drives the chart data)
             if ($stateParams.toggleRatings){
 
+                console.log("here 2");
+
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
-
-                // if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-
-                //     console.log("here");
-                //     console.log(vm.dashboard.summary.bucketMetadata);
-
-                //     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
-                // }
 
                 var id = vm.activeIteration.modelSummaryId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
@@ -97,29 +90,47 @@ angular.module('lp.models.ratings', [
 
             } else {
 
-                // If the model has been published previously and is Active
-                if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+                // $stateParams.newConfiguration is true if the user came to the ratings page
+                // using the "New Scoring Configuration" button on the dashboard
+                if ($stateParams.newConfiguration == true) {
 
-                    // Set active iteration and working buckets (determines what is displayed in the chart)
-                    vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
-                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
+                    // If the model has been published previously and is Active
+                    if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
 
-                    var id = vm.activeIteration.modelSummaryId;
-                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
-                        // Helps with chart data and display
-                        vm.ratingsSummary = result;
-                    });
+                        // Set active iteration and working buckets (determines what is displayed in the chart)
+                        vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
+                        vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
 
+                        var id = vm.activeIteration.modelSummaryId;
+                        ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                            // Helps with chart data and display
+                            vm.ratingsSummary = result;
+                        });
+
+                    } else {
+                        // If the model has not been published or is inactive, 
+                        // select the most recent iteration in the select menu
+                        vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
+                    }
                 } else {
 
-                    // If the model has not been published or is inactive, 
-                    // select the most recent iteration in the select menu
-                    vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
+                    // else they clicked the "Activate" button on the dashboard's "Creation History" list
+                    vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
+
+                    var id = vm.activeIteration.modelSummaryId;
+                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
+                        vm.workingBuckets = result;
+                    });
+                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                        vm.ratingsSummary = result;
+                    });
                 }
             }
 
             vm.ratingModelId = vm.activeIteration.id;
         }
+
+        console.log(vm.activeIteration);
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";

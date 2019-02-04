@@ -153,7 +153,8 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 modelId: '',
                 rating_id: '',
                 viewingIteration: false,
-                toggleRatings: false
+                toggleRatings: false,
+                newConfiguration: false
             },
             onEnter: [
                 '$stateParams',

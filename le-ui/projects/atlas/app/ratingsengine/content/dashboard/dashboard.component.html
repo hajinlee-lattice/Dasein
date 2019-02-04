@@ -39,7 +39,8 @@
                             rating_id: vm.ratingEngine.id,
                             modelId: vm.modelSummary,
                             section: 'dashboard.ratings',
-                            ratingEngine: vm.ratingEngine
+                            ratingEngine: vm.ratingEngine,
+                            newConfiguration: true
                         })"
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.activeIterations.length == 0">
@@ -54,7 +55,12 @@
                         Create Campaign
                     </button>
 
-                    
+                    <!-- <dropdownComponent
+                        callback="vm.remodelIteration()"
+                        menuItems="vm.testDropdownIterations" /> -->
+
+
+
                 </div>
             </div>
             <div class="content">
@@ -205,7 +211,13 @@
                 <div ng-if="!vm.isRulesBased">
                     <h3>
                         Creation History ({{ vm.dashboard.iterations.length }})
-                        <!-- <button>View All</button> -->
+                        <a
+                            ui-sref="home.ratingsengine.dashboard.viewall({
+                               type: 'iterations',
+                               data: vm.dashboard.iterations
+                            })"
+                            ng-if="vm.dashboard.iterations.length > 5"
+                            class="published-header link">View All</a>
                     </h3>
                     <table class="creation-history">
                         <thead>
@@ -238,12 +250,21 @@
                                         ng-if="vm.isIterationActive(iteration.id) && vm.statusIsActive">
                                         Scoring <br/>Active
                                     </p>
-                                    <button
+                                    <a
                                         class="button"
-                                        ng-if="!vm.isIterationActive(iteration.id) && (iteration.modelingJobStatus != 'Failed' || iteration.modelingJobStatus != 'Pending' || iteration.modelingJobStatus != 'Running')"
-                                        ng-click="vm.remodel(iteration)">
+                                        ng-if="
+                                            !vm.isIterationActive(iteration.id) && 
+                                            (iteration.modelingJobStatus != 'Failed' || 
+                                            iteration.modelingJobStatus != 'Pending' || 
+                                            iteration.modelingJobStatus != 'Running')"
+                                        ui-sref="home.model.ratings({ 
+                                                    rating_id: vm.ratingEngine.id,
+                                                    modelId: iteration.modelSummaryId,
+                                                    section: 'dashboard.ratings',
+                                                    ratingEngine: vm.ratingEngine
+                                                })">
                                         Activate
-                                    </button>
+                                    </a>
                                 </td>
                                 <td 
                                     ng-class="{
@@ -258,12 +279,13 @@
                                         Failed 
                                     </span>
                                     <span
-                                        ng-if="iteration.modelingJobStatus != 'Pending' || iteration.modelingJobStatus != 'Running'">
+                                        ng-if="iteration.modelingJobStatus === 'Completed' || iteration.modelingJobStatus === 'Failed'">
                                         {{ iteration.created | date }}
                                     </span>
 
                                     <span ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'">
-                                        Creating
+                                        <span></span>
+                                        <span>Creating</span>
                                     </span>
 
                                 </td>
@@ -280,7 +302,16 @@
                     </table>
                 </div>
                 <div>
-                    <h3>Used by ({{ vm.relatedItems.length }})</h3>
+                    <h3>
+                        Used by ({{ vm.relatedItems.length }})
+                        <a 
+                            ui-sref="home.ratingsengine.dashboard.viewall({
+                               type: 'usedby',
+                               data: vm.relatedItems
+                            })"
+                            ng-if="vm.relatedItems.length > 5"
+                            class="published-header link">View All</a>
+                    </h3>
                     <table ng-if="vm.relatedItems.length > 0">
                         <thead>
                             <tr>

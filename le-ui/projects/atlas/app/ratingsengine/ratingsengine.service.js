@@ -15,8 +15,6 @@ angular.module('lp.ratingsengine')
 
     this.init = function() {
 
-//         console.log('Test hot save');
-
         this.settings = {};
 
         this.validation = {
@@ -41,6 +39,8 @@ angular.module('lp.ratingsengine')
 
         this.currentRating = {};
         this.remodelIteration = null;
+        this.iterations = null;
+        this.usedBy = null;
         this.rule = null;
         this.rating = null;
         this.rating_id;
@@ -277,9 +277,22 @@ angular.module('lp.ratingsengine')
     this.getValidation = function(type) {
         return this.validation[type];
     }
-
     this.setValidation = function(type, value) {
         this.validation[type] = value;
+    }
+
+    this.getIterations = function() {
+        return this.iterations;
+    }
+    this.setIterations = function(iterations) {
+        this.iterations = iterations;
+    }
+
+    this.getUsedBy = function() {
+        return this.usedBy;
+    }
+    this.setUsedBy = function(usedBy) {
+        this.usedBy = usedBy;
     }
 
     this.getWizardProgressItems = function(step) {

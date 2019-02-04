@@ -9,7 +9,7 @@ angular
         'lp.ratingsengine.ratingsenginetype',
         'lp.ratingsengine.dashboard',
         'lp.ratingsengine.activatescoring',
-        'lp.ratingsengine.remodel',
+        'le.ratingsengine.viewall',
         'lp.notes',
         'lp.ratingsengine.wizard.segment',
         'lp.ratingsengine.wizard.attributes',
@@ -321,6 +321,17 @@ angular
                         templateUrl: 'app/ratingsengine/content/dashboard/dashboard.component.html'
                     },
                     'header.back@': 'backNav'
+                }
+            })
+            .state('home.ratingsengine.dashboard.viewall', {
+                url: '/viewall/:type',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_segment'
+                },
+                views: {
+                    'main@': 'viewAllComponent'
                 }
             })
             .state('home.ratingsengine.dashboard.segment', {
