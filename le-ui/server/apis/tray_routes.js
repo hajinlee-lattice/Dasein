@@ -16,6 +16,22 @@ class TrayRouter {
         app.use(bodyParser.json());
     }
 
+    getApiOptions(req) {
+
+        var authorization = (req.headers && req.headers.UserAccessToken) ?
+            req.headers.UserAccessToken :
+            "6cadf407-a686-41be-92e7-36e37c97c1e3";
+
+        const options = {
+            url: this.API_URL + this.PATH,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authorization}`
+            }
+        };
+
+        return options;
+    }
     createRoutes() {
 
         console.log('============> TRAY API ========================');
@@ -23,19 +39,19 @@ class TrayRouter {
             var plsUrl = this.proxies['/pls']['remote_host'];
             var validationUrl = '/pls/cdl/s3import/template';
             const options = {
-                url: plsUrl+validationUrl,
+                url: plsUrl + validationUrl,
                 method: 'GET',
                 headers: {
                     'Authorization': req.headers.authorization ? req.headers.authorization : ''
                 }
             };
-           
+
             console.log('Time: ', Date.now(), req.headers, this.proxies);
-            
+
             this.request(options, function (error, response, body) {
-                if(response.statusCode == 200){
+                if (response.statusCode == 200) {
                     next();
-                }else{
+                } else {
                     res.send(UIActionsFactory.getUIActionsObject('Unauthorized', 'Notice', 'Error'))
                 }
             });
@@ -47,19 +63,8 @@ class TrayRouter {
             console.log('USERNAME ', req.query.userName);
 
             try {
-                var authorization = (req.headers && req.headers.UserAccessToken) ?
-                    req.headers.UserAccessToken :
-                    "6cadf407-a686-41be-92e7-36e37c97c1e3";
-
-                const options = {
-                    url: this.API_URL + this.PATH,
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authorization}`
-                    },
-                    json: GraphQLParser.getUserQuery(req.query.userName)
-                };
-
+                var options = this.getApiOptions(req);
+                options.json = GraphQLParser.getUserQuery(req.query.userName);
                 this.request(options, function (error, response, body) {
                     if (error) {
                         res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
@@ -87,13 +92,17 @@ class TrayRouter {
         this.router.post('/user', function (req, res) {
             console.log('USER CREATION', req.body);
             if (req.body.validated === true) {
-                let uiAction = UIActionsFactory.getUIActionsObject('OK', 'Notice', 'Success');
-                res.append('UIAction', JSON.stringify(uiAction));
-                res.send({
-                    name: 'Leo',
-                    id: '1',
-                    externalId: 'externalId'
-                });
+
+                let options = this.getApiOptions(req);
+                options.json = GraphQLParser.getCreateUserQuery(req.query.userName);
+                this.request(options, function (error, response, body) {
+                    if (error) {
+                        res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                        return;
+                    }
+                    let userInfo = GraphQLParser.getUserInfo(body.data);
+                    res.send(userInfo);
+                }.bind(this));
             } else {
                 res.send(UIActionsFactory.getUIActionsObject('Not validated', 'Notice', 'Error'));
             }
