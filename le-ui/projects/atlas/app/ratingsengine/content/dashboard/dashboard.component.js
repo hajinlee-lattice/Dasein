@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.dashboard', [
     'mainApp.appCommon.directives.barchart'
 ])
 .controller('RatingsEngineDashboard', function(
-    $q, $stateParams, $state, $rootScope, $scope, $sce,
+    $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
     RatingsEngineStore, RatingsEngineService, Modal,
     Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
@@ -450,7 +450,26 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     };
 
-    vm.remodel = function(iteration){
+    vm.toggleMenu = function($event) {
+        vm.toggle = !vm.toggle;
+
+        if($event && $event.target) {
+            var target = angular.element($event.target),
+            parent = target.parent();
+            var click = function($event){
+                var clicked = angular.element($event.target),
+                inside = clicked.closest(parent).length;
+                if(!inside) {
+                    $scope.visible = false;
+                    $scope.$digest();
+                    $document.unbind('click', click);
+                }
+            }
+            $document.bind('click', click);
+        }
+    }
+
+    vm.remodelIteration = function(iteration){
 
         console.log(iteration);
 
@@ -462,6 +481,10 @@ angular.module('lp.ratingsengine.dashboard', [
         //     RatingsEngineStore.setRatingEngine(vm.ratingEngine);
         //     $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
         // });
+    }
+
+    vm.remodelSettings = function() {
+
     }
 
     vm.viewIteration = function(iteration){

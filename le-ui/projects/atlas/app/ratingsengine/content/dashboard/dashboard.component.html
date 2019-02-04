@@ -28,13 +28,6 @@
 
                     <!-- <button
                         class="button orange-button"
-                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.latest_iteration.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
-                        ng-if="!vm.isRulesBased"
-                        ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0 || vm.isJobRunning()">
-                        {{ vm.publishOrActivateButtonLabel }}
-                    </button> -->
-                    <button
-                        class="button orange-button"
                         ui-sref="home.model.ratings({ 
                             rating_id: vm.ratingEngine.id,
                             modelId: vm.modelSummary,
@@ -45,7 +38,7 @@
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.activeIterations.length == 0">
                         {{ vm.publishOrActivateButtonLabel }}
-                    </button>
+                    </button> -->
                     <button
                         class="button orange-button"
                         ng-if="!vm.isRulesBased && vm.playbookEnabled"
@@ -60,19 +53,27 @@
                         menuItems="vm.testDropdownIterations" /> -->
 
                     <div class="dropdown-split-button">
-                        <div class="dropdown">
-                            <button
-                                ng-click="vm.toggleMenu()">
+                        <div 
+                            class="dropdown"
+                            ng-class="{showMenu: vm.toggle}">
+                            <button ng-click="vm.toggleMenu($event)">
                                     Remodel 
                                     <span>
-                                        Iteration
+                                        Iteration 
+                                        <span ng-if="vm.isPublishedOrScored">
+                                            <span ng-if="vm.isPublished">{{ vm.ratingEngine.published_iteration.AI.iteration }}</span>
+                                            <span ng-if="!vm.isPublished">{{ vm.ratingEngine.scoring_iteration.AI.iteration }}</span>
+                                        </span>
+                                        <span ng-if="!vm.isPublishedOrScored">
+                                            {{ vm.activeIterations[vm.activeIterations.length - 1].iteration }}
+                                        </span>
                                     </span>
                             </button>
                             <ul>
                                 <li 
                                     ng-repeat="iteration in vm.activeIterations"
                                     ng-click="vm.remodelIteration(iteration)">
-                                        {{ iteration.iteration }}
+                                        Iteration {{ iteration.iteration }}
                                 </li>
                             </ul>
                         </div><button ng-click="vm.remodelSettings()">
