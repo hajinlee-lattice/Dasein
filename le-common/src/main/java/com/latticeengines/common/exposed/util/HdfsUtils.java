@@ -172,7 +172,7 @@ public class HdfsUtils {
 
     public static void copyFromLocalDirToHdfs(Configuration configuration, String localPath, String hdfsPath)
             throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, hdfsPath)) {
             FileUtil.copy(new File(localPath), fs, new Path(hdfsPath), false, configuration);
         }
     }
