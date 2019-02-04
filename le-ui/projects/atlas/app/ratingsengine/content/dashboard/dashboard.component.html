@@ -59,7 +59,27 @@
                         callback="vm.remodelIteration()"
                         menuItems="vm.testDropdownIterations" /> -->
 
+                    <div class="dropdown-split-button">
+                        <div class="dropdown">
+                            <button
+                                ng-click="vm.toggleMenu()">
+                                    Remodel 
+                                    <span>
+                                        Iteration
+                                    </span>
+                            </button>
+                            <ul>
+                                <li 
+                                    ng-repeat="iteration in vm.activeIterations"
+                                    ng-click="vm.remodelIteration(iteration)">
+                                        {{ iteration.iteration }}
+                                </li>
+                            </ul>
+                        </div><button ng-click="vm.remodelSettings()">
+                            <i class="fa fa-cog" aria-hidden="true"></i>
+                        </button>
 
+                    </div>
 
                 </div>
             </div>
