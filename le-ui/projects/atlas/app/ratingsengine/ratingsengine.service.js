@@ -281,6 +281,14 @@ angular.module('lp.ratingsengine')
         this.validation[type] = value;
     }
 
+    this.getRemodelIteration = function() {
+        return this.remodelIteration;
+    }
+    this.setRemodelIteration = function(remodelIteration) {
+        this.remodelIteration = remodelIteration;
+    }
+
+
     this.getIterations = function() {
         return this.iterations;
     }
