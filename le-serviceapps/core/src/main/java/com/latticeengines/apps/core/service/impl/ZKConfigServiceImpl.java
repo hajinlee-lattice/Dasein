@@ -144,20 +144,11 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     componentName);
             Path entityDataQuotaPath = null;
             switch (businessEntity) {
-                case Account:
-                    entityDataQuotaPath = path.append("AccountQuotaLimit");
-                    break;
-                case Contact:
-                    entityDataQuotaPath = path.append("ContactQuotaLimit");
-                    break;
-                case Product:
-                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
-                    break;
-                case Transaction:
-                    entityDataQuotaPath = path.append("TransactionQuotaLimit");
-                    break;
-                default:
-                    break;
+                case Account: entityDataQuotaPath = path.append("AccountQuotaLimit");break;
+                case Contact: entityDataQuotaPath = path.append("ContactQuotaLimit");break;
+                case Product: entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");break;
+                case Transaction: entityDataQuotaPath = path.append("TransactionQuotaLimit");break;
+                default:break;
             }
             Camille camille = CamilleEnvironment.getCamille();
             if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {
