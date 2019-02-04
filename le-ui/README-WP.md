@@ -187,6 +187,12 @@ launch.json file with the following content
       "name": "Atlas Dev-Mode",
       "url": "http://localhost:3001", // or whatever port you use
       "webRoot": "${workspaceFoler}"
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Nodea",
+        "program": "${workspaceFolder}/le-ui/bin/devsetup.js"
     }
   ]
 }

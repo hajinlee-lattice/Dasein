@@ -92,47 +92,6 @@ const httpService = {
         window[observablesName].addObservable(observer.getName(), observable);
     },
 
-    postGraphQl: (url, body, observer, headers) => {
-        let observable = Observable.create(obs => {
-            http.post(url, body, { headers: headers ? headers : {} })
-                .then(response => {
-                    let resp = new Response(
-                        response,
-                        response.status,
-                        response.statusText,
-                        response.data.data
-                    );
-                    // if(response && response.data && response.data.UIAction){
-                    messageService.sendMessage(
-                        new Message(response, '', '', '', '')
-                    );
-                    // }
-                    obs.next(resp);
-                    obs.complete();
-                })
-                .catch(error => {
-                    let respoError = new Error(
-                        error.response.status,
-                        error.response.statusText,
-                        error.message
-                    );
-                    messageService.sendMessage(
-                        new Message(
-                            error.response,
-                            BANNER,
-                            ERROR,
-                            respoError.getMsg(),
-                            `${url} ${respoError.getFullMessage()}`
-                        )
-                    );
-                    if (obs.error) {
-                        obs.error(respoError);
-                    }
-                    obs.complete();
-                });
-        }).subscribe(observer);
-        window[observablesName].addObservable(observer.getName(), observable);
-    },
     post: (url, body, observer, headers) => {
         let observable = Observable.create(obs => {
             http.post(url, body, { headers: headers ? headers : {} })
