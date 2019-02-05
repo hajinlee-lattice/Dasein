@@ -17,16 +17,20 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.callable.RedshiftIngestCallable;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -170,7 +174,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                     RatingModel model = future.get(1, TimeUnit.SECONDS);
                     completed.add(future);
                     log.info("Finished ingesting rating model " + model.getId());
-                } catch (TimeoutException e) {
+                } catch (TimeoutException expected) {
                     // ignore
                 } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException("Redshift ingest thread failed.", e);
@@ -178,7 +182,29 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             });
             completed.forEach(futures::remove);
         }
+        if (CollectionUtils.isEmpty(HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath))) {
+            log.warn("No ingested file in " + hdfsPath + ", write a dummy avro.");
+            writeDummyOutput(hdfsPath);
+        }
         HdfsUtils.writeToFile(yarnConfiguration, hdfsPath + "/_SUCCESS", "");
+    }
+
+    private void writeDummyOutput(String hdfsPath) {
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        GenericRecord record = builder.build();
+        String targetFile = String.format("%s/dummy.avro", hdfsPath);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        retry.execute(ctx -> {
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, targetFile);
+                }
+                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, Collections.singletonList(record), true);
+                return true;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to cleanup target file " + targetFile);
+            }
+        });
     }
 
     private class RedshiftIngest extends RedshiftIngestCallable<RatingModel> {
@@ -272,7 +298,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
-                            // ignore
+                            log.warn("Sleep interrupted.");
                         }
                     }
                 }
