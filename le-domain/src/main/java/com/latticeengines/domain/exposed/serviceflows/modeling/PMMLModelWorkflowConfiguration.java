@@ -91,6 +91,11 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         public Builder moduleName(String moduleName) {
             model.setModuleName(moduleName);
             pmml.setModuleName(moduleName);
