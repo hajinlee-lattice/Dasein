@@ -4,12 +4,13 @@ import {
     hashLocationPlugin,
     pushStateLocationPlugin
 } from "common/react-vendor";
-import {profiles } from "./states";
+import {profiles, profilesConnector } from "./states";
 
+const routerName = 'connectorsReactRouter';
 // window['reactrouter'] =var router;
 const ConnectorsRoutes = {
     getRouter() {
-        let router = window['connectorsReactRouter'];
+        let router = window[routerName];
         if (!router || router == null) {
             router = new UIRouterReact();
             console.log(router);
@@ -18,7 +19,7 @@ const ConnectorsRoutes = {
             router.plugin(hashLocationPlugin);
             // router.plugin(pushStateLocationPlugin);
             // Register each state
-            const states = [profiles];
+            const states = [profiles, profilesConnector];
             states.forEach(state => router.stateRegistry.register(state));
     
             // Set initial and fallback states
@@ -38,13 +39,13 @@ const ConnectorsRoutes = {
                 // console.log("Nav Error", err);
                 // Do something if transition errors
             });
-            window['connectorsReactRouter'] = router
+            window[routerName] = router
         }
     
         return router;
     },
     clearRouter() {
-        window['connectorsReactRouter'] = null;
+        window[routerName] = null;
     }
 };
 export default ConnectorsRoutes;

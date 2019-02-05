@@ -1,13 +1,44 @@
 @import 'common/widgets/colors.scss';
 
-.main-panel{
-    background-color: $pearl-white;
+profiles-container-component{
     display: flex;
-    justify-content: space-around;
+    flex:1;
+    justify-content: center;
+    height: 100%;
+    background-color: $pearl-white;
+    // border: 1px solid red;
+}
+.main-panel{
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 1px;
+
 }
 .connector-profile-container{
-    // background-color: $pearl-white;
     height: 100%;
     width: 100%;
-    max-width: 1300px;
+    max-width: 1000px;
+    margin-top: 2em;
+    display: flex;
+
+
+    .profiles{
+    }
+    .loading-container{
+        display: flex;
+        justify-content: center;
+    }
+
+    .profile-tile{
+        margin: 10px 10px;
+        min-width: 200px;
+        flex: 1;
+        max-width: 350px;
+        min-height: 250px;
+        width: 300px;
+
+    }
 }
