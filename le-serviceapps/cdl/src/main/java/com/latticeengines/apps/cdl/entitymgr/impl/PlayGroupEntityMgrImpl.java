@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.List;
 import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,6 +53,12 @@ public class PlayGroupEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayG
     @Override
     protected PlayGroupEntityMgrImpl getSelf() {
         return _self;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayGroup> findAll() {
+        return super.findAll();
     }
 
     @Override

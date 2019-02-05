@@ -28,14 +28,6 @@ public class PlayGroupFunctionalTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironment();
     }
 
-    // @Test(groups = "functional")
-    // public void testCreateDefaultsAndGet() {
-    // Assert.assertTrue(CollectionUtils.isEmpty(playGroupEntityMgr.findAll()));
-    // List<PlayGroup> groups = playGroupService.getAllPlayGroups(mainCustomerSpace);
-    // Assert.assertFalse(CollectionUtils.isEmpty(groups));
-    // Assert.assertEquals(groups.size(), 5);
-    // }
-
     @Test(groups = "functional")
     public void testCrud() throws InterruptedException {
         log.info("Start Test");
