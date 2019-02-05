@@ -33,6 +33,9 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
             return c.toUpperCase();
         });
     };
+    this.TitleCase = function(string) {
+        return string.split(' ').map(w => w[0].toUpperCase() + w.substr(1).toLowerCase()).join(' ') ;
+    };
 })
 .filter('title', function(StringUtility) {
     return function(input) {
