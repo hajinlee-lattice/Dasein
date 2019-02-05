@@ -42,7 +42,7 @@ public class AccountEntityServiceImplTestNG extends DataCloudMatchFunctionalTest
     private EntityRawSeedService entityRawSeedService;
 
     @Test(groups = "functional", dataProvider = "getAccountSeed")
-    private void testGetSeed(@NotNull EntityRawSeed currentSeed, @NotNull AccountSeed expectedSeed) {
+    private void testGetSeed(@NotNull EntityRawSeed currentSeed, @NotNull AccountSeed expectedSeed) throws Exception {
         Tenant tenant = TEST_GET_TENANT;
 
         // clear and check that we get null seed
@@ -51,6 +51,8 @@ public class AccountEntityServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         // set to serving and check we get the correct seed
         entityRawSeedService.setIfNotExists(EntityMatchEnvironment.SERVING, tenant, currentSeed, true);
+        Thread.sleep(2000L);
+
         AccountSeed seed = accountEntityService.get(tenant, currentSeed.getId());
         Assert.assertEquals(seed, expectedSeed);
 
