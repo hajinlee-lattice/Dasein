@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
@@ -56,13 +56,13 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     static final String BEAN_NAME = "mergeAccount";
 
     private int mergeStep;
-    private int slimInputStep;
+    //private int slimInputStep;
     private int matchStep;
     private int fetchOnlyMatchStep;
-    private int slimDiffStep;
-    // private int mergeMatchStep;
+    //private int slimDiffStep;
+    //private int mergeMatchStep;
     private int upsertMasterStep;
-    private int slimMasterStep;
+    //private int slimMasterStep;
     private int diffStep;
 
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -91,19 +91,16 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             //TransformationStepConfig slimInputs = createSlimInputs(Collections.singletonList(mergeStep));
             TransformationStepConfig match = match(Collections.singletonList(mergeStep));
 
-            // TODO(dzheng): Do we need to ensure the next step only runs for Entity Match?
             TransformationStepConfig fetchOnlyMatch = null;
             //TransformationStepConfig slimDiff = null;
             //TransformationStepConfig mergeMatch = null;
             TransformationStepConfig upsertMaster;
 
             if (configuration.isEntityMatchEnabled()) {
-                // TODO(dzheng): Does Fetch Only Match need both mergeStep and matchStep as input steps?
-                fetchOnlyMatch = fetchOnlyMatch(Arrays.asList(mergeStep, matchStep));
+                fetchOnlyMatch = fetchOnlyMatch(Collections.singletonList(matchStep));
                 //slimDiff = createSlimTable(Collections.singletonList(fetchOnlyMatchStep), diffTablePrefix);
-                //mergeMatch = mergeMatch(Arrays.asList(mergeStep, matchStep, fetchOnlyMatchStep));
-                // TODO(dzeng): Does Upsert Master need the result sof matchStep and fetchOnlyMatchStep?
-                upsertMaster = mergeMaster(Arrays.asList(matchStep, fetchOnlyMatchStep));
+                //mergeMatch = mergeMatch(Arrays.asList(mergeStep, fetchOnlyMatchStep));
+                upsertMaster = mergeMaster(Collections.singletonList(fetchOnlyMatchStep));
             } else {
                 //slimDiff = createSlimTable(Collections.singletonList(matchStep), diffTablePrefix);
                 //mergeMatch = mergeMatch(Arrays.asList(mergeStep, matchStep));
@@ -116,15 +113,15 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
-            // steps.add(slimInputs);
+            //steps.add(slimInputs);
             steps.add(match);
             if (configuration.isEntityMatchEnabled()) {
                 steps.add(fetchOnlyMatch);
             }
-            // steps.add(slimDiff);
-            // steps.add(mergeMatch);
+            //steps.add(slimDiff);
+            //steps.add(mergeMatch);
             steps.add(upsertMaster);
-            // steps.add(slimMaster);
+            //steps.add(slimMaster);
             steps.add(diff);
             steps.add(report);
             request.setSteps(steps);
