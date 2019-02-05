@@ -18,8 +18,8 @@ export class ConnectorList extends Component {
         console.log('THE PROPS ', props);
         this.clickHandler = this.clickHandler.bind(this);
         this.state = {
-            connectorSelected: this.props.ConnectorsService.getConnector(),
-            userValidated: false,
+            connectorSelected: this.props.ConnectorsService.test(),
+            userValidate: true,
             userInfo: null
         };
         this.connectors = [
@@ -37,37 +37,44 @@ export class ConnectorList extends Component {
     componentDidMount() {
         this.router = ConnectorsRoutes.getRouter();
         this.validateUser();
-        this.router.stateService.go('profiles', { nameConnector: this.state.connectorSelected });
+        this.router.stateService.go('profiles');
     }
     clickHandler(name) {
         this.setState({ connectorSelected: name });
         let nameConnector = name;
+        this.router.stateService.go('profilesconnector', { tenantName: 'M21BugBash1', nameConnector: nameConnector });
+
     }
 
     validateUser() {
-        let userName = 'Lattice-Jaya-POC-4';//User already created
-        // let userName = 'k9adsbgl';// User id for M21BugBash1
+        // let userName = 'Lattice-Jaya-POC-4';
+        let userName = 'k9adsbgl';
         let observer = new Observer(
             response => {
                 httpService.printObservables();
                 console.log('HEY ', response);
-                if (response.data && response.data.name) {
-                    this.setState({ userValidated: true, userInfo: response.data });
+                if (response.data.users.edges.length > 0) {
+                    let userInfo = ConnectorsService.getUserInfo(response.data.users.edges);
+                    this.setState({ userValidate: true, userInfo: userInfo });
                     httpService.unsubscribeObservable(observer);
                     httpService.printObservables();
+                    this.router.stateService.go('profiles', { nameConnector: this.state.connectorSelected });
                 } else {
-                    this.setState({ userValidated: false, userInfo: new User('No user') });
+                    this.setState({ userValidate: true, userInfo: new User('No user') });
+                    this.createUser(userName, observer);
                 }
             },
             error => {
                 console.error('ERROR ', error);
-                this.setState({ userValidated: false });
+                this.setState({ userValidate: true });
             }
         );
-
-        httpService.get(('/tray/user?userName='+userName), observer);
+        let query = ConnectorsService.getUserQuery(userName);
+        // httpService.post(trayAPI, query, observer);
+        httpService.postGraphQl(trayAPI, query, observer);
     }
-
+    createUser(userName, observer) {
+    }
     getConnectros() {
         console.log('STATE', this.state);
         let connectors = this.connectors.map((obj, index) => {
@@ -87,6 +94,8 @@ export class ConnectorList extends Component {
     render() {
         return (
             <div className="main-panel">
+                {/* // <LeVPanel vstretch={"true"} hstretch={"false"} classesName="le-connectors white-background"> */}
+
                     <LeHPanel hstretch={"true"} halignment={CENTER}>
                         <h2 className="connectors-title">Select one of our many application connectors</h2>
                     </LeHPanel>
@@ -98,22 +107,22 @@ export class ConnectorList extends Component {
                         <div className="right">
                             <LeButton
                                 name="credentials"
-                                disabled={!this.state.userValidated}
                                 config={{
                                     label: "Create",
                                     classNames: "gray-button"
                                 }}
                                 callback={() => {
                                     // httpService.get(
-                                    //     "/tray/user?userName=leonardo",
+                                    //     "/pls/lookup-id-mapping",
                                     //     new Observer(response => {
-                                    //         console.log("BACK HERE ", response);
+                                    //         // console.log("BACK HERE ", response);
                                     //     })
                                     // );
                                 }}
                             />
                         </div>
                     </LeToolBar>
+                {/* // </LeVPanel > */}
             </div>
         );
     }
@@ -123,7 +132,7 @@ angular
     .module("le.connectors.list", [])
     .service('ConnectorsService', function ($state) {
         let ConnectorsService = this;
-        this.getConnector = function () {
+        this.test = function () {
             console.log('Test', $state.router.locationConfig.$location.$$hash);
             let hash = $state.router.locationConfig.$location.$$hash;
             console.log(hash);
