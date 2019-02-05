@@ -36,6 +36,9 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     @Value("${pls.cdl.transform.cascading.partitions}")
     protected int cascadingPartitions;
 
+    @Value("${pls.cdl.transform.tez.am.mem.gb}")
+    private int tezAmMemGb; // requested memory for application master
+
     @Value("${pls.cdl.transform.tez.task.vcores}")
     private int tezVCores;
 
@@ -95,6 +98,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         Properties jobProperties = new Properties();
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
+        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024));
         return jobProperties;
     }
 
