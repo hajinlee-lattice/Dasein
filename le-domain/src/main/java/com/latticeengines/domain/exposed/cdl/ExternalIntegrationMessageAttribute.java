@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 public enum ExternalIntegrationMessageAttribute {
 
     // keys
+    WORKFLOW_REQ_ID("workflowRequestId"), //
     TARGET_SYSTEMS("targetSystems"), //
     TENANT_ID("tenantId"), //
     OPERATION("operation"), //
