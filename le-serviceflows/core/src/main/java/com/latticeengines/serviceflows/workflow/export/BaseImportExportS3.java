@@ -44,7 +44,7 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 public abstract class BaseImportExportS3<T extends ImportExportS3StepConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseImportExportS3.class);
-    private static final String SUCCESS_FILE = ".SUCCESS";
+    private static final String SUCCESS_FILE = "_SUCCESS";
 
     @Inject
     private DataUnitProxy dataUnitProxy;
