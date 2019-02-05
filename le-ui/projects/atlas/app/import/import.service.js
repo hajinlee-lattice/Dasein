@@ -1,6 +1,6 @@
 
 angular.module('lp.import')
-.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils){
+.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils, StringUtility){
     var ImportWizardStore = this;
 
     this.init = function() {
@@ -710,6 +710,28 @@ angular.module('lp.import')
     this.setCalendar = function(calendar) {
         this.calendar = calendar;
     };
+
+    this.saveCalendar = function(calendar) {
+        var deferred = $q.defer();
+
+        ImportWizardService.saveCalendar(calendar).then(function(result) {
+            ImportWizardStore.setCalendar(result);
+            deferred.resolve(result);
+        });
+        
+        return deferred.promise;
+    }
+
+    this.getCalendarInfo = function(calendar) {
+        var info = {};
+        if(!calendar || calendar && !Object.keys(calendar).length) {
+            info.mode = 'NONE';
+        } else {
+            info.mode = (calendar.mode === 'STANDARD' ? 'STANDARD' : 'CUSTOM');
+        }
+        info.modeDisplayName = StringUtility.TitleCase(info.mode);
+        return info;
+    }
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils, ReduxService) {
 
