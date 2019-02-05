@@ -1,4 +1,5 @@
 const GraphQLParser = require('../parsers/graphql-parser');
+const Queries = require('./queries');
 const UIActionsFactory = require('./uiactions-factory');
 /**
  * Routing for tray's apis
@@ -64,7 +65,7 @@ class TrayRouter {
 
             try {
                 var options = this.getApiOptions(req);
-                options.json = GraphQLParser.getUserQuery(req.query.userName);
+                options.json = Queries.getUserQuery(req.query.userName);
                 this.request(options, function (error, response, body) {
                     if (error) {
                         res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
@@ -94,7 +95,7 @@ class TrayRouter {
             if (req.body.validated === true) {
 
                 let options = this.getApiOptions(req);
-                options.json = GraphQLParser.getCreateUserQuery(req.query.userName);
+                options.json = Queries.getCreateUserQuery(req.query.userName);
                 this.request(options, function (error, response, body) {
                     if (error) {
                         res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
@@ -108,6 +109,22 @@ class TrayRouter {
             }
 
         }.bind(this));
+
+        this.router.get('solutions', function(req, res){
+
+        }.bind(this));
+
+        this.router.get('/solutionInstances', function(req, res){
+            var tagName = req.query.tagName;
+            let options = this.getApiOptions(req);
+            options.json = Queries.getSolutionsByTagQuery(tagName);
+            this.request(options, function(error, response, body){
+
+                console.log('', body);
+            });
+            res.send({iframeUrl: ""});
+        }.bind(this));
+
         return this.router;
     }
 }
