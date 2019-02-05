@@ -32,6 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -58,15 +59,19 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private static final String LOOKUP_BACKGROUND_THREAD_NAME = "entity-match-internal";
     private static final int ENTITY_ID_LENGTH = 16;
     private static final int MAX_ID_ALLOCATION_ATTEMPTS = 50;
+    private static final long TERMINATION_TIMEOUT_IN_MILLIS = 30000;
     // make the probability even for all characters since we want to have case insensitive ID
     private static final char[] ENTITY_ID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-    // TODO move this to property file or config service after the mechanism is finalized
-    private static final int NUM_LOOKUP_BACKGROUND_THREADS = 3;
-    private static final int LOOKUP_BATCH_SIZE = 25;
-    private static final long LOOKUP_POLLING_TIMEOUT_IN_MILLIS = 5000;
-    private static final long LOOKUP_POPULATE_SLEEP_IN_MILLIS = 200;
-    private static final long TERMINATION_TIMEOUT_IN_MILLIS = 30000;
+    // params for populating lookup entry to staging table in background
+    @Value("${datacloud.match.entity.lookup.populate.num.threads}")
+    private int nLookupPopulateThreads;
+    @Value("${datacloud.match.entity.lookup.populate.batch.size:25}")
+    private int lookupPopulateBatchSize;
+    @Value("${datacloud.match.entity.lookup.populate.poll.interval.ms:5000}")
+    private long lookupPopulatePollIntervalMillis;
+    @Value("${datacloud.match.entity.lookup.populate.sleep.ms:200}")
+    private long lookupPopulateSleepMillis;
 
     private final EntityLookupEntryService entityLookupEntryService;
     private final EntityRawSeedService entityRawSeedService;
@@ -709,9 +714,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 if (lookupExecutorService == null) {
                     log.info("Instantiating staging lookup entry publishers");
                     lookupExecutorService = ThreadPoolUtils
-                            .getFixedSizeThreadPool(LOOKUP_BACKGROUND_THREAD_NAME, NUM_LOOKUP_BACKGROUND_THREADS);
+                            .getFixedSizeThreadPool(LOOKUP_BACKGROUND_THREAD_NAME, nLookupPopulateThreads);
                     IntStream
-                            .range(0, NUM_LOOKUP_BACKGROUND_THREADS)
+                            .range(0, nLookupPopulateThreads)
                             .forEach((idx) -> lookupExecutorService.submit(new StagingLookupEntryPublisher()));
                 }
             }
@@ -744,7 +749,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             while (!shouldTerminate) {
                 try {
                     Triple<Tenant, EntityLookupEntry, String> triple = lookupQueue.poll(
-                            LOOKUP_POLLING_TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
+                            lookupPopulatePollIntervalMillis, TimeUnit.MILLISECONDS);
                     if (triple != null) {
                         String tenantId = triple.getLeft().getId(); // should not be null
                         batches.putIfAbsent(tenantId, new ArrayList<>());
@@ -752,14 +757,14 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         total++;
                     }
                     // triple == null means timeout
-                    if (triple == null || total >= LOOKUP_BATCH_SIZE) {
+                    if (triple == null || total >= lookupPopulateBatchSize) {
                         populate(batches);
                         // finishes total entries, decrease the same amount in processing entries counter
                         nProcessingLookupEntries.addAndGet(-total);
                         // clear populated batches
                         total = 0;
                         batches.clear();
-                        Thread.sleep(LOOKUP_POPULATE_SLEEP_IN_MILLIS);
+                        Thread.sleep(lookupPopulateSleepMillis);
                     }
                 } catch (InterruptedException e) {
                     if (!shouldTerminate) {
