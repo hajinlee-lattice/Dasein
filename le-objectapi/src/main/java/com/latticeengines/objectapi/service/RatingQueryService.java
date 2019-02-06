@@ -14,4 +14,6 @@ public interface RatingQueryService {
 
     Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
+    String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
+
 }

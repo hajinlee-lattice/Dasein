@@ -39,7 +39,7 @@ public class MetadataSegmentExportEntityMgrImpl extends BaseEntityMgrImpl<Metada
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void create(MetadataSegmentExport entity) {
         Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
@@ -69,7 +69,7 @@ public class MetadataSegmentExportEntityMgrImpl extends BaseEntityMgrImpl<Metada
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByExportId(String exportId) {
         metadataSegmentExportDao.deleteByExportId(exportId);
     }

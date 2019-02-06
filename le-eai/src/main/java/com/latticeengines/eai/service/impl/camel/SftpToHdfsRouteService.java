@@ -327,8 +327,8 @@ public class SftpToHdfsRouteService extends EaiRuntimeService<SftpToHdfsRouteCon
     }
 
     private void waitForRouteToFinish(CamelRouteConfiguration camelRouteConfiguration) {
-        Long startTime = System.currentTimeMillis();
-        Integer errorTimes = 0;
+        long startTime = System.currentTimeMillis();
+        int errorTimes = 0;
         while (System.currentTimeMillis() - startTime < timeout) {
             try {
                 if (routeIsFinished(camelRouteConfiguration)) {

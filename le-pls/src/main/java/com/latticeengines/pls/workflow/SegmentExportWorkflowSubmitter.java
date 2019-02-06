@@ -37,7 +37,7 @@ public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_DISPLAY_NAME, //
                 metadataSegmentExport.getExportPrefix());
         inputProperties.put(SegmentExportWorkflowConfiguration.EXPIRE_BY_UTC_TIMESTAMP, //
-                new Long(metadataSegmentExport.getCleanupBy().getTime()).toString());
+                Long.toString(metadataSegmentExport.getCleanupBy().getTime()));
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, getTimestampFromPath(path));
 
         SegmentExportWorkflowConfiguration configuration = new SegmentExportWorkflowConfiguration.Builder()
@@ -57,7 +57,7 @@ public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
 
     private String getTimestampFromPath(String path) {
         path = path.substring(0, path.length() - 1);
-        path = path.substring(path.lastIndexOf("/") + 1, path.length());
+        path = path.substring(path.lastIndexOf("/") + 1);
         return path;
     }
 }

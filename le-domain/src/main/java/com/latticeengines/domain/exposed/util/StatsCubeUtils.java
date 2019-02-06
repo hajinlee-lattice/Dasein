@@ -173,10 +173,10 @@ public class StatsCubeUtils {
             updateBooleanBucket(bucket, (BooleanBucket) algorithm, bktId);
         } else if (algorithm instanceof IntervalBucket) {
             updateIntervalBucket(bucket, (IntervalBucket) algorithm, bktId);
-        } else if (algorithm instanceof CategoricalBucket) {
-            updateCategoricalBucket(bucket, (CategoricalBucket) algorithm, bktId);
         } else if (algorithm instanceof DiscreteBucket) {
             updateDiscreteBucket(bucket, (DiscreteBucket) algorithm, bktId);
+        } else if (algorithm instanceof CategoricalBucket) {
+            updateCategoricalBucket(bucket, (CategoricalBucket) algorithm, bktId);
         } else if (algorithm instanceof DateBucket) {
             updateDateBucket(bucket, (DateBucket) algorithm, bktId);
         } else {
@@ -224,7 +224,7 @@ public class StatsCubeUtils {
         }
     }
 
-    private static void updateCategoricalBucket(Bucket bucket, CategoricalBucket algo, int bktId) {
+    private static void updateDiscreteBucket(Bucket bucket, DiscreteBucket algo, int bktId) {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
@@ -232,7 +232,7 @@ public class StatsCubeUtils {
         bucket.setComparisonType(ComparisonType.EQUAL);
     }
 
-    private static void updateDiscreteBucket(Bucket bucket, DiscreteBucket algo, int bktId) {
+    private static void updateCategoricalBucket(Bucket bucket, CategoricalBucket algo, int bktId) {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);

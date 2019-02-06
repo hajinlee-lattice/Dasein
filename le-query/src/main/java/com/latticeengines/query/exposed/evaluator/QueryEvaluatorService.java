@@ -56,6 +56,12 @@ public class QueryEvaluatorService {
         }
     }
 
+    public String getQueryStr(AttributeRepository attrRepo, Query query, String sqlUser) {
+        SQLQuery<?> sqlQuery = constructSqlQuery(attrRepo, query, sqlUser);
+        sqlQuery.setUseLiterals(true);
+        return sqlQuery.getSQL().getSQL();
+    }
+
     public DataPage getData(String customerSpace, DataCollection.Version version, Query query, String sqlUser) {
         return getData(dataCollectionProxy.getAttrRepo(customerSpace, version), query, sqlUser);
     }
@@ -65,7 +71,7 @@ public class QueryEvaluatorService {
         return new DataPage(results);
     }
 
-    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser) {
+    public SQLQuery<?> constructSqlQuery(AttributeRepository attrRepo, Query query, String sqlUser) {
         List<Lookup> filteredLookups = new ArrayList<>();
         for (Lookup lookup : query.getLookups()) {
             if (lookup instanceof AttributeLookup) {
@@ -80,7 +86,11 @@ public class QueryEvaluatorService {
             }
         }
         query.setLookups(filteredLookups);
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        return queryEvaluator.evaluate(attrRepo, query, sqlUser);
+    }
+
+    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser) {
+        SQLQuery<?> sqlQuery = constructSqlQuery(attrRepo, query, sqlUser);
         AtomicLong startTime = new AtomicLong();
         AtomicLong counter = new AtomicLong(0);
         return queryEvaluator.pipe(sqlQuery, query) //

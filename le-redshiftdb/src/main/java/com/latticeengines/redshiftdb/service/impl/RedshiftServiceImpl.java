@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -214,6 +215,14 @@ public class RedshiftServiceImpl implements RedshiftService {
         } else {
             return results.stream().map(m -> (String) m.get("tablename")).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public void unloadTable(String tableName, String s3bucket, String s3Prefix, RedshiftUnloadParams unloader) {
+        String s3Path = String.format("s3://%s/%s/", s3bucket, s3Prefix);
+        String creds = "CREDENTIALS 'aws_access_key_id=" + awsAccessKey + ";aws_secret_access_key=" + awsSecretKey + "'";
+        String sql = RedshiftUtils.unloadTableStatement(tableName, s3Path, creds, unloader);
+        redshiftJdbcTemplate.execute(sql);
     }
 
 }

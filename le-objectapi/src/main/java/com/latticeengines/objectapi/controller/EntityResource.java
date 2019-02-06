@@ -12,18 +12,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import reactor.core.publisher.Mono;
 
 @Api(value = "entities", description = "REST resource for entities")
 @RestController
@@ -62,6 +59,15 @@ public class EntityResource {
         final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
         return entityQueryService.getData(frontEndQuery, version, finalSqlUser, enforceTranslation);
 
+    }
+
+    @PostMapping(value = "/query")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+                            @RequestParam(value = "version", required = false) DataCollection.Version version,
+                            @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
+        return entityQueryService.getQueryStr(frontEndQuery, version, BATCH_USER);
     }
 
     @PostMapping(value = "/ratingcount")

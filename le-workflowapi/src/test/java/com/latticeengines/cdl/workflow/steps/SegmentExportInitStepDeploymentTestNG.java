@@ -83,7 +83,6 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-
         testPlayCreationHelper.setupTenantAndData();
         testPlayCreationHelper.setupPlayTestEnv();
         tenant = testPlayCreationHelper.getTenant();
@@ -217,7 +216,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
     }
 
     @AfterClass(groups = { "deployment" })
-    public void teardown() throws Exception {
+    public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
     }
 }
