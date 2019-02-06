@@ -44,39 +44,40 @@
                         ng-if="!vm.isRulesBased && vm.playbookEnabled"
                         ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })"
                         ng-disabled="!vm.canCreatePlay()">
-                        <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'" -->
                         Create Campaign
                     </button>
-
-                    <!-- <dropdownComponent
-                        callback="vm.remodelIteration()"
-                        menuItems="vm.testDropdownIterations" /> -->
 
                     <div class="dropdown-split-button">
                         <div 
                             class="dropdown"
-                            ng-class="{showMenu: vm.toggle}">
-                            <button ng-click="vm.toggleMenu($event)">
-                                    Remodel 
-                                    <span>
-                                        Iteration 
-                                        <span ng-if="vm.isPublishedOrScored">
-                                            <span ng-if="vm.isPublished">{{ vm.ratingEngine.published_iteration.AI.iteration }}</span>
-                                            <span ng-if="!vm.isPublished">{{ vm.ratingEngine.scoring_iteration.AI.iteration }}</span>
-                                        </span>
-                                        <span ng-if="!vm.isPublishedOrScored">
-                                            {{ vm.activeIterations[vm.activeIterations.length - 1].iteration }}
-                                        </span>
-                                    </span>
+                            ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress}">
+                            <button 
+                                ng-click="vm.remodelIteration()"
+                                ng-class="{disabled: vm.remodelingProgress}"
+                                ng-disabled="vm.remodelingProgress">Remodel 
+                            </button><button 
+                                ng-click="vm.toggleMenu($event)"
+                                ng-class="{disabled: vm.remodelingProgress}"
+                                ng-disabled="vm.remodelingProgress">
+                                <span>
+                                    Iteration {{ vm.selectedIteration.iteration }}
+                                </span>
                             </button>
                             <ul>
                                 <li 
-                                    ng-repeat="iteration in vm.activeIterations"
-                                    ng-click="vm.remodelIteration(iteration)">
+                                    ng-repeat="iteration in vm.activeIterations | orderBy: iteration"
+                                    ng-click="vm.setRemodelIteration(iteration); vm.toggleMenu()">
                                         Iteration {{ iteration.iteration }}
                                 </li>
                             </ul>
-                        </div><button ng-click="vm.remodelSettings()">
+                            <span>
+                                <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                                Remodling iteration {{ vm.selectedIteration.iteration }}
+                            </span>
+                        </div><button 
+                            ng-click="vm.remodelSettings()"
+                            ng-class="{disabled: vm.remodelingProgress}"
+                            ng-disabled="vm.remodelingProgress">
                             <i class="fa fa-cog" aria-hidden="true"></i>
                         </button>
 
