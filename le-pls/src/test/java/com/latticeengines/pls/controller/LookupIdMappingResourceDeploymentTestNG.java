@@ -37,7 +37,6 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     }
 
-    /*
     @Test(groups = "deployment")
     public void getLookupIdsMapping() {
         @SuppressWarnings({ "rawtypes" })
@@ -150,7 +149,6 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         confirmNonEmptyLookupConfigs(Boolean.TRUE);
     }
-    */
 
     // TODO - anoop - enable it
     @Test(groups = "deployment", enabled = false)
@@ -227,7 +225,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         });
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods="testDeregisterExternalSystem")
     public void testCreateWithAuthentication() {
         LookupIdMap lookupIdMapWithAuth = new LookupIdMap();
         lookupIdMapWithAuth.setExternalSystemType(CDLExternalSystemType.MAP);
