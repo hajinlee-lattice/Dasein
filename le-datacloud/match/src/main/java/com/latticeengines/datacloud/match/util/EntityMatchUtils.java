@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.match.util;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -15,6 +17,35 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * Utility functions for entity match
  */
 public class EntityMatchUtils {
+
+    /**
+     * Generate a (somewhat) user friendly string for the input
+     * {@link EntityLookupEntry}
+     *
+     * @param entry
+     *            target entry
+     * @return string representation of the entry
+     */
+    public static String prettyToString(EntityLookupEntry entry) {
+        if (entry == null) {
+            return StringUtils.EMPTY;
+        }
+
+        String[] values;
+        switch (entry.getType()) {
+        case DUNS:
+            return String.format("{DUNS=%s}", entry.getSerializedValues());
+        case NAME_COUNTRY:
+            values = entry.getValues();
+            return String.format("{Name=%s,Country=%s}", values[0], values[1]);
+        case DOMAIN_COUNTRY:
+            values = entry.getValues();
+            return String.format("{Domain=%s,Country=%s}", values[0], values[1]);
+        case EXTERNAL_SYSTEM:
+            return String.format("{System=%s,ID=%s}", entry.getSerializedKeys(), entry.getSerializedValues());
+        }
+        return StringUtils.EMPTY;
+    }
 
     /**
      * Check if input entry has conflict with target seed (same serialized key, different value). Only evaluate entries
