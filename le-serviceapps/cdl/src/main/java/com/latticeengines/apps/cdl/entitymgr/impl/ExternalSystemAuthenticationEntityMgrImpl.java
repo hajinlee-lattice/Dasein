@@ -1,8 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -18,12 +16,10 @@ import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.repository.ExternalSystemAuthenticationRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("externalSystemAuthenticationEntityMgr")
 public class ExternalSystemAuthenticationEntityMgrImpl
@@ -46,7 +42,7 @@ public class ExternalSystemAuthenticationEntityMgrImpl
     private ExternalSystemAuthenticationRepository extSysAuthenticationReaderRepository;
     
     @Override
-    public BaseDao<ExternalSystemAuthentication> getDao() {
+    public ExternalSystemAuthenticationDao getDao() {
         return extSysAuthenticationEntityMgrDao;
     }
 
@@ -77,14 +73,8 @@ public class ExternalSystemAuthenticationEntityMgrImpl
         if (lookupIdRef == null) {
             throw new LedpException(LedpCode.LEDP_40050, new String[] {externalSystemAuthentication.getLookupMapConfigId()});
         }
-        Tenant tenant = MultiTenantContext.getTenant();
-        externalSystemAuthentication.setTenant(tenant);
+
         externalSystemAuthentication.setLookupIdMap(lookupIdRef);
-        externalSystemAuthentication.setLookupMapConfigId(lookupIdRef.getId());
-        externalSystemAuthentication.setId(UUID.randomUUID().toString());
-        Date time = new Date();
-        externalSystemAuthentication.setCreated(time);
-        externalSystemAuthentication.setUpdated(time);
         getDao().create(externalSystemAuthentication);
         return externalSystemAuthentication;
     }
@@ -97,19 +87,9 @@ public class ExternalSystemAuthenticationEntityMgrImpl
                 throw new LedpException(LedpCode.LEDP_40051);
             }
 
-            ExternalSystemAuthentication extSysAuth = getWriterRepo().findByAuthId(authId);
-            if (extSysAuth == null) {
-                throw new LedpException(LedpCode.LEDP_40052, new String[] {authId});
-            }
-            // This will expand the Lazy Proxy for LookupIdMap. 
-            // This is needed because we are loading Object from WriterRepository and Saving it via Dao. Both have different SessionContexts
-            extSysAuth.getLookupIdMap().getId();
-            extSysAuth.getTenant().getId();
-
-            extSysAuth.setTrayAuthenticationId(externalSystemAuthentication.getTrayAuthenticationId());
-            extSysAuth.setUpdated(new Date());
-            getDao().update(extSysAuth);
-            return extSysAuth;
+            externalSystemAuthentication.setId(authId);
+            getDao().updateAuthentication(externalSystemAuthentication);
+            return externalSystemAuthentication;
     }
 
     @Override

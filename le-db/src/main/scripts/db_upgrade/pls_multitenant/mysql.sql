@@ -16,12 +16,15 @@ CREATE PROCEDURE `UpdatePLSTables`()
   CHANGE COLUMN `CANCELED` `ACTION_STATUS` VARCHAR(20) NULL DEFAULT 'ACTIVE' ;
   ALTER TABLE `PLS_MultiTenant`.`LOOKUP_ID_MAP` ADD COLUMN `EXT_SYS_NAME` varchar(255);
   create table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` (`PID` bigint not null auto_increment, `CREATED` datetime not null, 
-    `ID` varchar(255) not null, `TRAY_AUTHENTICATION_ID` varchar(255), `UPDATED` datetime not null, 
+    `ID` varchar(255) not null, `TRAY_AUTHENTICATION_ID` varchar(255), `SOLUTION_INSTANCE_ID` varchar(255), `TRAY_WORKFLOW_ENABLED` bit, `UPDATED` datetime not null, 
     `FK_LOOKUP_ID_MAP` bigint not null, `FK_TENANT_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
   alter table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` add constraint `FK_EXTERNALSYSTEMAUTHENTICATION_FKLOOKUPIDMAP_LOOKUPIDMAP` 
     foreign key (`FK_LOOKUP_ID_MAP`) references `PLS_MultiTenant`.`LOOKUP_ID_MAP` (`PID`) on delete cascade;
   alter table `PLS_MultiTenant`.`EXTERNAL_SYSTEM_AUTHENTICATION` add constraint `FK_EXTERNALSYSTEMAUTHENTICATION_FKTENANTID_TENANT` 
     foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
+
+  UPDATE PLS_MultiTenant.LOOKUP_ID_MAP set EXT_SYS_NAME = 'Salesforce' where EXT_SYS_TYPE = 'CRM';
+  UPDATE PLS_MultiTenant.LOOKUP_ID_MAP set EXT_SYS_NAME = 'Eloqua' where EXT_SYS_TYPE = 'MAP' and EXT_SYS_NAME is NULL;
 
   ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `SOURCE_FILE` VARCHAR(4096);
     

@@ -1,7 +1,13 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
@@ -10,7 +16,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
@@ -20,6 +28,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
     private String orgName = "Dummy name";
     private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
     private String configId = null;
+    private String configIdWithAuth = null;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -28,6 +37,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     }
 
+    /*
     @Test(groups = "deployment")
     public void getLookupIdsMapping() {
         @SuppressWarnings({ "rawtypes" })
@@ -140,6 +150,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         confirmNonEmptyLookupConfigs(Boolean.TRUE);
     }
+    */
 
     // TODO - anoop - enable it
     @Test(groups = "deployment", enabled = false)
@@ -214,5 +225,93 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
                 Assert.assertEquals(lookupIdMap.getIsRegistered(), isMarkedRegistered);
             });
         });
+    }
+
+    @Test(groups = "deployment")
+    public void testCreateWithAuthentication() {
+        LookupIdMap lookupIdMapWithAuth = new LookupIdMap();
+        lookupIdMapWithAuth.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdMapWithAuth.setExternalSystemName(CDLExternalSystemName.Marketo);
+        lookupIdMapWithAuth.setOrgId("Marketo_AuthTest");
+        lookupIdMapWithAuth.setOrgName("Marketo_AuthTest");
+
+        ExternalSystemAuthentication externalAuth = new ExternalSystemAuthentication();
+        externalAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
+        externalAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+        lookupIdMapWithAuth.setExternalAuthentication(externalAuth);
+
+        LookupIdMap resultLookupIdMap = restTemplate.postForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/register", lookupIdMapWithAuth, LookupIdMap.class);
+        assertNotNull(resultLookupIdMap);
+        assertNotNull(resultLookupIdMap.getId());
+        configIdWithAuth = resultLookupIdMap.getId();
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = {"testCreateWithAuthentication"})
+    public void testFindWithAuthentication() {
+        LookupIdMap lookupIdWithAuth = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
+        assertNotNull(lookupIdWithAuth);
+        assertNotNull(lookupIdWithAuth.getExternalAuthentication());
+        ExternalSystemAuthentication externalAuthFromDB = lookupIdWithAuth.getExternalAuthentication();
+        assertNotNull(externalAuthFromDB.getId());
+        assertNotNull(externalAuthFromDB.getTrayAuthenticationId());
+        assertNotNull(externalAuthFromDB.getSolutionInstanceId());
+        assertNull(externalAuthFromDB.getTrayWorkflowEnabled());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = {"testCreateWithAuthentication"})
+    public void testUpdateWithAuthentication() {
+        LookupIdMap lookupIdWithAuth = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
+        assertNotNull(lookupIdWithAuth);
+        assertNotNull(lookupIdWithAuth.getExternalAuthentication());
+        ExternalSystemAuthentication prevExtAuth = lookupIdWithAuth.getExternalAuthentication();
+        ExternalSystemAuthentication updatedExtAuth = new ExternalSystemAuthentication();
+        updatedExtAuth.setId(lookupIdWithAuth.getExternalAuthentication().getId());
+        updatedExtAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
+        updatedExtAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+        updatedExtAuth.setTrayWorkflowEnabled(true);
+        lookupIdWithAuth.setExternalAuthentication(updatedExtAuth);
+
+        restTemplate.put(getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, lookupIdWithAuth,
+                LookupIdMap.class);
+
+        LookupIdMap lookupIdWithAuthFromDB = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
+        assertNotNull(lookupIdWithAuthFromDB.getId());
+        assertNotNull(updatedExtAuth);
+        assertNotNull(updatedExtAuth.getId());
+        assertNotNull(updatedExtAuth.getTrayAuthenticationId());
+        assertNotNull(updatedExtAuth.getSolutionInstanceId());
+        assertNotNull(updatedExtAuth.getTrayWorkflowEnabled());
+        assertNotEquals(prevExtAuth.getTrayAuthenticationId(), updatedExtAuth.getTrayAuthenticationId());
+        assertNotEquals(prevExtAuth.getSolutionInstanceId(), updatedExtAuth.getSolutionInstanceId());
+        assertTrue(updatedExtAuth.getTrayWorkflowEnabled());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = {"testUpdateWithAuthentication"})
+    public void testUpdateWithNull() {
+        LookupIdMap lookupIdWithAuth = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
+        assertNotNull(lookupIdWithAuth);
+        assertNotNull(lookupIdWithAuth.getExternalAuthentication());
+        ExternalSystemAuthentication updatedExtAuth = new ExternalSystemAuthentication();
+        updatedExtAuth.setId(lookupIdWithAuth.getExternalAuthentication().getId());
+        updatedExtAuth.setTrayAuthenticationId(null);
+        updatedExtAuth.setSolutionInstanceId(null);
+        lookupIdWithAuth.setExternalAuthentication(updatedExtAuth);
+
+        restTemplate.put(getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, lookupIdWithAuth,
+                LookupIdMap.class);
+        LookupIdMap lookupIdWithAuthFromDB = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
+        updatedExtAuth = lookupIdWithAuthFromDB.getExternalAuthentication();
+        assertNotNull(lookupIdWithAuthFromDB.getId());
+        assertNotNull(updatedExtAuth);
+        assertNotNull(updatedExtAuth.getId());
+        assertNull(updatedExtAuth.getTrayAuthenticationId());
+        assertNull(updatedExtAuth.getSolutionInstanceId());
+        assertNull(updatedExtAuth.getTrayWorkflowEnabled());
     }
 }
