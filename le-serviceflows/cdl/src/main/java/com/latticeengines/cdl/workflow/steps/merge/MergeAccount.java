@@ -75,6 +75,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             // slimInputStep = 1;
             matchStep = 1;
             if (configuration.isEntityMatchEnabled()) {
+                log.error("$JAW$ Entity Match is Enabled! (1)");
+
                 fetchOnlyMatchStep = 2;
                 // slimDiffStep = 3;
                 upsertMasterStep = 3;
@@ -233,6 +235,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
 
         if (configuration.isEntityMatchEnabled()) {
+            log.error("$JAW$ Entity Match is Enabled! (2)");
+
+
             matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
             matchInput.setSkipKeyResolution(true);
             matchInput.setTargetEntity(BusinessEntity.Account.name());
