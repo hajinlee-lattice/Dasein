@@ -3,7 +3,7 @@ angular.module('lp.ratingsengine.dashboard', [
 ])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
-    RatingsEngineStore, RatingsEngineService, Modal,
+    RatingsEngineStore, RatingsEngineService, Modal, Banner, 
     Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
     var vm = this,
@@ -18,6 +18,7 @@ angular.module('lp.ratingsengine.dashboard', [
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
         modelSummary: Model,
+        selectedIteration: null,
         products: Products,
         targetProducts: TargetProducts,
         trainingProducts: TrainingProducts,
@@ -279,6 +280,10 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.model = vm.ratingEngine.latest_iteration.AI;
                 vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;   
             }
+
+            vm.selectedIteration = angular.copy(vm.model);
+            RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
+
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -365,13 +370,12 @@ angular.module('lp.ratingsengine.dashboard', [
           ];
 
         // console.log(vm.dashboard);
+        // console.log(vm.selectedIteration);
     }
 
     vm.init = function() {
         vm.initDataModel();
     }
-
-
 
     vm.isIterationActive = function(iterationId){
         if(vm.ratingEngine.scoring_iteration != null) {
@@ -469,18 +473,31 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
-    vm.remodelIteration = function(iteration){
+    vm.setRemodelIteration = function(iteration){
+        vm.selectedIteration = iteration;
+        RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
+    }
 
-        console.log(iteration);
+    vm.remodelIteration = function(){
+        var engineId = vm.ratingEngine.id,
+            iteration = RatingsEngineStore.getRemodelIteration(),
+            modelId = iteration.id;
 
-        // var engineId = vm.ratingEngine.id,
-        //     modelId = iteration.id;
+        vm.remodelingProgress = true;
 
-        // RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-        //     AtlasRemodelStore.setRemodelIteration(result);
-        //     RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-        //     $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
-        // });
+        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){            
+            RatingsEngineStore.setRemodelIteration(result);
+            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+            RatingsEngineStore.saveIteration('attributes').then(function(result){
+                if (!result.result) {
+                    Banner.success({
+                        message:
+                            "A remodel job has started. You can track it's progress on the jobs page."
+                    });
+                }
+                vm.remodelingProgress = result.showProgress;
+            });
+        });
     }
 
     vm.remodelSettings = function() {
