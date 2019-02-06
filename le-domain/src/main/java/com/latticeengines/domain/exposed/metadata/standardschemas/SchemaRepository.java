@@ -1378,7 +1378,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
@@ -1411,7 +1411,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
 
         Attribute address1 = attr(InterfaceName.Address_Street_1.name()) //
