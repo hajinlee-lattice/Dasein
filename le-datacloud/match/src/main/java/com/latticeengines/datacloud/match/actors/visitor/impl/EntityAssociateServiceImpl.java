@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -336,8 +337,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 }
                 // fail to associate the highest priority entry
                 return getResponse(
-                        request, null, getAssociationErrors(
-                                requestId, request, maxPriorityResult, null, null));
+                        request, null,
+                        getConflictMessages(targetEntitySeed.getId(), request, maxPriorityResult, null, null));
             }
 
             log.debug("Associate highest priority lookup entry successfully to target entity (ID={})," +
@@ -370,7 +371,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     result, mappingConflictEntries, seedConflictEntries, requestId);
             return getResponse(
                     request, targetEntitySeed.getId(),
-                    getAssociationErrors(requestId, request, result, mappingConflictEntries, seedConflictEntries));
+                    getConflictMessages(targetEntitySeed.getId(), request, result, mappingConflictEntries,
+                            seedConflictEntries));
         }
 
         // no conflict during association
@@ -379,7 +381,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 mappingConflictEntries, seedConflictEntries, requestId);
         return getResponse(
                 request, targetEntitySeed.getId(),
-                getAssociationErrors(requestId, request, null, mappingConflictEntries, seedConflictEntries));
+                getConflictMessages(targetEntitySeed.getId(), request, null, mappingConflictEntries,
+                        seedConflictEntries));
     }
 
     private Set<EntityLookupEntry> getSeedConflictEntries(
@@ -479,35 +482,46 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
     }
 
     /*
-     * TODO generate error with a better format
+     * generate conflict messages
      */
-    private List<String> getAssociationErrors(
-            @NotNull String requestId, @NotNull EntityAssociationRequest request,
+    private List<String> getConflictMessages(@NotNull String targetEntityId, @NotNull EntityAssociationRequest request,
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result,
             List<Pair<EntityLookupEntry, String>> mappingConflictEntries,
             Set<EntityLookupEntry> seedConflictEntries) {
-        String tenantId = request.getTenant().getId();
-        List<String> errors = new ArrayList<>();
+        String entity = request.getEntity();
+        List<String> seedConflicts = new ArrayList<>();
+        List<String> lookupConflicts = new ArrayList<>();
+
         if (CollectionUtils.isNotEmpty(mappingConflictEntries)) {
-            // conflict known with look results
-            String msg = String.format("Lookup entries already mapped to a different entity=%s," +
-                    " requestId=%s, tenantId=%s", mappingConflictEntries, requestId, tenantId);
-            errors.add(msg);
+            lookupConflicts.addAll(prettify(mappingConflictEntries.stream().map(Pair::getKey)));
         }
         if (CollectionUtils.isNotEmpty(seedConflictEntries)) {
-            // conflict with target seed
-            String msg = String.format("Lookup entries cannot be associated to entity=%s," +
-                    " requestId=%s, tenantId=%s", seedConflictEntries, requestId, tenantId);
-            errors.add(msg);
+            seedConflicts.addAll(prettify(seedConflictEntries.stream()));
         }
-        if (hasAssociationError(result)) {
-            // conflict occurs during association
-            String msg = String.format("Failed to associate to target entity=%s, conflict in seed=%s," +
-                    " conflict in lookup=%s, requestId=%s, tenantId=%s",
-                    result.getLeft(), result.getMiddle(), result.getRight(), requestId, tenantId);
-            errors.add(msg);
+        if (result != null) {
+            if (CollectionUtils.isNotEmpty(result.getRight())) {
+                lookupConflicts.addAll(prettify(result.getRight().stream()));
+            }
+            if (CollectionUtils.isNotEmpty(result.getMiddle())) {
+                seedConflicts.addAll(prettify(result.getMiddle().stream()));
+            }
         }
+
+        List<String> errors = new ArrayList<>();
+        if (!lookupConflicts.isEmpty()) {
+            errors.add(String.format("Match keys %s already map to another %s, cannot be mapped to matched %s(ID=%s)",
+                    lookupConflicts, entity, entity, targetEntityId));
+        }
+        if (!seedConflicts.isEmpty()) {
+            errors.add(String.format("Match keys %s already exist in matched %s(ID=%s) with different values",
+                    seedConflicts, entity, targetEntityId));
+        }
+
         return errors;
+    }
+
+    private List<String> prettify(@NotNull Stream<EntityLookupEntry> entries) {
+        return entries.map(EntityMatchUtils::prettyToString).collect(toList());
     }
 
     /*
