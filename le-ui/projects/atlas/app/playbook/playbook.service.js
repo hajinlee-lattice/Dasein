@@ -708,11 +708,12 @@ angular.module('lp.playbook')
     this.getLaunchedStatus = function(play) {
         var launchedState = (play.launchHistory && play.launchHistory.playLaunch && play.launchHistory.playLaunch.launchState ? play.launchHistory.playLaunch.launchState : null),
             hasLaunched = (launchedState === 'Launched' ? true : false),
-            hasLaunchHistory = (play.launchHistory.mostRecentLaunch ||  play.launchHistory.lastCompletedLaunch || play.launchHistory.lastIncompleteLaunch ? true : false);
+            //hasLaunchHistory = (play.launchHistory.mostRecentLaunch ||  play.launchHistory.lastCompletedLaunch || play.launchHistory.lastIncompleteLaunch ? true : false);
+            hasLaunchHistory = ((play.launchHistory && play.launchHistory.mostRecentLaunch && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || play.launchHistory && play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState) ? true : false);
         return {
             hasLaunchHistory: hasLaunchHistory,
             launchedState: launchedState,
-            hasLaunched: hasLaunched
+            hasLaunched: hasLaunched,
         };
     }    
 

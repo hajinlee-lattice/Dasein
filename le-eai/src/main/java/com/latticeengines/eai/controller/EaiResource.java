@@ -2,7 +2,8 @@ package com.latticeengines.eai.controller;
 
 import java.util.Collections;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("")
 public class EaiResource implements EaiInterface {
 
-    @Autowired
+    @Inject
     private EaiService eaiService;
 
     @RequestMapping(value = "/jobs", method = RequestMethod.POST, headers = "Accept=application/json")

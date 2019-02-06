@@ -1,34 +1,6 @@
 // export const trayAPI = '/tray';
 // window['reactrouter'] =var router;
 const GraphQLParser = {
-    getUserQuery(userName) {
-        let q = `query {
-              users (criteria: {name: "${userName}"}) {
-                edges {
-                  node {
-                    name
-                    id
-                    externalUserId
-                  }
-                }
-              }
-            }`
-
-        return {
-            query: q
-        };
-    },
-    getCreateUserQuery(userName) {
-        let q = `mutation {
-            createExternalUser(input: {name: "${userName}", externalUserId: "${userName}"}) {
-              authorizationCode
-              clientMutationId
-            }
-          }`;
-        return {
-            query: q
-        }
-    },
     getUserInfo(data, edges){
         console.log('DATA', data);
         if(data.users && data.users.edges && data.users.edges.length > 0){
@@ -37,7 +9,13 @@ const GraphQLParser = {
         }else{
             return null;
         }
-
+    },
+    getNewSolutionInstance(data, tagName){
+        if(data && data.viewer){
+            let url = data.viewr.solutions.edges
+        }else{
+            return null;
+        }
     }
 };
 module.exports = GraphQLParser;
@@ -58,4 +36,13 @@ class User{
         return this.externalId;
     }
     
+}
+
+class SolutionInstance {
+    constructor(tagName="", url=""){
+        this.tagName = tagName;
+        this.url = url;
+
+    }
+
 }

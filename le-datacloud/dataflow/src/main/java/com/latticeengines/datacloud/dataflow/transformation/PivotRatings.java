@@ -68,12 +68,12 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
             } else {
                 ruleEngineIds = new HashSet<>(idAttrsMap.values());
             }
-            Node ruleRating = addSource(parameters.getBaseTables().get(ruleSrcIdx));
+            Node ruleRating = removeDummyRows(addSource(parameters.getBaseTables().get(ruleSrcIdx)));
             pivoted = pivotRuleBased(ruleEngineIds, ruleRating);
         }
 
         if (aiSrcIdx != null) {
-            Node aiRating = addSource(parameters.getBaseTables().get(aiSrcIdx));
+            Node aiRating = removeDummyRows(addSource(parameters.getBaseTables().get(aiSrcIdx)));
             aiRating = aiRating.filter(idCol + " != null", new FieldList(idCol));
             Node aiPivoted = pivotAIBased(aiRating);
             if (pivoted == null) {
@@ -98,7 +98,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
         Integer inactiveSrcIdx = config.getInactiveSourceIdx();
         if (inactiveSrcIdx != null) {
-            Node inactive = addSource(parameters.getBaseTables().get(inactiveSrcIdx));
+            Node inactive = removeDummyRows(addSource(parameters.getBaseTables().get(inactiveSrcIdx)));
             List<String> inactiveEngines = config.getInactiveEngines();
             pivoted = joinInactiveEngines(pivoted, inactive, inactiveEngines);
         }
@@ -110,6 +110,10 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         pivoted = pivoted.addTimestamp(InterfaceName.CDLUpdatedTime.name());
 
         return pivoted;
+    }
+
+    private Node removeDummyRows(Node node) {
+        return node.filter(String.format("%s != null", idCol), new FieldList(idCol));
     }
 
     private Node pivotRuleBased(Set<String> ruleEngineIds, Node ruleRating) {

@@ -67,13 +67,16 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
         extSysAuth.setLookupMapConfigId(lookupIdMapRef.getId());
         extSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
+        extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         extSysAuth = extSysAuthenticationEntityMgr.createAuthentication(extSysAuth);
         assertNotNull(extSysAuth);
+        assertNotNull(extSysAuth.getTrayAuthenticationId());
+        assertNotNull(extSysAuth.getSolutionInstanceId());
         assertNotNull(extSysAuth.getLookupIdMap());
         extSysAuthRef = extSysAuth;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods="testCreate")
     public void testFindAll() {
         List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr.findAuthentications();
         assertNotNull(extSysAuthList);
@@ -84,14 +87,15 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         verifyCurrentObject(extSysAuth);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods= "testCreate")
     public void testUpdate() {
         ExternalSystemAuthentication extSysAuth = extSysAuthenticationEntityMgr.findAuthenticationByAuthId(extSysAuthRef.getId());
         verifyCurrentObject(extSysAuth);
-
+        log.info(JsonUtils.serialize(extSysAuth));
         ExternalSystemAuthentication updatedSysAuth = new ExternalSystemAuthentication();
         updatedSysAuth.setId(extSysAuth.getId());
         updatedSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
+        updatedSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         updatedSysAuth = extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
         try {
             Thread.sleep(2000L);
@@ -100,10 +104,12 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         }
         updatedSysAuth = extSysAuthenticationEntityMgr.findAuthenticationByAuthId(extSysAuthRef.getId());
         verifyCurrentObject(updatedSysAuth);
+        log.info(JsonUtils.serialize(updatedSysAuth));
         assertNotEquals(updatedSysAuth.getTrayAuthenticationId(), extSysAuth.getTrayAuthenticationId());
+        assertNotEquals(updatedSysAuth.getSolutionInstanceId(), extSysAuth.getSolutionInstanceId(), "SolutionInstaceID was not updated");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods="testCreate")
     public void testFindByLookupIdMap() {
         List<String> lookupMapIds = Collections.singletonList(lookupIdMapRef.getId());
         List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr.findAuthenticationsByLookupMapIds(lookupMapIds);

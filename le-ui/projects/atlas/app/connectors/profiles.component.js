@@ -65,11 +65,7 @@ export default class ProfilesComponent extends Component {
             return null;
         }
     }
-    // getProfilesUI(){
-    //     return (<div>
-    //         {this.getProfileUI()}
-    //     </div>);
-    // }
+    
     getProfiles() {
         if (this.state.loading === false) {
             return this.getProfilesUI();

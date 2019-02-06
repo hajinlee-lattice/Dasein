@@ -13,13 +13,11 @@ export class ProfilesContainerComponent extends Component {
 
     render() {
         return (
-            // <div className="main-panel">
                 <div className="connector-profile-container">
                     <UIRouter router={ConnectorsRoutes.getRouter()}>
                         <UIView name="mainreact" />
                     </UIRouter>
                 </div>
-            // </div>
         );
     }
 }

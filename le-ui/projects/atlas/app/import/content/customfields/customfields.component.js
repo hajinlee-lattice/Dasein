@@ -96,7 +96,7 @@ angular.module('lp.import.wizard.customfields', [])
             var userField = i,
                 item = fieldMappings[userField];
         }
-        field.fieldType = fieldMappings[field.userField].fieldType
+        field.fieldType = fieldMappings[field.userField].fieldType;
         vm.changeSingleType(field);
     }
     vm.changeSingleType = function(fieldMapping){

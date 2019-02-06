@@ -8,6 +8,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -27,6 +28,9 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
+
+    @Value("${pls.modeling.workflow.mem.mb}")
+    protected int workflowMemMb;
 
     public ApplicationId submit(String modelName, String modelDisplayName, String moduleName, String pivotFileName,
             String pmmlFileName, SchemaInterpretation schemaInterpretation) {
@@ -68,6 +72,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(schemaInterpretation.name()) //
+                .workflowContainerMem(workflowMemMb) //
                 .build();
         return workflowJobService.submit(configuration);
     }

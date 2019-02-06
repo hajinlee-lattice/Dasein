@@ -44,6 +44,9 @@ angular
         })
         .state('home.import.calendar', {
             url: '/calendar',
+            onEnter: function(ImportWizardStore){
+                //ImportWizardStore.clear();
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     return false;

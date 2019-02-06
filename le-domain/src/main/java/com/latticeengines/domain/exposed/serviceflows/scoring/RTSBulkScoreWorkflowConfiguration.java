@@ -162,6 +162,11 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         public Builder fetchOnly(boolean fetchOnly) {
             matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
             return this;

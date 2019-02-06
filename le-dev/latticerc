@@ -1,6 +1,9 @@
 export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 export LE_ENVIRONMENT=dev
 
+export LE_SECRET_KEY="I03TMIIUftFUUI7bV0zFBw=="
+export LE_SALT_HINT="bi0mpJJNxiYpEka5C6JO4g=="
+
 if [ -f $WSHOME/le-dev/aliases ]; then
     . $WSHOME/le-dev/aliases
 fi

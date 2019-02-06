@@ -104,12 +104,12 @@ export class ConnectorList extends Component {
                                     classNames: "gray-button"
                                 }}
                                 callback={() => {
-                                    // httpService.get(
-                                    //     "/tray/user?userName=leonardo",
-                                    //     new Observer(response => {
-                                    //         console.log("BACK HERE ", response);
-                                    //     })
-                                    // );
+                                    httpService.get(
+                                        "/tray/solutionInstances?tagName=Marketo",
+                                        new Observer(response => {
+                                            console.log("BACK HERE ", response);
+                                        })
+                                    );
                                 }}
                             />
                         </div>

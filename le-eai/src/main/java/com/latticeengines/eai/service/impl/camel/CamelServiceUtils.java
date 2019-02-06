@@ -34,7 +34,7 @@ public class CamelServiceUtils {
         }
     }
 
-    static String cleanDirPath(String hdfsDir) {
+    private static String cleanDirPath(String hdfsDir) {
         while (hdfsDir.endsWith("/")) {
             hdfsDir = hdfsDir.substring(0, hdfsDir.lastIndexOf("/"));
         }

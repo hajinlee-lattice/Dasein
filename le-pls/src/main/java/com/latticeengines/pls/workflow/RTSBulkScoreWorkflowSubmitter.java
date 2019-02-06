@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -48,6 +49,9 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Value("${pls.modeling.workflow.mem.mb}")
+    protected int workflowMemMb;
 
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
             String sourceDisplayName, boolean enableDebug) {
@@ -126,6 +130,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
                 .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
+                .workflowContainerMem(workflowMemMb) //
                 .build();
     }
 }

@@ -59,6 +59,15 @@ public class RatingResource {
         return ratingQueryService.getData(frontEndQuery, version, finalSqlUser);
     }
 
+    @PostMapping(value = "/query")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+                           @RequestParam(value = "version", required = false) DataCollection.Version version,
+                           @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
+        return ratingQueryService.getQueryStr(frontEndQuery, version, BATCH_USER);
+    }
+
     @PostMapping(value = "/coverage")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")

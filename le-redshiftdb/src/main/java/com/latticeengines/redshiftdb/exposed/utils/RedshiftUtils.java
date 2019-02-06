@@ -19,9 +19,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
+import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
 
 public class RedshiftUtils {
     public static final String AVRO_STAGE = "redshift_avro_stage";
+    public static final String CSV_STAGE = "redshift_csv_stage";
 
     public static void generateJsonPathsFile(Schema schema, OutputStream outputStream) {
         ObjectNode root = JsonUtils.createObjectNode();
@@ -41,14 +43,14 @@ public class RedshiftUtils {
             keys.addAll(redshiftTableConfig.getSortKeys());
         }
         StringBuilder sb = new StringBuilder();
+        //
+        //
         sb.append(String.format( //
                 "CREATE TABLE IF NOT EXISTS %s (%s)", //
                 redshiftTableConfig.getTableName(), //
-                String.join( //
-                        ",", //
-                        schema.getFields().stream() //
-                                .map(field -> getColumnSQLStatement(field, keys)) //
-                                .collect(Collectors.toList()))));
+                schema.getFields().stream() //
+                        .map(field -> getColumnSQLStatement(field, keys)) //
+                        .collect(Collectors.joining(","))));
 
         if (redshiftTableConfig.getDistStyle() != null) {
             sb.append(String.format(" diststyle %s", redshiftTableConfig.getDistStyle().getName()));
@@ -99,6 +101,25 @@ public class RedshiftUtils {
                 sb.append(" ENCODE lzo");
             }
         }
+        return sb.toString();
+    }
+
+    public static String unloadTableStatement(String tableName, String s3Path, String authorization, RedshiftUnloadParams unloader) {
+        return unloadQueryStatement("select * from \"" + tableName + "\"", s3Path, authorization, unloader);
+    }
+
+    private static String unloadQueryStatement(String query, String s3Path, String authorization, RedshiftUnloadParams unloader) {
+        StringBuffer sb = new StringBuffer("UNLOAD ('").append(query).append("')\n");
+        sb.append("TO '").append(s3Path).append("'\n");
+        sb.append(authorization).append("\n");
+        if (!Boolean.TRUE.equals(unloader.getNoHeader())) {
+            sb.append("HEADER\n");
+        }
+        if (Boolean.TRUE.equals(unloader.getCompress())) {
+            sb.append("GZIP\n");
+        }
+        sb.append("DELIMITER AS '").append(unloader.getDelimiter()).append("'\n");
+        sb.append("ESCAPE AS '\"'\n");
         return sb.toString();
     }
 

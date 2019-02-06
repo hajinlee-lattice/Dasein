@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -20,16 +21,16 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SegmentExportWorkflow extends AbstractWorkflow<SegmentExportWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private SegmentExportInitStep segmentExportInitStep;
 
-    @Autowired
+    @Inject
     private ExportData exportData;
 
-    @Autowired
+    @Inject
     private ExportSegmentExportToS3 exportSegmentExportToS3;
-    
-    @Autowired
+
+    @Inject
     private SegmentExportListener segmentExportListener;
 
     @Override

@@ -428,7 +428,7 @@ class Server {
     createTrayProxy(API_URL, API_PATH, PATH) {
         if(API_URL){
             console.log('TRAY PROXY <======================');
-            var router = new TrayRouter(this.express, this.app, bodyParser, chalk,  API_URL, PATH, request).createRoutes();
+            var router = new TrayRouter(this.express, this.app, bodyParser, chalk,  API_URL, PATH, request, this.options.config.proxies).createRoutes();
             this.app.use('/tray', router);
         }
     }

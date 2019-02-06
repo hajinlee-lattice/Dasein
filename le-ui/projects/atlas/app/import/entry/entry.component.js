@@ -6,7 +6,8 @@ angular.module('lp.import.entry', [
     'lp.import.entry.producthierarchy'
 ])
 .controller('ImportEntry', function(
-    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportWizardService, ImportStore, AuthorizationUtility, Banner
+    $state, $stateParams, $scope, 
+    FeatureFlagService, ResourceUtility, ImportWizardStore, ImportWizardService, ImportStore, AuthorizationUtility, Banner
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
