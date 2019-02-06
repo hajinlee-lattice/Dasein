@@ -489,12 +489,13 @@ angular.module('lp.ratingsengine.dashboard', [
             RatingsEngineStore.setRemodelIteration(result);
             RatingsEngineStore.setRatingEngine(vm.ratingEngine);
             RatingsEngineStore.saveIteration('attributes').then(function(result){
-
+                if (!result.result) {
+                    Banner.success({
+                        message:
+                            "A remodel job has started. You can track it's progress on the jobs page."
+                    });
+                }
                 vm.remodelingProgress = result.showProgress;
-                Banner.success({
-                    message:
-                        "A remodel job has started. You can track it's progress on the jobs page."
-                });
             });
         });
     }

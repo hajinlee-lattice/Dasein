@@ -10,6 +10,10 @@
     line-height: 28px;
     & > * {
         display: inline-block;
+        -webkit-transition: none;
+        -moz-transition: none;
+        -o-transition: none;
+        transition: none;
     }
     button {        
         background: #f16a22;
