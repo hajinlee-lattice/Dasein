@@ -351,7 +351,12 @@ public class DataLakeServiceImpl implements DataLakeService {
                 internalAccountIds, predefined, dataCloudVersion);
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        return AccountExtensionUtil.convertToDataPage(matchOutput);
+        List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);
+        List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream()
+                .filter(cm -> StatsCubeUtils.isDateAttribute(cm))
+                .collect(Collectors.toList());
+        return AccountExtensionUtil.processMatchOutputResults(customerSpace,
+                dateAttributesMetadata, matchOutput);
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
@@ -559,6 +564,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                 stopWatch.getTime(TimeUnit.SECONDS)));
     }
 
+    @Override
     public List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
         return getServingMetadataForEntity(customerSpace, entity).collectList().block();
     }

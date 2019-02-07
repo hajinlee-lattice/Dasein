@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,15 +18,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -169,6 +173,66 @@ public class AccountExtensionUtil {
         return matchInput;
     }
 
+    /*
+     * Reformats date attributes and converts matchOutput to data page
+     */
+    public static DataPage processMatchOutputResults(String customerSpace, List<ColumnMetadata> dateAttributesMetadata,
+            MatchOutput matchOutput) {
+        DataPage dataPage = createEmptyDataPage();
+        Map<String, ColumnMetadata> dateAttributesMap = dateAttributesMetadata.stream()
+                .collect(Collectors.toMap(ColumnMetadata::getAttrName, cm -> cm, (cm1, cm2) -> {
+                    log.info("duplicate key found! " + JsonUtils.serialize(cm1) + "/n" + JsonUtils.serialize(cm2));
+                    return cm1;
+                }));
+        List<String> fields = matchOutput.getOutputFields();
+        IntStream.range(0, matchOutput.getResult().size()) //
+                .forEach(i -> {
+                    Map<String, Object> data = null;
+                    if (matchOutput != null //
+                            && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
+                            && matchOutput.getResult().get(i) != null) {
+
+                        if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
+                            log.info("Didn't find any match from lattice data cloud. "
+                                    + "Still continue to process the result as we may "
+                                    + "have found partial match in my data table.");
+                        } else {
+                            log.info("Found full match from lattice data cloud as well as from my data table.");
+                        }
+
+                        final Map<String, Object> tempDataRef = new HashMap<>();
+                        List<Object> values = matchOutput.getResult().get(i).getOutput();
+                        IntStream.range(0, fields.size()) //
+                                .forEach(j -> {
+                                    Object value = values.get(j);
+                                    if (dateAttributesMap.containsKey(fields.get(j))) {
+                                        ColumnMetadata cm = dateAttributesMap.get(fields.get(j));
+                                        log.info("Date attribute to reformat: " + JsonUtils.serialize(cm));
+                                        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
+                                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
+
+                                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                                        try {
+                                            value = simpleDateFormat.format(value);
+                                        } catch (Exception e) {
+                                            log.info(String.format("Could not reformat date value %s for column %s",
+                                                    String.valueOf(value), fields.get(j)));
+                                        }
+                                    }
+                                    tempDataRef.put(fields.get(j), value);
+                                });
+                        data = tempDataRef;
+
+                    }
+
+                    if (MapUtils.isNotEmpty(data)) {
+                        dataPage.getData().add(data);
+                    }
+                });
+        return dataPage;
+    }
+
     public static DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         List<String> fields = matchOutput.getOutputFields();
@@ -184,8 +248,7 @@ public class AccountExtensionUtil {
                                     + "Still continue to process the result as we may "
                                     + "have found partial match in my data table.");
                         } else {
-                            log.info(
-                                    "Found full match from lattice data cloud as well as from my data table.");
+                            log.info("Found full match from lattice data cloud as well as from my data table.");
                         }
 
                         final Map<String, Object> tempDataRef = new HashMap<>();
