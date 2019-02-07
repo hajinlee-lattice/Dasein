@@ -150,6 +150,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         List<PrimaryKey> keys = seedIds
                 .stream()
                 .map(id -> buildKey(env, tenant, version, entity, id))
+                .distinct()
                 .collect(Collectors.toList());
         Map<String, Item> itemMap = getRetryTemplate(env).execute(ctx -> {
             return dynamoItemService
