@@ -326,7 +326,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             if (hasAssociationError(maxPriorityResult)) {
                 log.debug("Failed to associate highest priority lookup entry {} to target entity (ID={})," +
                         " requestId={}, tenant (ID={}), entity={}",
-                        maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
+                        maxPriorityEntry, targetEntitySeed.getId(), requestId, tenantId, request.getEntity());
                 // NOTE even conflict on lookup mapping for many to X entry is considered
                 // failure for highest priority key
                 if (maxPriorityResult.getLeft() == null) {
@@ -343,11 +343,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
             log.debug("Associate highest priority lookup entry successfully to target entity (ID={})," +
                     " requestId={}, tenant (ID={}), entity={}",
-                    maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
+                    maxPriorityEntry, targetEntitySeed.getId(), requestId, tenantId, request.getEntity());
         } else {
             log.debug("Highest priority lookup entry {} already maps to target entity (ID={})," +
                     " requestId={}, tenant (ID={}), entity={}",
-                    maxPriorityEntry, targetEntitySeed.getId(), tenantId, request.getEntity());
+                    maxPriorityEntry, targetEntitySeed.getId(), requestId, tenantId, request.getEntity());
         }
 
         List<Pair<EntityLookupEntry, String>> mappingConflictEntries =
