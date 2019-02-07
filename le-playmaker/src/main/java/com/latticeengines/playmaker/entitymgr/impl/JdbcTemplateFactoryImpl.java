@@ -86,6 +86,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
             TemplateInfo tempInfo = jdbcTemplates.remove(tenantName);
             if (tempInfo != null) {
                 try {
+                    log.info("Trying to remove PlayMaker DataSource: ", tempInfo.cpds.toString(true));
                     tempInfo.cpds.close();
                 } catch (Exception ex) {
                     log.warn("Can not close the data source for tenant=" + tenantName, ex);
@@ -130,6 +131,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
             NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(cpds);
             byte[] hash = getHash(tenant);
             TemplateInfo templateInfo = new TemplateInfo(template, hash, cpds);
+            log.info("Created PlayMaker DataSource: ", cpds.toString(true));
             return templateInfo;
 
         } catch (Exception ex) {
