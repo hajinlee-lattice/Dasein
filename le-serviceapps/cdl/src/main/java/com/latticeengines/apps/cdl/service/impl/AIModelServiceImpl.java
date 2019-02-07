@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -244,8 +245,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
         boolean shouldHaveParentSegment = true;
         AdvancedModelingConfig advancedModelingConfig = ratingModel.getAdvancedModelingConfig();
-        if (advancedModelingConfig != null
-                && advancedModelingConfig instanceof CustomEventModelingConfig) {
+        if (advancedModelingConfig instanceof CustomEventModelingConfig) {
             CustomEventModelingConfig customEventModelingConfig = (CustomEventModelingConfig) advancedModelingConfig;
             if (CustomEventModelingType.LPI
                     .equals(customEventModelingConfig.getCustomEventModelingType())) {
@@ -322,10 +322,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
                 .getAllowedModelingAttrs(customerSpace, false,
                         dataCollectionService.getActiveVersion(customerSpace))
-                .collectMap(this::getKey,
-                        cm -> iterationAttributes.containsKey(getKey(cm))
-                                ? iterationAttributes.get(getKey(cm))
-                                : cm,
+                .collectMap(this::getKey, cm -> iterationAttributes.getOrDefault(getKey(cm), cm),
                         () -> iterationAttributes)
                 .block();
 
@@ -421,6 +418,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                                 importanceOrdering.get(toReturn.getAttrName()));
                         importanceOrdering.remove(toReturn.getAttrName());
                     }
+                    cm.setEntity(BusinessEntity.Account);
                     return toReturn;
 
                 }, () -> iterationAttributes).block();
@@ -463,10 +461,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Map<String, StatsCube> accountStatsCube = getIterationMetadataCube(customerSpace,
                 ratingEngine, aiModel, dataStores);
 
-        TopNTree topNTree = StatsCubeUtils.constructTopNTree( //
+        return StatsCubeUtils.constructTopNTree( //
                 accountStatsCube, ImmutableMap.of(statsCubeKey, metadataAttrs), //
                 false, null);
-        return topNTree;
     }
 
     private String getKey(ColumnMetadata cm) {
