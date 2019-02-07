@@ -1,6 +1,6 @@
 import random
 
-import constants
+from . import constants
 
 def random_combination(cols, m):
     """Pick m columns from the given list. After that, fill missing columns to make sure
@@ -15,7 +15,7 @@ def random_combination(cols, m):
     """
     pool = tuple(cols)
     n = len(pool)
-    indices = sorted(random.sample(xrange(n), m))
+    indices = sorted(random.sample(range(n), m))
     return fill_missing_col(set(pool[i] for i in indices))
 
 def fill_missing_col(cols):
@@ -35,4 +35,4 @@ def fill_missing_col(cols):
 
 if __name__ == '__main__':
     res = random_combination(constants.MATCH_KEY_COLS, 3)
-    print res
+    print(res)

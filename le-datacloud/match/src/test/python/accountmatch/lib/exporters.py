@@ -15,7 +15,7 @@ class AvroExporter(object):
         """
         self._path = output_file_path
         # build avro schema for test data
-        self._schema = avro.schema.parse(
+        self._schema = avro.schema.Parse(
             json.dumps(constants.TEST_AVRO_SCHEMA))
 
     def __enter__(self):
@@ -57,7 +57,7 @@ class CsvExporter(object):
         if self._path is None:
             return
         # override if the output file already exists
-        self._csv_file = open(self._path, 'wb')
+        self._csv_file = open(self._path, 'w')
         self._csv_writer = csv.writer(self._csv_file, dialect='excel')
         # write csv header for test data
         self._csv_writer.writerow(constants.TEST_COLS)

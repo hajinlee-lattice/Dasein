@@ -18,7 +18,7 @@ def group1():
     # example for controlled group 1-a
     # 1. test data will use the given record
     # 2. no data in universe before testing
-    record = [ 'account1', 's2', 'm1', 'google', 'google.com', '999999999', 'usa', 'ca', 'mountain view' ]
+    record = [ 'account1', 'sfdc1', 'mkto1', 'google', 'google.com', '999999999', 'usa', 'ca', 'mountain view' ]
     return noconflict.Group(get_n_incr(), 50, scenario=noconflict.Group.ALL_MATCH_KEYS, populate_universe=False, record=record)
 
 def group2():
