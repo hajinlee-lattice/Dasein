@@ -149,7 +149,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         log.info("get contacts reply: " + result.toString() + "\n");
 =======
         if (log.isDebugEnabled()) {
-            log.debug("get contacts: " + result.toString() + "\n");
+            log.debug("get contacts: " + result.toString());
         }
 >>>>>>> c7ba7c1469... fix playmaker memory issues by cleaning up logs. PLS-11732 and increase the connection pool to 500
         return result;
