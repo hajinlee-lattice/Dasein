@@ -166,6 +166,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         setCategoryForTable(newMeta, entity);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
+            dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
+                    schemaTable, dataFeedTask.getImportTemplate());
             crosscheckDataType(customerSpace, entity, source, newMeta, dataFeedTask.getUniqueId());
             Table originMeta = dataFeedTask.getImportTemplate();
             DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
@@ -188,7 +190,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return dataFeedTask.getUniqueId();
         } else {
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
-                    schemaTable);
+                    schemaTable, null);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
             if (!finalSchemaCheck(newMeta, entity, withoutId)) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
