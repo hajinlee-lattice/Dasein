@@ -189,17 +189,18 @@ public class ModelingServiceExecutor {
             samplingConfig.setSamplingType(builder.getSamplingType());
         }
         samplingConfig.setCounterGroupResultMap(builder.getCounterGroupResultMap());
-        if (Boolean.TRUE == builder.shouldLimitMaxRows
+        if (Boolean.TRUE == builder.shouldLimitMaxRows //
+                && builder.maxRowsLimit != null //
                 && MapUtils.isNotEmpty(samplingConfig.getCounterGroupResultMap())) {
             Long totalCount = samplingConfig.getCounterGroupResultMap().values() //
                     .stream() //
                     .reduce((x, y) -> x + y).get();
-            int samplingRate = (new Double((100L * (1.0d * builder.maxRowsLimit) / totalCount))).intValue();
-
-            log.info(String.format("Setting sampling rate as %d as totalCount = %d and maxRowsLimit = %d", samplingRate,
-                    totalCount, builder.maxRowsLimit));
-
-            samplingConfig.setSamplingRate(samplingRate);
+            if (builder.maxRowsLimit < totalCount) {
+                int samplingRate = (new Double((100L * (1.0d * builder.maxRowsLimit) / totalCount))).intValue();
+                log.info(String.format("Setting sampling rate as %d as totalCount = %d and maxRowsLimit = %d",
+                        samplingRate, totalCount, builder.maxRowsLimit));
+                samplingConfig.setSamplingRate(samplingRate);
+            }
         }
         SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
         log.info(String.format("Configuration for sampling: %s", JsonUtils.serialize(samplingConfig)));
