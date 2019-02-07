@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
 import reactor.core.publisher.ParallelFlux;
@@ -240,23 +241,63 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<PatchBookValidationError> errors = new ArrayList<>();
         errors.addAll(PatchBookUtils.validateDuplicateMatchKey(books));
         errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
-        errors.addAll(enhancementOfAttributePatchApi(books, dataCloudVersion));
+        errors.addAll(validateSourceAttribute(books, dataCloudVersion));
         return errors;
+    }
+
+    List<PatchBookValidationError> domainPatchValidate(@NotNull List<PatchBook> books) {
+        List<PatchBookValidationError> errorList = new ArrayList<>();
+        Set<String> domainDunsSet = new HashSet<>();
+        for(PatchBook book : books) {
+            List<Long> pids = null;
+            PatchBookValidationError error = null;
+            if (checkOnlyDunsMatchKey(book)
+                    && book.getPatchItems().containsKey(MatchKey.Domain.name())
+                    && book.getPatchItems().size() == 1) { // match key = duns and patchedItem = domain
+                // check if match key = duns and patchedItem = domain, this combination is unique
+                if (!domainDunsSet.contains(
+                        book.getDuns() + book.getPatchItems().get(MatchKey.Domain.name()))) {
+                    domainDunsSet
+                            .add(book.getDuns() + book.getPatchItems().get(MatchKey.Domain.name()));
+                } else {
+                    error = new PatchBookValidationError();
+                    pids = new ArrayList<>();
+                    error.setMessage(DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO);
+                    pids.add(book.getPid());
+                    error.setPatchBookIds(pids);
+                    errorList.add(error);
+                }
+            } else {
+                // error : as match key needs to be duns and patch item needs to be domain
+                error = new PatchBookValidationError();
+                pids = new ArrayList<>();
+                error.setMessage(DOMAIN_PATCH_MATCH_KEY_ERR);
+                pids.add(book.getPid());
+                error.setPatchBookIds(pids);
+                errorList.add(error);
+            }
+        }
+        return errorList;
+    }
+
+    private boolean checkOnlyDunsMatchKey(PatchBook book) {
+        if (book.getCity() == null && book.getCountry() == null && book.getCreatedBy() == null
+                && book.getCreatedDate() == null && book.getDomain() == null
+                && book.getEffectiveSince() == null && book.getEffectiveSinceVersion() == null
+                && book.getExpireAfter() == null && book.getExpireAfterVersion() == null
+                && book.getLastModifiedBy() == null && book.getLastModifiedDate() == null
+                && book.getDuns() != null) {
+            return true;
+        }
+            return false;
     }
 
     /*
      * Enhancement of Attribute Patch Validation API based on domain / duns
      * based sources
      */
-    List<PatchBookValidationError> enhancementOfAttributePatchApi(@NotNull List<PatchBook> books, @NotNull String dataCloudVersion) {
-        /* HardCoding domain and duns based sources */
-        Set<String> domainBasedSources = new HashSet<>();
-        Set<String> dunsBasedSources = new HashSet<>();
-        String domBasedSources[] = { "AlexaMostRecent", "Bombora30DayAgg", "BomboraSurgePivoted", "BuiltWithPivoted",
-                "BuiltWithTechIndicators", "FeaturePivoted", "HGDataPivoted", "HGDataTechIndicators", "HPANewPivoted",
-                "OrbIntelligenceMostRecent", "SemrushMostRecent" };
-        domainBasedSources.addAll(Arrays.asList(domBasedSources));
-        dunsBasedSources.add("DnBCacheSeed");
+    List<PatchBookValidationError> validateSourceAttribute(@NotNull List<PatchBook> books,
+            @NotNull String dataCloudVersion) {
         /* extract attributes based on domain and duns based source */
         List<SourceAttribute> sourceAttributes = sourceAttributeEntityMgr.getAttributes("AccountMaster", "MapStage",
                 "mapAttribute", null, false);
@@ -268,53 +309,46 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             String[] argArray = argument.split(",");
             String source = argArray[argArray.length - 1].split(":")[1];
             // populate set of attribute names for domain based sources
-            if (domainBasedSources.contains(source)) {
+            if (DataCloudConstants.DOMAIN_BASED_SOURCES.contains(source)) {
                 attrNamesForDomBasedSources.add(attribute);
             }
             // populate set of attribute names for duns based sources
-            if (dunsBasedSources.contains(source)) {
+            if (DataCloudConstants.DUNS_BASED_SOURCES.contains(source)) {
                 attrNamesForDunsBasedSources.add(attribute);
             }
         }
         List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
         // Iterate through the patchItems to check patch item attribute is from domain based source or duns based source
         for(PatchBook book : books) {
-            boolean domMatchKeyPresent = false;
-            boolean dunsMatchKeyPresent = false;
-            boolean domSrcErrPresent = false;
-            boolean dunsSrcErrPresent = false;
             boolean encoded = false;
             List<String> domBasedSrcAbsentAttrs = new ArrayList<>();
             List<String> dunsBasedSrcAbsentAttrs = new ArrayList<>();
             List<String> encodedAttrs = new ArrayList<>();
             Map<String, Object> patchItems = book.getPatchItems();
-            // domain Match Key Present
-            if (!StringUtils.isEmpty(book.getDomain())) {
-                domMatchKeyPresent = true;
-            }
-            // duns Match Key Present
-            if (!StringUtils.isEmpty(book.getDuns())) {
-                dunsMatchKeyPresent = true;
-            }
             for (Map.Entry<String, Object> patchedItem : patchItems.entrySet()) {
                 String patchAttr = patchedItem.getKey();
-                if (domMatchKeyPresent) {
-                    if (!attrNamesForDomBasedSources.contains(patchAttr)) {
-                        // Error : since domain match key is present and patch
-                        // attrName should be one of the attr names for domain
-                        // based sources
-                        domSrcErrPresent = true;
-                        domBasedSrcAbsentAttrs.add(patchAttr);
-                    }
+                if ((StringUtils.isNotBlank(book.getDomain())
+                        && !attrNamesForDomBasedSources.contains(patchAttr))
+                        || (StringUtils.isBlank(book.getDomain())
+                                && attrNamesForDomBasedSources.contains(patchAttr))) {
+                    // Error : since domain match key is present and patch
+                    // attrName should be one of the attr names for domain
+                    // based sources
+                    System.out.println("## Entered Domain Book : " + book.getPid());
+                    domBasedSrcAbsentAttrs.add(patchAttr);
                 }
-                if (dunsMatchKeyPresent) {
-                    if (!attrNamesForDunsBasedSources.contains(patchAttr)) {
-                        // Error : since duns match key is present and patch
-                        // attrName should be one of the attr names for duns
-                        // based sources
-                        dunsSrcErrPresent = true;
-                        dunsBasedSrcAbsentAttrs.add(patchAttr);
-                    }
+                System.out.println(
+                        "book.getDomain : " + book.getDomain() + " book.getDuns() : "
+                                + book.getDuns() + " patchAttr : " + patchAttr);
+                if ((StringUtils.isNotBlank(book.getDuns())
+                        && !attrNamesForDunsBasedSources.contains(patchAttr))
+                        || (StringUtils.isBlank(book.getDuns())
+                                && attrNamesForDunsBasedSources.contains(patchAttr))) {
+                    // Error : since duns match key is present and patch
+                    // attrName should be one of the attr names for duns
+                    // based sources
+                    System.out.println("## Entered Duns Book : " + book.getPid());
+                    dunsBasedSrcAbsentAttrs.add(patchAttr);
                 }
                 // Doesn't support patching for encoded attributes
                 AccountMasterColumn amCol = columnEntityMgr.findById(patchAttr, dataCloudVersion);
@@ -323,9 +357,10 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     encodedAttrs.add(patchAttr);
                 }
             }
-            PatchBookValidationError error = reportErrorsForAttrPatchValidator(domSrcErrPresent,
-                    dunsMatchKeyPresent,
-                    dunsSrcErrPresent, domMatchKeyPresent, domBasedSrcAbsentAttrs,
+            PatchBookValidationError error = reportErrorsForAttrPatchValidator(
+                    StringUtils.isNotBlank(book.getDuns()),
+                    StringUtils.isNotBlank(book.getDomain()),
+                    domBasedSrcAbsentAttrs,
                     dunsBasedSrcAbsentAttrs, encodedAttrs, book.getPid(), encoded);
             if (error.getMessage() != null) {
                 patchBookValidErrorList.add(error);
@@ -334,26 +369,25 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         return patchBookValidErrorList;
     }
 
-    private PatchBookValidationError reportErrorsForAttrPatchValidator(
-            boolean domSrcErrPresent, boolean dunsMatchKeyPresent, boolean dunsSrcErrPresent,
+    private PatchBookValidationError reportErrorsForAttrPatchValidator(boolean dunsMatchKeyPresent,
             boolean domMatchKeyPresent, List<String> domBasedSrcAbsentAttrs,
             List<String> dunsBasedSrcAbsentAttrs, List<String> encodedAttrs, Long pid,
             boolean encoded) {
         List<Long> pids = new ArrayList<>();
         PatchBookValidationError error = new PatchBookValidationError();
-        if (domSrcErrPresent && !dunsMatchKeyPresent) {
+        if (domBasedSrcAbsentAttrs.size() > 0 && !dunsMatchKeyPresent) {
             error.setMessage(
-                    ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR + domBasedSrcAbsentAttrs.toString()); 
-            domSrcErrPresent = false;
+                    ATTRI_PATCH_DOM_BASED_SRC_ERR + domBasedSrcAbsentAttrs.toString());
             pids.add(pid);
+            domBasedSrcAbsentAttrs.clear();
         }
-        if (dunsSrcErrPresent && !domMatchKeyPresent) {
+        if (dunsBasedSrcAbsentAttrs.size() > 0 && !domMatchKeyPresent) {
             error.setMessage(
-                    ATTRI_PATCH_DOM_DUNS_BASED_SRC_ERR + dunsBasedSrcAbsentAttrs.toString());
-            dunsSrcErrPresent = false;
+                    ATTRI_PATCH_DUNS_BASED_SRC_ERR + dunsBasedSrcAbsentAttrs.toString());
             pids.add(pid);
+            dunsBasedSrcAbsentAttrs.clear();
         }
-        if (encoded && !domSrcErrPresent && !dunsSrcErrPresent) {
+        if (encoded) {
             error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
         }
         if (pids.size() > 0) {
@@ -411,8 +445,9 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     private List<PatchBookValidationError> validateDomainPatchBook(
             @NotNull String dataCloudVersion, @NotNull List<PatchBook> books) {
-        // TODO implement
-        return Collections.emptyList();
+        List<PatchBookValidationError> errors = new ArrayList<>();
+        errors.addAll(domainPatchValidate(books));
+        return errors;
     }
 
     /*
