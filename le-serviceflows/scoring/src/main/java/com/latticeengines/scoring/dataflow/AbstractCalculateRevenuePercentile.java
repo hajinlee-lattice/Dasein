@@ -45,7 +45,7 @@ public abstract class AbstractCalculateRevenuePercentile<T extends DataFlowParam
     public Node construct(T parameters) {
         log.info(String.format("%s = %s", parameters.getClass().getSimpleName(), JsonUtils.serialize(parameters)));
         parseParamAndSetFields(parameters);
-
+        
         Node inputTable = addSource(inputTableName);
         Node addPercentileColumn = inputTable.addColumnWithFixedValue(percentileFieldName, null, Integer.class);
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());

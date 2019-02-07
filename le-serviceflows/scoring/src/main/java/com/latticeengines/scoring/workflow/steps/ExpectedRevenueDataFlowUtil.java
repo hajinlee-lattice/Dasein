@@ -10,6 +10,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -17,6 +18,8 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.scoringapi.EVScoreDerivation;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 
@@ -51,6 +54,41 @@ public class ExpectedRevenueDataFlowUtil {
         return fitFunctionParametersMap;
     }
 
+    public static Map<String, Map<ScoreDerivationType, ScoreDerivation>> getScoreDerivationMap(
+            CustomerSpace customerSpace, Configuration yarnConfiguration, ModelSummaryProxy modelSummaryProxy,
+            Map<String, String> modelFieldMap, boolean loadOnlyForEVModel) {
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
+                yarnConfiguration);
+        Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMap = new HashMap<>();
+        modelFieldMap.entrySet().stream().forEach(entry -> {
+            String modelId = entry.getKey();
+            boolean isEV = ScoreResultField.ExpectedRevenue.displayName.equals(entry.getValue());
+            if (!loadOnlyForEVModel || isEV) {
+                String scoreDerivationStr = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId, isEV);
+
+                Map<ScoreDerivationType, ScoreDerivation> scoreDerivationInfo = new HashMap<>();
+
+                if (isEV) {
+                    EVScoreDerivation evScoreDerivation = JsonUtils.deserialize(scoreDerivationStr,
+                            EVScoreDerivation.class);
+
+                    scoreDerivationInfo.put(ScoreDerivationType.EV, evScoreDerivation.getEVScoreDerivation());
+                    scoreDerivationInfo.put(ScoreDerivationType.PROBABILITY,
+                            evScoreDerivation.getProbabilityScoreDerivation());
+                    scoreDerivationInfo.put(ScoreDerivationType.REVENUE, evScoreDerivation.getRevenueScoreDerivation());
+                } else {
+                    ScoreDerivation scoreDerivation = JsonUtils.deserialize(scoreDerivationStr, ScoreDerivation.class);
+                    scoreDerivationInfo.put(ScoreDerivationType.PROBABILITY, scoreDerivation);
+
+                }
+
+                scoreDerivationMap.put(modelId, scoreDerivationInfo);
+
+            }
+        });
+        return scoreDerivationMap;
+    }
+
     public static Map<String, String> getScoreFieldsMap(List<RatingModelContainer> allContainers) {
         Map<String, String> originalScoreFieldsMap;
         originalScoreFieldsMap = new HashMap<>();
@@ -77,5 +115,9 @@ public class ExpectedRevenueDataFlowUtil {
                     return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
                             || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
                 }).collect(Collectors.toList());
+    }
+
+    public static enum ScoreDerivationType {
+        EV, REVENUE, PROBABILITY
     }
 }
