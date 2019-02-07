@@ -26,6 +26,12 @@ public class Sample extends BaseModelStep<ModelStepConfiguration> {
     @Value("${common.sampling.type:STRATIFIED_SAMPLING}")
     private String samplingType;
 
+    @Value("${common.sampling.rows.max.shouldlimit:true}")
+    private Boolean shouldLimitMaxRows;
+
+    @Value("${common.sampling.rows.max.count:1000000}")
+    private Long maxRowsLimit;
+
     @Override
     public void execute() {
         log.info("Inside Sample execute()");
@@ -54,6 +60,8 @@ public class Sample extends BaseModelStep<ModelStepConfiguration> {
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
         bldr.counterGroupResultMap(counterGroupResultMap);
         bldr.samplingType(SamplingType.valueOf(samplingType));
+        bldr.shouldLimitMaxRows(shouldLimitMaxRows);
+        bldr.maxRowsLimit(maxRowsLimit);
         ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
         modelExecutor.sample();
     }
