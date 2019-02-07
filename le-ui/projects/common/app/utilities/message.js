@@ -30,6 +30,13 @@ export default class Message {
         return this.confirmText;
     }
 
+    setIcon(icon){
+        this.icon = icon;
+    }
+    getIcon(){
+        return this.icon;
+    }
+
     setCallbackFn(callbackFn){
         this.callback = callbackFn;
     }

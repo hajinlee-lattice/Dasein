@@ -35,11 +35,11 @@ class ConnectorService {
 
         return ConnectorService.instance;
     }
-    getImgByConnector(connectorName){
+    getImgByConnector(connectorName) {
         let path = ''
         this._connectorsList.forEach(element => {
-            if(element.name === connectorName){
-                
+            if (element.name === connectorName) {
+
                 path = element.config.img;
                 return;
             }
@@ -47,6 +47,24 @@ class ConnectorService {
         console.log('IMAGE PATH ', path);
         return path;
     }
+    getConnectorCreationTitle(otherTxt) {
+        switch (this.connectorInfo.name) {
+            case SALESFORCE:
+                return `${'SFDC'} ${otherTxt ? otherTxt : ''}`;
+            case ELOQUA:
+                return `${'ELOQUA'} ${otherTxt ? otherTxt : ''}`;
+            default:
+                return otherTxt;
+        }
+    }
+
+    getConnectorCreationBody() {
+        let system = this.getConnectorCreationTitle();
+        let h5 = `${'<h5>'}${system} ${'org Authentiocation</h5>'}`;
+        let p = '<p>Generate a One-time Authentication token below to connect the BIS application with Lattice platform</p>';
+        return `${h5}${p}`;
+    }
+
     setConnectorName(name) {
         this.connectorInfo.name = name;
     }
@@ -68,24 +86,25 @@ class ConnectorService {
         console.log('Getting List <=====================');
         return this._connectorsList;
     }
-    sendMSG(title, message, callbackFn) {
+    sendMSG(callbackFn) {
+        let title = this.getConnectorCreationTitle('Settings');
+        let body = this.getConnectorCreationBody();
         let msg = new Message(
             'Test',
             MODAL,
             GENERIC,
-            'SFDC Settings',
-            `<h5>SFDC org Authentiocation</h5>
-            <p>Generate a One-time Authentication token below to connect the BIS application with Lattice platform</p>
-            `
+            title,
+            body
         );
         msg.setConfirmText('Email Token');
+        msg.setIcon('fa fa-cog');
         msg.setCallbackFn((args) => {
             console.log('Callback', args);
-            if (args.action !== "closedForced") {
-                let closeMsg = new Message([], CLOSE_MODAL);
-                closeMsg.setName(args.name);
-                closeMsg.setCallbackFn();
-                messageService.sendMessage(closeMsg);
+            let closeMsg = new Message([], CLOSE_MODAL);
+            closeMsg.setName(args.name);
+            closeMsg.setCallbackFn();
+            messageService.sendMessage(closeMsg);
+            if (args.action == "ok") {
                 callbackFn();
             }
         });

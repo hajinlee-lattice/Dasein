@@ -11,7 +11,7 @@ import ConnectorsRoutes from "./connectors-routing";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
-import ConnectorService, { MARKETO } from './connectors.service';
+import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
 export class ConnectorList extends Component {
     constructor(props) {
@@ -41,9 +41,11 @@ export class ConnectorList extends Component {
     }
 
     generateAuthTokenClickHandler() {
-        ConnectorService.sendMSG({}, {}, () => {
-            this.props.ConnectorsService.generateAuthToken();
-        });
+        if (ConnectorService.getConnectorName() != '' && ConnectorService.getConnectorName() != MARKETO) {
+            ConnectorService.sendMSG(() => {
+                this.props.ConnectorsService.generateAuthToken();
+            });
+        }
 
     }
 

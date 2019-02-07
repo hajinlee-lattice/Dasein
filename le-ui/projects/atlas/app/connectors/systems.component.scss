@@ -15,7 +15,13 @@ systems-component{
     margin: 15px;
     flex-wrap: wrap;
   }
-  
+  .some-table{
+    margin: 0;
+    font-size: 0.7em;
+    .color-blue{
+        color: $blue-text;
+    }
+  }
   .row {
     display: flex;
     flex-direction: row;
@@ -35,6 +41,16 @@ systems-component{
 
         .systemImage{
             max-width: 36px;
+        }
+        .system-body{
+            height: 100%;;
+        }
+        .system-footer{
+            height: 50px;
+            .right-controlls{
+                display: flex;
+                justify-content: flex-end;
+            }
         }
         
       }
