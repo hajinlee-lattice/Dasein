@@ -141,9 +141,17 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds, accountIds, recStart,
                 orgInfo, appId);
         Map<String, Object> result = wrapResult(contacts);
+<<<<<<< HEAD
         if (log.isDebugEnabled()) {
             log.debug("get contacts: " + result.toString());
         }
+||||||| parent of c7ba7c1469... fix playmaker memory issues by cleaning up logs. PLS-11732 and increase the connection pool to 500
+        log.info("get contacts reply: " + result.toString() + "\n");
+=======
+        if (log.isDebugEnabled()) {
+            log.debug("get contacts: " + result.toString() + "\n");
+        }
+>>>>>>> c7ba7c1469... fix playmaker memory issues by cleaning up logs. PLS-11732 and increase the connection pool to 500
         return result;
     }
 
