@@ -1,5 +1,13 @@
 package com.latticeengines.matchapi.controller;
 
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_ACCOUNT_ID;
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_EXISTS_IN_UNIVERSE;
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_MKTO_ID;
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_SFDC_ID;
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_TEST_GRP_ID;
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_TEST_GRP_TYPE;
+import static com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier.COL_TEST_RECORD_ID;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +31,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -34,6 +44,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.matchapi.testframework.AdvancedAccountMatchTestResultVerifier;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -54,12 +65,12 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
 
     private static final String POD_ID = AccountMatchCorrectnessDeploymentTestNG.class.getSimpleName();
 
-    private static final String FLD_ACCOUNT_ID = "AccountId";
-    private static final String FLD_SFDC_ID = "SfdcId";
-    private static final String FLD_MKTO_ID = "MktoId";
+    private static final String FLD_ACCOUNT_ID = COL_ACCOUNT_ID;
+    private static final String FLD_SFDC_ID = COL_SFDC_ID;
+    private static final String FLD_MKTO_ID = COL_MKTO_ID;
 
-    private static final String[] FIELDS = { "TestGroupType", "TestGroupId", "TestRecordId", FLD_ACCOUNT_ID,
-            FLD_SFDC_ID, FLD_MKTO_ID, "Name", "Domain", "DUNS", "Country", "State", "City", "ExistsInUniverse" };
+    private static final String[] FIELDS = { COL_TEST_GRP_TYPE, COL_TEST_GRP_ID, COL_TEST_RECORD_ID, FLD_ACCOUNT_ID,
+            FLD_SFDC_ID, FLD_MKTO_ID, "Name", "Domain", "DUNS", "Country", "State", "City", COL_EXISTS_IN_UNIVERSE };
 
     @Inject
     private HdfsPathBuilder hdfsPathBuilder;
@@ -70,6 +81,12 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
     @Inject
     private TenantService tenantService;
 
+    @Inject
+    private EntityRawSeedService entityRawSeedService;
+
+    @Inject
+    private EntityLookupEntryService entityLookupEntryService;
+
     @BeforeClass(groups = "deployment")
     public void init() {
         HdfsPodContext.changeHdfsPodId(POD_ID);
@@ -79,6 +96,7 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         tenantService.registerTenant(tenant);
         // populate pid so that the tenant could be deleted in destroy()
         tenant = tenantService.findByTenantId(tenant.getId());
+        log.info("Tenant ID: {}", tenant.getId());
     }
 
     @AfterClass(groups = "deployment")
@@ -89,8 +107,16 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
 
     @Test(groups = "deployment")
     public void test() {
+        // instantiate test verifier
+        AdvancedAccountMatchTestResultVerifier verifier = new AdvancedAccountMatchTestResultVerifier(tenant,
+                BusinessEntity.Account.name(), entityRawSeedService, entityLookupEntryService);
+
         MatchInput input = prepareBulkMatchInput("accountmatchinput_builduniverse.avro");
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, POD_ID);
+        // set the accounts populated in the existing universe for verification of the
+        // second match job (some of the records have to match to a specific entity ID
+        // in the universe now)
+        verifier.addExistingRecords(AvroUtils.iterator(yarnConfiguration, finalStatus.getResultLocation() + "/*.avro"));
         input = prepareBulkMatchInput("accountmatchinput_test.avro");
         finalStatus = runAndVerifyBulkMatch(input, POD_ID);
         String resultAvro = finalStatus.getResultLocation() + "/*.avro";
@@ -99,14 +125,9 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         log.info("Error file: " + errorAvro);
         Iterator<GenericRecord> results = AvroUtils.iterator(yarnConfiguration, resultAvro);
         Iterator<GenericRecord> errors = AvroUtils.iterator(yarnConfiguration, errorAvro);
-        /*
-        AdvancedAccountMatchTestResultVerifier verifier = new AdvancedAccountMatchTestResultVerifier(
-                tenant, BusinessEntity.Account.name(), entityRawSeedService,
-                entityLookupEntryService);
         verifier.addTestResults(results);
         verifier.addMatchErrorResults(errors);
         verifier.verify();
-        */
     }
 
     private MatchInput prepareBulkMatchInput(String inputFile) {
