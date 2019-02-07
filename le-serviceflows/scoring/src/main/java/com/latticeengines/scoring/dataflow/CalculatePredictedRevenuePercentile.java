@@ -28,7 +28,7 @@ import cascading.tuple.Fields;
 @Component("calculatePredictedRevenuePercentile")
 public class CalculatePredictedRevenuePercentile
         extends TypesafeDataFlowBuilder<CalculatePredictedRevenuePercentileParameters> {
-    private static final Logger log = LoggerFactory.getLogger(AbstractCalculateRevenuePercentile.class);
+    private static final Logger log = LoggerFactory.getLogger(CalculatePredictedRevenuePercentile.class);
 
     @Inject
     private Configuration yarnConfiguration;
