@@ -54,6 +54,9 @@ public class ExternalSystemAuthenticationDaoImpl extends BaseDaoImpl<ExternalSys
         extSysAuthFromDB.setUpdated(new Date());
         super.update(extSysAuthFromDB);
 
+        if (extSysAuthFromDB.getLookupIdMap() != null) {
+            extSysAuthFromDB.setLookupMapConfigId(extSysAuthFromDB.getLookupIdMap().getId());
+        }
         return extSysAuthFromDB;
     }
 
