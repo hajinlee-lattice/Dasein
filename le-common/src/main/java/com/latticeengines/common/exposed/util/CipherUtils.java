@@ -38,12 +38,10 @@ public class CipherUtils {
     private static final String PROP_SALT_HINT = "com.latticeengines.secret.salthint";
 
     // Secret key used for both encryption and decryption
-    // TODO remove default value once everything is configured properly
-    private static final String KEY = getSecret(ENV_SECRET_KEY, PROP_SECRET_KEY, "I03TMIIUftFUUI7bV0zFBw==");
+    private static final String KEY = getSecret(ENV_SECRET_KEY, PROP_SECRET_KEY, null);
 
     // When seen this key, means the message is salted
-    // TODO remove default value once everything is configured properly
-    private static final String SALT_HINT_STR = getSecret(ENV_SALT_HINT, PROP_SALT_HINT, "bi0mpJJNxiYpEka5C6JO4g==");
+    private static final String SALT_HINT_STR = getSecret(ENV_SALT_HINT, PROP_SALT_HINT, null);
     private static final byte[] SALT_HINT_BYTES = Base64.decodeBase64(SALT_HINT_STR);
 
     private static final String CHARSET_UTF8 = "UTF-8";
