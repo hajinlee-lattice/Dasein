@@ -92,6 +92,7 @@ export default function (
                         // console.log(message.getMessage());
                         Modal[message.getType()]({
                             title: message.getMessage(),
+                            icon: message.getIcon(),
                             message: message.getFullMessage(),
                             confirmtext: message.getConfirmText() ? message.getConfirmText() : ''
                         }, message.getCallbackFn());

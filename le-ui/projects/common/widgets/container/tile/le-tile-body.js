@@ -8,7 +8,7 @@ class LeTileBody extends Component {
 
         return (
             <Aux>
-                <div className="le-flex-v-panel">
+                <div className={`${"le-flex-v-panel"} ${this.props.classNames ? this.props.classNames : ''}`}>
                     {this.props.children}
                 </div>
             </Aux>
