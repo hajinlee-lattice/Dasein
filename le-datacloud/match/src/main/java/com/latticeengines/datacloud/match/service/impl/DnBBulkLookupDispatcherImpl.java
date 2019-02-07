@@ -65,6 +65,9 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     @Value("${datacloud.dnb.bulk.servicebatchid.xpath}")
     private String serviceIdXpath;
 
+    @Value("${datacloud.dnb.bulk.result.id.xpath}")
+    private String batchResultIdXpath;
+
     @Value("${datacloud.dnb.bulk.input.record.format}")
     private String recordFormat;
 
@@ -82,6 +85,8 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
 
     @Override
     public DnBBatchMatchContext sendRequest(DnBBatchMatchContext batchContext) {
+        // Immediate retry is only for case that token expires (Other retriable
+        // cases will wait for next schedule)
         for (int i = 0; i < retries; i++) {
             // Don't actually acquire quota because submission might not be
             // successful. Only check quota availability
@@ -93,7 +98,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
                 return batchContext;
             }
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_DISPATCH);
-            if (batchContext.getDnbCode() == DnBReturnCode.SUBMITTED) {
+            if (batchContext.getDnbCode().isSubmittedStatus()) {
                 // After request is successfully submitted, log the used quota.
                 // Has potential issue that probably during 2 calls of
                 // acquireDnBBulkRequest, maybe another job logs its quota and
@@ -104,7 +109,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
                 // fail the request.
                 rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size(), false);
             }
-            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
+            if (!batchContext.getDnbCode().isImmediateRetryStatus()) {
                 log.info("Sent batched request to dnb bulk match api, status=" + batchContext.getDnbCode() + " size="
                         + batchContext.getContexts().size() + " timestamp=" + batchContext.getTimestamp()
                         + " serviceId=" + batchContext.getServiceBatchId());
@@ -112,25 +117,22 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
             }
             dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
         }
-        log.error("Fail to submit batched request because API token expires and fails to refresh");
+        log.error("Failed to submit batched request due to invalid token and failed to refresh");
         return batchContext;
     }
 
     @Override
-    protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
+    protected void parseError(String response, Exception ex, DnBBatchMatchContext batchContext) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            log.error(String.format("HttpClientErrorException in DnB batch match dispatching request: HttpStatus %d %s",
-                    ((HttpClientErrorException) ex).getStatusCode().value(),
-                    ((HttpClientErrorException) ex).getStatusCode().name()));
-            batchContext.setDnbCode(parseDnBHttpError(httpEx));
+            batchContext.setDnbCode(parseDnBHttpError(response, httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
             log.error(String.format("LedpException in DnB batch match dispatching request: %s %s",
                     ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
             switch (ledpEx.getCode()) {
             case LEDP_25027:
-                batchContext.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+                batchContext.setDnbCode(DnBReturnCode.UNAUTHORIZED);
                 break;
             case LEDP_25037:
                 batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
@@ -180,6 +182,11 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
         return url;
     }
 
+    @Override
+    protected String getResultIdPath() {
+        return batchResultIdXpath;
+    }
+
     private String constructBulkRequestBody(DnBBatchMatchContext batchContext) {
         Date now = new Date();
         batchContext.setTimestamp(now);
@@ -215,6 +222,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCountryCode(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getPhoneNumber(), ""));
     }
+
 
 
 }

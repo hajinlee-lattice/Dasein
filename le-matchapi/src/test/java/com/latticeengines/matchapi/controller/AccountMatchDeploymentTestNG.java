@@ -38,6 +38,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
 
+/**
+ * Mostly focus on bulk match end-to-end code path
+ * Account match correctness verification is in AccountMatchCorrectnessDeploymentTestNG
+ */
 public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AccountMatchDeploymentTestNG.class);
 

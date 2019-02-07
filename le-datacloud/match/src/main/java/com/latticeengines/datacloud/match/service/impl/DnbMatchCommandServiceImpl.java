@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -74,6 +75,16 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
         } catch (Exception e) {
             log.error("Failed to update DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
         }
+    }
+
+    // TODO: Consider to change to batch operation
+    @Override
+    public void dnbMatchCommandUpdateStatus(List<DnBBatchMatchContext> contexts) {
+        contexts.forEach(context -> {
+            DnBMatchCommand command = dnbMatchEntityMgr.findRecordByField("BatchID", context.getServiceBatchId());
+            command.setDnbCode(context.getDnbCode());
+            dnbMatchEntityMgr.updateCommand(command);
+        });
     }
 
     @Override
