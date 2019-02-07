@@ -42,22 +42,22 @@ def generate_controlled_group_1() -> List[noconflict.Group]:
     marketo_id_template = 'mkto{}'
     domain_name_duns_locations = [{
         'domain': 'google.com',
-        'name': 'google',
-        'duns': '999999999',
+        'name': 'Google LLC',
+        'duns': '060902413',
         'country': 'usa',
         'state': 'ca',
         'city': 'mountain view'
     }, {
         'domain': 'amazon.com',
-        'name': 'amazon',
-        'duns': '888888888',
+        'name': 'Amazon.com, Inc.',
+        'duns': '884745530',
         'country': 'usa',
         'state': 'wa',
         'city': 'seattle'
     }, {
         'domain': 'uber.com',
-        'name': 'uber',
-        'duns': '777777777',
+        'name': 'Uber Technologies',
+        'duns': '013895459',
         'country': 'usa',
         'state': 'ca',
         'city': 'san francisco'
