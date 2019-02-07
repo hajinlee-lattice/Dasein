@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.dataflow;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -20,6 +19,7 @@ import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.scoring.dataflow.ev.Helper;
 import com.latticeengines.scoring.workflow.steps.ExpectedRevenueDataFlowUtil;
 import com.latticeengines.scoring.workflow.steps.ExpectedRevenueDataFlowUtil.ScoreDerivationType;
 
@@ -35,6 +35,9 @@ public class CalculatePredictedRevenuePercentile
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private Helper helper;
 
     protected String inputTableName;
     protected String percentileFieldName;
@@ -75,7 +78,7 @@ public class CalculatePredictedRevenuePercentile
             String modelGuidFieldName, String percentileFieldName, String revenueFieldName, int minPct, int maxPct,
             Node mergedScoreCount) {
 
-        Map<String, Node> nodes = splitNodes(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
+        Map<String, Node> nodes = helper.splitNodes(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
             String modelGuid = entry.getKey();
@@ -96,18 +99,6 @@ public class CalculatePredictedRevenuePercentile
             }
         }
         return merged;
-    }
-
-    private Map<String, Node> splitNodes(Node input, Map<String, String> originalScoreFieldMap,
-            String modelGuidFieldName) {
-        Map<String, Node> nodes = new HashMap<>();
-        originalScoreFieldMap.forEach((modelGuid, scoreField) -> {
-            Node model = input.filter(String.format("\"%s\".equals(%s)", modelGuid, modelGuidFieldName),
-                    new FieldList(ScoreResultField.ModelId.displayName));
-            model = model.renamePipe(modelGuid);
-            nodes.put(modelGuid, model);
-        });
-        return nodes;
     }
 
     private void parseParamAndSetFields(CalculatePredictedRevenuePercentileParameters parameters) {
