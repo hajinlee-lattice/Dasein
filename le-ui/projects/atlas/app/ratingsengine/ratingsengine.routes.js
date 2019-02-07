@@ -380,8 +380,6 @@ angular
                             engineId = $stateParams.rating_id,
                             modelId = $stateParams.modelId;
 
-                        console.log(modelId);
-
                         RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
                             RatingsEngineStore.setRemodelIteration(result);
                             RatingsEngineStore.setRatingEngine(ratingEngine);

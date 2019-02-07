@@ -1,10 +1,13 @@
-<div class="ratingengine-training playbook-content container">
+<div 
+    class="ratingengine-training playbook-content container"
+    ng-class="{viewingIteration: $ctrl.viewingIteration}">
     <div class="inner-container">
         <ng-form name="trainingForm" form-on-change="$ctrl.formOnChange()"  novalidate>
         
             <div class="header">
+                <h1 ng-if="$ctrl.viewingIteration">Remodel - Iteration {{ $ctrl.ratingModel.iteration }}</h1>
                 <h2>{{ $ctrl.pageTitle }}</h2>
-                <p ng-if="$stateParams.section != 'wizard.ratingsengine_segment'">Changing these settings will probably result in a different set of attributes.</p>
+                <p ng-if="$ctrl.viewingIteration">These are advanced settings, use carefully.</p>
             </div>
 
             <div class="content-body">
@@ -242,5 +245,9 @@
             </div><!-- End .content-body -->
 
         </ng-form>
+    </div>
+    <div class="training-footer" ng-if="$ctrl.viewingIteration">
+        <button class="button white-button">Back to Model</button>
+        <button class="button blue-button">Create</button>
     </div>
 </div>

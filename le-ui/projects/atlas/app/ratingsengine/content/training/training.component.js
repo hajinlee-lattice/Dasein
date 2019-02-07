@@ -20,6 +20,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         var vm = this;
 
         angular.extend(vm, {
+            viewingIteration: $stateParams.viewingIteration,
             spendCriteria: "GREATER_OR_EQUAL",
             spendValue: 1500,
             quantityCriteria: "GREATER_OR_EQUAL",
@@ -132,12 +133,8 @@ angular.module('lp.ratingsengine.wizard.training', [
 
 
 
-
         // Functions for Cross Sell Models
         // ============================================================================================
-        // ============================================================================================
-        // ============================================================================================
-
         vm.getRecordsCount = function(engineId, modelId, ratingEngine) {
             vm.recordsCountReturned = false;
             RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'TRAINING').then(function(count){
@@ -320,12 +317,14 @@ angular.module('lp.ratingsengine.wizard.training', [
                 RatingsEngineStore.setValidation('refine', false);
             }
         }
+        // End of the functions for Cross Sell Models
+        // ============================================================================================
+
+
+
 
         // Functions for Custom Event Models
         // ============================================================================================
-        // ============================================================================================
-        // ============================================================================================
-        
         vm.checkForDisable = function(){
 
             RatingsEngineStore.setValidation('training', false);
@@ -405,6 +404,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
         }
+        // End of the functions for Custom Event Models
+        // ============================================================================================
 
         vm.formOnChange = function(){
             $timeout(function () {
