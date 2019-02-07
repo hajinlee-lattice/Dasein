@@ -48,8 +48,8 @@ export default class SystemComponent extends Component {
     }
     getEditTemplate() {
         console.log('TEMPLATE');
-        return(
-            <SystemMappingComponent system={this.props.system}/>
+        return (
+            <SystemMappingComponent system={this.props.system} />
             // <p>T</p>
         );
     }
@@ -57,14 +57,15 @@ export default class SystemComponent extends Component {
         console.log('Render', this.state.openModal);
         return (
             <Aux>
-                <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate}/>
-                <LeTile classNames="profile-tile">
-                    <LeTileHeader>
-                        <img src={this.props.img} className="systemImage" />
-                        <span className="le-tile-title">{this.props.system.externalSystemName}</span>
-
-                        <LeMenu classNames="personalMenu" image="fa fa-ellipsis-v" name="main">
-                        </LeMenu>
+                <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} />
+                <LeTile classNames="system-tile">
+                    <LeTileHeader classNames="system-title">
+                        <div className="system-image-container">
+                            <img src={this.props.img} className="systemImage" />
+                        </div>
+                        <div className="system-title-container">
+                            <span className="le-tile-title">{this.props.system.externalSystemName}</span>
+                        </div>
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
                         <div className="some-table">
