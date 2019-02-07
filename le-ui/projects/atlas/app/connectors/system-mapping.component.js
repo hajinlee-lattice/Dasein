@@ -10,7 +10,7 @@ export default class SystemMappingComponent extends Component {
     render() {
         return (
 
-            <div className="some-table">
+            <div className="system-mapping some-table">
                 <div className="row">
                     <div className="column">
                         System Org ID:
