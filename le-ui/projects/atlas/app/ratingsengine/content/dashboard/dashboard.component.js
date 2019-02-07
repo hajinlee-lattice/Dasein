@@ -500,21 +500,20 @@ angular.module('lp.ratingsengine.dashboard', [
         });
     }
 
-    vm.remodelSettings = function() {
+    vm.viewIteration = function(destination, iterationToView){
 
-    }
+        if (iteration) {
+            RatingsEngineStore.setRemodelIteration(iteration);
+        }
 
-    vm.viewIteration = function(iteration){
+        var iteration = iterationToView ? iterationToView : RatingsEngineStore.getRemodelIteration(),
+            modelId = iteration.modelSummaryId,
+            rating_id = $stateParams.rating_id,
+            url = destination;
 
-        RatingsEngineStore.setRemodelIteration(iteration);
-
-        var modelId = iteration.modelSummaryId,
-            rating_id = $stateParams.rating_id;
-
-        $state.go('home.model.attributes', { 
+        $state.go(url, { 
             rating_id: rating_id, 
-            modelId: modelId,
-            viewingIteration: true
+            modelId: modelId
         },{ reload:true });   
 
     }

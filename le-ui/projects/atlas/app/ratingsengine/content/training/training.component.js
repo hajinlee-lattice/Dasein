@@ -14,7 +14,7 @@ angular.module('lp.ratingsengine.wizard.training', [
     },
     controller: function (
         $q, $scope, $stateParams, $timeout,
-        RatingsEngineStore, RatingsEngineService, SegmentService, AtlasRemodelStore
+        RatingsEngineStore, RatingsEngineService, SegmentService
     ) {
 
         var vm = this;
@@ -45,8 +45,6 @@ angular.module('lp.ratingsengine.wizard.training', [
         };
 
         vm.$onInit = function() {
-
-            AtlasRemodelStore.setRemodelIteration(vm.iteration);
 
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
