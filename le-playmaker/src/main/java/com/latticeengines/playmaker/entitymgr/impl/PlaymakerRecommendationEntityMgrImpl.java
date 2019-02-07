@@ -141,9 +141,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds, accountIds, recStart,
                 orgInfo, appId);
         Map<String, Object> result = wrapResult(contacts);
-        if (log.isDebugEnabled()) {
-            log.debug("get contacts: " + result.toString());
-        }
+        log.debug("get contacts: {}", result);
         return result;
     }
 
