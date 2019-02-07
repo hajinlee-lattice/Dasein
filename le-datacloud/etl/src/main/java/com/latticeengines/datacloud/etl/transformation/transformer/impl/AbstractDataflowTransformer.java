@@ -101,7 +101,18 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
         if (baseSources.length > 0) {
             parameters.setTimestampField(targetTemplate.getTimestampField());
-            parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(targetTemplate.getSourceName()));
+            try {
+                parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(targetTemplate.getSourceName()));
+            } catch (Exception ex) {
+                // Only old datacloud transformers need SourceColumn table.
+                // Dataflows in application never use it.
+                // SourceColumn table could be updated in non release windows,
+                // don't want to fail transformer due to this table update, so
+                // just log the error.
+                // For transformers which do need SourceColumn table, it will
+                // fail in dataflow anyway
+                log.error("Fail to read from SourceColumn table");
+            }
             List<String> baseTables = new ArrayList<String>();
             for (Source baseSource : baseSources) {
                 baseTables.add(baseSource.getSourceName());
