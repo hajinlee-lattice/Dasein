@@ -18,7 +18,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 class EMRScalingCallable implements Callable<Boolean> {
@@ -30,8 +29,6 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private EMRService emrService;
 
-    private EMRCacheService emrCacheService;
-
     private EMREnvService emrEnvService;
 
     private LoadingCache<String, List<ClusterSummary>> clusterSummaryCache;
@@ -42,10 +39,6 @@ class EMRScalingCallable implements Callable<Boolean> {
 
     private void setEmrService(EMRService emrService) {
         this.emrService = emrService;
-    }
-
-    private void setEmrCacheService(EMRCacheService emrCacheService) {
-        this.emrCacheService = emrCacheService;
     }
 
     private void setEmrEnvService(EMREnvService emrEnvService) {
@@ -70,7 +63,7 @@ class EMRScalingCallable implements Callable<Boolean> {
                             String clusterName = summary.getName();
                             names.add(clusterName);
                             runnables.add(new EMRScalingRunnable(clusterName, clusterId, //
-                                    minTaskNodes, emrService, emrCacheService, emrEnvService));
+                                    minTaskNodes, emrService, emrEnvService));
                         });
                     }
                     log.info(String.format("Found %d clusters with %d min TASK nodes by pattern [%s]: %s", //
@@ -119,8 +112,6 @@ class EMRScalingCallable implements Callable<Boolean> {
 
         private EMRService emrService;
 
-        private EMRCacheService emrCacheService;
-
         private EMREnvService emrEnvService;
 
         Builder scalingClusters(String scalingClusters) {
@@ -135,11 +126,6 @@ class EMRScalingCallable implements Callable<Boolean> {
             return this;
         }
 
-        Builder emrCacheService(EMRCacheService emrCacheService) {
-            this.emrCacheService = emrCacheService;
-            return this;
-        }
-
         Builder emrEnvService(EMREnvService emrEnvService) {
             this.emrEnvService = emrEnvService;
             return this;
@@ -149,7 +135,6 @@ class EMRScalingCallable implements Callable<Boolean> {
             EMRScalingCallable callable = new EMRScalingCallable();
             callable.setScalingClusters(scalingClusters);
             callable.setEmrService(emrService);
-            callable.setEmrCacheService(emrCacheService);
             callable.setEmrEnvService(emrEnvService);
             return callable;
         }
