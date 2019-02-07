@@ -2,8 +2,8 @@ angular.module('lp.ratingsengine.dashboard', [
     'mainApp.appCommon.directives.barchart'
 ])
 .controller('RatingsEngineDashboard', function(
-    $q, $stateParams, $state, $rootScope, $scope, $sce,
-    RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
+    $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
+    RatingsEngineStore, RatingsEngineService, Modal, Banner, 
     Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
     var vm = this,
@@ -18,6 +18,7 @@ angular.module('lp.ratingsengine.dashboard', [
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
         modelSummary: Model,
+        selectedIteration: null,
         products: Products,
         targetProducts: TargetProducts,
         trainingProducts: TrainingProducts,
@@ -240,6 +241,9 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         });
 
+        RatingsEngineStore.setIterations(vm.dashboard.iterations);
+        RatingsEngineStore.setUsedBy(vm.relatedItems);
+
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
@@ -260,22 +264,26 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
+
+            var dashboardIterations = vm.dashboard.iterations;
+                vm.activeIterations = [];
+            angular.forEach(dashboardIterations, function(iteration){
+                if (iteration.modelSummaryId && iteration.modelingJobStatus == "Completed") {
+                    vm.activeIterations.push(iteration);
+                }
+            });
+
             if(vm.isPublishedOrScored) {
                 vm.model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration.AI : vm.ratingEngine.scoring_iteration.AI;
                 vm.modelSummary = vm.model.modelSummaryId;
             } else {
                 vm.model = vm.ratingEngine.latest_iteration.AI;
-
-                var dashboardIterations = vm.dashboard.iterations;
-                vm.activeIterations = [];
-                angular.forEach(dashboardIterations, function(iteration){
-                    if (iteration.modelSummaryId && iteration.modelingJobStatus == "Completed") {
-                        vm.activeIterations.push(iteration);
-                    }
-                });
-                vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;
-                
+                vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;   
             }
+
+            vm.selectedIteration = angular.copy(vm.model);
+            RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
+
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -328,7 +336,41 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         }
 
-        console.log(vm.dashboard);
+        vm.testDropdownIterations = [
+            {
+              id: 0,
+              title: 'Apple',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 1,
+              title: 'Orange',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 2,
+              title: 'Grape',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 3,
+              title: 'Pomegranate',
+              selected: false,
+              key: 'fruit'
+            },
+            {
+              id: 4,
+              title: 'Strawberry',
+              selected: false,
+              key: 'fruit'
+            }
+          ];
+
+        // console.log(vm.dashboard);
+        // console.log(vm.selectedIteration);
     }
 
     vm.init = function() {
@@ -412,25 +454,66 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     };
 
-    vm.remodel = function(iteration){
+    vm.toggleMenu = function($event) {
+        vm.toggle = !vm.toggle;
+
+        if($event && $event.target) {
+            var target = angular.element($event.target),
+            parent = target.parent();
+            var click = function($event){
+                var clicked = angular.element($event.target),
+                inside = clicked.closest(parent).length;
+                if(!inside) {
+                    $scope.visible = false;
+                    $scope.$digest();
+                    $document.unbind('click', click);
+                }
+            }
+            $document.bind('click', click);
+        }
+    }
+
+    vm.setRemodelIteration = function(iteration){
+        vm.selectedIteration = iteration;
+        RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
+    }
+
+    vm.remodelIteration = function(){
         var engineId = vm.ratingEngine.id,
+            iteration = RatingsEngineStore.getRemodelIteration(),
             modelId = iteration.id;
 
-        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-            AtlasRemodelStore.setRemodelIteration(result);
+        vm.remodelingProgress = true;
+
+        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){            
+            RatingsEngineStore.setRemodelIteration(result);
             RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-            $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
+            RatingsEngineStore.saveIteration('attributes').then(function(result){
+                if (!result.result) {
+                    Banner.success({
+                        message:
+                            "A remodel job has started. You can track it's progress on the jobs page."
+                    });
+                }
+                vm.remodelingProgress = result.showProgress;
+            });
         });
     }
 
-    vm.viewIteration = function(iteration){
-        var modelId = iteration.modelSummaryId,
-            rating_id = $stateParams.rating_id;
+    vm.viewIteration = function(destination, iterationToView){
 
-        $state.go('home.model.attributes', { 
+        if (iteration) {
+            RatingsEngineStore.setRemodelIteration(iteration);
+        }
+
+        var iteration = iterationToView ? iterationToView : RatingsEngineStore.getRemodelIteration(),
+            modelId = iteration.modelSummaryId,
+            rating_id = $stateParams.rating_id,
+            url = destination;
+
+        $state.go(url, { 
             rating_id: rating_id, 
-            modelId: modelId,
-            viewingIteration: true
+            modelId: modelId
         },{ reload:true });   
 
     }

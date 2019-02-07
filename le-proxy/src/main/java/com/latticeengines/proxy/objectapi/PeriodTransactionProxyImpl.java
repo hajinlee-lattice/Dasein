@@ -85,4 +85,13 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
         log.info("getProductHierarchy url " + url);
         return get("getProductHierarchy", url, DataPage.class);
     }
+
+    @Override
+    public List<String> getFinalAndFirstTransactionDate(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/transaction/maxmindate",
+                ProxyUtils.shortenCustomerSpace(customerSpace));
+
+        log.info("getFinalAndFirstTransactionDate url " + url);
+        return getList("getFinalAndFirstTransactionDate", url, String.class);
+    }
 }

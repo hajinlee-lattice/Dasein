@@ -53,6 +53,11 @@ public class RebuildProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder dataQuotaLimit(Long dataQuotaLimit) {
+            processProductStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
+            return this;
+        }
+
         public RebuildProductWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildProductWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

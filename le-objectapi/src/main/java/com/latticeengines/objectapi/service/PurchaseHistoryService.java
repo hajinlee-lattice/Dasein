@@ -20,4 +20,6 @@ public interface PurchaseHistoryService {
 
     DataPage getAllSpendAnalyticsSegments();
 
+    List<String> getFinalAndFirstTransactionDate();
+
 }

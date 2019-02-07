@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,7 @@ public abstract class DataFeedMetadataService {
     }
 
     public void applyAttributePrefix(CDLExternalSystemService cdlExternalSystemService, String customerSpace,
-            Table importTable, Table templateTable) {
+            Table importTable, Table templateTable, Table existingTemplate) {
         if (cdlExternalSystemService == null) {
             throw new IllegalArgumentException("ExternalSystemService cannot be null when set custom prefix!");
         }
@@ -80,9 +81,13 @@ public abstract class DataFeedMetadataService {
         }
         Set<String> templateAttrs = templateTable.getAttributes().stream().map(Attribute::getName)
                 .collect(Collectors.toSet());
+        Set<String> existingAttrs = existingTemplate == null ? new HashSet<>() :
+                existingTemplate.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
         Map<String, String> nameMap = new HashMap<>();
         importTable.getAttributes().forEach(attribute -> {
-            if (!templateAttrs.contains(attribute.getName())) {
+            if (!templateAttrs.contains(attribute.getName())
+                    && !attribute.getName().startsWith(USER_PREFIX)
+                    && !existingAttrs.contains(attribute.getName())) {
                 String originalName = attribute.getName();
                 String userAttrName = USER_PREFIX + attribute.getName();
                 log.info(String.format("Reset attribute name %s -> %s", attribute.getName(), userAttrName));

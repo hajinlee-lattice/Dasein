@@ -14,7 +14,6 @@ class LeTile extends Component {
                     {this.props.children}
                 </div>
             </Aux>
-
         );
     }
 }

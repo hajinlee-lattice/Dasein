@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;

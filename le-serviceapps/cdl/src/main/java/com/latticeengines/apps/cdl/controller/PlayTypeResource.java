@@ -4,9 +4,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
@@ -29,7 +26,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -78,14 +74,14 @@ public class PlayTypeResource {
 
     @GetMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Get a playtype given its id")
     public PlayType getPlayTypeById(@PathVariable String customerSpace, @PathVariable String playTypeId) {
         return playTypeEntityMgr.findById(playTypeId);
     }
 
     @PostMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Update a playtype given its id")
     public void updatePlayType(@PathVariable String customerSpace, @PathVariable String playTypeId,
             @RequestBody PlayType playType) {
         List<String> validationErrors = validatePlayTypeForUpdate(playType);
@@ -102,16 +98,16 @@ public class PlayTypeResource {
 
     @DeleteMapping(value = "/{playTypeId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all play types for a tenant")
+    @ApiOperation(value = "Delete a playtype given its id")
     public void deletePlayType(@PathVariable String customerSpace, @PathVariable String playTypeId) {
         PlayType toDelete = playTypeEntityMgr.findById(playTypeId);
         if (toDelete == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No PlayType found with Id: " + playTypeId });
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {"No PlayType found with Id: " + playTypeId});
         }
         Long playsUsingPlayType = playEntityMgr.countByPlayTypePid(toDelete.getPid());
         if (playsUsingPlayType > 0) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "Unable to delete play type: " + toDelete.getDisplayName() + " since plays of this type exist" });
+                    "Unable to delete play type: " + toDelete.getDisplayName() + " since plays of this type exist"});
         }
         playTypeEntityMgr.delete(toDelete);
     }

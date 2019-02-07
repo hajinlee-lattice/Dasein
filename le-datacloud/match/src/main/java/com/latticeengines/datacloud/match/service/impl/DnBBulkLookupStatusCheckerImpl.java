@@ -68,34 +68,41 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     @Override
     public List<DnBBatchMatchContext> checkStatus(List<DnBBatchMatchContext> batchContexts) {
         int count = 0;
-        StringBuilder sb = new StringBuilder();
+        StringBuilder logBuilder = new StringBuilder();
         while (count < batchContexts.size()) {
+            // BatchID -> DnBBatchMatchContext
             Map<String, DnBBatchMatchContext> batches = new HashMap<>();
             for (int i = count; i < Math.min(batchContexts.size(), count + checkStatusBatchSize); i++) {
                 batches.put(batchContexts.get(i).getServiceBatchId(), batchContexts.get(i));
                 count++;
             }
             for (int i = 0; i < retries; i++) {
-                RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkStatus();
+                RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkStatus(true);
                 if (!rlAcq.isAllowed()) {
                     logRateLimitingRejection(rlAcq, DnBAPIType.BATCH_STATUS);
                     break;
                 }
                 executeLookup(batches, DnBKeyType.BATCH, DnBAPIType.BATCH_STATUS);
-                sb.delete(0, sb.length());
+                if (batches.entrySet().iterator().next().getValue().getDnbCode().isNormalStatus()) {
+                    rateLimitingService.acquireDnBBulkStatus(false);
+                }
+                logBuilder.delete(0, logBuilder.length());
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batches.entrySet()) {
                     long mins = (System.currentTimeMillis() - entry.getValue().getTimestamp().getTime()) / 60 / 1000;
-                    sb.append(String.format("%s:%s(%d mins, %d records)%s ", entry.getValue().getServiceBatchId(),
+                    logBuilder.append(String.format("%s:%s(%d mins, %d records)%s ", entry.getValue().getServiceBatchId(),
                             entry.getValue().getDnbCode(), mins, entry.getValue().getContexts().size(),
                             StringUtils.isEmpty(entry.getValue().getRetryForServiceBatchId()) ? ""
                                     : " (retry for " + entry.getValue().getRetryForServiceBatchId() + ")"));
                 }
-                if (batches.entrySet().iterator().next().getValue()
-                        .getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
-                    log.info("Checked status for batch requests: " + sb.toString());
+                if (!batches.entrySet().iterator().next().getValue().getDnbCode().isImmediateRetryStatus()) {
+                    log.info("Checked status for batch requests: " + logBuilder.toString());
                     break;
                 }
                 dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
+                if (i == retries - 1) {
+                    log.error("Fail to check status for batch requests due to invalid token and failed to refresh: "
+                            + logBuilder.toString());
+                }
             }
         }
         return batchContexts;
@@ -140,7 +147,11 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
                 batches.get(serviceBatchId).setDnbCode(parseBatchStatus(status));
             }
         }
+    }
 
+    @Override
+    protected String getResultIdPath() {
+        return transactionCodeXPath;
     }
 
     private DnBReturnCode parseTransactionStatus(String body) {
@@ -149,7 +160,7 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
         case "CM000":
             return DnBReturnCode.OK;
         default:
-            return DnBReturnCode.BAD_STATUS;
+            return DnBReturnCode.UNKNOWN;
         }
     }
 
@@ -167,23 +178,23 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     }
 
     @Override
-    protected void parseError(Exception ex, Map<String, DnBBatchMatchContext> batch) {
+    protected void parseError(String response, Exception ex, Map<String, DnBBatchMatchContext> batch) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
             log.error(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
             for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
-                entry.getValue().setDnbCode(parseDnBHttpError(httpEx));
+                entry.getValue().setDnbCode(parseDnBHttpError(response, httpEx));
             }
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            log.error(String.format("LedpException in DnB batch status checking: %s %s",
-                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            log.error("LedpException in DnB batch status checking: {} {}", ledpEx.getCode().name(),
+                    ledpEx.getCode().getMessage());
             switch (ledpEx.getCode()) {
             case LEDP_25027:
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
-                    entry.getValue().setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+                    entry.getValue().setDnbCode(DnBReturnCode.UNAUTHORIZED);
                 }
                 break;
             case LEDP_25037:
@@ -198,14 +209,14 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
                 break;
             default:
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
-                    entry.getValue().setDnbCode(DnBReturnCode.BAD_STATUS);
+                    entry.getValue().setDnbCode(DnBReturnCode.UNKNOWN);
                 }
                 break;
             }
         } else {
             log.error("Unhandled exception in DnB batch status checking: " + ex.getMessage(), ex);
             for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
-                entry.getValue().setDnbCode(DnBReturnCode.BAD_STATUS);
+                entry.getValue().setDnbCode(DnBReturnCode.UNKNOWN);
             }
         }
     }
@@ -215,6 +226,5 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
             entry.getValue().setDnbCode(code);
         }
     }
-
 
 }

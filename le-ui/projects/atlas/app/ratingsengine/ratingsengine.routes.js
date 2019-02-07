@@ -9,7 +9,7 @@ angular
         'lp.ratingsengine.ratingsenginetype',
         'lp.ratingsengine.dashboard',
         'lp.ratingsengine.activatescoring',
-        'lp.ratingsengine.remodel',
+        'le.ratingsengine.viewall',
         'lp.notes',
         'lp.ratingsengine.wizard.segment',
         'lp.ratingsengine.wizard.attributes',
@@ -108,7 +108,7 @@ angular
                 }
             })
             .state('home.ratingsengine.dashboard', {
-                url: '/:rating_id/dashboard/:modelId',
+                url: '/:modelId/:rating_id/dashboard',
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Model',
@@ -321,6 +321,112 @@ angular
                         templateUrl: 'app/ratingsengine/content/dashboard/dashboard.component.html'
                     },
                     'header.back@': 'backNav'
+                }
+            })
+            .state('home.ratingsengine.dashboard.viewall', {
+                url: '/viewall/:type',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_segment'
+                },
+                views: {
+                    'main@': 'viewAllComponent'
+                }
+            })
+            .state('home.ratingsengine.dashboard.training', {
+                url: '/remodel-settings',
+                params: {
+                    pageIcon: 'ico-attributes',
+                    pageTitle: 'View Iteration',
+                    viewingIteration: true
+                },
+                onEnter: ['$stateParams', 'BackStore', function($stateParams, BackStore) {
+                    var backState = 'home.ratingsengine.dashboard',
+                        backParams = {
+                            rating_id: $stateParams.rating_id,
+                            modelId: $stateParams.modelId,
+                            viewingIteration: false
+                        },
+                        displayName = 'View Model';
+
+                    BackStore.setBackLabel(displayName);
+                    BackStore.setBackState(backState);
+                    BackStore.setBackParams(backParams);
+
+                    BackStore.setHidden(false);
+                }],
+                resolve: {
+                    ratingEngine: ['RatingsEngineStore', function (RatingsEngineStore) {
+                        return RatingsEngineStore.getRatingEngine();
+                    }],
+                    segments: ['SegmentService', function (SegmentService) {
+                        return SegmentService.GetSegments();
+                    }],
+                    products: ['$q', 'RatingsEngineStore', function ($q, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        var params = {
+                            max: 1000,
+                            offset: 0
+                        };
+                        RatingsEngineStore.getProducts(params).then(function (result) {
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
+                    }],
+                    iteration: ['$q', '$stateParams', 'RatingsEngineStore', 'ratingEngine', function($q, $stateParams, RatingsEngineStore, ratingEngine){
+                        var deferred = $q.defer(),
+                            engineId = $stateParams.rating_id,
+                            modelId = $stateParams.modelId;
+
+                        console.log(modelId);
+
+                        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+                            RatingsEngineStore.setRemodelIteration(result);
+                            RatingsEngineStore.setRatingEngine(ratingEngine);
+
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
+
+                    }],
+                    datacollectionstatus: ['$q', 'QueryStore', function ($q, QueryStore) {
+                        var deferred = $q.defer();
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    HasRatingsAvailable: function(
+                        $q,
+                        $stateParams,
+                        ModelRatingsService
+                    ) {
+                        var deferred = $q.defer(),
+                            id = $stateParams.modelId;
+
+                        ModelRatingsService.HistoricalABCDBuckets(id).then(function(
+                            result
+                        ) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }
+                },
+                views: {
+                    'navigation@home': {
+                        controller: 'SidebarModelController',
+                        controllerAs: 'vm',
+                        templateUrl:
+                            'app/navigation/sidebar/model/model.component.html'
+                    },          
+                    'summary@': {
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
+                    },
+                    'main@': 'ratingsEngineAITraining'
                 }
             })
             .state('home.ratingsengine.dashboard.segment', {
@@ -1295,7 +1401,6 @@ angular
                     datacollectionstatus: ['$q', 'QueryStore', function ($q, QueryStore) {
                         var deferred = $q.defer();
                         QueryStore.getCollectionStatus().then(function(result) {
-                            console.log(result);
                             deferred.resolve(result);
                         });
 

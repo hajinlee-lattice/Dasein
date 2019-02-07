@@ -3,6 +3,7 @@ package com.latticeengines.api.functionalframework;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
@@ -22,6 +23,8 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.api.exposed.exception.ModelingServiceRestException;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
+
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -44,6 +47,9 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
     @Value("${api.rest.endpoint.hostport}")
     protected String restEndpointHost;
 
+    @Resource(name = "awsBatchjobService")
+    protected AwsBatchJobService awsBatchJobService;
+
     @Override
     public boolean doClearDbTables() {
         return false;
@@ -56,6 +62,7 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
 
         platformTestBase.setYarnClient(defaultYarnClient);
+        platformTestBase.setAwsBatchJobService(awsBatchJobService);
 
     }
 

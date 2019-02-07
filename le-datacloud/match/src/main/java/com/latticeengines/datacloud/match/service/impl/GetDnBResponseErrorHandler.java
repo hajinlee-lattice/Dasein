@@ -32,6 +32,7 @@ public class GetDnBResponseErrorHandler implements ResponseErrorHandler {
         switch (response.getStatusCode()) {
         case UNAUTHORIZED:
         case REQUEST_TIMEOUT:
+        case FORBIDDEN:
             throw new HttpClientErrorException(response.getStatusCode());
         case BAD_REQUEST:
             throw new LedpException(LedpCode.LEDP_25037);

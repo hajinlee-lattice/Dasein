@@ -101,6 +101,11 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         public CDLOperationWorkflowConfiguration build() {
             configuration.add(deleteFileUploadStepConfiguration);
             configuration.add(startMaintenanceConfiguration);

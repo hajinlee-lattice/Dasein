@@ -126,7 +126,8 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
                 log.info("Merging file " + file.getName());
                 CSVReader csvReader = new CSVReader(new FileReader(file));
                 List<String[]> records = csvReader.readAll();
-                log.info(String.format("There are %d rows in file %s.", records.size(), file.getName()));
+                log.info(String.format("There are 1 header row, %d data row(s) in file %s.",
+                        records.size() - 1, file.getName()));
                 String[] header = records.get(0);
                 boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
                         || file.getName().toLowerCase().contains("unmatched"))

@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -266,7 +266,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(43));
+        Assert.assertEquals(count, Long.valueOf(43));
     }
 
     @Test(groups = "functional")
@@ -276,20 +276,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     private void testAccountDataWithTranslation(boolean enforceTranslation) {
-        Restriction accRestriction = Restriction.builder()
-                .let(BusinessEntity.Account, "TechIndicator_AdobeTargetStandard").isNotNull().build();
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-
-        FrontEndRestriction accountFERestriction = new FrontEndRestriction();
-        accountFERestriction.setRestriction(accRestriction);
-        frontEndQuery.setAccountRestriction(accountFERestriction);
-        PageFilter pageFilter = new PageFilter(0, 10);
-        frontEndQuery.setPageFilter(pageFilter);
-
-        frontEndQuery.addLookups(BusinessEntity.Account, InterfaceName.AccountId.name(),
-                "TechIndicator_AdobeTargetStandard");
-
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        FrontEndQuery frontEndQuery = getAccountDataQuery();
         DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, enforceTranslation);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
@@ -307,6 +294,32 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 Assert.assertTrue(techIndicatorValue == 1 || techIndicatorValue == 2, techIndicatorValue.toString());
             }
         });
+    }
+
+
+    @Test(groups = "functional")
+    public void testAccountSql() {
+        FrontEndQuery frontEndQuery = getAccountDataQuery();
+        String sql = entityQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        System.out.println(sql);
+    }
+
+    private FrontEndQuery getAccountDataQuery() {
+        Restriction accRestriction = Restriction.builder()
+                .let(BusinessEntity.Account, "TechIndicator_AdobeTargetStandard").isNotNull().build();
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+
+        FrontEndRestriction accountFERestriction = new FrontEndRestriction();
+        accountFERestriction.setRestriction(accRestriction);
+        frontEndQuery.setAccountRestriction(accountFERestriction);
+        PageFilter pageFilter = new PageFilter(0, 10);
+        frontEndQuery.setPageFilter(pageFilter);
+
+        frontEndQuery.addLookups(BusinessEntity.Account, InterfaceName.AccountId.name(),
+                "TechIndicator_AdobeTargetStandard");
+
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        return frontEndQuery;
     }
 
     @Test(groups = "functional")

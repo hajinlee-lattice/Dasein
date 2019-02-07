@@ -9,7 +9,7 @@ class LeTileFooter extends Component {
 
         return (
             <Aux>
-                <div className="le-flex-h-panel space-around le-footer">
+                <div className={`${"le-flex-h-panel space-around le-footer"} ${this.props.classNames ? this.props.classNames : ''}`}>
                     {this.props.children}
                 </div>
             </Aux>

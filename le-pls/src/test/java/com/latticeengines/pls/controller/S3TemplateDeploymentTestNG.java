@@ -98,7 +98,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
     public void testUpdateTemplateName() throws Exception {
         assertTrue(getS3ImportTemplateEntries());
         String url = BASE_URL_PREFIX + "/s3/template/displayname";

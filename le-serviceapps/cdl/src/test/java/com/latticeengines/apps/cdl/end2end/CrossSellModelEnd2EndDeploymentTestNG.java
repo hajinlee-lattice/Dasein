@@ -39,7 +39,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private static final Logger log = LoggerFactory
             .getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
+    private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLMTest1548550277029"; // LETest1528844192916-14
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
@@ -181,8 +181,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testModel = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId());
         Assert.assertEquals(testModel.getLatestIteration().getId(), testIteration2.getId());
 
-        Map<String, List<ColumnMetadata>> attrs = ratingEngineProxy.getIterationAttributes(
-                mainTestTenant.getId(), testModel.getId(), testIteration1.getId(), null);
+        List<ColumnMetadata> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
+                testModel.getId(), testIteration1.getId(), null);
         Assert.assertNotNull(attrs);
 
         verifyBucketMetadataGenerated(predictionType);
@@ -201,7 +201,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 .getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
 
-        attrs = ratingEngineProxy.getIterationAttributes(mainTestTenant.getId(), testModel.getId(),
+        attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testModel.getId(),
                 testIteration2.getId(), null);
         Assert.assertNotNull(attrs);
 
@@ -300,29 +300,25 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         }
     }
 
-    private void verifyRefinedAttributes(Map<String, List<ColumnMetadata>> attrs) {
+    private void verifyRefinedAttributes(List<ColumnMetadata> attrs) {
         for (String refinedAttribute : refinedAttributes.keySet()) {
-            ColumnMetadata cm = attrs.get(refinedAttributes.get(refinedAttribute).getName())
-                    .stream().filter(attr -> attr.getAttrName().equals(refinedAttribute))
-                    .findFirst().get();
+            ColumnMetadata cm = attrs.stream()
+                    .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
             Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
             Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE);
         }
     }
 
-    private Map<String, List<ColumnMetadata>> refineAttributes(
-            Map<String, List<ColumnMetadata>> attrs) {
+    private List<ColumnMetadata> refineAttributes(List<ColumnMetadata> attrs) {
         int noOfAttributesToRefine = 3;
-        for (List<ColumnMetadata> attrList : attrs.values()) {
-            for (ColumnMetadata attr : attrList) {
-                if (attr.getImportanceOrdering() != null) {
-                    refinedAttributes.put(attr.getAttrName(), attr.getCategory());
-                    attr.setApprovedUsageList(Arrays.asList(ApprovedUsage.NONE));
-                    noOfAttributesToRefine--;
-                }
-                if (noOfAttributesToRefine == 0) {
-                    return attrs;
-                }
+        for (ColumnMetadata attr : attrs) {
+            if (attr.getImportanceOrdering() != null) {
+                refinedAttributes.put(attr.getAttrName(), attr.getCategory());
+                attr.setApprovedUsageList(Arrays.asList(ApprovedUsage.NONE));
+                noOfAttributesToRefine--;
+            }
+            if (noOfAttributesToRefine == 0) {
+                return attrs;
             }
         }
 

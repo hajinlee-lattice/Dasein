@@ -184,7 +184,10 @@ public class RecommendationResource {
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        log.info("getContact API: " + request.getPathInfo() + request.getQueryString() + "\n");
+        log.info("getContact API: " + request.getPathInfo());
+        if (log.isDebugEnabled()) {
+            log.debug("getContact API: " + request.getQueryString());
+        }
         return playmakerRecommendationMgr.getContacts(tenantName, lookupSource, start, offset, maximum, contactIds,
                 accountIds, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));

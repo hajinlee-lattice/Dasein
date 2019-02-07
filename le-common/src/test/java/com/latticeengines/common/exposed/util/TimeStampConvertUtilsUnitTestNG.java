@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.TimeZone;
+
 @SuppressWarnings("checkstyle:FileTabCharacter")
 public class TimeStampConvertUtilsUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtilsUnitTestNG.class);
@@ -72,9 +74,15 @@ public class TimeStampConvertUtilsUnitTestNG {
         Assert.assertEquals(actualTime, 1522761825000L);
     }
 
-
+    // Test successful cases of date to timestamp conversion with various date/time formats.
     @Test(groups = { "unit", "functional" })
     public void testConvertToLongWithDateTimeFormatStringAndTimezone() throws Exception {
+
+        // DEBUGGING - Remove Later.
+        //log.error("Timezones are:\n");
+        //for (String timezone : TimeZone.getAvailableIDs()) {
+        //    log.error("  " + timezone);
+        //}
 
         // Test Case 1: Simple date with format MM/DD/YYYY, default timezone (UTC).
         long actualTime = TimeStampConvertUtils.convertToLong("02/01/2018",
@@ -174,11 +182,155 @@ public class TimeStampConvertUtilsUnitTestNG {
                 " \t \tMM-DD-YYYY    ", 	"			00:00:00 12H  ", "XXX");
         Assert.assertEquals(actualTime, 1522718625000L);
 
-        // TODO(jwinter): Add support to handle empty date/time string.
-        // Test Case 16: Empty string with format MM/DD/YYYY, default timezone (UTC).
-        //     long actualTime = TimeStampConvertUtils.convertToLong("",
-        //             "MM/DD/YYYY", "");
-        //     Assert.assertEquals(actualTime, 1517443200000L);
+        // Test Case 16: Test case 13 again with arbitrary whitespace before and between date and time in value.
+        actualTime = TimeStampConvertUtils.convertToLong(
+                " \t\n		4-3-2018\t \t \n\n\n\n			01:23:55 am  \t\t\n		",
+                "MM-DD-YYYY", "00:00:00 12H", "XXX");
+        Assert.assertEquals(actualTime, 1522718635000L);
+    }
+
+    // Test error cases for date to timestamp conversion with date/time formats.
+    @Test(groups = { "unit", "functional" })
+    public void testConvertToLongWithFormatStringErrorCases() throws Exception {
+        boolean exceptionFound;
+
+        // PLS-12095: Date Attribute : Column without date could still upload successfully.
+        // Test Case 1: Date/time with date format MM/DD/YY and time format 00:00:00 12H where data/time string
+        // provided only has time.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("01:15:16 PM", "MM/DD/YY", "00:00:00 12H", "UTC");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date/time value (01:15:16 PM) could not be parsed by format string: " +
+                                    "MM/DD/YY 00:00:00 12H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of time without date in value.");
+
+        // Test Case 2: Fail when date format of value does not match provided format for date/time.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "DD.MMM.YY", "00 00 00 24H", "Asia/Shanghai");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date/time value (11/11/11 11 11 11) could not be parsed by format string: " +
+                                    "DD.MMM.YY 00 00 00 24H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of date/time not matching date format.");
+
+        // Test Case 3: Fail when date format of value does not match provided format for date only.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("11/11/11", "YYYY-MM-DD", null, null);
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date value (11/11/11) could not be parsed by format string: YYYY-MM-DD"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of date only not matching date format.");
+
+        // Test Case 4: Fail when date format is not a valid format for date/time.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "DD.MMMM.YY", "00 00 00 24H", "Asia/Shanghai");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "User provided data format is not supported: DD.MMMM.YY"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of unsupported date format.");
+
+        // Test Case 5: Fail when time format of value does not match provided format.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "MM/DD/YY", "00-00-00 12H", "Asia/Shanghai");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date/time value (11/11/11 11 11 11) could not be parsed by format string: " +
+                                    "MM/DD/YY 00-00-00 12H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of date/time not matching time format.");
+
+        // Test Case 6: Fail when time format is not a valid format.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "MM/DD/YY", "00/00/00 12H", "Asia/Shanghai");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "User provided time format is not supported: 00/00/00 12H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of unsupported time format.");
+
+        // Test Case 7: Empty string with format MM/DD/YYYY, default timezone (UTC).
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("", "MM/DD/YYYY", "00:00:00 24H", "UTC");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date/time value () could not be parsed by format string: MM/DD/YYYY 00:00:00 24H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of empty date/time value.");
+
+        // Test Case 8: Fall back to user only date format when date and time format is provided but value only has
+        // date.
+        exceptionFound = false;
+        long actualTime = 0;
+
+        try {
+            actualTime = TimeStampConvertUtils.convertToLong("11/11/11", "MM/DD/YY", "00-00-00 12H", "Asia/Shanghai");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date/time value (11/11/11) could not be parsed by format string: MM/DD/YY 00-00-00 12H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertEquals(actualTime, 1320940800000L);
+        Assert.assertFalse(exceptionFound, "Should not fail on case of date only provided with date and time format.");
+
+        // Test Case 9: Use heuristic to parse out date component when only date format is provided but value has
+        // date and time.
+        exceptionFound = false;
+        actualTime = 0;
+        try {
+            actualTime = TimeStampConvertUtils.convertToLong("11/11/11 11:11:11", "MM/DD/YY", "", "Asia/Shanghai");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date value (11/11/11 11:11:11) could not be parsed by format string: MM/DD/YY"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertEquals(actualTime, 1320940800000L);
+        Assert.assertFalse(exceptionFound, "Should not fail on case of data and time with only date format.");
     }
 
     @Test(groups = { "unit", "functional" })

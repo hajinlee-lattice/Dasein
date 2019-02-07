@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -33,6 +35,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     private String inputMasterTableName;
     protected Table masterTable;
+
+    private List<BusinessEntity> businessEntities = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
+            BusinessEntity.Product, BusinessEntity.Transaction);
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -60,8 +65,26 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             if (table == null) {
                 throw new IllegalStateException("Did not generate new table for " + batchStore);
             }
+            isDataQuotaLimit(table);
             table = enrichTableSchema(table);
             dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
+        }
+    }
+
+    protected void isDataQuotaLimit(Table table) {
+        if (businessEntities.contains(configuration.getMainEntity())) {
+            List<Extract> extracts = table.getExtracts();
+            if (!CollectionUtils.isEmpty(extracts)) {
+                Long dataCount = 0L;
+                for (Extract extract : extracts) {
+                    dataCount = dataCount + extract.getProcessedRecords();
+                    log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
+                    if (configuration.getDataQuotaLimit() < dataCount)
+                        throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+                                ", The data you uploaded has exceeded the limit.");
+                }
+                log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+            }
         }
     }
 

@@ -10,6 +10,10 @@
             ]
         }
     },
+    { "Node": "AccountQuotaLimit", "Data": {"Type": "number", "Required": false}},
+    { "Node": "ContactQuotaLimit", "Data": {"Type": "number", "Required": false}},
+    { "Node": "ProductBundlesQuotaLimit", "Data": {"Type": "number", "Required": false}},
+    { "Node": "TransactionQuotaLimit", "Data": {"Type": "number", "Required": false}},
     { "Node": "ModelingProfilingVersion",
       "Data": {
         "Type": "options",

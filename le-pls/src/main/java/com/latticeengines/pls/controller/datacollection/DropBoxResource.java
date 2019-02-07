@@ -147,4 +147,11 @@ public class DropBoxResource {
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
+    @GetMapping("/summary")
+    @ResponseBody
+    @ApiOperation(value = "Get drop box summary")
+    public DropBoxSummary getDropBoxSummary() {
+        String customerSpace = MultiTenantContext.getShortTenantId();
+        return dropBoxProxy.getDropBox(customerSpace);
+    }
 }

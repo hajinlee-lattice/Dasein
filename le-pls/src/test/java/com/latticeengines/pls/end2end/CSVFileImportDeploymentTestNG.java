@@ -207,6 +207,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(avroFiles.size(), 1);
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
+        log.info("File path to avros is: " + avroFilePath + "/*.avro");
         Assert.assertEquals(rowCount, 50);
 
         // Validate TestDate1

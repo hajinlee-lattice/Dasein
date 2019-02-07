@@ -77,6 +77,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
                 CacheBuilder.newBuilder()//
                         .expireAfterWrite(tokenCacheExpirationTime, TimeUnit.MINUTES)//
                         .build(new CacheLoader<DnBKeyType, String>() {
+                            @Override
                             public String load(DnBKeyType type) throws Exception {
                                 return requestTokenFromDnB(type);
                             }
@@ -132,7 +133,6 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     }
 
     private String requestTokenFromDnB(DnBKeyType type) {
-
         String token = "";
         try {
             String response = obtainAuthorizationReponseBody(type);
@@ -140,6 +140,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        log.info("Refreshed DnB token to be {}", token);
 
         return token;
     }

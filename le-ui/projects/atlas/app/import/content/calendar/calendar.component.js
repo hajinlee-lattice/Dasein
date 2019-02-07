@@ -1,7 +1,7 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
     $state, $stateParams, $scope, $timeout, $sce, $window,
-    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory, Modal
+    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory, Modal, Banner
 ) {
     var vm = this,
         debug = false, // goto /import/calendar
@@ -185,14 +185,17 @@ angular.module('lp.import.calendar', [])
             };
 
         if(calendar.mode === 'STARTING_DATE') {
-            options.month = calendar.startingDate.split('-')[0];
-            options.day = calendar.startingDate.split('-')[1];
+            var startingDateAr = calendar.startingDate.split('-');
+            options.month = startingDateAr[0];
+            options.day = startingDateAr[1];
         } else if(calendar.mode === 'STARTING_DAY') {
-            options.nth = calendar.startingDate.split('-')[0];
-            options.day = calendar.startingDate.split('-')[1];
-            options.month = calendar.startingDate.split('-')[2];
+            var startingDayAr = calendar.startingDay.split('-');
+            options.nth = startingDayAr[0];
+            options.day = startingDayAr[1];
+            options.month = startingDayAr[2];
         }
         vm.calendarOptions = options;
+        vm.changeMode(vm.calendarOptions.mode);
     }
 
     vm.useStandardCalendar = function() {
@@ -233,7 +236,7 @@ angular.module('lp.import.calendar', [])
                 console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
             } else {
                 vm.saving = true;
-                ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
+                ImportWizardStore.saveCalendar(vm.calendar).then(function(result) {
                     Modal.modalRemoveFromDOM(modal, {name: 'calendar_warning'});
                     $state.go('home');
                 });
@@ -254,44 +257,46 @@ angular.module('lp.import.calendar', [])
                 vm.saving = true;
                 Modal.modalRemoveFromDOM(modal, {name: 'standard_calendar_warning'});
 
-                // this just deletes the calendar, then standard calendar is used by default
-                ImportWizardService.deleteCalendar().then(function(result) {
-                    vm.saving = false;
-                    $state.go('home');
-                });
-                
-                // this sets a blank calendar in standard mode (new way to set it rather then delete)
-                // ImportWizardService.saveCalendar({
-                //     mode: 'STANDARD',
-                //     startingDate: '',
-                //     evaluationYear: year,
-                //     longerMonth: ''
-                // }).then(function(result) {
-                //     vm.saving = false;
-                //     $state.go('home');
-                // });
+                var deleteCalender = false;
+                if(deleteCalender) {
+                    // this just deletes the calendar, then standard calendar is used by default
+                    ImportWizardService.deleteCalendar().then(function(result) {
+                        vm.saving = false;
+                        $state.go('home');
+                    });
+                } else {
+                    //this sets a blank calendar in standard mode (new way to set it rather then delete)
+                    ImportWizardStore.saveCalendar({
+                        mode: 'STANDARD',
+                        startingDate: '',
+                        evaluationYear: year,
+                        longerMonth: '1'
+                    }).then(function(result) {
+                        vm.saving = false;
+                        $state.go('home');
+                    });
+                }
             }
         }
     }
 
     vm.init = function() {
-        //parseCalendar(vm.calendar); // uncomment this to create a non-null state for existing calendars PLS-8479
+        var calendarInfo = ImportWizardStore.getCalendarInfo(Calendar);
+        Banner.info({
+            message: 'This tenant is currently using the <strong>' + calendarInfo.modeDisplayName + ' Mode</strong>.'//  The year starts on [start] and ends on [ends].'
+        });
+
+        parseCalendar(vm.calendar);
         if( vm.calendarOptions.mode === 'STARTING_DAY') {
+            vm.nthMapping = vm.nthMapping || {};
             vm.nthMapping.nth = vm.calendarOptions.nth;
             vm.nthMapping.day = vm.calendarOptions.day;
             vm.nthMapping.month = vm.calendarOptions.month;
             vm.selectedQuarter = vm.calendarOptions.longerMonth;
         }
 
-        // if((preventUnload) && !FieldDocument) {
-        //     $state.go('home.import.entry.product_hierarchy');
-        //     return false;
-        // }
-
         $timeout(initDatePicker, 0);
     };
-
-
 
     vm.init();
 });

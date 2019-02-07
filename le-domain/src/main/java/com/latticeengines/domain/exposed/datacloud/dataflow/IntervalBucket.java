@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,7 +14,9 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntervalBucket extends BucketAlgorithm {
+
     private static final long serialVersionUID = 5591535115795170400L;
+
     @JsonProperty("bnds")
     private List<Number> boundaries;
 
@@ -33,25 +37,29 @@ public class IntervalBucket extends BucketAlgorithm {
     @Override
     @JsonIgnore
     public List<String> generateLabelsInternal() {
-        Number firstBoundary = boundaries.get(0);
-        String firstLabel = String.format("< %s", formatBoundary(firstBoundary));
-        List<String> middleLabels = new ArrayList<>();
-        if (boundaries.size() > 1) {
-            for (int i = 0; i < boundaries.size() - 1; i++) {
-                Number lowerBound = boundaries.get(i);
-                Number upperBound = boundaries.get(i + 1);
-                middleLabels.add(String.format("%s - %s", formatBoundary(lowerBound),
-                        formatBoundary(upperBound)));
-            }
-        }
-        Number lastBoundary = boundaries.get(boundaries.size() - 1);
-        String lastLabel = String.format(">= %s", formatBoundary(lastBoundary));
-
         List<String> labels = new ArrayList<>();
-        labels.add(null);
-        labels.add(firstLabel);
-        labels.addAll(middleLabels);
-        labels.add(lastLabel);
+
+        if (CollectionUtils.isNotEmpty(boundaries)) {
+            Number firstBoundary = boundaries.get(0);
+            String firstLabel = String.format("< %s", formatBoundary(firstBoundary));
+            List<String> middleLabels = new ArrayList<>();
+            if (boundaries.size() > 1) {
+                for (int i = 0; i < boundaries.size() - 1; i++) {
+                    Number lowerBound = boundaries.get(i);
+                    Number upperBound = boundaries.get(i + 1);
+                    middleLabels.add(String.format("%s - %s", formatBoundary(lowerBound),
+                            formatBoundary(upperBound)));
+                }
+            }
+            Number lastBoundary = boundaries.get(boundaries.size() - 1);
+            String lastLabel = String.format(">= %s", formatBoundary(lastBoundary));
+
+            labels.add(null);
+            labels.add(firstLabel);
+            labels.addAll(middleLabels);
+            labels.add(lastLabel);
+        }
+
         return labels;
     }
 

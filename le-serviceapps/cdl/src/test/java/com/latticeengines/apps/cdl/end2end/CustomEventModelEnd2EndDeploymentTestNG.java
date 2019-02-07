@@ -1,5 +1,23 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,22 +43,6 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
-import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
@@ -109,8 +111,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     private void moveCustomerDataToS3() {
         try {
-            String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(protocol);
+            HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
             CustomerSpace space = CustomerSpace.parse(mainTestTenant.getId());
             String podId = CamilleEnvironment.getPodId();
             String hdfsAnalyticsDir = builder.getHdfsAnalyticsDir(space.toString());
@@ -198,9 +199,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 testRatingEngine.getId());
         Assert.assertEquals(testRatingEngine.getLatestIteration().getId(), testCERemodel.getId());
 
-        Map<String, List<ColumnMetadata>> attrs = ratingEngineProxy.getIterationAttributes(
-                mainTestTenant.getId(), testRatingEngine.getId(), testAIModel.getId(),
-                "CDL,DataCloud");
+        List<ColumnMetadata> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
+                testRatingEngine.getId(), testAIModel.getId(), "CDL,DataCloud");
         Assert.assertNotNull(attrs);
 
         verifyBucketMetadataGenerated(testRatingEngine);
@@ -219,39 +219,36 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 RatingEngineStatus.INACTIVE);
         verifyBucketMetadataGeneratedAfterRemodel(testRatingEngine);
 
-        attrs = ratingEngineProxy.getIterationAttributes(mainTestTenant.getId(),
+        attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
                 testRatingEngine.getId(), testCERemodel.getId(), "CDL,DataCloud");
         Assert.assertNotNull(attrs);
         verifyRefinedAttributes(attrs);
     }
 
-    private void verifyRefinedAttributes(Map<String, List<ColumnMetadata>> attrs) {
+    private void verifyRefinedAttributes(List<ColumnMetadata> attrs) {
         for (String refinedAttribute : refinedAttributes.keySet()) {
-            ColumnMetadata cm = attrs.get(refinedAttributes.get(refinedAttribute).getName())
-                    .stream().filter(attr -> attr.getAttrName().equals(refinedAttribute))
-                    .findFirst().get();
+            ColumnMetadata cm = attrs.stream()
+                    .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
             Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
             Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE,
                     "Failed to assert ApprovedUsage of attribute: " + refinedAttribute);
         }
     }
 
-    private Map<String, List<ColumnMetadata>> refineAttributes(
-            Map<String, List<ColumnMetadata>> attrs) {
+    private List<ColumnMetadata> refineAttributes(List<ColumnMetadata> attrs) {
         int noOfAttributesToRefine = 3;
-        for (List<ColumnMetadata> attrList : attrs.values()) {
-            for (ColumnMetadata attr : attrList) {
-                if (attr.getImportanceOrdering() != null) {
-                    refinedAttributes.put(attr.getAttrName(), attr.getCategory());
-                    attr.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
-                    noOfAttributesToRefine--;
-                    log.info("Refined Attr: " + attr.getAttrName());
-                }
-                if (noOfAttributesToRefine == 0) {
-                    return attrs;
-                }
+        for (ColumnMetadata attr : attrs) {
+            if (attr.getImportanceOrdering() != null) {
+                refinedAttributes.put(attr.getAttrName(), attr.getCategory());
+                attr.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
+                noOfAttributesToRefine--;
+                log.info("Refined Attr: " + attr.getAttrName());
+            }
+            if (noOfAttributesToRefine == 0) {
+                return attrs;
             }
         }
+
         return attrs;
     }
 

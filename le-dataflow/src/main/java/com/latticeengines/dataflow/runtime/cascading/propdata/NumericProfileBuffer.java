@@ -17,7 +17,6 @@ import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
@@ -136,7 +135,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), //
-                JsonUtils.serialize(new DiscreteBucket()));
+                JsonUtils.serialize(new IntervalBucket()));
         return result;
     }
 

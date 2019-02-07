@@ -306,7 +306,8 @@ angular.module('lp.playbook')
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
-                launchUnscored: PlaybookWizardStore.getLaunchUnscored()
+                launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
+                excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems()
             },
             saveOnly = opts.saveOnly || false,
             lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),
@@ -707,11 +708,12 @@ angular.module('lp.playbook')
     this.getLaunchedStatus = function(play) {
         var launchedState = (play.launchHistory && play.launchHistory.playLaunch && play.launchHistory.playLaunch.launchState ? play.launchHistory.playLaunch.launchState : null),
             hasLaunched = (launchedState === 'Launched' ? true : false),
-            hasLaunchHistory = (play.launchHistory.mostRecentLaunch ||  play.launchHistory.lastCompletedLaunch || play.launchHistory.lastIncompleteLaunch ? true : false);
+            //hasLaunchHistory = (play.launchHistory.mostRecentLaunch ||  play.launchHistory.lastCompletedLaunch || play.launchHistory.lastIncompleteLaunch ? true : false);
+            hasLaunchHistory = ((play.launchHistory && play.launchHistory.mostRecentLaunch && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || play.launchHistory && play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState) ? true : false);
         return {
             hasLaunchHistory: hasLaunchHistory,
             launchedState: launchedState,
-            hasLaunched: hasLaunched
+            hasLaunched: hasLaunched,
         };
     }    
 
@@ -949,10 +951,8 @@ angular.module('lp.playbook')
             destinationOrgId = opts.destinationOrgId,
             destinationSysType = opts.destinationSysType,
             destinationAccountId = opts.destinationAccountId,
-            excludeItems = opts.excludeItems;
+            excludeItems = opts.excludeItems,
             launchUnscored = opts.launchUnscored;
-
-return false;
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',

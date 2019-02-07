@@ -226,7 +226,7 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
         catBucket.setCategories(Arrays.asList(catValues));
         map.put("GLOBAL_ULTIMATE_DnB_COUNTY_CODE", catBucket);
         // map.put("LAST_UPDATE_DATE", null);
-        map.put("acct_int", new DiscreteBucket());
+        map.put("acct_int", new IntervalBucket());
         return map;
     }
 
@@ -334,12 +334,15 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
                         IntervalBucket actual = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
                         Assert.assertNotNull(actual);
                         IntervalBucket expected = (IntervalBucket) (flatAttrsToCheck.get(attr));
-                        Assert.assertNotNull(actual.getBoundaries(), String.valueOf(bktAlgo));
-                        Assert.assertEquals(actual.getBoundaries().size(), expected.getBoundaries().size(), //
-                                String.valueOf(bktAlgo));
-                        for (int i = 0; i < actual.getBoundaries().size(); i++) {
-                            Assert.assertEquals(actual.getBoundaries().get(i), expected.getBoundaries().get(i), //
+                        if (CollectionUtils.isNotEmpty(expected.getBoundaries())) {
+                            Assert.assertTrue(CollectionUtils.isNotEmpty(actual.getBoundaries()));
+                            Assert.assertNotNull(actual.getBoundaries(), String.valueOf(bktAlgo));
+                            Assert.assertEquals(actual.getBoundaries().size(), expected.getBoundaries().size(), //
                                     String.valueOf(bktAlgo));
+                            for (int i = 0; i < actual.getBoundaries().size(); i++) {
+                                Assert.assertEquals(actual.getBoundaries().get(i), expected.getBoundaries().get(i), //
+                                        String.valueOf(bktAlgo));
+                            }
                         }
                     } else if (flatAttrsToCheck.get(attr) instanceof DiscreteBucket) {
                         DiscreteBucket actual = JsonUtils.deserialize((String) bktAlgo, DiscreteBucket.class);

@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -16,6 +17,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -58,8 +61,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true")})
 @Filters({@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true")})
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE,
-        getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
 public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, SoftDeletable {
 
@@ -100,8 +102,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Transient
     private LaunchHistory launchHistory;
     @JsonProperty("talkingPoints")
-    @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "play",
-            fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TalkingPoint> talkingPoints;
     @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -134,6 +135,11 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @JoinColumn(name = "FK_PLAY_TYPE", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PlayType playType;
+    @JsonProperty("playGroups")
+    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "PLAY_PLAY_GROUP", joinColumns = {@JoinColumn(name = "FK_PLAY_ID")},
+            inverseJoinColumns = {@JoinColumn(name = "FK_PLAY_GROUP_ID")})
+    private Set<PlayGroup> playGroups;
     @JsonProperty("lastTalkingPointPublishTime")
     @Column(name = "LAST_TALKING_POINT_PUBLISH_TIME")
     @Temporal(TemporalType.TIMESTAMP)
@@ -322,6 +328,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     public void setPlayType(PlayType playType) {
         this.playType = playType;
+    }
+
+    public Set<PlayGroup> getPlayGroups() {
+        return playGroups;
+    }
+
+    public void setPlayGroups(Set<PlayGroup> playGroups) {
+        this.playGroups = playGroups;
     }
 
     @Override

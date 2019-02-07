@@ -213,5 +213,10 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
     }
 }

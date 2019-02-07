@@ -4,12 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
@@ -27,16 +28,16 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
 
     private static final Logger log = LoggerFactory.getLogger(HdfsToRedshiftService.class);
 
-    @Autowired
+    @Inject
     private HdfsToS3ExportService hdfsToS3ExportService;
 
-    @Autowired
+    @Inject
     private RedshiftService redshiftService;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Override

@@ -79,7 +79,7 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
                     + " file=" + srcDir + " tenantId=" + customer);
             if (fileStatus.getModificationTime() > paTs) {
                 String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                requests.add(new ImportExportRequest(srcDir, tgtDir, tableName, true));
+                requests.add(new ImportExportRequest(srcDir, tgtDir, tableName, true, true));
             }
         } catch (Exception ex) {
             log.warn("Can not get time stamp of table=" + tableName + " for tenant=" + customer + " error="

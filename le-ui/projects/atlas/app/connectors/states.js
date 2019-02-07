@@ -12,13 +12,30 @@ export const getAngularState = () => {
 };
 
 export const profiles = {
+
   name: "profiles",
-  url: "/:nameConnector",
+  url: "/",
   views: {
     mainreact: ProfilesComponent
   },
   resolve: [{
     token: 'profiles',
+    deps: ['$transition$'],
+    resolveFn: (trans) => {
+      return trans.params();
+    }
+  }]
+};
+
+export const profilesConnector = {
+
+  name: "profilesconnector",
+  url: "/:nameConnector",
+  views: {
+    mainreact: ProfilesComponent
+  },
+  resolve: [{
+    token: 'profilesconnector',
     deps: ['$transition$'],
     resolveFn: (trans) => {
       let params = trans.params().nameConnector;

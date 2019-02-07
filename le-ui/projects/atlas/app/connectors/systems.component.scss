@@ -1,0 +1,61 @@
+@import "common/widgets/colors.scss";
+systems-component{
+    display: flex;
+    // border: 2px solid red;
+    justify-content: center;
+    background-color: $pearl-white;
+    padding-bottom: 55px;
+.systems-main{
+
+    max-width: 1000px;
+        width: 100%;
+
+.some-page-wrapper {
+    max-width: 1000px;
+    margin: 15px;
+    flex-wrap: wrap;
+  }
+  .some-table{
+    margin: 0;
+    font-size: 0.7em;
+    .color-blue{
+        color: $blue-text;
+    }
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    .column {
+        display: flex;
+        flex-direction: column;
+        flex-basis: 100%;
+        flex: 1;
+        margin: 0.4em;
+        & .le-tile{
+            min-width: 200px;
+            max-width: 320px;
+            min-height: 250px;
+        }
+
+        .systemImage{
+            max-width: 36px;
+        }
+        .system-body{
+            height: 100%;;
+        }
+        .system-footer{
+            height: 50px;
+            .right-controlls{
+                display: flex;
+                justify-content: flex-end;
+            }
+        }
+        
+      }
+  }
+}
+} 
+  
+  

@@ -323,7 +323,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());
-        update(task);
+        datafeedTaskDao.update(task);
     }
 
     private void deleteReferences(Table table) {

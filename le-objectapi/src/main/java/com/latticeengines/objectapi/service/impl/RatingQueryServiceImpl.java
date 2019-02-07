@@ -98,20 +98,45 @@ public class RatingQueryServiceImpl implements RatingQueryService {
         return new DataPage(data);
     }
 
-    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+    @Override
+    public String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+        Query query = getDataQuery(frontEndQuery, version, sqlUser);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                    attrRepo);
-            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
-            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
-            if (query.getLookups() == null || query.getLookups().isEmpty()) {
-                query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+            return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);
+        } catch (Exception e) {
+            String msg = "Failed to construct query string " + JsonUtils.serialize(frontEndQuery) //
+                    + " for tenant " + MultiTenantContext.getShortTenantId();
+            if (version != null) {
+                msg += " in " + version;
             }
-            query = preProcess(frontEndQuery.getMainEntity(), query);
+            throw new QueryEvaluationException(msg, e);
+        }
+    }
+
+    private Query getDataQuery(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo);
+        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
+        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
+        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
+        if (query.getLookups() == null || query.getLookups().isEmpty()) {
+            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+        }
+        return preProcess(frontEndQuery.getMainEntity(), query);
+    }
+
+    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+        Query query = getDataQuery(frontEndQuery, version, sqlUser);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        try {
             return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
                     .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
         } catch (Exception e) {

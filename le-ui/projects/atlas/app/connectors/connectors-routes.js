@@ -1,8 +1,9 @@
 import './connectors-list.component';
+import './systems.component';
 import './profiles.component';
 import ConnectorsRoutes from "./connectors-routing";
 angular
-.module('le.connectors', ['le.connectors.list', 'le.connectors.profile'
+.module('le.connectors', ['le.connectors.list', 'le.connectors.profile','le.systems.list'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -25,7 +26,7 @@ angular
                     component: 'connectorListComponent'
                 },
                 'main@': {
-                    component: 'profilesContainerComponent'
+                    component: 'systemsComponent'
                 }
             }
         });

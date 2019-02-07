@@ -61,7 +61,7 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
                             new Fields(InterfaceName.PeriodName.name(), InterfaceName.PeriodId.name()),
                             config.getPeriodStrategies(), config.getTrxDateField(),
                             InterfaceName.PeriodName.name(), InterfaceName.PeriodId.name()),
-                    new FieldList(config.getTrxDateField()), fms, new FieldList(outputFields));
+                    new FieldList(result.getFieldNames()), fms, new FieldList(outputFields));
         }
         return result;
     }

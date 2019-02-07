@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
@@ -19,6 +19,9 @@ import cascading.flow.FlowRuntimeProps;
 import cascading.flow.tez.Hadoop2TezFlowConnector;
 
 public class TezExecutionEngine extends ExecutionEngine {
+    private static final String TEZ_AM_MEMORY_PROPERTY = "tez.am.resource.memory.mb";
+
+    private static final int DEFAULT_TEZ_AM_MEMORY_MB = 2048;
 
     private static final Logger log  = LoggerFactory.getLogger(TezExecutionEngine.class);
 
@@ -48,6 +51,10 @@ public class TezExecutionEngine extends ExecutionEngine {
             long sortmb = Math.min(Math.round(taskmb * 0.5), 2048);
             properties.put("tez.runtime.io.sort.mb", String.valueOf(sortmb));
             log.info("Automatically set tez.runtime.io.sort.mb = " + properties.get("tez.runtime.io.sort.mb"));
+        }
+        if (StringUtils.isBlank(properties.getProperty(TEZ_AM_MEMORY_PROPERTY))) {
+            // request default memory if it is not set
+            properties.put(TEZ_AM_MEMORY_PROPERTY, String.valueOf(DEFAULT_TEZ_AM_MEMORY_MB));
         }
         properties.put("tez.runtime.unordered.output.buffer.size-mb", "512");
         properties.put("tez.lib.uris",

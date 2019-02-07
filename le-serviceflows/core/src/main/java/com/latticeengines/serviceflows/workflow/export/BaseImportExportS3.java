@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.export;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -43,6 +44,7 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 public abstract class BaseImportExportS3<T extends ImportExportS3StepConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseImportExportS3.class);
+    private static final String SUCCESS_FILE = "_SUCCESS";
 
     @Inject
     private DataUnitProxy dataUnitProxy;
@@ -93,11 +95,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
 
         customer = configuration.getCustomerSpace().toString();
         tenantId = configuration.getCustomerSpace().getTenantId();
-        pathBuilder = new HdfsToS3PathBuilder();
+        pathBuilder = new HdfsToS3PathBuilder(useEmr);
         dropBoxSummary = dropBoxProxy.getDropBox(configuration.getCustomerSpace().toString());
-        if (Boolean.TRUE.equals(useEmr)) {
-            pathBuilder.setProtocol("s3a");
-        }
     }
 
     @Override
@@ -131,7 +130,10 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     try {
                         if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
                             String s3Path = pathBuilder.convertAtlasTableDir(hdfsPath, podId, tenantId, s3Bucket);
-                            requests.add(new ImportExportRequest(s3Path, hdfsPath, table.getName(), false, false));
+                            if (isDoImport(s3Path, hdfsPath)) {
+                                requests.add(
+                                        new ImportExportRequest(s3Path, hdfsPath, table.getName(), false, false, true));
+                            }
                         }
                     } catch (Exception ex) {
                         throw new RuntimeException("Failed to check Hdfs file=" + hdfsPath, ex);
@@ -141,12 +143,36 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         }
     }
 
+    private boolean isDoImport(String s3Path, String hdfsPath) {
+        try {
+            boolean hasHdfsSuccess = HdfsUtils.fileExists(distCpConfiguration, getSuccessFile(hdfsPath));
+            if (hasHdfsSuccess) {
+                return false;
+            }
+            boolean hasS3Path = HdfsUtils.fileExists(distCpConfiguration, s3Path);
+            if (!hasS3Path) {
+                log.warn(String.format("There's No hdfs success path=%s, and there's No S3 path=", hdfsPath, s3Path));
+                return false;
+            }
+            return true;
+        } catch (Exception ex) {
+            log.warn("Failed to check file=" + hdfsPath + " error=" + ex.getMessage());
+            return false;
+        }
+    }
+
+    private String getSuccessFile(String hdfsPath) {
+        return hdfsPath + "/" + SUCCESS_FILE;
+    }
+
     private class HdfsS3ImporterExporter implements Runnable {
         private String srcPath;
         private String tgtPath;
         private String tableName;
         private boolean hasDataUnit;
         private boolean isSync;
+        private boolean isImportFolder;
+        private boolean isExportFolder;
 
         HdfsS3ImporterExporter(ImportExportRequest request) {
             this.srcPath = request.srcPath;
@@ -154,6 +180,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
             this.tableName = request.tableName;
             this.hasDataUnit = request.hasDataUnit;
             this.isSync = request.isSync;
+            this.isImportFolder = request.isImportFolder;
+            this.isExportFolder = request.isExportFolder;
         }
 
         @Override
@@ -161,7 +189,6 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
             try (PerformanceTimer timer = new PerformanceTimer(
                     "Copying src path=" + srcPath + " to tgt path=" + tgtPath)) {
                 try {
-
                     Configuration hadoopConfiguration = createConfiguration();
                     if (isSync) {
                         globalSyncCopy(hadoopConfiguration);
@@ -171,6 +198,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     if (hasDataUnit && StringUtils.isNotBlank(tableName)) {
                         registerDataUnit();
                     }
+                    writeSuccessFile();
 
                 } catch (Exception ex) {
                     String msg = String.format("Failed to copy src path=%s to tgt path=%s for tenant=%s", srcPath,
@@ -178,6 +206,15 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     log.error(msg, ex);
                     throw new RuntimeException(msg);
                 }
+            }
+        }
+
+        private void writeSuccessFile() throws IOException {
+            if (isExportFolder) {
+                HdfsUtils.writeToFile(distCpConfiguration, getSuccessFile(srcPath), "success!");
+            }
+            if (isImportFolder) {
+                HdfsUtils.writeToFile(distCpConfiguration, getSuccessFile(tgtPath), "success!");
             }
         }
 
@@ -212,6 +249,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
             DataUnit created = dataUnitProxy.create(configuration.getCustomerSpace().toString(), unit);
             log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         }
+
     }
 
     class ImportExportRequest {
@@ -220,6 +258,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         String tableName;
         boolean hasDataUnit;
         boolean isSync;
+        boolean isImportFolder;
+        boolean isExportFolder;
 
         public ImportExportRequest() {
         }
@@ -231,21 +271,24 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         }
 
         public ImportExportRequest(String srcPath, String tgtPath, String tableName, boolean hasDataUnit,
-                boolean isSync) {
+                boolean isSync, boolean isImportFolder) {
             super();
             this.srcPath = srcPath;
             this.tgtPath = tgtPath;
             this.tableName = tableName;
             this.hasDataUnit = hasDataUnit;
             this.isSync = isSync;
+            this.isImportFolder = isImportFolder;
         }
 
-        public ImportExportRequest(String srcPath, String tgtPath, String tableName, boolean hasDataUnit) {
+        public ImportExportRequest(String srcPath, String tgtPath, String tableName, boolean hasDataUnit,
+                boolean isExportFolder) {
             super();
             this.srcPath = srcPath;
             this.tgtPath = tgtPath;
             this.tableName = tableName;
             this.hasDataUnit = hasDataUnit;
+            this.isExportFolder = isExportFolder;
         }
     }
 }

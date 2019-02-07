@@ -9,13 +9,13 @@ import com.amazonaws.services.sns.model.PublishResult;
 
 public interface SNSService {
 
-    public CreateTopicResult createTopic(String name);
+    CreateTopicResult createTopic(String name);
 
-    public String getTopicArnByName(String name);
+    String getTopicArnByName(String name);
 
-    public PublishResult publishToTopic(String topicArn, String message,
+    PublishResult publishToTopic(String topicArn, String message,
             Map<String, MessageAttributeValue> messageAttributes) throws Exception;
 
-    public ListTopicsResult getAllTopics();
+    ListTopicsResult getAllTopics();
 
 }

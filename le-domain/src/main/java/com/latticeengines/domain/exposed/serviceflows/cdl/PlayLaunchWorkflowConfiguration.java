@@ -37,8 +37,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             return this;
         }
 
-        public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean enableExport) {
-            boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch.getDestinationSysType());
+        public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
             if (!canBeLaunchedToExternal) {
                 exportFilesToS3Conf.setSkipStep(true);
                 exportFileGeneratorConf.setSkipStep(true);
@@ -51,15 +50,6 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
             exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
             return this;
-        }
-
-        private boolean isValidDestination(CDLExternalSystemType destinationSysType) {
-            switch (destinationSysType) {
-            case MAP:
-                return true;
-            default:
-                return false;
-            }
         }
 
         public Builder workflow(String workflowName) {

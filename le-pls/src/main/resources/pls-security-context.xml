@@ -266,6 +266,16 @@
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/playtypes/**" access="hasRole('VIEW_PLS_DATA')"/>
     </security:http>
+    
+    <security:http use-expressions="true"
+                   pattern="/pls/playgroups/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="pls/playgroups/**" access="hasRole('VIEW_PLS_DATA')"/>
+    </security:http>
 
     <security:http use-expressions="true"
                    pattern="/pls/ratingengines/**"
