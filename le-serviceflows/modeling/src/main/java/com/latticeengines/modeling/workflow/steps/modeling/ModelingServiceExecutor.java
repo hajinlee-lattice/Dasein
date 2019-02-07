@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -188,6 +189,18 @@ public class ModelingServiceExecutor {
             samplingConfig.setSamplingType(builder.getSamplingType());
         }
         samplingConfig.setCounterGroupResultMap(builder.getCounterGroupResultMap());
+        if (Boolean.TRUE == builder.shouldLimitMaxRows
+                && MapUtils.isNotEmpty(samplingConfig.getCounterGroupResultMap())) {
+            Long totalCount = samplingConfig.getCounterGroupResultMap().values() //
+                    .stream() //
+                    .reduce((x, y) -> x + y).get();
+            int samplingRate = (new Double((100L * (1.0d * builder.maxRowsLimit) / totalCount))).intValue();
+
+            log.info(String.format("Setting sampling rate as %d as totalCount = %d and maxRowsLimit = %d", samplingRate,
+                    totalCount, builder.maxRowsLimit));
+
+            samplingConfig.setSamplingRate(samplingRate);
+        }
         SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
         log.info(String.format("Configuration for sampling: %s", JsonUtils.serialize(samplingConfig)));
         AppSubmission submission = modelProxy.createSamples(samplingConfig);
@@ -528,6 +541,9 @@ public class ModelingServiceExecutor {
         private Map<String, Long> counterGroupResultMap;
         private SamplingType samplingType;
 
+        private Boolean shouldLimitMaxRows;
+        private Long maxRowsLimit;
+
         public Builder() {
         }
 
@@ -777,7 +793,7 @@ public class ModelingServiceExecutor {
         }
 
         public Builder counterGroupResultMap(Map<String, Long> counterGroupResultMap) {
-            this.setCounterGroupResultMap(counterGroupResultMap);
+            this.counterGroupResultMap = counterGroupResultMap;
             return this;
         }
 
@@ -810,7 +826,17 @@ public class ModelingServiceExecutor {
         }
 
         public Builder samplingType(SamplingType samplingType) {
-            this.setSamplingType(samplingType);
+            this.samplingType = samplingType;
+            return this;
+        }
+
+        public Builder shouldLimitMaxRows(Boolean shouldLimitMaxRows) {
+            this.shouldLimitMaxRows = shouldLimitMaxRows;
+            return this;
+        }
+
+        public Builder maxRowsLimit(Long maxRowsLimit) {
+            this.maxRowsLimit = maxRowsLimit;
             return this;
         }
 
@@ -1209,16 +1235,16 @@ public class ModelingServiceExecutor {
             return counterGroupResultMap;
         }
 
-        public void setCounterGroupResultMap(Map<String, Long> counterGroupResultMap) {
-            this.counterGroupResultMap = counterGroupResultMap;
-        }
-
         public SamplingType getSamplingType() {
             return samplingType;
         }
 
-        public void setSamplingType(SamplingType samplingType) {
-            this.samplingType = samplingType;
+        public Boolean getShouldLimitMaxRows() {
+            return shouldLimitMaxRows;
+        }
+
+        public Long getMaxRowsLimit() {
+            return maxRowsLimit;
         }
     }
 }

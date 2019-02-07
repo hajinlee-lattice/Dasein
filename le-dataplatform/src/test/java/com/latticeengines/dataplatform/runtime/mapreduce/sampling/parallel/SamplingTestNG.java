@@ -5,6 +5,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import org.apache.hadoop.mapreduce.JobID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -230,7 +233,53 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkSampleClassDistribution(sampleStats, STRIGENT_ERROR_RANGE);
         printSamplingStats(samplingConfig.getSamplingType(), sampleStats);
+        additionalCheck(sampleStats, 2000, 8000);
         deleteSamples();
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = { "testStratifiedSampling" })
+    public void testStratifiedSamplingWith() throws Exception {
+        SamplingConfiguration samplingConfig = getSamplingConfig();
+        samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
+        samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
+        Map<String, Long> counterGroupResultMap = new HashMap<>();
+        counterGroupResultMap.put("0", 5496L);
+        counterGroupResultMap.put("1", 4504L);
+        samplingConfig.setCounterGroupResultMap(counterGroupResultMap);
+        samplingConfig.setSamplingRate(60);
+
+        checkFinalApplicationStatusSucceeded(samplingConfig);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
+        assertEquals(samplingFiles.size(), trainingSet + 2);
+        List<SampleStat> sampleStats = getSampleStats(samplingFiles);
+        checkSampleClassDistribution(sampleStats, STRIGENT_ERROR_RANGE);
+        printSamplingStats(samplingConfig.getSamplingType(), sampleStats);
+        additionalCheck(sampleStats, 1200, 4800);
+        deleteSamples();
+    }
+
+    private void additionalCheck(List<SampleStat> sampleStats, int rowCountTest, int rowCountTraining) {
+        sampleStats.stream().forEach(stat -> {
+            if (stat.fileName.startsWith("allTest")) {
+                assertCountAndPercentages(stat, rowCountTest);
+            } else if (stat.fileName.startsWith("allTraining")) {
+                assertCountAndPercentages(stat, rowCountTraining);
+            }
+        });
+    }
+
+    private void assertCountAndPercentages(SampleStat stat, int rowCount) {
+        System.out.println("File = " + stat.fileName);
+        Assert.assertEquals(stat.rowCount, rowCount);
+        Assert.assertEquals(truncate(stat.classLabelToPercentage.get("0")), 0.55);
+        Assert.assertEquals(truncate(stat.classLabelToPercentage.get("1")), 0.45);
+    }
+
+    private Double truncate(Double toBeTruncated) {
+        return BigDecimal.valueOf(toBeTruncated) //
+                .setScale(2, RoundingMode.HALF_UP) //
+                .doubleValue();
     }
 
     private void checkFinalApplicationStatusSucceeded(EventCounterConfiguration samplingConfig, String counterGroupName,
