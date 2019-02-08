@@ -172,6 +172,8 @@
     }
     &.viewingIteration {
         width: 80%;
+        min-width: 720px;
+        max-width: 1000px;
         margin: 40px auto 100px;
         background: #fff;
         border: #ddd solid 1px;
