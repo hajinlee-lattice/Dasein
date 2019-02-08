@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
@@ -64,6 +65,9 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Inject
     private CDLTestDataService cdlTestDataService;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Inject
     protected ModelSummaryProxy modelSummaryProxy;
@@ -203,7 +207,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
                 modelPath, modelName, applicationId, modelVersion, uuid);
         ModelSummary modelSummary = null;
         try {
-            modelSummary = ModelSummaryUtils.createModelSummary(modelSummaryProxy, mainTestTenant, modelConfiguration);
+            modelSummary = ModelSummaryUtils.createModelSummary(modelSummaryProxy, columnMetadataProxy, mainTestTenant,
+                    modelConfiguration);
         } catch (IOException e) {
             Assert.fail("Could not create ModelSummary", e);
         }
