@@ -39,15 +39,15 @@ import com.latticeengines.objectapi.service.RatingQueryService;
 
 public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
-    private static final String ATTR_ACCOUNT_NAME = "name";
-    private static final String ATTR_CONTACT_TITLE = "Title";
+    private static final String ATTR_ACCOUNT_NAME = "CompanyName";
+    private static final String ATTR_CONTACT_TITLE = "Occupation";
 
     @Inject
     private RatingQueryService queryService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup();
+        super.setup("2");
     }
 
     @Test(groups = "functional")
@@ -60,7 +60,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
-        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Analyst"));
         Restriction contactRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
@@ -128,7 +128,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Analyst"));
         Restriction contactRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
@@ -142,10 +142,11 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
+            System.out.println(score + ":" + count);
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 533L, JsonUtils.pprint(ratingCounts));
+                Assert.assertEquals(count, Long.valueOf(1687));
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 49L, JsonUtils.pprint(ratingCounts));
+                Assert.assertEquals(count, Long.valueOf(371));
             }
         });
     }
@@ -194,10 +195,11 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
+//            System.out.println(score + ":" + count);
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 322L);
+                Assert.assertEquals(count, Long.valueOf(3908));
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 2848L);
+                Assert.assertEquals(count, Long.valueOf(29772));
             }
         });
     }
@@ -276,7 +278,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         RatingRule rule = RatingRule.constructDefaultRule();
 
         Map<String, Restriction> ruleA = new HashMap<>();
-        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        String prodId = "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks";
         TimeFilter timeFilter = TimeFilter.within(2, "Month");
         Bucket.Transaction txn = new Bucket.Transaction(prodId, timeFilter, null, null, false);
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,

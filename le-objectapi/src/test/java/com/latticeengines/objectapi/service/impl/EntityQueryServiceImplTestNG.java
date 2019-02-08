@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -43,8 +44,8 @@ import com.latticeengines.objectapi.service.EventQueryService;
 
 public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
-    private static final String ATTR_ACCOUNT_NAME = "name";
-    private static final String ATTR_CONTACT_TITLE = "Title";
+    private static final String ATTR_ACCOUNT_NAME = "CompanyName";
+    private static final String ATTR_CONTACT_TITLE = "Occupation";
 
     @Inject
     private EntityQueryService entityQueryService;
@@ -54,7 +55,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup();
+        super.setup("2");
     }
 
     @Test(groups = "functional")
@@ -69,7 +70,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(1));
+        Assert.assertEquals(count, Long.valueOf(1));
     }
 
     @Test(groups = "functional")
@@ -84,7 +85,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(149L));
+        Assert.assertEquals(count, Long.valueOf(10));
 
         DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, false);
         for (Map<String, Object> product : dataPage.getData()) {
@@ -104,7 +105,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(3165L));
+        Assert.assertEquals(count, Long.valueOf(33393));
     }
 
     @Test(groups = "functional")
@@ -113,35 +114,40 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 "  \"main_entity\": \"Contact\",\n" +
                 "  \"distinct\": false\n" +
                 "}", FrontEndQuery.class);
-//        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-//        frontEndQuery.setMainEntity(BusinessEntity.Contact);
-        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
-//        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-//        Assert.assertNotNull(count);
-//        Assert.assertEquals(count, new Long(3165L));
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        frontEndQuery.setMainEntity(BusinessEntity.Contact);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        Assert.assertEquals(count, 132628);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testMetricRestriction() {
+        final String phAttr = "AM_uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8__M_1_6__AS";
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.chgBkt(Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS,
                 Collections.singletonList(5));
-        Restriction restriction = new BucketRestriction(BusinessEntity.PurchaseHistory,
-                "AM_drZvmxtPAib4xI6tWtQobEvi6B9BeTQ3__M_1__M_2_3__SC", bucket);
+        Restriction restriction = new BucketRestriction(BusinessEntity.PurchaseHistory, phAttr, bucket);
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertNotNull(count);
-        Assert.assertEquals(count, Long.valueOf(716L));
+        frontEndQuery.addLookups(BusinessEntity.ProductHierarchy, phAttr);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        Assert.assertEquals(count, 33680);
+
+        frontEndQuery.setPageFilter(new PageFilter(0, 10));
+        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, false);
+        Assert.assertNotNull(dataPage);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(dataPage.getData()));
+        // not support querying PH attrs
+        Assert.assertFalse(dataPage.getData().get(0).containsKey(phAttr));
     }
 
     @Test(groups = "functional", dataProvider = "timefilterProvider")
     public void testAccountWithTxn(TimeFilter timeFilter, long expectedTotal) {
         MultiTenantContext.setTenant(tenant);
-        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        String prodId = "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks";
 
         // Ever Purchased
         Bucket.Transaction txn = new Bucket.Transaction(prodId, timeFilter, null, null, false);
@@ -153,7 +159,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 Collections.singletonList(0));
         txn = new Bucket.Transaction(prodId, timeFilter, greaterThan0, greaterThan0, false);
         long count = countTxnBkt(txn);
-        Assert.assertEquals(count, totalCount);
+        Assert.assertTrue(count <= totalCount, String.format("%d <= %d", count, totalCount));
 
         // Check add up
         AggregationFilter filter1 = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
@@ -166,7 +172,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         long count1 = countTxnBkt(txn1);
         long count2 = countTxnBkt(txn2);
         long count3 = countTxnBkt(txn3);
-        Assert.assertEquals(count1 + count2 + count3, totalCount);
+        Assert.assertEquals(count1 + count2 + count3, count);
 
         filter1 = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1));
         filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1, 10));
@@ -177,7 +183,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         count1 = countTxnBkt(txn1);
         count2 = countTxnBkt(txn2);
         count3 = countTxnBkt(txn3);
-        Assert.assertEquals(count1 + count2 + count3, totalCount);
+        Assert.assertEquals(count1 + count2 + count3, count);
     }
 
     @DataProvider(name = "timefilterProvider", parallel = true)
@@ -195,10 +201,10 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 PeriodStrategy.Template.Date.name(), //
                 Arrays.asList("2017-07-15", "2017-08-15"));
         return new Object[][] { //
-                { TimeFilter.ever(), 832L }, //
-                { currentMonth, 223L }, //
-                { lastMonth, 218L }, //
-                { betweendates, 223L }, //
+                { TimeFilter.ever(), 24636L }, //
+                { currentMonth, 1983L }, //
+                { lastMonth, 2056L }, //
+                { betweendates, 2185L }, //
         };
     }
 
@@ -241,7 +247,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Test(groups = "functional")
     public void testAccountContactWithTxn() {
-        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        String prodId = "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks";
         // Check add up
         AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
@@ -249,8 +255,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Restriction txnRestriction = getTxnRestriction(txn);
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
                 .build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name())
-                .eq("Buyer").build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE)
+                .eq("Analyst").build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -266,7 +272,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, Long.valueOf(43));
+        Assert.assertEquals(count, Long.valueOf(1668));
     }
 
     @Test(groups = "functional")
@@ -333,8 +339,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
                 .build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name())
-                .eq("Buyer").build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE)
+                .eq("Analyst").build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -350,7 +356,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(287));
+        Assert.assertEquals(count, Long.valueOf(2019));
     }
 
     private long countTxnBkt(Bucket.Transaction txn) {
@@ -361,9 +367,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertNotNull(count);
-        return count;
+        return entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
     }
 
     @SuppressWarnings("unused")
@@ -375,10 +379,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setTargetProductIds(Collections.singletonList("6368494B622E0CB60F9C80FEB1D0F95F"));
-        Long count = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
-        Assert.assertNotNull(count);
-        return count;
+        frontEndQuery.setTargetProductIds(Collections.singletonList("o13brsbfF10fllM6VUZRxMO7wfo5I7Ks"));
+        return eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
     private Restriction getTxnRestriction(Bucket.Transaction txn) {
@@ -399,12 +401,12 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(1L));
+        Assert.assertEquals(count, Long.valueOf(1));
     }
 
     @Test(groups = "functional")
     public void testContactAccountWithTxn() {
-        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        String prodId = "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks";
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction1 = new FrontEndRestriction();
@@ -426,7 +428,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(15L));
+        Assert.assertEquals(count, Long.valueOf(168));
 
     }
 
@@ -449,12 +451,12 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(43L));
+        Assert.assertEquals(count, Long.valueOf(203L));
 
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(44L));
+        Assert.assertEquals(count, Long.valueOf(217L));
     }
 
     @Test(groups = "functional")
@@ -523,20 +525,36 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+
         Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("On")
                 .build();
         Restriction restriction2 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("Ca")
                 .build();
-        frontEndRestriction.setRestriction(Restriction.builder().or(restriction1, restriction2).build());
-        frontEndQuery.setAccountRestriction(frontEndRestriction);
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        Restriction or = Restriction.builder().or(restriction1, restriction2).build();
+
+        // res 1
+        frontEndRestriction.setRestriction(restriction1);
+        long count1 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        Assert.assertTrue(count1 > 0, String.valueOf(count1));
+
+        // res 2
+        frontEndRestriction.setRestriction(restriction2);
+        long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        Assert.assertTrue(count2 > 0, String.valueOf(count2));
+
+        // or
+        frontEndRestriction.setRestriction(or);
         long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertEquals(count, 1226L);
+        Assert.assertTrue(count >= count1, String.format("%d >= %d", count, count1));
+        Assert.assertTrue(count >= count2, String.format("%d >= %d", count, count2));
+        Assert.assertTrue(count <= count1 + count2, String.format("%d <= %d + %d", count, count1, count2));
     }
 
     @Test(groups = "functional")
     public void testScoreData() {
-        String engineId = "engine_auoinzzzt5k4s3d_dxirvg";
+        String engineId = "engine_kzuu2r54skmqxpw1nr2lpw";
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -559,8 +577,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setLookups(Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()),
                 new AttributeLookup(BusinessEntity.Rating, ratingField),
-                new AttributeLookup(BusinessEntity.Rating, scoreField),
-                new AttributeLookup(BusinessEntity.Rating, evField)));
+                new AttributeLookup(BusinessEntity.Rating, scoreField)));
 
         DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, false);
         Assert.assertNotNull(dataPage);
@@ -569,7 +586,6 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey(ratingField));
             Assert.assertTrue(row.containsKey(scoreField));
-            Assert.assertTrue(row.containsKey(evField));
         });
 
         // only get scores for A, B
@@ -589,13 +605,14 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey(ratingField));
             String score = (String) row.get(ratingField);
-            Assert.assertEquals(score, RatingBucketName.B.getName());
+            Assert.assertTrue( //
+                    RatingBucketName.A.getName().equals(score) || RatingBucketName.B.getName().equals(score), score);
         });
     }
 
     @Test(groups = "functional")
     public void testScoreCount() {
-        String engineId = "engine_auoinzzzt5k4s3d_dxirvg";
+        String engineId = "engine_kzuu2r54skmqxpw1nr2lpw";
         RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -604,7 +621,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Analyst"));
         Restriction contactRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
@@ -617,13 +634,17 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
-            System.out.println(score + ":" + count);
-            if (RatingBucketName.B.getName().equals(score)) {
-                Assert.assertEquals((long) count, 2L);
+//            System.out.println(score + ":" + count);
+            if (RatingBucketName.A.getName().equals(score)) {
+                Assert.assertEquals(count, Long.valueOf(78));
+            } else if (RatingBucketName.B.getName().equals(score)) {
+                Assert.assertEquals(count, Long.valueOf(136));
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 4L);
+                Assert.assertEquals(count, Long.valueOf(508));
             } else if (RatingBucketName.D.getName().equals(score)) {
-                Assert.assertEquals((long) count, 4L);
+                Assert.assertEquals(count, Long.valueOf(977));
+            } else {
+                Assert.fail("Unexpected score: " + score);
             }
         });
     }
