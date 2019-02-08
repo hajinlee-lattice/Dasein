@@ -38,7 +38,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
     private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(50);
 
-    private static final ConcurrentMap<String, AtomicLong> lastScalingMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, AtomicLong> lastScalingOutMap = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, AtomicInteger> scalingDownAttemptMap = new ConcurrentHashMap<>();
 
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
@@ -170,10 +170,11 @@ public class EMRScalingRunnable implements Runnable {
                 log.info(String.format("Scale out %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
                 scale(target);
+                getLastScaleOutTime().set(System.currentTimeMillis());
                 resetScaleInCounter();
             } else if (target < requested) {
                 // attempt to scale in
-                if (getLastScalingUp().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
+                if (getLastScaleOutTime().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
                     log.info("Still in cool down period, won't attempt to scaling in.");
                 } else {
                     log.info(String.format(
@@ -194,7 +195,6 @@ public class EMRScalingRunnable implements Runnable {
     private void scale(int target) {
         try {
             emrService.scaleTaskGroup(clusterId, target);
-            getLastScalingUp().set(System.currentTimeMillis());
         } catch (Exception e) {
             log.error("Failed to scale " + emrCluster + " to " + target, e);
         }
@@ -298,11 +298,11 @@ public class EMRScalingRunnable implements Runnable {
         }
     }
 
-    private AtomicLong getLastScalingUp() {
-        lastScalingMap.putIfAbsent(clusterId, //
+    private AtomicLong getLastScaleOutTime() {
+        lastScalingOutMap.putIfAbsent(clusterId, //
                 // 10 min ago
                 new AtomicLong(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
-        return lastScalingMap.get(clusterId);
+        return lastScalingOutMap.get(clusterId);
     }
 
     private AtomicInteger getScaleInAttempt() {
