@@ -20,14 +20,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.AMLookupRebuild;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
+import com.latticeengines.datacloud.dataflow.transformation.am.AMLookupRebuild;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedPriActFix;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.am.AMLookupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedSecondDomainCleanupConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
@@ -123,7 +123,7 @@ public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGB
     }
 
     private String getAMLookupRebuildConfig() {
-        AccountMasterLookupRebuildConfig conf = new AccountMasterLookupRebuildConfig();
+        AMLookupConfig conf = new AMLookupConfig();
         conf.setCountryField("Country");
         conf.setDomainField("Domain");
         conf.setDomainMappingPrimaryDomainField("PrimaryDomain");

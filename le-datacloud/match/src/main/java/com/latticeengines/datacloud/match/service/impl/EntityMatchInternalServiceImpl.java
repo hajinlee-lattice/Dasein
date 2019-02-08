@@ -193,7 +193,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 getExistingLookupPairs(seedBeforeUpdate);
         Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs, seed);
         List<EntityLookupEntry> entriesFailedToSetLookup =
-                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed);
+                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed, clearAllFailedLookupEntries);
 
         // clear one to one entries in seed that we failed to set in the lookup table
         List<EntityLookupEntry> entriesToClear = entriesFailedToSetLookup
@@ -348,7 +348,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     protected List<EntityLookupEntry> mapLookupEntriesToSeed(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs,
-            @NotNull EntityRawSeed seed) {
+            @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries) {
         return seed.getLookupEntries()
                 .stream()
                 .filter(entry -> {
@@ -357,6 +357,16 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     EntityLookupEntry.Mapping mapping = entry.getType().mapping;
                     if (mapping == EntityLookupEntry.Mapping.ONE_TO_ONE
                             || mapping == EntityLookupEntry.Mapping.MANY_TO_ONE) {
+                        if (clearAllFailedLookupEntries && existingLookupPairs.containsKey(key)
+                                && existingLookupPairs.get(key).contains(entry.getSerializedValues())) {
+                            // to handle an very rare case, try to set lookup if the entry is exactly the
+                            // same as the
+                            // one in seed, worst case is to waste one request that does nothing. best case
+                            // can caught
+                            // false positive on setting highest priority key successfully.
+                            return true;
+                        }
+
                         // if mapping is x to 1, when key is in existing seed, either
                         //  (a) already have other value, cannot update
                         //  (b) have the same value, no need to update
@@ -370,8 +380,13 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 // try to map the lookup entry to seed and return if seed is mapped successfully
                 // NOTE use setIfEquals because two threads might be mapping the same entry to the same seed
                 //      need to consider this case as success in both threads
-                .map(entry -> Pair.of(entry, entityLookupEntryService
-                        .setIfEquals(env, tenant, entry, seed.getId(), shouldSetTTL(env))))
+                .map(entry -> {
+                    boolean setSucceeded = entityLookupEntryService.setIfEquals(env, tenant, entry, seed.getId(),
+                            shouldSetTTL(env));
+                    // NOTE for debugging concurrency issue.
+                    log.debug("Map lookup entry {} to seed(ID={}), success={}", entry, seed.getId(), setSucceeded);
+                    return Pair.of(entry, setSucceeded);
+                })
                 .filter(pair -> !pair.getValue()) // only get the ones failed to set
                 .map(Pair::getKey)
                 .collect(Collectors.toList());

@@ -1,10 +1,16 @@
-<div class="ratingengine-training playbook-content container">
+<div 
+    class="ratingengine-training playbook-content container"
+    ng-class="{viewingIteration: $ctrl.viewingIteration}">
+
+    <div class="training-header" ng-if="$ctrl.viewingIteration">
+        <h1>Remodel - Iteration {{ $ctrl.ratingModel.iteration }}</h1>
+    </div>
     <div class="inner-container">
         <ng-form name="trainingForm" form-on-change="$ctrl.formOnChange()"  novalidate>
         
             <div class="header">
                 <h2>{{ $ctrl.pageTitle }}</h2>
-                <p ng-if="$stateParams.section != 'wizard.ratingsengine_segment'">Changing these settings will probably result in a different set of attributes.</p>
+                <p ng-if="$ctrl.viewingIteration">These are advanced settings, use carefully.</p>
             </div>
 
             <div class="content-body">
@@ -205,8 +211,20 @@
 
 
                 <ul class="data" ng-if="$ctrl.engineType == 'cross_sell'">
+                    <li class="scoring-set">
+                        <h3>Scoring</h3>
+                        <div class="stats-group">
+                            <dl class="stats">
+                                <dt>Accounts to be scored</dt>
+                                <dd>
+                                    <span ng-if="!$ctrl.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.scoringCountReturned">{{ $ctrl.scoringCount | number }}</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </li>
                     <li class="training-data-set">
-                        <h3>Effect on Modeling</h3>
+                        <h3>Modeling</h3>
                         <div class="stats-group">
                             <dl class="stats">
                                 <dt>Records Selected</dt>
@@ -225,22 +243,18 @@
                             </dl>
                         </div>
                     </li>
-                    <li class="scoring-set">
-                        <h3>Effect on Scoring</h3>
-                        <div class="stats-group">
-                            <dl class="stats">
-                                <dt>Accounts to be scored</dt>
-                                <dd>
-                                    <span ng-if="!$ctrl.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                    <span ng-if="$ctrl.scoringCountReturned">{{ $ctrl.scoringCount | number }}</span>
-                                </dd>
-                            </dl>
-                        </div>
-                    </li>
                 </ul>
 
             </div><!-- End .content-body -->
 
         </ng-form>
+    </div>
+    <div class="training-footer" ng-if="$ctrl.viewingIteration">
+        <button 
+            class="button white-button"
+            ng-click="$ctrl.backToModel()">Back to Model</button>
+        <button 
+            class="button blue-button"
+            ng-click="$ctrl.remodelIteration()">Create</button>
     </div>
 </div>

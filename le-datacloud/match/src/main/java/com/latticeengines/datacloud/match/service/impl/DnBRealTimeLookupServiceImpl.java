@@ -82,13 +82,16 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Value("${datacloud.dnb.realtime.operatingstatus.outofbusiness}")
     private String outOfBusinessValue;
 
+    @Value("${datacloud.dnb.bulk.getstatus.transactioncode.xpath}")
+    private String transactionCodeXPath;
+
     @Override
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
             Long startTime = System.currentTimeMillis();
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_ENTITY);
             context.setDuration(System.currentTimeMillis() - startTime);
-            if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
+            if (context.getDnbCode() != DnBReturnCode.UNAUTHORIZED) {
                 log.info(String.format("DnB realtime entity matching request %s%s: Status=%s, Duration=%d",
                         context.getLookupRequestId(),
                         context.getRootOperationUid() == null ? ""
@@ -107,7 +110,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             Long startTime = System.currentTimeMillis();
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_EMAIL);
             context.setDuration(System.currentTimeMillis() - startTime);
-            if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
+            if (context.getDnbCode() != DnBReturnCode.UNAUTHORIZED || i == retries - 1) {
                 log.info(String.format("DnB realtime email matching request %s%s: Status=%s, Duration=%d",
                         context.getLookupRequestId(),
                         context.getRootOperationUid() == null ? ""
@@ -169,7 +172,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     }
 
     @Override
-    protected void parseError(Exception ex, DnBMatchContext context) {
+    protected void parseError(String response, Exception ex, DnBMatchContext context) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
             log.error(String.format("HttpClientErrorException in DnB realtime request%s: HttpStatus %d %s",
@@ -177,7 +180,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                             : " (RootOperationID=" + context.getRootOperationUid() + ")",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
-            context.setDnbCode(parseDnBHttpError(httpEx));
+            context.setDnbCode(parseDnBHttpError(response, httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
             // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned. 
@@ -190,7 +193,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             }
             switch (ledpEx.getCode()) {
             case LEDP_25027:
-                context.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+                context.setDnbCode(DnBReturnCode.UNAUTHORIZED);
                 break;
             case LEDP_25037:
                 context.setDnbCode(DnBReturnCode.BAD_REQUEST);
@@ -281,5 +284,10 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
         }
 
+    }
+
+    @Override
+    protected String getResultIdPath() {
+        return transactionCodeXPath;
     }
 }

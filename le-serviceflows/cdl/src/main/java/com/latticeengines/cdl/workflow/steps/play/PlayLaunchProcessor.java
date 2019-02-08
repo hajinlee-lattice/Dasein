@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -136,8 +133,8 @@ public class PlayLaunchProcessor {
             log.info(String.format("Total available accounts available for Launch: %d",
                     totalAccountsAvailableForLaunch));
 
-            DataCollection.Version version = dataCollectionProxy
-                    .getActiveVersion(playLaunchContext.getCustomerSpace().toString());
+            DataCollection.Version version =
+                    dataCollectionProxy.getActiveVersion(playLaunchContext.getCustomerSpace().toString());
             log.info(String.format("Using DataCollection.Version %s", version));
 
             long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext, version);
@@ -155,8 +152,8 @@ public class PlayLaunchProcessor {
                 int pages = (int) Math.ceil((totalAccountsCount * 1.0D) / pageSize);
                 log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
-                try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
-                        new GenericDatumWriter<>(playLaunchContext.getSchema()))) {
+                try (DataFileWriter<GenericRecord> dataFileWriter =
+                        new DataFileWriter<>(new GenericDatumWriter<>(playLaunchContext.getSchema()))) {
                     dataFileWriter.create(playLaunchContext.getSchema(), localFile);
 
                     // loop over to required number of pages
@@ -174,7 +171,7 @@ public class PlayLaunchProcessor {
             // %based failure rate to decide if play launch failed or not
             if (playLaunch.getAccountsLaunched() == null || playLaunch.getAccountsLaunched() == 0L) {
                 throw new LedpException(LedpCode.LEDP_18159,
-                        new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
+                        new Object[] {playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored()});
             } else {
                 String recAvroHdfsFilePath = runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis,
                         avroFileName, localFile);
@@ -201,8 +198,13 @@ public class PlayLaunchProcessor {
         }
     }
 
-    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
+    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext,
+            DataCollection.Version version) {
         long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
+        log.info("total account count");
+        log.info("" + totalAccountsCount);
+        log.info("accountFrontEndquery");
+        log.info(playLaunchContext.getAccountFrontEndQuery().toString());
 
         totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount, version);
 
@@ -212,7 +214,8 @@ public class PlayLaunchProcessor {
         return totalAccountsCount;
     }
 
-    private long handleBasicConfigurationAndBucketSelection(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
+    private long handleBasicConfigurationAndBucketSelection(PlayLaunchContext playLaunchContext,
+            DataCollection.Version version) {
         // prepare account and contact front end queries
         frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
         return accountFetcher.getCount(playLaunchContext, version);
@@ -296,7 +299,8 @@ public class PlayLaunchProcessor {
         return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
     }
 
-    private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount, DataCollection.Version version) {
+    private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount,
+            DataCollection.Version version) {
         // do handling of SFDC id based suppression
 
         long effectiveAccountCount = totalAccountsCount;
@@ -308,8 +312,8 @@ public class PlayLaunchProcessor {
             Restriction nonNullLookupIdRestriction = Restriction.builder()
                     .let(BusinessEntity.Account, launch.getDestinationAccountId()).isNotNull().build();
 
-            Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
-                    .and(accountRestriction, nonNullLookupIdRestriction).build();
+            Restriction accountRestrictionWithNonNullLookupId =
+                    Restriction.builder().and(accountRestriction, nonNullLookupIdRestriction).build();
             accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
 
             effectiveAccountCount = accountFetcher.getCount(playLaunchContext, version);
@@ -319,7 +323,8 @@ public class PlayLaunchProcessor {
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
-            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
+            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter,
+            DataCollection.Version version) {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch accounts in current page
@@ -328,8 +333,7 @@ public class PlayLaunchProcessor {
                         playLaunchContext, segmentAccountsCount, processedSegmentAccountsCount, version);
 
         // process accounts in current page
-        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage,
-                dataFileWriter, version);
+        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage, dataFileWriter, version);
 
         // update launch progress
         updateLaunchProgress(playLaunchContext, processedSegmentAccountsCount, segmentAccountsCount);
@@ -376,10 +380,14 @@ public class PlayLaunchProcessor {
 
         Table recommendationTable = metadataProxy.getTable(tenant.getId(), playLaunch.getTableName());
         Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
-        RatingModel publishedIteration = ratingEngine.getPublishedIteration();
-        String modelId = publishedIteration.getId();
-        String ratingId = ratingEngine.getId();
-
+        RatingModel publishedIteration = null;
+        String modelId = null;
+        String ratingId = null;
+        if (ratingEngine != null) {
+            publishedIteration = ratingEngine.getPublishedIteration();
+            modelId = publishedIteration.getId();
+            ratingId = ratingEngine.getId();
+        }
         log.info(String.format("Processing segment: %s", segmentName));
 
         playLaunchContextBuilder //
@@ -421,8 +429,8 @@ public class PlayLaunchProcessor {
 
     private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage,
             DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
-        List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
-                .getModifiableAccountIdCollectionForContacts();
+        List<Object> modifiableAccountIdCollectionForContacts =
+                playLaunchContext.getModifiableAccountIdCollectionForContacts();
 
         List<Map<String, Object>> accountList = accountsPage.getData();
 

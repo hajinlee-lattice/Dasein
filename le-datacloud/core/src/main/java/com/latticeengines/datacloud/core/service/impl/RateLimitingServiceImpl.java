@@ -44,7 +44,7 @@ public class RateLimitingServiceImpl implements RateLimitingService {
     private int bulkStatusPerHour;
 
     @Override
-    public RateLimitedAcquisition acquireDnBBulkRequest(long numRows, boolean withoutAcquireQuota) {
+    public RateLimitedAcquisition acquireDnBBulkRequest(long numRows, boolean attemptOnly) {
         if (!dnbBulkRequestRegulatorRegistered) {
             registerDnBBulkRequestRegulator();
         }
@@ -52,20 +52,20 @@ public class RateLimitingServiceImpl implements RateLimitingService {
         inquiringQuantities.put(COUNTER_REQUEST, 1L);
         inquiringQuantities.put(COUNTER_ROWS, numRows);
         RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(DNB_BULK_REQUEST_REGULATOR,
-                inquiringQuantities, 1, TimeUnit.SECONDS, withoutAcquireQuota);
+                inquiringQuantities, 1, TimeUnit.SECONDS, attemptOnly);
         logRejectedAcquisition(acquisition, DNB_BULK_REQUEST_REGULATOR);
         return acquisition;
     }
 
     @Override
-    public RateLimitedAcquisition acquireDnBBulkStatus() {
+    public RateLimitedAcquisition acquireDnBBulkStatus(boolean attemptOnly) {
         if (!dnbBulkStatusRegulatorRegistered) {
             registerDnBBulkStatusRegulator();
         }
         Map<String, Long> inquiringQuantities = new HashMap<>();
         inquiringQuantities.put(COUNTER_REQUEST, 1L);
         RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(DNB_BULK_STATUS_REGULATOR,
-                inquiringQuantities, 1, TimeUnit.SECONDS);
+                inquiringQuantities, 1, TimeUnit.SECONDS, attemptOnly);
         logRejectedAcquisition(acquisition, DNB_BULK_STATUS_REGULATOR);
         return acquisition;
     }

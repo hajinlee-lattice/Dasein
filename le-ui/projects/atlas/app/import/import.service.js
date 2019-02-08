@@ -830,8 +830,10 @@ angular.module('lp.import')
 	                    ResultErrors: data.Errors,
 	                    Result: data.Result
                     };
-                    let redux = $state.get('home.import').data.redux;
-                    redux.setInitialMapping(ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings));
+                    if($state.get('home.import') && $state.get('home.import').data && $state.get('home.import').data.redux){
+                        let redux = $state.get('home.import').data.redux;
+                        redux.setInitialMapping(ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings));
+                    }
                     // ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings);
 	            }
 

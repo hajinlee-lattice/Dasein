@@ -1,59 +1,116 @@
-export const trayAPI = '/tray';
-// window['reactrouter'] =var router;
-const ConnectorsService = {
-    getUserQuery(userName) {
-        let q = `query {
-              users (criteria: {name: "${userName}"}) {
-                edges {
-                  node {
-                    name
-                    id
-                    externalUserId
-                  }
+export const MARKETO = 'Marketo';
+export const SALESFORCE = 'Salesforce';
+export const ELOQUA = 'Eloqua';
+
+import messageService from 'common/app/utilities/messaging-service';
+import Message, {
+    MODAL,
+    GENERIC,
+    CLOSE_MODAL
+} from 'common/app/utilities/message';
+class ConnectorService {
+    constructor() {
+        if (!ConnectorService.instance) {
+            console.log('============>Creating instance');
+            ConnectorService.instance = this;
+            this.userInfo = { validated: false };
+            this.connectorInfo = {
+                name: ''
+            };
+            this._connectorsList = [
+                {
+                    name: 'Salesforce',
+                    config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive reccomandations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' },
+                },
+                {
+                    name: 'Marketo',
+                    config: { img: '/atlas/assets/images/logo_marketo_2.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Marketo' }
+                },
+                {
+                    name: 'Eloqua',
+                    config: { img: '/atlas/assets/images/eloqua.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Eloqua' }
                 }
-              }
-            }`
+            ];
+        }
 
-        return {
-            query: q
-        };
-    },
-    getCreateUserQuery(userName) {
-        let q = `mutation {
-            createExternalUser(input: {name: "${userName}", externalUserId: "${userName}"}) {
-              authorizationCode
-              clientMutationId
+        return ConnectorService.instance;
+    }
+    getImgByConnector(connectorName) {
+        let path = ''
+        this._connectorsList.forEach(element => {
+            if (element.name === connectorName) {
+
+                path = element.config.img;
+                return;
             }
-          }`;
-        return {
-            query: q
+        });
+        return path;
+    }
+    getConnectorCreationTitle(otherTxt) {
+        switch (this.connectorInfo.name) {
+            case SALESFORCE:
+                return `${'SFDC'} ${otherTxt ? otherTxt : ''}`;
+            case ELOQUA:
+                return `${'ELOQUA'} ${otherTxt ? otherTxt : ''}`;
+            default:
+                return otherTxt;
         }
-    },
-    getUserInfo(edges){
-        if(edges && edges.length > 0){
-            return new User(edges[0].node.name, edges[0].node.id, edges[0].node.externalUserId);
-        }else{
-            return new User();
-        }
+    }
 
+    getConnectorCreationBody() {
+        let system = this.getConnectorCreationTitle();
+        let h5 = `${'<h5>'}${system} ${'org Authentiocation</h5>'}`;
+        let p = '<p>Generate a One-time Authentication token below to connect the BIS application with Lattice platform</p>';
+        return `${h5}${p}`;
     }
-};
-export default ConnectorsService;
 
-export class User{
-    constructor(name='', id='', externalId=''){
-        this.name = name,
-        this.id = id;
-        this.externalId = externalId;
+    setConnectorName(name) {
+        this.connectorInfo.name = name;
     }
-    getName(){
-        return this.name;
+    getConnectorName() {
+        return this.connectorInfo.name;
     }
-    getId() {
-        return this.id;
+    setUserValidated(validated) {
+        this.userInfo.validated = validated;
     }
-    getExternalId() {
-        return this.externalId;
+    isUserValidated() {
+        return this.userInfo.validated;
     }
-    
+
+    setList(list) {
+        this._connectorsList = list;
+    }
+
+    getList() {
+        return this._connectorsList;
+    }
+    sendMSG(callbackFn) {
+        let title = this.getConnectorCreationTitle('Settings');
+        let body = this.getConnectorCreationBody();
+        let msg = new Message(
+            'Test',
+            MODAL,
+            GENERIC,
+            title,
+            body
+        );
+        msg.setConfirmText('Email Token');
+        msg.setIcon('fa fa-cog');
+        msg.setCallbackFn((args) => {
+            let closeMsg = new Message([], CLOSE_MODAL);
+            closeMsg.setName(args.name);
+            closeMsg.setCallbackFn();
+            messageService.sendMessage(closeMsg);
+            if (args.action == "ok") {
+                callbackFn();
+            }
+        });
+        messageService.sendMessage(msg);
+    }
 }
+
+const instance = new ConnectorService();
+Object.freeze(instance);
+
+export default instance;
+

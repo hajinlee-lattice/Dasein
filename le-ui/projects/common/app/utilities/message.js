@@ -5,6 +5,8 @@ export const SUCCESS = 'success';
 export const ERROR = 'error';
 export const INFO = 'info';
 export const WARNING= 'warning';
+export const GENERIC = 'generic';
+export const CLOSE_MODAL = 'close_modal';
 
 export default class Message {
 
@@ -20,7 +22,33 @@ export default class Message {
         }
 
     }
+    setConfirmText(confirmText){
+        this.confirmText = confirmText;
+    }
 
+    getConfirmText(){
+        return this.confirmText;
+    }
+
+    setIcon(icon){
+        this.icon = icon;
+    }
+    getIcon(){
+        return this.icon;
+    }
+
+    setCallbackFn(callbackFn){
+        this.callback = callbackFn;
+    }
+    getCallbackFn(){
+        return this.callback;
+    }
+    setName(name){
+        this.name = name;
+    }
+    getName(){
+        return this.name;
+    }
     getResponse() {
         return this.response;
     }

@@ -1,10 +1,11 @@
 import {
     MODAL,
     BANNER,
-    NOTIFICATION
+    NOTIFICATION,
+    CLOSE_MODAL
 } from '../../common/app/utilities/message';
 
-export default function(
+export default function (
     $scope,
     BrowserStorageUtility,
     SessionTimeoutUtility,
@@ -70,7 +71,7 @@ export default function(
             // console.log("RECEIVED", message);
             if (message.isErrorUtility()) {
                 ServiceErrorUtility.process(message.getResponse());
-                $scope.$apply(() => {});
+                $scope.$apply(() => { });
             } else {
                 switch (message.getPosition()) {
                     case BANNER:
@@ -79,16 +80,23 @@ export default function(
                             title: message.getMessage(),
                             message: message.getFullMessage()
                         });
-                        $scope.$apply(() => {});
+                        $scope.$apply(() => { });
                         break;
-
+                    case CLOSE_MODAL:
+                        let modal = Modal.get(message.getName());
+                        if (modal) {
+                            Modal.modalRemoveFromDOM(modal, {name: message.getName()});
+                        }
+                        break;
                     case MODAL:
                         // console.log(message.getMessage());
                         Modal[message.getType()]({
                             title: message.getMessage(),
-                            message: message.getFullMessage()
-                        });
-                        $scope.$apply(() => {});
+                            icon: message.getIcon(),
+                            message: message.getFullMessage(),
+                            confirmtext: message.getConfirmText() ? message.getConfirmText() : ''
+                        }, message.getCallbackFn());
+                        $scope.$apply(() => { });
                         break;
 
                     case NOTIFICATION:
@@ -97,7 +105,9 @@ export default function(
                             title: message.getMessage(),
                             message: message.getFullMessage()
                         });
-                        $scope.$apply(() => {});
+                        $scope.$apply(() => { });
+                        break;
+
                         break;
                 }
             }

@@ -4,8 +4,21 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 
 public interface RateLimitingService {
 
-    RateLimitedAcquisition acquireDnBBulkRequest(long numRows, boolean withoutAcquireQuota);
+    /**
+     * @param numRows
+     * @param attemptOnly:
+     *            true: Only check whether there is quota available, don't
+     *            really acquire quota
+     * @return
+     */
+    RateLimitedAcquisition acquireDnBBulkRequest(long numRows, boolean attemptOnly);
 
-    RateLimitedAcquisition acquireDnBBulkStatus();
+    /**
+     * @param attemptOnly:
+     *            true: Only check whether there is quota available, don't
+     *            really acquire quota
+     * @return
+     */
+    RateLimitedAcquisition acquireDnBBulkStatus(boolean attemptOnly);
 
 }

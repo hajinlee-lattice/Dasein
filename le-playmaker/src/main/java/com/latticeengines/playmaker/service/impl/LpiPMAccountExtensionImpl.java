@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -183,8 +184,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     private void setPageFilter(FrontEndQuery frontEndQuery, Long offset, Long maximum) {
-        offset = ((Long) offset == null) ? 0 : offset;
-        maximum = ((Long) maximum == null) ? MAX_ROWS : maximum;
+        offset = (offset == null) ? 0 : offset;
+        maximum = (maximum == null) ? MAX_ROWS : maximum;
         PageFilter pageFilter = new PageFilter(offset, Math.min(MAX_ROWS, maximum));
         frontEndQuery.setPageFilter(pageFilter);
     }
@@ -373,7 +374,9 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                         Map<String, Object> metadataInfoMap = new HashMap<>();
                         metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
                         metadataInfoMap.put(PlaymakerConstants.Type,
-                                PlaymakerUtils.convertToSFDCFieldType(metadata.getJavaClass()));
+                                PlaymakerUtils.convertToSFDCFieldType(
+                                        StatsCubeUtils.isDateAttribute(metadata) ? PlaymakerConstants.DateTime
+                                                : metadata.getJavaClass()));
                         metadataInfoMap.put(PlaymakerConstants.StringLength,
                                 PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
                         metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());

@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,20 +371,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                             ex.getMessage()));
                     batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
                 }
-                switch (batchContext.getDnbCode()) {
-                case SUBMITTED:
+                if (batchContext.getDnbCode() == DnBReturnCode.SUBMITTED) {
+                    // Successfully submitted batch requests
                     dnbMatchCommandService.dnbMatchCommandCreate(batchContext);
                     submittedBatches.add(batchContext);
-                    break;
-                case RATE_LIMITING:
-                case EXCEED_LIMIT_OR_UNAUTHORIZED:
-                    // Not allow to submit this request due to rate limiting
-                    // Put it back to unsubmittedReqs list.
+                } else if (batchContext.getDnbCode().isScheduledRetryStatus()) {
+                    // For these status, wait for next scheduled submission to
+                    // retry
                     unsubmittedBatches.add(0, batchContext);
-                    break;
-                default:
+                } else { // Failed batch requests
                     failedBatches.add(batchContext);
-                    break;
                 }
             }
             int unsubmittedNum = getUnsubmittedStats().get(MatchConstants.REQUEST_NUM);
@@ -404,37 +401,41 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             initExecutors();
         }
         try {
-            // Failed batch requests to process
-            List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             // Batch requests to retry
             List<DnBBatchMatchContext> retryBatches = new ArrayList<>();
+            // BatchID -> DnBCode, to find out requests which change status so that DnBMatchCommand table could be updated
+            Map<String, DnBReturnCode> changedBatchStatus = new HashMap<>();
+            // Batch requests which changed status
+            List<DnBBatchMatchContext> changedBatches = new ArrayList<>();
+            // Finished requests to fetch result
+            List<DnBBatchMatchContext> finishedBatches = new ArrayList<>();
             if (submittedBatches.isEmpty()) {
                 return;
             }
             synchronized (submittedBatches) {
                 dnbBulkLookupStatusChecker.checkStatus(submittedBatches);
+                // If already have retried requests which haven't got response
+                // back, don't retry more
                 boolean hasRetried = false;
                 for (DnBBatchMatchContext batch : submittedBatches) {
                     if (batch.getRetryForServiceBatchId() != null) {
                         hasRetried = true;
-                        break;
                     }
+                    changedBatchStatus.put(batch.getServiceBatchId(), batch.getDnbCode());
                 }
                 Iterator<DnBBatchMatchContext> iter = submittedBatches.iterator();
                 while (iter.hasNext()) {
                     DnBBatchMatchContext submittedBatch = iter.next();
+                    if (submittedBatch.getDnbCode() != changedBatchStatus.get(submittedBatch.getServiceBatchId())) {
+                        changedBatches.add(submittedBatch);
+                    }
                     switch (submittedBatch.getDnbCode()) {
                     case OK:
-                        finishedBatches.offer(submittedBatch);
-                        synchronized (finishedBatches) {
-                            finishedBatches.notify();
-                        }
+                        finishedBatches.add(submittedBatch);
                         iter.remove();
                         break;
                     case SUBMITTED:
                     case IN_PROGRESS:
-                    case RATE_LIMITING:
-                    case EXCEED_LIMIT_OR_UNAUTHORIZED:
                         if (submittedBatch.getRetryTimes() < bulkRetryTimes && submittedBatch.getTimestamp() != null
                                 && (System.currentTimeMillis()
                                         - submittedBatch.getTimestamp().getTime() >= bulkRetryWait)) {
@@ -449,16 +450,21 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                             }
                         }
                         break;
+                    // For any requests failed to check status, don't do
+                    // anything and wait for next scheduled check until timeout
                     default:
-                        failedBatches.add(submittedBatch);
-                        iter.remove();
                         break;
                     }
                 }
             }
-            // Process failed batch requests
-            for (DnBBatchMatchContext batchContext : failedBatches) {
-                processBulkMatchResult(batchContext, false, true);
+            // Update DnB command status
+            if (CollectionUtils.isNotEmpty(changedBatches)) {
+                dnbMatchCommandService.dnbMatchCommandUpdateStatus(changedBatches);
+            }
+            // Fetch result for finished batch requests
+            finishedBatches.forEach(finishedBatch -> this.finishedBatches.offer(finishedBatch));
+            synchronized (this.finishedBatches) {
+                this.finishedBatches.notify();
             }
             // Retry batch requests
             for (DnBBatchMatchContext retryBatch : retryBatches) {
@@ -508,13 +514,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                         batch.getServiceBatchId(), ex.getMessage()));
                 batch.setDnbCode(DnBReturnCode.UNKNOWN);
             }
-            switch (batch.getDnbCode()) {
-            case OK:
+            if (batch.getDnbCode() == DnBReturnCode.OK) {
+                // Successful batch request
                 processBulkMatchResult(batch, true, true);
-                break;
-            default:
+            } else if (batch.getDnbCode().isScheduledRetryStatus()) {
+                // For these status, wait for next scheduled fetch to
+                // retry
+                finishedBatches.offer(batch);
+            } else {
+                // Failed batch request
                 processBulkMatchResult(batch, false, true);
-                break;
             }
         } catch (Exception ex) {
             log.error("Exception in fetching dnb batch request result", ex);

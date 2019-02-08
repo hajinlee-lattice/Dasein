@@ -3,7 +3,7 @@ angular.module('lp.ratingsengine.dashboard', [
 ])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
-    RatingsEngineStore, RatingsEngineService, Modal,
+    RatingsEngineStore, RatingsEngineService, Modal, Banner, 
     Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
     var vm = this,
@@ -18,6 +18,7 @@ angular.module('lp.ratingsengine.dashboard', [
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
         modelSummary: Model,
+        selectedIteration: null,
         products: Products,
         targetProducts: TargetProducts,
         trainingProducts: TrainingProducts,
@@ -279,6 +280,10 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.model = vm.ratingEngine.latest_iteration.AI;
                 vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;   
             }
+
+            vm.selectedIteration = angular.copy(vm.model);
+            RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
+
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -365,13 +370,12 @@ angular.module('lp.ratingsengine.dashboard', [
           ];
 
         // console.log(vm.dashboard);
+        // console.log(vm.selectedIteration);
     }
 
     vm.init = function() {
         vm.initDataModel();
     }
-
-
 
     vm.isIterationActive = function(iterationId){
         if(vm.ratingEngine.scoring_iteration != null) {
@@ -469,35 +473,47 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
-    vm.remodelIteration = function(iteration){
-
-        console.log(iteration);
-
-        // var engineId = vm.ratingEngine.id,
-        //     modelId = iteration.id;
-
-        // RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-        //     AtlasRemodelStore.setRemodelIteration(result);
-        //     RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-        //     $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
-        // });
+    vm.setRemodelIteration = function(iteration){
+        vm.selectedIteration = iteration;
+        RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
     }
 
-    vm.remodelSettings = function() {
+    vm.remodelIteration = function(){
+        var engineId = vm.ratingEngine.id,
+            iteration = RatingsEngineStore.getRemodelIteration(),
+            modelId = iteration.id;
 
+        vm.remodelingProgress = true;
+
+        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){            
+            RatingsEngineStore.setRemodelIteration(result);
+            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+            RatingsEngineStore.saveIteration('attributes').then(function(result){
+                if (!result.result) {
+                    Banner.success({
+                        message:
+                            "A remodel job has started. You can track it's progress on the jobs page."
+                    });
+                }
+                vm.remodelingProgress = result.showProgress;
+            });
+        });
     }
 
-    vm.viewIteration = function(iteration){
+    vm.viewIteration = function(destination, iterationToView){
 
-        RatingsEngineStore.setRemodelIteration(iteration);
+        if (iteration) {
+            RatingsEngineStore.setRemodelIteration(iteration);
+        }
 
-        var modelId = iteration.modelSummaryId,
-            rating_id = $stateParams.rating_id;
+        var iteration = iterationToView ? iterationToView : RatingsEngineStore.getRemodelIteration(),
+            modelId = iteration.modelSummaryId,
+            rating_id = $stateParams.rating_id,
+            url = destination;
 
-        $state.go('home.model.attributes', { 
+        $state.go(url, { 
             rating_id: rating_id, 
-            modelId: modelId,
-            viewingIteration: true
+            modelId: modelId
         },{ reload:true });   
 
     }

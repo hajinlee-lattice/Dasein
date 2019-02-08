@@ -11,6 +11,7 @@ import LeHPanel from 'common/widgets/container/le-h-panel';
 import Aux from "common/widgets/hoc/_Aux";
 import {SPACEBETWEEN} from "common/widgets/container/le-alignments";
 // import ConnectorsService, { trayAPI, User } from './connectors.service';
+import ConnectorService from './connectors.service';
 export default class ProfilesComponent extends Component {
 
     constructor(props) {
@@ -50,7 +51,7 @@ export default class ProfilesComponent extends Component {
         );
     }
     getProfilesUI() {
-        console.log('CREATING ', this.state.connectors);
+        // console.log('CREATING ', this.state.connectors);
         if (this.state.connectors && this.state.connectors.length > 0) {
             let systems = Object.keys(this.state.connectors).map(
                 (obj, index) => {
@@ -77,7 +78,8 @@ export default class ProfilesComponent extends Component {
     }
 
     componentDidMount() {
-        console.log('PROFILE TRY');
+        // console.log('PROFILE TRY');
+        ConnectorService.getList();
         this.router = ConnectorsRoutes.getRouter();
         // this.setState({ nameConnector: this.router.stateService.params.nameConnector, loading: true });
         // httpService.get()
@@ -87,7 +89,7 @@ export default class ProfilesComponent extends Component {
                 let connectors = response.data.CRM;
                 connectors = connectors.concat(response.data.MAP);
                 this.setState({ nameConnector: this.router.stateService.params.nameConnector, loading: false, connectors: connectors });
-                console.log("BACK HERE ", response);
+                // console.log("BACK HERE ", response);
             })
         );
     }

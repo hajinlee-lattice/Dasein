@@ -1,26 +1,27 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.am;
 
 import java.util.Arrays;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.am.AMLookupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(AMLookupRebuild.DATAFLOW_BEAN_NAME)
-public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupRebuildConfig> {
+public class AMLookupRebuild extends ConfigurableFlowBase<AMLookupConfig> {
 
-    private AccountMasterLookupRebuildConfig config;
+    private AMLookupConfig config;
 
-    public static final String DATAFLOW_BEAN_NAME = "AMLookupRebuild";
-    public static final String TRANSFORMER_NAME = "AMLookupRebuildTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "AMLookupRebuildFlow";
+    public static final String TRANSFORMER_NAME = "AMLookupRebuild";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -159,6 +160,6 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return AccountMasterLookupRebuildConfig.class;
+        return AMLookupConfig.class;
     }
 }

@@ -41,6 +41,18 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("SkipAPS")
     private boolean skipAPS = false;
 
+    /*
+     * flag to inherit all import actions from last failed PA
+     */
+    @JsonProperty("InheritAllCompleteImportActions")
+    private boolean inheritAllCompleteImportActions;
+
+    /*
+     * list of import action PIDs to inherit from last failed PA
+     */
+    @JsonProperty("ImportActionPidsToInherit")
+    private List<Long> importActionPidsToInherit;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
@@ -105,5 +117,19 @@ public class ProcessAnalyzeRequest {
         this.skipAPS = skipAPS;
     }
 
+    public boolean isInheritAllCompleteImportActions() {
+        return inheritAllCompleteImportActions;
+    }
 
+    public void setInheritAllCompleteImportActions(boolean inheritAllCompleteImportActions) {
+        this.inheritAllCompleteImportActions = inheritAllCompleteImportActions;
+    }
+
+    public List<Long> getImportActionPidsToInherit() {
+        return importActionPidsToInherit;
+    }
+
+    public void setImportActionPidsToInherit(List<Long> importActionPidsToInherit) {
+        this.importActionPidsToInherit = importActionPidsToInherit;
+    }
 }

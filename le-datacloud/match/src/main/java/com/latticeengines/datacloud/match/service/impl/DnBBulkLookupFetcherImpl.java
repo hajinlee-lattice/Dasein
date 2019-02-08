@@ -77,11 +77,22 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Value("${datacloud.dnb.bulk.getresult.url.format}")
     private String getResultUrlFormat;
 
+    @Value("${datacloud.dnb.bulk.getstatus.transactioncode.xpath}")
+    private String transactionCodeXPath;
+
     @Override
     public DnBBatchMatchContext getResult(DnBBatchMatchContext batchContext) {
         for (int i = 0; i < retries; i++) {
+            // Don't check rate limit because every request could call status
+            // check API multiple times (successfully), but only fetch result
+            // API single time (successfully).
+            // Both 2 APIs' quota limit is the same. As long as we have rate
+            // limit control on status check API, we don't need to have control
+            // here
+            // If DnB API response complains we exceed rate limit, we will wait
+            // for next scheduled fetch to retry
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_FETCH);
-            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
+            if (!batchContext.getDnbCode().isImmediateRetryStatus()) {
                 if (batchContext.getDnbCode() == DnBReturnCode.OK) {
                     log.info("Successfully fetched batch results from dnb. Size=" + batchContext.getContexts().size()
                             + " Timestamp=" + batchContext.getTimestamp() + " ServiceId="
@@ -99,20 +110,20 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     }
 
     @Override
-    protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
+    protected void parseError(String response, Exception ex, DnBBatchMatchContext batchContext) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
             log.error(String.format("HttpClientErrorException in DnB batch match fetching request: HttpStatus %d %s",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
-            batchContext.setDnbCode(parseDnBHttpError(httpEx));
+            batchContext.setDnbCode(parseDnBHttpError(response, httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
             log.error(String.format("LedpException in DnB batch match fetching request: %s %s",
                     ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
             switch (ledpEx.getCode()) {
             case LEDP_25027:
-                batchContext.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+                batchContext.setDnbCode(DnBReturnCode.UNAUTHORIZED);
                 break;
             case LEDP_25037:
                 batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
@@ -172,6 +183,11 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             batchContext.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
 
+    }
+
+    @Override
+    protected String getResultIdPath() {
+        return transactionCodeXPath;
     }
 
     /**

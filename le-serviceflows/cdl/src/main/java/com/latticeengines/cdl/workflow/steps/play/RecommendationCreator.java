@@ -146,30 +146,33 @@ public class RecommendationCreator {
         }
 
         recommendation.setTenantId(tenant.getPid());
-        String score = checkAndGet(account,
-                playLaunchContext.getRatingId() + PlaymakerConstants.RatingScoreColumnSuffix);
-        String bucketName = checkAndGet(account, playLaunchContext.getRatingId(),
-                RatingBucketName.getUnscoredBucketName());
-        RatingBucketName bucket = EnumUtils.isValidEnum(RatingBucketName.class, bucketName)
-                ? RatingBucketName.valueOf(bucketName) : null;
-        recommendation.setLikelihood(
-                StringUtils.isNotEmpty(score) ? Double.parseDouble(score) : getDefaultLikelihood(bucket));
 
-        String expectedValue = checkAndGet(account,
-                playLaunchContext.getRatingId() + PlaymakerConstants.RatingEVColumnSuffix);
-        recommendation
-                .setMonetaryValue(StringUtils.isNotEmpty(expectedValue) ? Double.parseDouble(expectedValue) : null);
+        if (playLaunchContext.getRatingId() != null){
+            String score = checkAndGet(account,
+                    playLaunchContext.getRatingId() + PlaymakerConstants.RatingScoreColumnSuffix);
+            String bucketName = checkAndGet(account, playLaunchContext.getRatingId(),
+                    RatingBucketName.getUnscoredBucketName());
+            RatingBucketName bucket = EnumUtils.isValidEnum(RatingBucketName.class, bucketName)
+                    ? RatingBucketName.valueOf(bucketName) : null;
+            recommendation.setLikelihood(
+                    StringUtils.isNotEmpty(score) ? Double.parseDouble(score) : getDefaultLikelihood(bucket));
 
-        setSyncDestination(playLaunch, recommendation);
+            String expectedValue = checkAndGet(account,
+                    playLaunchContext.getRatingId() + PlaymakerConstants.RatingEVColumnSuffix);
+            recommendation
+                    .setMonetaryValue(StringUtils.isNotEmpty(expectedValue) ? Double.parseDouble(expectedValue) : null);
 
-        recommendation.setPriorityID(bucket);
-        recommendation.setPriorityDisplayName(bucketName);
+            setSyncDestination(playLaunch, recommendation);
+    
+            recommendation.setPriorityID(bucket);
+            recommendation.setPriorityDisplayName(bucketName);
 
-        recommendation.setRatingModelId(playLaunchContext.getPublishedIteration().getId());
-        recommendation.setModelSummaryId(
-                playLaunchContext.getPlay().getRatingEngine().getType() != RatingEngineType.RULE_BASED
-                        ? ((AIModel) playLaunchContext.getPublishedIteration()).getModelSummaryId() : "");
+            recommendation.setRatingModelId(playLaunchContext.getPublishedIteration().getId());
+            recommendation.setModelSummaryId(
+                    playLaunchContext.getPlay().getRatingEngine().getType() != RatingEngineType.RULE_BASED
+                            ? ((AIModel) playLaunchContext.getPublishedIteration()).getModelSummaryId() : "");
 
+        }
         if (mapForAccountAndContactList.containsKey(accountId)) {
             List<Map<String, String>> contactsForRecommendation = PlaymakerUtils
                     .generateContactForRecommendation(mapForAccountAndContactList.get(accountId));

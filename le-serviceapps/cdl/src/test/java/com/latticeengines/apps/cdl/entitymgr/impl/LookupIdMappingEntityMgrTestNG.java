@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -185,6 +186,16 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = {"testCreateWithAuthentication"})
     public void testFindWithAuthentication() {
         LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        validateLookupIdWithAuth(lookupIdWithAuth);
+
+        LookupIdMap lookupIdAuthByOrgId = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdWithAuth.getOrgId(),
+                lookupIdWithAuth.getExternalSystemType());
+        validateLookupIdWithAuth(lookupIdAuthByOrgId);
+        assertEquals(lookupIdWithAuth.getExternalAuthentication().getTrayAuthenticationId(),
+                lookupIdAuthByOrgId.getExternalAuthentication().getTrayAuthenticationId());
+    }
+
+    private void validateLookupIdWithAuth(LookupIdMap lookupIdWithAuth) {
         assertNotNull(lookupIdWithAuth);
         assertNotNull(lookupIdWithAuth.getExternalAuthentication());
         ExternalSystemAuthentication externalAuthFromDB = lookupIdWithAuth.getExternalAuthentication();

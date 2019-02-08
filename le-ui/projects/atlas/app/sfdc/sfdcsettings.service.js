@@ -55,7 +55,9 @@ angular.module('lp.sfdc', [])
 
 })
 .service('SfdcService', function($q, $http, $state) {
-
+    this.test = function(){
+        alert('Test');
+    }
     this.generateAuthToken = function(emailAddress, tenantId) {
         var deferred = $q.defer();
 

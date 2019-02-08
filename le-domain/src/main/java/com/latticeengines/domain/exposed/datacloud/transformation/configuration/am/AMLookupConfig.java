@@ -1,8 +1,9 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.configuration.am;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-public class AccountMasterLookupRebuildConfig extends TransformerConfig {
+public class AMLookupConfig extends TransformerConfig {
     @JsonProperty("LatticeIdField")
     private String latticeIdField;
 
