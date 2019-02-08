@@ -3,7 +3,6 @@ connector-list-component{
     display: flex;
     flex: 1;
     justify-content: center;
-    // border: 1px solid red;
     background-color: $pearl-white;
     margin-top: 1px;
     .connectors-title{
@@ -12,24 +11,32 @@ connector-list-component{
 
     .connectors-list{
         margin: 3em 0;
-        // border: 1px solid yellow;
             .le-connector{
-            max-width: 160px;
-            height: 100%;
-            margin: 0 2px;
-            // border: 1px solid green;
-            cursor: pointer;
-            
+                max-width: 160px;
+                height: 100%;
+                margin: 0 2px;
+                cursor: pointer;
+                border-radius: 4px;
+            .le-card-image-container{
+                height: 60px;
+                align-items: center;
+
+            }
             .le-card-body{
                 font-size: 12px;
                 & > p {
                     display: inline-flex;
                     justify-content: space-around;
+                    text-align: center;
                 }
             }
             &.selected{
 
             }
+          
+        }
+        .le-connector:hover{
+            background-color: $saphire-two;
         }
     }
     .le-connectors{

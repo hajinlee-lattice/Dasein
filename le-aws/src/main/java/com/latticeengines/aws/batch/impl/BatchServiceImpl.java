@@ -77,7 +77,9 @@ public class BatchServiceImpl implements BatchService {
             DescribeJobsResult jobResult = awsBatch.describeJobs(describeJobsRequest);
             JobDetail jobDetail = jobResult.getJobs().get(0);
             status = jobDetail.getStatus();
-            log.info("Job name=" + jobDetail.getJobName() + " Job id=" + jobId + " Status=" + jobDetail.getStatus());
+            log.info(String.format("Job Id=%s Job Name=%s, Status=%s, Log Stream Name=%s", jobDetail.getJobId(),
+                    jobDetail.getJobName(), jobDetail.getStatus(),
+                    jobDetail.getContainer() != null ? jobDetail.getContainer().getLogStreamName() : ""));
             if (status.equalsIgnoreCase("SUCCEEDED")) {
                 return true;
             }
@@ -102,6 +104,9 @@ public class BatchServiceImpl implements BatchService {
         describeJobsRequest.setJobs(Arrays.asList(jobId));
         DescribeJobsResult jobResult = awsBatch.describeJobs(describeJobsRequest);
         JobDetail jobDetail = jobResult.getJobs().get(0);
+        log.info(String.format("Job Id=%s Job Name=%s, Status=%s, Log Stream Name=%s", jobDetail.getJobId(),
+                jobDetail.getJobName(), jobDetail.getStatus(),
+                jobDetail.getContainer() != null ? jobDetail.getContainer().getLogStreamName() : ""));
         return jobDetail.getStatus();
     }
 }

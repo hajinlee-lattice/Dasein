@@ -38,12 +38,22 @@ systems-component{
             max-width: 320px;
             min-height: 250px;
         }
-
-        .systemImage{
-            max-width: 36px;
+        .system-title{
+            justify-content: flex-start;
+            align-items: center;
+            height: 70px;
+            .system-image-container{
+                flex:1;
+                .systemImage{
+                    max-width: 36px;
+                }
+            }
+            .system-title-container{
+                flex:3;
+            }
         }
         .system-body{
-            height: 100%;;
+            height: 100%;
         }
         .system-footer{
             height: 50px;
