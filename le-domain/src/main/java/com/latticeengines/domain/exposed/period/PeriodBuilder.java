@@ -11,4 +11,5 @@ public interface PeriodBuilder extends Serializable {
 
     Pair<LocalDate, LocalDate> toDateRange(int startPeriod, int endPeriod);
 
+    Pair<LocalDate, LocalDate> getDateRangeOfYear(int year);
 }

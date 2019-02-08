@@ -28,11 +28,11 @@ public class BusinessWeekPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
     @Override
     public int toPeriodId(String date) {
         LocalDate evalDate = LocalDate.parse(date);
-        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(
+        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfYear(
                 evalDate.getYear());
         int businessYear = getBusinessYear(evalDate, busiYearDateRange);
         if (businessYear != evalDate.getYear()) {
-            busiYearDateRange = getDateRangeOfBusinessYear(businessYear);
+            busiYearDateRange = getDateRangeOfYear(businessYear);
         }
 
         switch (calendar.getMode()) {
@@ -59,7 +59,7 @@ public class BusinessWeekPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
             case STARTING_DATE:
                 int busiYear = getBusiYearFromWeekPeriod(period);
                 int weekOffsetInBusiYear = getWeekOffsetInBusiYearFromWeekPeriod(period);
-                LocalDate startDateInBusiYear = getDateRangeOfBusinessYear(busiYear).getLeft();
+                LocalDate startDateInBusiYear = getDateRangeOfYear(busiYear).getLeft();
                 return startDateInBusiYear.plusDays(weekOffsetInBusiYear * 7);
             case STARTING_DAY:
                 return startDate.plusDays(period * 7);
@@ -76,10 +76,10 @@ public class BusinessWeekPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
             case STARTING_DATE:
                 int busiYear = getBusiYearFromWeekPeriod(period);
                 int weekOffsetInBusiYear = getWeekOffsetInBusiYearFromWeekPeriod(period);
-                LocalDate startDateInBusiYear = getDateRangeOfBusinessYear(busiYear).getLeft();
+                LocalDate startDateInBusiYear = getDateRangeOfYear(busiYear).getLeft();
                 if (weekOffsetInBusiYear == 51) {
                     // First day of next business year - 1
-                    return getDateRangeOfBusinessYear(busiYear + 1).getLeft().minusDays(1);
+                    return getDateRangeOfYear(busiYear + 1).getLeft().minusDays(1);
                 } else {
                     return startDateInBusiYear.plusDays(weekOffsetInBusiYear * 7 + 6);
                 }

@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.controller;
 
 import javax.inject.Inject;
 
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -67,6 +69,32 @@ public class PeriodResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         periodProxy.deleteBusinessCalendar(mainCustomerSpace);
         Assert.assertNull(periodProxy.getBusinessCalendar(mainCustomerSpace));
+    }
+
+    @Test(groups = "deployment", priority = 4)
+    public void testDateRange() {
+        Assert.assertNull(periodProxy.getBusinessCalendar(mainCustomerSpace));
+
+        businessCalendar = createBusinessCalendar(BusinessCalendar.Mode.STARTING_DATE);
+        businessCalendar.setEvaluationYear(2017);
+        BusinessCalendar calendar = periodProxy.saveBusinessCalendar(mainCustomerSpace, businessCalendar);
+        Assert.assertNotNull(calendar);
+
+        List<String> dateRange = periodProxy.getDateRange(mainCustomerSpace, calendar.getEvaluationYear());
+        Assert.assertEquals(dateRange.get(0), "01/15/2017");
+        Assert.assertEquals(dateRange.get(1), "01/14/2018");
+
+        periodProxy.deleteBusinessCalendar(mainCustomerSpace);
+        dateRange = periodProxy.getDateRange(mainCustomerSpace, 2017);
+        Assert.assertEquals(dateRange.get(0), "01/01/2017");
+        Assert.assertEquals(dateRange.get(1), "12/31/2017");
+
+        businessCalendar = createBusinessCalendar(BusinessCalendar.Mode.STANDARD);
+        calendar = periodProxy.saveBusinessCalendar(mainCustomerSpace, businessCalendar);
+        Assert.assertNotNull(calendar);
+        dateRange = periodProxy.getDateRange(mainCustomerSpace, 2017);
+        Assert.assertEquals(dateRange.get(0), "01/01/2017");
+        Assert.assertEquals(dateRange.get(1), "12/31/2017");
     }
 
     private BusinessCalendar createBusinessCalendar(BusinessCalendar.Mode mode) {

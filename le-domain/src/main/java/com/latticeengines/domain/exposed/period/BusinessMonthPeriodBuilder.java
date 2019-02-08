@@ -25,11 +25,11 @@ public class BusinessMonthPeriodBuilder extends BusinessCalendarBasedPeriodBuild
     @Override
     public int toPeriodId(String date) {
         LocalDate evalDate = LocalDate.parse(date);
-        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(
+        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfYear(
                 evalDate.getYear());
         int busiYear = getBusinessYear(evalDate, busiYearDateRange);
         if (busiYear != evalDate.getYear()) {
-            busiYearDateRange = getDateRangeOfBusinessYear(busiYear);
+            busiYearDateRange = getDateRangeOfYear(busiYear);
         }
 
         int weekOffsetInBusiYear = getWeekOffsetInBusiYear(evalDate, busiYearDateRange);
@@ -41,7 +41,7 @@ public class BusinessMonthPeriodBuilder extends BusinessCalendarBasedPeriodBuild
         int busiYear = getBusiYearFromMonthPeriod(period);
         int monthOffsetInBusiYear = getMonthOffsetInBusiYearFromMonthPeriod(period);
         int weekOffsetInBusiYear = getWeekOffsetInBusiYear(monthOffsetInBusiYear);
-        return getDateRangeOfBusinessYear(busiYear).getLeft().plusDays(weekOffsetInBusiYear * 7);
+        return getDateRangeOfYear(busiYear).getLeft().plusDays(weekOffsetInBusiYear * 7);
     }
 
     @Override
@@ -51,11 +51,11 @@ public class BusinessMonthPeriodBuilder extends BusinessCalendarBasedPeriodBuild
 
         if (monthOffsetInBusiYear == 11) {
             // First day of next business year - 1
-            return getDateRangeOfBusinessYear(busiYear + 1).getLeft().minusDays(1);
+            return getDateRangeOfYear(busiYear + 1).getLeft().minusDays(1);
         } else {
             int weekOffsetOfNextMonth = getWeekOffsetInBusiYear(monthOffsetInBusiYear + 1);
             // First day of next business month - 1
-            return getDateRangeOfBusinessYear(busiYear).getLeft()
+            return getDateRangeOfYear(busiYear).getLeft()
                     .plusDays(weekOffsetOfNextMonth * 7).minusDays(1);
         }
     }
