@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
-import org.apache.hadoop.yarn.api.records.NodeReport;
-import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -30,7 +28,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.aws.EC2InstanceType;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public class EMRScalingRunnable implements Runnable {
@@ -39,9 +36,9 @@ public class EMRScalingRunnable implements Runnable {
 
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
-    private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(45);
+    private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(50);
 
-    private static final ConcurrentMap<String, AtomicLong> lastScalingUpMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, AtomicLong> lastScalingOutMap = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, AtomicInteger> scalingDownAttemptMap = new ConcurrentHashMap<>();
 
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
@@ -69,7 +66,7 @@ public class EMRScalingRunnable implements Runnable {
     private InstanceGroup taskGrp;
     private InstanceGroup coreGrp = null;
 
-    EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, EMRService emrService, EMRCacheService emrCacheService, //
+    EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, EMRService emrService, //
                        EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
         this.minTaskNodes = minTaskNodes;
@@ -101,6 +98,7 @@ public class EMRScalingRunnable implements Runnable {
         taskGrp = emrService.getTaskGroup(clusterId);
         taskVCores = getInstanceVCores(taskGrp);
         taskMb = getInstanceMemory(taskGrp);
+        log.debug(String.format("taskMb=%d, taskVCores=%d", taskMb, taskVCores));
 
         // -512 mb and -1 vcore to avoid flapping scaling out/in
         // when available resource is right at the threshold
@@ -110,7 +108,7 @@ public class EMRScalingRunnable implements Runnable {
         if (needToScale()) {
             attemptScale();
         } else {
-            resetScalingDownCounter();
+            resetScaleInCounter();
         }
 
         metrics = new ClusterMetrics();
@@ -161,27 +159,33 @@ public class EMRScalingRunnable implements Runnable {
     private void attemptScale() {
         int running = taskGrp.getRunningInstanceCount();
         int requested = taskGrp.getRequestedInstanceCount();
-        int target = getTargetTaskNodes();
-        if (target != requested) {
+        if (running > requested) {
+            // during scaling in
+            log.info("Still in the process of scaling in, won't attempt to take any action now");
+        } else {
+            // during scaling out or no action
+            int target = getTargetTaskNodes();
             if (target > requested) {
+                // attempt to scale out
                 log.info(String.format("Scale out %s, running=%d, requested=%d, target=%d", //
                         emrCluster, running, requested, target));
-                getLastScalingUp().set(System.currentTimeMillis());
                 scale(target);
-                resetScalingDownCounter();
-            } else {
-                if (getLastScalingUp().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
+                getLastScaleOutTime().set(System.currentTimeMillis());
+                resetScaleInCounter();
+            } else if (target < requested) {
+                // attempt to scale in
+                if (getLastScaleOutTime().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
                     log.info("Still in cool down period, won't attempt to scaling in.");
                 } else {
                     log.info(String.format(
                             "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                            emrCluster, getScalingDownAttempt().incrementAndGet(), running, requested,
+                            emrCluster, getScaleInAttempt().incrementAndGet(), running, requested,
                             target));
-                    if (requested <= running && getScalingDownAttempt().get() >= 3) {
+                    if (getScaleInAttempt().get() >= 5) {
                         log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
                         // be conservative about terminating machines
                         scale(target);
-                        resetScalingDownCounter();
+                        resetScaleInCounter();
                     }
                 }
             }
@@ -204,34 +208,6 @@ public class EMRScalingRunnable implements Runnable {
                     yarnClient.start();
                     List<ApplicationReport> apps = yarnClient.getApplications(PENDING_APP_STATES);
                     return getReqs(apps);
-                }
-            } catch (IOException | YarnException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    private SingleNodeResource getBestSingleNode() {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(context -> {
-            try {
-                try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
-                    yarnClient.start();
-                    List<NodeReport> nodes = yarnClient.getNodeReports(NodeState.RUNNING);
-                    SingleNodeResource res = new SingleNodeResource();
-                    nodes.forEach(node -> {
-                        Resource cap = node.getCapability();
-                        Resource used = node.getUsed();
-                        long availMb = cap.getMemorySize() - used.getMemorySize();
-                        int availVCores = cap.getVirtualCores() - used.getVirtualCores();
-                        if (availMb > res.mb) {
-                            res.mb = availMb;
-                            res.vcores = availVCores;
-                        } else if (availMb == res.mb && availVCores > res.vcores) {
-                            res.vcores = availVCores;
-                        }
-                    });
-                    return res;
                 }
             } catch (IOException | YarnException e) {
                 throw new RuntimeException(e);
@@ -315,21 +291,21 @@ public class EMRScalingRunnable implements Runnable {
         return buffer;
     }
 
-    private void resetScalingDownCounter() {
-        if (getScalingDownAttempt().get() > 0) {
-            log.info("Reset " + emrCluster +" scaling in counter from " + getScalingDownAttempt().get());
-            getScalingDownAttempt().set(0);
+    private void resetScaleInCounter() {
+        if (getScaleInAttempt().get() > 0) {
+            log.info("Reset " + emrCluster +" scaling in counter from " + getScaleInAttempt().get());
+            getScaleInAttempt().set(0);
         }
     }
 
-    private AtomicLong getLastScalingUp() {
-        lastScalingUpMap.putIfAbsent(clusterId, //
+    private AtomicLong getLastScaleOutTime() {
+        lastScalingOutMap.putIfAbsent(clusterId, //
                 // 10 min ago
                 new AtomicLong(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
-        return lastScalingUpMap.get(clusterId);
+        return lastScalingOutMap.get(clusterId);
     }
 
-    private AtomicInteger getScalingDownAttempt() {
+    private AtomicInteger getScaleInAttempt() {
         scalingDownAttemptMap.putIfAbsent(clusterId, new AtomicInteger(0));
         return scalingDownAttemptMap.get(clusterId);
     }
@@ -339,6 +315,7 @@ public class EMRScalingRunnable implements Runnable {
             coreGrp = emrService.getCoreGroup(clusterId);
             coreMb = getInstanceMemory(coreGrp);
             coreVCores = getInstanceVCores(coreGrp);
+            log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
         }
         return coreGrp;
     }
@@ -352,11 +329,19 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private long getMaxAvailMemMb() {
-        return (long) Math.floor((minTaskNodes + 0.5) * taskMb + getCoreCount() * coreMb);
+        int coreCount = getCoreCount();
+        long maxAvailMb = (long) Math.floor((minTaskNodes + 0.5) * taskMb + coreCount * coreMb);
+        log.debug(String.format("minTaskNodes=%d, taskMb=%d, coreCount=%d, coreMb=%d: maxAvailMb=%d", //
+                minTaskNodes, taskMb, coreCount,coreMb, maxAvailMb));
+        return maxAvailMb;
     }
 
     private int getMaxAvailVCores() {
-        return (int) Math.floor((minTaskNodes + 0.5) * taskVCores + getCoreCount() * coreVCores);
+        int coreCount = getCoreCount();
+        int maxAvailVCores =  (int) Math.floor((minTaskNodes + 0.5) * taskVCores + coreCount * coreVCores);
+        log.debug(String.format("minTaskNodes=%d, taskVCores=%d, coreCount=%d, coreVCores=%d: maxAvailVCores=%d", //
+                minTaskNodes, taskVCores, coreCount, coreVCores, maxAvailVCores));
+        return maxAvailVCores;
     }
 
     private int getInstanceVCores(InstanceGroup grp) {
@@ -371,16 +356,6 @@ public class EMRScalingRunnable implements Runnable {
             throw new IllegalArgumentException("Instance type " + grp.getInstanceType() + " is too small");
         }
         return mem;
-    }
-
-    private static class SingleNodeResource {
-        long mb = 0L;
-        int vcores = 0;
-
-        @Override
-        public String toString() {
-            return String.format("[mb=%d, vcores=%d]", mb, vcores);
-        }
     }
 
     private static class ReqResource {
