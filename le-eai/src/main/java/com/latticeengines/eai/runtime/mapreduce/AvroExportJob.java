@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -99,7 +100,8 @@ public abstract class AvroExportJob extends MRJobCustomizationBase {
             MRJobUtil.setLocalizedResources(mrJob, properties);
 
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
-            config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
+            config.set(MRJobConfig.MAP_JAVA_OPTS,
+                    opts + " -Dlog4j.configurationFile=log4j2-yarn.xml " + CipherUtils.getSecretPropertyStr());
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE
             // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
