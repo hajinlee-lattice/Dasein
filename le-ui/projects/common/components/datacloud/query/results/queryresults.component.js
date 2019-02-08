@@ -374,6 +374,7 @@ angular.module('common.datacloud.query.results', [
     }
 
     vm.updateTopNCount = function() {
+        vm.topNCount = Math.floor(vm.topNCount);
         //sync issue with vm.counts.accounts using vm.recommendationCounts.selected instead
         // vm.maxTargetValue = vm.recommendationCounts.selected;
         // if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
