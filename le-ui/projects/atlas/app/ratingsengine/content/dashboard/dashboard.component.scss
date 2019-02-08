@@ -240,6 +240,29 @@
             color: #467dba;
         }
     }
+    .icon {
+        background-color: #D2D2D2;
+        border-radius: 3px;
+        padding: 4px;
+        display: inline-block;
+        vertical-align: bottom;
+        span {
+            background-repeat: no-repeat;
+            background-size: 13px;
+            background-position: 50% 50%;
+            display: block;
+            padding: 8px;
+        }
+    }
+    .ico-segment span {
+        background-image: url('/assets/images/ico-segments.png');
+    }
+    .ico-model span {
+        background-image: url('/assets/images/ico-model-black.png');
+    }
+    .ico-campaign span {
+        background-image: url('/assets/images/ico-campaign-type.png');
+    }
     .creation-history {
         margin-bottom: 0;
         & * {
@@ -276,7 +299,7 @@
                         }
                     }
                     &:nth-child(2) {
-                        width: 22px;
+                        width: 68px;
                         font-size: 12px;
                         vertical-align: top;
                         .button {
