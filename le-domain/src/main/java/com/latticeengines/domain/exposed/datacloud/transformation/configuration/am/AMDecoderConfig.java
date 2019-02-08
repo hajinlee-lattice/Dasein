@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.am;
+package com.latticeengines.domain.exposed.datacloud.transformation.configuration.am;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
