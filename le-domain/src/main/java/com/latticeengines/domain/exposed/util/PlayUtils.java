@@ -29,10 +29,6 @@ public class PlayUtils {
     public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch,
             Play play) {
         if (play.getRatingEngine() == null) {
-//            if (!CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
-//                throw new LedpException(LedpCode.LEDP_18149, new String[] {play.getName()});
-//
-//            }
             playLaunch.setBucketsToLaunch(Collections.emptySet());
             if (!playLaunch.isLaunchUnscored()) {
                 throw new LedpException(LedpCode.LEDP_18212, new String[] {play.getName()});
