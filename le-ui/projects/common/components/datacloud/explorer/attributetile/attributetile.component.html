@@ -1,18 +1,31 @@
-<div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
-<div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
-     ng-class="{'active': enrichment.IsSelected}">
+<div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate" ng-class="{
+                    'active': enrichment.IsSelected,
+                    'has_warning': vm.section == 're.model_iteration'
+                }">
+    <div class="attribute-importance" ng-if="vm.section == 're.model_iteration'">
+        <div class="attribute-warning" ng-if="enrichment.HasWarnings">
+            <i class="fa fa-warning pull-left"></i>Warning
+        </div>
+        <span class="attribute-importance-label" ng-if="vm.checkImportance(enrichment)">
+            Feature Importance
+        </span>
+        <span class="attribute-importance-number" ng-if="vm.checkImportance(enrichment)">
+            {{ enrichment.ImportanceOrdering }}
+        </span>
+    </div>
     <span>
         <span class="attribute-count background-color show-tooltip delay bottom left" ng-if="(totalcount = vm.getAttributeRules(enrichment)).length > 0">
             <strong>{{ totalcount.length }}</strong>
             <div class="tooltip_">
                 <div class="cover" ng-if="totalcount.length == 1" ng-init="type = vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type">
                     <h3>Attribute Selected</h3>
-                    <p>This attribute has been used already and can be used again in another query condition. Go to Refine Query to make changes.</p>
+                    <p>This attribute has been used already and can be used again in another query condition. Go to
+                        Refine Query to make changes.</p>
                     <em>Query Snippet:</em>
                     <ul>
-                        <li ng-repeat="rule in totalcount" >
+                        <li ng-repeat="rule in totalcount">
                             {{vm.getQuerySnippet(enrichment, rule, type)}}
-                        </li> 
+                        </li>
                     </ul>
                 </div>
                 <div class="cover" ng-if="totalcount.length >= 2">
@@ -31,12 +44,8 @@
         </span>
 
 
-        <attribute-feedback-button 
-            button-type="'menu'" 
-            attribute="enrichment" 
-            value="vm.filterLookupFiltered(vm.lookupFiltered[enrichment.ColumnId], enrichment.FundamentalType)" 
-            icon-image="vm.categoryIcon(enrichment.Category)"
-            category-class="vm.categoryClass(enrichment.Category)"
+        <attribute-feedback-button button-type="'menu'" attribute="enrichment" value="vm.filterLookupFiltered(vm.lookupFiltered[enrichment.ColumnId], enrichment.FundamentalType)"
+            icon-image="vm.categoryIcon(enrichment.Category)" category-class="vm.categoryClass(enrichment.Category)"
             ng-if="vm.lookupMode && vm.hasCompanyInfo" />
 
         <div class="header">
@@ -46,8 +55,9 @@
                         <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                     </div>
 
-                    <img ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" fallback-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" onerror="this.style.display='none'" />
-                    
+                    <img ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" fallback-src="{{vm.categoryIcon(enrichment.Category)}}"
+                        class="ico noselect" onerror="this.style.display='none'" />
+
                     <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.showHighlighting()">
                         <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                     </div>
@@ -62,8 +72,10 @@
         </div>
         <p>{{enrichment.SecondaryDisplayName}}</p>
         <p class="description" title="{{enrichment.Description}}">
-            <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.ColumnId]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.ColumnId]}}</strong></a>
-            <strong ng-if="vm.lookupFiltered[enrichment.ColumnId] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.ColumnId]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.ColumnId], enrichment.FundamentalType)}}</strong>
+            <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.ColumnId]}}" target="_blank"
+                class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.ColumnId]}}</strong></a>
+            <strong ng-if="vm.lookupFiltered[enrichment.ColumnId] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.ColumnId]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.ColumnId],
+                enrichment.FundamentalType)}}</strong>
             <span ng-if="!vm.lookupFiltered[enrichment.ColumnId]">{{enrichment.Description}}</span>
         </p>
 
@@ -85,19 +97,14 @@
                             vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                             !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                             && enrichment.Entity === 'Rating'"
-                        vm='vm'    
-                        statcount="statcount = vm.getAttributeRules(enrichment, stat).length"
-                        config="vm.getChartConfig(vm.getBktListRating(enrichment))" 
-                        bktlist="vm.getBktListRating(enrichment)"
-                        callback="vm.chartRowClicked"
-                        enrichment="enrichment">
+            vm='vm' statcount="statcount = vm.getAttributeRules(enrichment, stat).length" config="vm.getChartConfig(vm.getBktListRating(enrichment))"
+            bktlist="vm.getBktListRating(enrichment)" callback="vm.chartRowClicked" enrichment="enrichment">
         </bar-chart>
-        <div    class="attributes-more noselect" 
-                    ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)" 
-                    ng-if="enrichment.Entity === 'Rating' 
+        <div class="attributes-more noselect" ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)"
+            ng-if="enrichment.Entity === 'Rating' 
                             && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum' 
                             && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length > 5">
-                See {{ vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length - 5 | number }} More
+            See {{ vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length - 5 | number }} More
         </div>
         <!-- End Rating  -->
         <!-- Account - Contacts - PurchaseHistory Entity -->
@@ -105,13 +112,13 @@
                                   vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                                   !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                                   && enrichment.Entity !== 'Rating'">
-    <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
-            <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? 'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
-            
+            <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
+            <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
+                    'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
+
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
-                    class="attribute attribute-stat delay top"
-                    ng-class="{
+                    class="attribute attribute-stat delay top" ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
                                 'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0,
                                 'show-tooltip': vm.section == 'segment.analysis'
@@ -121,7 +128,8 @@
                     <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && statcount == 0">
                         <div class="cover">
                             <h3>Select Attribute</h3>
-                            <p>Match accounts that have this condition. By default this is an AND condition with other selections. Go to Refine Query to make changes and use advanced query language</p>
+                            <p>Match accounts that have this condition. By default this is an AND condition with other
+                                selections. Go to Refine Query to make changes and use advanced query language</p>
                             <em>Click to select this attribute</em>
                         </div>
                     </div>
@@ -153,58 +161,65 @@
                     </ul>
                 </li>
             </ul>
-            <div    class="attributes-more noselect" 
-                    ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)" 
-                    ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum' && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length > 5">
+            <div class="attributes-more noselect" ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)"
+                ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum' && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length > 5 && vm.section != 're.model_iteration'">
                 See {{ vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length - 5 | number }} More
             </div>
         </div>
 
         <!--  -->
-        <div ng-if="vm.showFreeTextAttributeCard(enrichment)" class="free-text-attribute"> 
-                {{'Free Text Attribute' | uppercase}}
-                <div>
-                    <button class="{{vm.categoryClass(enrichment.Category)}} button attribute-count show-tooltip delay top left" ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
-                        <span ng-if="totalcount.length == 0" class="free-text fa fa-plus"></span>
-                        <span ng-if="totalcount.length == 1" class="free-text fa fa-check" ng-class="{'selected': totalcount.length == 1}"></span>
-                        <span ng-if="totalcount.length > 1" class="free-text" ng-class="{'selected': totalcount.length > 1}"> {{totalcount.length}} </span>
-                        Add To Query
-                    </button>
-                </div>
-        </div> 
-        <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute"> 
-                {{'No Data Available' | uppercase}}
-        </div> 
+        <div ng-if="vm.showFreeTextAttributeCard(enrichment)" class="free-text-attribute">
+            {{'Free Text Attribute' | uppercase}}
+            <div ng-if="vm.section != 're.model_iteration'">
+                <button class="{{vm.categoryClass(enrichment.Category)}} button attribute-count show-tooltip delay top left"
+                    ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
+                    <span ng-if="totalcount.length == 0" class="free-text fa fa-plus"></span>
+                    <span ng-if="totalcount.length == 1" class="free-text fa fa-check" ng-class="{'selected': totalcount.length == 1}"></span>
+                    <span ng-if="totalcount.length > 1" class="free-text" ng-class="{'selected': totalcount.length > 1}">
+                        {{totalcount.length}} </span>
+                    Add To Query
+                </button>
+            </div>
+        </div>
+        <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute">
+            {{'No Data Available' | uppercase}}
+        </div>
+
+        <div class="attribute-modeliteration-toggle" ng-if="vm.section == 're.model_iteration'">
+            <i ng-click="vm.toggleApprovedUsage(enrichment)" class="fa" ng-class="{ 
+                    'fa-toggle-on': vm.checkApprovedUsage(enrichment),
+                    'fa-toggle-off': !vm.checkApprovedUsage(enrichment)
+                }">
+            </i>
+        </div>
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode">
         <li class="control enrich" ng-if="vm.section == 'edit'">
-            <button class="button"
-                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
-                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
+            <button class="button" ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
+                ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
                 <span>
-                    {{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}
+                    {{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty
+                    ? vm.label.button_deselect : vm.label.button_selected)}}
                 </span>
             </button>
         </li>
-        
+
         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.ColumnId] = {}">
             <!-- this can't be a <button> element because IE and FF don't like it -->
-            <div class="button"
-                    ng-class="{'selected': vm.openHighlighter[enrichment.ColumnId].open, 'enabled': enrichment.HighlightState.enabled}"
-                    ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.ColumnId].open = !vm.openHighlighter[enrichment.ColumnId].open">
+            <div class="button" ng-class="{'selected': vm.openHighlighter[enrichment.ColumnId].open, 'enabled': enrichment.HighlightState.enabled}"
+                ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.ColumnId].open = !vm.openHighlighter[enrichment.ColumnId].open">
                 <span class="highlight-icon {{vm.openHighlighter[enrichment.ColumnId].state.type || enrichment.HighlightState.type}}">
                     {{vm.openHighlighter[enrichment.ColumnId].state.label || enrichment.HighlightState.label || 'Set'}}
                 </span>
                 <ul ng-class="{open: vm.openHighlighter[enrichment.ColumnId].open}" class="highlightOptions button-dropdown">
-                    <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="vm.openHighlighter[enrichment.ColumnId].state = vm.setFlags(type, enrichment)">{{label}}</li>
+                    <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}"
+                        ng-click="vm.openHighlighter[enrichment.ColumnId].state = vm.setFlags(type, enrichment)">{{label}}</li>
                 </ul>
             </div>
         </li>
 
         <li class="control ratings-selection" ng-if="vm.section == 'wizard.ratingsengine_segment' && vm.mode != 'dashboardrules'">
-            <button class="button"
-                    ng-class="{'selected': enrichment.IsRatingsEngineAttribute}"
-                    ng-click="vm.selectRatingsEngineAttribute(enrichment)">
+            <button class="button" ng-class="{'selected': enrichment.IsRatingsEngineAttribute}" ng-click="vm.selectRatingsEngineAttribute(enrichment)">
                 <span>
                     {{!enrichment.IsRatingsEngineAttribute ? 'Select Attribute' : 'Remove Attribute'}}
                 </span>
@@ -212,9 +227,7 @@
         </li>
 
         <li class="control ratings-selection dashboardrules" ng-if="vm.section == 'wizard.ratingsengine_segment' && vm.mode == 'dashboardrules'">
-            <button class="button"
-                    ng-class="{'selected': totalcount.length > 0}"
-                    ng-click="vm.selectRatingsEngineAttribute(enrichment)">
+            <button class="button" ng-class="{'selected': totalcount.length > 0}" ng-click="vm.selectRatingsEngineAttribute(enrichment)">
                 <span>
                     {{totalcount.length > 0 ? 'Attribute Selected' : 'Select Attribute'}}
                 </span>

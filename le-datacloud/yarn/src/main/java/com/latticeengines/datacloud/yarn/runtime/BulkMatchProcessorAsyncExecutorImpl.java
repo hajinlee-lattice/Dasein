@@ -268,6 +268,14 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         for (int i = 0; i < futures.size(); i++) {
             Future<Object> future = futures.get(i);
             InternalOutputRecord internRecord = internalRecords.get(i);
+            if (future == null) {
+                if (CollectionUtils.isNotEmpty(internRecord.getErrorMessages())) {
+                    log.warn("There's match input errors=" + String.join("|", internRecord.getErrorMessages()));
+                } else {
+                    log.warn("Match future is null for unknown reason!");
+                }
+                continue;
+            }
             if (future.isCompleted()) {
                 currentCompletedfutures.add(future);
                 currentCompletedRecords.add(internRecord);

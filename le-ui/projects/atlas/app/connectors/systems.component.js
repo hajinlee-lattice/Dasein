@@ -31,7 +31,7 @@ export default class SystemsComponent extends Component {
         columns.forEach(element => {
             console.log('ELEMENT ===>',element);
             let columnsUi = (
-                <div class='column'>
+                <div class='le-flex-column'>
                     <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
                 </div>
             );
@@ -52,7 +52,7 @@ export default class SystemsComponent extends Component {
             let ui = [];
             for (let i = 0; i < rows; i++) {
                 let rowUI = (
-                    <div class='row'>
+                    <div class='le-flex-row'>
                         {this.getColumns(i, 3)}
                     </div>
                 );
