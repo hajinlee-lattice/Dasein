@@ -21,7 +21,7 @@ public class RedshiftUnloadStepDeploymentTestNG extends WorkflowFrameworkDeploym
     @BeforeClass(groups = "deployment" )
     public void setup() throws Exception {
         super.setup();
-        cdlTestDataService.populateData(mainTestCustomerSpace.getTenantId(), 4);
+        //cdlTestDataService.populateData(mainTestCustomerSpace.getTenantId(), 4);
     }
 
     @Override

@@ -89,6 +89,9 @@ public class ExternalSystemAuthenticationEntityMgrImpl
 
             externalSystemAuthentication.setId(authId);
             externalSystemAuthentication = getDao().updateAuthentication(externalSystemAuthentication);
+            if (externalSystemAuthentication.getLookupIdMap() != null) {
+                externalSystemAuthentication.setLookupMapConfigId(externalSystemAuthentication.getLookupIdMap().getId());
+            }
             return externalSystemAuthentication;
     }
 
