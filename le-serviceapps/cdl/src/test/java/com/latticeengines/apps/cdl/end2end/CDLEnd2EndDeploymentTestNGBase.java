@@ -1310,6 +1310,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion);
         // Verify number of days
         List<String> dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dailyTable.getExtractsDirectory());
+        dailyFiles = dailyFiles.stream().filter(f -> !f.contains("_SUCCESS")).collect(Collectors.toList());
         Assert.assertEquals(dailyFiles.size(), totalDays);
         // Verify max/min day period
         Pair<Integer, Integer> minMaxPeriods = TimeSeriesUtils.getMinMaxPeriod(yarnConfiguration, dailyTable);
