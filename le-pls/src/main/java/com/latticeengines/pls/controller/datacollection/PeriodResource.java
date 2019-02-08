@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +61,17 @@ public class PeriodResource {
         try {
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             return periodProxy.getBusinessCalendar(customerSpace);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping(value = "/daterange/{year}")
+    @ApiOperation(value = "Get the start date and end date of given year")
+    public List<String> getDateRange(@PathVariable int year) {
+        try {
+            String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+            return periodProxy.getDateRange(customerSpace, year);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
