@@ -14,11 +14,12 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 public class ModelSummaryUtils {
 
-    public static ModelSummary generateModelSummary(Tenant tenant,
-            String modelSummaryJsonLocalResourcePath) throws IOException {
+    public static ModelSummary generateModelSummary(Tenant tenant, String modelSummaryJsonLocalResourcePath)
+            throws IOException {
         ModelSummary summary;
 
         summary = new ModelSummary();
@@ -39,8 +40,7 @@ public class ModelSummaryUtils {
         summary.setLastUpdateTime(summary.getConstructionTime());
         summary.setTenant(tenant);
 
-        InputStream modelSummaryFileAsStream = ClassLoader
-                .getSystemResourceAsStream(modelSummaryJsonLocalResourcePath);
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(modelSummaryJsonLocalResourcePath);
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
@@ -51,8 +51,8 @@ public class ModelSummaryUtils {
     }
 
     public static ModelSummary createModelSummary(ModelSummaryProxy modelSummaryProxy,
-            Tenant tenant, ModelSummaryUtils.TestModelConfiguration modelConfiguration)
-            throws IOException {
+            ColumnMetadataProxy columnMetadataProxy, Tenant tenant,
+            ModelSummaryUtils.TestModelConfiguration modelConfiguration) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
@@ -61,16 +61,19 @@ public class ModelSummaryUtils {
         modelSummary.setId(modelConfiguration.getModelId());
         modelSummary.setName(modelConfiguration.getModelName());
         modelSummary.setDisplayName(modelConfiguration.getModelName());
-        modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(),
-                modelConfiguration.getEventTable(), modelConfiguration.getModelVersion()));
+        modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), modelConfiguration.getEventTable(),
+                modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
+        String dataCloudVersion = columnMetadataProxy
+                .latestVersion(//
+                        null)//
+                .getVersion();
+        modelSummary.setDataCloudVersion(dataCloudVersion);
 
-        ModelSummary retrievedSummary = modelSummaryProxy
-                .getByModelId(modelConfiguration.getModelId());
+        ModelSummary retrievedSummary = modelSummaryProxy.getByModelId(modelConfiguration.getModelId());
         if (retrievedSummary != null) {
-            modelSummaryProxy.deleteByModelId(customerSpace.toString(),
-                    modelConfiguration.getModelId());
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
         modelSummary.setModelType(modelConfiguration.getModelType());
         modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
@@ -92,8 +95,8 @@ public class ModelSummaryUtils {
         private String sourceInterpretation;
         private String modelSummaryJsonLocalpath;
 
-        public TestModelConfiguration(String modelPath, String modelName, String applicationId,
-                String modelVersion, String uuid) {
+        public TestModelConfiguration(String modelPath, String modelName, String applicationId, String modelVersion,
+                String uuid) {
             this.modelId = TestFrameworkUtils.MODEL_PREFIX + uuid + "_";
             this.modelName = modelName;
             this.applicationId = applicationId;
