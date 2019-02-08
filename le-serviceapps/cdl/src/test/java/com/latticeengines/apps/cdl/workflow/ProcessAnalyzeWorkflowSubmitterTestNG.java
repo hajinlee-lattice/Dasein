@@ -162,8 +162,11 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 
-        List<Long> actionIds = processAnalyzeWorkflowSubmitter.getActionsFromLastFailedPA(customerSpace).stream()
-                .map(Action::getPid).collect(Collectors.toList());
+        List<Long> actionIds = processAnalyzeWorkflowSubmitter //
+                .getActionsFromLastFailedPA(customerSpace, false, null) //
+                .stream() //
+                .map(Action::getPid) //
+                .collect(Collectors.toList());
 
         Assert.assertNotNull(actionIds);
         Assert.assertEquals(actionIds, inheritableActionIds);
@@ -194,7 +197,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
                                                                                                            // action,
                                                                                                            // not
                                                                                                            // inherited
-                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L, 8L) }, };
+                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L) }, };
     }
 
     private List<Action> newTypedActions(ActionType... types) {
