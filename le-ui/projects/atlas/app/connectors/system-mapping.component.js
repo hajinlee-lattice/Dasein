@@ -62,27 +62,27 @@ export default class SystemMappingComponent extends Component {
         return (
 
             <div className="system-mapping some-table">
-                <div className="row">
-                    <div className="column">
+                <div className="le-flex-row">
+                    <div className="le-flex-column">
                         System Org ID:
                             </div>
-                    <div className="column color-blue">
+                    <div className="le-flex-column color-blue">
                         {this.props.system.orgId}
                     </div>
                 </div>
-                <div className="row">
-                    <div className="column">
+                <div className="le-flex-row">
+                    <div className="le-flex-column">
                         System Org Name:
                             </div>
-                    <div className="column color-blue">
+                    <div className="le-flex-column color-blue">
                         {this.props.system.orgName}
                     </div>
                 </div>
-                <div className="row">
-                    <div className="column">
+                <div className="le-flex-row">
+                    <div className="le-flex-column">
                         Account ID:
                             </div>
-                    <div className="column">
+                    <div className="le-flex-column">
                         {this.getAccountIDSelection()}
                     </div>
                 </div>

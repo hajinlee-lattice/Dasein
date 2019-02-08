@@ -69,35 +69,35 @@ export default class SystemComponent extends Component {
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
                         <div className="some-table">
-                            <div className="row">
-                                <div className="column">
+                            <div className="le-flex-row">
+                                <div className="le-flex-column">
                                     System Org Name
                             </div>
-                                <div className="column color-blue">
+                                <div className="le-flex-column color-blue">
                                     {this.props.system.orgName}
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="column">
+                            <div className="le-flex-row">
+                                <div className="le-flex-column">
                                     Last Updated
                             </div>
-                                <div className="column color-blue">
+                                <div className="le-flex-column color-blue">
                                     {this.props.system.updated}
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="column">
+                            <div className="le-flex-row">
+                                <div className="le-flex-column">
                                     Status
                             </div>
-                                <div className="column">
+                                <div className="le-flex-column">
                                     {this.getSystemStatus()}
                                 </div>
                             </div>
                         </div>
                     </LeTileBody>
                     <LeTileFooter classNames={'system-footer'}>
-                        <div className="row">
-                            <div className="column">
+                        <div className="le-flex-row">
+                            <div className="le-flex-column">
                                 <div className="right-controlls">
                                     <LeButton
                                         name={`${"edit-mappings-"}${this.props.system.orgName}`}

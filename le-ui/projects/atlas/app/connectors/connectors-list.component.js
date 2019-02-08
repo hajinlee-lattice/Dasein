@@ -111,7 +111,7 @@ export class ConnectorList extends Component {
                     <h2 className="connectors-title">Select one of our many application connectors</h2>
                 </LeHPanel>
 
-                <LeHPanel hstretch={"true"} halignment={LEFT} classesName="connectors-list">
+                <LeHPanel hstretch={"false"} halignment={LEFT} classesName="connectors-list">
                     {this.getConnectros()}
                 </LeHPanel>
                 <LeToolBar direction={HORIZONTAL}>
