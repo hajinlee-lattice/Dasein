@@ -21,11 +21,11 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
 
-            if (PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch != null){
-                vm.excludeItemsWithoutSalesforceId = PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId;
-            } else {
-                vm.excludeItemsWithoutSalesforceId = false;
-            }
+            vm.excludeItemsWithoutSalesforceId = (PlaybookWizardStore.getCurrentPlay() && 
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory && 
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch && 
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId ? 
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId : false);
             vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
 
             PlaybookWizardStore.setValidation('crmselection', false);
@@ -68,43 +68,46 @@ angular.module('lp.playbook.wizard.crmselection', [])
             }, 1);
         }
 
-        // vm.calculateUnscoredCounts = function(form, segment, accountId, scoredNotNullCount){
-        //     var template = {
-        //         //lookupId: accountId, 
-        //         account_restriction: {
-        //             restriction: {
-        //                 logicalRestriction: {
-        //                     operator: "AND",
-        //                     restrictions: []
-        //                 }
-        //             }
-        //         },
-        //         page_filter: {  
-        //             num_rows: 10,
-        //             row_offset: 0
-        //         }
-        //     };
-        //     template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
-        //     template.account_restriction.restriction.logicalRestriction.restrictions.push({
-        //         bucketRestriction: {
-        //             attr: 'Account.' + accountId,
-        //             bkt: {
-        //                 Cmp: 'IS_NULL',
-        //                 Id: 1,
-        //                 ignored: false,
-        //                 Vals: []
-        //             }
-        //         }
-        //     });
-        //     // vm.totalCount = segment.accounts // small
-        //     QueryStore.getEntitiesCounts(template).then(function(result) {
-        //         PlaybookWizardStore.setValidation('crmselection', form.$valid);
+        vm.calculateUnscoredCounts = function(form, segment, accountId){
+            var template = {
+                //lookupId: accountId, 
+                account_restriction: {
+                    restriction: {
+                        logicalRestriction: {
+                            operator: "AND",
+                            restrictions: []
+                        }
+                    }
+                },
+                page_filter: {  
+                    num_rows: 10,
+                    row_offset: 0
+                }
+            };
+            template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
+            template.account_restriction.restriction.logicalRestriction.restrictions.push({
+                bucketRestriction: {
+                    attr: 'Account.' + accountId,
+                    bkt: {
+                        Cmp: 'IS_NOT_NULL',
+                        Id: 1,
+                        ignored: false,
+                        Vals: []
+                    }
+                }
+            });
+            // vm.totalCount = segment.accounts // small
+            QueryStore.getEntitiesCounts(template).then(function(result) {
+                PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
-        //         vm.loadingCoverageCounts = false;
-        //         vm.notNullCount = result.Account + scoredNotNullCount;
-        //         vm.nullCount = vm.totalCount - vm.notNullCount;
-        //     });
-        // }
+                vm.loadingCoverageCounts = false;
+                vm.notNullCount = result.Account;
+                console.log(result.Account);
+                console.log(vm.notNullCount);
+                vm.nullCount = vm.totalCount - vm.notNullCount;
+                console.log(vm.nullCount);
+            });
+        }
 
         vm.checkValid = function(form, accountId, orgId, isRegistered) {
             vm.orgIsRegistered = isRegistered;
@@ -152,11 +155,9 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         var unscoredNotNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].unscoredAccountCount;
                         vm.notNullCount = scoredNotNullCount + unscoredNotNullCount;
                         vm.nullCount = vm.totalCount - vm.notNullCount;
-                        //vm.calculateUnscoredCounts(form, segment, accountId, scoredNotNullCount);
-                            // scoredNullCount = (totalScoredCount - scoredNonNullCount);
                     });
                 } else {
-                    vm.calculateUnscoredCounts(form, segment, accountId, 0);
+                    vm.calculateUnscoredCounts(form, segment, accountId);
                 }
             } else {
                 PlaybookWizardStore.setValidation('crmselection', form.$valid);                

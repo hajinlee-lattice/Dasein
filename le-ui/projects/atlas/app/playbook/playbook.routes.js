@@ -987,43 +987,54 @@ angular
                             });
                         } else {
                             // this should look like the return of getRatingSegmentCounts (this.host + '/ratingengines/coverage/segment/' +  segmentName)
-                            var segment = PlaybookWizardStore.getCurrentPlay().targetSegment,
-                                accountId = PlaybookWizardStore.crmselection_form.crm_selection.accountId,
-                                template = {
-                                account_restriction: {
-                                    restriction: {
-                                        logicalRestriction: {
-                                            operator: "AND",
-                                            restrictions: []
+                            var segment = PlaybookWizardStore.getCurrentPlay().targetSegment;
+                            if (PlaybookWizardStore.getExcludeItems()){
+                                var accountId = PlaybookWizardStore.crmselection_form.crm_selection.accountId,
+                                    template = {
+                                        account_restriction: {
+                                            restriction: {
+                                                logicalRestriction: {
+                                                    operator: "AND",
+                                                    restrictions: []
+                                                }
+                                            }
+                                        },
+                                        page_filter: {  
+                                            num_rows: 10,
+                                            row_offset: 0
+                                        }
+                                    };
+                                template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
+                                template.account_restriction.restriction.logicalRestriction.restrictions.push({
+                                    bucketRestriction: {
+                                        attr: 'Account.' + accountId,
+                                        bkt: {
+                                            Cmp: 'IS_NOT_NULL',
+                                            Id: 1,
+                                            ignored: false,
+                                            Vals: []
                                         }
                                     }
-                                },
-                                page_filter: {  
-                                    num_rows: 10,
-                                    row_offset: 0
-                                }
-                            };
-                            template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
-                            template.account_restriction.restriction.logicalRestriction.restrictions.push({
-                                bucketRestriction: {
-                                    attr: 'Account.' + accountId,
-                                    bkt: {
-                                        Cmp: 'IS_NULL',
-                                        Id: 1,
-                                        ignored: false,
-                                        Vals: []
-                                    }
-                                }
-                            });
-                            QueryStore.getEntitiesCounts(template).then(function(result) {
+                                });
+                                QueryStore.getEntitiesCounts(template).then(function(result) {
+                                    deferred.resolve({
+                                        accountCount: 0,
+                                        unscoredAccountCount: result.Account || 0,
+                                        contactCount: 0,
+                                        unscoredContactCount: result.Contact || 0,
+                                        bucketCoverageCounts: []
+                                    });
+                                });
+                            }
+                            else{
                                 deferred.resolve({
                                     accountCount: 0,
-                                    unscoredAccountCount: result.Account || 0,
+                                    unscoredAccountCount: segment.accounts || 0,
                                     contactCount: 0,
-                                    unscoredContactCount: result.Contact || 0,
+                                    unscoredContactCount: segment.contacts || 0,
                                     bucketCoverageCounts: []
                                 });
-                            });
+                            }
                         }
                     });
 
