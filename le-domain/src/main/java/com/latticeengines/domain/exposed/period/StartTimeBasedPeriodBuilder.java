@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.period;
 import java.time.LocalDate;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class StartTimeBasedPeriodBuilder extends BasePeriodBuilder
         implements PeriodBuilder {
@@ -35,5 +36,10 @@ public abstract class StartTimeBasedPeriodBuilder extends BasePeriodBuilder
     }
 
     protected abstract int getPeriodsBetweenDates(LocalDate start, LocalDate end);
+
+    @Override
+    public Pair<LocalDate, LocalDate> getDateRangeOfYear(int year) {
+        return Pair.of(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
+    }
 
 }
