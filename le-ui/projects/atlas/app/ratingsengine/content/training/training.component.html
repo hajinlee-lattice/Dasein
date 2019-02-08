@@ -250,7 +250,11 @@
         </ng-form>
     </div>
     <div class="training-footer" ng-if="$ctrl.viewingIteration">
-        <button class="button white-button">Back to Model</button>
-        <button class="button blue-button">Create</button>
+        <button 
+            class="button white-button"
+            ng-click="$ctrl.backToModel()">Back to Model</button>
+        <button 
+            class="button blue-button"
+            ng-click="$ctrl.remodelIteration()">Create</button>
     </div>
 </div>
