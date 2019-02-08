@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -33,7 +35,6 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
@@ -48,11 +49,15 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
+import com.latticeengines.scoringapi.controller.TestModelConfiguration;
+import com.latticeengines.scoringapi.controller.TestRegisterModels;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
-import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
@@ -92,6 +97,12 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    protected MetadataProxy metadataProxy;
 
     @Autowired
     @Qualifier(value = "deploymentTestBed")
@@ -147,9 +158,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected OAuth2RestTemplate createOAuth2RestTemplate(String clientId) {
         OAuth2RestTemplate oAuth2RestTemplate = null;
         if (shouldUseAppId()) {
-            log.info(String.format("Requesting access token for app id = %s, user id = %s, password = %s, client id = %s", getAppIdForOauth2(),oAuthUser.getUserId(),
-                    oAuthUser.getPassword(),
-                    clientId));
+            log.info(String.format(
+                    "Requesting access token for app id = %s, user id = %s, password = %s, client id = %s",
+                    getAppIdForOauth2(), oAuthUser.getUserId(), oAuthUser.getPassword(), clientId));
             oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(oAuthUser, clientId,
                     getAppIdForOauth2(), authHostPort);
         } else {
@@ -239,35 +250,43 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         user.setPasswordExpiration(userEntityMgr.getPasswordExpiration(userId));
     }
 
+    protected void createModel(String modelId, CustomerSpace customerSpace, Tenant tenant) throws IOException {
+        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(), modelId);
+        if (retrievedSummary != null) {
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelId);
+        }
+        Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
+        TestRegisterModels modelCreator = new TestRegisterModels();
+        long timestamp = System.currentTimeMillis();
+        String hdfsSubPathForModel = "Event";
+
+        hdfsSubPathForModel = "Random" + 0;
+
+        String applicationId = "application_" + 0 + "1457046993615_3823_" + timestamp;
+        String modelVersion = "ba99b36-c222-4f93" + 0 + "-ab8a-6dcc11ce45e9-" + timestamp;
+        TestModelConfiguration modelConfiguration = null;
+        TestModelArtifactDataComposition modelArtifactDataComposition = null;
+        modelConfiguration = new TestModelConfiguration(modelId, modelId, applicationId, modelVersion);
+        modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration, bucketedScoreProxy,
+                columnMetadataProxy, (tenant != null ? tenant : this.tenant), modelConfiguration,
+                (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
+                getTestModelSummaryParser(), hdfsSubPathForModel, modelSummaryProxy);
+
+        models.put(modelConfiguration, modelArtifactDataComposition);
+        System.out.println("Registered model: " + modelId);
+    }
+
     protected Tenant setupTenantAndModelSummary(boolean includeApplicationId) throws IOException {
 
         Tenant tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
         deploymentTestBed.switchToSuperAdmin();
         customerSpace = CustomerSpace.parse(tenant.getId());
-        ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant, MODELSUMMARYJSON_LOCALPATH);
-        if (includeApplicationId) {
-            modelSummary.setApplicationId(APPLICATION_ID);
-        }
-        modelSummary.setEventTableName(EVENT_TABLE);
-        modelSummary.setId(MODEL_ID);
-        modelSummary.setDisplayName(MODEL_NAME);
-        modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), EVENT_TABLE, MODEL_VERSION));
-        modelSummary.setSourceSchemaInterpretation(SOURCE_INTERPRETATION);
-        modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
-        modelSummary.setModelType("DUMMY_MODEL_TYPE");
-        testModelSummaryParser.setPredictors(modelSummary, MODELSUMMARYJSON_LOCALPATH);
-
-        String modelId = modelSummary.getId();
-        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(), modelId);
-        if (retrievedSummary != null) {
-            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelId);
-        }
-        modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
+        createModel(MODEL_ID, customerSpace, tenant);
 
         List<BucketMetadata> bucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
         request.setBucketMetadataList(bucketMetadataList);
-        request.setModelGuid(modelId);
+        request.setModelGuid(MODEL_ID);
         bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
         return tenant;
     }
@@ -368,7 +387,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         expectedScores.add(99);
         expectedScores.add(60);
         // (YSong) When cutting M25 release RC, this was changed from 89 to 91.
-        // The reason for the score change is still unknown, might be DC 2.0.16 release.
+        // The reason for the score change is still unknown, might be DC 2.0.16
+        // release.
         expectedScores.add(91);
         expectedScores.add(88);
         return expectedScores;
