@@ -5,21 +5,24 @@ import LeTile from 'common/widgets/container/tile/le-tile';
 import LeTileHeader from 'common/widgets/container/tile/le-tile-header';
 import LeTileBody from 'common/widgets/container/tile/le-tile-body';
 import LeTileFooter from 'common/widgets/container/tile/le-tile-footer';
-import LeMenu from 'common/widgets/menu/le-menu';
 import LeButton from "common/widgets/buttons/le-button";
 import LeModal from "common/widgets/modal/le-modal";
 import SystemMappingComponent from './system-mapping.component';
+import httpService from "common/app/http/http-service";
+import Observer from "common/app/http/observer";
 
 import './systems.component.scss';
 
 export default class SystemComponent extends Component {
     constructor(props) {
         super(props);
-        console.log('System', props);
-        this.state = { openModal: false };
+        console.log('System', props.system);
+        this.state = { system: props.system, openModal: false, saving: false };
         this.editMappingClickHandler = this.editMappingClickHandler.bind(this);
         this.modalCallback = this.modalCallback.bind(this);
         this.getEditTemplate = this.getEditTemplate.bind(this);
+        this.editMapping = Object.assign({}, props.system);
+        this.mappingClosed = this.mappingClosed.bind(this);
 
     }
     editMappingClickHandler() {
@@ -27,19 +30,46 @@ export default class SystemComponent extends Component {
         this.setState({ openModal: true });
     }
 
+    mappingClosed(system) {
+        console.log('CHANGED? =====>', system);
+        if (this.state.saving) {
+            let observer = new Observer(
+                response => {
+                    // httpService.printObservables();
+                    console.log('HEY ', response);
+                    if (response.data) {
+                        let tmp = response.data;
+
+                        console.log('@@@@@@@@@@@@@ ', tmp);
+
+                        this.setState({ saving: false, system: tmp });
+                        httpService.unsubscribeObservable(observer);
+                    }
+                }
+            );
+
+            httpService.put((('/pls/lookup-id-mapping/config/' + this.state.system.configId)), system, observer);
+
+        }
+
+    }
+
     modalCallback(action) {
+
+        // console.log('CHANGED? =====>',this.editMapping);
         switch (action) {
             case 'close':
                 this.setState({ openModal: false });
                 break;
             case 'ok':
-                this.setState({ openModal: false });
+                this.setState({ openModal: false, saving: true });
                 break;
         }
     }
 
+
     getSystemStatus() {
-        switch (this.props.system.isRegistered) {
+        switch (this.state.system.isRegistered) {
             case true:
                 return 'Registered';
             case false:
@@ -47,9 +77,10 @@ export default class SystemComponent extends Component {
         }
     }
     getEditTemplate() {
-        console.log('TEMPLATE');
+        console.log('TEMPLATE ', this.editMapping);
+        this.editMapping = Object.assign({}, this.state.system);
         return (
-            <SystemMappingComponent system={this.props.system} />
+            <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
             // <p>T</p>
         );
     }
@@ -64,7 +95,7 @@ export default class SystemComponent extends Component {
                             <img src={this.props.img} className="systemImage" />
                         </div>
                         <div className="system-title-container">
-                            <span className="le-tile-title">{this.props.system.externalSystemName}</span>
+                            <span className="le-tile-title">{this.state.system.externalSystemName}</span>
                         </div>
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
@@ -74,7 +105,7 @@ export default class SystemComponent extends Component {
                                     System Org Name
                             </div>
                                 <div className="le-flex-column color-blue">
-                                    {this.props.system.orgName}
+                                    {this.state.system.orgName}
                                 </div>
                             </div>
                             <div className="le-flex-row">
@@ -82,7 +113,7 @@ export default class SystemComponent extends Component {
                                     Last Updated
                             </div>
                                 <div className="le-flex-column color-blue">
-                                    {this.props.system.updated}
+                                    {this.state.system.updated}
                                 </div>
                             </div>
                             <div className="le-flex-row">
@@ -100,7 +131,8 @@ export default class SystemComponent extends Component {
                             <div className="le-flex-column">
                                 <div className="right-controlls">
                                     <LeButton
-                                        name={`${"edit-mappings-"}${this.props.system.orgName}`}
+                                        name={`${"edit-mappings-"}${this.state.system.orgName}`}
+                                        disabled={this.state.saving}
                                         config={{
                                             label: "Edit Mappings",
                                             classNames: "blue-button"

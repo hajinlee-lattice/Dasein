@@ -7,7 +7,14 @@ export default class SystemMappingComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { systemsAvailable: [] };
+        console.log('THE MAPPING', this.props);
+        this.state = { systemsAvailable: [], system: props.system };
+        this.accountIdClickHandler = this.accountIdClickHandler.bind(this);
+    }
+
+    componentWillUnmount(){
+        // this.props.system = this.state.system;
+        this.props.closed(this.state.system);
     }
 
     componentDidMount() {
@@ -45,10 +52,16 @@ export default class SystemMappingComponent extends Component {
         return options;
     }
 
+    accountIdClickHandler(event) {
+        let systemCopy = Object.assign({}, this.state.system);
+        console.log('COPY IN MAPPING', systemCopy);
+        systemCopy.accountId = event.target.value;
+        this.setState({system: systemCopy});
+    }
     getAccountIDSelection() {
         if (this.state.accountIdSelectionLoaded) {
             return (
-                <select value={this.props.system.accountId}>
+                <select value={this.state.system.accountId} onChange={this.accountIdClickHandler}>
                     {this.getSystemsAvailable()}
                 </select>
             );
