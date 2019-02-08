@@ -6,6 +6,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowFrameworkDeploymentTestNGBase;
 
@@ -20,8 +21,8 @@ public class RedshiftUnloadStepDeploymentTestNG extends WorkflowFrameworkDeploym
     @Override
     @BeforeClass(groups = "deployment" )
     public void setup() throws Exception {
-        super.setup();
-        //cdlTestDataService.populateData(mainTestCustomerSpace.getTenantId(), 4);
+        setupTestEnvironment(LatticeProduct.CG);
+        cdlTestDataService.populateData(mainTestCustomerSpace.getTenantId(), 4);
     }
 
     @Override
