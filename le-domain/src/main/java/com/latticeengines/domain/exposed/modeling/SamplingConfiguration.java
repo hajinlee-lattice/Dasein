@@ -38,7 +38,7 @@ public class SamplingConfiguration {
     private boolean parallelEnabled;
     private String hdfsDirPath;
     private Long randomSeed = -1L;
-    private SamplingType samplingType = SamplingType.STRATIFIED_SAMPLING;
+    private SamplingType samplingType = SamplingType.DEFAULT_SAMPLING;
     private Map<String, Long> counterGroupResultMap;
 
     public void addSamplingElement(SamplingElement samplingElement) {
