@@ -8,16 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -25,7 +22,6 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -36,7 +32,6 @@ import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
@@ -73,11 +68,8 @@ public class FrontEndQueryCreator {
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, launch.getDestinationAccountId());
 
-        RatingEngine ratingEngine = play.getRatingEngine();
+        prepareQueryWithRestrictions(playLaunchContext);
 
-        if (ratingEngine != null) {
-            prepareQueryUsingRatingsDefn(playLaunchContext);
-        } 
         if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
             contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
         }
@@ -88,8 +80,9 @@ public class FrontEndQueryCreator {
     private void addSort(PlayLaunchContext playLaunchContext, FrontEndQuery accountFrontEndQuery,
             FrontEndQuery contactFrontEndQuery) {
         String ratingId = playLaunchContext.getRatingId();
-
-        setSortField(BusinessEntity.Rating, Collections.singletonList(ratingId), false, accountFrontEndQuery);
+        if (ratingId != null) {
+            setSortField(BusinessEntity.Rating, Collections.singletonList(ratingId), false, accountFrontEndQuery);
+        }
         setSortField(BusinessEntity.Account, Collections.singletonList(InterfaceName.AccountId.name()), false,
                 accountFrontEndQuery);
         setSortField(BusinessEntity.Contact, Collections.singletonList(InterfaceName.ContactId.name()), false,
@@ -159,19 +152,22 @@ public class FrontEndQueryCreator {
         entityFrontEndQuery.setSort(sort);
     }
 
-    private void prepareQueryUsingRatingsDefn(PlayLaunchContext playLaunchContext) {
+    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext) {
 
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
-        List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
-                .getModifiableAccountIdCollectionForContacts();
+        List<Object> modifiableAccountIdCollectionForContacts =
+                playLaunchContext.getModifiableAccountIdCollectionForContacts();
         String ratingId = playLaunchContext.getRatingId();
         if (playLaunchContext.getSegment() != null) {
-            FrontEndRestriction accountRestriction = createAccountRestrictionForSelectedRatings(playLaunchContext,
-                    ratingId);
+            FrontEndRestriction accountRestriction =
+                    new FrontEndRestriction(playLaunchContext.getSegment().getAccountRestriction());
+            if (ratingId != null) {
+                accountRestriction = createAccountRestrictionForSelectedRatings(playLaunchContext, ratingId);
+            }
 
-            FrontEndRestriction contactRestriction = new FrontEndRestriction(
-                    playLaunchContext.getSegment().getContactRestriction());
+            FrontEndRestriction contactRestriction =
+                    new FrontEndRestriction(playLaunchContext.getSegment().getContactRestriction());
 
             accountFrontEndQuery.setAccountRestriction(accountRestriction);
             accountFrontEndQuery.setContactRestriction(contactRestriction);
@@ -183,20 +179,22 @@ public class FrontEndQueryCreator {
         }
 
         List<RatingModel> ratingModels = Collections.singletonList(playLaunchContext.getPublishedIteration());
-        accountFrontEndQuery.setRatingModels(ratingModels);
+        if (ratingId != null && CollectionUtils.isNotEmpty(ratingModels)) {
+            accountFrontEndQuery.setRatingModels(ratingModels);
 
-        // TODO add filtering based on list of selected buckets and update
-        // selected vs skipped count accordingly
-        List<Lookup> lookups = accountFrontEndQuery.getLookups();
-        Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
-        lookups.add(lookup);
-        if (playLaunchContext.getRatingEngine().getType() != RatingEngineType.RULE_BASED) {
-            lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_score"));
-        }
-        if (playLaunchContext.getRatingEngine().getType() == RatingEngineType.CROSS_SELL
-                && ((AIModel) playLaunchContext.getPublishedIteration())
-                        .getPredictionType() == PredictionType.EXPECTED_VALUE) {
-            lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_ev"));
+            // TODO add filtering based on list of selected buckets and update
+            // selected vs skipped count accordingly
+            List<Lookup> lookups = accountFrontEndQuery.getLookups();
+            Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
+            lookups.add(lookup);
+            if (playLaunchContext.getRatingEngine().getType() != RatingEngineType.RULE_BASED) {
+                lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_score"));
+            }
+            if (playLaunchContext.getRatingEngine().getType() == RatingEngineType.CROSS_SELL
+                    && ((AIModel) playLaunchContext.getPublishedIteration())
+                            .getPredictionType() == PredictionType.EXPECTED_VALUE) {
+                lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_ev"));
+            }
         }
     }
 
@@ -216,11 +214,13 @@ public class FrontEndQueryCreator {
 
         Restriction baseRestriction = playLaunchContext.getSegment().getAccountRestriction();
 
-        ratingRestriction = playLaunchContext.getPlayLaunch().isLaunchUnscored() //
-                ? Restriction.builder()
-                        .or(ratingRestriction, new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
-                        .build()
-                : ratingRestriction;
+        ratingRestriction =
+                playLaunchContext.getPlayLaunch().isLaunchUnscored() //
+                        ? Restriction.builder()
+                                .or(ratingRestriction,
+                                        new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
+                                .build()
+                        : ratingRestriction;
 
         Restriction finalAccountRestriction = Restriction.builder().and(baseRestriction, ratingRestriction).build();
         return new FrontEndRestriction(finalAccountRestriction);
@@ -228,9 +228,9 @@ public class FrontEndQueryCreator {
 
     private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
             Collection<Object> modifiableAccountIdCollection) {
-        Restriction accountIdRestriction = Restriction.builder()
-                .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(modifiableAccountIdCollection)
-                .build();
+        Restriction accountIdRestriction =
+                Restriction.builder().let(BusinessEntity.Contact, InterfaceName.AccountId.name())
+                        .inCollection(modifiableAccountIdCollection).build();
         return new FrontEndRestriction(
                 Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
     }
