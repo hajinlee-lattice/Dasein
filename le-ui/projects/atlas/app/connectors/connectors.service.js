@@ -44,7 +44,6 @@ class ConnectorService {
                 return;
             }
         });
-        console.log('IMAGE PATH ', path);
         return path;
     }
     getConnectorCreationTitle(otherTxt) {
@@ -83,7 +82,6 @@ class ConnectorService {
     }
 
     getList() {
-        console.log('Getting List <=====================');
         return this._connectorsList;
     }
     sendMSG(callbackFn) {
@@ -99,7 +97,6 @@ class ConnectorService {
         msg.setConfirmText('Email Token');
         msg.setIcon('fa fa-cog');
         msg.setCallbackFn((args) => {
-            console.log('Callback', args);
             let closeMsg = new Message([], CLOSE_MODAL);
             closeMsg.setName(args.name);
             closeMsg.setCallbackFn();
