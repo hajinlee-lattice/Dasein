@@ -22,12 +22,12 @@ systems-component{
         color: $blue-text;
     }
   }
-  .row {
+  .le-flex-row {
     display: flex;
     flex-direction: row;
     width: 100%;
 
-    .column {
+    .le-flex-column {
         display: flex;
         flex-direction: column;
         flex-basis: 100%;
@@ -56,7 +56,7 @@ systems-component{
             height: 100%;
         }
         .system-footer{
-            height: 50px;
+            // height: 50px;
             .right-controlls{
                 display: flex;
                 justify-content: flex-end;
