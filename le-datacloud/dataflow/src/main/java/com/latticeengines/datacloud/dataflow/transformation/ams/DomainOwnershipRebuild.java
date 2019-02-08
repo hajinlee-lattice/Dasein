@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.ams;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -13,16 +14,16 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.DomOwnerConstructA
 import com.latticeengines.dataflow.runtime.cascading.propdata.ams.DomOwnerCalRootDunsFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.ams.DomainOwnershipConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
-@Component(DomainOwnershipRebuildFlow.DATAFLOW_BEAN_NAME)
-public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<DomainOwnershipConfig> {
+@Component(DomainOwnershipRebuild.DATAFLOW_BEAN_NAME)
+public class DomainOwnershipRebuild extends ConfigurableFlowBase<DomainOwnershipConfig> {
     public final static String DATAFLOW_BEAN_NAME = "DomainOwnershipRebuildFlow";
-    public final static String TRANSFORMER_NAME = "FormDomOwnershipTableTransformer";
+    public final static String TRANSFORMER_NAME = "DomainOwnershipRebuild";
 
     @Override
     public String getDataFlowBeanName() {
