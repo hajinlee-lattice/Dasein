@@ -1,8 +1,8 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, 
+.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval,
     PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, RatingsEngineStore){
     var PlaybookWizardStore = this;
-    
+
     this.current = {
         plays: [],
         tileStates: {}
@@ -18,6 +18,7 @@ angular.module('lp.playbook')
     this.destinationOrgId = null;
     this.destinationSysType = null;
     this.destinationAccountId = null;
+    this.audienceId = null;
     this.excludeItems = false;
 
     this.init = function() {
@@ -126,7 +127,7 @@ angular.module('lp.playbook')
     }
 
     this.init();
-    
+
     this.clear = function() {
         this.init();
         this.currentPlay = null;
@@ -176,7 +177,7 @@ angular.module('lp.playbook')
 
     this.checkLaunchStateInterval = function(play){
         PlaybookWizardStore.checkLaunchState[play.name] = $interval(function() {
-            
+
             var params = {
                     playName: play.name,
                     offset: 0
@@ -191,13 +192,13 @@ angular.module('lp.playbook')
                         play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
                         PlaybookWizardStore.current.tileStates[play.name].launching == false;
                     }
-                } 
+                }
             });
 
 
         }, 10 * 1000);
     }
-    
+
     this.cancelCheckLunch = function(){
         for(var i in PlaybookWizardStore.checkLaunchState) {
             $interval.cancel(PlaybookWizardStore.checkLaunchState[i]);
@@ -218,7 +219,7 @@ angular.module('lp.playbook')
             }
         }
     }
-    
+
     this.nextSaveGeneric = function(nextState) {
         var opts = PlaybookWizardStore.settings,
             changed = false;
@@ -305,6 +306,7 @@ angular.module('lp.playbook')
                 destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
+                audienceId: PlaybookWizardStore.getAudienceId(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
                 launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
                 excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems()
@@ -405,6 +407,7 @@ angular.module('lp.playbook')
                 destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
+                audienceId: PlaybookWizardStore.getAudienceId(),
                 excludeItems: PlaybookWizardStore.getExcludeItems(),
                 launchUnscored: PlaybookWizardStore.getLaunchUnscored()
             }
@@ -539,6 +542,13 @@ angular.module('lp.playbook')
         return this.destinationAccountId;
     }
 
+    this.setAudienceId = function(audienceId) {
+        this.audienceId = audienceId;
+    }
+    this.getAudienceId = function() {
+        return this.audienceId;
+    }
+
     this.setExcludeItems = function(excludeItems) {
         this.excludeItems = excludeItems;
     }
@@ -591,13 +601,13 @@ angular.module('lp.playbook')
         PlaybookWizardService.deletePlay(playName).then(function(result) {
             deferred.resolve(result);
             if(result === true){
-                PlaybookWizardStore.setPlays(PlaybookWizardStore.current.plays.filter(function(play) { 
+                PlaybookWizardStore.setPlays(PlaybookWizardStore.current.plays.filter(function(play) {
                     return play.name != playName;
                 }));
             }
         });
 
-        
+
         return deferred.promise;
     }
 
@@ -634,7 +644,7 @@ angular.module('lp.playbook')
             });
             return deferred.promise;
         }
-        
+
     }
 
     this.getPlayLaunchCount = function(params, where) {
@@ -650,7 +660,7 @@ angular.module('lp.playbook')
         PlaybookWizardService.getPlayLaunchCount(params).then(function(data){
             deferred.resolve(data);
         });
-        return deferred.promise;        
+        return deferred.promise;
     }
 
     this.launchPlay = function(play, opts) {
@@ -701,7 +711,7 @@ angular.module('lp.playbook')
                 launchButton.label = launchButtonStates.initial.label;
             }
         }
-        
+
         return launchButton;
     }
 
@@ -715,12 +725,12 @@ angular.module('lp.playbook')
             launchedState: launchedState,
             hasLaunched: hasLaunched,
         };
-    }    
+    }
 
     this.setTargetData = function(targetData) {
         this.targetData = targetData;
     }
-    this.getTargetData = function(){ 
+    this.getTargetData = function(){
         return this.targetData;
     };
 
@@ -743,7 +753,7 @@ angular.module('lp.playbook')
             PlaybookWizardStore.setTypes(data);
             deferred.resolve(data);
         });
-        return deferred.promise;        
+        return deferred.promise;
     }
 
     this.setRecommendationCounts = function(recommendationCounts) {
@@ -870,8 +880,8 @@ angular.module('lp.playbook')
     this.saveLaunch = function(play_name, opts) {
         var deferred = $q.defer(),
             opts = opts || {},
-            launch_id = opts.launch_id || '', 
-            action = opts.action || '', 
+            launch_id = opts.launch_id || '',
+            action = opts.action || '',
             launchObj = opts.launchObj || '';
 
         $http({
@@ -951,6 +961,7 @@ angular.module('lp.playbook')
             destinationOrgId = opts.destinationOrgId,
             destinationSysType = opts.destinationSysType,
             destinationAccountId = opts.destinationAccountId,
+            audienceId = opts.audienceId,
             excludeItems = opts.excludeItems,
             launchUnscored = opts.launchUnscored;
         $http({
@@ -964,7 +975,8 @@ angular.module('lp.playbook')
                 destinationSysType: destinationSysType,
                 destinationAccountId: destinationAccountId,
                 excludeItemsWithoutSalesforceId: excludeItems,
-                launchUnscored: launchUnscored
+                launchUnscored: launchUnscored,
+                audienceId: audienceId
             }
         }).then(
             function onSuccess(response) {
