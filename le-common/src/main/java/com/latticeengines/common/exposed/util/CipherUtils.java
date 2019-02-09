@@ -111,17 +111,15 @@ public class CipherUtils {
      * helper to retrieve secret (from system property & env variable)
      */
     private static String getSecret(@NotNull String envName, @NotNull String propName, String defaultValue) {
-        // FIXME remove these logs once everything is configured properly
         // try system property first and then env variable
         if (System.getProperty(propName) != null) {
-            log.info("Secret property [{}] is configured in system property", propName);
+            log.debug("Secret property [{}] is configured in system property", propName);
             return System.getProperty(propName);
         } else if (System.getenv(envName) != null) {
-            log.info("Secret property [{}] is configured in environment variable", envName);
+            log.debug("Secret property [{}] is configured in environment variable", envName);
             return System.getenv(envName);
         }
 
-        log.warn("Secret property [prop={}, env={}] is not configured", propName, envName);
         return defaultValue;
     }
 
