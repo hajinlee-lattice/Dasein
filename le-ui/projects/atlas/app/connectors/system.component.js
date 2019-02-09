@@ -31,7 +31,6 @@ export default class SystemComponent extends Component {
     }
 
     mappingClosed(system) {
-        console.log('CHANGED? =====>', system);
         if (this.state.saving) {
             let observer = new Observer(
                 response => {
@@ -39,9 +38,6 @@ export default class SystemComponent extends Component {
                     console.log('HEY ', response);
                     if (response.data) {
                         let tmp = response.data;
-
-                        console.log('@@@@@@@@@@@@@ ', tmp);
-
                         this.setState({ saving: false, system: tmp });
                         httpService.unsubscribeObservable(observer);
                     }
@@ -49,9 +45,7 @@ export default class SystemComponent extends Component {
             );
 
             httpService.put((('/pls/lookup-id-mapping/config/' + this.state.system.configId)), system, observer);
-
         }
-
     }
 
     modalCallback(action) {
@@ -110,6 +104,22 @@ export default class SystemComponent extends Component {
                             </div>
                             <div className="le-flex-row">
                                 <div className="le-flex-column">
+                                    System Org Id
+                            </div>
+                                <div className="le-flex-column color-blue">
+                                    {this.state.system.orgId}
+                                </div>
+                            </div>
+                            <div className="le-flex-row">
+                                <div className="le-flex-column">
+                                    Account Id
+                            </div>
+                                <div className="le-flex-column color-blue">
+                                    {this.state.system.accountId}
+                                </div>
+                            </div>
+                            <div className="le-flex-row">
+                                <div className="le-flex-column">
                                     Last Updated
                             </div>
                                 <div className="le-flex-column color-blue">
@@ -132,7 +142,7 @@ export default class SystemComponent extends Component {
                                 <div className="right-controlls">
                                     <LeButton
                                         name={`${"edit-mappings-"}${this.state.system.orgName}`}
-                                        disabled={this.state.saving}
+                                        disabled={this.state.saving || !this.state.system.isRegistered}
                                         config={{
                                             label: "Edit Mappings",
                                             classNames: "blue-button"

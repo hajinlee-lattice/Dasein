@@ -30,12 +30,14 @@ export default class SystemsComponent extends Component {
         let columns = this.state.connectors.slice(rowNum * numColumns, numColumns);
         columns.forEach(element => {
             console.log('ELEMENT ===>',element);
-            let columnsUi = (
-                <div class='le-flex-column'>
-                    <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
-                </div>
-            );
-            ui.push(columnsUi);
+            if(element){
+                let columnsUi = (
+                    <div class='le-flex-column'>
+                        <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
+                    </div>
+                );
+                ui.push(columnsUi);
+            }
         });
         return ui;
 

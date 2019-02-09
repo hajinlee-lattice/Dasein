@@ -214,11 +214,11 @@ angular
                     if: store.showSalesforceSettings,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                     active: function() {
-                        return store.state.includes('home.sfdcsettings') && !store.isTransitingFrom(['home.sfdcsettings']);
+                        return store.state.includes('home.connectors') && !store.isTransitingFrom(['home.connectors']);
                     },
-                    sref: "home.sfdcsettings",
+                    sref: "home.connectors",
                     label: !store.showCdlEnabledPage ? ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC") : "Application Settings",
-                    icon: "ico-salesforce ico-light-gray"
+                    icon: "ico-connectors ico-light-gray"
                 },{
                     if: store.showApiConsole && !store.showCdlEnabledPage,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
@@ -240,7 +240,7 @@ angular
 
         return deferred.promise;
     };
-
+    //home.sfdcsettings
     this.set = function(source) {
         //console.log(source, back);
         if (!source) {
