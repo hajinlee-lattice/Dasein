@@ -8,6 +8,7 @@ import SystemComponent from './system.component';
 import ConnectorService from './connectors.service';
 
 import './systems.component.scss';
+import '../../../common/widgets/layout/le-layouts.scss';
 export default class SystemsComponent extends Component {
     constructor(props) {
         super(props);
@@ -37,7 +38,7 @@ export default class SystemsComponent extends Component {
             console.log('ELEMENT ===>',element);
             if(element){
                 let columnsUi = (
-                    <div class='le-flex-column'>
+                    <div class='le-layout-flex-col'>
                         <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
                     </div>
                 );
@@ -59,7 +60,7 @@ export default class SystemsComponent extends Component {
             let ui = [];
             for (let i = 0; i < rows; i++) {
                 let rowUI = (
-                    <div class='le-flex-row'>
+                    <div class='le-layout-flex-grid'>
                         {this.getColumns(i, 3)}
                     </div>
                 );
@@ -72,9 +73,9 @@ export default class SystemsComponent extends Component {
     render() {
         return (
             <div className="systems-main">
-                <div class='some-page-wrapper'>
+                {/* <div class='some-page-wrapper'> */}
                     {this.getSystemsRows()}
-                </div>
+                {/* </div> */}
             </div>
         );
     }

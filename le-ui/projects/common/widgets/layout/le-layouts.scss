@@ -1,0 +1,17 @@
+  .le-layout-flex-grid {
+    display: flex;
+    flex:1;
+    .le-layout-flex-col {
+      padding: 5px;
+      flex: 1;
+    }
+}
+  @media (max-width: 400px) {
+    .le-layout-flex-grid{
+      display: block;
+      .le-layout-flex-col {
+        width: 100%;
+        margin: 10px
+      }
+    }
+  }
