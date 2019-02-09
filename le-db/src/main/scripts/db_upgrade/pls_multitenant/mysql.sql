@@ -29,7 +29,9 @@ CREATE PROCEDURE `UpdatePLSTables`()
   ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `SOURCE_FILE` VARCHAR(4096);
     
   ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` MODIFY `ERROR_FILE` VARCHAR(4096);
-  
+
+  ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` ADD COLUMN `AUDIENCE_ID` VARCHAR(255);
+
   create table `PLS_MultiTenant`.`PLAY_GROUP` (
     `PID` bigint not null auto_increment, 
     `CREATED` datetime not null, 
