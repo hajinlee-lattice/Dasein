@@ -519,7 +519,7 @@ public class MetadataResolver {
     @VisibleForTesting
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()) {
+            if (StringUtils.isNotBlank(columnField)) {
                 DateTime dateTime = null;
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime == null) {
@@ -541,7 +541,7 @@ public class MetadataResolver {
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()) {
+            if (StringUtils.isNotBlank(columnField)) {
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
                     DateTime date = null;
@@ -580,7 +580,7 @@ public class MetadataResolver {
     @VisibleForTesting
     boolean isBooleanTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()
+            if (StringUtils.isNotBlank(columnField)
                     && !ACCEPTED_BOOLEAN_VALUES.contains(columnField.toLowerCase())) {
                 return false;
             }
@@ -590,7 +590,7 @@ public class MetadataResolver {
 
     private boolean isDoubleTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()) {
+            if (StringUtils.isNotBlank(columnField)) {
                 try {
                     Double.parseDouble(columnField);
                 } catch (NumberFormatException e) {
@@ -604,7 +604,7 @@ public class MetadataResolver {
 
     private boolean isIntegerTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()) {
+            if (StringUtils.isNotBlank(columnField)) {
                 try {
                     Integer.parseInt(columnField);
                 } catch (NumberFormatException e) {
