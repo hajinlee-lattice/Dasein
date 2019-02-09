@@ -37,6 +37,8 @@ jacoco/
 **/dist/**
 **/.sass-cache/**
 **/.vscode/
+**/storybook-static/
+**/uicomponents/.cache
 
 # tez
 *.dot
