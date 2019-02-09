@@ -256,6 +256,7 @@ public class MetadataResolver {
 
             unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
+            //unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
             unknownColumn.setMappedToLatticeField(false);
 
             result.fieldMappings.add(unknownColumn);
@@ -534,7 +535,7 @@ public class MetadataResolver {
 
     @VisibleForTesting
     MutablePair<String, String> distinguishDateAndTime(List<String> columnFields) {
-        List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_DATE_TIME_FORMAT;
+        List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {

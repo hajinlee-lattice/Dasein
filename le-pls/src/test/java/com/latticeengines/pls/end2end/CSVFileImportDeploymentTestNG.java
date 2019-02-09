@@ -159,10 +159,10 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
 
         String dateFormatString1 = "DD/MM/YYYY";
         String timeFormatString1 = null;
-        String timezone1 = "America/New_York";
+        String timezone1 = "UTC-5     America/New York, America/Lima";
         String dateFormatString2 = "MM.DD.YY";
         String timeFormatString2 = "00:00:00 24H";
-        String timezone2 = "GMT+8";
+        String timezone2 = "UTC+8     Asia/Shanghai, Australia/Perth";
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (mapping.getUserField().equals("TestDate1")) {
                 mapping.setFieldType(UserDefinedType.DATE);
