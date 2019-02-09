@@ -284,7 +284,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.Seed);
         matchInput.setAllocateId(false);
         matchInput.setFetchOnly(true);
-        matchInput.setFields(Arrays.asList(InterfaceName.EntityId.name()));
+        // TODO(jwinter): Should we be setting the field for BulkMatch?
+        //matchInput.setFields(Arrays.asList(InterfaceName.EntityId.name()));
 
         // Prepare Entity Key Map for Fetch Oly Match.
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(Arrays.asList(InterfaceName.EntityId.name()));
