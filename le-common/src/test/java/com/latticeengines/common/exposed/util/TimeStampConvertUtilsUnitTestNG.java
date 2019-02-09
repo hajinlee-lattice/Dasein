@@ -300,11 +300,10 @@ public class TimeStampConvertUtilsUnitTestNG {
         }
         Assert.assertTrue(exceptionFound, "Did not fail on case of empty date/time value.");
 
-        // Test Case 8: Fall back to user only date format when date and time format is provided but value only has
+        // Test Case 8: Fall back to user only date format when date and time format are provided but value only has
         // date.
         exceptionFound = false;
         long actualTime = 0;
-
         try {
             actualTime = TimeStampConvertUtils.convertToLong("11/11/11", "MM/DD/YY", "00-00-00 12H",
                     "UTC+8     Asia/Shanghai, Australia/Perth");
@@ -316,15 +315,41 @@ public class TimeStampConvertUtilsUnitTestNG {
                             "Date/time value (11/11/11) could not be parsed by format string: MM/DD/YY 00-00-00 12H"),
                     "Wrong error message: " + e.getMessage());
         }
-        Assert.assertEquals(actualTime, 1320940800000L);
         Assert.assertFalse(exceptionFound, "Should not fail on case of date only provided with date and time format.");
+        Assert.assertEquals(actualTime, 1320940800000L);
 
-        // Test Case 9: Use heuristic to parse out date component when only date format is provided but value has
+
+        // TODO(jwinter): Decide if we want to handle Case 9 by ignoring a badly formatted time component and parsing
+        //     only the date component.  If the user provided a time format and the value doesn't match but we ignore
+        //     it, the user will not even be informed about their incorrectly formatted data, so this is approach has
+        //     trade-offs.
+        /*
+        // Test Case 9: Use heuristic to parse out date component when date and time format are provided but time value
+        // can't be parsed.
+        exceptionFound = false;
+        actualTime = 0;
+        try {
+            actualTime = TimeStampConvertUtils.convertToLong("11/11/11 11:11:11 AM", "MM/DD/YY", "00-00-00 12H",
+                    "UTC+8     Asia/Shanghai, Australia/Perth");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date/time value (11/11/11) could not be parsed by format string: MM/DD/YY 00-00-00 12H"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertFalse(exceptionFound,
+                "Should not fail on case of parsable date with unparsable time provided with date and time format.");
+        Assert.assertEquals(actualTime, 1320940800000L);
+        */
+
+        // Test Case 10: Use heuristic to parse out date component when only date format is provided but value has
         // date and time.
         exceptionFound = false;
         actualTime = 0;
         try {
-            actualTime = TimeStampConvertUtils.convertToLong("11/11/11 11:11:11", "MM/DD/YY", "",
+            actualTime = TimeStampConvertUtils.convertToLong("11/11/11 11:11:11 AM", "MM/DD/YY", "",
                     "UTC+8     Asia/Shanghai, Australia/Perth");
         } catch (Exception e) {
             exceptionFound = true;
@@ -334,10 +359,10 @@ public class TimeStampConvertUtilsUnitTestNG {
                             "Date value (11/11/11 11:11:11) could not be parsed by format string: MM/DD/YY"),
                     "Wrong error message: " + e.getMessage());
         }
-        Assert.assertEquals(actualTime, 1320940800000L);
         Assert.assertFalse(exceptionFound, "Should not fail on case of data and time with only date format.");
+        Assert.assertEquals(actualTime, 1320940800000L);
 
-        // Test Case 10: Fail when user provided time zone is not a valid time zone.
+        // Test Case 11: Fail when user provided time zone is not a valid time zone.
         exceptionFound = false;
         try {
             TimeStampConvertUtils.convertToLong("4-3-2018 01:23:45 am", "MM-DD-YYYY",  "00:00:00 12H",
@@ -374,7 +399,6 @@ public class TimeStampConvertUtilsUnitTestNG {
         log.info("To Zone Id for PST is: " + pst.toZoneId().getId());
         // Below doesn't work.
         //log.info("Zone Id (of) for PST is: " + ZoneId.of("PST"));
-
 
         TimeZone est = TimeZone.getTimeZone("EST");
         log.info("Time zone (getID) for EST is: " + est.getID());
