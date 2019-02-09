@@ -8,6 +8,7 @@ import Message, {
     GENERIC,
     CLOSE_MODAL
 } from 'common/app/utilities/message';
+
 class ConnectorService {
     constructor() {
         if (!ConnectorService.instance) {
@@ -17,34 +18,39 @@ class ConnectorService {
             this.connectorInfo = {
                 name: ''
             };
-            this._connectorsList = [
-                {
+            this._connectors = {
+                Salesforce: {
                     name: 'Salesforce',
-                    config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive reccomandations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' },
+                    config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive reccomandations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' }
                 },
-                {
+                Marketo: {
                     name: 'Marketo',
                     config: { img: '/atlas/assets/images/logo_marketo_2.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Marketo' }
                 },
-                {
+                Eloqua: {
                     name: 'Eloqua',
                     config: { img: '/atlas/assets/images/eloqua.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Eloqua' }
                 }
+            };
+            this._connectorsList = [
+
             ];
         }
 
         return ConnectorService.instance;
     }
     getImgByConnector(connectorName) {
-        let path = ''
-        this._connectorsList.forEach(element => {
-            if (element.name === connectorName) {
+        let element = this._connectors[connectorName];
+        return element.config.img;
+        // let path = ''
+        // this._connectorsList.forEach(element => {
+        //     if (element.name === connectorName) {
 
-                path = element.config.img;
-                return;
-            }
-        });
-        return path;
+        //         path = element.config.img;
+        //         return;
+        //     }
+        // });
+        // return path;
     }
     getConnectorCreationTitle(otherTxt) {
         switch (this.connectorInfo.name) {
@@ -81,7 +87,17 @@ class ConnectorService {
         this._connectorsList = list;
     }
 
-    getList() {
+    getList(markettoEnabled) {
+        if (this._connectorsList.length == 0) {
+            Object.keys(this._connectors).forEach(element => {
+                let el = this._connectors[element];
+                if (element !== MARKETO && el) {
+                    this._connectorsList.push(this._connectors[element]);
+                } else if (markettoEnabled && el) {
+                    this._connectorsList.push(this._connectors[element]);
+                }
+            });
+        }
         return this._connectorsList;
     }
     sendMSG(callbackFn) {
