@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DynamoDBLookupService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -107,6 +108,13 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
             if (log.isDebugEnabled()) {
                 log.debug("Skip lookup into dynamodb for " + lookupRequestId);
             }
+        }
+
+        // TODO: Put duns for matched ldc account into traveler for entity match
+        if (result != null) {
+            request.getMatchTravelerContext().setDunsOriginMapIfAbsent(new HashMap<>());
+            request.getMatchTravelerContext().getDunsOriginMap().put(DataCloudConstants.ACCOUNT_MASTER,
+                    matchKeyTuple.getDuns());
         }
 
         return result;
