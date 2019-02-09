@@ -27,7 +27,12 @@ export default class SystemsComponent extends Component {
     }
     getColumns(rowNum, numColumns) {
         let ui = [];
-        let columns = this.state.connectors.slice(rowNum * numColumns, numColumns);
+        let columns = [];
+        if((rowNum * numColumns + numColumns) >= this.state.connectors.length){
+            columns = this.state.connectors.slice(rowNum * numColumns);
+        }else{
+            columns = this.state.connectors.slice(rowNum * numColumns, numColumns);
+        }
         columns.forEach(element => {
             console.log('ELEMENT ===>',element);
             if(element){
@@ -44,7 +49,7 @@ export default class SystemsComponent extends Component {
     }
     getSystemsRows() {
         if (this.state.connectors.length == 0) {
-            return (<h4>No systems created</h4>);
+            return (<h5>No systems created</h5>);
         } else {
             let rows = this.state.connectors.length / 3;
             if (this.state.connectors.length % 3 > 0) {
