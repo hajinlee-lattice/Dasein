@@ -519,10 +519,12 @@ public class MetadataResolver {
     @VisibleForTesting
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
-            DateTime dateTime = null;
-            dateTime = TimeStampConvertUtils.parseDateTime(columnField);
-            if (dateTime == null) {
-                return false;
+            if (columnField != null && !columnField.isEmpty()) {
+                DateTime dateTime = null;
+                dateTime = TimeStampConvertUtils.parseDateTime(columnField);
+                if (dateTime == null) {
+                    return false;
+                }
             }
         }
         MutablePair<String, String> result = distinguishDateAndTime(columnFields);
@@ -539,15 +541,18 @@ public class MetadataResolver {
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
-            for (String format : supportedDateTimeFormat) {
-                DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
-                DateTime date = null;
-                try {
-                    date = dtf.parseDateTime(columnField);
-                } catch (Exception e) {
-                }
-                if (date != null) {
-                    hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+            if (columnField != null && !columnField.isEmpty()) {
+                for (String format : supportedDateTimeFormat) {
+                    DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
+                    DateTime date = null;
+                    try {
+                        date = dtf.parseDateTime(columnField);
+                    } catch (Exception e) {
+                        log.debug("Found columnField unparsable as date/time: " + columnField);
+                    }
+                    if (date != null) {
+                        hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+                    }
                 }
             }
         }

@@ -76,7 +76,7 @@ public class MetadatatResolverUnitTestNG {
         // case 7: M-d-yyyy 2 times and d/M/yyyy 2 times, hit M-d-yyyy
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11-4-2016", "12-05-2018", "23/04/2016", "23/05/2018"), formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M-d-yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "d/M/yyyy");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
         // case 8: add some timezone, no match pattern, false
@@ -117,5 +117,12 @@ public class MetadatatResolverUnitTestNG {
         Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
         Assert.assertEquals(formatForDateAndTime.getRight(), "h-m-s a");
 
+        // case 14: missing date time value, skip those and expect true.
+        Assert.assertTrue(
+                metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "", "12/05/2018", null, "", "1/1/1",
+                        "13/11/2017"),
+                        formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "d/M/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getRight(), null);
     }
 }
