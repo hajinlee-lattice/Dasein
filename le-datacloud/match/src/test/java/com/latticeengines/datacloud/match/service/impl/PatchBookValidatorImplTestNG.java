@@ -135,6 +135,8 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
         map2.put("Domain", "def.com"); // column not present in AccountMasterColumn
         map2.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS), "123456778  "); // excludedPatchItem
         map2.put("City", "  Mountain View  "); // column not present in AccountMasterColumn
+        Map<String, Object> map4 = new HashMap<>();
+        map4.put("BmbrSurge_2in1PCs_BuckScore", "test_value");
         return new Object[][] {
                 {
                 new PatchBook[] {
@@ -151,16 +153,27 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                 .withDomain("yahoo.com") //
                                 .withDuns("434343433") //
                                 .withName("Yahoo Inc.") //
-                                .build(), map2) //
-                },
-                new PatchBookValidationError[] {
-                        // Column = Domain
-                                newError(PatchBookValidator.PATCH_ITEM_NOT_IN_AM + "[Domain]", 1L),
-                        // Column = LDC_DUNS
-                                newError(PatchBookValidator.EXCLUDED_PATCH_ITEM
-                                        + "[" + MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS) + "]", 1L, 2L),
-                        // Column Domain, Duns
-                                newError(PatchBookValidator.PATCH_ITEM_NOT_IN_AM + "[City, Domain]", 2L) }
+                                .build(), map2),
+                        TestPatchBookUtils //
+                        .newPatchBook(7L,
+                                new MatchKeyTuple //
+                                    .Builder() //
+                                    .withDomain("lmn.com") //
+                                    .withCountry("USA") //
+                                    .build(), map4)
+            },
+            new PatchBookValidationError[] {
+                    // Column = Domain
+                            newError(PatchBookValidator.PATCH_ITEM_NOT_IN_AM + "[Domain]", 1L),
+                    // Column = LDC_DUNS
+                            newError(PatchBookValidator.EXCLUDED_PATCH_ITEM
+                                    + "[" + MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS) + "]", 1L, 2L),
+                    // Column Domain, Duns
+                            newError(PatchBookValidator.PATCH_ITEM_NOT_IN_AM + "[City, Domain]",
+                                    2L),
+                            // Encoded Attributes not allowed to patch
+                            newError(PatchBookValidator.ENCODED_ATTRS_NOT_SUPPORTED
+                                    + "[BmbrSurge_2in1PCs_BuckScore]", 7L) }
                 }
         };
     }
@@ -283,6 +296,8 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
         map1.put(MatchKey.Domain.name(), "abc.com");
         Map<String, Object> map2 = new HashMap<>();
         map2.put(MatchKey.DUNS.name(), "123412313");
+        Map<String, Object> map3 = new HashMap<>();
+        map3.put(MatchKey.Domain.name(), "google.com");
         return new Object[][] { {
                 new PatchBook[] {
                         // correct entry
@@ -302,7 +317,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("123214444") //
                                                         .build(),
                                         map2),
-                        // error entry
+                        // error entry : duplicate duns
                         TestPatchBookUtils //
                                 .newPatchBook(3L,
                                         new MatchKeyTuple //
@@ -310,11 +325,34 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("123456789") //
                                                         .build(),
                                         map1),
-
+                        TestPatchBookUtils //
+                                .newPatchBook(4L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("333333333") //
+                                                        .build(),
+                                        map3),
+                        TestPatchBookUtils //
+                                .newPatchBook(5L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("333333333") //
+                                                        .build(),
+                                        map3),
+                        TestPatchBookUtils //
+                                .newPatchBook(6L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("333333333") //
+                                                        .build(),
+                                        map3),
                 },
                 new PatchBookValidationError[] {
                         newError(PatchBookValidator.DOMAIN_PATCH_MATCH_KEY_ERR, 2L), 
-                        newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 3L) }, } };
+                        newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 1L,
+                                3L),
+                        newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 4L, 5L,
+                                6L), }, } };
     }
 
     @DataProvider(name = "patchBookMatchKeyDomainDunsSrc")
@@ -326,8 +364,6 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
         Map<String, Object> map3 = new HashMap<>();
         map3.put("bemfab", "1");
         map3.put("DnB_CITY_CODE", "1111");
-        Map<String, Object> map4 = new HashMap<>();
-        map4.put("BmbrSurge_2in1PCs_BuckScore", "test_value");
         return new Object[][] { {
                 new PatchBook[] {
                         // no conflict
@@ -379,23 +415,13 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDomain("abc.com") //
                                                         .withCountry("USA") //
                                                         .build(),
-                                        map3),
-                        TestPatchBookUtils //
-                                .newPatchBook(7L,
-                                        new MatchKeyTuple //
-                                                .Builder() //
-                                                        .withDomain("lmn.com") //
-                                                        .withCountry("USA") //
-                                                        .build(),
-                                        map4) },
+                                        map3) },
                 "2.0.16",
                 new PatchBookValidationError[] {
                         newError(PatchBookValidator.ATTRI_PATCH_DUNS_BASED_SRC_ERR
                                 + "[AlexaUSRank]", 5L),
                         newError(PatchBookValidator.ATTRI_PATCH_DOM_BASED_SRC_ERR
-                                + "[bemfab, DnB_CITY_CODE]", 6L),
-                        newError(PatchBookValidator.ENCODED_ATTRS_NOT_SUPPORTED
-                                + "[BmbrSurge_2in1PCs_BuckScore]", 7L) }, } };
+                                + "[bemfab, DnB_CITY_CODE]", 6L) }, } };
     }
 
     private Object[][] provideLookupPatchBookValidationTestData() {

@@ -33,7 +33,7 @@ public interface PatchBookValidator {
     static final String DOMAIN_PATCH_MATCH_KEY_ERR = "Provided Match Key/Patch item attribute is incorrect. "
             + "Expected input match key is DUNS and patched Item attribute is Domain.";
 
-    static final String DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO = "Duplicate combination of Match Key DUNS and Patch Item Domain exists";
+    static final String DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO = "Duplicate combination of Match Key DUNS and Patch Item Domain exists : ";
 
     static final String ENCODED_ATTRS_NOT_SUPPORTED = "Encoded Attributes not supported : ";
 

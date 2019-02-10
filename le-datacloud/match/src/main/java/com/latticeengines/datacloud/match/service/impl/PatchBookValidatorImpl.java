@@ -114,27 +114,39 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         // Getting List from ParallelFlux
         List<AccountMasterColumn> amColsList = amCols.sequential().collectList().block();
         // Collected AMColumnIds that we need to compare into a set
-        Set<String> amColumnIds = new HashSet<>();
-        for(AccountMasterColumn a : amColsList){
-            amColumnIds.add(a.getAmColumnId());
+        Map<String, AccountMasterColumn> amColsMap = new HashMap<>();
+        for(AccountMasterColumn a : amColsList){ // mapping columnId to accMasterColumn
+            amColsMap.put(a.getAmColumnId(), a);
         }
         Map<String, List<Long>> errNotInAmAndExcluded = new HashMap<>();
         // Iterate through input patch Books
         for (PatchBook book : books) {
+            List<String> encodedAttrs = new ArrayList<>();
             // Resetting the error message values as null
             List<String> keysNotInAm = new ArrayList<>();
             List<String> keysExcluded = new ArrayList<>();
             // Iterate through the patchItems map to verify if one of AMColumn or from excluded patch list item
             for (Map.Entry<String, Object> patchedItems : book.getPatchItems().entrySet()) {
-                if (!amColumnIds.contains(patchedItems.getKey())) {
-                    keysNotInAm.add(patchedItems.getKey());
+                String patchAttr = patchedItems.getKey();
+                if (!amColsMap.containsKey(patchAttr)) {
+                    keysNotInAm.add(patchAttr);
+                } else {
+                    if (amColsMap.get(patchAttr).getDecodeStrategy() != null) {
+                        // Doesn't support patching for encoded attributes
+                        encodedAttrs.add(patchAttr);
+                    }
                 }
-                if (excludePatchItems.contains(patchedItems.getKey())) {
-                    keysExcluded.add(patchedItems.getKey());
+                if (excludePatchItems.contains(patchAttr)) {
+                    keysExcluded.add(patchAttr);
                 }
             }
+            if (encodedAttrs.size() > 0) {
+                PatchBookValidationError error = new PatchBookValidationError();
+                error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
+                error.setPatchBookIds(Arrays.asList(book.getPid()));
+                patchBookValidErrorList.add(error);
+            }
             if (!keysNotInAm.isEmpty()) {
-
                 errNotInAmAndExcluded.putIfAbsent(PATCH_ITEM_NOT_IN_AM + keysNotInAm, new ArrayList<>());
                 errNotInAmAndExcluded.get(PATCH_ITEM_NOT_IN_AM + keysNotInAm).add(book.getPid());
             }
@@ -246,33 +258,39 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     }
 
     List<PatchBookValidationError> domainPatchValidate(@NotNull List<PatchBook> books) {
+        Map<String, List<Long>> patchBooksWithSameDomDuns = new HashMap<>();
         List<PatchBookValidationError> errorList = new ArrayList<>();
-        Set<String> domainDunsSet = new HashSet<>();
+        PatchBookValidationError error = null;
         for(PatchBook book : books) {
-            List<Long> pids = null;
-            PatchBookValidationError error = null;
+            String dunsKeyAndDomPatchItem = book.getDuns() + book.getPatchItems().get(MatchKey.Domain.name());
+            error = null;
             if (checkOnlyDunsMatchKey(book)
                     && book.getPatchItems().containsKey(MatchKey.Domain.name())
                     && book.getPatchItems().size() == 1) { // match key = duns and patchedItem = domain
                 // check if match key = duns and patchedItem = domain, this combination is unique
-                if (!domainDunsSet.contains(
-                        book.getDuns() + book.getPatchItems().get(MatchKey.Domain.name()))) {
-                    domainDunsSet
-                            .add(book.getDuns() + book.getPatchItems().get(MatchKey.Domain.name()));
+                if (!patchBooksWithSameDomDuns.containsKey(dunsKeyAndDomPatchItem)) {
+                    patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem,
+                            Arrays.asList(book.getPid()));
                 } else {
-                    error = new PatchBookValidationError();
-                    pids = new ArrayList<>();
-                    error.setMessage(DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO);
+                    List<Long> pids = new ArrayList<>(
+                            patchBooksWithSameDomDuns.get(dunsKeyAndDomPatchItem));
                     pids.add(book.getPid());
-                    error.setPatchBookIds(pids);
-                    errorList.add(error);
+                    patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem, pids);
                 }
             } else {
                 // error : as match key needs to be duns and patch item needs to be domain
                 error = new PatchBookValidationError();
-                pids = new ArrayList<>();
                 error.setMessage(DOMAIN_PATCH_MATCH_KEY_ERR);
-                pids.add(book.getPid());
+                error.setPatchBookIds(Arrays.asList(book.getPid()));
+                errorList.add(error);
+            }
+        }
+        for (String key : patchBooksWithSameDomDuns.keySet()) {
+            List<Long> pids = patchBooksWithSameDomDuns.get(key);
+            if (pids.size() > 0) {
+                error = new PatchBookValidationError();
+                error.setMessage(DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO);
+                System.out.println("# pids : " + pids);
                 error.setPatchBookIds(pids);
                 errorList.add(error);
             }
@@ -320,10 +338,8 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
         // Iterate through the patchItems to check patch item attribute is from domain based source or duns based source
         for(PatchBook book : books) {
-            boolean encoded = false;
             List<String> domBasedSrcAbsentAttrs = new ArrayList<>();
             List<String> dunsBasedSrcAbsentAttrs = new ArrayList<>();
-            List<String> encodedAttrs = new ArrayList<>();
             Map<String, Object> patchItems = book.getPatchItems();
             for (Map.Entry<String, Object> patchedItem : patchItems.entrySet()) {
                 String patchAttr = patchedItem.getKey();
@@ -334,12 +350,8 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     // Error : since domain match key is present and patch
                     // attrName should be one of the attr names for domain
                     // based sources
-                    System.out.println("## Entered Domain Book : " + book.getPid());
                     domBasedSrcAbsentAttrs.add(patchAttr);
                 }
-                System.out.println(
-                        "book.getDomain : " + book.getDomain() + " book.getDuns() : "
-                                + book.getDuns() + " patchAttr : " + patchAttr);
                 if ((StringUtils.isNotBlank(book.getDuns())
                         && !attrNamesForDunsBasedSources.contains(patchAttr))
                         || (StringUtils.isBlank(book.getDuns())
@@ -347,21 +359,14 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     // Error : since duns match key is present and patch
                     // attrName should be one of the attr names for duns
                     // based sources
-                    System.out.println("## Entered Duns Book : " + book.getPid());
                     dunsBasedSrcAbsentAttrs.add(patchAttr);
-                }
-                // Doesn't support patching for encoded attributes
-                AccountMasterColumn amCol = columnEntityMgr.findById(patchAttr, dataCloudVersion);
-                if (amCol.getDecodeStrategy() != null) {
-                    encoded = true;
-                    encodedAttrs.add(patchAttr);
                 }
             }
             PatchBookValidationError error = reportErrorsForAttrPatchValidator(
                     StringUtils.isNotBlank(book.getDuns()),
                     StringUtils.isNotBlank(book.getDomain()),
                     domBasedSrcAbsentAttrs,
-                    dunsBasedSrcAbsentAttrs, encodedAttrs, book.getPid(), encoded);
+                    dunsBasedSrcAbsentAttrs, book.getPid());
             if (error.getMessage() != null) {
                 patchBookValidErrorList.add(error);
             }
@@ -371,8 +376,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     private PatchBookValidationError reportErrorsForAttrPatchValidator(boolean dunsMatchKeyPresent,
             boolean domMatchKeyPresent, List<String> domBasedSrcAbsentAttrs,
-            List<String> dunsBasedSrcAbsentAttrs, List<String> encodedAttrs, Long pid,
-            boolean encoded) {
+            List<String> dunsBasedSrcAbsentAttrs, Long pid) {
         List<Long> pids = new ArrayList<>();
         PatchBookValidationError error = new PatchBookValidationError();
         if (domBasedSrcAbsentAttrs.size() > 0 && !dunsMatchKeyPresent) {
@@ -386,9 +390,6 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     ATTRI_PATCH_DUNS_BASED_SRC_ERR + dunsBasedSrcAbsentAttrs.toString());
             pids.add(pid);
             dunsBasedSrcAbsentAttrs.clear();
-        }
-        if (encoded) {
-            error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
         }
         if (pids.size() > 0) {
             error.setPatchBookIds(pids);
