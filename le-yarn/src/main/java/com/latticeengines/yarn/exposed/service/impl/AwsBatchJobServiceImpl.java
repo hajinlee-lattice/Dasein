@@ -24,7 +24,6 @@ import com.latticeengines.aws.batch.AWSBatchConfig;
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
@@ -182,7 +181,7 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
         paths.add(containerProperties.getProperty(PythonContainerProperty.SCHEMA.name()));
         paths.add(containerProperties.getProperty(PythonContainerProperty.DATAPROFILE.name()));
         String configMetadata = containerProperties.getProperty(PythonContainerProperty.CONFIGMETADATA.name());
-        if (StringUtils.isNotBlank(configMetadata) && configMetadata.endsWith(HdfsFileFormat.AVSC_FILE)) {
+        if (StringUtils.isNotBlank(configMetadata) && configMetadata.endsWith(".avsc")) {
             paths.add(configMetadata);
         }
         paths.add(containerProperties.getProperty(PythonContainerProperty.PIPELINEDRIVER.name()));
