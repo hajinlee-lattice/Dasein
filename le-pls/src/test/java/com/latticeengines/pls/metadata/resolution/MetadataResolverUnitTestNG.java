@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
-public class MetadatatResolverUnitTestNG {
+public class MetadataResolverUnitTestNG {
 
     private MetadataResolver metadataResolver = new MetadataResolver();
 
