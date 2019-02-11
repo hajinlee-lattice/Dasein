@@ -1,5 +1,8 @@
 package com.latticeengines.scoring.dataflow;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -15,14 +18,19 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-import com.latticeengines.scoring.dataflow.ev.Helper;
-import com.latticeengines.scoring.dataflow.ev.MoreMoreProc;
-import com.latticeengines.scoring.dataflow.ev.MoreProc;
-import com.latticeengines.scoring.dataflow.ev.MoreProc3;
+import com.latticeengines.scoring.dataflow.ev.CalculateFittedExpectedRevenueHelper;
+import com.latticeengines.scoring.dataflow.ev.PercentileCalculationHelper;
+import com.latticeengines.scoring.dataflow.ev.PercentileLookupAverageEvHelper;
 import com.latticeengines.scoring.workflow.steps.ExpectedRevenueDataFlowUtil;
+
+import cascading.operation.aggregator.Count;
+import cascading.tuple.Fields;
 
 @Component("calculateExpectedRevenuePercentile")
 public class CalculateExpectedRevenuePercentile
@@ -38,35 +46,32 @@ public class CalculateExpectedRevenuePercentile
     public ModelSummaryProxy modelSummaryProxy;
 
     @Inject
-    private Helper helper;
+    private PercentileLookupAverageEvHelper percentileLookupAverageEvHelper;
 
     @Inject
-    public MoreProc moreProc;
+    public PercentileCalculationHelper percentileCalculationHelper;
 
     @Inject
-    public MoreMoreProc moreMoreProc;
+    public CalculateFittedExpectedRevenueHelper calculateFittedExpectedRevenueHelper;
 
-    @Inject
-    public MoreProc3 moreProc3;
-
+    @SuppressWarnings("deprecation")
     @Override
     public Node construct(CalculateExpectedRevenuePercentileParameters parameters) {
         log.info(String.format("%s = %s", parameters.getClass().getSimpleName(), JsonUtils.serialize(parameters)));
         context = new ParsedContext(parameters);
 
         Node inputTable = addSource(context.inputTableName);
-        // 1. add new fixed column for ExpectedRevenuePercentile column
         Node addPercentileColumn = inputTable.addColumnWithFixedValue(context.percentileFieldName, null, Integer.class);
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());
 
         if (MapUtils.isNotEmpty(context.originalScoreFieldMap)) {
-            // 2. count number of rows
-            Node mergedScoreCount = moreMoreProc.mergeCount(context, addPercentileColumn);
+            // count number of rows
+            Node mergedScoreCount = mergeCount(context, addPercentileColumn);
 
-            // 3. sort based on ExpectedRevenue column (and using number of
+            // sort based on ExpectedRevenue column (and using number of
             // rows) calculate percentile and put value in new
             // ExpectedRevenuePercentile field
-            Node calculatePercentile = moreMoreProc.calculatePercentileByFieldMap(context, mergedScoreCount);
+            Node calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount);
 
             calculatePercentile = calculatePercentile.retain(retainedFields);
             log.info(String.format("percentileFieldName '%s', standardScoreField '%s'", context.percentileFieldName,
@@ -75,43 +80,90 @@ public class CalculateExpectedRevenuePercentile
             if (!context.standardScoreField.equals(context.percentileFieldName)) {
                 retainedFields = new FieldList(calculatePercentile.getFieldNames());
 
-                calculatePercentile = moreProc.additionalProcessing(context, calculatePercentile);
+                String EV_PERCENTILE_EXPRESSION = "%s != null ? %s : %s";
+                calculatePercentile = calculatePercentile //
+                        .addFunction(
+                                String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
+                                        context.percentileFieldName, context.standardScoreField), //
+                                new FieldList(context.percentileFieldName, context.standardScoreField), //
+                                new FieldMetadata(context.outputPercentileFieldName, Integer.class));
 
-                // 4. for each percentile bucket calculate average expected
+                // for each percentile bucket calculate average expected
                 // revenue
                 //
-                // 5. Use "ev" field from evScoreDerivation.json to lookup for
+                // Use "ev" field from evScoreDerivation.json to lookup for
                 // temporary EV percentile score for average expected revenue
                 // value
-                calculatePercentile = helper.doSomethingHere(context, calculatePercentile);
+                calculatePercentile = percentileLookupAverageEvHelper.calculate(context, calculatePercentile);
 
-                // 6. load evFitFunctionParamaters
+                // load evFitFunctionParamaters
                 context.fitFunctionParametersMap = ExpectedRevenueDataFlowUtil.getEVFitFunctionParametersMap(
                         context.customerSpace, yarnConfiguration, modelSummaryProxy, context.originalScoreFieldMap,
                         parameters.getFitFunctionParametersMap());
                 log.info(String.format("fitFunctionParametersMap = %s",
                         JsonUtils.serialize(context.fitFunctionParametersMap)));
 
-                // 7. initialize expectedRevenueFitter based on corresponding
+                // initialize expectedRevenueFitter based on corresponding
                 // fit function parameters
                 //
-                // 8. for each row
-                // 8.1. calculate fitted expected revenue using this new
+                // for each row
+                // calculate fitted expected revenue using this new
                 // temporary EV percentile score and set it back to
                 // ExpectedRevenue column
                 //
-                // 9. copy values of ExpectedRevenuePercentile in original
+                // copy values of ExpectedRevenuePercentile in original
                 // percentile column ("Score") as downstream processing expects
                 // final percentiles into original percentile column
-                calculatePercentile = moreProc3.additionalProcessing2(context, calculatePercentile, retainedFields);
+                calculatePercentile = calculateFittedExpectedRevenueHelper.calculate(context, calculatePercentile,
+                        retainedFields);
+
+                calculatePercentile = calculatePercentile.addColumnWithFixedValue(context.percentileFieldName, null,
+                        Integer.class);
+
+                mergedScoreCount = mergeCount(context, calculatePercentile);
+
+                calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount)
+                        .retain(retainedFields);
+
+                calculatePercentile = calculatePercentile //
+                        .addFunction(
+                                String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
+                                        context.percentileFieldName, context.standardScoreField), //
+                                new FieldList(context.percentileFieldName, context.standardScoreField), //
+                                new FieldMetadata(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField,
+                                        Integer.class));
+                calculatePercentile = calculatePercentile.discard(context.standardScoreField);
+                calculatePercentile = calculatePercentile.rename(
+                        new FieldList(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField),
+                        new FieldList(context.standardScoreField));
+
             }
             return calculatePercentile;
         }
         return addPercentileColumn;
     }
 
+    private Node mergeCount(ParsedContext context, Node node) {
+        Node score = node.retain(context.modelGuidFieldName)
+                .renamePipe("modelScoreCount_" + System.currentTimeMillis());
+        List<FieldMetadata> scoreCountFms = Arrays.asList( //
+                new FieldMetadata(context.modelGuidFieldName, String.class), //
+                new FieldMetadata(context.scoreCountFieldName, Long.class) //
+        );
+        Node totalCount = score
+                .groupByAndAggregate(new FieldList(context.modelGuidFieldName), //
+                        new Count(new Fields(context.scoreCountFieldName)), //
+                        scoreCountFms, Fields.ALL) //
+                .retain(context.modelGuidFieldName, context.scoreCountFieldName);
+
+        List<String> fieldsNames = new ArrayList<>(node.getFieldNames());
+        fieldsNames.add(context.scoreCountFieldName);
+        FieldList outputFields = new FieldList(fieldsNames);
+        return node.innerJoin(context.modelGuidFieldName, totalCount, context.modelGuidFieldName).retain(outputFields);
+    }
+
     public class ParsedContext {
-        private static final String PREFIX_TEMP_COL = "__TEMP__";
+        public static final String PREFIX_TEMP_COL = "__TEMP__";
 
         public final String standardScoreField = ScoreResultField.Percentile.displayName;
         public final String expectedRevenueField = ScoreResultField.ExpectedRevenue.displayName;
@@ -127,6 +179,7 @@ public class CalculateExpectedRevenuePercentile
         public String outputPercentileFieldName;
         public String outputExpRevFieldName;
         public String scoreCountFieldName;
+        public Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
         ParsedContext(CalculateExpectedRevenuePercentileParameters parameters) {
             customerSpace = parameters.getCustomerSpace();
@@ -139,7 +192,8 @@ public class CalculateExpectedRevenuePercentile
             long timestamp = System.currentTimeMillis();
             outputPercentileFieldName = String.format("%sper_%d", PREFIX_TEMP_COL, timestamp);
             outputExpRevFieldName = String.format("%sev_%d", PREFIX_TEMP_COL, timestamp);
-            scoreCountFieldName = ScoreResultField.RawScore.displayName + "_count";
+            scoreCountFieldName = String.format("%scount_%d", PREFIX_TEMP_COL, timestamp);
+            scoreDerivationMaps = parameters.getScoreDerivationMaps();
         }
     }
 }

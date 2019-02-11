@@ -34,9 +34,10 @@ public class CalculatePredictedRevenuePercentileDataFlow
     void initAndSetDataFlowParam(String inputTableName, String modelGuidField, int percentileLowerBound,
             int percentileUpperBound, Map<String, String> originalScoreFieldMap) {
         CalculatePredictedRevenuePercentileParameters params = new CalculatePredictedRevenuePercentileParameters();
+        params.setCustomerSpace(configuration.getCustomerSpace());
         params.setInputTableName(inputTableName);
         params.setPercentileFieldName(ScoreResultField.PredictedRevenuePercentile.displayName);
-        params.setRevenueFieldName(getRevenueFieldName());
+//        params.setRevenueFieldName(getRevenueFieldName());
         params.setModelGuidField(modelGuidField);
         params.setPercentileLowerBound(percentileLowerBound);
         params.setPercentileUpperBound(percentileUpperBound);

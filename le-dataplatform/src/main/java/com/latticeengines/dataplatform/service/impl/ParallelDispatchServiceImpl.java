@@ -6,6 +6,8 @@ import javax.annotation.Resource;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.mortbay.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,8 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 @Component("parallelDispatchService")
 public class ParallelDispatchServiceImpl implements DispatchService {
+
+    private static final Logger log = LoggerFactory.getLogger(ParallelDispatchServiceImpl.class);
 
     @Value("${dataplatform.model.parallel.enabled:false}")
     private boolean configParallelEnabled;
@@ -112,7 +116,7 @@ public class ParallelDispatchServiceImpl implements DispatchService {
     @Override
     public ApplicationId submitJob(ModelingJob modelingJob, boolean isParallelEnabled, boolean isModeling) {
 
-        Log.info("useEmr=" + useEmr + " modelAwsBatchEnabled=" + modelAwsBatchEnabled + "isParallelEnabled="
+        log.info("useEmr=" + useEmr + " modelAwsBatchEnabled=" + modelAwsBatchEnabled + "isParallelEnabled="
                 + isParallelEnabled);
         if (modelAwsBatchEnabled && !isParallelEnabled) {
             return awsBatchContainerDispatcher.submitJob(modelingJob, isParallelEnabled, isModeling);

@@ -3,6 +3,7 @@ package com.latticeengines.scoring.dataflow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +14,17 @@ import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
 public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlowsDataFlowFunctionalTestNGBase {
+
+    String evModelGuid = "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm";
 
     @Test(groups = "functional")
     public void testCalculationExpectedRevenuePercentile() {
@@ -32,11 +38,10 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
         List<GenericRecord> outputRecords = readOutput();
 
         assertEquals(outputRecords.size(), inputRecords.size());
-
-        String[] modelGuids = { "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
-                "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
-                "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql",
-                "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", };
+        String[] modelGuids = { "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", //
+                "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", //
+                "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql", //
+                evModelGuid, };
 
         Map<String, List<GenericRecord>> modelRecordMap = new HashMap<>();
         Stream.of(modelGuids).forEach((guid) -> modelRecordMap.put(guid, new ArrayList<>()));
@@ -49,9 +54,9 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
             }
         }
 
-        assertEquals(3210, modelRecordMap.get("ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm").size());
+        assertEquals(3210, modelRecordMap.get(evModelGuid).size());
 
-        String[] evModelGuids = { "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", };
+        String[] evModelGuids = { evModelGuid, };
 
         for (String modelGuid : evModelGuids) {
             verifyPerModelOutput(modelGuid, modelRecordMap.get(modelGuid), true);
@@ -97,7 +102,7 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
         rawScoreFieldMap.put("ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", rawScoreField);
         rawScoreFieldMap.put("ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", rawScoreField);
         rawScoreFieldMap.put("ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql", rawScoreField);
-        rawScoreFieldMap.put("ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", predictedRevenueField);
+        rawScoreFieldMap.put(evModelGuid, predictedRevenueField);
 
         parameters.setInputTableName("InputTable");
         parameters.setPercentileFieldName(scoreField);
@@ -106,9 +111,25 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
 
+        setDummyScoreDerivationMap(parameters, evModelGuid);
+
         setFitFunctionParametersMap(parameters);
 
         return parameters;
+    }
+
+    private void setDummyScoreDerivationMap(CalculateExpectedRevenuePercentileParameters parameters, String modelGuid) {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("calculateExpectedRevenuePercentile/PLS-11356/params.json");
+        CalculateExpectedRevenuePercentileParameters tempParameters = JsonUtils.deserialize(inputStream,
+                CalculateExpectedRevenuePercentileParameters.class);
+        Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps = new HashMap<>();
+        for (Map<ScoreDerivationType, ScoreDerivation> scoreDerivationMap : tempParameters.getScoreDerivationMaps()
+                .values()) {
+            scoreDerivationMaps.put(modelGuid, scoreDerivationMap);
+            break;
+        }
+        parameters.setScoreDerivationMaps(scoreDerivationMaps);
     }
 
     @Override

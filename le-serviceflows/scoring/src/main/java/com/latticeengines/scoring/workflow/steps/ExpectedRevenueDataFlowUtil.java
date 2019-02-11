@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -20,10 +22,12 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.EVScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 
 public class ExpectedRevenueDataFlowUtil {
+    private static final Logger log = LoggerFactory.getLogger(ExpectedRevenueDataFlowUtil.class);
 
     public static Map<String, String> getEVFitFunctionParametersMap(CustomerSpace customerSpace,
             Configuration yarnConfiguration, ModelSummaryProxy modelSummaryProxy, Map<String, String> modelFieldMap) {
@@ -48,6 +52,9 @@ public class ExpectedRevenueDataFlowUtil {
             }
 
             if (fitFunctionParameters != null) {
+                log.info(String.format("getEVFitFunctionParametersMap - modelId = %s, fitFunctionParameters = %s",
+                        modelId, JsonUtils.serialize(fitFunctionParameters)));
+
                 fitFunctionParametersMap.put(modelId, fitFunctionParameters);
             }
         });
@@ -56,13 +63,13 @@ public class ExpectedRevenueDataFlowUtil {
 
     public static Map<String, Map<ScoreDerivationType, ScoreDerivation>> getScoreDerivationMap(
             CustomerSpace customerSpace, Configuration yarnConfiguration, ModelSummaryProxy modelSummaryProxy,
-            Map<String, String> modelFieldMap, boolean loadOnlyForEVModel) {
+            Map<String, String> modelFieldMap, String fieldNameForEVIdentification, boolean loadOnlyForEVModel) {
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
                 yarnConfiguration);
         Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMap = new HashMap<>();
         modelFieldMap.entrySet().stream().forEach(entry -> {
             String modelId = entry.getKey();
-            boolean isEV = ScoreResultField.ExpectedRevenue.displayName.equals(entry.getValue());
+            boolean isEV = fieldNameForEVIdentification.equals(entry.getValue());
             if (!loadOnlyForEVModel || isEV) {
                 String scoreDerivationStr = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId, isEV);
 
@@ -82,6 +89,8 @@ public class ExpectedRevenueDataFlowUtil {
 
                 }
 
+                log.info(String.format("getScoreDerivationMap - modelId = %s, scoreDerivationInfo = %s", modelId,
+                        JsonUtils.serialize(scoreDerivationInfo)));
                 scoreDerivationMap.put(modelId, scoreDerivationInfo);
 
             }
@@ -115,9 +124,5 @@ public class ExpectedRevenueDataFlowUtil {
                     return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
                             || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
                 }).collect(Collectors.toList());
-    }
-
-    public static enum ScoreDerivationType {
-        EV, REVENUE, PROBABILITY
     }
 }

@@ -1,10 +1,8 @@
 package com.latticeengines.scoring.dataflow.ev;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -18,34 +16,16 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.scoring.dataflow.CalculateExpectedRevenuePercentile.ParsedContext;
 
-import cascading.operation.aggregator.Count;
 import cascading.tuple.Fields;
 
-@Component("moreMoreProc")
-public class MoreMoreProc {
+@Component("percentileCalculationHelper")
+public class PercentileCalculationHelper {
 
     @Inject
-    private Helper helper;
+    private NodeSplitter nodeSplitter;
 
-    public Node mergeCount(ParsedContext context, Node node) {
-        String scoreCountPipeName = "ModelScoreCount_" + UUID.randomUUID().toString().replace("-", "") + "_";
-        String scoreFieldName = ScoreResultField.Percentile.displayName;
-        Node score = node.retain(scoreFieldName, context.modelGuidFieldName).renamePipe(scoreCountPipeName);
-        List<FieldMetadata> scoreCountFms = Arrays.asList( //
-                new FieldMetadata(context.modelGuidFieldName, String.class), //
-                new FieldMetadata(scoreFieldName, String.class), //
-                new FieldMetadata(context.scoreCountFieldName, Long.class) //
-        );
-        Node totalCount = score
-                .groupByAndAggregate(new FieldList(context.modelGuidFieldName), //
-                        new Count(new Fields(context.scoreCountFieldName)), //
-                        scoreCountFms, Fields.ALL) //
-                .retain(context.modelGuidFieldName, context.scoreCountFieldName);
-        return node.innerJoin(context.modelGuidFieldName, totalCount, context.modelGuidFieldName);
-    }
-
-    public Node calculatePercentileByFieldMap(ParsedContext context, Node mergedScoreCount) {
-        Map<String, Node> nodes = helper.splitNodes(mergedScoreCount, context.originalScoreFieldMap,
+    public Node calculate(ParsedContext context, Node mergedScoreCount) {
+        Map<String, Node> nodes = nodeSplitter.split(mergedScoreCount, context.originalScoreFieldMap,
                 context.modelGuidFieldName);
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {

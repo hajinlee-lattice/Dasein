@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.dataflow;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -17,11 +18,11 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.cdl.LookupPercentileForRevenueFunction;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-import com.latticeengines.scoring.dataflow.ev.Helper;
+import com.latticeengines.scoring.dataflow.ev.NodeSplitter;
 import com.latticeengines.scoring.workflow.steps.ExpectedRevenueDataFlowUtil;
-import com.latticeengines.scoring.workflow.steps.ExpectedRevenueDataFlowUtil.ScoreDerivationType;
 
 import cascading.tuple.Fields;
 
@@ -37,7 +38,7 @@ public class CalculatePredictedRevenuePercentile
     private ModelSummaryProxy modelSummaryProxy;
 
     @Inject
-    private Helper helper;
+    private NodeSplitter nodeSplitter;
 
     protected String inputTableName;
     protected String percentileFieldName;
@@ -45,8 +46,9 @@ public class CalculatePredictedRevenuePercentile
     protected Map<String, String> originalScoreFieldMap;
     protected int minPct = 5;
     protected int maxPct = 99;
-    protected String standardScoreField = ScoreResultField.Percentile.displayName;
+    protected String predictedRevenueFieldName = ScoreResultField.PredictedRevenue.displayName;
     protected Map<String, String> fitFunctionParametersMap;
+    private Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
     @Override
     public Node construct(CalculatePredictedRevenuePercentileParameters parameters) {
@@ -58,14 +60,14 @@ public class CalculatePredictedRevenuePercentile
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());
 
         if (MapUtils.isNotEmpty(originalScoreFieldMap)) {
+            if (MapUtils.isEmpty(scoreDerivationMaps)) {
+                scoreDerivationMaps = ExpectedRevenueDataFlowUtil.getScoreDerivationMap(parameters.getCustomerSpace(),
+                        yarnConfiguration, modelSummaryProxy, originalScoreFieldMap, predictedRevenueFieldName, true);
+            }
+            log.info(String.format("scoreDerivationMaps = %s", scoreDerivationMaps));
 
-            Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMap = ExpectedRevenueDataFlowUtil
-                    .getScoreDerivationMap(parameters.getCustomerSpace(), yarnConfiguration, modelSummaryProxy,
-                            originalScoreFieldMap, true);
-
-            Node calculatePercentile = lookupPercentileFromScoreDerivation(scoreDerivationMap, originalScoreFieldMap,
-                    modelGuidFieldName, percentileFieldName, parameters.getRevenueFieldName(), minPct, maxPct,
-                    addPercentileColumn);
+            Node calculatePercentile = lookupPercentileFromScoreDerivation(scoreDerivationMaps, originalScoreFieldMap,
+                    modelGuidFieldName, percentileFieldName, minPct, maxPct, addPercentileColumn);
             calculatePercentile = calculatePercentile.retain(retainedFields);
             return calculatePercentile;
         }
@@ -75,21 +77,24 @@ public class CalculatePredictedRevenuePercentile
     private Node lookupPercentileFromScoreDerivation(
             Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMap, //
             Map<String, String> originalScoreFieldMap, //
-            String modelGuidFieldName, String percentileFieldName, String revenueFieldName, int minPct, int maxPct,
-            Node mergedScoreCount) {
+            String modelGuidFieldName, String percentileFieldName, int minPct, int maxPct, Node mergedScoreCount) {
 
-        Map<String, Node> nodes = helper.splitNodes(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
+        Map<String, Node> nodes = nodeSplitter.split(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
             String modelGuid = entry.getKey();
             Node node = entry.getValue();
 
             if (scoreDerivationMap.containsKey(modelGuid)) {
-                node = node.apply(
-                        new LookupPercentileForRevenueFunction( //
-                                new Fields(node.getFieldNamesArray()), revenueFieldName, percentileFieldName,
-                                scoreDerivationMap.get(modelGuid).get(ScoreDerivationType.REVENUE)),
+                log.info(String.format(
+                        "modelGuid = %s, node.getFieldNamesArray() = %s, revenueFieldName = %s, percentileFieldName = %s",
+                        modelGuid, JsonUtils.serialize(node.getFieldNamesArray()), originalScoreFieldMap.get(modelGuid),
+                        percentileFieldName));
+                node = node.apply(new LookupPercentileForRevenueFunction( //
+                        new Fields(node.getFieldNamesArray()), originalScoreFieldMap.get(modelGuid),
+                        percentileFieldName, scoreDerivationMap.get(modelGuid).get(ScoreDerivationType.REVENUE)),
                         new FieldList(node.getFieldNamesArray()), node.getSchema(), null, Fields.REPLACE);
+                node = node.sort(Arrays.asList(percentileFieldName, originalScoreFieldMap.get(modelGuid)), true);
             }
 
             if (merged == null) {
@@ -108,5 +113,6 @@ public class CalculatePredictedRevenuePercentile
         originalScoreFieldMap = parameters.getOriginalScoreFieldMap();
         minPct = parameters.getPercentileLowerBound();
         maxPct = parameters.getPercentileUpperBound();
+        scoreDerivationMaps = parameters.getScoreDerivationMaps();
     }
 }
