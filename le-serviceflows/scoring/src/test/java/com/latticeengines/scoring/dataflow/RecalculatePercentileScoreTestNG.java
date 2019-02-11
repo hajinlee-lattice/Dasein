@@ -1,5 +1,9 @@
 package com.latticeengines.scoring.dataflow;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +19,7 @@ import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-@ContextConfiguration(locations = {"classpath:serviceflows-scoring-dataflow-context.xml"})
+@ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
 public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
@@ -35,11 +35,9 @@ public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFuncti
 
         assertEquals(outputRecords.size(), inputRecords.size());
 
-        String[] modelGuids = {
-            "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
-            "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
-            "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql"
-        };
+        String[] modelGuids = { "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", // 5324
+                "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", // 3012
+                "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql" }; // 7733
 
         Map<String, List<GenericRecord>> modelRecordMap = new HashMap<>();
         Stream.of(modelGuids).forEach((guid) -> modelRecordMap.put(guid, new ArrayList<>()));
@@ -67,7 +65,7 @@ public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFuncti
             Integer curPct = (Integer) record.get(ScoreResultField.Percentile.displayName);
 
             assertEquals(recordModelGuid, modelGuid);
-            assertTrue(curPct <= prevPct);
+            assertTrue(curPct <= prevPct, modelGuid);
             assertTrue(curRawScore <= prevRawScore);
 
             assertTrue(curPct <= 99 && curPct >= 5, "Percentile " + curPct + " is not in range of [5, 99]");
@@ -88,12 +86,20 @@ public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFuncti
         String modelGuidField = ScoreResultField.ModelId.displayName;
 
         String scoreField = ScoreResultField.Percentile.displayName;
+
+        Map<String, String> rawScoreFieldMap = new HashMap<>();
+        rawScoreFieldMap.put("ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", rawScoreField);
+        rawScoreFieldMap.put("ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", rawScoreField);
+        rawScoreFieldMap.put("ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql",
+                ScoreResultField.ExpectedRevenue.displayName);
+
         parameters.setInputTableName("InputTable");
         parameters.setRawScoreFieldName(rawScoreField);
         parameters.setScoreFieldName(scoreField);
         parameters.setModelGuidField(modelGuidField);
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
+        parameters.setOriginalScoreFieldMap(rawScoreFieldMap);
 
         return parameters;
     }

@@ -58,6 +58,14 @@ public class PercentileLookupAverageEvHelper {
                 new FieldMetadata(context.percentileFieldName, Integer.class)); //
         log.info(String.format("result fields = %s", JsonUtils.serialize(result.getFieldNames())));
 
+        Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps = context.scoreDerivationMaps;
+        if (MapUtils.isEmpty(context.scoreDerivationMaps)) {
+            scoreDerivationMaps = ExpectedRevenueDataFlowUtil.getScoreDerivationMap(context.customerSpace,
+                    yarnConfiguration, modelSummaryProxy, context.originalScoreFieldMap, context.expectedRevenueField,
+                    true);
+            context.scoreDerivationMaps = scoreDerivationMaps;
+        }
+
         Map<String, Node> nodes = nodeSplitter.split(result, context.originalScoreFieldMap, context.modelGuidFieldName);
         Node aggregatedNode = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
@@ -101,14 +109,8 @@ public class PercentileLookupAverageEvHelper {
         if (MapUtils.isNotEmpty(context.originalScoreFieldMap)) {
 
             FieldList retainedFields = new FieldList(node.getFieldNames());
-            Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps = context.scoreDerivationMaps;
-            if (MapUtils.isEmpty(context.scoreDerivationMaps)) {
-                scoreDerivationMaps = ExpectedRevenueDataFlowUtil.getScoreDerivationMap(context.customerSpace,
-                        yarnConfiguration, modelSummaryProxy, context.originalScoreFieldMap,
-                        context.expectedRevenueField, true);
-                context.scoreDerivationMaps = scoreDerivationMaps;
-            }
-            node = lookupPercentileFromScoreDerivation(scoreDerivationMaps, context.originalScoreFieldMap,
+
+            node = lookupPercentileFromScoreDerivation(context.scoreDerivationMaps, context.originalScoreFieldMap,
                     context.modelGuidFieldName, context.outputPercentileFieldName, context.expectedRevenueField,
                     context.minPct, context.maxPct, node);
             node = node.retain(retainedFields);

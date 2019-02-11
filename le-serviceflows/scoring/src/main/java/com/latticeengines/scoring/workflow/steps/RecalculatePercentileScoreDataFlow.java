@@ -1,9 +1,16 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.Map;
+
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
@@ -12,6 +19,8 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("recalculatePercentileScoreDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculatePercentileScoreDataFlowConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(RecalculatePercentileScoreDataFlow.class);
 
     private static final String rawScoreField = ScoreResultField.RawScore.displayName;
 
@@ -44,6 +53,17 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
         params.setModelGuidField(modelGuidField);
         params.setPercentileLowerBound(percentileLowerBound);
         params.setPercentileUpperBound(percentileUpperBound);
+
+        Map<String, String> scoreFieldMap = ExpectedRevenueDataFlowUtil
+                .getScoreFieldsMap(getListObjectFromContext(RATING_MODELS, RatingModelContainer.class));
+
+        if (MapUtils.isNotEmpty(scoreFieldMap)) {
+            log.info(String.format("Using scoreFieldMap %s", JsonUtils.serialize(scoreFieldMap)));
+            params.setOriginalScoreFieldMap(scoreFieldMap);
+        } else {
+            throw new RuntimeException("Couldn't find any valid scoreFieldMap or individual modelGuid");
+        }
+
         configuration.setDataFlowParams(params);
     }
 }

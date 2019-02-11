@@ -238,6 +238,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
             setMatchConfig();
             setAddStandardAttributesConfig();
+            recalculatePercentile.setSkipStep(forceEVSteps);
             recalculateExpectedRevenue.setSkipStep(!forceEVSteps);
             calculatePredictedRevenuePercentile.setSkipStep(!forceEVSteps);
             calculateExpectedRevenuePercentile.setSkipStep(!forceEVSteps);
