@@ -14,7 +14,7 @@ angular
         $scope,
         $filter,
         $timeout,
-        $interval,
+        $injector,
         $q,
         $state,
         $stateParams,
@@ -38,6 +38,10 @@ angular
         ConfigureAttributesStore,
         Notice
     ) {
+        let ReviewData = $injector.has('ReviewData')
+            ? $injector.get('ReviewData')
+            : { success: false };
+
         var vm = this,
             flags = FeatureFlagService.Flags();
 
@@ -146,7 +150,6 @@ angular
         }
 
         vm.init = function () {
-            console.log(vm);
             // leo();
             if (['segment.analysis'].indexOf(vm.section) != -1) {
                 // only run on 'my data' page

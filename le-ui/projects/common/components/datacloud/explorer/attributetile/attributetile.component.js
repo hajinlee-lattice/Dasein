@@ -210,6 +210,10 @@ angular
                     return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List;
                 }
 
+                vm.getWarning = function (warning) {
+                    return DataCloudStore.warnings[warning];
+                }
+
                 vm.toggleApprovedUsage = function (item) {
                     switch (item.ApprovedUsage[0]) {
                         case 'None':

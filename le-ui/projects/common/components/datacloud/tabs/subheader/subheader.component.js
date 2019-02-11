@@ -3,7 +3,8 @@ angular
     .controller('SubHeaderTabsController', function (
         $state, $rootScope, $stateParams, $timeout, StateHistory,
         FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
-        SegmentStore, HealthService, QueryTreeService
+        SegmentStore, HealthService, QueryTreeService, ModelStore,
+        TopPredictorService
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
@@ -146,6 +147,32 @@ angular
             $timeout(function () {
                 $state.go(state, $stateParams);
             }, 1);
+        };
+
+        vm.clickedExport = function () {
+            var data = ModelStore.data;
+            var csvRows = TopPredictorService.GetTopPredictorExport(data);
+            var lineArray = [];
+
+            csvRows.forEach(function (infoArray, index) {
+                var line = infoArray.join(",");
+                lineArray.push(line);
+            });
+
+            var csvContent = lineArray.join("\n");
+            var element = document.createElement("a");
+
+            element.setAttribute(
+                "href",
+                "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
+            );
+            element.setAttribute("download", "attributes.csv");
+            element.style.display = "none";
+
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+
         };
 
         vm.clickPickerBack = function () {
@@ -296,7 +323,6 @@ angular
                     SegmentService.CreateOrUpdateSegmentExport(
                         segmentExport
                     ).then(function (result) {
-                        console.log(result);
                         if (result.success) {
                             vm.displayExportBanner = true;
                         }

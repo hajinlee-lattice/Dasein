@@ -287,6 +287,27 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 viewingIteration: true
             },
             resolve: {
+                // ReviewData: function (
+                //     $q,
+                //     $stateParams,
+                //     Model,
+                //     ModelReviewStore
+                // ) {
+                //     var deferred = $q.defer(),
+                //         modelId = $stateParams.modelId,
+                //         eventTableName =
+                //             Model.EventTableProvenance.EventTableName;
+
+                //     console.log('### resolve ReviewData', Model, modelId, eventTableName);
+                //     ModelReviewStore.GetReviewData(
+                //         modelId,
+                //         eventTableName
+                //     ).then(function (result) {
+                //         deferred.resolve(result);
+                //     });
+
+                //     return deferred.promise;
+                // },
                 Enrichments: function ($q, $stateParams, DataCloudStore, ApiHost) {
                     var deferred = $q.defer(),
                         ratingId = $stateParams['rating_id'],
@@ -303,6 +324,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                         result.forEach((item) => {
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
+                                console.log('fart', item);
                             }
                         })
                         deferred.resolve(result);

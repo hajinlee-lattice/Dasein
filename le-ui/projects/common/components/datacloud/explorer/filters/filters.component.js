@@ -49,6 +49,10 @@ angular
                 }
 
                 vm.init_filters = function () {
+                    if (vm.section == 're.model_iteration') {
+                        vm.orders.attribute = ['-HighlightHighlighted', 'HasWarnings', 'ImportanceOrdering', 'DisplayName'];
+                    }
+
                     vm.download_button.items = [{
                         href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
                         label: vm.label.button_download,

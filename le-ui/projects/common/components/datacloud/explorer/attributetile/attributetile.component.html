@@ -3,7 +3,13 @@
                     'has_warning': vm.section == 're.model_iteration'
                 }">
     <div class="attribute-importance" ng-if="vm.section == 're.model_iteration'">
-        <div class="attribute-warning" ng-if="enrichment.HasWarnings">
+        <div class="attribute-warning show-tooltip top" ng-if="enrichment.HasWarnings">
+            <div class="tooltip_">
+                <div class="cover" ng-repeat="warning in enrichment.AssociatedDataRules">
+                    <em>{{ vm.getWarning(warning).displayName + ' (' + warning + ')' || warning; }}</em>
+                    <p>{{ vm.getWarning(warning).description || 'description not found.'; }}</p>
+                </div>
+            </div>
             <i class="fa fa-warning pull-left"></i>Warning
         </div>
         <span class="attribute-importance-label" ng-if="vm.checkImportance(enrichment)">
