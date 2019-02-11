@@ -11,12 +11,16 @@ connector-list-component{
 
     .connectors-list{
         margin: 3em 0;
+        // overflow: hidden;
+        // flex-wrap: wrap;
             .le-connector{
-                max-width: 160px;
+                // margin: 0 1em;
                 height: 100%;
-                margin: 0 2px;
+                margin: 0 5px;
                 cursor: pointer;
                 border-radius: 4px;
+                padding: 1.5em;
+                max-width: 200px;
             .le-card-image-container{
                 height: 60px;
                 align-items: center;
@@ -38,6 +42,7 @@ connector-list-component{
         .le-connector:hover{
             background-color: $saphire-two;
         }
+
     }
     .le-connectors{
         margin-top: 1px;
