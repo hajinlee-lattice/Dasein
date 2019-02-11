@@ -70,6 +70,21 @@ export default class SystemComponent extends Component {
                 return 'Unmapped';
         }
     }
+
+    getSystemStatusClass(){
+        let color = 'color-';
+        switch(this.state.system.isRegistered){
+            case true:
+            color = `${color}${'green'}`;
+            break;
+            default:
+            color = `${color}${'red'}`;
+            break;
+        }
+        return color;
+        
+    }
+
     getEditTemplate() {
         console.log('TEMPLATE ', this.editMapping);
         this.editMapping = Object.assign({}, this.state.system);
@@ -93,43 +108,43 @@ export default class SystemComponent extends Component {
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
                             <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col">
+                                <div className="le-layout-flex-col lable">
                                     System Org Name
                                 </div>
-                                <div className="le-layout-flex-col color-blue">
+                                <div className="le-layout-flex-col color-blue content">
                                     {this.state.system.orgName}
                                 </div>
                             </div>
                             <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col">
+                                <div className="le-layout-flex-col lable">
                                     System Org Id
                             </div>
-                                <div className="le-layout-flex-col color-blue">
+                                <div className="le-layout-flex-col color-blue content">
                                     {this.state.system.orgId}
                                 </div>
                             </div>
                             <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col">
+                                <div className="le-layout-flex-col lable">
                                     Account Id
                             </div>
-                                <div className="le-layout-flex-col color-blue">
+                                <div className="le-layout-flex-col color-blue content" title={this.state.system.accountId}>
                                     {this.state.system.accountId}
                                 </div>
                             </div>
                             <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col">
+                                <div className="le-layout-flex-col lable">
                                     Last Updated
                             </div>
-                                <div className="le-layout-flex-col color-blue">
+                                <div className="le-layout-flex-col color-blue content">
                                     {this.state.system.updated}
                                 </div>
                             </div>
                             <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col">
+                                <div className="le-layout-flex-col lable">
                                     Status
                             </div>
-                                <div className="le-layout-flex-col">
-                                    {this.getSystemStatus()}
+                                <div className="le-layout-flex-col content">
+                                    <span className={this.getSystemStatusClass()}>{this.getSystemStatus()}</span>
                                 </div>
                             </div>
                     </LeTileBody>
