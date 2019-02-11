@@ -22,7 +22,7 @@ export default class LeTableHeader extends Component {
                 columnsMapping={this.props.headerMapping}
                 rowIndex={0}
                 rowData={this.data}
-                rowClasses={"le-table-header le-table-row-no-select"}
+                rowClasses={"le-table-header"}
             >
                 {this.props.children}
             </LeTableRow>

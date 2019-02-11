@@ -342,7 +342,16 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="item in vm.relatedItems | limitTo: 5">
-                                <td>{{ item.type }}</td>
+                                <td>
+                                    <span 
+                                        class="icon"
+                                        ng-class="{
+                                            'ico-segment': item.type == 'Segment',
+                                            'ico-campaign': item.type == 'Campaign',
+                                            'ico-model': item.type == 'Model'
+                                        }"><span></span></span>
+                                    {{ item.type }}
+                                </td>
                                 <td>{{ item.name }}</td>
                             </tr>
                         </tbody>
