@@ -308,15 +308,6 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("123456789") //
                                                         .build(),
                                         map1),
-                        // error entry
-                        TestPatchBookUtils //
-                                .newPatchBook(2L,
-                                        new MatchKeyTuple //
-                                                .Builder() //
-                                                        .withDomain("def.com") //
-                                                        .withDuns("123214444") //
-                                                        .build(),
-                                        map2),
                         // error entry : duplicate duns
                         TestPatchBookUtils //
                                 .newPatchBook(3L,
@@ -348,7 +339,6 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                         map3),
                 },
                 new PatchBookValidationError[] {
-                        newError(PatchBookValidator.DOMAIN_PATCH_MATCH_KEY_ERR, 2L), 
                         newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 1L,
                                 3L),
                         newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 4L, 5L,

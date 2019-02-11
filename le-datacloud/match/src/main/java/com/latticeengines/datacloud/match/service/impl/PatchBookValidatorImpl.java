@@ -264,25 +264,16 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         for(PatchBook book : books) {
             String dunsKeyAndDomPatchItem = book.getDuns() + book.getPatchItems().get(MatchKey.Domain.name());
             error = null;
-            if (checkOnlyDunsMatchKey(book)
-                    && book.getPatchItems().containsKey(MatchKey.Domain.name())
-                    && book.getPatchItems().size() == 1) { // match key = duns and patchedItem = domain
-                // check if match key = duns and patchedItem = domain, this combination is unique
-                if (!patchBooksWithSameDomDuns.containsKey(dunsKeyAndDomPatchItem)) {
-                    patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem,
-                            Arrays.asList(book.getPid()));
-                } else {
-                    List<Long> pids = new ArrayList<>(
-                            patchBooksWithSameDomDuns.get(dunsKeyAndDomPatchItem));
-                    pids.add(book.getPid());
-                    patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem, pids);
-                }
+            // match key = duns and patchedItem = domain
+            // check if match key = duns and patchedItem = domain, this
+            // combination is unique
+            if (!patchBooksWithSameDomDuns.containsKey(dunsKeyAndDomPatchItem)) {
+                patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem, Arrays.asList(book.getPid()));
             } else {
-                // error : as match key needs to be duns and patch item needs to be domain
-                error = new PatchBookValidationError();
-                error.setMessage(DOMAIN_PATCH_MATCH_KEY_ERR);
-                error.setPatchBookIds(Arrays.asList(book.getPid()));
-                errorList.add(error);
+                List<Long> pids = new ArrayList<>(
+                        patchBooksWithSameDomDuns.get(dunsKeyAndDomPatchItem));
+                pids.add(book.getPid());
+                patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem, pids);
             }
         }
         for (String key : patchBooksWithSameDomDuns.keySet()) {
@@ -290,24 +281,11 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             if (pids.size() > 0) {
                 error = new PatchBookValidationError();
                 error.setMessage(DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO);
-                System.out.println("# pids : " + pids);
                 error.setPatchBookIds(pids);
                 errorList.add(error);
             }
         }
         return errorList;
-    }
-
-    private boolean checkOnlyDunsMatchKey(PatchBook book) {
-        if (book.getCity() == null && book.getCountry() == null && book.getCreatedBy() == null
-                && book.getCreatedDate() == null && book.getDomain() == null
-                && book.getEffectiveSince() == null && book.getEffectiveSinceVersion() == null
-                && book.getExpireAfter() == null && book.getExpireAfterVersion() == null
-                && book.getLastModifiedBy() == null && book.getLastModifiedDate() == null
-                && book.getDuns() != null) {
-            return true;
-        }
-            return false;
     }
 
     /*
