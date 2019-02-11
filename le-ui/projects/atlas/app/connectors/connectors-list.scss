@@ -11,10 +11,7 @@ connector-list-component{
 
     .connectors-list{
         margin: 3em 0;
-        // overflow: hidden;
-        // flex-wrap: wrap;
             .le-connector{
-                // margin: 0 1em;
                 height: 100%;
                 margin: 0 5px;
                 cursor: pointer;
@@ -34,20 +31,14 @@ connector-list-component{
                     text-align: center;
                 }
             }
-            &.selected{
-
-            }
-          
         }
         .le-connector:hover{
             background-color: $saphire-two;
         }
-
     }
     .le-connectors{
         margin-top: 1px;
         padding: 1em 0;
-        // border: 1px solid green;
         width: 100%;
         max-width: 1000px;
         height: 100%;
