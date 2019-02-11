@@ -1,16 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -19,6 +8,16 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ContactFetcher {
@@ -80,7 +79,7 @@ public class ContactFetcher {
         processedContactsCount += contactPage.getData().size();
 
         contactPage //
-                .getData().stream() //
+                .getData()
                 .forEach( //
                         contact -> processContToUpdMapForAccContList(mapForAccountAndContactList, contact));
         return processedContactsCount;
