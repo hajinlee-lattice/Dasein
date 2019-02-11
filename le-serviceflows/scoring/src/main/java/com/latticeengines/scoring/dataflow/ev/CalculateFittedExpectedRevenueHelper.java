@@ -22,13 +22,6 @@ public class CalculateFittedExpectedRevenueHelper {
 
     public Node calculate(ParsedContext context, Node calculatePercentile, FieldList retainedFields) {
 
-        // calculatePercentile =
-        // calculateFittedExpectedRevenue(context.fitFunctionParametersMap,
-        // context.originalScoreFieldMap, context.modelGuidFieldName,
-        // context.outputExpRevFieldName,
-        // context.outputPercentileFieldName, context.minPct, context.maxPct,
-        // calculatePercentile);
-
         Map<String, Node> nodes = nodeSplitter.split(calculatePercentile, context.originalScoreFieldMap,
                 context.modelGuidFieldName);
         Node merged = null;
@@ -60,40 +53,4 @@ public class CalculateFittedExpectedRevenueHelper {
                         new FieldList(context.expectedRevenueField)) //
                 .retain(retainedFields);
     }
-
-    // private Node calculateFittedExpectedRevenue(Map<String, String>
-    // fitFunctionParametersMap,
-    // Map<String, String> originalScoreFieldMap, String modelGuidFieldName,
-    // String outputExpRevFieldName,
-    // String outputPercentileFieldName, int minPct, int maxPct, Node
-    // mergedScoreCount) {
-    //
-    // Map<String, Node> nodes = helper.splitNodes(mergedScoreCount,
-    // originalScoreFieldMap, modelGuidFieldName);
-    // Node merged = null;
-    // for (Map.Entry<String, Node> entry : nodes.entrySet()) {
-    // String modelGuid = entry.getKey();
-    // String evFitFunctionParamsStr = fitFunctionParametersMap.get(modelGuid);
-    //
-    // Node node = entry.getValue();
-    //
-    // if (ScoreResultField.ExpectedRevenue.displayName //
-    // .equals(originalScoreFieldMap.get(modelGuid))) {
-    // node = node.apply(
-    // new CalculateFittedExpectedRevenueFunction(new
-    // Fields(node.getFieldNamesArray()),
-    // outputExpRevFieldName, outputPercentileFieldName,
-    // evFitFunctionParamsStr),
-    // new FieldList(node.getFieldNamesArray()), node.getSchema(), null,
-    // Fields.REPLACE);
-    // }
-    //
-    // if (merged == null) {
-    // merged = node;
-    // } else {
-    // merged = merged.merge(node);
-    // }
-    // }
-    // return merged;
-    // }
 }

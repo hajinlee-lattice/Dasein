@@ -37,7 +37,6 @@ public class CalculatePredictedRevenuePercentileDataFlow
         params.setCustomerSpace(configuration.getCustomerSpace());
         params.setInputTableName(inputTableName);
         params.setPercentileFieldName(ScoreResultField.PredictedRevenuePercentile.displayName);
-//        params.setRevenueFieldName(getRevenueFieldName());
         params.setModelGuidField(modelGuidField);
         params.setPercentileLowerBound(percentileLowerBound);
         params.setPercentileUpperBound(percentileUpperBound);

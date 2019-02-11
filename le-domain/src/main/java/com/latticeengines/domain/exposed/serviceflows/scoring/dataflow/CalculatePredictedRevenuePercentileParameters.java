@@ -20,9 +20,6 @@ public class CalculatePredictedRevenuePercentileParameters extends DataFlowParam
 
     @JsonProperty("percentile_field_name")
     private String percentileFieldName;
-//
-//    @JsonProperty("revenue_field_name")
-//    private String revenueFieldName;
 
     @JsonProperty("original_score_field_map")
     private Map<String, String> originalScoreFieldMap;
@@ -62,14 +59,6 @@ public class CalculatePredictedRevenuePercentileParameters extends DataFlowParam
     public void setPercentileFieldName(String percentileFieldName) {
         this.percentileFieldName = percentileFieldName;
     }
-//
-//    public String getRevenueFieldName() {
-//        return revenueFieldName;
-//    }
-//
-//    public void setRevenueFieldName(String revenueFieldName) {
-//        this.revenueFieldName = revenueFieldName;
-//    }
 
     public String getModelGuidField() {
         return modelGuidField;

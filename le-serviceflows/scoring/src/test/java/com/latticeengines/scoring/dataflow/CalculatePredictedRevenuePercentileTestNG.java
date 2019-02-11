@@ -115,7 +115,6 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
         parameters.setModelGuidField(modelGuidField);
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
-        // parameters.setRevenueFieldName(predictedRevenueField);
 
         setDummyScoreDerivationMap(parameters, evModelGuid);
 
