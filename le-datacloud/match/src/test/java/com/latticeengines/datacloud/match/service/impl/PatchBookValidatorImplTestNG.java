@@ -59,6 +59,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
 import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -293,11 +294,9 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     @DataProvider(name = "domainPatchValidation")
     private Object[][] domainPatchValidation() {
         Map<String, Object> map1 = new HashMap<>();
-        map1.put(MatchKey.Domain.name(), "abc.com");
-        Map<String, Object> map2 = new HashMap<>();
-        map2.put(MatchKey.DUNS.name(), "123412313");
+        map1.put(DataCloudConstants.ATTR_LDC_DOMAIN, "abc.com");
         Map<String, Object> map3 = new HashMap<>();
-        map3.put(MatchKey.Domain.name(), "google.com");
+        map3.put(DataCloudConstants.ATTR_LDC_DOMAIN, "google.com");
         return new Object[][] { {
                 new PatchBook[] {
                         // correct entry
@@ -339,10 +338,13 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                         map3),
                 },
                 new PatchBookValidationError[] {
-                        newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 1L,
+                        newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO
+                                + "DUNS = 123456789 PatchDomain = abc.com", 1L,
                                 3L),
-                        newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO, 4L, 5L,
-                                6L), }, } };
+                        newError(
+                                PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO
+                                        + "DUNS = 333333333 PatchDomain = google.com",
+                                4L, 5L, 6L), }, } };
     }
 
     @DataProvider(name = "patchBookMatchKeyDomainDunsSrc")
