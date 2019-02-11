@@ -256,6 +256,7 @@ public class MetadataResolver {
 
             unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
+            //unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
             unknownColumn.setMappedToLatticeField(false);
 
             result.fieldMappings.add(unknownColumn);
@@ -518,10 +519,12 @@ public class MetadataResolver {
     @VisibleForTesting
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
-            DateTime dateTime = null;
-            dateTime = TimeStampConvertUtils.parseDateTime(columnField);
-            if (dateTime == null) {
-                return false;
+            if (StringUtils.isNotBlank(columnField)) {
+                DateTime dateTime = null;
+                dateTime = TimeStampConvertUtils.parseDateTime(columnField);
+                if (dateTime == null) {
+                    return false;
+                }
             }
         }
         MutablePair<String, String> result = distinguishDateAndTime(columnFields);
@@ -534,19 +537,22 @@ public class MetadataResolver {
 
     @VisibleForTesting
     MutablePair<String, String> distinguishDateAndTime(List<String> columnFields) {
-        List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_DATE_TIME_FORMAT;
+        List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
-            for (String format : supportedDateTimeFormat) {
-                DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
-                DateTime date = null;
-                try {
-                    date = dtf.parseDateTime(columnField);
-                } catch (Exception e) {
-                }
-                if (date != null) {
-                    hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+            if (StringUtils.isNotBlank(columnField)) {
+                for (String format : supportedDateTimeFormat) {
+                    DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
+                    DateTime date = null;
+                    try {
+                        date = dtf.parseDateTime(columnField);
+                    } catch (Exception e) {
+                        log.debug("Found columnField unparsable as date/time: " + columnField);
+                    }
+                    if (date != null) {
+                        hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+                    }
                 }
             }
         }
@@ -574,7 +580,7 @@ public class MetadataResolver {
     @VisibleForTesting
     boolean isBooleanTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()
+            if (StringUtils.isNotBlank(columnField)
                     && !ACCEPTED_BOOLEAN_VALUES.contains(columnField.toLowerCase())) {
                 return false;
             }
@@ -584,7 +590,7 @@ public class MetadataResolver {
 
     private boolean isDoubleTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()) {
+            if (StringUtils.isNotBlank(columnField)) {
                 try {
                     Double.parseDouble(columnField);
                 } catch (NumberFormatException e) {
@@ -598,7 +604,7 @@ public class MetadataResolver {
 
     private boolean isIntegerTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && !columnField.isEmpty()) {
+            if (StringUtils.isNotBlank(columnField)) {
                 try {
                     Integer.parseInt(columnField);
                 } catch (NumberFormatException e) {

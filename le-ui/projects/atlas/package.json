@@ -42,6 +42,9 @@
     "webpack-cli": "^3.0.8",
     "webpack-merge": "^4.1.4"
   },
+  "resolutions": {
+    "ajv": "6.8.1"
+  },
   "jest": {
     "modulePaths": [
       "/shared/vendor/modules"

@@ -8,6 +8,7 @@ import SystemComponent from './system.component';
 import ConnectorService from './connectors.service';
 
 import './systems.component.scss';
+import '../../../common/widgets/layout/le-layouts.scss';
 export default class SystemsComponent extends Component {
     constructor(props) {
         super(props);
@@ -27,22 +28,29 @@ export default class SystemsComponent extends Component {
     }
     getColumns(rowNum, numColumns) {
         let ui = [];
-        let columns = this.state.connectors.slice(rowNum * numColumns, numColumns);
+        let columns = [];
+        if((rowNum * numColumns + numColumns) >= this.state.connectors.length){
+            columns = this.state.connectors.slice(rowNum * numColumns);
+        }else{
+            columns = this.state.connectors.slice(rowNum * numColumns, numColumns);
+        }
         columns.forEach(element => {
             console.log('ELEMENT ===>',element);
-            let columnsUi = (
-                <div class='le-flex-column'>
-                    <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
-                </div>
-            );
-            ui.push(columnsUi);
+            if(element){
+                let columnsUi = (
+                    <div class='le-layout-flex-col'>
+                        <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
+                    </div>
+                );
+                ui.push(columnsUi);
+            }
         });
         return ui;
 
     }
     getSystemsRows() {
         if (this.state.connectors.length == 0) {
-            return (<h4>No systems created</h4>);
+            return (<h5>No systems created</h5>);
         } else {
             let rows = this.state.connectors.length / 3;
             if (this.state.connectors.length % 3 > 0) {
@@ -52,7 +60,7 @@ export default class SystemsComponent extends Component {
             let ui = [];
             for (let i = 0; i < rows; i++) {
                 let rowUI = (
-                    <div class='le-flex-row'>
+                    <div class='le-layout-flex-grid'>
                         {this.getColumns(i, 3)}
                     </div>
                 );
@@ -65,9 +73,9 @@ export default class SystemsComponent extends Component {
     render() {
         return (
             <div className="systems-main">
-                <div class='some-page-wrapper'>
+                {/* <div class='some-page-wrapper'> */}
                     {this.getSystemsRows()}
-                </div>
+                {/* </div> */}
             </div>
         );
     }

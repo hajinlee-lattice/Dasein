@@ -41,6 +41,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     // Actor name (class name) -> duns
     // Duns from different source could be treated differently
+    // Predefined special key: DataCloudConstants.ACCOUNT_MASTER. Duns attached
+    // with this key is the Duns for final matched account in LDC
     private Map<String, String> dunsOriginMap;
 
     // The raw input data record we are matching.

@@ -297,6 +297,11 @@ Table of Contents
 		-webkit-mask-image: url("/assets/images/ico-salesforce.svg");
 		mask: url("/assets/images/ico-salesforce.svg");
 	}
+	&.ico-connectors{
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/connectors.svg");
+		mask: url("/assets/images/connectors.svg");
+	}
 	&.ico-api-console {
 		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-api-console.svg");

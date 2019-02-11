@@ -4,16 +4,16 @@ import argparse
 import random
 import os
 import os.path
-
-import lib.exporters as exporters
+from importlib import import_module
+from lib.exporters import *
 
 TEST_FILE_DIR = './accountmatchtests'
 OUTPUT_DIR = './output'
 OUTPUT_FORMAT_CSV = 'csv'
 OUTPUT_FORMAT_AVRO = 'avro'
 DEFAULT_SEED = 1337
-
 current_directory = os.path.dirname(os.path.realpath(__file__))
+
 
 def parse_args():
     """parse command line arguments
@@ -95,24 +95,20 @@ def generate_test_data(test_file, output_file, output_format, seed, verbose):
 
 def get_exporter(file_path, output_format):
     if output_format == OUTPUT_FORMAT_AVRO:
-        return exporters.AvroExporter(file_path)
+        return AvroExporter(file_path)
     elif output_format == OUTPUT_FORMAT_CSV:
-        return exporters.CsvExporter(file_path)
+        return CsvExporter(file_path)
     else:
         raise Exception('Invalid output format = {}'.format(output_format))
 
+
 def get_test_groups(test_file):
     # import the specified test file and retrieve test groups
-    mod = __import__('accountmatchtests.{}'.format(test_file), fromlist=[''])
+    mod = import_module('accountmatchtests.{}'.format(test_file))
     return mod.get_test_groups()
 
 
-def main():
-    # entry point
+if __name__ == '__main__':
     args = parse_args()
     check(args)
     generate_test_data(args.test_file, args.output_file, args.output_format, args.seed, args.verbose)
-
-
-if __name__ == '__main__':
-    main()

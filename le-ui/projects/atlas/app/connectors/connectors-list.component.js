@@ -24,7 +24,7 @@ export class ConnectorList extends Component {
             userValidated: false,
             userInfo: null
         };
-        this.connectors = ConnectorService.getList();
+        this.connectors = ConnectorService.getList(this.props.ConnectorsService.isMarketoEnabled());
 
     }
     componentDidMount() {
@@ -133,8 +133,8 @@ export class ConnectorList extends Component {
 }
 
 angular
-    .module("le.connectors.list", ['lp.sfdc', 'mainApp.core.utilities.BrowserStorageUtility', 'common.modal'])
-    .service('ConnectorsService', function ($state, BrowserStorageUtility, SfdcService, Notice) {
+    .module("le.connectors.list", ['lp.sfdc', 'mainApp.core.utilities.BrowserStorageUtility', 'mainApp.core.services.FeatureFlagService', 'common.modal'])
+    .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
         let ConnectorsService = this;
         this.getConnector = function () {
             console.log('Test', $state.router.locationConfig.$location.$$hash);
@@ -163,7 +163,11 @@ angular
                     Banner.error({ message: 'Failed to Generate Salesforce Access Token.' });
 
                 }
-            });;
+            });
+        }
+        this.isMarketoEnabled = function(){
+            let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
+            return connectorsEnabled;
         }
     })
     .component(

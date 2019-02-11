@@ -2,8 +2,8 @@ from __future__ import print_function
 
 import random
 
-import matchkeys
-from constants import DOMAIN, DUNS, MATCH_KEY_COLS, NAME
+from . import matchkeys
+from .constants import DOMAIN, DUNS, MATCH_KEY_COLS, NAME
 
 
 def random_from_records(records, col_generator, weights=None):

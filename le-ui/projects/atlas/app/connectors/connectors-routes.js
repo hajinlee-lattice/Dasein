@@ -2,6 +2,11 @@ import './connectors-list.component';
 import './systems.component';
 import './profiles.component';
 import ConnectorsRoutes from "./connectors-routing";
+// &.ico-connectors{
+//     background-color: $pearl-white;
+//     -webkit-mask-image: url("/assets/images/connections.png");
+//     mask: url("/assets/images/connections.png");
+// }
 angular
 .module('le.connectors', ['le.connectors.list', 'le.connectors.profile','le.systems.list'
 ])

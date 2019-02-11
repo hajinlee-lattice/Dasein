@@ -342,11 +342,7 @@ angular.module('lp.segments', [
 
         return attrs;
     };
-    
-    vm.connectorsEnabled = () => {
-        let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
-        return connectorsEnabled;
-    };
+
 
     function createOrUpdateSegment(segment) {
         var deferred = $q.defer();

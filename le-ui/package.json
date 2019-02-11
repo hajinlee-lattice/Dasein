@@ -41,6 +41,9 @@
         "webpack": "1.13.3",
         "webpack-merge": "^4.1.4"
     },
+    "resolutions": {
+        "ajv": "6.8.1"
+    },
     "scripts": {
         "install": "npm run InstallDev",
         "postinstall": "npm run build",

@@ -31,7 +31,6 @@ export default class SystemComponent extends Component {
     }
 
     mappingClosed(system) {
-        console.log('CHANGED? =====>', system);
         if (this.state.saving) {
             let observer = new Observer(
                 response => {
@@ -39,9 +38,6 @@ export default class SystemComponent extends Component {
                     console.log('HEY ', response);
                     if (response.data) {
                         let tmp = response.data;
-
-                        console.log('@@@@@@@@@@@@@ ', tmp);
-
                         this.setState({ saving: false, system: tmp });
                         httpService.unsubscribeObservable(observer);
                     }
@@ -49,9 +45,7 @@ export default class SystemComponent extends Component {
             );
 
             httpService.put((('/pls/lookup-id-mapping/config/' + this.state.system.configId)), system, observer);
-
         }
-
     }
 
     modalCallback(action) {
@@ -81,7 +75,6 @@ export default class SystemComponent extends Component {
         this.editMapping = Object.assign({}, this.state.system);
         return (
             <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
-            // <p>T</p>
         );
     }
     render() {
@@ -99,49 +92,58 @@ export default class SystemComponent extends Component {
                         </div>
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
-                        <div className="some-table">
-                            <div className="le-flex-row">
-                                <div className="le-flex-column">
+                            <div className="le-layout-flex-grid">
+                                <div className="le-layout-flex-col">
                                     System Org Name
-                            </div>
-                                <div className="le-flex-column color-blue">
+                                </div>
+                                <div className="le-layout-flex-col color-blue">
                                     {this.state.system.orgName}
                                 </div>
                             </div>
-                            <div className="le-flex-row">
-                                <div className="le-flex-column">
+                            <div className="le-layout-flex-grid">
+                                <div className="le-layout-flex-col">
+                                    System Org Id
+                            </div>
+                                <div className="le-layout-flex-col color-blue">
+                                    {this.state.system.orgId}
+                                </div>
+                            </div>
+                            <div className="le-layout-flex-grid">
+                                <div className="le-layout-flex-col">
+                                    Account Id
+                            </div>
+                                <div className="le-layout-flex-col color-blue">
+                                    {this.state.system.accountId}
+                                </div>
+                            </div>
+                            <div className="le-layout-flex-grid">
+                                <div className="le-layout-flex-col">
                                     Last Updated
                             </div>
-                                <div className="le-flex-column color-blue">
+                                <div className="le-layout-flex-col color-blue">
                                     {this.state.system.updated}
                                 </div>
                             </div>
-                            <div className="le-flex-row">
-                                <div className="le-flex-column">
+                            <div className="le-layout-flex-grid">
+                                <div className="le-layout-flex-col">
                                     Status
                             </div>
-                                <div className="le-flex-column">
+                                <div className="le-layout-flex-col">
                                     {this.getSystemStatus()}
                                 </div>
                             </div>
-                        </div>
                     </LeTileBody>
-                    <LeTileFooter classNames={'system-footer'}>
-                        <div className="le-flex-row">
-                            <div className="le-flex-column">
-                                <div className="right-controlls">
+                    <LeTileFooter classNames={'system-footer right-controlls'}>
+
                                     <LeButton
                                         name={`${"edit-mappings-"}${this.state.system.orgName}`}
-                                        disabled={this.state.saving}
+                                        disabled={this.state.saving || !this.state.system.isRegistered}
                                         config={{
                                             label: "Edit Mappings",
                                             classNames: "blue-button"
                                         }}
                                         callback={this.editMappingClickHandler}
                                     />
-                                </div>
-                            </div>
-                        </div>
                     </LeTileFooter>
                 </LeTile>
             </Aux>
