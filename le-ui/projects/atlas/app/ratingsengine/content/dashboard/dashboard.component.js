@@ -181,12 +181,7 @@ angular.module('lp.ratingsengine.dashboard', [
                             message: 'Your scoring has been ' + msgStatus + '.'
                         });
 
-                        console.log("here");
-
                         RatingsEngineService.getRatingDashboard(newRating.id).then(function (data) {
-
-                            console.log("here 2");
-
                             vm.dashboard.plays = data.plays;
                             vm.initDataModel();
                             deferred.resolve({ success: true });
@@ -224,7 +219,7 @@ angular.module('lp.ratingsengine.dashboard', [
         }
 
         vm.activateIteration = function (iteration) {
-            console.log(iteration);
+            //console.log(iteration);
         }
 
         vm.initDataModel = function () {
