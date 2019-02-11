@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import com.latticeengines.dataflow.runtime.cascading.cdl.CalculateExpectedRevenu
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculateExpectedRevenueParameters;
+import com.latticeengines.scoring.dataflow.ev.NodeSplitter;
 
 import cascading.tuple.Fields;
 
@@ -24,6 +27,9 @@ import cascading.tuple.Fields;
 public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<RecalculateExpectedRevenueParameters> {
 
     private static final Logger log = LoggerFactory.getLogger(RecalculateExpectedRevenue.class);
+
+    @Inject
+    private NodeSplitter nodeSplitter;
 
     @Override
     public Node construct(RecalculateExpectedRevenueParameters parameters) {
@@ -50,7 +56,7 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
     private Node calculateExpectedRevenueByFieldMap(Map<String, String> originalScoreFieldMap,
             Map<String, String> fitFunctionParametersMap, String modelGuidFieldName, String percentileFieldName,
             String predictedRevenuePercentileFieldName, String expectedRevenueFieldName, Node input) {
-        Map<String, Node> nodes = splitNodes(input, originalScoreFieldMap, modelGuidFieldName);
+        Map<String, Node> nodes = nodeSplitter.split(input, originalScoreFieldMap, modelGuidFieldName);
         Node merged = null;
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
             String modelGuid = entry.getKey();
@@ -68,18 +74,6 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
             }
         }
         return merged;
-    }
-
-    private Map<String, Node> splitNodes(Node input, Map<String, String> originalScoreFieldMap,
-            String modelGuidFieldName) {
-        Map<String, Node> nodes = new HashMap<>();
-        originalScoreFieldMap.forEach((modelGuid, scoreField) -> {
-            Node model = input.filter(String.format("\"%s\".equals(%s)", modelGuid, modelGuidFieldName),
-                    new FieldList(ScoreResultField.ModelId.displayName));
-            model = model.renamePipe(modelGuid);
-            nodes.put(modelGuid, model);
-        });
-        return nodes;
     }
 
     private Node calculatePercentileAndFittedExpectedRevenue(String percentileFieldName, String predictedRevenuePercentileFieldName,
