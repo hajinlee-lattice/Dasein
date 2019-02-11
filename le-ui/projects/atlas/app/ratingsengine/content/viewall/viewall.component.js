@@ -3,6 +3,7 @@ import React, {
   react2angular
 } from "common/react-vendor";
 import LeTable from "common/widgets/table/table";
+import LeLink from "common/widgets/link/le-link";
 import LeButton from "common/widgets/buttons/le-button";
 import TemplatesRowActions, {
     CREATE_TEMPLATE
@@ -14,150 +15,219 @@ import {
 import "./viewall.scss";
 
 class ViewAllComponent extends Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    let data = []
-    let tableHeader = []
-    let tableColumns = []
-    switch (this.props.$state.params.type) {
-      case "iterations":
-        data = this.props.RatingsEngineStore.getIterations();
-        tableHeader = [
-          {
-              name: "Iteration",
-              displayName: "Iteration",
-              sortable: false
-          },
-          {
-              name: "Status",
-              displayName: "",
-              sortable: false
-          },
-          {
-              name: "CreationStatus",
-              displayName: "Creation Status",
-              sortable: false
-          }
-        ];
-        tableColumns = [
-          {
-              colSpan: 1,
-              template: cell => {
-                if (cell.props.rowData) {
-                  return (
-                    cell.props.rowData.iteration
-                  )
-                } else {
-                  return null;
-                }
-              }
-          },
-          {
-              colSpan: 1,
-              template: cell => {
-                if (cell.props.rowData) {
-                  return (
-                    ''
-                  )
-                } else {
-                  return null;
-                }
-              }
-          },
-          {
-              colSpan: 10,
-              template: cell => {
-                if (cell.props.rowData) {
-                  return (
-                    cell.props.rowData.modelingJobStatus
-                  )
-                } else {
-                  return null;
-                }
-              }
-          }
-        ];
-        break;
+        let pageTitle = ""
+        let data = []
+        let tableConfig = {}
+        switch (this.props.$state.params.type) {
+          case "iterations":
+            pageTitle = "Creation History";
+            data = this.props.RatingsEngineStore.getIterations();
+            tableConfig = {
+                name: "creation-history",
+                sorting:{
+                    initial: 'none',
+                    direction: 'none'
+                },
+                pagination:{
+                    perPage: 10,
+                    startPage: 1
+                },
+                header: [
+                  {
+                      name: "iteration",
+                      displayName: "Iteration",
+                      sortable: true
+                  },
+                  {
+                      name: "status",
+                      displayName: "",
+                      sortable: false
+                  },
+                  {
+                      name: "creationStatus",
+                      displayName: "Creation Status",
+                      sortable: true
+                  },
+                  {
+                      name: "viewModel",
+                      displayName: "",
+                      sortable: false
+                  }
+                ],
+                columns: [
+                  {
+                      colSpan: 1,
+                      template: cell => {
+                        if (cell.props.rowData) {
+                          return (
+                            cell.props.rowData.iteration
+                          )
+                        } else {
+                          return null;
+                        }
+                      }
+                  },
+                  {
+                      colSpan: 1,
+                      template: cell => {
+                        let isActive = true;
+                        if (isActive) {
+                            return (
+                                <p className="green-text">
+                                    Scoring Active
+                                </p>
+                            )
+                        } else {
+                            return (
+                                <a>
+                                    Activate
+                                </a>
+                            )
+                        }
+                      }
+                  },
+                  {
+                    colSpan: 8,
+                    template: cell => {
+                        if (cell.props.rowData.modelingJobStatus == 'Pending' || cell.props.rowData.modelingJobStatus == 'Running') {
+                            return (
+                                <span>
+                                    <span>Loading...</span>
+                                    <span>{cell.props.rowData.modelingJobStatus}</span>
+                                </span>
+                            )
+                        } else {
+                            return (
+                                <span>
+                                    <span>{cell.props.rowData.modelingJobStatus}</span>
+                                </span>
+                            )
+                        }
+                    }
+                  },
+                  {
+                      colSpan: 2,
+                      template: cell => {
+                          return (
+                            <button className="button link-button">View Model</button>
+                          )
+                      }
+                  }
+                ]
+            };
+            break;
 
-      case "usedby":
-        data = this.props.RatingsEngineStore.getUsedBy();
-        tableHeader = [
-          {
-              name: "Type",
-              displayName: "Type",
-              sortable: false
-          },
-          {
-              name: "Name",
-              displayName: "Name",
-              sortable: false
-          }
-        ];
-        tableColumns = [
-          {
-              colSpan: 2,
-              template: cell => {
-                if (cell.props.rowData) {
-                  return (
-                    cell.props.rowData.type
-                  )
-                } else {
-                  return null;
-                }
-              }
-          },
-          {
-              colSpan: 10,
-              template: cell => {
-                if (cell.props.rowData) {
-                  return (
-                    cell.props.rowData.name
-                  )
-                } else {
-                  return null;
-                }
-              }
-          }
-        ];
-        break;
+          case "usedby":
+            pageTitle = "Used By";
+            data = this.props.RatingsEngineStore.getUsedBy();
+            tableConfig = {
+                name: "used-by",
+                pagination: {
+                    perPage: 10,
+                    startPage: 1
+                },
+                header: [
+                    {
+                        name: "type",
+                        displayName: "Type",
+                        sortable: true
+                    },
+                    {
+                        name: "name",
+                        displayName: "Name",
+                        sortable: true
+                    }
+                ],
+                columns: [
+                    {
+                        colSpan: 2,
+                        template: cell => {
+                            if (cell.props.rowData) {
+                                let type = cell.props.rowData.type;
+                                let iconClass = '';
+                                switch (type) {
+                                    case "Segment": 
+                                        iconClass = 'ico-segment';
+                                        break;
+                                    case "Campaign": 
+                                        iconClass = 'ico-campaign'; 
+                                        break;
+                                    case "Model": 
+                                        iconClass = 'ico-model';
+                                        break;
+                                }
+                                return (
+                                    <span>
+                                        <span className={"icon " + iconClass}><span></span></span>
+                                        {cell.props.rowData.type}
+                                    </span>
+                                );
+                            } else {
+                                return null;
+                            }
+                        }
+                    },
+                    {
+                        colSpan: 10,
+                        template: cell => {
+                            if (cell.props.rowData) {
+                                return (
+                                    cell.props.rowData.name
+                                )
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
+                ]
+            };
+            break;
+        }
+
+        this.state = {
+            pageTitle: pageTitle,
+            data: data,
+            tableConfig: tableConfig
+        }
     }
 
-    this.state = {
-        forceReload: false,
-        showEmpty: false,
-        showLoading: false,
-        data: data,
-        tableHeader: tableHeader,
-        tableColumns: tableColumns
-    };
-  }
+    backToDashboard() {
+        console.log(this.props);
+    }
 
-  getConfig() {
-      let config = {
-          name: "viewall",
-          header: this.state.tableHeader,
-          columns: this.state.tableColumns
-      };
-
-      return config;
-  }
-
-  render() {
-
-    return (
-      <div>
-          <LeTable
-              name="viewall"
-              config={this.getConfig()}
-              forceReload={this.state.forceReload}
-              showLoading={this.state.showLoading}
-              showEmpty={this.state.showEmpty}
-              data={this.state.data}
-          />
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="view-all">
+                <div className="header">
+                    <LeButton
+                        name="back"
+                        callback={this.backToDashboard}
+                        config={{
+                            label: "Back",
+                            classNames: "back-link"
+                        }}
+                    /> 
+                    | {this.state.pageTitle} ({this.state.data.length})
+                </div>
+                <LeToolBar>
+                    <div className="left">
+                        Sort
+                        Search
+                    </div>
+                </LeToolBar>
+                <LeTable
+                    name={this.state.tableConfig.name}
+                    config={this.state.tableConfig}    
+                    showLoading={false}
+                    showEmpty={false}
+                    data={this.state.data} 
+                />
+            </div>
+        );
+    }
 }
 
 angular

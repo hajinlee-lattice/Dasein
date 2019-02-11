@@ -24,7 +24,7 @@
                     <h3>Segment</h3>
                     <h4 class="text-ellipsis">
                         {{ segmentName }}
-                        <span ng-if="!IsRuleBased || !IsCustomEvent">
+                        <span ng-if="IsRuleBased == false || IsCustomEvent == false">
                             ({{ segmentAccounts | number }})
                         </span>
                     </h4>
@@ -63,7 +63,7 @@
                     <h3>Segment</h3>
                     <h4 class="text-ellipsis">
                         {{ segmentName }}
-                        <span ng-if="!IsRuleBased || !IsCustomEvent">
+                        <span ng-if="IsRuleBased == false || IsCustomEvent == false">
                             ({{ segmentAccounts | number }})
                         </span>
                     </h4>

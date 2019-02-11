@@ -1,0 +1,55 @@
+.view-all {
+	padding: 30px 20px;
+	.header {
+		font-size: 20px;
+		.back-link {
+		    color: #222;
+			background: transparent;
+			padding: 0;
+			font-size: 20px;
+			line-height: 1;
+		    text-align: left;
+			vertical-align: baseline;
+			&:hover {
+				cursor: pointer;
+			}
+			.le-button-title {
+				padding: 0 10px 0 0;
+			}
+		}
+	}
+	.le-tool-bar, .le-table {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	.le-tool-bar {
+		margin-top: 20px;
+	}
+	.le-table .le-table-cell .le-cell-template {
+		flex: 1;
+	}
+	.icon {
+        background-color: #D2D2D2;
+        border-radius: 3px;
+        padding: 4px;
+        margin-right: 6px;
+        display: inline-block;
+        vertical-align: bottom;
+        span {
+            background-repeat: no-repeat;
+            background-size: 13px;
+            background-position: 50% 50%;
+            display: block;
+            padding: 8px;
+        }
+    }
+	.ico-segment span {
+        background-image: url('/assets/images/ico-segments.png');
+    }
+    .ico-model span {
+        background-image: url('/assets/images/ico-model-black.png');
+    }
+    .ico-campaign span {
+        background-image: url('/assets/images/ico-campaign-type.png');
+    }
+}

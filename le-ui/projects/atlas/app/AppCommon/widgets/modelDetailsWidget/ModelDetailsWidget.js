@@ -20,8 +20,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         var ratingEngine = $scope.RatingEngine,
             dashboard = ModelStore.getDashboardData();
 
-        $scope.IsRuleBased = ratingEngine.type == 'RULE_BASED' ? true : false;
-        $scope.IsCustomEvent = ratingEngine.type == 'CUSTOM_EVENT' ? true : false;
+        console.log(ratingEngine.type);
+
+        $scope.IsRuleBased = ratingEngine.type === 'RULE_BASED' ? true : false;
+        $scope.IsCustomEvent = ratingEngine.type === 'CUSTOM_EVENT' ? true : false;
         $scope.IsRatingEngine = true;
         $scope.viewingIteration = false;
         $scope.type = ratingEngine.type;
@@ -114,8 +116,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 ratingEngine = RatingsEngineStore.getRatingEngine(),
                 type = ratingEngine.type.toLowerCase();
 
-            $scope.IsRuleBased = ratingEngine.type == 'RULE_BASED' ? true : false;
-            $scope.IsCustomEvent = ratingEngine.type == 'CUSTOM_EVENT' ? true : false;
+            console.log(ratingEngine.type);
+
+            $scope.IsRuleBased = ratingEngine.type === 'RULE_BASED' ? true : false;
+            $scope.IsCustomEvent = ratingEngine.type === 'CUSTOM_EVENT' ? true : false;
 
             $scope.$on('statusChange', function(event, args) {
                 $scope.activeStatus = args.activeStatus;
@@ -286,6 +290,9 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $("#moreDataPoints").slideToggle('400');
         };
     }
+
+
+    console.log($scope.IsCustomEvent || $scope.IsRuleBased);
 })
 .directive('modelDetailsWidget', function ($compile) {
     var directiveDefinitionObject = {

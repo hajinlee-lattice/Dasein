@@ -367,10 +367,7 @@ angular.module('lp.ratingsengine.dashboard', [
               selected: false,
               key: 'fruit'
             }
-          ];
-
-        // console.log(vm.dashboard);
-        // console.log(vm.selectedIteration);
+        ];
     }
 
     vm.init = function() {
