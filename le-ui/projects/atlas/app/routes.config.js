@@ -277,8 +277,8 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 }
             }
         })
-        .state('home.model.attributes', {
-            url: '/attributes/:aiModel',
+        .state('home.model.datacloud', {
+            url: '/datacloud/:aiModel',
             params: {
                 section: 're.model_iteration',
                 pageIcon: 'ico-attributes',
@@ -291,7 +291,8 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 //     $q,
                 //     $stateParams,
                 //     Model,
-                //     ModelReviewStore
+                //     ModelReviewStore,
+                //     DataCloudStore
                 // ) {
                 //     var deferred = $q.defer(),
                 //         modelId = $stateParams.modelId,
@@ -300,9 +301,9 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                 //     console.log('### resolve ReviewData', Model, modelId, eventTableName);
                 //     ModelReviewStore.GetReviewData(
-                //         modelId,
-                //         eventTableName
+                //         modelId
                 //     ).then(function (result) {
+                //         console.log('### ReviewData result', result);
                 //         deferred.resolve(result);
                 //     });
 
@@ -324,7 +325,6 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                         result.forEach((item) => {
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
-                                console.log('fart', item);
                             }
                         })
                         deferred.resolve(result);
@@ -386,31 +386,31 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 }
             }
         })
-        // .state('home.model.attributes', {
-        //     url: '/attributes',
-        //     params: {
-        //         pageIcon: 'ico-attributes',
-        //         pageTitle: 'Attributes'
-        //     },
-        //     views: {
-        //         'main@': {
-        //             controller: function(
-        //                 $scope,
-        //                 $compile,
-        //                 ModelStore
-        //             ) {
-        //                 $scope.data = ModelStore.data;
-        //                 $compile(
-        //                     $('#modelDetailContainer').html(
-        //                         '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
-        //                     )
-        //                 )($scope);
-        //             },
-        //             template:
-        //                 '<div id="modelDetailContainer" class="model-details"></div>'
-        //         }
-        //     }
-        // })
+        .state('home.model.attributes', {
+            url: '/attributes',
+            params: {
+                pageIcon: 'ico-attributes',
+                pageTitle: 'Attributes'
+            },
+            views: {
+                'main@': {
+                    controller: function (
+                        $scope,
+                        $compile,
+                        ModelStore
+                    ) {
+                        $scope.data = ModelStore.data;
+                        $compile(
+                            $('#modelDetailContainer').html(
+                                '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
+                            )
+                        )($scope);
+                    },
+                    template:
+                        '<div id="modelDetailContainer" class="model-details"></div>'
+                }
+            }
+        })
         .state('home.model.performance', {
             url: '/performance',
             params: {
