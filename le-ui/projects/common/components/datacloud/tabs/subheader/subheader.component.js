@@ -120,7 +120,7 @@ angular
                 'home.segment.explorer.enumpicker': 'picker',
                 'home.segment.accounts': 'accounts',
                 'home.segment.contacts': 'contacts',
-                'home.model.attributes': 'model_iteration'
+                'home.model.datacloud': 'model_iteration'
             };
 
             return map[state] == type;
