@@ -34,6 +34,9 @@ angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
         return value;
     };
 
+    /* 
+        Date attributes should be treated as formatted strings we receive from Ulysses - AR
+    */
     this.formatType = function (value, type) {
         switch (type) {
             case MetadataUtility.PropertyType.CURRENCY:
@@ -42,9 +45,9 @@ angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
             case MetadataUtility.PropertyType.EPOCH_TIME:
                 value = new Date(value * 1000).toLocaleDateString();
                 break;
-            case MetadataUtility.PropertyType.DATE_TIME:
-                value = DateTimeFormatUtility.FormatJsonDateCSharpFormat(value, "DATETIME");
-                break;
+            // case MetadataUtility.PropertyType.DATE_TIME:
+            //     value = DateTimeFormatUtility.FormatJsonDateCSharpFormat(value, "DATETIME");
+            //     break;
             default:
                 break;
         }
@@ -224,8 +227,8 @@ angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
     }
 
     var recId = URLUtility.CrmRecommendation();
-    var talkingPointText = TalkingPointWidgetService.FormatTalkingPoint(data.Content, parentData, data.PlayID, metadata, recId);
 
+    var talkingPointText = TalkingPointWidgetService.FormatTalkingPoint(data.Content, parentData, data.PlayID, metadata, recId);
     // greedy match for a string with only whitespace and bracketed expressions
     // ie: talkingPointText = '<p></p>';
     var regex = /(<[^>]*>|\s)*/;
