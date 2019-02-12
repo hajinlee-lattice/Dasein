@@ -390,6 +390,20 @@ angular
                         return deferred.promise;
 
                     }],
+                    attributes: ['$q', '$stateParams', 'DataCloudStore', function($q, $stateParams, DataCloudStore) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id,
+                            modelId = $stateParams.modelId;
+
+                        DataCloudStore.ratingIterationFilter = 'all';
+
+                        DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+
+                    }],
                     datacollectionstatus: ['$q', 'QueryStore', function ($q, QueryStore) {
                         var deferred = $q.defer();
                         QueryStore.getCollectionStatus().then(function(result) {
