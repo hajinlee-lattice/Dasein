@@ -13,7 +13,7 @@
                 <table class="delete-warning" data-ng-hide="deleteInProgress">
                     <tr>
                         <td><i class="fa fa-exclamation-triangle fa-2x text-danger"></i></td>
-                        <td>{{ResourceUtility.getString('DELETE_USER_CONFIRM_MESSAGE')}}</td>
+                        <td>{{ResourceUtility.getString('DELETE_USER_CONFIRM_MESSAGE', [user.Username])}}</td>
                     </tr>
                 </table>
                 <div class="global-error local-error" data-ng-show="showDeleteUserError">

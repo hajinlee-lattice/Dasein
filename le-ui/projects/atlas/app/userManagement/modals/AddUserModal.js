@@ -78,7 +78,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
 
     }
     $scope.allowAccessSelect = function(){
-        if($scope.user && $scope.user.Email && $scope.user.Email.length) {
+        if ($scope.user && $scope.user.Email && $scope.user.Email.length && !$scope.showAddUserSuccess) {
             return true;
         }
     }
