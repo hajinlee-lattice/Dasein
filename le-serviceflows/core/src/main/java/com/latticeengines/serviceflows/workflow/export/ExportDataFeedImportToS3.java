@@ -1,6 +1,7 @@
 package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -39,6 +40,7 @@ public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3S
             return;
         }
         List<String> pathList = eaiImportJobDetail.getPathDetail();
+        pathList = pathList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(pathList)) {
             pathList.forEach(p -> {
                 p = pathBuilder.getFullPath(p);
