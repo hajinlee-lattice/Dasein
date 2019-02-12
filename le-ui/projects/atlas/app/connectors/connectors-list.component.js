@@ -110,10 +110,17 @@ export class ConnectorList extends Component {
                 <LeHPanel hstretch={"true"} halignment={CENTER}>
                     <h2 className="connectors-title">Select one of our many application connectors</h2>
                 </LeHPanel>
+                <LeVPanel halignment={CENTER}>
+                    
+                    <LeHPanel hstretch={"true"} halignment={CENTER} valignment={CENTER}>
+                        {/* <button>L</button> */}
+                        <LeHPanel hstretch={"false"} halignment={CENTER} classesName="connectors-list">
+                            {this.getConnectros()}
+                        </LeHPanel>
+                        {/* <button>R</button> */}
+                    </LeHPanel>
 
-                <LeHPanel hstretch={"false"} halignment={LEFT} classesName="connectors-list">
-                    {this.getConnectros()}
-                </LeHPanel>
+                </LeVPanel>
                 <LeToolBar direction={HORIZONTAL}>
                     <div className="right">
                         <LeButton
@@ -165,7 +172,7 @@ angular
                 }
             });
         }
-        this.isMarketoEnabled = function(){
+        this.isMarketoEnabled = function () {
             let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
             return connectorsEnabled;
         }

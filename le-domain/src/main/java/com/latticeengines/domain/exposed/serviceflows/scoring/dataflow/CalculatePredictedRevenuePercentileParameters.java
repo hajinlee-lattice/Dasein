@@ -4,9 +4,16 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 
 public class CalculatePredictedRevenuePercentileParameters extends DataFlowParameters {
+
+    @JsonProperty("customer_space")
+    private CustomerSpace customerSpace;
+
     @JsonProperty("input_table_name")
     @SourceTableName
     private String inputTableName;
@@ -25,6 +32,17 @@ public class CalculatePredictedRevenuePercentileParameters extends DataFlowParam
 
     @JsonProperty("percentile_upper_bound")
     private Integer percentileUpperBound;
+
+    @JsonProperty("score_derivation_maps")
+    private Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
+
+    public CustomerSpace getCustomerSpace() {
+        return customerSpace;
+    }
+
+    public void setCustomerSpace(CustomerSpace customerSpace) {
+        this.customerSpace = customerSpace;
+    }
 
     public String getInputTableName() {
         return inputTableName;
@@ -72,5 +90,13 @@ public class CalculatePredictedRevenuePercentileParameters extends DataFlowParam
 
     public void setOriginalScoreFieldMap(Map<String, String> originalScoreFieldMap) {
         this.originalScoreFieldMap = originalScoreFieldMap;
+    }
+
+    public Map<String, Map<ScoreDerivationType, ScoreDerivation>> getScoreDerivationMaps() {
+        return scoreDerivationMaps;
+    }
+
+    public void setScoreDerivationMaps(Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps) {
+        this.scoreDerivationMaps = scoreDerivationMaps;
     }
 }

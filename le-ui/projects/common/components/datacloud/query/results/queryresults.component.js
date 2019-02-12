@@ -86,9 +86,10 @@ angular.module('common.datacloud.query.results', [
                     vm.launchUnscored = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.launchUnscored;
                     vm.topNCount = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.topNCount;
                     vm.topNClicked = vm.topNCount ? true : false;
-                    vm.launchUnscoredClick();
-                    vm.makeRecommendationCounts();
                 }
+
+                vm.launchUnscoredClick();
+                vm.makeRecommendationCounts();
 
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes

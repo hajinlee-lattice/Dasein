@@ -74,7 +74,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
         String targetPath = PathBuilder
                 .buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace))
-                .append(orphanRecordsType.getOrphanType()).toString();
+                .append(NamingUtils.timestamp(orphanRecordsType.getOrphanType())).toString();
         log.info("Use targetPath=" + targetPath);
 
         DataCollectionArtifact artifact = new DataCollectionArtifact();
@@ -107,6 +107,21 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 request.getArtifactVersion());
         String productTableName = getTableName(TableRoleInCollection.ConsolidatedProduct,
                 request.getArtifactVersion());
+
+        if (orphanRecordsType == OrphanRecordsType.TRANSACTION &&
+                !validateTableNames(new String[] { transactionTableName, accountTableName, productTableName })) {
+            return null;
+        }
+
+        if (orphanRecordsType == OrphanRecordsType.CONTACT &&
+                !validateTableNames(new String[] { contactTableName, accountTableName })) {
+            return null;
+        }
+
+        if (orphanRecordsType == OrphanRecordsType.UNMATCHED_ACCOUNT &&
+                !validateTableNames(new String[] { accountTableName })) {
+            return null;
+        }
 
         OrphanRecordsExportWorkflowConfiguration wfConfig = new OrphanRecordsExportWorkflowConfiguration.Builder()
                 .customer(getCustomerSpace()) //
@@ -153,5 +168,14 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         }
 
         return task.getImportTemplate().getAttributes();
+    }
+
+    private boolean validateTableNames(String[] tableNames) {
+        for (String tableName : tableNames) {
+            if (StringUtils.isBlank(tableName)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

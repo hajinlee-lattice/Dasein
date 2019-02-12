@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.scoring.dataflow;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
@@ -23,6 +25,9 @@ public class RecalculatePercentileScoreParameters extends DataFlowParameters {
 
     @JsonProperty("percentile_upper_bound")
     private Integer percentileUpperBound;
+
+    @JsonProperty("original_score_field_map")
+    private Map<String, String> originalScoreFieldMap;
 
     public String getInputTableName() {
         return inputTableName;
@@ -70,5 +75,13 @@ public class RecalculatePercentileScoreParameters extends DataFlowParameters {
 
     public void setPercentileUpperBound(Integer percentileUpperBound) {
         this.percentileUpperBound = percentileUpperBound;
+    }
+
+    public Map<String, String> getOriginalScoreFieldMap() {
+        return originalScoreFieldMap;
+    }
+
+    public void setOriginalScoreFieldMap(Map<String, String> originalScoreFieldMap) {
+        this.originalScoreFieldMap = originalScoreFieldMap;
     }
 }
