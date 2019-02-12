@@ -463,10 +463,10 @@ angular.module('lp.ratingsengine.dashboard', [
         var ratingId = $stateParams.rating_id,
             modelId = iteration.id;
 
-        vm.remodelingProgress = true;
+        vm.gatheringAttributes = true;
 
         DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
-            vm.remodelingProgress = false;
+            vm.gatheringAttributes = false;
             DataCloudStore.setEnrichments(result);
         });
 
