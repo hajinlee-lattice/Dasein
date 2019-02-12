@@ -15,12 +15,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.ResourceUtility = ResourceUtility;
     var data = ModelStore.data;
 
-    if (data === undefined) {
+    if (data == undefined) {
 
         var ratingEngine = $scope.RatingEngine,
             dashboard = ModelStore.getDashboardData();
-
-        console.log(ratingEngine.type);
 
         $scope.IsRuleBased = ratingEngine.type === 'RULE_BASED' ? true : false;
         $scope.IsCustomEvent = ratingEngine.type === 'CUSTOM_EVENT' ? true : false;
@@ -32,7 +30,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.created = ratingEngine.created;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
         $scope.segmentName = ratingEngine.segment ? ratingEngine.segment.display_name : 'No segment selected'; 
-        $scope.modelHealthScore = data.ModelDetails.RocScore;
         
         if($scope.IsRuleBased || $scope.IsCustomEvent) {
             if($scope.IsRuleBased) {
@@ -50,7 +47,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             if (ratingEngine.segment) {
                 RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
-                    console.log(result);
                     $scope.scorableAccounts = result;
                 });
             } else {
@@ -83,6 +79,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.iteration = iteration.AI;
 
                 if($scope.viewingIteration) {
+                    $scope.modelHealthScore = data.ModelDetails.RocScore;
                     $scope.createdBy = iteration.AI.createdBy;
                     $scope.created = iteration.AI.created;
                 }
@@ -115,8 +112,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             var engineId = $stateParams.rating_id,
                 ratingEngine = RatingsEngineStore.getRatingEngine(),
                 type = ratingEngine.type.toLowerCase();
-
-            console.log(ratingEngine.type);
 
             $scope.IsRuleBased = ratingEngine.type === 'RULE_BASED' ? true : false;
             $scope.IsCustomEvent = ratingEngine.type === 'CUSTOM_EVENT' ? true : false;
@@ -179,6 +174,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                     $scope.iteration = iteration.AI;
 
                     if($scope.viewingIteration) {
+                        $scope.modelHealthScore = data.ModelDetails.RocScore;
                         $scope.createdBy = iteration.AI.createdBy;
                         $scope.created = iteration.AI.created;
                     }
@@ -291,8 +287,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         };
     }
 
-
-    console.log($scope.IsCustomEvent || $scope.IsRuleBased);
 })
 .directive('modelDetailsWidget', function ($compile) {
     var directiveDefinitionObject = {
