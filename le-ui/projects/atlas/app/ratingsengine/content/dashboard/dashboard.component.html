@@ -265,9 +265,7 @@
                                     </p>
                                     <a class="button" ng-if="
                                             !vm.isIterationActive(iteration.id) && 
-                                            (iteration.modelingJobStatus != 'Failed' || 
-                                            iteration.modelingJobStatus != 'Pending' || 
-                                            iteration.modelingJobStatus != 'Running')"
+                                            iteration.modelingJobStatus == 'Completed'"
                                         ui-sref="home.model.ratings({ 
                                                     rating_id: vm.ratingEngine.id,
                                                     modelId: iteration.modelSummaryId,
@@ -299,7 +297,9 @@
 
                                 </td>
                                 <td>
-                                    <button class="button link-button" ng-click="vm.viewIteration('home.model.datacloud', iteration)"
+                                    <button 
+                                        class="button link-button" 
+                                        ng-click="vm.viewIteration('home.model.attributes', iteration)"
                                         ng-if="
                                             iteration.modelingJobStatus === 'Completed' && 
                                             iteration.modelSummaryId">View
