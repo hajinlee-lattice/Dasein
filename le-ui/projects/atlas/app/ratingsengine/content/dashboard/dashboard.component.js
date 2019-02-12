@@ -440,6 +440,8 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.toggleMenu = function($event) {
         vm.toggle = !vm.toggle;
 
+        console.log($event);
+
         if($event && $event.target) {
             var target = angular.element($event.target),
             parent = target.parent();
@@ -447,7 +449,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 var clicked = angular.element($event.target),
                 inside = clicked.closest(parent).length;
                 if(!inside) {
-                    $scope.visible = false;
+                    vm.toggle = false;
                     $scope.$digest();
                     $document.unbind('click', click);
                 }
@@ -496,8 +498,8 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.viewIteration = function(destination, iterationToView){
 
-        if (iteration) {
-            RatingsEngineStore.setRemodelIteration(iteration);
+        if (iterationToView) {
+            RatingsEngineStore.setRemodelIteration(iterationToView);
         }
 
         var iteration = iterationToView ? iterationToView : RatingsEngineStore.getRemodelIteration(),
