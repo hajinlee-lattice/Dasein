@@ -10,11 +10,12 @@ angular.module('lp.ratingsengine.wizard.training', [
         segments: '<',
         products: '<',
         datacollectionstatus: '<',
-        iteration: '<'
+        iteration: '<',
+        attributes: '<'
     },
     controller: function (
         $q, $scope, $state, $stateParams, $timeout,
-        RatingsEngineStore, RatingsEngineService, SegmentService, Banner
+        RatingsEngineStore, RatingsEngineService, DataCloudStore, SegmentService, Banner
     ) {
 
         var vm = this;
@@ -47,6 +48,8 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
+            DataCloudStore.setEnrichments(vm.attributes);
+
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
             vm.periodType = vm.datacollectionstatus.ApsRollingPeriod ? vm.datacollectionstatus.ApsRollingPeriod.toLowerCase() : 'quarter';
@@ -56,9 +59,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                     vm.filters = angular.copy(vm.ratingModel.advancedModelingConfig.cross_sell.filters);
                     
-                    console.log(vm.ratingModel);
-                    console.log(vm.filters);
-
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
                     if(vm.repeatPurchase){
                         vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD ? vm.filters.PURCHASED_BEFORE_PERIOD.value : 6;
@@ -441,7 +441,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             RatingsEngineStore.setRatingEngine(vm.ratingEngine);
             RatingsEngineStore.saveIteration('training').then(function(result){
                 if (!result.result) {
-                    $state.go('home.ratingsengine.dashboard', { "rating_id": engineId, "modelId": modelId, viewingIteration: false, remodelSuccessBanner: true });
+                    $state.go('home.ratingsengine.dashboard', { "rating_id": engineId, "modelId": '', viewingIteration: false, remodelSuccessBanner: true });
                 }
                 vm.remodelingProgress = result.showProgress;
             });

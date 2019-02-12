@@ -50,11 +50,11 @@
                     <div class="dropdown-split-button">
                         <div 
                             class="dropdown"
-                            ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress}">
+                            ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress || vm.gatheringAttributes}">
                             <button 
                                 ng-click="vm.remodelIteration()"
-                                ng-class="{disabled: vm.remodelingProgress}"
-                                ng-disabled="vm.remodelingProgress">Remodel 
+                                ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
+                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">Remodel 
                             </button><button 
                                 ng-click="vm.toggleMenu($event)"
                                 ng-class="{disabled: vm.remodelingProgress}"
@@ -72,11 +72,12 @@
                             </ul>
                             <span>
                                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                                Remodling iteration {{ vm.selectedIteration.iteration }}
+                                <span ng-if="!vm.gatheringAttributes">Remodling iteration {{ vm.selectedIteration.iteration }}</span>
+                                <span ng-if="vm.gatheringAttributes">Gathering  attributes</span>
                             </span>
                         </div><button ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')"
-                            ng-class="{disabled: vm.remodelingProgress}"
-                            ng-disabled="vm.remodelingProgress">
+                            ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
+                            ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">
                             <i class="fa fa-cog" aria-hidden="true"></i>
                         </button>
 
