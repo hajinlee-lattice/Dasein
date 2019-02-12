@@ -74,7 +74,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthCleanupTestNG.class);
     private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(7);
-    private static final Long redshiftCleanupThreshold = TimeUnit.DAYS.toMillis(1);
+    private static final Long redshiftCleanupThreshold = TimeUnit.DAYS.toMillis(3);
     private static final String customerBase = "/user/s-analytics/customers";
 
     @Inject
