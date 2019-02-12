@@ -113,7 +113,8 @@ angular
                     pageIcon: 'ico-model',
                     pageTitle: 'Model',
                     modelId: '',
-                    modelingJobStatus: null
+                    modelingJobStatus: null,
+                    remodelSuccessBanner: false
                 },
                 onEnter: ['RatingEngine', 'BackStore', function(RatingEngine, BackStore) {
                     BackStore.setBackLabel(RatingEngine.displayName);
