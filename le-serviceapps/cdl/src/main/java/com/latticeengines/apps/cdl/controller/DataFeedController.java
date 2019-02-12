@@ -76,6 +76,9 @@ public class DataFeedController {
         try {
             ApplicationId appId = orphanRecordExportWorkflowSubmitter.submit(
                     customerSpace, request, new WorkflowPidWrapper(-1L));
+            if (appId == null) {
+                return null;
+            }
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
