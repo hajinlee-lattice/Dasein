@@ -113,7 +113,8 @@ angular
                     pageIcon: 'ico-model',
                     pageTitle: 'Model',
                     modelId: '',
-                    modelingJobStatus: null
+                    modelingJobStatus: null,
+                    remodelSuccessBanner: false
                 },
                 onEnter: ['RatingEngine', 'BackStore', function(RatingEngine, BackStore) {
                     BackStore.setBackLabel(RatingEngine.displayName);
@@ -386,6 +387,20 @@ angular
 
                             deferred.resolve(result);
                         });
+                        return deferred.promise;
+
+                    }],
+                    attributes: ['$q', '$stateParams', 'DataCloudStore', function($q, $stateParams, DataCloudStore) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id,
+                            modelId = $stateParams.modelId;
+
+                        DataCloudStore.ratingIterationFilter = 'all';
+
+                        DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
+                            deferred.resolve(result);
+                        });
+
                         return deferred.promise;
 
                     }],

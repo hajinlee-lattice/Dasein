@@ -64,9 +64,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
         log.info("TenantId=" + MultiTenantContext.getTenant().getId());
-
-        // setup checkpoint
-        checkpointService.resumeCheckpoint(CHECK_POINT, 19);
     }
 
     @AfterClass(groups = "deployment")
@@ -74,7 +71,27 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         checkpointService.cleanup();
     }
 
-    @Test(groups = "deployment", priority = 0)
+    @Test(groups = "deployment")
+    public void testInvalidOrphanReportExport() throws Exception {
+        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+
+        OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.TRANSACTION);
+        ApplicationId appid = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+        Assert.assertNull(appid);
+
+        request = createExportJob(OrphanRecordsType.CONTACT);
+        appid = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+        Assert.assertNull(appid);
+
+        request = createExportJob(OrphanRecordsType.UNMATCHED_ACCOUNT);
+        appid = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+        Assert.assertNull(appid);
+
+        // setup checkpoint
+        checkpointService.resumeCheckpoint(CHECK_POINT, 19);
+    }
+
+    @Test(groups = "deployment", priority = 1, dependsOnMethods = "testInvalidOrphanReportExport")
     public void testOrphanTransactionExport() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.TRANSACTION);
@@ -87,13 +104,13 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 4);
+        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9308);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         verifyResults(expectedResults);
     }
 
-    @Test(groups = "deployment", priority = 1)
+    @Test(groups = "deployment", priority = 2, dependsOnMethods = "testInvalidOrphanReportExport")
     public void testOrphanContactExport() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.CONTACT);
@@ -106,13 +123,13 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 4);
+        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 3);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.CONTACT.getOrphanType());
         verifyResults(expectedResults);
     }
 
-    @Test(groups = "deployment", priority = 2)
+    @Test(groups = "deployment", priority = 3, dependsOnMethods = "testInvalidOrphanReportExport")
     public void testUnmatchedAccountExport() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.UNMATCHED_ACCOUNT);
@@ -125,9 +142,82 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 4);
+        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType());
+        verifyResults(expectedResults);
+    }
+
+    @Test(groups = "deployment", priority = 4, dependsOnMethods = "testInvalidOrphanReportExport")
+    public void testMultipleOrphanTypesExport() {
+        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+
+        OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.UNMATCHED_ACCOUNT);
+        ApplicationId accountAppId = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+
+        request = createExportJob(OrphanRecordsType.TRANSACTION);
+        ApplicationId transactionAppId = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+
+        request = createExportJob(OrphanRecordsType.CONTACT);
+        ApplicationId contactAppId = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+
+        JobStatus status = waitForWorkflowStatus(accountAppId.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        Map<String, Object> expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 3);
+        expectedResults.put(NUM_RECORDS, 9);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType());
+        verifyResults(expectedResults);
+
+        status = waitForWorkflowStatus(transactionAppId.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 3);
+        expectedResults.put(NUM_RECORDS, 9308);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
+        verifyResults(expectedResults);
+
+        status = waitForWorkflowStatus(contactAppId.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 3);
+        expectedResults.put(NUM_RECORDS, 3);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.CONTACT.getOrphanType());
+        verifyResults(expectedResults);
+    }
+
+    @Test(groups = "deployment", priority = 5, dependsOnMethods = "testInvalidOrphanReportExport")
+    public void testSameOrphanTypesExport() {
+        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        OrphanRecordsExportRequest request = createExportJob(OrphanRecordsType.TRANSACTION);
+        ApplicationId applicationId1 = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+        request = createExportJob(OrphanRecordsType.TRANSACTION);
+        ApplicationId applicationId2 = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+        request = createExportJob(OrphanRecordsType.TRANSACTION);
+        ApplicationId applicationId3 = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+
+        JobStatus status = waitForWorkflowStatus(applicationId1.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        Map<String, Object> expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 3);
+        expectedResults.put(NUM_RECORDS, 9308);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
+        verifyResults(expectedResults);
+
+        status = waitForWorkflowStatus(applicationId2.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 3);
+        expectedResults.put(NUM_RECORDS, 9308);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
+        verifyResults(expectedResults);
+
+        status = waitForWorkflowStatus(applicationId3.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        expectedResults = new HashMap<>();
+        expectedResults.put(NUM_FILES, 3);
+        expectedResults.put(NUM_RECORDS, 9308);
+        expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         verifyResults(expectedResults);
     }
 

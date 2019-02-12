@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -65,13 +66,27 @@ public class OrphanRecordsResource {
         Log.info(String.format("Start to submit orphan records workflow. Tenant=%s. Request=%s",
                 customerSpace, JsonUtils.serialize(request)));
         ApplicationId applicationId = cdlProxy.submitOrphanRecordsExport(customerSpace, request);
+        response.setHeader("Content-Type", "text/event-stream");
+        response.setHeader("Cache-Control", "no-cache");
+        if (applicationId == null) {
+            try {
+                Job failedJob = new Job();
+                failedJob.setApplicationId(null);
+                failedJob.setErrorMsg("Required tables are not uploaded.");
+                failedJob.setJobStatus(JobStatus.FAILED);
+                FileCopyUtils.copy(JsonUtils.serialize(failedJob).getBytes(), response.getOutputStream());
+                response.getOutputStream().flush();
+            } catch (Exception exc) {
+                Log.warn(String.format("Getting exception while returning failed job. Exception=%s.",
+                        exc.getMessage()));
+                throw new RuntimeException(exc);
+            }
+        }
 
         final long maxWaitTime = TimeUnit.MILLISECONDS.convert(24L, TimeUnit.HOURS);
         final long checkInterval = TimeUnit.MILLISECONDS.convert(10L, TimeUnit.SECONDS);
         int retryOnException = 16;
         long start = System.currentTimeMillis();
-        response.setHeader("Content-Type", "text/event-stream");
-        response.setHeader("Cache-Control", "no-cache");
         do {
             try {
                 Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);

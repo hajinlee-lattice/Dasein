@@ -15,13 +15,13 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.ResourceUtility = ResourceUtility;
     var data = ModelStore.data;
 
-    if (data === undefined) {
+    if (data == undefined) {
 
         var ratingEngine = $scope.RatingEngine,
             dashboard = ModelStore.getDashboardData();
 
-        $scope.IsRuleBased = ratingEngine.type == 'RULE_BASED' ? true : false;
-        $scope.IsCustomEvent = ratingEngine.type == 'CUSTOM_EVENT' ? true : false;
+        $scope.IsRuleBased = ratingEngine.type === 'RULE_BASED' ? true : false;
+        $scope.IsCustomEvent = ratingEngine.type === 'CUSTOM_EVENT' ? true : false;
         $scope.IsRatingEngine = true;
         $scope.viewingIteration = false;
         $scope.type = ratingEngine.type;
@@ -30,7 +30,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.created = ratingEngine.created;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
         $scope.segmentName = ratingEngine.segment ? ratingEngine.segment.display_name : 'No segment selected'; 
-        $scope.modelHealthScore = data.ModelDetails.RocScore;
         
         if($scope.IsRuleBased || $scope.IsCustomEvent) {
             if($scope.IsRuleBased) {
@@ -44,11 +43,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             var type = ratingEngine.type.toLowerCase();
             $scope.typeContext = 'AI';
             $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
-            $scope.segmentAccounts = ratingEngine.segment.accounts;
+            $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
+            $scope.segmentAccountsString = "(" + $scope.segmentAccounts + ")";
 
             if (ratingEngine.segment) {
                 RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
-                    console.log(result);
                     $scope.scorableAccounts = result;
                 });
             } else {
@@ -81,6 +80,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.iteration = iteration.AI;
 
                 if($scope.viewingIteration) {
+                    $scope.modelHealthScore = data.ModelDetails.RocScore;
                     $scope.createdBy = iteration.AI.createdBy;
                     $scope.created = iteration.AI.created;
                 }
@@ -114,8 +114,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 ratingEngine = RatingsEngineStore.getRatingEngine(),
                 type = ratingEngine.type.toLowerCase();
 
-            $scope.IsRuleBased = ratingEngine.type == 'RULE_BASED' ? true : false;
-            $scope.IsCustomEvent = ratingEngine.type == 'CUSTOM_EVENT' ? true : false;
+            $scope.IsRuleBased = ratingEngine.type === 'RULE_BASED' ? true : false;
+            $scope.IsCustomEvent = ratingEngine.type === 'CUSTOM_EVENT' ? true : false;
 
             $scope.$on('statusChange', function(event, args) {
                 $scope.activeStatus = args.activeStatus;
@@ -142,7 +142,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 var type = ratingEngine.type.toLowerCase();
                 $scope.typeContext = 'AI';
                 $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
-                $scope.segmentAccounts = ratingEngine.segment.accounts;
+                $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
+                $scope.segmentAccountsString = "(" + $scope.segmentAccounts + ")";
 
                 if (ratingEngine.segment) {
                     RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
@@ -175,6 +176,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                     $scope.iteration = iteration.AI;
 
                     if($scope.viewingIteration) {
+                        $scope.modelHealthScore = data.ModelDetails.RocScore;
                         $scope.createdBy = iteration.AI.createdBy;
                         $scope.created = iteration.AI.created;
                     }
@@ -286,6 +288,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $("#moreDataPoints").slideToggle('400');
         };
     }
+
 })
 .directive('modelDetailsWidget', function ($compile) {
     var directiveDefinitionObject = {

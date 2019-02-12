@@ -57,7 +57,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                 dataFileWriter.create(schema, localFile);
 
                 int pageNo = 0;
-                while (pageNo < pages) {
+                while (true) {
                     total = fetchAndProcessPage(segmentExportContext, segmentAccountsCount, offset, pageNo,
                             dataFileWriter, schema, version);
                     if (total == offset) {
