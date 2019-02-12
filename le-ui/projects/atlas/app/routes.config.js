@@ -319,8 +319,6 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                             url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata`
                         };
 
-                    console.log(Iteration);
-
                     // clear DataCloudStore (tried this in onEnter, didn't work right)                   
                     DataCloudStore.clear();
                     DataCloudStore.ratingIterationFilter = 'all';
@@ -329,7 +327,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                         result.forEach((item) => {
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
-                                console.log('fart', item);
+                                // console.log('fart', item);
                             }
                         })
                         deferred.resolve(result);
