@@ -93,6 +93,10 @@ angular
                     return vm.enrichments.filter((item) => {
                         return item.HasWarnings;
                     }).length;
+                case 'disabled':
+                    return vm.enrichments.filter((item) => {
+                        return item.ApprovedUsage[0] == 'None';
+                    }).length;
             };
 
             return 0;
@@ -103,6 +107,7 @@ angular
         }
 
         vm.checkIterationFilter = function (type) {
+            console.log(type, DataCloudStore.ratingIterationFilter);
             return DataCloudStore.ratingIterationFilter == type;
         }
 
@@ -115,7 +120,7 @@ angular
                 'home.segment.explorer.enumpicker': 'picker',
                 'home.segment.accounts': 'accounts',
                 'home.segment.contacts': 'contacts',
-                'home.model.attributes': 'model_iteration'
+                'home.model.datacloud': 'model_iteration'
             };
 
             return map[state] == type;
