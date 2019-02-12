@@ -277,8 +277,8 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 }
             }
         })
-        .state('home.model.datacloud', {
-            url: '/datacloud/:aiModel',
+        .state('home.model.attributes', {
+            url: '/attributes',
             params: {
                 section: 're.model_iteration',
                 pageIcon: 'ico-attributes',
@@ -287,34 +287,34 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 viewingIteration: true
             },
             resolve: {
-                ReviewData: function (
-                    $q,
-                    $stateParams,
-                    Model,
-                    ModelReviewStore,
-                    DataCloudStore
-                ) {
-                    var deferred = $q.defer(),
-                        modelId = $stateParams.modelId;
+                // ReviewData: function (
+                //     $q,
+                //     $stateParams,
+                //     Model,
+                //     ModelReviewStore
+                // ) {
+                //     var deferred = $q.defer(),
+                //         modelId = $stateParams.modelId,
+                //         eventTableName =
+                //             Model.EventTableProvenance.EventTableName;
 
-                    ModelReviewStore.GetReviewData(
-                        modelId
-                    ).then(function (result) {
-                        console.log('### ReviewData result', result);
-                        var warnings = {};
-                        result.forEach(item => {
-                            warnings[item.name] = item;
-                        });
-                        DataCloudStore.setWarnings(warnings);
-                        deferred.resolve(result);
-                    });
+                //     console.log('### resolve ReviewData', Model, modelId, eventTableName);
+                //     ModelReviewStore.GetReviewData(
+                //         modelId,
+                //         eventTableName
+                //     ).then(function (result) {
+                //         deferred.resolve(result);
+                //     });
 
-                    return deferred.promise;
+                //     return deferred.promise;
+                // },
+                Iteration: function (RatingsEngineStore) {
+                    return RatingsEngineStore.getRemodelIteration();
                 },
-                Enrichments: function ($q, $stateParams, DataCloudStore, ApiHost) {
+                Enrichments: function ($q, $stateParams, Iteration, DataCloudStore, ApiHost) {
                     var deferred = $q.defer(),
                         ratingId = $stateParams['rating_id'],
-                        aiModel = $stateParams['aiModel'],
+                        aiModel = Iteration.id,
                         opts = {
                             url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata`
                         };
@@ -327,6 +327,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                         result.forEach((item) => {
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
+                                // console.log('fart', item);
                             }
                         })
                         deferred.resolve(result);
@@ -334,10 +335,10 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                     return deferred.promise;
                 },
-                EnrichmentTopAttributes: function ($q, $stateParams, DataCloudStore, ApiHost) {
+                EnrichmentTopAttributes: function ($q, $stateParams, Iteration, DataCloudStore, ApiHost) {
                     var deferred = $q.defer(),
                         ratingId = $stateParams['rating_id'],
-                        aiModel = $stateParams['aiModel'],
+                        aiModel = Iteration.id,
                         opts = {
                             url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/topn`
                         };
@@ -388,31 +389,31 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 }
             }
         })
-        .state('home.model.attributes', {
-            url: '/attributes',
-            params: {
-                pageIcon: 'ico-attributes',
-                pageTitle: 'Attributes'
-            },
-            views: {
-                'main@': {
-                    controller: function (
-                        $scope,
-                        $compile,
-                        ModelStore
-                    ) {
-                        $scope.data = ModelStore.data;
-                        $compile(
-                            $('#modelDetailContainer').html(
-                                '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
-                            )
-                        )($scope);
-                    },
-                    template:
-                        '<div id="modelDetailContainer" class="model-details"></div>'
-                }
-            }
-        })
+        // .state('home.model.attributes', {
+        //     url: '/attributes',
+        //     params: {
+        //         pageIcon: 'ico-attributes',
+        //         pageTitle: 'Attributes'
+        //     },
+        //     views: {
+        //         'main@': {
+        //             controller: function(
+        //                 $scope,
+        //                 $compile,
+        //                 ModelStore
+        //             ) {
+        //                 $scope.data = ModelStore.data;
+        //                 $compile(
+        //                     $('#modelDetailContainer').html(
+        //                         '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
+        //                     )
+        //                 )($scope);
+        //             },
+        //             template:
+        //                 '<div id="modelDetailContainer" class="model-details"></div>'
+        //         }
+        //     }
+        // })
         .state('home.model.performance', {
             url: '/performance',
             params: {
