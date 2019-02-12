@@ -250,7 +250,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         user.setPasswordExpiration(userEntityMgr.getPasswordExpiration(userId));
     }
 
-    protected void createModel(String modelId, CustomerSpace customerSpace, Tenant tenant) throws IOException {
+    protected void createModel(String modelName, String modelId, CustomerSpace customerSpace, Tenant tenant)
+            throws IOException {
         ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(), modelId);
         if (retrievedSummary != null) {
             modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelId);
@@ -266,7 +267,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         String modelVersion = "ba99b36-c222-4f93" + 0 + "-ab8a-6dcc11ce45e9-" + timestamp;
         TestModelConfiguration modelConfiguration = null;
         TestModelArtifactDataComposition modelArtifactDataComposition = null;
-        modelConfiguration = new TestModelConfiguration(modelId, modelId, applicationId, modelVersion);
+        modelConfiguration = new TestModelConfiguration(modelName, modelId, applicationId, modelVersion);
         modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration, bucketedScoreProxy,
                 columnMetadataProxy, (tenant != null ? tenant : this.tenant), modelConfiguration,
                 (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
@@ -281,7 +282,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         Tenant tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
         deploymentTestBed.switchToSuperAdmin();
         customerSpace = CustomerSpace.parse(tenant.getId());
-        createModel(MODEL_ID, customerSpace, tenant);
+        createModel(MODEL_NAME, MODEL_ID, customerSpace, tenant);
 
         List<BucketMetadata> bucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
