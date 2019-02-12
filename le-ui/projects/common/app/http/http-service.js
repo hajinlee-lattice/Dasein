@@ -26,7 +26,6 @@ const setParams = (axiosObj, obj) => {
 };
 const init = () => {
     if (!window['http']) {
-        console.log('init', window['http'], typeof window['http']);
         window['http'] = axios;
         window['observables'] = new Observables();
     }
@@ -43,7 +42,6 @@ const httpService = {
      * Set up headeer for all the requests
      */
     setUpHeader: headerObj => {
-        console.log('setUpHeader', headerObj);
         setParams(http.defaults.headers.common, headerObj);
     },
     unsubscribeObservable: observer => {

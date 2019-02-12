@@ -6,11 +6,7 @@
                 <span class="fa fa-times" ng-show="$ctrl.query.length && !$ctrl.queryInProgress"></span>
                 <span class="fa fa-spinner fa-pulse fa-fw" ng-show="$ctrl.queryInProgress"></span>
             </a>
-            <input  type="text" 
-                    class="form-control" 
-                    placeholder="Search" 
-                    ng-model="$ctrl.filters.queryText" 
-                    ng-change="$ctrl.filters.page = 1" />
+            <input type="text" class="form-control" placeholder="Search" ng-model="$ctrl.filters.queryText" ng-change="$ctrl.filters.page = 1" />
         </div>
     </li>
 
@@ -20,55 +16,35 @@
         </button>
     </li>
 
-    <li class="filter dropdown-container pull-right"
-        ng-class="{ 'open': $ctrl.filters.showFilterBy }"
-        ng-click="$ctrl.filters.showFilterBy = !$ctrl.filters.showFilterBy">
+    <li class="filter dropdown-container pull-right" ng-class="{ 'open': $ctrl.filters.showFilterBy }" ng-click="$ctrl.filters.showFilterBy = !$ctrl.filters.showFilterBy">
         <button class="button borderless-button" ng-class="{ selected: $ctrl.isFilterSelected() }">
             <i class="fa fa-filter"></i>
         </button>
         <ul class="dropdown">
-            <li class="toggle selected show" 
-                ng-class="{ 'disabled': $ctrl.filters.disabled.Selected }">
-                <input  type="checkbox" id="showSelected" name="showSelected"
-                        ng-change="$ctrl.filters.page = 1; $ctrl.filters.hide.Selected = false"
-                        ng-model="$ctrl.filters.show.Selected" 
-                        ng-disabled="$ctrl.filters.disabled.Selected"
-                        ng-checked="$ctrl.filters.show.Selected" /> 
+            <li class="toggle selected show" ng-class="{ 'disabled': $ctrl.filters.disabled.Selected }">
+                <input type="checkbox" id="showSelected" name="showSelected" ng-change="$ctrl.filters.page = 1; $ctrl.filters.hide.Selected = false"
+                    ng-model="$ctrl.filters.show.Selected" ng-disabled="$ctrl.filters.disabled.Selected" ng-checked="$ctrl.filters.show.Selected" />
                 <label for="showSelected">
                     {{ $ctrl.section == 'activate' ? 'Activated' : 'Enabled' }} only
                 </label>
             </li>
-            <li class="toggle selected hide" 
-                ng-class="{ 'disabled': $ctrl.filters.disabled.Selected }">
-                <input  type="checkbox" id="hideSelected" name="hideSelected"
-                        ng-change="$ctrl.filters.page = 1; $ctrl.filters.show.Selected = false"
-                        ng-model="$ctrl.filters.hide.Selected" 
-                        ng-disabled="$ctrl.filters.disabled.Selected"
-                        ng-checked="$ctrl.filters.hide.Selected" /> 
+            <li class="toggle selected hide" ng-class="{ 'disabled': $ctrl.filters.disabled.Selected }">
+                <input type="checkbox" id="hideSelected" name="hideSelected" ng-change="$ctrl.filters.page = 1; $ctrl.filters.show.Selected = false"
+                    ng-model="$ctrl.filters.hide.Selected" ng-disabled="$ctrl.filters.disabled.Selected" ng-checked="$ctrl.filters.hide.Selected" />
                 <label for="hideSelected">
                     {{ $ctrl.section == 'activate' ? 'Non-activated' : 'Disabled' }} only
                 </label>
             </li>
-            <li class="toggle premium show" 
-                ng-if="$ctrl.section == 'enable'"
-                ng-class="{ 'disabled': $ctrl.filters.disabled.IsPremium }">
-                <input  type="checkbox" id="showPremium" name="showPremium"
-                        ng-change="$ctrl.filters.page = 1; $ctrl.filters.hide.IsPremium = false"
-                        ng-model="$ctrl.filters.show.IsPremium"
-                        ng-disabled="$ctrl.filters.disabled.IsPremium"
-                        ng-checked="$ctrl.filters.show.IsPremium" /> 
+            <li class="toggle premium show" ng-if="$ctrl.section == 'enable'" ng-class="{ 'disabled': $ctrl.filters.disabled.IsPremium }">
+                <input type="checkbox" id="showPremium" name="showPremium" ng-change="$ctrl.filters.page = 1; $ctrl.filters.hide.IsPremium = false"
+                    ng-model="$ctrl.filters.show.IsPremium" ng-disabled="$ctrl.filters.disabled.IsPremium" ng-checked="$ctrl.filters.show.IsPremium" />
                 <label for="showPremium">
                     Premium only
                 </label>
             </li>
-            <li class="toggle premium hide" 
-                ng-if="$ctrl.section == 'enable'" 
-                ng-class="{ 'disabled': $ctrl.filters.disabled.IsPremium }">
-                <input  type="checkbox" id="hidePremium" name="hidePremium"
-                        ng-change="$ctrl.filters.page = 1; $ctrl.filters.show.IsPremium = false"
-                        ng-model="$ctrl.filters.hide.IsPremium" 
-                        ng-disabled="$ctrl.filters.disabled.IsPremium"
-                        ng-checked="$ctrl.filters.hide.IsPremium" /> 
+            <li class="toggle premium hide" ng-if="$ctrl.section == 'enable'" ng-class="{ 'disabled': $ctrl.filters.disabled.IsPremium }">
+                <input type="checkbox" id="hidePremium" name="hidePremium" ng-change="$ctrl.filters.page = 1; $ctrl.filters.show.IsPremium = false"
+                    ng-model="$ctrl.filters.hide.IsPremium" ng-disabled="$ctrl.filters.disabled.IsPremium" ng-checked="$ctrl.filters.hide.IsPremium" />
                 <label for="hidePremium">
                     Non-premium only
                 </label>

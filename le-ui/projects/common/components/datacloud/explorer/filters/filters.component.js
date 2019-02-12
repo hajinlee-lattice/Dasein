@@ -25,6 +25,19 @@ angular
                         iconrotate: false,
                         tooltip: 'Download Enrichments'
                     },
+                    header: {
+                        sort_modeliteration: {
+                            label: 'Sort By',
+                            icon: 'numeric',
+                            order: '-',
+                            property: 'updated',
+                            items: [
+                                { label: 'Display Name', icon: 'numeric', property: 'DisplayName' },
+                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' },
+                                { label: 'Predictive Power', icon: 'numeric', property: 'created' }
+                            ]
+                        },
+                    },
                     sortPrefix: '+',
                     view: 'list',
                     queryText: '',
@@ -50,7 +63,7 @@ angular
 
                 vm.init_filters = function () {
                     if (vm.section == 're.model_iteration') {
-                        vm.orders.attribute = ['-HighlightHighlighted', 'HasWarnings', 'ImportanceOrdering', 'DisplayName'];
+                        vm.orders.attribute = ['-HighlightHighlighted', 'ImportanceOrdering', 'DisplayName'];
                     }
 
                     vm.download_button.items = [{
@@ -290,6 +303,10 @@ angular
 
                     if (DataCloudStore.ratingIterationFilter == 'warnings') {
                         filter.HasWarnings = '!!';
+                    }
+
+                    if (DataCloudStore.ratingIterationFilter == 'disabled') {
+                        filter.ApprovedUsage = 'None';
                     }
 
                     return filter;

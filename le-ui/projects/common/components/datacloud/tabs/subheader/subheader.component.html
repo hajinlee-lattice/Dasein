@@ -18,15 +18,16 @@
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('model_iteration')">
         <li ng-click="vm.clickIterationFilter('all')" ng-class="{'active':vm.checkIterationFilter('all')}">Top
-            Predictive
-            Attributes ({{ vm.getIterationFilterNumber('all') }})</li>
+            {{ vm.getIterationFilterNumber('all') }}</li>
         <li>|</li>
         <li ng-click="vm.clickIterationFilter('used')" ng-class="{'active':vm.checkIterationFilter('used')}">Used by
-            the
             Model ({{ vm.getIterationFilterNumber('used') }})</li>
         <li>|</li>
         <li ng-click="vm.clickIterationFilter('warnings')" ng-class="{'active':vm.checkIterationFilter('warnings')}">Warnings
             ({{ vm.getIterationFilterNumber('warnings') }})</li>
+        <li>|</li>
+        <li ng-click="vm.clickIterationFilter('disabled')" ng-class="{'active':vm.checkIterationFilter('disabled')}">Disabled
+            ({{ vm.getIterationFilterNumber('disabled') }})</li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('accounts')">
         <li>Accounts</li>
