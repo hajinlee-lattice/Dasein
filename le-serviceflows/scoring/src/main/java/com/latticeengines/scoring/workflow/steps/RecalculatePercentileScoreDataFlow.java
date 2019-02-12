@@ -1,8 +1,10 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -56,9 +58,15 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
 
         Map<String, String> scoreFieldMap = ExpectedRevenueDataFlowUtil
                 .getScoreFieldsMap(getListObjectFromContext(RATING_MODELS, RatingModelContainer.class));
+        String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
 
         if (MapUtils.isNotEmpty(scoreFieldMap)) {
             log.info(String.format("Using scoreFieldMap %s", JsonUtils.serialize(scoreFieldMap)));
+            params.setOriginalScoreFieldMap(scoreFieldMap);
+        } else if (StringUtils.isNotBlank(modelGuid)) {
+            log.info(String.format("Using individual modelGuid %s to set scoreFieldMap", modelGuid));
+            scoreFieldMap = new HashMap<>();
+            scoreFieldMap.put(modelGuid, ScoreResultField.RawScore.displayName);
             params.setOriginalScoreFieldMap(scoreFieldMap);
         } else {
             throw new RuntimeException("Couldn't find any valid scoreFieldMap or individual modelGuid");
