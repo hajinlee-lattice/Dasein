@@ -1,11 +1,13 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,9 @@ import com.latticeengines.app.exposed.download.HttpFileDownLoader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -30,6 +35,7 @@ import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("dataFileProviderService")
 public class DataFileProviderServiceImpl implements DataFileProviderService {
@@ -58,6 +64,9 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Autowired
     private BatonService batonService;
+
+    @Inject
+    protected MetadataProxy metadataProxy;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
@@ -94,11 +103,25 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Override
     public void downloadModelProfile(HttpServletRequest request, HttpServletResponse response, String modelId,
             String mimeType) throws IOException {
-        ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
+        String customer = MultiTenantContext.getTenant().getId();
+        ModelSummary summary = modelSummaryProxy.findValidByModelId(customer, modelId);
         validateModelSummary(summary, modelId);
-        String modelProfilePath = String.format("%s%s/data/%s-Event-Metadata/%s", modelingServiceHdfsBaseDir,
-                summary.getTenant().getId(), summary.getEventTableName(), MODEL_PROFILE_AVRO);
+        String eventColumn = getEventColumn(customer, summary.getEventTableName());
+        String modelProfilePath = String.format("%s%s/data/%s-%s-Metadata/%s", modelingServiceHdfsBaseDir,
+                summary.getTenant().getId(), summary.getEventTableName(), eventColumn, MODEL_PROFILE_AVRO);
         downloadFileByPath(request, response, mimeType, modelProfilePath);
+    }
+
+    private String getEventColumn(String customer, String eventTableName) {
+        String eventColumn = "Event";
+        Table eventTable = metadataProxy.getTable(customer, eventTableName);
+        if (eventTable != null) {
+            List<Attribute> events = eventTable.getAttributes(LogicalDataType.Event);
+            if (CollectionUtils.isNotEmpty(events)) {
+                eventColumn = events.get(0).getDisplayName();
+            }
+        }
+        return eventColumn;
     }
 
     @Override
