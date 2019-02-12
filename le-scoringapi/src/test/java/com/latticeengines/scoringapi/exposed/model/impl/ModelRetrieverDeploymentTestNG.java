@@ -13,12 +13,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
-import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
@@ -54,8 +52,6 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
     private void testArtifacts(ScoringArtifacts artifacts) throws IOException {
         Assert.assertNotNull(artifacts);
         Assert.assertNotNull(artifacts.getModelSummary());
-        ModelSummary expectedModelSummary = ModelSummaryUtils.generateModelSummary(tenant, MODELSUMMARYJSON_LOCALPATH);
-        Assert.assertEquals(artifacts.getModelSummary().getName(), expectedModelSummary.getName());
         Assert.assertNotNull(artifacts.getBucketMetadataList());
         List<BucketMetadata> expectedBucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
         Assert.assertEquals(artifacts.getBucketMetadataList().size(), expectedBucketMetadataList.size());
