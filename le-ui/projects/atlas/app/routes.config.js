@@ -278,7 +278,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
             }
         })
         .state('home.model.attributes', {
-            url: '/attributes/:aiModel',
+            url: '/attributes',
             params: {
                 section: 're.model_iteration',
                 pageIcon: 'ico-attributes',
@@ -308,13 +308,18 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                 //     return deferred.promise;
                 // },
-                Enrichments: function ($q, $stateParams, DataCloudStore, ApiHost) {
+                Iteration: function (RatingsEngineStore) {
+                    return RatingsEngineStore.getRemodelIteration();
+                },
+                Enrichments: function ($q, $stateParams, Iteration, DataCloudStore, ApiHost) {
                     var deferred = $q.defer(),
                         ratingId = $stateParams['rating_id'],
-                        aiModel = $stateParams['aiModel'],
+                        aiModel = Iteration.id,
                         opts = {
                             url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata`
                         };
+
+                    console.log(Iteration);
 
                     // clear DataCloudStore (tried this in onEnter, didn't work right)                   
                     DataCloudStore.clear();
@@ -332,10 +337,10 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                     return deferred.promise;
                 },
-                EnrichmentTopAttributes: function ($q, $stateParams, DataCloudStore, ApiHost) {
+                EnrichmentTopAttributes: function ($q, $stateParams, Iteration, DataCloudStore, ApiHost) {
                     var deferred = $q.defer(),
                         ratingId = $stateParams['rating_id'],
-                        aiModel = $stateParams['aiModel'],
+                        aiModel = Iteration.id,
                         opts = {
                             url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/topn`
                         };
