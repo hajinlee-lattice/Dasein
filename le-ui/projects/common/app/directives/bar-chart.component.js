@@ -191,7 +191,7 @@ angular
 
                     /************************** Chart Config ***********************/
                     $scope.header = $scope.config.chart.header !== undefined ? $scope.config.chart.header : 'Header';
-                    $scope.emptymsg = $scope.config.chart.emptymsg !== undefined ? $scope.config.chart.emptymsg || 'No Stats' : 'No Stats';
+                    $scope.emptymsg = $scope.config.chart.emptymsg !== undefined ? $scope.config.chart.emptymsg || 'No scored accounts available.' : 'No scored accounts available.';
                     $scope.color = $scope.config.chart.color !== undefined ? $scope.config.chart.color : '#D0D1D0';
                     $scope.usecolor = $scope.config.chart.usecolor !== undefined ? Boolean($scope.config.chart.usecolor) : true;
                     $scope.mousehover = $scope.config.chart.mousehover !== undefined ? $scope.config.chart.mousehover : false;
