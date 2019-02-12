@@ -498,8 +498,8 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.viewIteration = function(destination, iterationToView){
 
-        if (iteration) {
-            RatingsEngineStore.setRemodelIteration(iteration);
+        if (iterationToView) {
+            RatingsEngineStore.setRemodelIteration(iterationToView);
         }
 
         var iteration = iterationToView ? iterationToView : RatingsEngineStore.getRemodelIteration(),

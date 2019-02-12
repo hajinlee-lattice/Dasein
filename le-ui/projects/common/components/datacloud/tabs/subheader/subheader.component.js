@@ -4,7 +4,7 @@ angular
         $state, $rootScope, $stateParams, $timeout, StateHistory,
         FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
         SegmentStore, HealthService, QueryTreeService, ModelStore,
-        TopPredictorService, RatingsEngineStore
+        TopPredictorService, RatingsEngineStore, Banner
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
@@ -270,29 +270,40 @@ angular
 
             console.log($stateParams);
 
-            // var engineId = vm.ratingEngine.id,
-            //     iteration = RatingsEngineStore.getRemodelIteration(),
-            //     modelId = iteration.id;
+            var engineId = $stateParams.rating_id,
+                iteration = RatingsEngineStore.getRemodelIteration(),
+                iterationId = iteration.id;
 
-            // vm.remodelingProgress = true;
+            RatingsEngineStore.getRating(engineId).then(function (engine) {
+                RatingsEngineStore.setRatingEngine(engine);
+            });
 
-            // RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){            
-            //     RatingsEngineStore.setRemodelIteration(result);
-            //     RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-            //     RatingsEngineStore.saveIteration('attributes').then(function(result){
-            //         if (!result.result) {
-            //             Banner.success({
-            //                 message:
-            //                     "A remodel job has started. You can track it's progress on the jobs page."
-            //             });
-            //         }
-            //         vm.remodelingProgress = result.showProgress;
-            //     });
-            // });
+            vm.remodelingProgress = true;
+
+            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function(result){            
+                RatingsEngineStore.setRemodelIteration(result);
+                RatingsEngineStore.saveIteration('attributes').then(function(result){
+                    if (!result.result) {
+                        Banner.success({
+                            message:
+                                "A remodel job has started. You can track it's progress on the jobs page."
+                        });
+                    }
+                    vm.remodelingProgress = result.showProgress;
+                });
+            });
         }
 
         vm.changeSettings = function () {
+            var iteration = RatingsEngineStore.getRemodelIteration(),
+                modelId = iteration.modelSummaryId,
+                rating_id = $stateParams.rating_id,
+                url = 'home.ratingsengine.dashboard.training';
 
+            $state.go(url, { 
+                rating_id: rating_id, 
+                modelId: modelId
+            },{ reload:true });
         }
 
         vm.inModel = function () {
