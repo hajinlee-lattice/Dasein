@@ -12,7 +12,7 @@
         <property name="jdbcUrl"
                   value="${redshift.jdbc.url}/${redshift.app.database}?user=${redshift.root.user}&amp;password=${redshift.password.encrypted}&amp;tcpKeepAlive=true"/>
         <property name="acquireIncrement" value="1"/>
-        <property name="maxPoolSize" value="4"/>
+        <property name="maxPoolSize" value="8"/>
         <property name="minPoolSize" value="0"/>
         <property name="checkoutTimeout" value="300000"/>
         <property name="maxIdleTime" value="10"/>
