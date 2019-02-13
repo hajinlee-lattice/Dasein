@@ -283,8 +283,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 section: 're.model_iteration',
                 pageIcon: 'ico-attributes',
                 pageTitle: 'View Iteration',
-                gotoNonemptyCategory: true,
-                viewingIteration: true
+                gotoNonemptyCategory: true
             },
             resolve: {
                 // ReviewData: function (
