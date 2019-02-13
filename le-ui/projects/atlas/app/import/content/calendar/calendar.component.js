@@ -1,7 +1,7 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
     $state, $stateParams, $scope, $timeout, $sce, $window,
-    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory, Modal, Banner
+    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, DateRange, FieldDocument, StateHistory, Modal, Banner
 ) {
     var vm = this,
         debug = false, // goto /import/calendar
@@ -281,9 +281,11 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.init = function() {
-        var calendarInfo = ImportWizardStore.getCalendarInfo(Calendar);
+        var calendarInfo = ImportWizardStore.getCalendarInfo(Calendar),
+            start_date = DateRange[0],
+            end_date = DateRange[1];
         Banner.info({
-            message: 'This tenant is currently using the <strong>' + calendarInfo.modeDisplayName + ' Mode</strong>.'//  The year starts on [start] and ends on [ends].'
+            message: `This tenant is currently using the <strong> ${calendarInfo.modeDisplayName} Mode</strong>. The year starts on <strong>${start_date}</strong> and ends on <strong>${end_date}</strong>.`
         });
 
         parseCalendar(vm.calendar);

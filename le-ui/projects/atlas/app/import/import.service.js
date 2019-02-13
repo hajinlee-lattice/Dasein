@@ -1085,4 +1085,33 @@ angular.module('lp.import')
             return deferred.promise;
 
         }
+        this.getDateRange = function(year) {
+            var deferred = $q.defer();
+            $http({
+                method: 'GET',
+                url: '/pls/datacollection/periods/daterange/' + year,
+                headers: { 'Content-Type': 'application/json' }
+            }).then(
+                function onSuccess(response) {
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        result = {};
+                        deferred.resolve(result);
+                    }
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
+
+            return deferred.promise;
+        }
     });

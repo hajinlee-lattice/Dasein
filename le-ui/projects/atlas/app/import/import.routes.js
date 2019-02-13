@@ -66,6 +66,16 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                DateRange: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer(),
+                        year = new Date().getFullYear();
+
+                    ImportWizardService.getDateRange(year).then(function(result){
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             views: {
