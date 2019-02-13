@@ -13,8 +13,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         iteration: '<'
     },
     controller: function (
-        $q, $scope, $state, $stateParams, $timeout,
-        RatingsEngineStore, RatingsEngineService, SegmentService, Banner
+        $q, $scope, $stateParams, $timeout,
+        RatingsEngineStore, RatingsEngineService, SegmentService
     ) {
 
         var vm = this;
@@ -130,6 +130,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
             }
         }
+
+
 
         // Functions for Cross Sell Models
         // ============================================================================================
@@ -414,37 +416,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
             }, 1500);
         };
-
-        vm.backToModel = function() {
-            var modelId = vm.iteration.modelSummaryId,
-                rating_id = $stateParams.rating_id;
-
-            $state.go('home.ratingsengine.dashboard', { 
-                rating_id: rating_id, 
-                modelId: modelId
-            });
-        }
-
-        vm.remodelIteration = function() {
-            var engineId = vm.ratingEngine.id,
-                modelId = vm.ratingModel.id;
-
-            vm.remodelingProgress = true;
-
-            RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){            
-                RatingsEngineStore.setRemodelIteration(result);
-                RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-                RatingsEngineStore.saveIteration('training').then(function(result){
-                    if (!result.result) {
-                        Banner.success({
-                            message:
-                                "A remodel job has started. You can track it's progress on the jobs page."
-                        });
-                    }
-                    vm.remodelingProgress = result.showProgress;
-                });
-            });
-        }
         
     }
 });
