@@ -134,7 +134,8 @@
                     class="attribute attribute-stat delay top" ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
                                 'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0,
-                                'show-tooltip': vm.section == 'segment.analysis'
+                                'show-tooltip': vm.section == 'segment.analysis',
+                                'non-interactive': vm.section == 're.model_iteration'
                               }"
                     ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
                     ng-init="highest = vm.getHighestStat(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List)">
@@ -202,9 +203,8 @@
         </div>
 
         <div class="attribute-modeliteration-toggle" ng-if="vm.section == 're.model_iteration'">
-            <i ng-click="vm.toggleApprovedUsage(enrichment)" class="fa" ng-class="{ 
-                    'fa-toggle-on': vm.checkApprovedUsage(enrichment),
-                    'fa-toggle-off': !vm.checkApprovedUsage(enrichment)
+            <i ng-click="vm.toggleApprovedUsage(enrichment)" class="fa fa-toggle-on" ng-class="{ 
+                    'fa-rotate-180': !vm.checkApprovedUsage(enrichment)
                 }">
             </i>
         </div>
