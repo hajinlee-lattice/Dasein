@@ -4,7 +4,7 @@ angular
         $state, $rootScope, $stateParams, $timeout, StateHistory,
         FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
         SegmentStore, HealthService, QueryTreeService, ModelStore,
-        TopPredictorService, RatingsEngineStore, Banner
+        TopPredictorService
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
@@ -120,7 +120,7 @@ angular
                 'home.segment.explorer.enumpicker': 'picker',
                 'home.segment.accounts': 'accounts',
                 'home.segment.contacts': 'contacts',
-                'home.model.attributes': 'model_iteration'
+                'home.model.datacloud': 'model_iteration'
             };
 
             return map[state] == type;
@@ -265,46 +265,6 @@ angular
                     xhrGetSegmentResult
                 );
         };
-
-        vm.remodel = function () {
-
-            console.log($stateParams);
-
-            var engineId = $stateParams.rating_id,
-                iteration = RatingsEngineStore.getRemodelIteration(),
-                iterationId = iteration.id;
-
-            RatingsEngineStore.getRating(engineId).then(function (engine) {
-                RatingsEngineStore.setRatingEngine(engine);
-            });
-
-            vm.remodelingProgress = true;
-
-            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function(result){            
-                RatingsEngineStore.setRemodelIteration(result);
-                RatingsEngineStore.saveIteration('attributes').then(function(result){
-                    if (!result.result) {
-                        Banner.success({
-                            message:
-                                "A remodel job has started. You can track it's progress on the jobs page."
-                        });
-                    }
-                    vm.remodelingProgress = result.showProgress;
-                });
-            });
-        }
-
-        vm.changeSettings = function () {
-            var iteration = RatingsEngineStore.getRemodelIteration(),
-                modelId = iteration.modelSummaryId,
-                rating_id = $stateParams.rating_id,
-                url = 'home.ratingsengine.dashboard.training';
-
-            $state.go(url, { 
-                rating_id: rating_id, 
-                modelId: modelId
-            },{ reload:true });
-        }
 
         vm.inModel = function () {
             var name = $state.current.name.split('.');
