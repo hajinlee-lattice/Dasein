@@ -33,8 +33,6 @@ angular
             vm.viewingIteration = $stateParams.viewingIteration ? true : false;
         }
 
-        console.log(vm.IsRatingEngine, vm.viewingIteration);
-
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
             vm.HasRatingsAvailable = true;
         } else {

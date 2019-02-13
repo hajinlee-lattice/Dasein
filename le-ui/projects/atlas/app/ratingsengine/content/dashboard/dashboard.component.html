@@ -74,7 +74,8 @@
                                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
                                 Remodling iteration {{ vm.selectedIteration.iteration }}
                             </span>
-                        </div><button ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')"
+                        </div><button 
+                            ng-click="vm.remodelSettings()"
                             ng-class="{disabled: vm.remodelingProgress}"
                             ng-disabled="vm.remodelingProgress">
                             <i class="fa fa-cog" aria-hidden="true"></i>
@@ -313,7 +314,7 @@
                                 <td>
                                     <button 
                                         class="button link-button" 
-                                        ng-click="vm.viewIteration('home.model.attributes', iteration)"
+                                        ng-click="vm.viewIteration(iteration)"
                                         ng-if="
                                             iteration.modelingJobStatus === 'Completed' && 
                                             iteration.modelSummaryId">View Model</button>
