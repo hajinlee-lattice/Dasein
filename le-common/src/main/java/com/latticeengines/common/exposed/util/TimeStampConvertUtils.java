@@ -30,7 +30,8 @@ import java.util.TimeZone;
 public class TimeStampConvertUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
-    // linked hash map to use inserted order as priority at field mapping phase
+    // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
+    // and to keep generated lists of user supported date formats, time formats, and time zones in order.
     // Mapping from user exposed date format to Java 8 date/time library format.
     private static final Map<String, String> userToJavaDateFormatMap = new LinkedHashMap<>();
     // Mapping from user exposed time format to Java 8 date/time library format.
@@ -38,13 +39,10 @@ public class TimeStampConvertUtils {
     // Mapping from user exposed time zone format to Java 8 supported time zones.
     private static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
 
-    // Lists of supported user date and time formats and time zones.
-    public static final List<String> SUPPORTED_USER_DATE_FORMATS = new ArrayList<>();
-    public static final List<String> SUPPORTED_USER_TIME_FORMATS = new ArrayList<>();
-    public static final List<String> SUPPORTED_USER_TIME_ZONES = new ArrayList<>();
-
-    // List of supported java time zones.
-    public static final List<String> SUPPORTED_JAVA_TIME_ZONES = new ArrayList<>();
+    // Reverse mapping from Java 8 date/time library date format to user exposed format.
+    private static final Map<String, String> javaToUserDateFormatMap = new LinkedHashMap<>();
+    // Reverse mapping from Java 8 date/time library time format to user exposed format.
+    private static final Map<String, String> javaToUserTimeFormatMap = new LinkedHashMap<>();
 
     // List of all supported java date + time and date only formats.
     public static final List<String> SUPPORTED_JAVA_DATE_TIME_FORMATS = new ArrayList<>();
@@ -148,12 +146,13 @@ public class TimeStampConvertUtils {
 
     // Set up format data structures for autodetection of formats during user data import workflow.
     static {
-        // Set up lists of user supported date and time formats and timezones.
-        SUPPORTED_USER_DATE_FORMATS.addAll(userToJavaDateFormatMap.keySet());
-        SUPPORTED_USER_TIME_FORMATS.addAll(userToJavaTimeFormatMap.keySet());
-        SUPPORTED_USER_TIME_ZONES.addAll(userToJavaTimeZoneMap.keySet());
+        for (Map.Entry<String, String> userJavaDateFormat : userToJavaDateFormatMap.entrySet()) {
+            javaToUserDateFormatMap.put(userJavaDateFormat.getValue(), userJavaDateFormat.getKey());
+        }
 
-        SUPPORTED_JAVA_TIME_ZONES.addAll(userToJavaTimeZoneMap.values());
+        for (Map.Entry<String, String> userJavaTimeFormat : userToJavaTimeFormatMap.entrySet()) {
+            javaToUserTimeFormatMap.put(userJavaTimeFormat.getValue(), userJavaTimeFormat.getKey());
+        }
 
         // Construct all supported java date + time formats (included date only formats).
         for (String dateFormat : userToJavaDateFormatMap.values()) {
@@ -194,6 +193,35 @@ public class TimeStampConvertUtils {
                             DateTimeFormat.forPattern("dd/MMM/yyyy").withLocale(Locale.ENGLISH).getParser()})
                     .toFormatter()
                     .withZoneUTC();
+
+
+    // TODO: Add additional "getters and setters" as needed.
+
+    // Get lists of user supported date formats, time formats, and time zones.
+    public static List<String> getSupportedUserDateFormats() {
+        return new ArrayList<>(userToJavaDateFormatMap.keySet());
+    }
+
+    public static List<String> getSupportedUserTimeFormats() {
+        return new ArrayList<>(userToJavaTimeFormatMap.keySet());
+    }
+
+    public static List<String> getSupportedUserTimeZones() {
+        return new ArrayList<>(userToJavaTimeZoneMap.keySet());
+    }
+
+    // Get list of Java supported time zones.
+    public static List<String> getSupportedJavaTimeZones() {
+        return new ArrayList<>(userToJavaTimeZoneMap.values());
+    }
+
+    public static String mapJavaToUserDateFormat(String javaDateFormat) {
+        return javaToUserDateFormatMap.get(javaDateFormat);
+    }
+
+    public static String mapJavaToUserTimeFormat(String javaTimeFormat) {
+        return javaToUserTimeFormatMap.get(javaTimeFormat);
+    }
 
     // Simple method for date conversion which assumes one of five basic date only formats.
     public static long convertToLong(String date) {
@@ -244,6 +272,7 @@ public class TimeStampConvertUtils {
         // Remove excessive whitespace from the date/time value.  First trim the beginning and end.
         dateTime = dateTime.trim();
         // Now turn any whitespace larger than one space into exactly one space.
+        // NOTE: This won't work if date formats have whitespace in them.
         dateTime = dateTime.replaceFirst("(\\s\\s+)", " ");
 
         try {

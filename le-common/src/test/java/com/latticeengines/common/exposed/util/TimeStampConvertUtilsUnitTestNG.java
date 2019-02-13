@@ -25,14 +25,14 @@ public class TimeStampConvertUtilsUnitTestNG {
     @Test(groups = { "unit", "functional" })
     public void testJavaTimeZoneIdsAreValid() {
         // Test that all the supported Java time zones are valid Java time zones.
-        Set<String> timeZoneIds = new LinkedHashSet<String>(Arrays.asList(getAvailableTimeZoneIDs()));
-        for (String javaTimeZones : TimeStampConvertUtils.SUPPORTED_JAVA_TIME_ZONES) {
+        Set<String> timeZoneIds = new LinkedHashSet<>(Arrays.asList(getAvailableTimeZoneIDs()));
+        for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
             Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
         }
 
         // Test that when processed, the Java time zones return the correct string.  This test is needed because
         // if Java fails to convert a TimeZone to a ZoneId, it silently fails and returns "GMT" as the ZoneId.
-        for (String javaTimeZones : TimeStampConvertUtils.SUPPORTED_JAVA_TIME_ZONES) {
+        for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
             Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
             log.info("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
                     + TimeZone.getTimeZone(javaTimeZones).toZoneId());
@@ -436,6 +436,16 @@ public class TimeStampConvertUtilsUnitTestNG {
             log.info("   ZoneId: " + zoneIdStr + "  ZoneOffset: " + zoneOffset.toString());
 
         }
+
+        // Trying to understand what DATE_TIME_FORMATTER is for.
+        //long test1 = TimeStampConvertUtils.DATE_TIME_FORMATTER.parseMillis("11.21.11 11:11:11 AM");
+        //log.info("Parsed 11/21/11 11:11:11 AM into " + test1);
+
+        //long test2 = TimeStampConvertUtils.DATE_TIME_FORMATTER.parseMillis("11.21.11");
+        //log.info("Parsed 11/21/11 into " + test2);
+
+
+
     }
 
 }

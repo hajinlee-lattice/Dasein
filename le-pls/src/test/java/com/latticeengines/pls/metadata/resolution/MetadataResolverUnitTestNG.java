@@ -39,7 +39,7 @@ public class MetadataResolverUnitTestNG {
         MutablePair<String, String> formatForDateAndTime = new MutablePair<String, String>();
         Assert.assertTrue(
                 metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "12/05/2018"), formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
         // case 2: malformed date time value, expected false
@@ -51,78 +51,76 @@ public class MetadataResolverUnitTestNG {
         Assert.assertFalse(metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "12/55/2018", "12/05/2018"),
                 formatForDateAndTime));
 
-        // case 4: M-d-yyyy and M-d-yyyy have same occurrence times, hit
-        // M/d/yyyy
+        // case 4: M-d-yyyy and M-d-yyyy have same occurrence times, hit M/d/yyyy => MM/DD/YYYY.
         Assert.assertTrue(
                 metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "12/05/2018", "11-4-2016", "12-05-2018"),
                         formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
-        // case 5: M/d/yyyy and d/M/yyyy have same occurrence times, hit
-        // M/d/yyyy
+        // case 5: M/d/yyyy and d/M/yyyy have same occurrence times, hit M/d/yyyy => MM/DD/YYYY.
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016", "12/05/2018"), formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
-        // case 6: M/d/yyyy 2 times and d/M/yyyy 4 times, hit d/M/yyyy
+        // case 6: M/d/yyyy 2 times and d/M/yyyy 4 times, hit d/M/yyyy => DD/MM/YYYY.
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016", "12/05/2018", "23/04/2016", "23/05/2018"),
                 formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "d/M/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
-        // case 7: M-d-yyyy 2 times and d/M/yyyy 2 times, hit M-d-yyyy
+        // case 7: M-d-yyyy 2 times and d/M/yyyy 2 times, hit M-d-yyyy => MM-DD-YYYY,
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11-4-2016", "12-05-2018", "23/04/2016", "23/05/2018"), formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "d/M/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
         // case 8: add some timezone, no match pattern, false
         Assert.assertFalse(metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "02/01/2019 3:20:55 PM+0800"),
                 formatForDateAndTime));
 
-        // case 9: for unified date time format M/d/yyyy H:m:s
+        // case 9: for unified date time format M/d/yyyy H:m:s => MM/DD/YYYY 00:00:00 24H
         Assert.assertTrue(metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016 4:20:10", "12/05/2018 20:10:20"),
                 formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
-        Assert.assertEquals(formatForDateAndTime.getRight(), "H:m:s");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), "00:00:00 24H");
 
-        // case 10: same times for M/d/yyyy H:m:s and M/d/yyyy H-m-s
+        // case 10: same times for M/d/yyyy H:m:s and M/d/yyyy H-m-s, M/d/yyyy H:m:s wins => MM/DD/YYYY 00:00:00 24H
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016 4:20:10", "12/05/2018 20:10:20", "11/4/2016 4-20-10", "12/05/2018 20-10-20"),
                 formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
-        Assert.assertEquals(formatForDateAndTime.getRight(), "H:m:s");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), "00:00:00 24H");
 
-        // case 11: same times for M/d/yyyy and M/d/yyyy H-m-s
+        // case 11: same times for M/d/yyyy and M/d/yyyy H-m-s, M/d/yyyy H-m-s wins => MM/DD/YYYY 00-00-00 24H
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016", "12/05/2018", "11/4/2016 4-20-10", "12/05/2018 20-10-20"),
                 formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
-        Assert.assertEquals(formatForDateAndTime.getRight(), "H-m-s");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), "00-00-00 24H");
 
-        // case 12: identify M/d/yyyy h-m-s a
+        // case 12: identify M/d/yyyy h-m-s a => MM/DD/YYYY 00-00-00 12H
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016", "12/05/2018", "11/4/2016 4-20-10 AM", "12/05/2018 6-10-20 PM"),
                 formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
-        Assert.assertEquals(formatForDateAndTime.getRight(), "h-m-s a");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), "00-00-00 12H");
 
-        // case 13: same times for M/d/yyyy and M/d/yyyy H-m-s a
+        // case 13: same times for M/d/yyyy and M/d/yyyy H-m-s a, M/d/yyyy H-m-s a => MM/DD/YYYY 00-00-00 12H wins.
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016", "12/05/2018", "11/4/2016 4-20-10 AM", "12/05/2018 6-10-20 PM"),
                 formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "M/d/yyyy");
-        Assert.assertEquals(formatForDateAndTime.getRight(), "h-m-s a");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), "00-00-00 12H");
 
         // case 14: missing date time value, skip those and expect true.
         Assert.assertTrue(
                 metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "", "12/05/2018", null, "", "1/1/1",
                         "13/11/2017"),
                         formatForDateAndTime));
-        Assert.assertEquals(formatForDateAndTime.getLeft(), "d/M/yyyy");
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
     }
 }
