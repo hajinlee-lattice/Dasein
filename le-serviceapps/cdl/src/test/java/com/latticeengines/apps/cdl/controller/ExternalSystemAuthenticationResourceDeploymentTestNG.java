@@ -91,6 +91,11 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends CDLDep
         extSysAuth.setId(extSysAuthenticationRef.getId());
         extSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         extSysAuth = extSysAuthenticationProxy.updateAuthentication(mainCustomerSpace, extSysAuth.getId(), extSysAuth);
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            //Ignore
+        }
         verifyCurrentAuthentication(extSysAuth);
     }
 
