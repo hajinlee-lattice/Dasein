@@ -1,144 +1,4 @@
 // grid view multple of 12 (24), dynamic across
-<<<<<<< HEAD
-angular
-    .module('common.datacloud.explorer', [
-        'common.datacloud.explorer.utils',
-        'common.datacloud.explorer.filters',
-        'common.datacloud.explorer.companyprofile',
-        'common.datacloud.explorer.latticeratingcard',
-        'common.datacloud.explorer.categorytile',
-        'common.datacloud.explorer.subcategorytile',
-        'common.datacloud.explorer.attributetile',
-        'mainApp.core.utilities.BrowserStorageUtility'
-    ])
-    .controller('DataCloudController', function (
-        $scope,
-        $filter,
-        $timeout,
-        $injector,
-        $q,
-        $state,
-        $stateParams,
-        Enrichments,
-        BrowserStorageUtility,
-        FeatureFlagService,
-        DataCloudStore,
-        DataCloudService,
-        EnrichmentTopAttributes,
-        EnrichmentPremiumSelectMaximum,
-        EnrichmentSelectMaximum,
-        LookupStore,
-        QueryStore,
-        QueryRestriction,
-        CurrentConfiguration,
-        LookupResponse,
-        RatingsEngineModels,
-        RatingsEngineStore,
-        QueryTreeService,
-        ExplorerUtils,
-        ConfigureAttributesStore,
-        Notice
-    ) {
-        let ReviewData = $injector.has('ReviewData')
-            ? $injector.get('ReviewData')
-            : { success: false };
-
-        var vm = this,
-            flags = FeatureFlagService.Flags();
-
-        angular.extend(vm, {
-            debug: window.location.search.indexOf('debug=1') > 0,
-            label: {
-                total: 'Total',
-                premium: 'Premium',
-                button_download: 'Download All',
-                button_download_selected: 'Download Selected',
-                button_save: 'Save Changes',
-                button_select: 'Enrichment Disabled',
-                button_selected: 'Enrichment Enabled',
-                button_deselect: 'Enrichment Enabled',
-                button_import_data: 'Import Data',
-                deselected_messsage:
-                    'Attribute will be turned off for enrichment',
-                categories_see_all: 'See All Categories',
-                categories_select_all: 'All Categories',
-                premiumTotalSelectError: 'Premium attribute limit reached',
-                generalTotalSelectError: 'Attribute limit reached',
-                insufficientUserRights: 'Lattice Insights are disabled',
-                no_results: 'No attributes were found',
-                saved_alert: 'Your changes have been saved.',
-                saved_error: 'Your changes could not be saved.',
-                saving_alert:
-                    'Your changes are being saved. <i class="fa fa-cog fa-spin fa-fw"></i>',
-                changed_alert:
-                    "No changes will be saved until you press the 'Save' button.",
-                disabled_alert: 'You have disabled an attribute.'
-            },
-            highlightMetadata: {
-                categories: {}
-            },
-            EnrichmentPremiumSelectMaximum: EnrichmentPremiumSelectMaximum,
-            EnrichmentSelectMaximum: EnrichmentSelectMaximum,
-            lookupMode: LookupResponse && LookupResponse.attributes !== null,
-            lookupFiltered: LookupResponse.attributes,
-            LookupResponse: LookupStore.response,
-            no_lookup_results_message: false,
-            hasCompanyInfo:
-                LookupStore.response && LookupStore.response.companyInfo
-                    ? Object.keys(LookupStore.response.companyInfo).length
-                    : 0,
-            count: LookupResponse.attributes
-                ? Object.keys(LookupResponse.attributes).length
-                : (Enrichments || []).length,
-            show_internal_filter:
-                FeatureFlagService.FlagIsEnabled(
-                    flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES
-                ) &&
-                $stateParams.section != 'insights' &&
-                $stateParams.section != 'team',
-            show_lattice_insights: FeatureFlagService.FlagIsEnabled(
-                flags.LATTICE_INSIGHTS
-            ),
-            show_segmentation: FeatureFlagService.FlagIsEnabled(
-                flags.ENABLE_CDL
-            ),
-            enabledManualSave: false,
-            enrichmentsObj: {}, // by Category
-            enrichmentsMap: {}, // by ColumnId, value is enrichments[] index
-            enrichments: [],
-            subcategoriesList: [],
-            status_alert: {},
-            _subcategories: [],
-            subcategories: [],
-            subcategoriesExclude: [],
-            categories: [],
-            topAttributes: [],
-            cube: null,
-            selected_categories: {},
-            metadata: DataCloudStore.metadata,
-            authToken: BrowserStorageUtility.getTokenDocument(),
-            userSelectedCount: 0,
-            selectDisabled: 1,
-            saveDisabled: 1,
-            selectedCount: 0,
-            section: $stateParams.section,
-            category: $stateParams.category,
-            subcategory: $stateParams.subcategory,
-            openHighlighter: {},
-            categoryCounts: {},
-            TileTableItems: {},
-            workingBuckets: CurrentConfiguration,
-            pagesize: 24,
-            categorySize: 7,
-            addBucketTreeRoot: null,
-            feedbackModal: DataCloudStore.getFeedbackModal(),
-            stateParams: $stateParams,
-            segment: $stateParams.segment,
-            inWizard: false,
-            datacollectionPrecheck: null,
-            datacollectionPrechecking: false,
-            collectionStatus: null
-=======
 angular.module('common.datacloud.explorer', [
     'common.datacloud.explorer.utils',
     'common.datacloud.explorer.filters',
@@ -243,7 +103,6 @@ angular.module('common.datacloud.explorer', [
         ConfigureAttributesStore.getPrecheck().then(function(result) {
             vm.datacollectionPrecheck = result;
             vm.datacollectionPrechecking = false;
->>>>>>> parent of 72e22223db... - View Remodel changes
         });
     }
 
@@ -265,16 +124,7 @@ angular.module('common.datacloud.explorer', [
             vm.inWizard = false;
         }
 
-<<<<<<< HEAD
-        vm.init = function () {
-            // leo();
-            if (['segment.analysis'].indexOf(vm.section) != -1) {
-                // only run on 'my data' page
-                getDatacollectionPrecheck();
-            }
-=======
         QueryStore.setSegmentEnabled = false;
->>>>>>> parent of 72e22223db... - View Remodel changes
 
         if (vm.section == 'insights' && !vm.show_lattice_insights) {
             vm.statusMessage(vm.label.insufficientUserRights, { wait: 0, special: 'nohtml' });
@@ -1611,46 +1461,6 @@ angular.module('common.datacloud.explorer', [
             return 0;
         }
 
-<<<<<<< HEAD
-            for (var i = 0, result = []; i < filtered.length; i++) {
-                var item = filtered[i];
-
-                if (item && vm.searchFields(item)) {
-                    if (
-                        item.Category != category ||
-                        (vm.lookupMode &&
-                            !vm.metadata.toggle.show.nulls &&
-                            item.AttributeValue == 'No' &&
-                            vm.isYesNoCategory(category)) ||
-                        (vm.metadata.toggle.show.selected &&
-                            !item.IsSelected) ||
-                        (vm.metadata.toggle.hide.selected && item.IsSelected) ||
-                        (vm.metadata.toggle.show.premium && !item.IsPremium) ||
-                        (vm.metadata.toggle.hide.premium && item.IsPremium) ||
-                        (!vm.metadata.toggle.show.internal &&
-                            item.IsInternal) ||
-                        (vm.metadata.toggle.show.enabled &&
-                            item.HighlightHidden) ||
-                        (vm.metadata.toggle.hide.enabled &&
-                            !item.HighlightHidden) ||
-                        (vm.metadata.toggle.show.highlighted &&
-                            !item.HighlightHighlighted) ||
-                        (vm.metadata.toggle.hide.highlighted &&
-                            item.HighlightHighlighted) ||
-                        (vm.metadata.toggle.show
-                            .selected_ratingsengine_attributes &&
-                            !item.IsRatingsEngineAttribute) ||
-                        (DataCloudStore.ratingIterationFilter == 'used' &&
-                            !('ImportanceOrdering' in item)) ||
-                        (DataCloudStore.ratingIterationFilter == 'warnings' &&
-                            !item.HasWarnings) ||
-                        (DataCloudStore.ratingIterationFilter == 'disabled' &&
-                            item.ApprovedUsage[0] != 'None')
-                    ) {
-                        continue;
-                    }
-                    result.push(item);
-=======
         for (var i=0, result=[]; i < filtered.length; i++) {
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
@@ -1667,7 +1477,6 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
                 || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
                     continue;
->>>>>>> parent of 72e22223db... - View Remodel changes
                 }
                 result.push(item);
             }

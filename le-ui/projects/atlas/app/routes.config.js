@@ -277,13 +277,8 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 }
             }
         })
-<<<<<<< HEAD
-        .state('home.model.datacloud', {
-            url: '/datacloud/:aiModel',
-=======
         .state('home.model.attributes', {
             url: '/attributes',
->>>>>>> parent of 72e22223db... - View Remodel changes
             params: {
                 pageIcon: 'ico-attributes',
                 pageTitle: 'View Iteration',
@@ -291,6 +286,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 viewingIteration: true
             },
             resolve: {
+<<<<<<< HEAD
 <<<<<<< HEAD
                 // ReviewData: function (
                 //     $q,
@@ -362,13 +358,14 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         deferred.resolve(result);
                     });
 =======
+=======
+>>>>>>> be13581dd0... Revert "- View Remodel changes #432"
                 Enrichments: [
                     '$q',
                     'DataCloudStore',
                     'ApiHost',
                     function($q, DataCloudStore, ApiHost) {
                         var deferred = $q.defer();
->>>>>>> parent of 72e22223db... - View Remodel changes
 
                         DataCloudStore.setHost(ApiHost);
 

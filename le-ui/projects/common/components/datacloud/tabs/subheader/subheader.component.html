@@ -29,25 +29,11 @@
         </li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('model_iteration')">
-<<<<<<< HEAD
-        <li ng-click="vm.clickIterationFilter('all')" ng-class="{'active':vm.checkIterationFilter('all')}">Top
-            {{ vm.getIterationFilterNumber('all') }}</li>
-        <li>|</li>
-        <li ng-click="vm.clickIterationFilter('used')" ng-class="{'active':vm.checkIterationFilter('used')}">Used by
-            Model ({{ vm.getIterationFilterNumber('used') }})</li>
-        <li>|</li>
-        <li ng-click="vm.clickIterationFilter('warnings')" ng-class="{'active':vm.checkIterationFilter('warnings')}">Warnings
-            ({{ vm.getIterationFilterNumber('warnings') }})</li>
-        <li>|</li>
-        <li ng-click="vm.clickIterationFilter('disabled')" ng-class="{'active':vm.checkIterationFilter('disabled')}">Disabled
-            ({{ vm.getIterationFilterNumber('disabled') }})</li>
-=======
         <li class="active">Top Predictive Attributes (300)</li>
         <li>|</li>
         <li>Used by the Model (50)</li>
         <li>|</li>
         <li>Warnings (2)</li>
->>>>>>> parent of 72e22223db... - View Remodel changes
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('accounts')">
         <li>Accounts</li>

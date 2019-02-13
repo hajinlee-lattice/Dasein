@@ -1,12 +1,5 @@
 angular
     .module('common.datacloud.tabs.subheader', [])
-<<<<<<< HEAD
-    .controller('SubHeaderTabsController', function (
-        $state, $rootScope, $stateParams, $timeout, StateHistory,
-        FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
-        SegmentStore, HealthService, QueryTreeService, ModelStore,
-        TopPredictorService, RatingsEngineStore, Banner
-=======
     .controller('SubHeaderTabsController', function(
         $state,
         $rootScope,
@@ -20,7 +13,6 @@ angular
         HealthService,
         QueryTreeService,
         StateHistory
->>>>>>> parent of 72e22223db... - View Remodel changes
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
@@ -92,40 +84,7 @@ angular
             return QueryTreeService.getPickerObject();
         };
 
-<<<<<<< HEAD
-        vm.getIterationFilterNumber = function (type) {
-            switch (type) {
-                case 'all':
-                    return vm.enrichments.length;
-                case 'used':
-                    return vm.enrichments.filter((item) => {
-                        return typeof item.ImportanceOrdering != 'undefined';
-                    }).length;
-                case 'warnings':
-                    return vm.enrichments.filter((item) => {
-                        return item.HasWarnings;
-                    }).length;
-                case 'disabled':
-                    return vm.enrichments.filter((item) => {
-                        return item.ApprovedUsage[0] == 'None';
-                    }).length;
-            };
-
-            return 0;
-        }
-
-        vm.clickIterationFilter = function (type) {
-            DataCloudStore.ratingIterationFilter = type;
-        }
-
-        vm.checkIterationFilter = function (type) {
-            return DataCloudStore.ratingIterationFilter == type;
-        }
-
-        vm.checkState = function (type) {
-=======
         vm.checkState = function(type) {
->>>>>>> parent of 72e22223db... - View Remodel changes
             var state = $state.current.name;
 
             var map = {
@@ -168,37 +127,7 @@ angular
             }, 1);
         };
 
-<<<<<<< HEAD
-        vm.clickedExport = function () {
-            var data = ModelStore.data;
-            var csvRows = TopPredictorService.GetTopPredictorExport(data);
-            var lineArray = [];
-
-            csvRows.forEach(function (infoArray, index) {
-                var line = infoArray.join(",");
-                lineArray.push(line);
-            });
-
-            var csvContent = lineArray.join("\n");
-            var element = document.createElement("a");
-
-            element.setAttribute(
-                "href",
-                "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
-            );
-            element.setAttribute("download", "attributes.csv");
-            element.style.display = "none";
-
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-
-        };
-
-        vm.clickPickerBack = function () {
-=======
         vm.clickPickerBack = function() {
->>>>>>> parent of 72e22223db... - View Remodel changes
             var state = StateHistory.lastFrom();
             var params = StateHistory.lastFromParams();
 
@@ -284,51 +213,7 @@ angular
                   );
         };
 
-<<<<<<< HEAD
-        vm.remodel = function () {
-
-            console.log($stateParams);
-
-            var engineId = $stateParams.rating_id,
-                iteration = RatingsEngineStore.getRemodelIteration(),
-                iterationId = iteration.id;
-
-            RatingsEngineStore.getRating(engineId).then(function (engine) {
-                RatingsEngineStore.setRatingEngine(engine);
-            });
-
-            vm.remodelingProgress = true;
-
-            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function (result) {
-                RatingsEngineStore.setRemodelIteration(result);
-                RatingsEngineStore.saveIteration('attributes').then(function (result) {
-                    if (!result.result) {
-                        Banner.success({
-                            message:
-                                "A remodel job has started. You can track it's progress on the jobs page."
-                        });
-                    }
-                    vm.remodelingProgress = result.showProgress;
-                });
-            });
-        }
-
-        vm.changeSettings = function () {
-            var iteration = RatingsEngineStore.getRemodelIteration(),
-                modelId = iteration.modelSummaryId,
-                rating_id = $stateParams.rating_id,
-                url = 'home.ratingsengine.dashboard.training';
-
-            $state.go(url, {
-                rating_id: rating_id,
-                modelId: modelId
-            }, { reload: true });
-        }
-
-        vm.inModel = function () {
-=======
         vm.inModel = function() {
->>>>>>> parent of 72e22223db... - View Remodel changes
             var name = $state.current.name.split('.');
             return name[1] == 'model';
         };
@@ -389,12 +274,8 @@ angular
 
                     SegmentService.CreateOrUpdateSegmentExport(
                         segmentExport
-<<<<<<< HEAD
-                    ).then(function (result) {
-=======
                     ).then(function(result) {
                         console.log(result);
->>>>>>> parent of 72e22223db... - View Remodel changes
                         if (result.success) {
                             vm.displayExportBanner = true;
                         }

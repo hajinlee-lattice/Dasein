@@ -209,34 +209,6 @@ angular
                 vm.getBktListRating = function(enrichment){
                     return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List;
                 }
-<<<<<<< HEAD
-
-                vm.getWarning = function (warning) {
-                    let warnings = DataCloudStore.getWarnings();
-                    return warnings[warning];
-                }
-
-                vm.toggleApprovedUsage = function (item) {
-                    switch (item.ApprovedUsage[0]) {
-                        case 'None':
-                            Notice.success({ message: 'Enabled attribute for remodeling' })
-                            item.ApprovedUsage[0] = 'ModelAndAllInsights';
-                            break;
-                        default:
-                            Notice.warning({ message: 'Disabled attribute from remodeling' })
-                            item.ApprovedUsage[0] = 'None';
-                    }
-                }
-
-                vm.checkApprovedUsage = function (item) {
-                    return item.ApprovedUsage[0] != 'None';
-                }
-
-                vm.checkImportance = function (item) {
-                    return 'ImportanceOrdering' in item;
-                }
-=======
->>>>>>> parent of 72e22223db... - View Remodel changes
             }
         };
     });

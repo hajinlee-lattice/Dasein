@@ -1,57 +1,6 @@
 angular.module('lp.ratingsengine.dashboard', [
     'mainApp.appCommon.directives.barchart'
 ])
-<<<<<<< HEAD
-    .controller('RatingsEngineDashboard', function (
-        $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
-        RatingsEngineStore, RatingsEngineService, Modal, Banner, DataCloudStore,
-        Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
-    ) {
-        var vm = this,
-            flags = FeatureFlagService.Flags();
-
-        var featureFlagsConfig = {};
-        featureFlagsConfig[flags.PLAYBOOK_MODULE] = true;
-
-        angular.extend(vm, {
-            playbookEnabled: AuthorizationUtility.checkFeatureFlags(featureFlagsConfig),
-            deactivateInProgress: false,
-            dashboard: Dashboard,
-            ratingEngine: RatingEngine,
-            modelSummary: Model,
-            selectedIteration: null,
-            products: Products,
-            targetProducts: TargetProducts,
-            trainingProducts: TrainingProducts,
-            periodType: DataCollectionStatus.ApsRollingPeriod,
-            barChartConfig: {
-                'data': {
-                    'tosort': true,
-                    'sortBy': 'bucket_name',
-                    'trim': true,
-                    'top': 6,
-                },
-                'chart': {
-                    'header': 'Value',
-                    'emptymsg': '',
-                    'usecolor': true,
-                    'color': '#e8e8e8',
-                    'mousehover': false,
-                    'type': 'integer',
-                    'showstatcount': false,
-                    'maxVLines': 3,
-                    'showVLines': false,
-                },
-                'vlines': {
-                    'suffix': ''
-                },
-                'columns': [{
-                    'field': 'num_leads',
-                    'label': 'Records',
-                    'type': 'number',
-                    'chart': true,
-                }]
-=======
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
     RatingsEngineStore, RatingsEngineService, Modal, Banner, 
@@ -80,7 +29,6 @@ angular.module('lp.ratingsengine.dashboard', [
                 'sortBy': 'bucket_name',
                 'trim': true,
                 'top': 6,
->>>>>>> parent of 72e22223db... - View Remodel changes
             },
             'chart': {
                 'header':'Value',
@@ -349,37 +297,8 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.targetProducts = vm.targetProducts.ProductName;
                 }
 
-<<<<<<< HEAD
-                vm.selectedIteration = angular.copy(vm.model);
-                RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
-
-                vm.gatheringAttributes = true;
-
-                var ratingId = $stateParams.rating_id,
-                    modelId = vm.selectedIteration.id;
-
-                DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
-                    vm.gatheringAttributes = false;
-                    DataCloudStore.setEnrichments(result);
-                });
-
-
-                var type = vm.ratingEngine.type.toLowerCase();
-
-                if (type === 'cross_sell') {
-
-                    if (Array.isArray(vm.targetProducts)) {
-                        vm.targetProductsIsArray = true;
-                        vm.tooltipContent = angular.copy(vm.targetProducts);
-                        vm.targetProducts = vm.targetProducts.length + ' selected';
-                    } else {
-                        vm.targetProductsIsArray = false;
-                        vm.targetProducts = vm.targetProducts.ProductName;
-                    }
-=======
                 vm.modelingStrategy = vm.model.advancedModelingConfig[type].modelingStrategy;
                 vm.configFilters = vm.model.advancedModelingConfig[type].filters;
->>>>>>> parent of 72e22223db... - View Remodel changes
 
                 vm.hasSettingsInfo = 
                     ((vm.trainingProducts || vm.trainingSegment) ||
@@ -397,33 +316,10 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.quantityCriteria = vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL' ? 'at least' : 'at most';
                 }
 
-<<<<<<< HEAD
-                if ($stateParams.remodelSuccessBanner) {
-                    Banner.success({
-                        message:
-                            "A remodel job has started. You can track it's progress on the jobs page."
-                    });
-                }
-
-            }
-        }
-
-        vm.init = function () {
-            vm.initDataModel();
-        }
-
-        vm.isIterationActive = function (iterationId) {
-            if (vm.ratingEngine.scoring_iteration != null) {
-                if (vm.ratingEngine.scoring_iteration.AI.id == iterationId) {
-                    return true;
-                } else {
-                    return false;
-=======
                 if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
                     vm.ratingEngineType = 'First Purchase Cross-Sell'
                 } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
                     vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
->>>>>>> parent of 72e22223db... - View Remodel changes
                 }
             } else {
                 vm.modelingStrategy = 'CUSTOM_EVENT';
@@ -488,45 +384,6 @@ angular.module('lp.ratingsengine.dashboard', [
             } else {
                 return false;
             }
-<<<<<<< HEAD
-        };
-
-        vm.toggleMenu = function ($event) {
-            vm.toggle = !vm.toggle;
-
-            console.log($event);
-
-            if ($event && $event.target) {
-                var target = angular.element($event.target),
-                    parent = target.parent();
-                var click = function ($event) {
-                    var clicked = angular.element($event.target),
-                        inside = clicked.closest(parent).length;
-                    if (!inside) {
-                        vm.toggle = false;
-                        $scope.$digest();
-                        $document.unbind('click', click);
-                    }
-                }
-                $document.bind('click', click);
-            }
-        }
-
-        vm.setRemodelIteration = function (iteration) {
-            vm.selectedIteration = iteration;
-            RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
-
-            var ratingId = $stateParams.rating_id,
-                modelId = iteration.id;
-
-            vm.gatheringAttributes = true;
-
-            DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
-                vm.gatheringAttributes = false;
-                DataCloudStore.setEnrichments(result);
-            });
-
-=======
         } else {
             return false;
         }
@@ -567,7 +424,6 @@ angular.module('lp.ratingsengine.dashboard', [
         }else{
             var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.latest_iteration;
             jobStatus = model.AI.modelingJobStatus;
->>>>>>> parent of 72e22223db... - View Remodel changes
         }
 
         switch(jobStatus){
@@ -579,10 +435,6 @@ angular.module('lp.ratingsengine.dashboard', [
 
     };
 
-<<<<<<< HEAD
-            if (iterationToView) {
-                RatingsEngineStore.setRemodelIteration(iterationToView);
-=======
     vm.canNewScoringConfig = function() {
         var can = !((vm.dashboard.summary.bucketMetadata && vm.dashboard.summary.bucketMetadata.length === 0) || vm.isJobRunning());
         if(vm.dashboard.iterations){
@@ -616,25 +468,11 @@ angular.module('lp.ratingsengine.dashboard', [
                     $scope.$digest();
                     $document.unbind('click', click);
                 }
->>>>>>> parent of 72e22223db... - View Remodel changes
             }
             $document.bind('click', click);
         }
     }
 
-<<<<<<< HEAD
-            var iteration = iterationToView ? iterationToView : RatingsEngineStore.getRemodelIteration(),
-                modelId = iteration.modelSummaryId,
-                rating_id = $stateParams.rating_id,
-                aiModel = iteration.id,
-                url = destination;
-
-            $state.go(url, {
-                rating_id: rating_id,
-                modelId: modelId,
-                aiModel: aiModel
-            }, { reload: true });
-=======
     vm.setRemodelIteration = function(iteration){
         vm.selectedIteration = iteration;
         RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
@@ -644,7 +482,6 @@ angular.module('lp.ratingsengine.dashboard', [
         var engineId = vm.ratingEngine.id,
             iteration = RatingsEngineStore.getRemodelIteration(),
             modelId = iteration.id;
->>>>>>> parent of 72e22223db... - View Remodel changes
 
         vm.remodelingProgress = true;
 
