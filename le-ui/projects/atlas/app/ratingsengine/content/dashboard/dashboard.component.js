@@ -334,14 +334,6 @@ angular.module('lp.ratingsengine.dashboard', [
             } else if (vm.predictionType === 'EXPECTED_VALUE') {
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
-
-            if ($stateParams.remodelSuccessBanner) {
-                Banner.success({
-                    message:
-                        "A remodel job has started. You can track it's progress on the jobs page."
-                });
-            }
-
         }
     }
 

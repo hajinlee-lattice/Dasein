@@ -54,14 +54,11 @@ angular.module('lp.ratingsengine.wizard.training', [
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){
 
-                    vm.filters = angular.copy(vm.ratingModel.advancedModelingConfig.cross_sell.filters);
-                    
-                    console.log(vm.ratingModel);
-                    console.log(vm.filters);
+                    vm.filters = vm.ratingModel.advancedModelingConfig.cross_sell.filters;
 
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
                     if(vm.repeatPurchase){
-                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD ? vm.filters.PURCHASED_BEFORE_PERIOD.value : 6;
+                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value;
                         vm.repeatPurchaseRemodel = true;
                     }
 
@@ -102,6 +99,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                         transformationGroup: (vm.filters.transformationGroup == 'NONE') ? false : true
                     }
 
+                    console.log(vm.checkboxModel);
+
                     vm.configFilters = angular.copy(vm.filters);
 
                     vm.configFilters.dataStores = [];
@@ -124,8 +123,6 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.modelId = vm.ratingModel.id;
 
             vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
-
-            console.log(vm.ratingModel);
 
             if(vm.engineType == 'cross_sell'){
                 vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -430,20 +427,22 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.remodelIteration = function() {
             var engineId = vm.ratingEngine.id,
-                modelId = vm.ratingModel.id,
-                ratingModel = {
-                    AI: vm.ratingModel
-                };
+                modelId = vm.ratingModel.id;
 
             vm.remodelingProgress = true;
 
-            RatingsEngineStore.setRemodelIteration(ratingModel);
-            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-            RatingsEngineStore.saveIteration('training').then(function(result){
-                if (!result.result) {
-                    $state.go('home.ratingsengine.dashboard', { "rating_id": engineId, "modelId": modelId, viewingIteration: false, remodelSuccessBanner: true });
-                }
-                vm.remodelingProgress = result.showProgress;
+            RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){            
+                RatingsEngineStore.setRemodelIteration(result);
+                RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+                RatingsEngineStore.saveIteration('training').then(function(result){
+                    if (!result.result) {
+                        Banner.success({
+                            message:
+                                "A remodel job has started. You can track it's progress on the jobs page."
+                        });
+                    }
+                    vm.remodelingProgress = result.showProgress;
+                });
             });
         }
         
