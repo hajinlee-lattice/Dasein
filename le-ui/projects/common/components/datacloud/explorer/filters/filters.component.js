@@ -28,13 +28,13 @@ angular
                     header: {
                         sort_modeliteration: {
                             label: 'Sort By',
-                            icon: 'alpha',
-                            order: '',
-                            property: 'DisplayName',
+                            icon: 'numeric',
+                            order: '-',
+                            property: 'updated',
                             items: [
-                                { label: 'Display Name', icon: 'alpha', property: 'DisplayName' },
-                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }//,
-                                //{ label: 'Predictive Power', icon: 'numeric', property: 'created' }
+                                { label: 'Display Name', icon: 'numeric', property: 'DisplayName' },
+                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' },
+                                { label: 'Predictive Power', icon: 'numeric', property: 'created' }
                             ]
                         },
                     },
@@ -62,6 +62,10 @@ angular
                 }
 
                 vm.init_filters = function () {
+                    if (vm.section == 're.model_iteration') {
+                        vm.orders.attribute = ['-HighlightHighlighted', 'ImportanceOrdering', 'DisplayName'];
+                    }
+
                     vm.download_button.items = [{
                         href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
                         label: vm.label.button_download,
@@ -224,11 +228,7 @@ angular
                 };
 
                 vm.sortOrder = function () {
-                    if (vm.section == 're.model_iteration') {
-                        var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
-                    } else {
-                        var sortPrefix = vm.sortPrefix.replace('+', '');
-                    }
+                    var sortPrefix = vm.sortPrefix.replace('+', '');
                     if (!vm.category) {
                         return handleFilterOrder(vm.orders.category);
                     } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
@@ -244,26 +244,13 @@ angular
 
                 var handleFilterOrder = function (order, sortPrefix) {
                     var sortPrefix = sortPrefix || vm.sortPrefix.replace('+', '');
-
                     if (typeof order === 'object') {
                         var sortArr = order,
                             retArr = [];
 
-                        if (vm.section == 're.model_iteration') {
-                            var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
-                            var importance = 'ImportanceOrdering';
-                            var name = sortPrefix + 'DisplayName';
-
-                            if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
-                                retArr.push(importance);
-                            }
-
-                            retArr.push(name);
-                        } else {
-                            sortArr.forEach(function (item, index) {
-                                retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
-                            });
-                        }
+                        sortArr.forEach(function (item, index) {
+                            retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
+                        });
 
                         return retArr;
                     }

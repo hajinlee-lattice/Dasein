@@ -972,6 +972,16 @@ attr-categories,
                             &:nth-child(odd) {
                                background-color: rgba(0,0,0,0.05);
                             }
+                            &:hover ul.graph {
+                                color: #fff;
+                                li.bar_ {
+                                    border-left-color: #fff;
+                                    div span {
+                                        background-color: #fff;
+                                        opacity: 0.5;
+                                    }
+                                }
+                            }
                             ul.graph {
                                 @include flex-container;
                                 color: #000;
@@ -1037,33 +1047,6 @@ attr-categories,
                                             }
                                         }
                                     }
-                                }
-                            }
-                        }
-                        li.attribute-stat:not(.non-interactive) {
-                            &:hover ul.graph {
-                                color: #fff;
-                                li.bar_ {
-                                    border-left-color: #fff;
-                                    div span {
-                                        background-color: #fff;
-                                        opacity: 0.5;
-                                    }
-                                }
-                            }
-                        }
-                        li.non-interactive {
-                            background-color: initial !important;
-
-                            &:nth-child(odd) {
-                               background-color: rgba(0,0,0,0.05) !important;
-                            }
-                    
-                            ul {
-                                cursor: default;
-                    
-                                li.label {
-                                    color: initial !important;
                                 }
                             }
                         }
@@ -1139,22 +1122,12 @@ attr-categories,
         div.attribute-modeliteration-toggle {
             display: block;
             height: 1.5em;
-            i.fa-toggle-on {
-                font-size: 1.6em;
+            i {
+                font-size: 2em;
                 position: absolute;
-                bottom: 0.6em;
+                bottom: 0.4em;
                 left: 0;
                 right: 0;
-                color: #60af3a;
-
-                &,&:before,&:after {
-                    -webkit-transition: none;
-                    transition: none;
-                }
-                &.fa-rotate-180 {
-                    color: #aaa;
-                    bottom: .675em;
-                }
             }
         }
         div.attribute-importance {
