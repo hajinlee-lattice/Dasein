@@ -43,8 +43,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             var type = ratingEngine.type.toLowerCase();
             $scope.typeContext = 'AI';
             $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
-            $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
-            $scope.segmentAccountsString = "(" + $scope.segmentAccounts + ")";
+            $scope.segmentAccounts = ratingEngine.segment.accounts;
 
             if (ratingEngine.segment) {
                 RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
@@ -142,8 +141,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 var type = ratingEngine.type.toLowerCase();
                 $scope.typeContext = 'AI';
                 $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
-                $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
-                $scope.segmentAccountsString = "(" + $scope.segmentAccounts + ")";
+                $scope.segmentAccounts = ratingEngine.segment.accounts;
 
                 if (ratingEngine.segment) {
                     RatingsEngineStore.getScorableAccounts(ratingEngine, ratingEngine.id, ratingEngine.latest_iteration.AI.id).then(function(result){
