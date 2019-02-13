@@ -3,7 +3,7 @@ angular.module('lp.ratingsengine.dashboard', [
 ])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce, $document,
-    RatingsEngineStore, RatingsEngineService, Modal, Banner, DataCloudStore, 
+    RatingsEngineStore, RatingsEngineService, Modal, Banner, 
     Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, TargetProducts, TrainingProducts, AuthorizationUtility, FeatureFlagService, DataCollectionStatus
 ) {
     var vm = this,
@@ -284,17 +284,6 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.selectedIteration = angular.copy(vm.model);
             RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
 
-            vm.gatheringAttributes = true;
-
-            var ratingId = $stateParams.rating_id,
-                modelId = vm.selectedIteration.id;
-
-            DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
-                vm.gatheringAttributes = false;
-                DataCloudStore.setEnrichments(result);
-            });
-
-
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -459,17 +448,6 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.setRemodelIteration = function(iteration){
         vm.selectedIteration = iteration;
         RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
-
-        var ratingId = $stateParams.rating_id,
-            modelId = iteration.id;
-
-        vm.remodelingProgress = true;
-
-        DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
-            vm.remodelingProgress = false;
-            DataCloudStore.setEnrichments(result);
-        });
-
     }
 
     vm.remodelIteration = function(){
