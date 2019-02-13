@@ -125,6 +125,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     RatingEngineType.CUSTOM_EVENT };
 
     private final String statsCubeKey = "Account";
+    private final String nullLabel = "Not Populated";
 
     protected AIModelServiceImpl() {
         super(Arrays.asList(types));
@@ -145,43 +146,38 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingModel.getTrainingSegment() != null) {
             String segmentName = ratingModel.getTrainingSegment().getName();
-            MetadataSegmentDTO segmentDTO = segmentProxy
-                    .getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
+            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
             MetadataSegment segment = segmentDTO.getMetadataSegment();
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingModel.setTrainingSegment(segment);
         }
         if (ratingModel.getId() == null) {
             ratingModel.setId(AIModel.generateIdStr());
-            log.info(String.format("Creating an AI model with id %s for ratingEngine %s",
-                    ratingModel.getId(), ratingEngineId));
+            log.info(String.format("Creating an AI model with id %s for ratingEngine %s", ratingModel.getId(),
+                    ratingEngineId));
             return aiModelEntityMgr.createAIModel(ratingModel, ratingEngineId);
         } else {
             AIModel retrievedAIModel = aiModelEntityMgr.findById(ratingModel.getId());
             if (retrievedAIModel == null) {
-                log.warn(String.format("AIModel with id %s is not found. Creating a new one",
-                        ratingModel.getId()));
+                log.warn(String.format("AIModel with id %s is not found. Creating a new one", ratingModel.getId()));
                 return aiModelEntityMgr.createAIModel(ratingModel, ratingEngineId);
             } else {
-                return aiModelEntityMgr.updateAIModel(ratingModel, retrievedAIModel,
-                        ratingEngineId);
+                return aiModelEntityMgr.updateAIModel(ratingModel, retrievedAIModel, ratingEngineId);
             }
         }
     }
 
     @Override
     public AIModel createNewIteration(AIModel aiModel, RatingEngine ratingEngine) {
-        String customerSpace = CustomerSpace.shortenCustomerSpace(
-                CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString());
+        String customerSpace = CustomerSpace
+                .shortenCustomerSpace(CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString());
         if (StringUtils.isEmpty(aiModel.getDerivedFromRatingModel())) {
-            throw new LedpException(LedpCode.LEDP_40039,
-                    new String[] { MultiTenantContext.getTenant().getId() });
+            throw new LedpException(LedpCode.LEDP_40039, new String[] { MultiTenantContext.getTenant().getId() });
         }
 
         AIModel derivedFromRatingModel = getRatingModelById(aiModel.getDerivedFromRatingModel());
         if (!derivedFromRatingModel.getRatingEngine().getId().equals(ratingEngine.getId())) {
-            throw new LedpException(LedpCode.LEDP_40040,
-                    new String[] { MultiTenantContext.getTenant().getId() });
+            throw new LedpException(LedpCode.LEDP_40040, new String[] { MultiTenantContext.getTenant().getId() });
         }
 
         AIModel toCreate = new AIModel();
@@ -194,16 +190,13 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
             log.info("Cloning the Sourcefile and Training table for the new iteration");
-            CustomEventModelingConfig modelingConfig = (CustomEventModelingConfig) toCreate
-                    .getAdvancedModelingConfig();
+            CustomEventModelingConfig modelingConfig = (CustomEventModelingConfig) toCreate.getAdvancedModelingConfig();
             String sourceFileName = modelingConfig.getSourceFileName();
-            String trainingTableName = sourceFileProxy
-                    .findByName(customerSpace, modelingConfig.getSourceFileName()).getTableName();
+            String trainingTableName = sourceFileProxy.findByName(customerSpace, modelingConfig.getSourceFileName())
+                    .getTableName();
             Table clonedTable = metadataProxy.cloneTable(customerSpace, trainingTableName);
-            sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(),
-                    customerSpace);
-            SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace,
-                    clonedTable.getName());
+            sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
+            SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
             modelingConfig.setSourceFileName(clonedSourceFile.getName());
             modelingConfig.setSourceFileDisplayName(clonedSourceFile.getDisplayName());
             log.info("Completed cloning the Sourcefile and Training table for the new iteration");
@@ -218,18 +211,16 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, ModelingQueryType modelingQueryType, DataCollection.Version version) {
-        CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel
-                .getAdvancedModelingConfig();
+    public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            ModelingQueryType modelingQueryType, DataCollection.Version version) {
+        CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
 
-        if (advancedConf != null && Arrays.asList(ModelingStrategy.values())
-                .contains(advancedConf.getModelingStrategy())) {
+        if (advancedConf != null
+                && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
             PeriodStrategy strategy = periodService.getApsRollupPeriod(version);
             int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
-            RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
-                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType,
-                            strategy.getName(), maxPeriod);
+            RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder.getCrossSellRatingQueryBuilder(
+                    ratingEngine, aiModel, modelingQueryType, strategy.getName(), maxPeriod);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,
@@ -247,8 +238,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         AdvancedModelingConfig advancedModelingConfig = ratingModel.getAdvancedModelingConfig();
         if (advancedModelingConfig instanceof CustomEventModelingConfig) {
             CustomEventModelingConfig customEventModelingConfig = (CustomEventModelingConfig) advancedModelingConfig;
-            if (CustomEventModelingType.LPI
-                    .equals(customEventModelingConfig.getCustomEventModelingType())) {
+            if (CustomEventModelingType.LPI.equals(customEventModelingConfig.getCustomEventModelingType())) {
                 shouldHaveParentSegment = false;
             }
         }
@@ -259,51 +249,47 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             }
         }
         if (CollectionUtils.isNotEmpty(segments)) {
-            ratingModel.setRatingModelAttributes(
-                    new HashSet<>(segmentService.findDependingAttributes(segments)));
+            ratingModel.setRatingModelAttributes(new HashSet<>(segmentService.findDependingAttributes(segments)));
         }
     }
 
-    public void updateModelingJobStatus(String ratingEngineId, String aiModelId,
-            JobStatus newStatus) {
+    public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
         AIModel aiModel = getRatingModelById(aiModelId);
         if (aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40028, new String[] { aiModelId });
         }
         aiModel.setModelingJobStatus(newStatus);
         createOrUpdate(aiModel, ratingEngineId);
-        log.info(String.format("Modeling Job status updated for AIModel:%s, RatingEngine:%s to %s",
-                aiModelId, ratingEngineId, newStatus.name()));
+        log.info(String.format("Modeling Job status updated for AIModel:%s, RatingEngine:%s to %s", aiModelId,
+                ratingEngineId, newStatus.name()));
     }
 
     @Override
-    public Map<String, List<ColumnMetadata>> getIterationAttributes(String customerSpace,
-            RatingEngine ratingEngine, AIModel aiModel,
-            List<CustomEventModelingConfig.DataStore> dataStores) {
+    public Map<String, List<ColumnMetadata>> getIterationAttributes(String customerSpace, RatingEngine ratingEngine,
+            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
         if (!aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40034,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
-        if (aiModel.getModelingJobStatus() != JobStatus.COMPLETED
-                || StringUtils.isEmpty(aiModel.getModelSummaryId())) {
+        if (aiModel.getModelingJobStatus() != JobStatus.COMPLETED || StringUtils.isEmpty(aiModel.getModelSummaryId())) {
             throw new LedpException(LedpCode.LEDP_40035,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
         ModelSummary modelSummary = modelSummaryProxy.getByModelId(aiModel.getModelSummaryId());
         if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_40036, new String[] { "ModelSummary",
-                    aiModel.getId(), ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "ModelSummary", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
         String tableName = modelSummary.getEventTableName();
         if (tableName == null) {
-            throw new LedpException(LedpCode.LEDP_40036, new String[] { "Event table name",
-                    aiModel.getId(), ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "Event table name", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
 
         Table table = metadataProxy.getTable(customerSpace, tableName);
         if (table == null) {
-            throw new LedpException(LedpCode.LEDP_40036, new String[] { "Event table metadata",
-                    aiModel.getId(), ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "Event table metadata", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
 
         Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
@@ -311,17 +297,14 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                         ? new HashSet<>(Arrays.asList(Category.values()))
                         : CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
 
-        Map<String, Integer> importanceOrdering = featureImportanceUtil
-                .getFeatureImportance(customerSpace, modelSummary);
+        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
+                modelSummary);
 
-        Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy
-                .getMetadata(MetadataStoreName.Table,
-                        CustomerSpace.shortenCustomerSpace(customerSpace), table.getName())
-                .collectMap(this::getKey).block();
+        Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy.getMetadata(MetadataStoreName.Table,
+                CustomerSpace.shortenCustomerSpace(customerSpace), table.getName()).collectMap(this::getKey).block();
 
         Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
-                .getAllowedModelingAttrs(customerSpace, false,
-                        dataCollectionService.getActiveVersion(customerSpace))
+                .getAllowedModelingAttrs(customerSpace, false, dataCollectionService.getActiveVersion(customerSpace))
                 .collectMap(this::getKey, cm -> iterationAttributes.getOrDefault(getKey(cm), cm),
                         () -> iterationAttributes)
                 .block();
@@ -352,72 +335,67 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public List<ColumnMetadata> getIterationMetadata(String customerSpace,
-            RatingEngine ratingEngine, AIModel aiModel,
+    public List<ColumnMetadata> getIterationMetadata(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             List<CustomEventModelingConfig.DataStore> dataStores) {
-        return new ArrayList<>(
-                getIterationMetadataAsMap(customerSpace, ratingEngine, aiModel, dataStores)
-                        .values());
+        return new ArrayList<>(getIterationMetadataAsMap(customerSpace, ratingEngine, aiModel, dataStores).values());
     }
 
-    private Map<String, ColumnMetadata> getIterationMetadataAsMap(String customerSpace,
-            RatingEngine ratingEngine, AIModel aiModel,
-            List<CustomEventModelingConfig.DataStore> dataStores) {
+    private Map<String, ColumnMetadata> getIterationMetadataAsMap(String customerSpace, RatingEngine ratingEngine,
+            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
         if (!aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40034,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
-        if (aiModel.getModelingJobStatus() != JobStatus.COMPLETED
-                || StringUtils.isEmpty(aiModel.getModelSummaryId())) {
+        if (aiModel.getModelingJobStatus() != JobStatus.COMPLETED || StringUtils.isEmpty(aiModel.getModelSummaryId())) {
             throw new LedpException(LedpCode.LEDP_40035,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
         ModelSummary modelSummary = modelSummaryProxy.getByModelId(aiModel.getModelSummaryId());
         if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_40036, new String[] { "ModelSummary",
-                    aiModel.getId(), ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "ModelSummary", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
         String tableName = modelSummary.getEventTableName();
         if (tableName == null) {
-            throw new LedpException(LedpCode.LEDP_40036, new String[] { "Event table name",
-                    aiModel.getId(), ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "Event table name", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
 
         Table table = metadataProxy.getTable(customerSpace, tableName);
         if (table == null) {
-            throw new LedpException(LedpCode.LEDP_40036, new String[] { "Event table metadata",
-                    aiModel.getId(), ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "Event table metadata", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
+
+        Map<String, Predictor> predictors = extractPredictorsFromSummary(modelSummary);
 
         Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
                 || ratingEngine.getType() != RatingEngineType.CUSTOM_EVENT
                         ? new HashSet<>(Arrays.asList(Category.values()))
                         : CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
 
-        Map<String, Integer> importanceOrdering = featureImportanceUtil
-                .getFeatureImportance(customerSpace, modelSummary);
+        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
+                modelSummary);
 
         Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy
-                .getMetadata(MetadataStoreName.Table,
-                        CustomerSpace.shortenCustomerSpace(customerSpace), table.getName())
-                .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI)
-                        .negate()) //
+                .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
+                        table.getName())
+                .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey).block();
 
         Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
-                .getAllowedModelingAttrs(customerSpace, false,
-                        dataCollectionService.getActiveVersion(customerSpace))
+                .getAllowedModelingAttrs(customerSpace, false, dataCollectionService.getActiveVersion(customerSpace))
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
-                .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI)
-                        .negate()) //
+                .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
                     if (importanceOrdering.containsKey(toReturn.getAttrName())) {
                         // could move this into le-metadata as a decorator
-                        toReturn.setImportanceOrdering(
-                                importanceOrdering.get(toReturn.getAttrName()));
+                        toReturn.setImportanceOrdering(importanceOrdering.get(toReturn.getAttrName()));
                         importanceOrdering.remove(toReturn.getAttrName());
                     }
+                    cm.setPredictivePower(predictors.getOrDefault(toReturn.getAttrName(), new Predictor())
+                            .getUncertaintyCoefficient());
                     cm.setEntity(BusinessEntity.Account);
                     return toReturn;
 
@@ -432,19 +410,17 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public Map<String, StatsCube> getIterationMetadataCube(String customerSpace,
-            RatingEngine ratingEngine, AIModel aiModel,
-            List<CustomEventModelingConfig.DataStore> dataStores) {
-        List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine,
-                aiModel, dataStores);
+    public Map<String, StatsCube> getIterationMetadataCube(String customerSpace, RatingEngine ratingEngine,
+            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
+        List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine, aiModel, dataStores);
 
-        ModelSummary modelSummary = modelSummaryProxy.findByModelId(customerSpace,
-                aiModel.getModelSummaryId(), true, false, false);
+        ModelSummary modelSummary = modelSummaryProxy.findByModelId(customerSpace, aiModel.getModelSummaryId(), true,
+                false, false);
         Map<String, Predictor> predictors = extractPredictorsFromSummary(modelSummary);
 
-        Map<String, AttributeStats> predictorStats = Flux.fromIterable(metadataAttrs).collectMap(
-                ColumnMetadata::getAttrName,
-                cm -> convertToAttributeStats(cm, predictors.getOrDefault(cm.getAttrName(), null)))
+        Map<String, AttributeStats> predictorStats = Flux.fromIterable(metadataAttrs)
+                .collectMap(ColumnMetadata::getAttrName,
+                        cm -> convertToAttributeStats(cm, predictors.getOrDefault(cm.getAttrName(), null)))
                 .block();
 
         StatsCube modelingAttrsStatsCube = new StatsCube();
@@ -454,12 +430,11 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public TopNTree getIterationMetadataTopN(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
-        List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine,
-                aiModel, dataStores);
-        Map<String, StatsCube> accountStatsCube = getIterationMetadataCube(customerSpace,
-                ratingEngine, aiModel, dataStores);
+    public TopNTree getIterationMetadataTopN(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            List<CustomEventModelingConfig.DataStore> dataStores) {
+        List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine, aiModel, dataStores);
+        Map<String, StatsCube> accountStatsCube = getIterationMetadataCube(customerSpace, ratingEngine, aiModel,
+                dataStores);
 
         return StatsCubeUtils.constructTopNTree( //
                 accountStatsCube, ImmutableMap.of(statsCubeKey, metadataAttrs), //
@@ -487,9 +462,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                         toReturn.remove(pair.getLeft());
                     } else {
                         if (pair.getRight().size() != cms.size()) {
-                            log.info(String.format(
-                                    "Removed '%d' attributes from list of attributes under '%s' category",
-                                    (pair.getRight().size() - cms.size()), pair.getLeft()));
+                            log.info(
+                                    String.format("Removed '%d' attributes from list of attributes under '%s' category",
+                                            (pair.getRight().size() - cms.size()), pair.getLeft()));
                             toReturn.put(pair.getLeft(), new ArrayList<>(cms));
                         }
                     }
@@ -502,45 +477,40 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         boolean predictorsElementsExist = predictor != null
                 && CollectionUtils.isNotEmpty(predictor.getPredictorElements());
         cm.setCanEnrich(!predictorsElementsExist);
-        attrStat.setNonNullCount(
-                predictorsElementsExist
-                        ? predictor.getPredictorElements().stream()
-                                .mapToLong(PredictorElement::getCount).sum()
-                        : 0);
+        attrStat.setNonNullCount(predictorsElementsExist
+                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum()
+                : 0);
         attrStat.getBuckets()
                 .setBucketList(predictorsElementsExist
                         ? predictor.getPredictorElements().stream().map(this::convertToBucket)
-                                .sorted(Comparator.comparing(Bucket::getCount).reversed()).collect(
-                                        Collectors.toList())
+                                .sorted(Comparator.comparing(Bucket::getCount).reversed()).collect(Collectors.toList())
                         : new ArrayList<>());
 
-        attrStat.getBuckets()
-                .setType(predictorsElementsExist ? interpretType(predictor) : BucketType.Enum);
+        attrStat.getBuckets().setType(predictorsElementsExist ? interpretType(predictor) : BucketType.Enum);
 
         return attrStat;
 
     }
 
     private BucketType interpretType(Predictor predictor) {
-        return predictor.getPredictorElements().stream()
-                .allMatch(e -> CollectionUtils.isNotEmpty(e.getValuesList())
-                        && e.getLowerInclusive() == null && e.getUpperExclusive() == null)
-                                ? BucketType.Enum
-                                : BucketType.Numerical;
+        return predictor.getPredictorElements().stream().allMatch(e -> CollectionUtils.isNotEmpty(e.getValuesList())
+                && e.getLowerInclusive() == null && e.getUpperExclusive() == null) ? BucketType.Enum
+                        : BucketType.Numerical;
     }
 
     private Bucket convertToBucket(PredictorElement predictorElement) {
         Bucket bkt = new Bucket();
         bkt.setCount(predictorElement.getCount());
         bkt.setLift(predictorElement.getLift());
-        if (CollectionUtils.isNotEmpty(predictorElement.getValuesList().stream()
-                .filter(Objects::nonNull).collect(Collectors.toList()))) {
-            bkt.setLabel(predictorElement.getValuesList().get(0));
+        if (CollectionUtils.isNotEmpty(
+                predictorElement.getValuesList().stream().filter(Objects::nonNull).collect(Collectors.toList()))) {
+            bkt.setLabel((StringUtils.isBlank(predictorElement.getValuesList().get(0))
+                    || predictorElement.getValuesList().get(0).toLowerCase().equals("null") ? nullLabel
+                            : predictorElement.getValuesList().get(0)));
             bkt.setComparisonType(ComparisonType.EQUAL);
             bkt.setValues(Collections.singletonList(bkt.getLabel()));
-        } else if (predictorElement.getLowerInclusive() == null
-                && predictorElement.getUpperExclusive() == null) {
-            bkt.setLabel("Null");
+        } else if (predictorElement.getLowerInclusive() == null && predictorElement.getUpperExclusive() == null) {
+            bkt.setLabel(nullLabel);
             bkt.setComparisonType(ComparisonType.EQUAL);
             bkt.setValues(Collections.singletonList(bkt.getLabel()));
         } else if (predictorElement.getLowerInclusive() == null) {
@@ -548,22 +518,17 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             bkt.setComparisonType(ComparisonType.LESS_THAN);
             bkt.setValues(Collections.singletonList(predictorElement.getUpperExclusive()));
         } else {
-            bkt.setLabel(predictorElement.getLowerInclusive() + " - "
-                    + predictorElement.getUpperExclusive());
+            bkt.setLabel(predictorElement.getLowerInclusive() + " - " + predictorElement.getUpperExclusive());
             bkt.setComparisonType(ComparisonType.GTE_AND_LT);
-            bkt.setValues(Arrays.asList(predictorElement.getLowerInclusive(),
-                    predictorElement.getUpperExclusive()));
+            bkt.setValues(Arrays.asList(predictorElement.getLowerInclusive(), predictorElement.getUpperExclusive()));
         }
         return bkt;
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, Predictor> extractPredictorsFromSummary(ModelSummary modelSummary) {
-        Map<String, Object> maps = JsonUtils.deserialize(modelSummary.getDetails().getPayload(),
-                Map.class);
-        return Flux
-                .fromIterable(
-                        JsonUtils.convertList(((List<?>) maps.get("Predictors")), Predictor.class))
+        Map<String, Object> maps = JsonUtils.deserialize(modelSummary.getDetails().getPayload(), Map.class);
+        return Flux.fromIterable(JsonUtils.convertList(((List<?>) maps.get("Predictors")), Predictor.class))
                 .collectMap(Predictor::getName).block();
     }
 
