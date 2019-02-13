@@ -8,7 +8,7 @@ import HTTP from './http.interceptor.js';
 import Utils from './common.utils.js';
 
 angular
-    .module('Atlas', [
+    .module('mainApp', [
         'ngRoute',
         'ui.router',
         'ui.bootstrap',

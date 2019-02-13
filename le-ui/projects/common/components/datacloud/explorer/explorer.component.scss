@@ -867,7 +867,7 @@ attr-categories,
                     h2 {
                         padding: 0;
                         font-size: 16px;
-                        margin: 0.45em 0 1.25em;
+                        margin: 0.25em 0 1em;
                         font-weight: bold;
                         .category-icon {
                             position: relative;
@@ -1136,6 +1136,7 @@ attr-categories,
                 }
             }
         }
+<<<<<<< HEAD
         div.attribute-modeliteration-toggle {
             display: block;
             height: 1.5em;
@@ -1194,6 +1195,8 @@ attr-categories,
                 }
             }
         }
+=======
+>>>>>>> parent of 72e22223db... - View Remodel changes
         span.attribute-count {
             display: inline-block;
             position: absolute;
