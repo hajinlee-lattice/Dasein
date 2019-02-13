@@ -48,7 +48,7 @@ export default class LeTableCell extends Component {
     }
     getCellContent() {
         let displayName = this.props.rowData[this.props.colName];
-        if (displayName && !this.state.editing && this.props.columnsMapping[this.props.colName].onlyTemplate != true) {
+        if (displayName && !this.state.editing) {
             return (
                 <CellContent
                     value={displayName}

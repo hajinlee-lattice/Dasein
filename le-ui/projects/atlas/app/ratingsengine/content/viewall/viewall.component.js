@@ -59,7 +59,6 @@ class ViewAllComponent extends Component {
                 ],
                 columns: [
                   {
-                      onlyTemplate: true,
                       colSpan: 1,
                       template: cell => {
                         if (cell.props.rowData) {
@@ -72,7 +71,6 @@ class ViewAllComponent extends Component {
                       }
                   },
                   {
-                      onlyTemplate: true,
                       colSpan: 1,
                       template: cell => {
                         let isActive = true;
@@ -92,7 +90,6 @@ class ViewAllComponent extends Component {
                       }
                   },
                   {
-                    onlyTemplate: true,
                     colSpan: 8,
                     template: cell => {
                         if (cell.props.rowData.modelingJobStatus == 'Pending' || cell.props.rowData.modelingJobStatus == 'Running') {
@@ -112,7 +109,6 @@ class ViewAllComponent extends Component {
                     }
                   },
                   {
-                      onlyTemplate: true,
                       colSpan: 2,
                       template: cell => {
                           return (
@@ -147,7 +143,6 @@ class ViewAllComponent extends Component {
                 ],
                 columns: [
                     {
-                        onlyTemplate: true,
                         colSpan: 2,
                         template: cell => {
                             if (cell.props.rowData) {
@@ -176,7 +171,6 @@ class ViewAllComponent extends Component {
                         }
                     },
                     {
-                        onlyTemplate: true,
                         colSpan: 10,
                         template: cell => {
                             if (cell.props.rowData) {
@@ -204,13 +198,6 @@ class ViewAllComponent extends Component {
         console.log(this.props);
     }
 
-    // <LeToolBar>
-    //     <div className="left">
-    //         Sort
-    //         Search
-    //     </div>
-    // </LeToolBar>
-
     render() {
         return (
             <div className="view-all">
@@ -225,6 +212,12 @@ class ViewAllComponent extends Component {
                     /> 
                     | {this.state.pageTitle} ({this.state.data.length})
                 </div>
+                <LeToolBar>
+                    <div className="left">
+                        Sort
+                        Search
+                    </div>
+                </LeToolBar>
                 <LeTable
                     name={this.state.tableConfig.name}
                     config={this.state.tableConfig}    
