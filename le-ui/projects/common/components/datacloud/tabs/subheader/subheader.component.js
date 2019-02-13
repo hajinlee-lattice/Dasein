@@ -1,24 +1,17 @@
 angular
     .module('common.datacloud.tabs.subheader', [])
-    .controller('SubHeaderTabsController', function(
-        $state,
-        $rootScope,
-        $stateParams,
-        $timeout,
-        FeatureFlagService,
-        DataCloudStore,
-        QueryStore,
-        SegmentService,
-        SegmentStore,
-        HealthService,
-        QueryTreeService,
-        StateHistory
+    .controller('SubHeaderTabsController', function (
+        $state, $rootScope, $stateParams, $timeout, StateHistory,
+        FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
+        SegmentStore, HealthService, QueryTreeService, ModelStore,
+        TopPredictorService, RatingsEngineStore, Banner
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
         // vm.showExportDropdown = false;
         vm.displayExportBanner = false;
         angular.extend(vm, {
+            enrichments: [],
             stateParams: $stateParams,
             segment: $stateParams.segment,
             section: $stateParams.section,
@@ -45,7 +38,7 @@ angular
             counts: QueryStore.getCounts()
         });
 
-        vm.init = function() {
+        vm.init = function () {
             QueryStore.setPublicProperty('enableSaveSegmentButton', false);
             this.header.exportSegment.items = [
                 {
@@ -78,13 +71,46 @@ angular
                         !QueryStore.counts.contacts.value
                 }
             ];
+
+            DataCloudStore.getEnrichments().then((result) => {
+                vm.enrichments = result;
+            });
         };
 
-        vm.getPickerItem = function() {
+        vm.getPickerItem = function () {
             return QueryTreeService.getPickerObject();
         };
 
-        vm.checkState = function(type) {
+        vm.getIterationFilterNumber = function (type) {
+            switch (type) {
+                case 'all':
+                    return vm.enrichments.length;
+                case 'used':
+                    return vm.enrichments.filter((item) => {
+                        return typeof item.ImportanceOrdering != 'undefined';
+                    }).length;
+                case 'warnings':
+                    return vm.enrichments.filter((item) => {
+                        return item.HasWarnings;
+                    }).length;
+                case 'disabled':
+                    return vm.enrichments.filter((item) => {
+                        return item.ApprovedUsage[0] == 'None';
+                    }).length;
+            };
+
+            return 0;
+        }
+
+        vm.clickIterationFilter = function (type) {
+            DataCloudStore.ratingIterationFilter = type;
+        }
+
+        vm.checkIterationFilter = function (type) {
+            return DataCloudStore.ratingIterationFilter == type;
+        }
+
+        vm.checkState = function (type) {
             var state = $state.current.name;
 
             var map = {
@@ -99,7 +125,7 @@ angular
             return map[state] == type;
         };
 
-        vm.clickBuilder = function() {
+        vm.clickBuilder = function () {
             var state = vm.ifInModel(
                 'home.model.analysis.explorer.builder',
                 'home.segment.explorer.builder'
@@ -108,12 +134,12 @@ angular
             vm.builderClicked = true;
             vm.attribuesClicked = false;
 
-            $timeout(function() {
+            $timeout(function () {
                 $state.go(state, $stateParams);
             }, 1);
         };
 
-        vm.clickAttributes = function() {
+        vm.clickAttributes = function () {
             var state = vm.ifInModel(
                 'home.model.analysis.explorer.attributes',
                 'home.segment.explorer.attributes'
@@ -122,19 +148,45 @@ angular
             vm.builderClicked = false;
             vm.attribuesClicked = true;
 
-            $timeout(function() {
+            $timeout(function () {
                 $state.go(state, $stateParams);
             }, 1);
         };
 
-        vm.clickPickerBack = function() {
+        vm.clickedExport = function () {
+            var data = ModelStore.data;
+            var csvRows = TopPredictorService.GetTopPredictorExport(data);
+            var lineArray = [];
+
+            csvRows.forEach(function (infoArray, index) {
+                var line = infoArray.join(",");
+                lineArray.push(line);
+            });
+
+            var csvContent = lineArray.join("\n");
+            var element = document.createElement("a");
+
+            element.setAttribute(
+                "href",
+                "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent)
+            );
+            element.setAttribute("download", "attributes.csv");
+            element.style.display = "none";
+
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+
+        };
+
+        vm.clickPickerBack = function () {
             var state = StateHistory.lastFrom();
             var params = StateHistory.lastFromParams();
 
             $state.go(state.name, params);
         };
 
-        vm.clickSegmentButton = function(parms) {
+        vm.clickSegmentButton = function (parms) {
             var state = vm.ifInModel(
                 'home.model.segmentation',
                 'home.segments'
@@ -144,20 +196,20 @@ angular
             $state.go(state, parms, opts);
         };
 
-        vm.clearSegment = function() {
+        vm.clearSegment = function () {
             QueryStore.resetRestrictions();
             QueryStore.setPublicProperty('enableSaveSegmentButton', false);
             $rootScope.$broadcast('clearSegment');
         };
 
-        vm.saveSegment = function() {
+        vm.saveSegment = function () {
             var segmentName = $stateParams.segment,
                 isNewSegment = segmentName === 'Create',
                 accountRestriction = QueryStore.getAccountRestriction(),
                 contactRestriction = QueryStore.getContactRestriction(),
                 ts = new Date().getTime();
 
-            var xhrSaveSegment = function(segmentData) {
+            var xhrSaveSegment = function (segmentData) {
                 console.log(segmentData);
 
                 var name = isNewSegment ? 'segment' + ts : segmentData.name;
@@ -181,7 +233,7 @@ angular
                 });
                 QueryStore.setPublicProperty('enableSaveSegmentButton', false);
                 vm.isSaving = true;
-                SegmentService.CreateOrUpdateSegment(segment).then(function(
+                SegmentService.CreateOrUpdateSegment(segment).then(function (
                     result
                 ) {
                     if (isNewSegment) {
@@ -190,7 +242,7 @@ angular
                         });
                     } else {
                         vm.enableSaveSegmentMsg = true;
-                        $timeout(function() {
+                        $timeout(function () {
                             vm.enableSaveSegmentMsg = false;
                         }, 3500);
                     }
@@ -202,27 +254,67 @@ angular
 
             QueryStore.setPublicProperty('enableSaveSegmentButton', false);
 
-            var xhrGetSegmentResult = function(result) {
+            var xhrGetSegmentResult = function (result) {
                 xhrSaveSegment(result);
             };
 
             isNewSegment
                 ? xhrSaveSegment()
                 : SegmentStore.getSegmentByName(segmentName).then(
-                      xhrGetSegmentResult
-                  );
+                    xhrGetSegmentResult
+                );
         };
 
-        vm.inModel = function() {
+        vm.remodel = function () {
+
+            console.log($stateParams);
+
+            var engineId = $stateParams.rating_id,
+                iteration = RatingsEngineStore.getRemodelIteration(),
+                iterationId = iteration.id;
+
+            RatingsEngineStore.getRating(engineId).then(function (engine) {
+                RatingsEngineStore.setRatingEngine(engine);
+            });
+
+            vm.remodelingProgress = true;
+
+            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function (result) {
+                RatingsEngineStore.setRemodelIteration(result);
+                RatingsEngineStore.saveIteration('attributes').then(function (result) {
+                    if (!result.result) {
+                        Banner.success({
+                            message:
+                                "A remodel job has started. You can track it's progress on the jobs page."
+                        });
+                    }
+                    vm.remodelingProgress = result.showProgress;
+                });
+            });
+        }
+
+        vm.changeSettings = function () {
+            var iteration = RatingsEngineStore.getRemodelIteration(),
+                modelId = iteration.modelSummaryId,
+                rating_id = $stateParams.rating_id,
+                url = 'home.ratingsengine.dashboard.training';
+
+            $state.go(url, {
+                rating_id: rating_id,
+                modelId: modelId
+            }, { reload: true });
+        }
+
+        vm.inModel = function () {
             var name = $state.current.name.split('.');
             return name[1] == 'model';
         };
 
-        vm.ifInModel = function(model, not) {
+        vm.ifInModel = function (model, not) {
             return vm.inModel() ? model : not;
         };
 
-        vm.exportSegment = function(exportType) {
+        vm.exportSegment = function (exportType) {
             var segmentName = $stateParams.segment,
                 ts = new Date().getTime();
             // console.log('export type', exportType);
@@ -245,7 +337,7 @@ angular
                 );
 
                 SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(
-                    function(result) {
+                    function (result) {
                         console.log(result);
                         if (result.success) {
                             vm.displayExportBanner = true;
@@ -254,7 +346,7 @@ angular
                     }
                 );
             } else {
-                SegmentStore.getSegmentByName(segmentName).then(function(
+                SegmentStore.getSegmentByName(segmentName).then(function (
                     result
                 ) {
                     var segmentData = result,
@@ -274,8 +366,7 @@ angular
 
                     SegmentService.CreateOrUpdateSegmentExport(
                         segmentExport
-                    ).then(function(result) {
-                        console.log(result);
+                    ).then(function (result) {
                         if (result.success) {
                             vm.displayExportBanner = true;
                         }
@@ -292,16 +383,16 @@ angular
         //     vm.showExportDropdown = !vm.showExportDropdown;
         // }
 
-        vm.hideExportBanner = function() {
+        vm.hideExportBanner = function () {
             vm.displayExportBanner = false;
         };
 
-        vm.toggleExportDropdown = function(bool) {
+        vm.toggleExportDropdown = function (bool) {
             vm.header.exportSegment.icondisabled = bool;
             vm.header.exportSegment.showSpinner = bool;
         };
 
-        vm.disableExport = function() {
+        vm.disableExport = function () {
             var accountsAvailable = vm.counts.accounts.value;
             var contactsAvailable = vm.counts.contacts.value;
             vm.header.exportSegment.items[0].disabledif = !accountsAvailable;
@@ -313,7 +404,7 @@ angular
         function checkStatusBeforeExport(exportType, $event) {
             $event.preventDefault();
 
-            HealthService.checkSystemStatus().then(function() {
+            HealthService.checkSystemStatus().then(function () {
                 vm.toggleExportDropdown(true); //disable dropdown
                 vm.exportSegment(exportType);
             });

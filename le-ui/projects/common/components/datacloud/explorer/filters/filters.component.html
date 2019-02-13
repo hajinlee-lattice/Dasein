@@ -7,8 +7,10 @@
     <li class="ratingsengine-selected" ng-if="vm.section == 'wizard.ratingsengine_segment'">
         <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = (vm.metadata.selectedForRatingsEngine > 0) && !vm.addBucketTreeRoot;">
             <li><span class="ico ico-model ico-black"></span></li>
-            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = false;" ng-class="{selected: !vm.metadata.toggle.show.selected_ratingsengine_attributes}">All Attributes ({{vm.count|number}})</li>
-            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}">Selected Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>
+            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = false;" ng-class="{selected: !vm.metadata.toggle.show.selected_ratingsengine_attributes}">All
+                Attributes ({{vm.count|number}})</li>
+            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}">Selected
+                Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>
         </ul>
     </li>
 </ul>
@@ -25,67 +27,89 @@
     </li>
     <li class="configureattributes show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Configure Attributes</span></div>
-        <button class="button borderless-button"
-                ng-class="{disabled: (vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAllCuratedMetrics) || !vm.datacollectionPrecheck}"
-                ng-disabled="(vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAllCuratedMetrics) || !vm.datacollectionPrecheck" 
-                ui-sref="home.configureattributes">
+        <button class="button borderless-button" ng-class="{disabled: (vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAllCuratedMetrics) || !vm.datacollectionPrecheck}"
+            ng-disabled="(vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAllCuratedMetrics) || !vm.datacollectionPrecheck"
+            ui-sref="home.configureattributes">
             <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.datacollectionPrechecking"></i>
             <i class="fa fa-wrench" ng-if="!vm.datacollectionPrechecking"></i>
         </button>
     </li>
     <li class="attributeadmin show-tooltip title-tooltip top" ng-if="vm.showAtributeAdmin() === true">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Attribute Admin</span></div>
-        <button class="button borderless-button" 
-                ui-sref="home.attributes">
+        <button class="button borderless-button" ui-sref="home.attributes">
             <i class="fa fa-sliders"></i>
         </button>
     </li>
     <li class="import show-tooltip title-tooltip top" ng-if="vm.showFileImport() === true">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Import Data</span></div>
-        <button class="button borderless-button" 
-                ui-sref="home.importtemplates">
+        <button class="button borderless-button" ui-sref="home.importtemplates">
             <i class="fa fa-cloud-upload"></i>
         </button>
     </li>
     <li class="configure-calendar show-tooltip title-tooltip top" ng-if="vm.showFileImport() === true">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Configure Calendar</span></div>
-        <button class="button borderless-button" 
-                ui-sref="home.import.calendar">
+        <button class="button borderless-button" ui-sref="home.import.calendar">
             <i class="fa fa-calendar"></i>
         </button>
     </li>
     <li class="import show-tooltip title-tooltip top right" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && vm.hasDeleteAccessRights">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Delete Data</span></div>
-        <button class="button borderless-button" 
-                ui-sref="home.delete">
+        <button class="button borderless-button" ui-sref="home.delete">
             <i class="fa fa-trash"></i>
         </button>
     </li>
-    <li class="filter dropdown-container show-tooltip title-tooltip top right" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+    <li class="filter dropdown-container show-tooltip title-tooltip top right" ng-if="['segment.analysis','wizard.ratingsengine_segment','re.model_iteration'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Filtering</span></div>
         <h2 class="button borderless-button" ng-class="{ selected: vm.isFilterSelected() }">
             <i class="fa fa-filter"></i>
         </h2>
         <ul class="dropdown">
-            <li class="toggle selected show" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected"  ng-disabled="vm.metadata.toggle.hide.selected" /> <label for="enabled">Enabled only</label></li>
-            <li class="toggle selected hide" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input type="checkbox" id="nonenabled" name="nonenabled" ng-model="vm.metadata.toggle.hide.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.selected"  ng-disabled="vm.metadata.toggle.show.selected"/> <label for="nonenabled">Non-Enabled only</label></li>
+            <li class="toggle selected show" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input
+                    type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;"
+                    ng-checked="vm.metadata.toggle.show.selected" ng-disabled="vm.metadata.toggle.hide.selected" />
+                <label for="enabled">Enabled only</label></li>
+            <li class="toggle selected hide" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input
+                    type="checkbox" id="nonenabled" name="nonenabled" ng-model="vm.metadata.toggle.hide.selected"
+                    ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.selected" ng-disabled="vm.metadata.toggle.show.selected" />
+                <label for="nonenabled">Non-Enabled only</label></li>
 
-            <li class="toggle enabled show" ng-if="!vm.lookupMode && vm.section == 'team'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.enabled" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.enabled"  ng-disabled="vm.metadata.toggle.hide.enabled" /> <label for="enabled">Enabled only</label></li>
-            <li class="toggle enabled hide" ng-if="!vm.lookupMode && vm.section == 'team'"><input type="checkbox" id="nonenabled" name="nonenabled" ng-model="vm.metadata.toggle.hide.enabled" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.enabled"  ng-disabled="vm.metadata.toggle.show.enabled"/> <label for="nonenabled">Non-Enabled only</label></li>
+            <li class="toggle enabled show" ng-if="!vm.lookupMode && vm.section == 'team'"><input type="checkbox" id="enabled"
+                    name="enabled" ng-model="vm.metadata.toggle.show.enabled" ng-change="vm.metadata.current = 1;"
+                    ng-checked="vm.metadata.toggle.show.enabled" ng-disabled="vm.metadata.toggle.hide.enabled" />
+                <label for="enabled">Enabled only</label></li>
+            <li class="toggle enabled hide" ng-if="!vm.lookupMode && vm.section == 'team'"><input type="checkbox" id="nonenabled"
+                    name="nonenabled" ng-model="vm.metadata.toggle.hide.enabled" ng-change="vm.metadata.current = 1;"
+                    ng-checked="vm.metadata.toggle.hide.enabled" ng-disabled="vm.metadata.toggle.show.enabled" />
+                <label for="nonenabled">Non-Enabled only</label></li>
 
-            <li class="toggle highlighted show" ng-if="vm.section == 'team'"><input type="checkbox" id="highlighted" name="highlighted" ng-model="vm.metadata.toggle.show.highlighted" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.highlighted" ng-disabled="vm.metadata.toggle.hide.highlighted" /> <label for="highlighted">Highlighted only</label></li>
-            <li class="toggle highlighted hide" ng-if="vm.section == 'team'"><input type="checkbox" id="nonhighlighted" name="nonhighlighted" ng-model="vm.metadata.toggle.hide.highlighted" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.highlighted"  ng-disabled="vm.metadata.toggle.show.highlighted"/> <label for="nonhighlighted">Non-Highlighted only</label></li>
+            <li class="toggle highlighted show" ng-if="vm.section == 'team'"><input type="checkbox" id="highlighted"
+                    name="highlighted" ng-model="vm.metadata.toggle.show.highlighted" ng-change="vm.metadata.current = 1;"
+                    ng-checked="vm.metadata.toggle.show.highlighted" ng-disabled="vm.metadata.toggle.hide.highlighted" />
+                <label for="highlighted">Highlighted only</label></li>
+            <li class="toggle highlighted hide" ng-if="vm.section == 'team'"><input type="checkbox" id="nonhighlighted"
+                    name="nonhighlighted" ng-model="vm.metadata.toggle.hide.highlighted" ng-change="vm.metadata.current = 1;"
+                    ng-checked="vm.metadata.toggle.hide.highlighted" ng-disabled="vm.metadata.toggle.show.highlighted" />
+                <label for="nonhighlighted">Non-Highlighted only</label></li>
 
-            <li class="toggle premium show" ng-if="!vm.lookupMode"><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
-            <li class="toggle premium hide" ng-if="!vm.lookupMode"><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
+            <li class="toggle premium show" ng-if="!vm.lookupMode"><input type="checkbox" id="premium_show" name="premium_show"
+                    ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium"
+                    ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
+            <li class="toggle premium hide" ng-if="!vm.lookupMode"><input type="checkbox" id="premium_hide" name="premium_hide"
+                    ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium"
+                    ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
 
-            <li class="toggle internal show" ng-if="vm.show_internal_filter"><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" /> <label for="internal">Include Internal Attributes</label></li>
-            <li class="toggle no-attributes show" ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
+            <li class="toggle internal show" ng-if="vm.show_internal_filter"><input type="checkbox" id="internal" name="internal"
+                    ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" />
+                <label for="internal">Include Internal Attributes</label></li>
+            <li class="toggle no-attributes show" ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls"
+                    ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" />
+                <label for="nulls">Include "No" Attributes</label></li>
         </ul>
     </li>
     <li class="sort show-tooltip title-tooltip top right" ng-disabled="!vm.category" ng-if="vm.category && vm.section != 're.model_iteration'">
         <div class="tooltip_"><span>Sorting</span></div>
-        <button class="button borderless-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
+        <button class="button borderless-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;"
+            ng-init="vm.sortPrefix = '+';">
             <i class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></i>
         </button>
     </li>
@@ -95,7 +119,7 @@
     <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li class="download dropdown-container show-tooltip title-tooltip top right" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+    <li class="download dropdown-container show-tooltip title-tooltip top right" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment','re.model_iteration'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Download Attributes</span></div>
         <h2 class="button borderless-button">
             <i class="fa fa-download"></i>
@@ -106,10 +130,7 @@
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
     <li ng-if="vm.mode == 'dashboardrules' && !vm.inWizard">
-        <button
-            type="button"
-            ng-click="vm.goBackToModelRules()"
-            class="button blue-button">
+        <button type="button" ng-click="vm.goBackToModelRules()" class="button blue-button">
             Back to Rules
         </button>
     </li>
