@@ -280,7 +280,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
         .state('home.model.datacloud', {
             url: '/datacloud/:aiModel',
             params: {
-                section: 're.model_iteration',
+                section: 'remodel_iteration',
                 pageIcon: 'ico-attributes',
                 pageTitle: 'View Iteration',
                 gotoNonemptyCategory: true,
