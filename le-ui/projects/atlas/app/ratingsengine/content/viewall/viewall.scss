@@ -92,4 +92,47 @@
             }
         }
     }
+    .creation-history {
+    	.link-button {
+	        border: solid 1px transparent;
+	        padding: 5px 7px;
+	        line-height: 1;
+	        padding: 5px 7px;
+	    }
+	    .le-table-body {
+        	.le-table-row {
+        		.le-table-cell {
+        			&:first-of-type {
+        				span {
+        					text-align: center;
+                            background: #D2D2D2;
+                            border-radius: 4px;
+                            display: inline-block;
+                            width: 28px;
+                            padding: 4px 0;
+                            font-size: 11px;
+        				}
+        			}
+        		}
+        		&:hover {
+        			.le-table-cell {
+	        			&:first-of-type {
+	        				span {
+	        					background: #fff;
+	        					color: #222;
+	        				}
+	        			}
+	        		}
+        			.activate-button {
+        				color: #fff;
+                        background: rgba(255, 255, 255, 0.2);
+        			}
+        			.link-button {
+        				border-color: rgba(255, 255, 255, 0.4);
+                        color: #fff;
+        			}
+        		}
+        	}
+        }
+    }
 }
