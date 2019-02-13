@@ -36,19 +36,25 @@
                         Create Campaign
                     </button>
 
-                    <div class="dropdown-split-button">
+                    <div class="dropdown-split-button" ng-if="!vm.isRulesBased">
 
                         <div class="dropdown" ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress || vm.gatheringAttributes}">
-                            <button ng-click="vm.remodelIteration()" ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
-                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">Remodel
-                            </button><button ng-click="vm.toggleMenu($event)" ng-class="{disabled: vm.remodelingProgress}"
-                                ng-disabled="vm.remodelingProgress">
+                            <button 
+                                ng-click="vm.remodelIteration()" 
+                                ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0}"
+                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0">Remodel
+                            </button><button 
+                                ng-click="vm.toggleMenu($event)" 
+                                ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0}"
+                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0">
                                 <span>
                                     Iteration {{ vm.selectedIteration.iteration }}
                                 </span>
                             </button>
                             <ul>
-                                <li ng-repeat="iteration in vm.activeIterations | orderBy: iteration" ng-click="vm.setRemodelIteration(iteration); vm.toggleMenu()">
+                                <li 
+                                    ng-repeat="iteration in vm.activeIterations | orderBy: -iteration" 
+                                    ng-click="vm.setRemodelIteration(iteration); vm.toggleMenu()">
                                     Iteration {{ iteration.iteration }}
                                 </li>
                             </ul>
@@ -59,8 +65,10 @@
                                 <span ng-if="vm.gatheringAttributes">Gathering attributes</span>
                             </span>
 
-                        </div><button ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')" ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
-                            ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">
+                        </div><button 
+                            ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')" 
+                            ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0}"
+                            ng-disabled="vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0">
                             <i class="fa fa-cog" aria-hidden="true"></i>
                         </button>
 
