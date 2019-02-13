@@ -47,7 +47,9 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     protected abstract void parseResponse(String response, T context, DnBAPIType apiType);
 
-    protected abstract void parseError(Exception ex, T context);
+    protected abstract void parseError(String response, Exception ex, T context);
+
+    protected abstract String getResultIdPath();
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -59,14 +61,18 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     }
 
     public void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
+        String response = null;
         try {
             String token = dnBAuthenticationService.requestToken(keyType);
             String url = constructUrl(context, apiType);
             HttpEntity<String> entity = constructEntity(context, token);
-            String response = sendRequest(url, entity, apiType);
+            if (keyType == DnBKeyType.BATCH) {
+                log.info("Submitting request {} with token {}", url, token);
+            }
+            response = sendRequest(url, entity, apiType);
             parseResponse(response, context, apiType);
         } catch (Exception ex) {
-            parseError(ex, context);
+            parseError(response, ex, context);
         }
     }
 
@@ -79,12 +85,24 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         }
     }
 
-    protected DnBReturnCode parseDnBHttpError(HttpClientErrorException ex) {
+    protected DnBReturnCode parseDnBHttpError(String response, HttpClientErrorException ex) {
         switch (ex.getStatusCode()) {
         case REQUEST_TIMEOUT:
             return DnBReturnCode.TIMEOUT;
         case UNAUTHORIZED:
-            return DnBReturnCode.EXCEED_LIMIT_OR_UNAUTHORIZED;
+            String resultId = (String) retrieveXmlValueFromResponse(getResultIdPath(), response);
+            switch (resultId) {
+            case "SC001":
+            case "SC002":
+            case "SC003":
+            case "SC004":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC005":
+            case "SC006":
+                return DnBReturnCode.RATE_LIMITING;
+            default:
+                return DnBReturnCode.UNKNOWN;
+            }
         default:
             return DnBReturnCode.UNKNOWN;
         }

@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 public interface LookupIdMappingEntityMgr {
 
-    Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemTyp, String sortby,
+    Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending);
 
     LookupIdMap createExternalSystem(LookupIdMap lookupIdsMap);

@@ -129,8 +129,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     private String getS3PathIfNeeded(String hdfsPath, boolean isGlob) {
-        String protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(protocol);
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         return pathBuilder.getS3PathWithGlob(yarnConfiguration, hdfsPath, isGlob, s3Bucket);
     }
 
@@ -188,7 +187,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             log.info("Event table composition dir=" + hdfsScoreArtifactTableDirWithWildChar);
             List<String> resolvedHdfsScoreArtifactTableDirs = HdfsUtils.getFilesByGlob(yarnConfiguration,
                     hdfsScoreArtifactTableDirWithWildChar);
-            resolvedHdfsScoreArtifactTableDirs = new HdfsToS3PathBuilder()
+            resolvedHdfsScoreArtifactTableDirs = new HdfsToS3PathBuilder(useEmr)
                     .toHdfsPaths(resolvedHdfsScoreArtifactTableDirs);
             String resolvedHdfsScoreArtifactTableDir = null;
             if (resolvedHdfsScoreArtifactTableDirs.size() == 1) {

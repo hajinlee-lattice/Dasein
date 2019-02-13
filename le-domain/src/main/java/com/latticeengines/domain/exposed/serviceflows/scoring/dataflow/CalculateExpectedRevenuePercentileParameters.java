@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class CalculateExpectedRevenuePercentileParameters extends DataFlowParameters {
 
@@ -33,6 +34,9 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
 
     @JsonProperty("fit_function_parameters_map")
     private Map<String, String> fitFunctionParametersMap;
+
+    @JsonProperty("score_derivation_maps")
+    private Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -96,5 +100,17 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
 
     public void setFitFunctionParametersMap(Map<String, String> fitFunctionParametersMap) {
         this.fitFunctionParametersMap = fitFunctionParametersMap;
+    }
+
+    public Map<String, Map<ScoreDerivationType, ScoreDerivation>> getScoreDerivationMaps() {
+        return scoreDerivationMaps;
+    }
+
+    public void setScoreDerivationMaps(Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps) {
+        this.scoreDerivationMaps = scoreDerivationMaps;
+    }
+
+    public static enum ScoreDerivationType {
+        EV, REVENUE, PROBABILITY
     }
 }

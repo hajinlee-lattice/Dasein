@@ -25,8 +25,7 @@ public class BusinessYearPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
     @Override
     public int toPeriodId(String date) {
         LocalDate evalDate = LocalDate.parse(date);
-        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(
-                evalDate.getYear());
+        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfYear(evalDate.getYear());
         int businessYear = getBusinessYear(evalDate, busiYearDateRange);
         return businessYear - startYear;
     }
@@ -34,14 +33,14 @@ public class BusinessYearPeriodBuilder extends BusinessCalendarBasedPeriodBuilde
     @Override
     protected LocalDate getStartDate(int period) {
         int busiYear = startYear + period;
-        return getDateRangeOfBusinessYear(busiYear).getLeft();
+        return getDateRangeOfYear(busiYear).getLeft();
     }
 
     @Override
     protected LocalDate getEndDate(int period) {
         int nextBusiYear = startYear + period + 1;
         // First day of next business year - 1
-        return getDateRangeOfBusinessYear(nextBusiYear).getLeft().minusDays(1);
+        return getDateRangeOfYear(nextBusiYear).getLeft().minusDays(1);
     }
 
 }

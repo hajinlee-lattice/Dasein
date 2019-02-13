@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.workflow;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
@@ -26,6 +29,7 @@ import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -45,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -74,6 +79,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
 
+    @Value("${cdl.account.dataquota.limit:5000000}")
+    private Long defaultAccountQuotaLimit;
+
+    @Value("${cdl.contact.dataquota.limit:10000000}")
+    private Long defaultContactQuotaLimit;
+
+    @Value("${cdl.product.dataquota.limit:200}")
+    private Long defaultProductQuotaLimit;
+
+    @Value("${cdl.transaction.dataquota.limit:20000000}")
+    private Long defaultTransactionQuotaLimit;
+
     private final DataCollectionProxy dataCollectionProxy;
 
     private final DataFeedProxy dataFeedProxy;
@@ -90,8 +107,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService, ZKConfigService zkConfigService) {
+                                           WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
+                                           BatonService batonService, ZKConfigService zkConfigService) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
@@ -117,7 +134,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
 
-        List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace);
+        List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
+                request.isInheritAllCompleteImportActions(), request.getImportActionPidsToInherit());
 
         if (dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
             String errorMessage;
@@ -144,7 +162,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
                 List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
                         .collect(Collectors.toList());
-                log.info("Inherit actions from last failed processAnalyze workflow, actionIds={}", lastFailedActionIds);
+                log.info(
+                        "Inherit actions from last failed processAnalyze workflow, inheritAllImportActions={}, "
+                                + "importActionPIds={}, inherited actionPids={}",
+                        request.isInheritAllCompleteImportActions(), request.getImportActionPidsToInherit(),
+                        lastFailedActionIds);
                 // create copies of last failed actions
                 lastFailedActions.forEach(action -> {
                     action.setPid(null);
@@ -201,8 +223,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
                 ? Collections.emptyList()
                 : importAndDeleteJobs.stream().filter(
-                        job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
-                        .map(Job::getPid).collect(Collectors.toList());
+                job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
+                .map(Job::getPid).collect(Collectors.toList());
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
 
@@ -242,7 +264,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Action> actions = actionService.findByOwnerId(null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         List<Long> canceledActionPids = actions.stream()
-                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getOwnerId()== null && action.getActionStatus() == ActionStatus.CANCELED)
+                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getOwnerId() == null && action.getActionStatus() == ActionStatus.CANCELED)
                 .map(Action::getPid).collect(Collectors.toList());
         return canceledActionPids;
     }
@@ -252,7 +274,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
      * empty list otherwise.
      */
     @VisibleForTesting
-    List<Action> getActionsFromLastFailedPA(String customerSpace) {
+    List<Action> getActionsFromLastFailedPA(@NotNull String customerSpace, boolean inheritAllCompleteImportActions,
+            List<Long> importActionPidsToInherit) {
         DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(customerSpace,
                 DataFeedExecutionJobType.PA);
         if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
@@ -267,15 +290,103 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             return Collections.emptyList();
         }
         Long workflowPid = job.getPid();
+        checkImportActionIds(workflowPid, importActionPidsToInherit);
 
-        return actionService.findByOwnerId(workflowPid).stream().filter(action -> {
+        List<Action> actions = actionService.findByOwnerId(workflowPid).stream().filter(action -> {
             if (action == null || action.getPid() == null || action.getType() == null) {
                 return false;
             }
 
-            // not inherit system actions
-            return !ActionType.getDataCloudRelatedTypes().contains(action.getType());
+            // import actions
+            if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                if (CollectionUtils.isNotEmpty(importActionPidsToInherit)
+                        && importActionPidsToInherit.contains(action.getPid())) {
+                    // user gives a list of action PIDs to inherit and the action is in that list
+                    return true;
+                } else if (inheritAllCompleteImportActions) {
+                    // only consider the flag if there is no input list of action PIDs given
+                    return true;
+                }
+            }
+
+            // not inherit system actions and import actions by default (unless flag/list is
+            // given)
+            return !ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
+                    && !ActionType.getDataCloudRelatedTypes().contains(action.getType());
         }).collect(Collectors.toList());
+        Set<Long> completedPIds = getCompletedImportActionPids(actions);
+        log.info("PID of last failed PA = {}, all completed import action PIDs = {}", workflowPid, completedPIds);
+        return actions.stream().filter(action -> {
+            if (!ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                // all non-import actions already inheritable at this point
+                return true;
+            }
+
+            return completedPIds.contains(action.getPid());
+        }).collect(Collectors.toList());
+    }
+
+    @VisibleForTesting
+    Set<Long> getCompletedImportActionPids(@NotNull List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return Collections.emptySet();
+        }
+
+        List<Long> importWorkflowPIds = actions.stream() //
+                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) //
+                .map(Action::getTrackingPid) //
+                .filter(Objects::nonNull) //
+                .collect(Collectors.toList());
+        if (importWorkflowPIds.isEmpty()) {
+            return Collections.emptySet();
+        }
+        List<String> pidStrs = importWorkflowPIds.stream().map(String::valueOf).collect(Collectors.toList());
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobPids(pidStrs);
+        if (CollectionUtils.isEmpty(jobs)) {
+            return Collections.emptySet();
+        }
+
+        Set<Long> completedJobPIds = jobs.stream() //
+                .filter(job -> JobStatus.COMPLETED.equals(job.getJobStatus())) //
+                .map(Job::getPid) //
+                .collect(Collectors.toSet());
+        return actions.stream() //
+                .filter(action -> action.getTrackingPid() != null) //
+                .filter(action -> completedJobPIds.contains(action.getTrackingPid())) //
+                .map(Action::getPid) //
+                .collect(Collectors.toSet());
+    }
+
+    /*
+     * Make sure input action PIDs all belong to import actions owned by last failed
+     * PA
+     */
+    @VisibleForTesting
+    void checkImportActionIds(long workflowPid, List<Long> importActionPIds) {
+        if (CollectionUtils.isEmpty(importActionPIds)) {
+            return;
+        }
+        // make sure input PIDs are valid
+        importActionPIds.forEach(Preconditions::checkNotNull);
+
+        // find all actions in the list that are (a) owned by the workflow and (b) is
+        // import workflow
+        Map<Long, Action> importActions = actionService.findByPidIn(importActionPIds) //
+                .stream() //
+                .filter(action -> action.getOwnerId() != null && action.getOwnerId().equals(workflowPid)) //
+                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) //
+                .collect(Collectors.toMap(Action::getPid, action -> action, (v1, v2) -> v1));
+        // get all invalid action PIDs from the input list
+        List<Long> invalidActionPIds = importActionPIds //
+                .stream() //
+                .filter(pid -> !importActions.containsKey(pid)) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(invalidActionPIds)) {
+            String msg = String.format(
+                    "Following actions are either not owned by the last failed PA or not import actions: %s",
+                    invalidActionPIds);
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     private void updateActions(List<Long> actionIds, Long workflowPid) {
@@ -287,7 +398,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
-            List<Long> completedImportAndDeleteJobPids) {
+                                     List<Long> completedImportAndDeleteJobPids) {
         boolean isComplete = true; // by default every action is valid
         if (selectedTypes.contains(action.getType())) {
             // special check if is selected type
@@ -310,8 +421,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
-            ProcessAnalyzeRequest request, List<Long> actionIds, Status status, String currentDataCloudBuildNumber,
-            long workflowPid) {
+                                                                      ProcessAnalyzeRequest request, List<Long> actionIds, Status status, String currentDataCloudBuildNumber,
+                                                                      long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
 
@@ -326,7 +437,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
                 .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
-
+        getDataQuotaLimit(CustomerSpace.parse(customerSpace), CDLComponent.componentName);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -340,7 +451,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchYarnQueue(scoringQueue) //
-                .inputProperties(ImmutableMap.<String, String> builder() //
+                .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
@@ -353,12 +464,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)//put dataQuotaLimit into
+                // stepConfiguration
+                .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
+                .dataQuotaLimit(defaultProductQuotaLimit, BusinessEntity.Product)
+                .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
+                .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
                 .build();
     }
 
     public ApplicationId retryLatestFailed(String customerSpace, Integer memory) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
-        List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace);
+        List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace, true, null);
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
         checkWorkflowId(customerSpace, datafeed, workflowId);
 
@@ -401,6 +518,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    private void getDataQuotaLimit(CustomerSpace customerSpace, String componentName) {
+        Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
+                componentName, BusinessEntity.Account);
+        defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
+        Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
+        defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
+        Long productDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Product);
+        defaultProductQuotaLimit = productDataLimit != null ? productDataLimit : defaultProductQuotaLimit;
+        Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                BusinessEntity.Transaction);
+        defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
     }
 
 }

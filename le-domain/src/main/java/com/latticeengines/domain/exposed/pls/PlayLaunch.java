@@ -176,6 +176,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ACC_ID", nullable = true)
     private String destinationAccountId;
 
+    @JsonProperty("audienceId")
+    @Column(name = "AUDIENCE_ID", nullable = true)
+    private String audienceId;
+
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
@@ -215,18 +219,22 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.launchId = launchId;
     }
 
+    @Override
     public Date getCreated() {
         return created;
     }
 
+    @Override
     public void setCreated(Date created) {
         this.created = created;
     }
 
+    @Override
     public Date getUpdated() {
         return updated;
     }
 
+    @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
     }

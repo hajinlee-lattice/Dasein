@@ -1,10 +1,14 @@
 package com.latticeengines.scoring.exposed.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -13,7 +17,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -43,6 +46,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
@@ -50,20 +54,20 @@ import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
 
     @Value("${common.test.pls.url}")
     private String plsApiHostPort;
 
-    @Autowired
+    @Inject
     private ScoringServiceImpl scoringService;
 
-    @Autowired
+    @Inject
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
@@ -192,8 +196,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
     }
 
-    private ModelSummary createModel(ModelSummaryProxy modelSummaryProxy,
-             Tenant tenant, ScoringTestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
+    private ModelSummary createModel(ModelSummaryProxy modelSummaryProxy, Tenant tenant,
+            ScoringTestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
@@ -206,8 +210,14 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
+        String dataCloudVersion = columnMetadataProxy
+                .latestVersion(//
+                        null)//
+                .getVersion();
+        modelSummary.setDataCloudVersion(dataCloudVersion);
 
-        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelConfiguration.getModelId());
+        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(),
+                modelConfiguration.getModelId());
         if (retrievedSummary != null) {
             modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
@@ -217,7 +227,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         attrMap.put(ModelSummary.STATUS, ModelSummaryStatus.ACTIVE.getStatusCode());
         modelSummaryProxy.update(customerSpace.toString(), modelSummary.getId(), attrMap);
 
-        retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelConfiguration.getModelId());
+        retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(),
+                modelConfiguration.getModelId());
         assertNotNull(retrievedSummary);
         return modelSummary;
     }

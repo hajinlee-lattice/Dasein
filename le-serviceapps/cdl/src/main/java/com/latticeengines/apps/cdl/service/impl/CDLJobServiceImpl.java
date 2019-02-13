@@ -71,7 +71,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Value("${cdl.processAnalyze.concurrent.job.count:2}")
+    @Value("${cdl.processAnalyze.concurrent.job.count:4}")
     private int concurrentProcessAnalyzeJobs;
 
     @Value("${cdl.processAnalyze.job.retry.count:1}")

@@ -124,16 +124,13 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             return inputStream;
         }
 
-        // todo: hard-coded date format. Need to be replaced in date attribute
-        // phase 2.
+        // todo: hard-coded date format. Need to be replaced in date attribute in phase 2.
         final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
 
         List<String> dateAttributes = getDateAttributes();
         if (CollectionUtils.isNotEmpty(dateAttributes)) {
             Map<String, String> dateToFormats = new HashMap<>();
-            dateAttributes.forEach(attrib -> {
-                dateToFormats.put(attrib, DATE_FORMAT);
-            });
+            dateAttributes.forEach(attrib -> dateToFormats.put(attrib, DATE_FORMAT));
             return reformatDates(inputStream, dateToFormats);
         }
         return inputStream;
@@ -204,7 +201,14 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                     String dateFormat = dateToFormats.get(columnName);
                                     SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
                                     formatter.setTimeZone(TimeZone.getTimeZone("PST"));
-                                    String dateInString = formatter.format(new Date(Long.valueOf(columnValue)));
+                                    String dateInString = columnValue;
+                                    try {
+                                        dateInString = formatter.format(new Date(Long.valueOf(columnValue)));
+                                    } catch (NumberFormatException exc) {
+                                        // do nothing. Keep original date value as-is.
+                                        log.info(String.format("Skip reformatting date value %s for column %s",
+                                                columnValue, columnName));
+                                    }
                                     recordAsArray[columnIndex] = dateInString;
                                 }
                             }
@@ -288,10 +292,9 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     .getCustomDisplayNames(MultiTenantContext.getShortTenantId());
             if (MapUtils.isNotEmpty(customDisplayNameAttrs)
                     && CollectionUtils.isNotEmpty(customDisplayNameAttrs.get(BusinessEntity.Account))) {
-                customDisplayNameAttrs.get(BusinessEntity.Account).forEach(config -> {
-                    nameToDisplayNameMap.put(config.getAttrName(),
-                            (String) config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue());
-                });
+                customDisplayNameAttrs.get(BusinessEntity.Account).forEach(config ->
+                        nameToDisplayNameMap.put(config.getAttrName(),
+                                (String) config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue()));
             }
         } catch (LedpException e) {
             log.warn("Got LedpException " + ExceptionUtils.getStackTrace(e));

@@ -1,13 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.export.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
+import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
+import com.latticeengines.domain.exposed.query.DataPage;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
@@ -19,12 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
-import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
-import com.latticeengines.domain.exposed.query.DataPage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class AccountContactExportProcessor extends SegmentExportProcessor {
@@ -33,8 +32,10 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
 
     @Override
     public boolean accepts(MetadataSegmentExportType type) {
-        return !MetadataSegmentExportType.CONTACT.equals(type)
-                && !MetadataSegmentExportType.ORPHAN_CONTACT.equals(type);
+        return type == MetadataSegmentExportType.ACCOUNT //
+                || type == MetadataSegmentExportType.ACCOUNT_AND_CONTACT //
+                || type == MetadataSegmentExportType.ACCOUNT_ID //
+                || type == MetadataSegmentExportType.ORPHAN_TXN;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
             log.info("Number of minimum required loops: " + pages + ", with pageSize: " + pageSize);
 
             try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
-                    new GenericDatumWriter<GenericRecord>(schema))) {
+                    new GenericDatumWriter<>(schema))) {
                 dataFileWriter.create(schema, localFile);
 
                 int pageNo = 0;
@@ -167,13 +168,10 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
     }
 
     private List<Object> getAccountsIds(List<Map<String, Object>> accountList) {
-        List<Object> accountIds = //
-                accountList//
-                        .stream().parallel() //
-                        .map( //
-                                account -> account.get(InterfaceName.AccountId.name()) //
-                        ) //
-                        .collect(Collectors.toList());
+        List<Object> accountIds = accountList //
+                .stream().parallel() //
+                .map(account -> account.get(InterfaceName.AccountId.name())) //
+                .collect(Collectors.toList());
 
         log.info(String.format("Extracting contacts for accountIds: %s",
                 Arrays.deepToString(accountIds.toArray(new Object[accountIds.size()]))));

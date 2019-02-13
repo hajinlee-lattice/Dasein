@@ -46,6 +46,10 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         this.baseSegment = (MetadataSegment) ratingEngine.getSegment().clone();
         this.aiModel = aiModel;
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
+        if (CollectionUtils.isEmpty(config.getTargetProducts())) {
+            throw new IllegalArgumentException("AI Model " + aiModel.getId() //
+                    + " has empty target products list, which is not allowed.");
+        }
         this.productIds = String.join(",", config.getTargetProducts());
         this.targetPeriodId = targetPeriodId;
         this.periodTypeName = periodTypeName;

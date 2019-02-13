@@ -63,6 +63,11 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public Tenant bootstrapForProduct(LatticeProduct product, String jsonFileName) {
+        throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
+    }
+
+    @Override
     public void overwriteFeatureFlag(Tenant teanant, String featureFlagName, boolean value) {
         throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
     }

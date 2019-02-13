@@ -115,7 +115,7 @@ public class ExportModelToS3 extends BaseImportExportS3<ImportExportS3StepConfig
                         if (StringUtils.isNotBlank(extract.getPath())) {
                             String srcDir = pathBuilder.getFullPath(extract.getPath());
                             String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                            requests.add(new ImportExportRequest(srcDir, tgtDir, tableName, true));
+                            requests.add(new ImportExportRequest(srcDir, tgtDir, tableName, true, true));
                         }
                     });
                 }

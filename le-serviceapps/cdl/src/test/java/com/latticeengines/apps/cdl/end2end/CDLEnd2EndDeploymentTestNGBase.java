@@ -330,6 +330,22 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
+    protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
+        log.info("Bootstrapping test tenants using tenant console ...");
+
+        setupTestEnvironmentByFile(jsonFileName);
+        mainTestTenant = testBed.getMainTestTenant();
+
+        log.info("Test environment setup finished.");
+        createDataFeed();
+        setupBusinessCalendar();
+        setupPurchaseHistoryMetrics();
+        setDefaultAPSRollupPeriod();
+
+        attachProtectedProxy(fileUploadProxy);
+        attachProtectedProxy(testMetadataSegmentProxy);
+    }
+
     protected void resetCollection() {
         log.info("Start reset collection data ...");
         boolean resetStatus = cdlProxy.reset(mainTestTenant.getId());
@@ -534,13 +550,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         case Account:
             modifyFieldMappingsForAccount(fieldMappingDocument);
             break;
+        case Contact:
+            modifyFieldMappingsForContact(fieldMappingDocument);
         default:
         }
     }
 
     private void modifyFieldMappingsForAccount(FieldMappingDocument fieldMappingDocument) {
         setExternalSystem(fieldMappingDocument.getFieldMappings());
-        setDateAttributes(fieldMappingDocument.getFieldMappings());
+        setAccountDateAttributes(fieldMappingDocument.getFieldMappings());
     }
 
     private void setExternalSystem(List<FieldMapping> fieldMappings) {
@@ -565,7 +583,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    private void setDateAttributes(List<FieldMapping> fieldMappings) {
+    private void setAccountDateAttributes(List<FieldMapping> fieldMappings) {
         for (FieldMapping fieldMapping : fieldMappings) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equalsIgnoreCase("Test Date")) {
@@ -576,34 +594,64 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date field mapping.");
+                    log.info("Setting Account Attribute 'Test Date' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("YYYY-MM-DD");
                     fieldMapping.setTimeFormatString(null);
-                    fieldMapping.setTimezone("America/Los_Angeles");
+                    fieldMapping.setTimezone("UTC-8     America/Los Angeles, America/Vancouver");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date 2 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 2' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 3")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("DD.MM.YY");
                     fieldMapping.setTimeFormatString("00:00:00 24H");
-                    fieldMapping.setTimezone("GMT+8");
+                    fieldMapping.setTimezone("UTC+8     Asia/Shanghai, Australia/Perth");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date 3 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 3' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 4")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("MM/DD/YYYY");
                     fieldMapping.setTimeFormatString("00-00-00 12H");
-                    fieldMapping.setTimezone("Asia/Kolkata");
+                    fieldMapping.setTimezone("UTC+5:30  Asia/Kolkata, Asia/Colombo");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Test Date 4 field mapping.");
+                    log.info("Setting Account Attribute 'Test Date 4' field mapping.");
+                }
+            }
+        }
+    }
+
+    private void modifyFieldMappingsForContact(FieldMappingDocument fieldMappingDocument) {
+        setContactDateAttributes(fieldMappingDocument.getFieldMappings());
+    }
+
+    private void setContactDateAttributes(List<FieldMapping> fieldMappings) {
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equalsIgnoreCase("Last_Communication_Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("DD-MMM-YY");
+                    fieldMapping.setTimeFormatString("00 00 00 24H");
+                    fieldMapping.setTimezone("UTC+1     Europe/Berlin, Africa/Lagos");
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.info("Setting Contact Attribute 'Last_Communication_Date' field mapping.");
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Renewal_Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("YYYY.MMM.DD");
+                    fieldMapping.setTimeFormatString(null);
+                    fieldMapping.setTimezone(null);
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+
+                    log.info("Setting Contact Attribute 'Renewal_Date' field mapping.");
                 }
             }
         }
@@ -1262,6 +1310,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion);
         // Verify number of days
         List<String> dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dailyTable.getExtractsDirectory());
+        dailyFiles = dailyFiles.stream().filter(f -> !f.contains("_SUCCESS")).collect(Collectors.toList());
         Assert.assertEquals(dailyFiles.size(), totalDays);
         // Verify max/min day period
         Pair<Integer, Integer> minMaxPeriods = TimeSeriesUtils.getMinMaxPeriod(yarnConfiguration, dailyTable);

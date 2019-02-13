@@ -1,9 +1,12 @@
 @import "../../colors.scss";
-.sort-container{
-    padding: 0.5em;
-    cursor: pointer;
+.sort-container {
+    padding: 0;
+    line-height: 1;
+    color: rgba(0,0,0,0.6);
 }
-.sort-container:hover{
-    // border: 1px solid $white-gold;
-    // background-color: $palladium;
+.sort-container:hover {
+	cursor: pointer;
+	i {
+	    color: rgba(0,0,0,1);
+	}
 }

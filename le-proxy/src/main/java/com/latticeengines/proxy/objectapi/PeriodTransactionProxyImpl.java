@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.objectapi;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +61,11 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegment/{spendAnalyticsSegment}",
                 ProxyUtils.shortenCustomerSpace(customerSpace), spendAnalyticsSegment);
+        try {
+            url = URLDecoder.decode(url, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         if (periodName != null) {
             url += ("?periodname=" + periodName);
         }
@@ -84,5 +91,14 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
 
         log.info("getProductHierarchy url " + url);
         return get("getProductHierarchy", url, DataPage.class);
+    }
+
+    @Override
+    public List<String> getFinalAndFirstTransactionDate(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/transaction/maxmindate",
+                ProxyUtils.shortenCustomerSpace(customerSpace));
+
+        log.info("getFinalAndFirstTransactionDate url " + url);
+        return getList("getFinalAndFirstTransactionDate", url, String.class);
     }
 }

@@ -45,6 +45,14 @@ angular.module('common.modal', [])
                 headerconfig: { "background-color":"#629acc", "color":"white" },
                 showcancel: false
             },
+            generic: {
+                name: "generic_modal",
+                title: "",
+                icon: "",
+                confirmcolor: "blue-button",
+                headerconfig: { "background-color":"white", "color":"black" },
+                showcancel: true
+            }
         };
     };
 
@@ -111,7 +119,9 @@ angular.module('common.modal', [])
     this.info = function(opts, cb) {
         this.prefab_generator('info', opts, cb);
     };
-
+    this.generic = function(opts, cb) {
+        this.prefab_generator('generic', opts, cb);
+    };
     this.prefab_generator = function(type, opts, cb) {
         let modal = Modal.get(opts.name);
 

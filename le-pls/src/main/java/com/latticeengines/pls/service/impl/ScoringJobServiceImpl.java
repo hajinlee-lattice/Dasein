@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.app.exposed.service.ImportFromS3Service;
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -76,13 +75,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @Inject
-    private ImportFromS3Service importFromS3Service;
-
-    @Inject
-    private S3Service s3Service;
-
-    private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Override
     public List<Job> getJobs(String modelId) {
@@ -91,8 +85,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                 + modelId);
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid);
         List<Job> ret = new ArrayList<>();
-        ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
-                modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(), modelId,
+                false, false, true);
         String jobModelName = modelSummary != null ? modelSummary.getDisplayName() : null;
         for (Job job : jobs) {
             if (job.getJobType() == null) {
@@ -141,20 +135,25 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
 
-            List<String> pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            List<String> pathsWithQuote = null;
+            try {
+                pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
+            } catch (Exception ex) {
+                log.info("There's no Quote Protection file on HDFS!");
+            }
             if (CollectionUtils.isEmpty(pathsWithQuote)) {
                 InputStream inputStream = getResultStreamFromS3(hdfsDir, filePrefix);
                 if (inputStream == null) {
                     List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
                     if (CollectionUtils.isEmpty(paths)) {
-                        throw new LedpException(LedpCode.LEDP_18103, new String[]{workflowJobId});
+                        throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
                     }
 
                     inputStream = HdfsUtils.getInputStream(yarnConfiguration, paths.get(0));
                 }
 
                 try {
-                    writeToHdfsWithQuoteProtection(inputStream, hdfsDir+ "/qp_" + filePrefix);
+                    writeToHdfsWithQuoteProtection(inputStream, hdfsDir + "/qp_" + filePrefix);
                     pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
                 } catch (Exception e) {
                     log.error("Error writing the input stream to hdfs.");
@@ -171,16 +170,16 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     private void writeToHdfsWithQuoteProtection(InputStream inputStream, String hdfsPath) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(
-                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
-                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
-                        ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)) {
+                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                StandardCharsets.UTF_8)) {
             try (CSVParser parser = new CSVParser(reader, LECSVFormat.format)) {
                 try (FileSystem fs = HdfsUtils.getFileSystem(yarnConfiguration, hdfsPath)) {
                     Path filePath = new Path(hdfsPath);
-                    try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fs.create(filePath, true))) {
+                    try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fs.create(filePath, true))) {
                         try (CSVPrinter printer = new CSVPrinter(outputStreamWriter,
                                 CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL)
-                                        .withHeader(parser.getHeaderMap().keySet().toArray(new String[]{})))) {
+                                        .withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                             for (CSVRecord record : parser) {
                                 for (String val : record) {
                                     printer.print(val != null ? val : "");
@@ -195,7 +194,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private InputStream getResultStreamFromS3(String hdfsDir, String filePrefix) {
-        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, "bucket");
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String s3Dir = pathBuilder.exploreS3FilePath(hdfsDir, s3Bucket);
         if (s3Dir.endsWith("/Exports")) {
             s3Dir = StringUtils.substringBeforeLast(s3Dir, "/");
         }
@@ -206,13 +206,19 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             String name = FilenameUtils.getName(filePath);
             return name.matches(filePrefix + ".*.csv");
         };
-        List<String> matchedFiles = importFromS3Service.getFilesForDir(s3Dir, fileFilter);
-        if (CollectionUtils.isNotEmpty(matchedFiles)) {
-            String key = pathBuilder.stripProtocolAndBucket(matchedFiles.get(0));
-            log.debug("Streaming out S3 object " + key);
-            return importFromS3Service.getS3FileInputStream(key);
-        } else {
-            log.warn("Did not find file with prefix " + filePrefix + " in s3 folder " + s3Dir + " either.");
+
+        try {
+            List<String> matchedFiles = HdfsUtils.getFilesForDir(yarnConfiguration, s3Dir, fileFilter);
+            if (CollectionUtils.isNotEmpty(matchedFiles)) {
+                log.info("Streaming out S3 path " + matchedFiles.get(0));
+                return HdfsUtils.getInputStream(yarnConfiguration, matchedFiles.get(0));
+            } else {
+                log.warn("Did not find file with prefix " + filePrefix + " in s3 folder " + s3Dir + " either.");
+                return null;
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to find file with prefix " + filePrefix + " in s3 folder " + s3Dir + " either. error="
+                    + ex.getMessage());
             return null;
         }
     }
@@ -263,7 +269,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        boolean enableLeadEnrichment =  Boolean.TRUE.equals(performEnrichment);
+        boolean enableLeadEnrichment = Boolean.TRUE.equals(performEnrichment);
         boolean enableDebug = Boolean.TRUE.equals(debug);
         return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment, enableDebug);
     }
@@ -275,7 +281,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        boolean enableLeadEnrichment =  Boolean.TRUE.equals(performEnrichment);
+        boolean enableLeadEnrichment = Boolean.TRUE.equals(performEnrichment);
         boolean enableDebug = Boolean.TRUE.equals(debug);
         return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
     }
@@ -286,7 +292,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment,
-                                                boolean debug) {
+            boolean debug) {
         if (modelSummary.getTrainingTableName() == null) {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
@@ -296,7 +302,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName, boolean enableLeadEnrichment,
-                                               boolean debug) {
+            boolean debug) {
         return importAndRTSBulkScoreWorkflowSubmitter
                 .submit(modelSummary.getId(), fileName, enableLeadEnrichment, debug).toString();
     }

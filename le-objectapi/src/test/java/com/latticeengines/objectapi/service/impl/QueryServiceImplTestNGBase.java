@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 
 import javax.inject.Inject;
 
-import com.latticeengines.query.factory.RedshiftQueryProvider;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +17,13 @@ import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(QueryServiceImplTestNGBase.class);
 
-    protected static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
+    static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
 
     @Inject
     private TransactionService transactionService;
@@ -34,7 +34,8 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
     protected Tenant tenant;
     protected String maxTransactionDate;
 
-    protected void setup() {
+    protected void setup(String dataVersion) {
+        setupBase(dataVersion);
         mockDataCollectionProxy();
         mockPeriodProxy();
         tenant = new Tenant("LocalTest");

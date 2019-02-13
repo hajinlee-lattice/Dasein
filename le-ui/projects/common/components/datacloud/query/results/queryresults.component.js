@@ -86,9 +86,10 @@ angular.module('common.datacloud.query.results', [
                     vm.launchUnscored = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.launchUnscored;
                     vm.topNCount = PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.topNCount;
                     vm.topNClicked = vm.topNCount ? true : false;
-                    vm.launchUnscoredClick();
-                    vm.makeRecommendationCounts();
                 }
+
+                vm.launchUnscoredClick();
+                vm.makeRecommendationCounts();
 
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
@@ -331,9 +332,6 @@ angular.module('common.datacloud.query.results', [
                         //     PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
                         // }
                         vm.updateTopNCount();
-                        if(!vm.hasModel && vm.launchedUnscored) {
-                            PlaybookWizardStore.setValidation('targets', true);
-                        }
                     });
                 } else if (vm.search) { 
                     var countsQuery = { 
@@ -367,7 +365,17 @@ angular.module('common.datacloud.query.results', [
         vm.checkSaveButtonState();
     };
 
+    vm.setValidation = function(){
+        if (vm.showError == true || vm.recommendationCounts.launched <= 0){
+            PlaybookWizardStore.setValidation('targets', false);
+        }
+        else{
+            PlaybookWizardStore.setValidation('targets', true);
+        }
+    }
+
     vm.updateTopNCount = function() {
+        vm.topNCount = Math.floor(vm.topNCount);
         //sync issue with vm.counts.accounts using vm.recommendationCounts.selected instead
         // vm.maxTargetValue = vm.recommendationCounts.selected;
         // if (vm.topNCount <= vm.maxTargetValue && vm.topNCount > 0) {
@@ -380,10 +388,8 @@ angular.module('common.datacloud.query.results', [
         // }
         if (vm.topNClicked && (vm.topNCount <= 0 || vm.topNCount == null)){
             vm.showError = true;
-            PlaybookWizardStore.setValidation('targets', false);
         } else {
             vm.showError = false;
-            PlaybookWizardStore.setValidation('targets', true);
             vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
         }
     }
@@ -425,7 +431,6 @@ angular.module('common.datacloud.query.results', [
 
     vm.launchUnscoredClick = function() {
         $timeout(function() {
-            PlaybookWizardStore.setValidation('targets', vm.recommendationCounts.launched);
             PlaybookWizardStore.setLaunchUnscored(vm.launchUnscored);
             updatePage();
             vm.makeRecommendationCounts();
@@ -640,6 +645,7 @@ angular.module('common.datacloud.query.results', [
 
         vm.recommendationCounts = sections;
         PlaybookWizardStore.setRecommendationCounts(sections);
+        vm.setValidation();
     }
 
     $scope.$watch('vm.current', function(newValue, oldValue) {

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,17 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         }
     }
 
-    private static int bucketDate(Object value, DateBucket bucket) {
+    // Decide which interval the date value falls into among the default date buckets.
+    // Here are the options:
+    // BUCKET #  BUCKET NAME    CRITERIA
+    // 0         null           date value null, unparsable or negative
+    // 1         LAST 7 DAYS    date between current time and 6 days before current time (inclusive)
+    // 2         LAST 30 DAYS   date between current time and 29 days before current time (inclusive)
+    // 3         LAST 90 DAYS   date between current time and 89 days before current time (inclusive)
+    // 4         LAST 180 DAYS  date between current time and 179 days before current time (inclusive)
+    // 5         EVER           date either after current time (in the future) or before 179 days ago
+    @VisibleForTesting
+    static int bucketDate(Object value, DateBucket bucket) {
         // If no value was provided for this Date Attribute, return 0 representing the "null" bucket.
         if (value == null) {
             return 0;
@@ -181,6 +192,16 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
                 log.error("Failed to convert value " + value + " to a timestamp for a date bucket.");
                 return 0;
             }
+        }
+
+        if (timestamp < 0) {
+            // Return null bucket for negative dates.
+            log.error("Negative valued timestamp provided for a date attribute");
+            return 0;
+        } else if (timestamp > bucket.getCurTimestamp()) {
+            // Return EVER bucket for future dates (greater than current timestamp) until Future Dates is implemented
+            // in PLS-11623.
+            return bucket.getDateBoundaries().size() + 1;
         }
 
         List<Long> dateBoundaries = bucket.getDateBoundaries();

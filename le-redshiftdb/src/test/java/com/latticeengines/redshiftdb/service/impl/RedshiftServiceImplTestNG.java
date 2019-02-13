@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
+import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -59,12 +60,14 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     private String avroPrefix;
     private String jsonPathPrefix;
+    private String unloadPrefix;
     private Schema schema;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         avroPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.avro";
         jsonPathPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.jsonpath";
+        unloadPrefix = RedshiftUtils.CSV_STAGE + "/" + leStack + "/eventTable";
         cleanupS3();
         cleanupRedshift();
     }
@@ -77,6 +80,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     private void cleanupS3() {
         s3Service.cleanupPrefix(s3Bucket, jsonPathPrefix);
         s3Service.cleanupPrefix(s3Bucket, avroPrefix);
+        s3Service.cleanupPrefix(s3Bucket, unloadPrefix);
     }
 
     private void cleanupRedshift() {
@@ -116,6 +120,11 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     }
 
     @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift")
+    public void unloadQueryToS3() {
+        redshiftService.unloadTable(TABLE_NAME, s3Bucket, unloadPrefix, new RedshiftUnloadParams());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift", enabled = false)
     public void queryTableSchema() {
         List<Map<String, Object>> result = redshiftJdbcTemplate.queryForList(String.format(
                 "SELECT \"COLUMN\", TYPE, ENCODING, DISTKEY, SORTKEY FROM PG_TABLE_DEF WHERE TABLENAME = '%s';",
@@ -135,7 +144,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = "queryTableSchema")
+    @Test(groups = "functional", dependsOnMethods = "queryTableSchema", enabled = false)
     public void queryTable() {
         List<Map<String, Object>> result = redshiftJdbcTemplate
                 .queryForList(String.format("SELECT * FROM %s LIMIT 10", TABLE_NAME));
@@ -145,7 +154,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = "queryTable")
+    @Test(groups = "functional", dependsOnMethods = "queryTable", enabled = false)
     public void updateExistingRows() {
         redshiftService.createStagingTable(STAGING_TABLE_NAME, TABLE_NAME);
         redshiftService.loadTableFromAvroInS3(STAGING_TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
@@ -159,7 +168,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = "queryTable")
+    @Test(groups = "functional", dependsOnMethods = "queryTable", enabled = false)
     public void getTables() {
         List<String> tables = redshiftService.getTables("");
         Assert.assertTrue(tables.contains(TABLE_NAME.toLowerCase()));

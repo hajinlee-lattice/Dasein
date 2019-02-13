@@ -2,7 +2,7 @@ angular.module('lp.import.entry.productbundles', [])
 .component('productBundlesContent', {
     templateUrl: 'app/import/entry/productbundles/productbundles.component.html',
     controller: function (
-        $q, $scope, $stateParams, ResourceUtility
+        $q, $scope, $stateParams, ResourceUtility, ImportWizardStore
     ) {
 
         var vm = this;
@@ -13,7 +13,9 @@ angular.module('lp.import.entry.productbundles', [])
         });
 
         vm.$onInit = function() {
-
+            ImportWizardStore.getCalendar().then(function(result) {
+                vm.calendarInfo = ImportWizardStore.getCalendarInfo(result);
+            });
         }
 
     }

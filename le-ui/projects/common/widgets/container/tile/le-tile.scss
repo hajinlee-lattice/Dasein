@@ -13,6 +13,7 @@
     .le-header{
         border-bottom: 1px solid $silver;
         align-items: center;
+        flex-wrap: nowrap;
     }
     .le-footer{
         border-top: 1px solid $silver;

@@ -58,7 +58,7 @@ public class RateLimitedResourceManager {
     }
 
     public static RateLimitedAcquisition acquire(String resourceName, Map<String, Long> quantities, long duration,
-            TimeUnit timeUnit, boolean withoutAcquireQuota) {
+            TimeUnit timeUnit, boolean attemptOnly) {
         localMode.set(false);
 
         if (!definitions.containsKey(resourceName)) {
@@ -81,7 +81,7 @@ public class RateLimitedResourceManager {
             return answerByPeek;
         }
 
-        if (withoutAcquireQuota) {
+        if (attemptOnly) {
             return answerByPeek;
         }
 

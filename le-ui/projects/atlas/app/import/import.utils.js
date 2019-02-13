@@ -1,4 +1,3 @@
-import {isOnlyDateMandatory, isTimezoneMandatory} from './date-utils/date-utils';
 /**
  * Account:[
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}
@@ -130,7 +129,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     }
 
     function setMapping(entity, savedObj, fieldsMapped){
-        originalMapping = fieldsMapping ? fieldsMapping : {};
+        // let originalMapping = fieldsMapping ? fieldsMapping : {};
         var keysMapped = Object.keys(fieldsMapped);
         keysMapped.forEach(function(mapped){
             if(savedObj.mappedField === fieldsMapped[mapped].mappedField && 
@@ -157,10 +156,4 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
             });
         }
     };
-
-    this.isOnlyDateMandatory = (originlMappings) => {
-
-    }
-
-
 });

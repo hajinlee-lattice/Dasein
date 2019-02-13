@@ -10,16 +10,18 @@ angular.module('lp.ratingsengine.wizard.training', [
         segments: '<',
         products: '<',
         datacollectionstatus: '<',
-        iteration: '<'
+        iteration: '<',
+        attributes: '<'
     },
     controller: function (
-        $q, $scope, $stateParams, $timeout,
-        RatingsEngineStore, RatingsEngineService, SegmentService, AtlasRemodelStore
+        $q, $scope, $state, $stateParams, $timeout,
+        RatingsEngineStore, RatingsEngineService, DataCloudStore, SegmentService, Banner
     ) {
 
         var vm = this;
 
         angular.extend(vm, {
+            viewingIteration: $stateParams.viewingIteration,
             spendCriteria: "GREATER_OR_EQUAL",
             spendValue: 1500,
             quantityCriteria: "GREATER_OR_EQUAL",
@@ -46,7 +48,7 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
-            AtlasRemodelStore.setRemodelIteration(vm.iteration);
+            DataCloudStore.setEnrichments(vm.attributes);
 
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
@@ -55,11 +57,11 @@ angular.module('lp.ratingsengine.wizard.training', [
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){
 
-                    vm.filters = vm.ratingModel.advancedModelingConfig.cross_sell.filters;
-
+                    vm.filters = angular.copy(vm.ratingModel.advancedModelingConfig.cross_sell.filters);
+                    
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
                     if(vm.repeatPurchase){
-                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value;
+                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD ? vm.filters.PURCHASED_BEFORE_PERIOD.value : 6;
                         vm.repeatPurchaseRemodel = true;
                     }
 
@@ -100,8 +102,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                         transformationGroup: (vm.filters.transformationGroup == 'NONE') ? false : true
                     }
 
-                    console.log(vm.checkboxModel);
-
                     vm.configFilters = angular.copy(vm.filters);
 
                     vm.configFilters.dataStores = [];
@@ -125,6 +125,8 @@ angular.module('lp.ratingsengine.wizard.training', [
 
             vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
 
+            console.log(vm.ratingModel);
+
             if(vm.engineType == 'cross_sell'){
                 vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -132,14 +134,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
         }
 
-
-
-
         // Functions for Cross Sell Models
         // ============================================================================================
-        // ============================================================================================
-        // ============================================================================================
-
         vm.getRecordsCount = function(engineId, modelId, ratingEngine) {
             vm.recordsCountReturned = false;
             RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'TRAINING').then(function(count){
@@ -322,12 +318,14 @@ angular.module('lp.ratingsengine.wizard.training', [
                 RatingsEngineStore.setValidation('refine', false);
             }
         }
+        // End of the functions for Cross Sell Models
+        // ============================================================================================
+
+
+
 
         // Functions for Custom Event Models
         // ============================================================================================
-        // ============================================================================================
-        // ============================================================================================
-        
         vm.checkForDisable = function(){
 
             RatingsEngineStore.setValidation('training', false);
@@ -407,6 +405,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
         }
+        // End of the functions for Custom Event Models
+        // ============================================================================================
 
         vm.formOnChange = function(){
             $timeout(function () {
@@ -417,6 +417,35 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
             }, 1500);
         };
+
+        vm.backToModel = function() {
+            var modelId = vm.iteration.modelSummaryId,
+                rating_id = $stateParams.rating_id;
+
+            $state.go('home.ratingsengine.dashboard', { 
+                rating_id: rating_id, 
+                modelId: modelId
+            });
+        }
+
+        vm.remodelIteration = function() {
+            var engineId = vm.ratingEngine.id,
+                modelId = vm.ratingModel.id,
+                ratingModel = {
+                    AI: vm.ratingModel
+                };
+
+            vm.remodelingProgress = true;
+
+            RatingsEngineStore.setRemodelIteration(ratingModel);
+            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+            RatingsEngineStore.saveIteration('training').then(function(result){
+                if (!result.result) {
+                    $state.go('home.ratingsengine.dashboard', { "rating_id": engineId, "modelId": '', viewingIteration: false, remodelSuccessBanner: true });
+                }
+                vm.remodelingProgress = result.showProgress;
+            });
+        }
         
     }
 });

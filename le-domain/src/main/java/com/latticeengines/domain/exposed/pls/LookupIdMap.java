@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -102,6 +103,10 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     @JsonProperty("isRegistered")
     @Column(name = "IS_REGISTERED", nullable = false)
     private Boolean isRegistered;
+
+    @JsonProperty("externalAuthentication")
+    @OneToOne(mappedBy="lookupIdMap", fetch = FetchType.EAGER)
+    private ExternalSystemAuthentication externalAuthentication;
 
     @Override
     public Long getPid() {
@@ -207,6 +212,14 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
 
     public void setExternalSystemName(CDLExternalSystemName externalSystemName) {
         this.externalSystemName = externalSystemName;
+    }
+
+    public ExternalSystemAuthentication getExternalAuthentication() {
+        return externalAuthentication;
+    }
+
+    public void setExternalAuthentication(ExternalSystemAuthentication externalAuthentication) {
+        this.externalAuthentication = externalAuthentication;
     }
 
     @Override

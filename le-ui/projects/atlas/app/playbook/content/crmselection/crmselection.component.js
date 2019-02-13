@@ -7,11 +7,12 @@ angular.module('lp.playbook.wizard.crmselection', [])
         orgs: '<'
     },
     controller: function(
-        $scope, $state, $timeout, $stateParams, 
+        $scope, $state, $timeout, $stateParams,
         ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService, QueryStore
     ) {
         var vm = this;
         vm.showMAPSystems = vm.featureflags.EnableCdl;
+        vm.externalIntegrationEnabled = vm.featureflags.EnableExternalIntegration;
 
         angular.extend(vm, {
             status: $stateParams.status
@@ -20,8 +21,13 @@ angular.module('lp.playbook.wizard.crmselection', [])
         vm.$onInit = function() {
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
-            $scope.excludeItemsWithoutSalesforceId = false;
-            vm.setExcludeItems(false);
+
+            vm.excludeItemsWithoutSalesforceId = (PlaybookWizardStore.getCurrentPlay() &&
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory &&
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch &&
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId ?
+                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId : false);
+            vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
 
             PlaybookWizardStore.setValidation('crmselection', false);
             if(vm.orgs){
@@ -29,10 +35,10 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 vm.ratingEngine = PlaybookWizardStore.getSavedRating();
                 if($stateParams.play_name) {
                     var play = PlaybookWizardStore.getCurrentPlay(),
-                        crmselection = (play && 
-                                        play.launchHistory && 
-                                        play.launchHistory.mostRecentLaunch && 
-                                        play.launchHistory.mostRecentLaunch.destinationOrgId ? 
+                        crmselection = (play &&
+                                        play.launchHistory &&
+                                        play.launchHistory.mostRecentLaunch &&
+                                        play.launchHistory.mostRecentLaunch.destinationOrgId ?
                                         vm.orgs.find(function(org) { return org.orgId === play.launchHistory.mostRecentLaunch.destinationOrgId}) : '');
 
                     vm.savedSegment = crmselection;
@@ -49,7 +55,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     }
                 }
             }
-
         }
 
         vm.setExcludeItems = function(excludeItemsWithoutSalesforceId) {
@@ -64,51 +69,60 @@ angular.module('lp.playbook.wizard.crmselection', [])
             }, 1);
         }
 
-        // vm.calculateUnscoredCounts = function(form, segment, accountId, scoredNotNullCount){
-        //     var template = {
-        //         //lookupId: accountId, 
-        //         account_restriction: {
-        //             restriction: {
-        //                 logicalRestriction: {
-        //                     operator: "AND",
-        //                     restrictions: []
-        //                 }
-        //             }
-        //         },
-        //         page_filter: {  
-        //             num_rows: 10,
-        //             row_offset: 0
-        //         }
-        //     };
-        //     template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
-        //     template.account_restriction.restriction.logicalRestriction.restrictions.push({
-        //         bucketRestriction: {
-        //             attr: 'Account.' + accountId,
-        //             bkt: {
-        //                 Cmp: 'IS_NULL',
-        //                 Id: 1,
-        //                 ignored: false,
-        //                 Vals: []
-        //             }
-        //         }
-        //     });
-        //     // vm.totalCount = segment.accounts // small
-        //     QueryStore.getEntitiesCounts(template).then(function(result) {
-        //         PlaybookWizardStore.setValidation('crmselection', form.$valid);
+        vm.calculateUnscoredCounts = function(form, segment, accountId){
+            var template = {
+                //lookupId: accountId,
+                account_restriction: {
+                    restriction: {
+                        logicalRestriction: {
+                            operator: "AND",
+                            restrictions: []
+                        }
+                    }
+                },
+                page_filter: {
+                    num_rows: 10,
+                    row_offset: 0
+                }
+            };
+            template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
+            template.account_restriction.restriction.logicalRestriction.restrictions.push({
+                bucketRestriction: {
+                    attr: 'Account.' + accountId,
+                    bkt: {
+                        Cmp: 'IS_NOT_NULL',
+                        Id: 1,
+                        ignored: false,
+                        Vals: []
+                    }
+                }
+            });
+            // vm.totalCount = segment.accounts // small
+            QueryStore.getEntitiesCounts(template).then(function(result) {
+                PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
-        //         vm.loadingCoverageCounts = false;
-        //         vm.notNullCount = result.Account + scoredNotNullCount;
-        //         vm.nullCount = vm.totalCount - vm.notNullCount;
-        //     });
-        // }
+                vm.loadingCoverageCounts = false;
+                vm.notNullCount = result.Account;
+                console.log(result.Account);
+                console.log(vm.notNullCount);
+                vm.nullCount = vm.totalCount - vm.notNullCount;
+                console.log(vm.nullCount);
+            });
+        }
+
+        vm.updateAudienceId = function() {
+          console.log(vm.stored);
+          var audienceId = vm.externalIntegrationEnabled && vm.stored.crm_selection.externalAuthentication ? vm.audienceId : null;
+          PlaybookWizardStore.setAudienceId(audienceId);
+        }
 
         vm.checkValid = function(form, accountId, orgId, isRegistered) {
             vm.orgIsRegistered = isRegistered;
             vm.nullCount = null;
             vm.totalCount = null;
+            vm.audienceId = null;
 
-            $scope.excludeItemsWithoutSalesforceId = false;
-            vm.setExcludeItems(false);
+            vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
             PlaybookWizardStore.setValidation('crmselection', false);
 
             if(vm.stored && vm.stored.crm_selection) {
@@ -123,7 +137,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 vm.nullCount = null;
                 vm.loadingCoverageCounts = true;
 
-                var allCountsQuery = { 
+                var allCountsQuery = {
                         freeFormTextSearch: vm.search || '',
                         entityType: 'Account',
                         selectedBuckets: PlaybookWizardStore.getBucketsToLaunch(),
@@ -137,7 +151,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 vm.totalCount = segment.accounts;
                 if(engineId) {
                     PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], {
-                        lookupId: accountId, 
+                        lookupId: accountId,
                         restrictNullLookupId: true,
                         loadContactsCount: true,
                         loadContactsCountByBucket: true
@@ -149,14 +163,12 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         var unscoredNotNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].unscoredAccountCount;
                         vm.notNullCount = scoredNotNullCount + unscoredNotNullCount;
                         vm.nullCount = vm.totalCount - vm.notNullCount;
-                        //vm.calculateUnscoredCounts(form, segment, accountId, scoredNotNullCount);
-                            // scoredNullCount = (totalScoredCount - scoredNonNullCount);
                     });
                 } else {
-                    vm.calculateUnscoredCounts(form, segment, accountId, 0);
+                    vm.calculateUnscoredCounts(form, segment, accountId);
                 }
             } else {
-                PlaybookWizardStore.setValidation('crmselection', form.$valid);                
+                PlaybookWizardStore.setValidation('crmselection', form.$valid);
             }
         }
 

@@ -16,6 +16,9 @@ public interface DataUnitService {
 
     void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType);
 
-    DataUnit renameRedShiftTableName(DataUnit dataUnit, String tableName);
+    boolean delete(DataUnit dataUnit);
 
+    boolean renameTableName(DataUnit dataUnit, String tableName);
+
+    boolean cleanupByTenant();
 }

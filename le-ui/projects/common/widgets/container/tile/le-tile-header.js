@@ -5,10 +5,10 @@ class LeTileHeader extends Component {
         super(props);
     }
     render() {
-
+        
         return (
             <Aux>
-                <div className="le-flex-h-panel space-middle le-header">
+                <div className={`${"le-flex-h-panel space-middle le-header"} ${this.props.classNames ? this.props.classNames : ''}`}>
                     {this.props.children}
                 </div>
             </Aux>

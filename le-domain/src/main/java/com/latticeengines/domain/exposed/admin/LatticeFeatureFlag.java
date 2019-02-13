@@ -31,6 +31,7 @@ public enum LatticeFeatureFlag {
     LAUNCH_PLAY_TO_MAP_SYSTEM("LaunchPlayToMapSystem", "Launch Play to MAP System"), //
     AUTO_IMPORT_ON_INACTIVE("AutoImportOnInactive", "Run Auto Import on Inactive stack"),
     IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."),
+    ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

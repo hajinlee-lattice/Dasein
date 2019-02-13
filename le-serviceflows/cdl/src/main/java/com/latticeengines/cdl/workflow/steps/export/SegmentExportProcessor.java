@@ -1,34 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.eclipse.jetty.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.Counter;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.SegmentExportContextBuilder;
@@ -45,7 +16,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -64,9 +34,36 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.eclipse.jetty.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class SegmentExportProcessor {
 
@@ -102,8 +99,7 @@ public abstract class SegmentExportProcessor {
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
-    private List<Predefined> filterByPredefinedSelection = //
-            Arrays.asList(ColumnSelection.Predefined.Enrichment);
+    private List<Predefined> filterByPredefinedSelection = Collections.singletonList(Predefined.Enrichment);
 
     protected DataCollection.Version version;
 
@@ -121,7 +117,7 @@ public abstract class SegmentExportProcessor {
             Configuration yarnConfiguration) {
         CustomerSpace customerSpace = config.getCustomerSpace();
         version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        log.info(String.format("Using DataCollection.Version", version.name()));
+        log.info(String.format("Using DataCollection.Version %s", version.name()));
 
         MetadataSegmentExport metadataSegmentExport = config.getMetadataSegmentExport();
         if (metadataSegmentExport == null) {
@@ -140,13 +136,11 @@ public abstract class SegmentExportProcessor {
         List<Attribute> configuredPurHistoryAttributes = configuredBusEntityAttrMap.get(BusinessEntity.PurchaseHistory);
         List<Attribute> configuredCuratedAccAttributes = configuredBusEntityAttrMap.get(BusinessEntity.CuratedAccount);
 
-
         if (exportType == MetadataSegmentExportType.ACCOUNT
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
 
-            Map<String, Attribute> defaultAccountAttributesMap = new HashMap<>();
-            exportType.getDefaultAttributeTuples().stream() //
+            Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Account) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
@@ -156,13 +150,9 @@ public abstract class SegmentExportProcessor {
                         attribute.setPhysicalDataType(Type.STRING.name());
                         return attribute;
                     }) //
-                    .forEach(att -> defaultAccountAttributesMap.put(att.getName(), att));
+                    .collect(Collectors.toMap(Attribute::getName, att -> att));
 
-            configuredAccountAttributes.stream().forEach(attr -> {
-                if (defaultAccountAttributesMap.containsKey(attr.getName())) {
-                    defaultAccountAttributesMap.remove(attr.getName());
-                }
-            });
+            configuredAccountAttributes.forEach(attr -> defaultAccountAttributesMap.remove(attr.getName()));
 
             if (MapUtils.isNotEmpty(defaultAccountAttributesMap)) {
                 configuredAccountAttributes.addAll(defaultAccountAttributesMap.values());
@@ -174,7 +164,7 @@ public abstract class SegmentExportProcessor {
 
             Map<String, String> customizedNameMapping = getCustomizedDisplayNames(tenant.getId(),
                     BusinessEntity.Account);
-            configuredAccountAttributes.stream().forEach(attr -> {
+            configuredAccountAttributes.forEach(attr -> {
                 if (customizedNameMapping.containsKey(attr.getName())) {
                     attr.setDisplayName(customizedNameMapping.get(attr.getName()));
                 }
@@ -199,11 +189,7 @@ public abstract class SegmentExportProcessor {
                     }) //
                     .forEach(att -> defaultContactAttributesMap.put(att.getName(), att));
 
-            configuredContactAttributes.stream().forEach(attr -> {
-                if (defaultContactAttributesMap.containsKey(attr.getName())) {
-                    defaultContactAttributesMap.remove(attr.getName());
-                }
-            });
+            configuredContactAttributes.forEach(attr -> defaultContactAttributesMap.remove(attr.getName()));
 
             if (MapUtils.isNotEmpty(defaultContactAttributesMap)) {
                 configuredContactAttributes.addAll(defaultContactAttributesMap.values());
@@ -211,7 +197,7 @@ public abstract class SegmentExportProcessor {
 
             Map<String, String> customizedNameMapping = getCustomizedDisplayNames(tenant.getId(),
                     BusinessEntity.Contact);
-            configuredContactAttributes.stream().forEach(attr -> {
+            configuredContactAttributes.forEach(attr -> {
                 if (customizedNameMapping.containsKey(attr.getName())) {
                     attr.setDisplayName(customizedNameMapping.get(attr.getName()));
                 }
@@ -219,19 +205,22 @@ public abstract class SegmentExportProcessor {
         }
 
         registerTableForExport(customerSpace, metadataSegmentExport, configuredBusEntityAttrMap);
-
         config.setMetadataSegmentExport(metadataSegmentExport);
-
-        Table segmentExportTable = metadataProxy.getTable(tenant.getId(), metadataSegmentExport.getTableName());
-        long currentTimeMillis = System.currentTimeMillis();
-        log.info("segmentExportTable = : " + JsonUtils.serialize(segmentExportTable));
-
-        Schema schema = TableUtils.createSchema(metadataSegmentExport.getTableName(), segmentExportTable);
-
         SegmentExportContext segmentExportContext = initSegmentExportContext(tenant, config, metadataSegmentExport,
                 configuredBusEntityAttrMap);
+        fetchExtratPageByPage(tenant, metadataSegmentExport, segmentExportContext, yarnConfiguration);
+    }
 
+    private void fetchExtratPageByPage(Tenant tenant, MetadataSegmentExport metadataSegmentExport,
+            SegmentExportContext segmentExportContext, Configuration yarnConfiguration) {
         try {
+            long currentTimeMillis = System.currentTimeMillis();
+
+            Table segmentExportTable = metadataProxy.getTable(tenant.getId(), metadataSegmentExport.getTableName());
+            log.info("segmentExportTable = : " + JsonUtils.serialize(segmentExportTable));
+
+            Schema schema = TableUtils.createSchema(metadataSegmentExport.getTableName(), segmentExportTable);
+
             String csvFileName = metadataSegmentExport.getFileName();
             String avroFileName = csvFileName.substring(0, csvFileName.lastIndexOf(".csv")) + ".avro";
 
@@ -260,7 +249,6 @@ public abstract class SegmentExportProcessor {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-
     }
 
     private void registerTableForExport( //
@@ -272,7 +260,6 @@ public abstract class SegmentExportProcessor {
                 configuredBusEntityAttrMap);
 
         metadataProxy.createTable(tenant.getId(), segmentExportTable.getName(), segmentExportTable);
-        segmentExportTable = metadataProxy.getTable(tenant.getId(), segmentExportTable.getName());
     }
 
     private SegmentExportContext initSegmentExportContext(Tenant tenant, //
@@ -342,9 +329,7 @@ public abstract class SegmentExportProcessor {
                 .modifiableAccountIdCollectionForContacts(modifiableAccountIdCollectionForContacts) //
                 .counter(new Counter());
 
-        SegmentExportContext segmentExportContext = segmentExportContextBuilder.build();
-
-        return segmentExportContext;
+        return segmentExportContextBuilder.build();
     }
 
     private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
@@ -352,13 +337,12 @@ public abstract class SegmentExportProcessor {
         Restriction accountIdRestriction = Restriction.builder()
                 .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(modifiableAccountIdCollection)
                 .build();
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
-                Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
 
-        return frontEndRestriction;
+        return new FrontEndRestriction(
+                Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
     }
 
-    protected Map<String, String> getCustomizedDisplayNames(String tenantId, BusinessEntity business) {
+    private Map<String, String> getCustomizedDisplayNames(String tenantId, BusinessEntity business) {
         Map<String, String> nameToDisplayNameMap = new HashMap<>();
         try {
             Map<BusinessEntity, List<AttrConfig>> customDisplayNameAttrs = cdlAttrConfigProxy
@@ -398,7 +382,6 @@ public abstract class SegmentExportProcessor {
 
         if (CollectionUtils.isNotEmpty(configuredAccountAttributes)) {
             configuredAccountAttributes //
-                    .stream() //
                     .forEach( //
                             a -> {
                                 AttributeLookup attributeForLookup = new AttributeLookup(BusinessEntity.Account, //
@@ -413,7 +396,6 @@ public abstract class SegmentExportProcessor {
             List<Attribute> configuredAttributes = configuredBusEntityAttrMap.get(entity);
             if (CollectionUtils.isNotEmpty(configuredAttributes)) {
                 configuredAttributes //
-                        .stream() //
                         .forEach( //
                                 r -> accountLookups.add(new AttributeLookup(entity, //
                                         r.getName() //
@@ -424,7 +406,6 @@ public abstract class SegmentExportProcessor {
         List<Lookup> contactLookups = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(configuredContactAttributes)) {
             configuredContactAttributes //
-                    .stream() //
                     .forEach( //
                             c -> contactLookups.add(new AttributeLookup(BusinessEntity.Contact, //
                                     c.getName() //
@@ -443,7 +424,7 @@ public abstract class SegmentExportProcessor {
     private void setSortField(BusinessEntity entityType, List<String> sortBy, boolean descending,
             FrontEndQuery entityFrontEndQuery) {
         if (CollectionUtils.isEmpty(sortBy)) {
-            sortBy = Arrays.asList(InterfaceName.AccountId.name());
+            sortBy = Collections.singletonList(InterfaceName.AccountId.name());
         }
 
         List<AttributeLookup> lookups = sortBy.stream() //

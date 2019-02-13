@@ -40,13 +40,8 @@ $font-size: 12px;
         @include display-grid;
         @include columns-grid;
         grid-column: span 12;
-        min-height: $row-height;
-        border-top: 1px solid $silver;
         border-bottom: 1px solid $silver;
-        border-top-left-radius: 3px;
-        border-top-right-radius: 3px;
         background-color: $pearl-white;
-
         &.disabled {
             background-color: $palladium;
             color: $gun-metal;
@@ -59,11 +54,10 @@ $font-size: 12px;
     }
     .le-table-header {
         @extend .le-table-row;
-        border-top: 1px solid $silver;
-        border-bottom: 0px solid $silver;
-        border-top-left-radius: 3px;
-        border-top-right-radius: 3px;
-        background-color: $pearl-white;
+        border-bottom: 1px solid #222;
+        text-transform: uppercase;
+        font-size: 10px;
+        background-color: transparent;
         font-weight: bold;
     }
 
@@ -75,7 +69,7 @@ $font-size: 12px;
     }
     .le-table-header:hover,
     .le-table-footer:hover {
-        background-color: $pearl-white;
+        background-color: transparent;
         & > .le-table-cell {
             color: $black;
             * {
@@ -87,17 +81,16 @@ $font-size: 12px;
     .le-table-body:hover {
         background: none;
     }
-    .le-table-row-no-select {
-        background-color: $pearl-white;
-        color: $black;
-        opacity: 1;
-    }
-    .le-table-row-no-select:hover {
-        background-color: $pearl-white;
-        color: $black;
-        opacity: 1;
-    }
-
+    // .le-table-row-no-select {
+    //     background-color: $pearl-white;
+    //     color: $black;
+    //     opacity: 1;
+    // }
+    // .le-table-row-no-select:hover {
+    //     background-color: $pearl-white;
+    //     color: $black;
+    //     opacity: 1;
+    // }
     .le-table-col-span-1 {
         -ms-grid-column-span: 1;
         grid-column: span 1;
@@ -150,15 +143,16 @@ $font-size: 12px;
     .le-table-cell {
         text-overflow: ellipsis;
         overflow: hidden;
-        height: $row-height;
+        // height: $row-height;
+        margin: 0;
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
-        padding: 0.2em;
+        padding: 8px 0 8px 8px;
         justify-content: space-between;
 
         & > div {
-            @extend .le-flex-h-panel;
+            box-sizing: border-box;
             // padding-left: 8px;
             // padding-right: 8px;
             align-items: center;
@@ -179,7 +173,13 @@ $font-size: 12px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                margin-left: 1em;
+                margin-right: 1em;
+
+            }
+            &:last-of-type {
+                & > span {
+                    margin-right: 0;
+                }
             }
         }
         .le-table-cell-icon {
@@ -217,7 +217,9 @@ $font-size: 12px;
     }
 
     .le-table-footer {
-        @extend .le-table-header;
+        @include display-grid;
+        @include columns-grid;
+        grid-column: span 12;
         border-top: 0px;
         .table-pagination {
             justify-content: flex-end;

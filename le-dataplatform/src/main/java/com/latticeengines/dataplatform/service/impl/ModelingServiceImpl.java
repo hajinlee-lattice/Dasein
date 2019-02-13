@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -248,7 +247,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil
                 .getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
-        setContainerMemoryProperties(properties, memory, "Event Counting");
+        setContainerMemoryProperties(properties, samplingMapReduceMemorySize, "Event Counting");
         return properties;
     }
 

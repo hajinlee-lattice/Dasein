@@ -16,17 +16,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr 
+                        <tr
                             ng-repeat="org in $ctrl.orgs"
                             ng-if="$ctrl.orgs.length > 0"
                             ng-init="$ctrl.checkValidDelay(crmselection_form, org.accountId, org.orgId, org.isRegistered)">
                             <td>
-                                <input  
-                                    type="radio" 
-                                    id="{{org.orgId}}" 
-                                    name="{{org.orgId}}" 
+                                <input
+                                    type="radio"
+                                    id="{{org.orgId}}"
+                                    name="{{org.orgId}}"
                                     ng-value="org"
-                                    ng-change="$ctrl.checkValid(crmselection_form, org.accountId, org.orgId, org.isRegistered)" 
+                                    ng-change="$ctrl.checkValid(crmselection_form, org.accountId, org.orgId, org.isRegistered)"
                                     ng-model="$ctrl.stored.crm_selection" />
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
@@ -36,13 +36,13 @@
                                 <span ng-if="org.accountId !== null">{{ org.accountId }}</span>
                                 <span>
                                 <span ng-if="!org.isRegistered">
-                                    <span 
+                                    <span
                                         class="ico ico-warning _top"
                                         data-stooltip="Register this System Org and map it to an Account ID to enable it for selection."></span>
                                     Unregistered
                                 </span>
                                 <span ng-if="org.isRegistered && org.accountId === null">
-                                    <span 
+                                    <span
                                         class="ico ico-warning _top"
                                         data-stooltip="Map this Account ID to System Org ID in Application settings page."></span>
                                     Unmapped
@@ -70,13 +70,20 @@
                         <p>For the above selected System Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. <span  ng-if="$ctrl.nullCount != $ctrl.totalCount">It is advisable to remove these recommendations from the campaigns as they will fail to launch your {{$ctrl.stored.crm_selection.externalSystemType}} system.</span></p>
                         <p ng-if="$ctrl.nullCount != $ctrl.totalCount">Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
                         <label ng-if="$ctrl.nullCount != $ctrl.totalCount">
-                            <input 
-                                type="checkbox" 
-                                ng-model="excludeItemsWithoutSalesforceId"
-                                ng-change="$ctrl.setExcludeItems(excludeItemsWithoutSalesforceId)">
+                            <input
+                                type="checkbox"
+                                ng-model="$ctrl.excludeItemsWithoutSalesforceId"
+                                ng-change="$ctrl.setExcludeItems($ctrl.excludeItemsWithoutSalesforceId)">
                                 Remove all recommendations with blank Account ID
                         </label>
                     </div>
+
+                </div>
+                <div
+                    class="audience-selection"
+                    ng-if="$ctrl.externalIntegrationEnabled && $ctrl.stored && $ctrl.stored.crm_selection && vm.stored.crm_selection.externalAuthentication">
+                    <p>Audience Id: </p>
+                    <input type="text" ng-model="$ctrl.audienceId" class="form-control" ng-change="$ctrl.updateAudienceId()">
                 </div>
 
             </form>

@@ -8,7 +8,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
@@ -181,10 +180,6 @@ public class PLSComponentManager {
             // ignore
         }
 
-        if (StringUtils.isNotEmpty(specialAdmin) && !tenant.getTenantType().equals(TenantType.CUSTOMER)
-                && !tenant.getTenantType().equals(TenantType.STAGING)) {
-            superAdminEmails.add(specialAdmin);
-        }
         assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
         assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
         assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());

@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
     public static final String NQ_FIND_AUTHS_BY_LOOKUPMAP_IDS = "ExternalSystemAuthentication.findAuthsByLookupMapConfigId";
-    public static final String NQ_FIND_AUTHS_BY_AUTH_ID = "ExternalSystemAuthentication.findAuthsByConfigId";
+    public static final String NQ_FIND_AUTHS_BY_AUTH_ID = "ExternalSystemAuthentication.findAuthsByAuthId";
     public static final String NQ_FIND_ALL_AUTHS = "ExternalSystemAuthentication.findAllAuths";
     static final String SELECT_AUTHS_BY_LOOKUPMAP_IDS = "SELECT new com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication "
             + "( esa, esa.lookupIdMap.id ) "
@@ -66,7 +66,7 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
     private String id;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_LOOKUP_ID_MAP", nullable = false)
     private LookupIdMap lookupIdMap;
@@ -78,6 +78,14 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
     @JsonProperty("trayAuthenticationId")
     @Column(name = "TRAY_AUTHENTICATION_ID", nullable = true)
     private String trayAuthenticationId;
+
+    @JsonProperty("solutionInstanceId")
+    @Column(name = "SOLUTION_INSTANCE_ID", nullable = true)
+    private String solutionInstanceId;
+
+    @JsonProperty("trayWorkflowEnabled")
+    @Column(name = "TRAY_WORKFLOW_ENABLED", nullable = true)
+    private Boolean trayWorkflowEnabled;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -103,6 +111,8 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
         this.id = extSysAuth.getId();
         this.trayAuthenticationId = extSysAuth.getTrayAuthenticationId();
         this.lookupMapConfigId = lookupMapConfigId;
+        this.solutionInstanceId = extSysAuth.getSolutionInstanceId();
+        this.trayWorkflowEnabled = extSysAuth.getTrayWorkflowEnabled();
         this.lookupIdMap = extSysAuth.getLookupIdMap();
         this.created = extSysAuth.getCreated();
         this.updated = extSysAuth.getUpdated();
@@ -171,7 +181,26 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
     }
 
     public void setLookupIdMap(LookupIdMap lookupIdMap) {
+        if (lookupIdMap != null) {
+            this.lookupMapConfigId = lookupIdMap.getId();
+        }
         this.lookupIdMap = lookupIdMap;
+    }
+
+    public String getSolutionInstanceId() {
+        return solutionInstanceId;
+    }
+
+    public void setSolutionInstanceId(String solutionInstanceId) {
+        this.solutionInstanceId = solutionInstanceId;
+    }
+
+    public Boolean getTrayWorkflowEnabled() {
+        return trayWorkflowEnabled;
+    }
+
+    public void setTrayWorkflowEnabled(Boolean trayWorkflowEnabled) {
+        this.trayWorkflowEnabled = trayWorkflowEnabled;
     }
 
 }

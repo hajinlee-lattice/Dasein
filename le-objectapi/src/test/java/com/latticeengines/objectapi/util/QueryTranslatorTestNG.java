@@ -39,7 +39,7 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup();
+        super.setup("2");
     }
 
     @Test(groups = "functional")
@@ -51,7 +51,7 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
                 ComparisonType.PRIOR_ONLY, //
                 PeriodStrategy.Template.Month.name(), //
                 Collections.singletonList(2));
-        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        String prodId = "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks";
         Bucket.Transaction txn = new Bucket.Transaction(prodId, prior2Months, null, null, false);
         EntityQueryTranslator translator = new EntityQueryTranslator(queryFactory, attrRepo);
         FrontEndQuery feQuery = toFrontEndQuery(txn);

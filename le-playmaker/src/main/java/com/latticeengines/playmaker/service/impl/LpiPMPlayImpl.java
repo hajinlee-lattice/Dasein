@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -204,7 +205,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         playMap.put(PlaymakerConstants.Description, play.getDescription());
         playMap.put(PlaymakerConstants.AverageProbability, null);
         playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
-        playMap.put(PlaymakerConstants.PlayGroups, null);
+        playMap.put(PlaymakerConstants.PlayGroups, play.getPlayGroups().stream().map(PlayGroup::getDisplayName).collect(Collectors.toList()));
         if (play.getRatingEngine() != null) {
             RatingEngine ratingEngine = ratingEngineProxy
                     .getRatingEngine(MultiTenantContext.getCustomerSpace().toString(), play.getRatingEngine().getId());

@@ -241,11 +241,15 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
         return dest;
     }
 
+    protected String getExecutionEngine() {
+        return engine;
+    }
+
     protected DataFlowContext createDataFlowContext(DataFlowParameters parameters) {
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
-        ctx.setProperty(DataFlowProperty.ENGINE, engine);
+        ctx.setProperty(DataFlowProperty.ENGINE, getExecutionEngine());
         ctx.setProperty(DataFlowProperty.TARGETPATH, getTargetDirectory());
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, getFlowBeanName());
         ctx.setProperty(DataFlowProperty.FLOWNAME, getFlowBeanName());
@@ -282,6 +286,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
         Map<String, String> paths = sourcePaths;
         for (String key : paths.keySet()) {
             if (key.equals(source)) {
+                log.info(String.format("Table Name = %s, Path = %s", key, paths.get(key)));
                 return AvroUtils.getDataFromGlob(yarnConfiguration, paths.get(key));
             }
         }
@@ -292,7 +297,8 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
         uploadAvro(data, columns, AVRO_INPUT, AVRO_DIR);
     }
 
-    protected void uploadAvro(Object[][] data, List<Pair<String, Class<?>>> columns, String recordName, String dirPath) {
+    protected void uploadAvro(Object[][] data, List<Pair<String, Class<?>>> columns, String recordName,
+            String dirPath) {
         Map<String, Class<?>> schemaMap = new HashMap<>();
         for (int i = 0; i < columns.size(); i++) {
             schemaMap.put(columns.get(i).getKey(), columns.get(i).getValue());
@@ -403,7 +409,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
     }
 
     protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right,
-                                    String rightId) {
+            String rightId) {
         return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 

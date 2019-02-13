@@ -2,16 +2,14 @@
 
 
     <div class="row">
-        
+
         <div class="list-header">
             <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
                 <menu-sort-by config="vm.header.sort" store="segments.sort"></menu-sort-by>
                 <search-filter query="vm.query" current="vm.currentPage"></search-filter>
             </div>
             <div class="pull-right">
-                <a
-                    class="button blue-button"
-                    ng-click="vm.addSegment()">
+                <a class="button blue-button" ng-click="vm.addSegment()">
                     Add Segment
                 </a>
             </div>
@@ -24,26 +22,21 @@
             <ul class="tiles">
 
 
-                <li
-                    ng-repeat="
+                <li ng-repeat="
                         segment in vm.segments |
                         filter: vm.query |
                         orderBy: vm.header.sort.order + vm.header.sort.property |
                         startFrom: (vm.currentPage - 1) * pagesize |
                         limitTo: pagesize"
-                    ng-click="vm.tileStates[segment.name].editSegment || vm.tileClick($event, segment)"
-                    ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null"
-                >
+                    ng-click="vm.tileStates[segment.name].editSegment || vm.tileClick($event, segment)" ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null">
                     <div class="tile-header" ng-if="!vm.tileStates[segment.name].editSegment">
                         <h2 title="{{segment.display_name}}">
-                            {{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' : ''}}
+                            {{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' :
+                            ''}}
                             <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.tileStates[segment.name].loading"></i>
                         </h2>
                         <div class="edit" ng-if="!segment.is_master_segment">
-                            <button
-                                    type="button"
-                                    ng-click="vm.customMenuClick($event, segment)"
-                                    ng-class="{ 'open': vm.tileStates[segment.name].showCustomMenu }">
+                            <button type="button" ng-click="vm.customMenuClick($event, segment)" ng-class="{ 'open': vm.tileStates[segment.name].showCustomMenu }">
                                 <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[segment.name].showCustomMenu }"></span>
                             </button>
                             <ul class="model-menu" ng-show="vm.tileStates[segment.name].showCustomMenu">
@@ -64,22 +57,19 @@
                     </div>
                     <div class="tile-metadata" ng-if="!vm.tileStates[segment.name].editSegment">
                         <ul>
-                            <li>Created by <span class="blue-text">{{segment.created_by}}</span> on <span class="blue-text">{{segment.created | date}}</span></li>
-<!--                             <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
+                            <li>Created by <span class="blue-text">{{segment.created_by}}</span> on <span class="blue-text">{{segment.created
+                                    | date}}</span></li>
+                            <!--                             <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
                             <li>Last updated <span class="blue-text">{{segment.updated | date}}</span></li> -->
-                            <li> 
-                                <p 
-                                    title="{{segment.description}}"
-                                    class="description"
-                                    ng-if="segment.description">
-                                    Description: 
-                                        <span class="blue-text">{{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}} </span>
+                            <li>
+                                <p title="{{segment.description}}" class="description" ng-if="segment.description">
+                                    Description:
+                                    <span class="blue-text">{{segment.description | limitTo: 250
+                                        }}{{segment.description.length > 250 ? '&hellip;' : ''}} </span>
                                 </p>
-                                <p 
-                                    ng-if="!segment.description">
+                                <p ng-if="!segment.description">
                                     <span class="gray-text">This segment does not have a description.</span> <span
-                                        class="blue-text" 
-                                        data-ng-click="vm.editSegmentClick($event, segment)">
+                                        class="blue-text" data-ng-click="vm.editSegmentClick($event, segment)">
                                         Add description
                                     </span>
                                 </p>
@@ -87,7 +77,7 @@
                         </ul>
                     </div>
                     <div class="tile-body wrap-body" ng-if="!vm.tileStates[segment.name].editSegment">
-<!--                         <p 
+                        <!--                         <p 
                             title="{{segment.description}}" 
                             ng-if="segment.description">
                             {{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}}
@@ -100,10 +90,13 @@
                                 Add description
                             </span>
                         </p> -->
-                        <p ng-if="!vm.invalidSegments.has(segment.name)" ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index" class="attributesDisplay">
+                        <p ng-if="!vm.invalidSegments.has(segment.name)" ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index"
+                            class="attributesDisplay">
                             {{attr.label}}<em>{{attr.value}}</em>
                         </p>
-                        <p ng-if="vm.invalidSegments.has(segment.name)" class="attributesDisplay centered italicized"> <i class="fa fa-exclamation-triangle" style="color:#ca2b2b"></i> This segment contains invalid or deleted attributes. </p>
+                        <p ng-if="vm.invalidSegments.has(segment.name)" class="attributesDisplay centered italicized">
+                            <i class="fa fa-exclamation-triangle" style="color:#ca2b2b"></i> This segment contains
+                            invalid or deleted attributes. </p>
                     </div>
                     <div class="tile-footer segments">
                         <div class="account-count columns six">
@@ -117,20 +110,15 @@
                             <div class="blue-text">
                                 {{segment.contacts || 0}}
                             </div>
-                        </div>                  
+                        </div>
                     </div>
 
-                    <edit-form ng-if="vm.tileStates[segment.name].editSegment" 
-                        config="vm.editConfig"
-                        dataobj="segment" 
-                        saving="vm.saveInProgress"
-                        callback="vm.saveNameDescription(obj, newData)">
+                    <edit-form ng-if="vm.tileStates[segment.name].editSegment" config="vm.editConfig" dataobj="segment"
+                        saving="vm.saveInProgress" callback="vm.saveNameDescription(obj, newData)">
                     </edit-form>
                 </li>
                 <li class="create-tile" ng-if="vm.segments.length < 1">
-                    <a
-                        class="button new-tile-button"
-                        ng-click="vm.addSegment()">
+                    <a class="button new-tile-button" ng-click="vm.addSegment()">
                         <span>&#43;</span>
                         Add Segment
                     </a>

@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DynamoDBLookupService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -109,6 +110,14 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
             }
         }
 
+        // Put duns for matched ldc account into traveler for entity match
+        // TODO: If it's domain-only match, not able to get duns
+        if (result != null) {
+            request.getMatchTravelerContext().setDunsOriginMapIfAbsent(new HashMap<>());
+            request.getMatchTravelerContext().getDunsOriginMap().put(DataCloudConstants.ACCOUNT_MASTER,
+                    matchKeyTuple.getDuns());
+        }
+
         return result;
     }
 
@@ -143,7 +152,8 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
         @Override
         public void run() {
             while(true) {
-                Map<String, List<String>> reqIdsWithVersion = new HashMap<String, List<String>>();
+                // DataCloudVersion -> ReqIds
+                Map<String, List<String>> reqIdsWithVersion = new HashMap<>();
                 Map<String, AccountLookupRequest> lookupReqWithVersion = new HashMap<String, AccountLookupRequest>();
                 synchronized (pendingReqIds) {
                     while (pendingReqIds.isEmpty()) {
@@ -204,6 +214,14 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
                                     log.debug("Got result from lookup for Lookup key=" + reqIds.get(i)
                                             + " Lattice Account Id=" + result);
                                 }
+                                // Put duns for matched ldc account into
+                                // traveler for entity match
+                                // TODO: If it's domain-only match, not able to
+                                // get duns
+                                DataSourceLookupRequest req = getReq(reqIds.get(i));
+                                req.getMatchTravelerContext().setDunsOriginMapIfAbsent(new HashMap<>());
+                                req.getMatchTravelerContext().getDunsOriginMap().put(DataCloudConstants.ACCOUNT_MASTER,
+                                        ((MatchKeyTuple) req.getInputData()).getDuns());
                             } else {
                                 // may not be able to handle empty string
                                 result = null;

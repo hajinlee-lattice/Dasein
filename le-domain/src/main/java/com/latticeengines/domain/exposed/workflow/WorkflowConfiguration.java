@@ -56,7 +56,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     private boolean restart;
 
     @JsonProperty
-    private boolean skipCompletedSteps;
+    private boolean skipCompletedSteps = false;
 
     @JsonProperty
     private WorkflowExecutionId workflowIdToRestart;

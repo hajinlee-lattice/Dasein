@@ -229,8 +229,20 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                 System.out.println("Expected score = " + expectedScores.get(idx));
                 DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res),
                         DebugRecordScoreResponse.class);
-                Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
-                        new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
+                try {
+                    Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
+                            new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
+                } catch (Exception ex) {
+                    log.error(
+                            String.format(
+                                    "\nres = %s, " //
+                                            + "\nsignleRecordScoreResponseList.get(idx) = %s" //
+                                            + "\n",
+                                    JsonUtils.serialize(res), //
+                                    JsonUtils.serialize(signleRecordScoreResponseList.get(idx))), //
+                            ex);
+                    throw ex;
+                }
                 assertScoreIsWithinAcceptableRange(result.getScores().get(0).getScore(), expectedScores.get(idx));
                 System.out.println("idx = " + idx);
                 System.out.println("single record request = " + JsonUtils.serialize(scoreRequests.get(idx)));

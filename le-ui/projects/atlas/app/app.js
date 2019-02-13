@@ -8,10 +8,11 @@ import HTTP from './http.interceptor.js';
 import Utils from './common.utils.js';
 
 angular
-    .module('mainApp', [
+    .module('Atlas', [
         'ngRoute',
         'ui.router',
         'ui.bootstrap',
+        'oc.lazyLoad',
         'angulartics',
         'angulartics.mixpanel',
         'common.modules',

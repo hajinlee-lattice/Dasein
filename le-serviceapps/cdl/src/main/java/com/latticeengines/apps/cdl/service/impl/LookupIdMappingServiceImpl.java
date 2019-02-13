@@ -46,6 +46,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             return lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
         } else {
             existingLookupIdMap.setIsRegistered(true);
+            existingLookupIdMap.setExternalAuthentication(lookupIdsMap.getExternalAuthentication());
             return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
         }
     }
@@ -76,6 +77,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             if (lookupIdMap != null) {
                 existingLookupIdMap.setAccountId(lookupIdMap.getAccountId());
                 existingLookupIdMap.setDescription(lookupIdMap.getDescription());
+                existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
             } else {
                 throw new RuntimeException(
                         "Incorrect input payload. Will replace this exception with proper LEDP exception.");
@@ -128,5 +130,10 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Override
     public List<CDLExternalSystemType> getAllCDLExternalSystemType() {
         return Arrays.asList(CDLExternalSystemType.values());
+    }
+
+    @Override
+    public LookupIdMap getLookupIdMapByOrgId(String orgId, CDLExternalSystemType externalSystemType) {
+        return lookupIdMappingEntityMgr.getLookupIdMap(orgId, externalSystemType);
     }
 }

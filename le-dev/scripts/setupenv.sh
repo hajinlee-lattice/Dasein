@@ -21,4 +21,3 @@ bash $WSHOME/le-dev/scripts/setupenv_docker.sh $BOOTSTRAP_MODE || true
 
 pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
 echo "REVIEWBOARD_URL='http://bodcdevvrvw65.lattice.local/rb'" > ~/.reviewboardrc
-

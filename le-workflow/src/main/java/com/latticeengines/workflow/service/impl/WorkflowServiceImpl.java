@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -438,15 +439,15 @@ public class WorkflowServiceImpl implements WorkflowService {
         long checkInterval = 1000 * 120;
         JobWaitCaller caller = new JobWaitCaller(workflowId, maxWaitTime, checkInterval);
         callerRegister.register(Thread.currentThread(), caller);
-        boolean isDone = caller.sleep();
-        if (isDone) {
-            log.info(String.format("Finished waiting for the workflow id= %s", workflowId.getId()));
-        } else {
-            throw new RuntimeException("Timeout when waiting for workflow Id=" + workflowId.getId());
-        }
+        caller.sleep();
+        log.info(String.format("Finished waiting for the workflow id= %s", workflowId.getId()));
     }
 
     private class JobWaitCaller implements LEJobCaller {
+        // report once every X wait periods after the job has been running longer than
+        // maxWaitTime
+        private static final int LONG_RUNNING_JOB_REPORT_PERIOD = 30;
+
         private long checkInterval;
         private long maxWaitTime;
         private WorkflowExecutionId workflowId;
@@ -460,11 +461,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         public boolean sleep() {
             long start = System.currentTimeMillis();
+            int nWaitPeriodAfterMaxWaitTime = 0;
             int retryOnException = 16;
             WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
             long workflowPid = workflowJob.getPid();
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
-            do {
+            while (true) {
                 if (isDone) {
                     return true;
                 }
@@ -488,8 +490,15 @@ public class WorkflowServiceImpl implements WorkflowService {
                     }
                 }
                 log.info("Waiting workflow to finish. workflow Id=" + workflowId.getId());
-            } while (System.currentTimeMillis() - start < maxWaitTime);
-            return false;
+                long currentRunningTime = System.currentTimeMillis() - start;
+                if (currentRunningTime >= maxWaitTime) {
+                    if (nWaitPeriodAfterMaxWaitTime % LONG_RUNNING_JOB_REPORT_PERIOD == 0) {
+                        log.error("Job (PID={}) has been running for {} hours", workflowPid,
+                                TimeUnit.MILLISECONDS.toHours(currentRunningTime));
+                    }
+                    nWaitPeriodAfterMaxWaitTime++;
+                }
+            }
         }
 
         @Override

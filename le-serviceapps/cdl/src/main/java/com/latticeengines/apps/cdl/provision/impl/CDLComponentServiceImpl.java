@@ -47,7 +47,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
     @Inject
-    private DataUnitEntityMgr dataUnitEntityMgr;
+    private DataUnitService dataUnitService;
 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
@@ -115,7 +115,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
             String tenantId = cs.getTenantId();
             attrConfigEntityMgr.cleanupTenant(tenantId);
-            dataUnitEntityMgr.cleanupTenant(tenantId);
+            dataUnitService.cleanupByTenant();
             Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
             MultiTenantContext.setTenant(tenant);
             dropBoxService.delete();

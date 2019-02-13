@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.query.DataPage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.objectapi.service.PurchaseHistoryService;
@@ -63,6 +63,14 @@ public class PeriodTransactionResource {
     public List<ProductHierarchy> getProductHierarchy(@PathVariable String customerSpace,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return purchaseHistoryService.getProductHierarchy(version);
+    }
+
+    @GetMapping(value = "/transaction/maxmindate")
+    @ResponseBody
+    @ApiOperation("Get final and first transaction date")
+    public List<String> getFinalAndFirstTransactionDate(@PathVariable String customerSpace,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        return purchaseHistoryService.getFinalAndFirstTransactionDate();
     }
 
 }

@@ -1,0 +1,50 @@
+@import 'common/widgets/colors.scss';
+connector-list-component{
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    background-color: $pearl-white;
+    margin-top: 1px;
+    .connectors-title{
+        padding: 1em 0;
+    }
+
+    .connectors-list{
+        margin: 3em 0;
+            .le-connector{
+                height: 100%;
+                margin: 0 5px;
+                cursor: pointer;
+                border-radius: 4px;
+                padding: 1.5em;
+                max-width: 200px;
+            .le-card-image-container{
+                height: 60px;
+                align-items: center;
+
+            }
+            .le-card-body{
+                font-size: 12px;
+                & > p {
+                    display: inline-flex;
+                    justify-content: space-around;
+                    text-align: center;
+                }
+            }
+        }
+        .le-connector:hover{
+            background-color: $saphire-two;
+        }
+    }
+    .le-connectors{
+        margin-top: 1px;
+        padding: 1em 0;
+        width: 100%;
+        max-width: 1000px;
+        height: 100%;
+        &.white-background{
+            background-color: $pearl-white;
+        }
+    } 
+}
+

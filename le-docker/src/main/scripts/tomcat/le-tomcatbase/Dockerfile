@@ -22,5 +22,8 @@ COPY conf/env/prodcluster/latticeengines.properties /tmp/conf/env/prodcluster/la
 COPY conf/env/prodcluster_dr/latticeengines.properties /tmp/conf/env/prodcluster_dr/latticeengines.properties
 COPY start.sh /start.sh
 
+ENV LE_SECRET_KEY I03TMIIUftFUUI7bV0zFBw==
+ENV LE_SALT_HINT bi0mpJJNxiYpEka5C6JO4g==
+
 EXPOSE 8080 8443 1099
 CMD ["bash", "/start.sh"]

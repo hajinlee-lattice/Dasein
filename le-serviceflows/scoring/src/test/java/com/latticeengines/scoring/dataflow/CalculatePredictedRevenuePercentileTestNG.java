@@ -3,6 +3,7 @@ package com.latticeengines.scoring.dataflow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +14,16 @@ import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = {"classpath:serviceflows-scoring-dataflow-context.xml"})
+@ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
 public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
@@ -34,12 +39,10 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
 
         assertEquals(outputRecords.size(), inputRecords.size());
 
-        String[] modelGuids = {
-            "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
-            "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
-            "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql",
-            "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm",
-        };
+        String[] modelGuids = { "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
+                "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
+                "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql",
+                "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", };
 
         Map<String, List<GenericRecord>> modelRecordMap = new HashMap<>();
         Stream.of(modelGuids).forEach((guid) -> modelRecordMap.put(guid, new ArrayList<>()));
@@ -54,9 +57,7 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
 
         assertEquals(3210, modelRecordMap.get("ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm").size());
 
-        String[] evModelGuids = {
-            "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm",
-        };
+        String[] evModelGuids = { "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", };
 
         for (String modelGuid : evModelGuids) {
             verifyPerModelOutput(modelGuid, modelRecordMap.get(modelGuid), true);
@@ -66,8 +67,8 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
 
     private void verifyPerModelOutput(String modelGuid, List<GenericRecord> outputRecords, boolean expectedValue) {
         Double prevRawScore = (expectedValue) ? Double.MAX_VALUE : 1.0;
-        String scoreFieldName = (expectedValue) ? ScoreResultField.PredictedRevenue.displayName :
-            ScoreResultField.RawScore.displayName;
+        String scoreFieldName = (expectedValue) ? ScoreResultField.PredictedRevenue.displayName
+                : ScoreResultField.RawScore.displayName;
         Integer prevPct = 99;
 
         for (GenericRecord record : outputRecords) {
@@ -77,7 +78,9 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
 
             assertEquals(recordModelGuid, modelGuid);
             assertTrue(curPct <= prevPct);
-            assertTrue(curRawScore <= prevRawScore);
+            assertTrue(curRawScore <= prevRawScore,
+                    String.format("modelGuid = %s, curPct = %s, prevPct = %s, curRawScore = %s, prevRawScore = %s",
+                            modelGuid, curPct, prevPct, curRawScore, prevRawScore));
 
             assertTrue(curPct <= 99 && curPct >= 5, "Percentile " + curPct + " is not in range of [5, 99]");
             prevPct = curPct;
@@ -98,12 +101,13 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
         String modelGuidField = ScoreResultField.ModelId.displayName;
 
         String scoreField = ScoreResultField.PredictedRevenuePercentile.displayName;
+        String evModelGuid = "ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm";
 
         Map<String, String> rawScoreFieldMap = new HashMap<>();
         rawScoreFieldMap.put("ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", rawScoreField);
         rawScoreFieldMap.put("ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", rawScoreField);
         rawScoreFieldMap.put("ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql", rawScoreField);
-        rawScoreFieldMap.put("ms__73d85df6-688e-4368-948b-65f3688cc7ea-ai_0tlcm", predictedRevenueField);
+        rawScoreFieldMap.put(evModelGuid, predictedRevenueField);
 
         parameters.setInputTableName("InputTable");
         parameters.setPercentileFieldName(scoreField);
@@ -112,7 +116,24 @@ public class CalculatePredictedRevenuePercentileTestNG extends ServiceFlowsDataF
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
 
+        setDummyScoreDerivationMap(parameters, evModelGuid);
+
         return parameters;
+    }
+
+    private void setDummyScoreDerivationMap(CalculatePredictedRevenuePercentileParameters parameters,
+            String modelGuid) {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("calculateExpectedRevenuePercentile/PLS-11356/params.json");
+        CalculateExpectedRevenuePercentileParameters tempParameters = JsonUtils.deserialize(inputStream,
+                CalculateExpectedRevenuePercentileParameters.class);
+        Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps = new HashMap<>();
+        for (Map<ScoreDerivationType, ScoreDerivation> scoreDerivationMap : tempParameters.getScoreDerivationMaps()
+                .values()) {
+            scoreDerivationMaps.put(modelGuid, scoreDerivationMap);
+            break;
+        }
+        parameters.setScoreDerivationMaps(scoreDerivationMaps);
     }
 
     @Override

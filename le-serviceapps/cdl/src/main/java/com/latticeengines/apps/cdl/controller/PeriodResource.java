@@ -1,10 +1,14 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.BusinessCalendarService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 import io.swagger.annotations.Api;
@@ -65,6 +71,31 @@ public class PeriodResource {
     @ApiOperation(value = "Get evaluation date")
     public String getEvaluationDate(@PathVariable String customerSpace) {
         return periodService.getEvaluationDate();
+    }
+
+    @GetMapping(value = "/daterange/{year}")
+    @ApiOperation(value = "Get start date and end date")
+    public List<String> getStartEndDate(@PathVariable String customerSpace,
+                                                      @PathVariable int year) {
+        String yearString = String.valueOf(year);
+        // convert year from "18" to "2018"
+        if (yearString.length() == 2) {
+            yearString = "20" + yearString;
+        }
+        BusinessCalendar businessCalendar = businessCalendarService.find();
+        PeriodStrategy periodStrategy;
+        if (businessCalendar == null || businessCalendar.getMode() == BusinessCalendar.Mode.STANDARD) {
+            periodStrategy = PeriodStrategy.CalendarYear;
+        } else {
+            periodStrategy = new PeriodStrategy(businessCalendar, PeriodStrategy.Template.Year);
+        }
+        PeriodBuilder periodBuilder = PeriodBuilderFactory.build(periodStrategy);
+        Pair<LocalDate, LocalDate> dateRange = periodBuilder.getDateRangeOfYear(Integer.valueOf(yearString));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        List<String> result = new ArrayList<>();
+        result.add(dateRange.getLeft().format(formatter));
+        result.add(dateRange.getRight().format(formatter));
+        return result;
     }
 
     @PostMapping(value = "/calendar")

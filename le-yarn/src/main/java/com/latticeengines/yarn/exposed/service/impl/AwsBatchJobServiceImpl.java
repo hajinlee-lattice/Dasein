@@ -180,7 +180,10 @@ public class AwsBatchJobServiceImpl implements AwsBatchJobService {
         paths.add(containerProperties.getProperty(PythonContainerProperty.PYTHONPIPELINELIBFQDN.name()));
         paths.add(containerProperties.getProperty(PythonContainerProperty.SCHEMA.name()));
         paths.add(containerProperties.getProperty(PythonContainerProperty.DATAPROFILE.name()));
-        paths.add(containerProperties.getProperty(PythonContainerProperty.CONFIGMETADATA.name()));
+        String configMetadata = containerProperties.getProperty(PythonContainerProperty.CONFIGMETADATA.name());
+        if (StringUtils.isNotBlank(configMetadata) && configMetadata.endsWith(".avsc")) {
+            paths.add(configMetadata);
+        }
         paths.add(containerProperties.getProperty(PythonContainerProperty.PIPELINEDRIVER.name()));
 
         return paths;

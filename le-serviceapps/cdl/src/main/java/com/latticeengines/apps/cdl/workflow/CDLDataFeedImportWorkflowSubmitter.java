@@ -92,7 +92,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public void registerFailedAction(String customerSpace, String taskId, String actionInitiator,
-                                     S3FileToHdfsConfiguration importConfig, ErrorDetails errorDetails) {
+            S3FileToHdfsConfiguration importConfig, ErrorDetails errorDetails, String initialS3FilePath) {
         log.info(String.format("Registering an import action for datafeedTask=%s, tenant=%s",
                 taskId, customerSpace));
         Action action = new Action();
@@ -105,7 +105,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         Map<String, String> inputs = new HashMap<>();
         inputs.put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, importConfig.getS3FileName());
         inputs.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, importConfig.getS3FileName());
-        inputs.put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, importConfig.getS3FilePath());
+        inputs.put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, initialS3FilePath);
         failedJob.setInputs(inputs);
         failedJob.setErrorCode(errorDetails.getErrorCode());
         failedJob.setErrorMsg(errorDetails.getErrorMsg());

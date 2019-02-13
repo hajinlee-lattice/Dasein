@@ -10,11 +10,10 @@ class LeTile extends Component {
 
         return (
             <Aux>
-                <div className="le-tile">
+                <div className={`${"le-tile"} ${this.props.classNames ? this.props.classNames : ''}`}>
                     {this.props.children}
                 </div>
             </Aux>
-
         );
     }
 }

@@ -64,6 +64,10 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         this.yarnClient = yarnClient;
     }
 
+    public void setAwsBatchJobService(AwsBatchJobService awsBatchJobService) {
+        this.awsBatchJobService = awsBatchJobService;
+    }
+
     private YarnClient getYarnClient(String yarnClientName) {
         try {
             if (StringUtils.isEmpty(yarnClientName)) {

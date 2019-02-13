@@ -17,10 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -189,8 +192,29 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void cloneTable(String srcTable, String tgtTable) {
         log.info("Clone table " + srcTable + " to " + tgtTable);
-        redshiftJdbcTemplate.execute(String.format("CREATE TABLE %s (LIKE %s)", tgtTable, srcTable));
-        redshiftJdbcTemplate.execute(String.format("INSERT INTO %s (SELECT * FROM %s)", tgtTable, srcTable));
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            retry.execute(context -> {
+                if (context.getRetryCount() >= 1) {
+                    log.warn("Last clone ({} -> {}) wasn't successful. Retrying for {} times", srcTable, tgtTable,
+                            context.getRetryCount());
+                }
+                redshiftJdbcTemplate.execute(String.format("DROP TABLE IF EXISTS %s", tgtTable));
+                redshiftJdbcTemplate.execute(String.format("CREATE TABLE %s (LIKE %s)", tgtTable, srcTable));
+                redshiftJdbcTemplate.execute(String.format("INSERT INTO %s (SELECT * FROM %s)", tgtTable, srcTable));
+                Long srcCnt = countTable(srcTable);
+                Long tgtCnt = countTable(tgtTable);
+                if (srcCnt.longValue() != tgtCnt.longValue()) {
+                    log.error(
+                            "Target table {} has total row count as {}, different with source table {} total row count {}",
+                            tgtTable, tgtCnt, srcTable, srcCnt);
+                    throw new RuntimeException(String.format("Table clone from %s to %s failed", srcTable, tgtTable));
+                }
+                return null;
+            });
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     @Override
@@ -214,6 +238,14 @@ public class RedshiftServiceImpl implements RedshiftService {
         } else {
             return results.stream().map(m -> (String) m.get("tablename")).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public void unloadTable(String tableName, String s3bucket, String s3Prefix, RedshiftUnloadParams unloader) {
+        String s3Path = String.format("s3://%s/%s/", s3bucket, s3Prefix);
+        String creds = "CREDENTIALS 'aws_access_key_id=" + awsAccessKey + ";aws_secret_access_key=" + awsSecretKey + "'";
+        String sql = RedshiftUtils.unloadTableStatement(tableName, s3Path, creds, unloader);
+        redshiftJdbcTemplate.execute(sql);
     }
 
 }

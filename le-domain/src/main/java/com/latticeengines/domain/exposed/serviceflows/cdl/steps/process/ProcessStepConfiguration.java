@@ -2,9 +2,11 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.process;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
@@ -29,6 +31,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("owner_id")
     private long ownerId;
+
+    @JsonProperty("skip_entities")
+    private Set<BusinessEntity> skipEntities;
 
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
@@ -85,4 +90,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     public void setOwnerId(long ownerId) {
         this.ownerId = ownerId;
     }
+
+    public Set<BusinessEntity> getSkipEntities() {
+        return skipEntities;
+    }
+
+    public void setSkipEntities(Set<BusinessEntity> skipEntities) {
+        this.skipEntities = skipEntities;
+    }
+
 }

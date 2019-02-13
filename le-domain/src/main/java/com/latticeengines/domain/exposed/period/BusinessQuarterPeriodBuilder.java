@@ -25,11 +25,11 @@ public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBui
     @Override
     public int toPeriodId(String date) {
         LocalDate evalDate = LocalDate.parse(date);
-        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfBusinessYear(
+        Pair<LocalDate, LocalDate> busiYearDateRange = getDateRangeOfYear(
                 evalDate.getYear());
         int businessYear = getBusinessYear(evalDate, busiYearDateRange);
         if (businessYear != evalDate.getYear()) {
-            busiYearDateRange = getDateRangeOfBusinessYear(businessYear);
+            busiYearDateRange = getDateRangeOfYear(businessYear);
         }
 
         int weekOffsetInBusiYear = getWeekOffsetInBusiYear(evalDate, busiYearDateRange);
@@ -41,7 +41,7 @@ public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBui
     protected LocalDate getStartDate(int period) {
         int busiYear = getBusiYearFromQuarterPeriod(period);
         int quarterOffset = getQuarterOffsetInBusiYearFromQuarterPeriod(period);
-        return getDateRangeOfBusinessYear(busiYear).getLeft().plusDays(13 * 7 * quarterOffset);
+        return getDateRangeOfYear(busiYear).getLeft().plusDays(13 * 7 * quarterOffset);
     }
 
     @Override
@@ -51,11 +51,11 @@ public class BusinessQuarterPeriodBuilder extends BusinessCalendarBasedPeriodBui
 
         if (quarterOffset == 3) {
             // First day of next business year - 1
-            return getDateRangeOfBusinessYear(busiYear + 1).getLeft().minusDays(1);
+            return getDateRangeOfYear(busiYear + 1).getLeft().minusDays(1);
         } else {
             int weekOffsetOfNextQuarter = 13 * (quarterOffset + 1);
             // First day of next business quarter - 1
-            return getDateRangeOfBusinessYear(busiYear).getLeft()
+            return getDateRangeOfYear(busiYear).getLeft()
                     .plusDays(weekOffsetOfNextQuarter * 7).minusDays(1);
         }
     }

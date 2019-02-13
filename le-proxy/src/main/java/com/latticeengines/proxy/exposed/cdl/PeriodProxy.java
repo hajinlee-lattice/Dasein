@@ -58,4 +58,9 @@ public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return get("get evaluation date", url, String.class);
     }
 
+    public List<String> getDateRange(String customerSpace, int year) {
+        String url = constructUrl(URL_PREFIX + "/daterange/{year}", shortenCustomerSpace(customerSpace), year);
+        List<?> dateRange = get("get start date and end date", url, List.class);
+        return JsonUtils.convertList(dateRange, String.class);
+    }
 }

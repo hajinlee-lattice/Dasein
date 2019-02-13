@@ -29,7 +29,12 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ScoringSer
         return "PLS-11356";
     }
 
-    @Test(groups = "functional")
+    @Override
+    protected String getExecutionEngine() {
+        return "TEZ";
+    }
+
+    @Test(groups = "functional", enabled=false)
     public void testCalculationExpectedRevenuePercentile() {
         CalculateExpectedRevenuePercentileParameters parameters = prepareInputWithExpectedRevenue();
         executeDataFlow(parameters);

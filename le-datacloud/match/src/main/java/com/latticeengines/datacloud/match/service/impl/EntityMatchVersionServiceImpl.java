@@ -26,6 +26,7 @@ import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -59,6 +60,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
 
     @Override
     public int getCurrentVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
         initCache();
         Pair<String, EntityMatchEnvironment> cacheKey = Pair.of(tenant.getId(), environment);
         // try in memory cache first
@@ -77,6 +79,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
 
     @Override
     public int bumpVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
         initCache();
         PrimaryKey key = buildKey(environment, tenant);
         UpdateItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
@@ -96,6 +99,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
 
     @Override
     public void clearVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
         initCache();
         PrimaryKey key = buildKey(environment, tenant);
         dynamoItemService.delete(tableName, new DeleteItemSpec().withPrimaryKey(key));

@@ -1,18 +1,5 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,6 +13,18 @@ import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -97,7 +96,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("DataLicense")
     private String dataLicense;
     @JsonProperty("IsHiddenForRemodelingUI")
-    private Boolean isHiddenForRemodelingUI;
+    private boolean isHiddenForRemodelingUI;
 
     @JsonProperty("IsCoveredByOptionalRule")
     private boolean isCoveredByOptionalRule;
@@ -319,11 +318,11 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.dataLicense = dataLicense;
     }
 
-    public Boolean isHiddenForRemodelingUI() {
+    public boolean isHiddenForRemodelingUI() {
         return isHiddenForRemodelingUI;
     }
 
-    public void setIsHiddenForRemodelingUI(Boolean isHiddenForRemodelingUI) {
+    public void setIsHiddenForRemodelingUI(boolean isHiddenForRemodelingUI) {
         this.isHiddenForRemodelingUI = isHiddenForRemodelingUI;
     }
 

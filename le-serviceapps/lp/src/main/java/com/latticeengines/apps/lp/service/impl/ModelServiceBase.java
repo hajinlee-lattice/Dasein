@@ -71,6 +71,9 @@ public abstract class ModelServiceBase implements ModelService {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     public static ModelService getModelService(String modelTypeStr) {
         if (modelTypeStr == null) {
             return registry.get(ModelType.PYTHONMODEL);
@@ -100,12 +103,12 @@ public abstract class ModelServiceBase implements ModelService {
         String sourceCustomerRoot = customerBaseDir + sourceTenantId;
         String targetCustomerRoot = customerBaseDir + targetTenantId;
 
-        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder();
+        HdfsToS3PathBuilder builder = new HdfsToS3PathBuilder(useEmr);
         sourceCustomerRoot = builder.getS3PathWithGlob(yarnConfiguration, sourceCustomerRoot + "/", false, s3Bucket);
         sourceCustomerRoot = StringUtils.removeEnd(sourceCustomerRoot, "/");
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory")) {
             ModelingHdfsUtils.copyModelingDataDirectory(sourceCustomerRoot, targetCustomerRoot, eventTableName,
-                    cpEventTableName, yarnConfiguration, s3Bucket);
+                    cpEventTableName, yarnConfiguration, s3Bucket, useEmr);
         }
 
         String sourceModelRoot = sourceCustomerRoot + "/models/" + eventTableName + "/"
@@ -142,7 +145,7 @@ public abstract class ModelServiceBase implements ModelService {
             CustomerSpace customerSpace = CustomerSpace.parse(targetTenantId);
             try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy artifacts in module")) {
                 newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration, module.getArtifacts(),
-                        customerSpace, newModuleName, s3Bucket);
+                        customerSpace, newModuleName, s3Bucket, useEmr);
             }
             for (Artifact artifact : newArtifactsMap.values()) {
                 metadataProxy.createArtifact(customerSpace.toString(), newModuleName, artifact.getName(), artifact);
@@ -186,7 +189,7 @@ public abstract class ModelServiceBase implements ModelService {
             log.info(String.format("Copying hdfs data from %s to %s", sourceModelLocalRoot, targetModelRoot));
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
             log.info(String.format("Copying hdfs data from %s to %s", sourceModelLocalRoot, s3TargetModelRoot));
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, s3TargetModelRoot);
+            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, sourceModelLocalRoot, s3TargetModelRoot);
         }
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")) {
             FileUtils.deleteDirectory(new File(sourceModelLocalRoot));

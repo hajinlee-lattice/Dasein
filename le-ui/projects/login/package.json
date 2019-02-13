@@ -38,6 +38,9 @@
     "webpack-cli": "^3.2.1",
     "webpack-merge": "^4.1.4"
   },
+  "resolutions": {
+    "ajv": "6.8.1"
+  },
   "scripts": {
     "build": "webpack -p --progress --config=webpack.prod.js --mode production",
     "builddev": "webpack -p --progress --config=webpack.dev.js --mode development",

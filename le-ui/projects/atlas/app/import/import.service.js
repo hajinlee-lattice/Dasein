@@ -1,6 +1,6 @@
 
 angular.module('lp.import')
-.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils){
+.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils, StringUtility){
     var ImportWizardStore = this;
 
     this.init = function() {
@@ -710,6 +710,28 @@ angular.module('lp.import')
     this.setCalendar = function(calendar) {
         this.calendar = calendar;
     };
+
+    this.saveCalendar = function(calendar) {
+        var deferred = $q.defer();
+
+        ImportWizardService.saveCalendar(calendar).then(function(result) {
+            ImportWizardStore.setCalendar(result);
+            deferred.resolve(result);
+        });
+        
+        return deferred.promise;
+    }
+
+    this.getCalendarInfo = function(calendar) {
+        var info = {};
+        if(!calendar || calendar && !Object.keys(calendar).length) {
+            info.mode = 'NONE';
+        } else {
+            info.mode = (calendar.mode === 'STANDARD' ? 'STANDARD' : 'CUSTOM');
+        }
+        info.modeDisplayName = StringUtility.TitleCase(info.mode);
+        return info;
+    }
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils, ReduxService) {
 
@@ -808,8 +830,10 @@ angular.module('lp.import')
 	                    ResultErrors: data.Errors,
 	                    Result: data.Result
                     };
-                    let redux = $state.get('home.import').data.redux;
-                    redux.setInitialMapping(ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings));
+                    if($state.get('home.import') && $state.get('home.import').data && $state.get('home.import').data.redux){
+                        let redux = $state.get('home.import').data.redux;
+                        redux.setInitialMapping(ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings));
+                    }
                     // ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings);
 	            }
 
@@ -1060,5 +1084,34 @@ angular.module('lp.import')
 
             return deferred.promise;
 
+        }
+        this.getDateRange = function(year) {
+            var deferred = $q.defer();
+            $http({
+                method: 'GET',
+                url: '/pls/datacollection/periods/daterange/' + year,
+                headers: { 'Content-Type': 'application/json' }
+            }).then(
+                function onSuccess(response) {
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        result = {};
+                        deferred.resolve(result);
+                    }
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
+
+            return deferred.promise;
         }
     });

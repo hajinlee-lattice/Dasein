@@ -44,6 +44,9 @@ angular
         })
         .state('home.import.calendar', {
             url: '/calendar',
+            onEnter: function(ImportWizardStore){
+                //ImportWizardStore.clear();
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     return false;
@@ -59,6 +62,16 @@ angular
                     var deferred = $q.defer();
 
                     ImportWizardStore.getCalendar().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                DateRange: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer(),
+                        year = new Date().getFullYear();
+
+                    ImportWizardService.getDateRange(year).then(function(result){
                         deferred.resolve(result);
                     });
 

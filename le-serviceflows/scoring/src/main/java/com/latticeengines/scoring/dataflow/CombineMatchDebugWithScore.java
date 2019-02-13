@@ -19,11 +19,11 @@ public class CombineMatchDebugWithScore extends TypesafeDataFlowBuilder<CombineM
         Node inputTable = addSource(parameters.getInputTableName());
         Node scoreTable = addSource(parameters.getScoreResultsTableName());
 
-        String idColumn = null;
-        if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
-            idColumn = InterfaceName.Id.name();
-        } else {
+        String idColumn = InterfaceName.InternalId.name();
+        if (inputTable.getSourceAttribute(InterfaceName.InternalId.name()) != null) {
             idColumn = InterfaceName.InternalId.name();
+        } else if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
+            idColumn = InterfaceName.Id.name();
         }
         List<String> columnsToRetain = new ArrayList<>();
         if (!parameters.getColumnsToRetain().contains(idColumn)) {

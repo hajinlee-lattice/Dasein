@@ -105,10 +105,14 @@ public class TestFrameworkUtils {
 
     public static long getTestTimestamp(String tenantId) {
         for (String prefix: TENANTID_PREFIXES) {
-            Pattern pattern = Pattern.compile(prefix + "\\d+");
+            Pattern pattern = Pattern.compile(prefix + "\\d+$");
             Matcher matcher = pattern.matcher(tenantId);
             if (matcher.find()) {
-                return Long.valueOf(tenantId.replace(prefix, ""));
+                try {
+                    return Long.valueOf(tenantId.replace(prefix, ""));
+                } catch (NumberFormatException e) {
+                    return -1;
+                }
             }
         }
         return -1L;

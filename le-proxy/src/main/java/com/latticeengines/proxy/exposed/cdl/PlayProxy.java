@@ -1,19 +1,17 @@
 package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
@@ -32,6 +30,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     private static final String DASHBOARD_COUNT_URL = DASHBOARD_URL + "/count";
 
     private static final String PLAY_TYPE_URL_PREFIX = "/customerspaces/{customerSpace}/playtypes";
+
+    private static final String PLAY_GROUP_URL_PREFIX = "/customerspaces/{customerSpace}/playgroups";
 
     public PlayProxy() {
         super("cdl");
@@ -298,23 +298,56 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayType getPlayTypeById(String customerSpace, String playTypeId) {
-        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
-                playTypeId);
+        String url =
+                constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace), playTypeId);
         log.info("url is " + url);
         return get("get Play Type", url, PlayType.class);
     }
 
     public void updatePlayType(String customerSpace, String playTypeId, PlayType playType) {
-        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
-                playTypeId);
+        String url =
+                constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace), playTypeId);
         log.info("url is " + url);
         post("create new Play Types", url, playType, PlayType.class);
     }
 
     public void deletePlayTypeById(String customerSpace, String playTypeId) {
-        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
-                playTypeId);
+        String url =
+                constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace), playTypeId);
         log.info("url is " + url);
         delete("delete Play Type", url);
+    }
+
+    public List<PlayGroup> getPlayGroups(String customerSpace) {
+        String url = constructUrl(PLAY_GROUP_URL_PREFIX, shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
+        return getList("get all Play Groups", url, PlayGroup.class);
+    }
+
+    public PlayGroup createPlayGroup(String customerSpace, PlayGroup playGroup) {
+        String url = constructUrl(PLAY_GROUP_URL_PREFIX, shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
+        return post("create new Play Groups", url, playGroup, PlayGroup.class);
+    }
+
+    public PlayGroup getPlayGroupById(String customerSpace, String playGroupId) {
+        String url = constructUrl(PLAY_GROUP_URL_PREFIX + "/{playGroupId}", shortenCustomerSpace(customerSpace),
+                playGroupId);
+        log.info("url is " + url);
+        return get("get Play Group", url, PlayGroup.class);
+    }
+
+    public void updatePlayGroup(String customerSpace, String playGroupId, PlayGroup playGroup) {
+        String url = constructUrl(PLAY_GROUP_URL_PREFIX + "/{playGroupId}", shortenCustomerSpace(customerSpace),
+                playGroupId);
+        log.info("url is " + url);
+        post("create new Play Groups", url, playGroup, PlayGroup.class);
+    }
+
+    public void deletePlayGroupById(String customerSpace, String playGroupId) {
+        String url = constructUrl(PLAY_GROUP_URL_PREFIX + "/{playGroupId}", shortenCustomerSpace(customerSpace),
+                playGroupId);
+        log.info("url is " + url);
+        delete("delete Play Group", url);
     }
 }

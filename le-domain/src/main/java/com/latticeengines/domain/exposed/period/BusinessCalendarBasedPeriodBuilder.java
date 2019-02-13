@@ -29,17 +29,18 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
         this.startDate = getDefaultFirstDate();
     }
 
-    protected Pair<LocalDate, LocalDate> getDateRangeOfBusinessYear(int busiYear) {
+    @Override
+    public Pair<LocalDate, LocalDate> getDateRangeOfYear(int businessYear) {
         Pair<LocalDate, LocalDate> dateRange;
 
         switch (calendar.getMode()) {
             case STARTING_DATE:
                 dateRange = BusinessCalendarUtils
-                        .parseDateRangeFromStartDate(calendar.getStartingDate(), busiYear);
+                        .parseDateRangeFromStartDate(calendar.getStartingDate(), businessYear);
                 break;
             case STARTING_DAY:
                 dateRange = BusinessCalendarUtils
-                        .parseDateRangeFromStartDay(calendar.getStartingDay(), busiYear);
+                        .parseDateRangeFromStartDay(calendar.getStartingDay(), businessYear);
                 break;
             case STANDARD:
             default:
@@ -114,7 +115,7 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
     }
 
     private LocalDate getDefaultFirstDate() {
-        return getDateRangeOfBusinessYear(startYear).getLeft();
+        return getDateRangeOfYear(startYear).getLeft();
     }
 
 }

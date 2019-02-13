@@ -1,10 +1,11 @@
 angular.module('lp.segments', [
     'common.modal',
-    'lp.tile.edit'
+    'lp.tile.edit',
+    'le.connectors'
 ])
 .controller('SegmentationListController', function ($q, $scope, $rootScope, $element, $state, $stateParams,
     SegmentsList, Enrichments, Cube, Modal, Banner, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
-    DataCloudStore, LookupResponse, LookupStore, PercentStore, QueryTreeDateAttributeStore, AttrConfigStore
+    DataCloudStore, LookupResponse, LookupStore, PercentStore, QueryTreeDateAttributeStore, FeatureFlagService
 ) {
     var vm = this;
 
@@ -246,7 +247,7 @@ angular.module('lp.segments', [
         Modal.warning({
             name: 'deleteSegmentWarning',
             title: "Delete Segment",
-            message: "Are you sure you want to delete this segment: " + segment.name + "?",
+            message: `Are you sure you want to delete this segment: <strong>${segment.display_name}</strong>?`,
             confirmtext: "Delete Segment"
         }, vm.callbackModalWindow);
     };
@@ -341,6 +342,7 @@ angular.module('lp.segments', [
 
         return attrs;
     };
+
 
     function createOrUpdateSegment(segment) {
         var deferred = $q.defer();

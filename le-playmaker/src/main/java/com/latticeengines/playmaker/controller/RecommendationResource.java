@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping(value = "/playmaker")
 public class RecommendationResource {
 
-    Logger log = Logger.getLogger(this.getClass());
+    Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Inject
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
@@ -184,7 +184,9 @@ public class RecommendationResource {
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        log.info("getContact API: " + request.getPathInfo() + request.getQueryString() + "\n");
+        log.info("getContact API: {}",request.getPathInfo());
+        log.debug("getContact API: {}", request.getQueryString());
+        
         return playmakerRecommendationMgr.getContacts(tenantName, lookupSource, start, offset, maximum, contactIds,
                 accountIds, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));

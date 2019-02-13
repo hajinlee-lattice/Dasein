@@ -1,9 +1,11 @@
 package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -15,11 +17,21 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.latticeengines.aws.sns.SNSService;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageAttribute;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
+import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
+import com.latticeengines.proxy.exposed.cdl.DataIntegrationMonitoringProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.cdl.ExternalSystemAuthenticationProxy;
 
 @Component("playLaunchExportFilesToS3Step")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -33,6 +45,18 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     @Inject
     private SNSService snsService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private ExternalSystemAuthenticationProxy externalSystemAuthenticationProxy;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private DataIntegrationMonitoringProxy dataIntegrationMonitoringProxy;
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
@@ -55,45 +79,60 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     }
 
-    private void publishToSnsTopic() {
+    private void createStatusMonitor() {
         PlayLaunchExportFilesToS3Configuration config = getConfiguration();
+        CustomerSpace customerSpace = config.getCustomerSpace();
         String playLaunchId = config.getPlayLaunchId();
         String externalSystemId = config.getDestinationOrgId();
-        s3ExportFilePaths.stream().forEach(exportPath -> {
-            Map<String, MessageAttributeValue> messageAttributes = new HashMap<String, MessageAttributeValue>();
-            // TODO: Replace with destination org type
-            messageAttributes.put(ExternalIntegrationMessageAttribute.TARGET_SYSTEMS.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue("Marketo"));
-            messageAttributes.put(ExternalIntegrationMessageAttribute.OPERATION.getName(),
-                    new MessageAttributeValue().withDataType(STRING)
-                            .withStringValue(ExternalIntegrationWorkflowType.EXPORT.toString()));
-            messageAttributes.put(ExternalIntegrationMessageAttribute.TENANT_ID.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue(tenantId));
-            messageAttributes.put(ExternalIntegrationMessageAttribute.ENTITY_NAME.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue(PlayLaunch.class.getSimpleName()));
-            messageAttributes.put(ExternalIntegrationMessageAttribute.ENTITY_ID.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue(playLaunchId));
-            messageAttributes.put(ExternalIntegrationMessageAttribute.EXTERNAL_SYSTEM_ID.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue(externalSystemId));
-            messageAttributes.put(ExternalIntegrationMessageAttribute.SOURCE_FILE.getName(),
-                    new MessageAttributeValue().withDataType(STRING).withStringValue(exportPath));
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
 
-            try {
-                log.info(String.format("Publishing play launch id %s to destination org id %s ", playLaunchId,
-                        externalSystemId));
-                snsService.publishToTopic("ExportDataTopic", exportPath.substring(exportPath.indexOf("dropfolder")),
-                        messageAttributes);
-            } catch (Exception e) {
-                log.info(e.getMessage());
-            }
+        s3ExportFilePaths.stream().forEach(exportPath -> {
+            DataIntegrationStatusMonitorMessage message = new DataIntegrationStatusMonitorMessage();
+            String workflowRequestId = UUID.randomUUID().toString();
+            message.setWorkflowRequestId(workflowRequestId);
+            message.setTenantId(tenant.getName());
+            message.setOperation(ExternalIntegrationWorkflowType.EXPORT.toString());
+            message.setEntityId(playLaunchId);
+            message.setEntityName(PlayLaunch.class.getSimpleName());
+            message.setExternalSystemId(externalSystemId);
+            message.setSourceFile(exportPath.substring(exportPath.indexOf("dropfolder")));
+            message.setEventType(DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
+            message.setEventTime(new Date());
+            message.setMessageType(MessageType.EVENT.toString());
+            message.setMessage(
+                    String.format("Workflow Request Id has been launched to %s", workflowRequestId, externalSystemId));
+            dataIntegrationMonitoringProxy.createOrUpdateStatus(message);
+            log.info(JsonUtils.serialize(message));
+            publishToSnsTopic(customerSpace.toString(), workflowRequestId, exportPath);
         });
+    }
+
+    private void publishToSnsTopic(String customerSpace, String workflowRequestId, String exportPath) {
+        Map<String, MessageAttributeValue> messageAttributes = new HashMap<String, MessageAttributeValue>();
+        // TODO: Replace with destination org type
+        String dropfolder = exportPath.substring(exportPath.indexOf("dropfolder"));
+        messageAttributes.put(ExternalIntegrationMessageAttribute.WORKFLOW_REQ_ID.getName(),
+                new MessageAttributeValue().withDataType(STRING).withStringValue(workflowRequestId));
+        messageAttributes.put(ExternalIntegrationMessageAttribute.TARGET_SYSTEMS.getName(),
+                new MessageAttributeValue().withDataType(STRING).withStringValue("Marketo"));
+        messageAttributes.put(ExternalIntegrationMessageAttribute.OPERATION.getName(), new MessageAttributeValue()
+                .withDataType(STRING).withStringValue(ExternalIntegrationWorkflowType.EXPORT.toString()));
+        messageAttributes.put(ExternalIntegrationMessageAttribute.SOURCE_FILE.getName(), new MessageAttributeValue()
+                .withDataType(STRING).withStringValue(dropfolder));
+
+        try {
+            log.info(String.format("Publishing play launch with workflow request id %s ", workflowRequestId));
+            snsService.publishToTopic("ExportDataTopic", dropfolder, messageAttributes);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
     }
 
 
     @Override
     public void execute() {
         super.execute();
-        publishToSnsTopic();
+        createStatusMonitor();
     }
 
 }

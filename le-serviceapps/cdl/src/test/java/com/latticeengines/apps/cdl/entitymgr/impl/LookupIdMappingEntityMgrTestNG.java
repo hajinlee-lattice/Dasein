@@ -1,7 +1,14 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -15,6 +22,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
@@ -24,6 +32,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     private LookupIdMap lookupIdMap;
     private String configId;
+    private String configIdWithAuth;
     private String orgId = "ABC_s";
     private String orgName = "n1234_1";
     private String accountId = "someAccId";
@@ -153,6 +162,96 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     public void testDelete() {
         lookupIdMappingEntityMgr.deleteLookupIdMap(configId);
         Assert.assertNull(lookupIdMappingEntityMgr.getLookupIdMap(configId));
+    }
+
+    @Test(groups = "functional")
+    public void testCreateWithAuthentication() {
+        LookupIdMap lookupIdMapWithAuth = new LookupIdMap();
+        lookupIdMapWithAuth.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdMapWithAuth.setExternalSystemName(CDLExternalSystemName.Marketo);
+        lookupIdMapWithAuth.setOrgId("Marketo_AuthTest");
+        lookupIdMapWithAuth.setOrgName("Marketo_AuthTest");
+
+        ExternalSystemAuthentication externalAuth = new ExternalSystemAuthentication();
+        externalAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
+        externalAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+        lookupIdMapWithAuth.setExternalAuthentication(externalAuth);
+
+        LookupIdMap lookupIdWithAuthCreated = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMapWithAuth);
+        assertNotNull(lookupIdWithAuthCreated);
+        assertNotNull(lookupIdWithAuthCreated.getId());
+        configIdWithAuth = lookupIdWithAuthCreated.getId();
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testCreateWithAuthentication"})
+    public void testFindWithAuthentication() {
+        LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        validateLookupIdWithAuth(lookupIdWithAuth);
+
+        LookupIdMap lookupIdAuthByOrgId = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdWithAuth.getOrgId(),
+                lookupIdWithAuth.getExternalSystemType());
+        validateLookupIdWithAuth(lookupIdAuthByOrgId);
+        assertEquals(lookupIdWithAuth.getExternalAuthentication().getTrayAuthenticationId(),
+                lookupIdAuthByOrgId.getExternalAuthentication().getTrayAuthenticationId());
+    }
+
+    private void validateLookupIdWithAuth(LookupIdMap lookupIdWithAuth) {
+        assertNotNull(lookupIdWithAuth);
+        assertNotNull(lookupIdWithAuth.getExternalAuthentication());
+        ExternalSystemAuthentication externalAuthFromDB = lookupIdWithAuth.getExternalAuthentication();
+        assertNotNull(externalAuthFromDB.getId());
+        assertNotNull(externalAuthFromDB.getTrayAuthenticationId());
+        assertNotNull(externalAuthFromDB.getSolutionInstanceId());
+        assertNull(externalAuthFromDB.getTrayWorkflowEnabled());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testCreateWithAuthentication"})
+    public void testUpdateWithAuthentication() {
+        LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        assertNotNull(lookupIdWithAuth);
+        assertNotNull(lookupIdWithAuth.getExternalAuthentication());
+        ExternalSystemAuthentication prevExtAuth = lookupIdWithAuth.getExternalAuthentication();
+        ExternalSystemAuthentication updatedExtAuth = new ExternalSystemAuthentication();
+        updatedExtAuth.setId(lookupIdWithAuth.getExternalAuthentication().getId());
+        updatedExtAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
+        updatedExtAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+        updatedExtAuth.setTrayWorkflowEnabled(true);
+        lookupIdWithAuth.setExternalAuthentication(updatedExtAuth);
+
+        lookupIdMappingEntityMgr.updateLookupIdMap(lookupIdWithAuth.getId(), lookupIdWithAuth);
+
+        LookupIdMap lookupIdWithAuthFromDB = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        assertNotNull(lookupIdWithAuthFromDB.getId());
+        assertNotNull(updatedExtAuth);
+        assertNotNull(updatedExtAuth.getId());
+        assertNotNull(updatedExtAuth.getTrayAuthenticationId());
+        assertNotNull(updatedExtAuth.getSolutionInstanceId());
+        assertNotNull(updatedExtAuth.getTrayWorkflowEnabled());
+        assertNotEquals(prevExtAuth.getTrayAuthenticationId(), updatedExtAuth.getTrayAuthenticationId());
+        assertNotEquals(prevExtAuth.getSolutionInstanceId(), updatedExtAuth.getSolutionInstanceId());
+        assertTrue(updatedExtAuth.getTrayWorkflowEnabled());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testUpdateWithAuthentication"})
+    public void testUpdateWithNull() {
+        LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        assertNotNull(lookupIdWithAuth);
+        assertNotNull(lookupIdWithAuth.getExternalAuthentication());
+        ExternalSystemAuthentication updatedExtAuth = new ExternalSystemAuthentication();
+        updatedExtAuth.setId(lookupIdWithAuth.getExternalAuthentication().getId());
+        updatedExtAuth.setTrayAuthenticationId(null);
+        updatedExtAuth.setSolutionInstanceId(null);
+        lookupIdWithAuth.setExternalAuthentication(updatedExtAuth);
+
+        lookupIdMappingEntityMgr.updateLookupIdMap(lookupIdWithAuth.getId(), lookupIdWithAuth);
+        LookupIdMap lookupIdWithAuthFromDB = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        updatedExtAuth = lookupIdWithAuthFromDB.getExternalAuthentication();
+        assertNotNull(lookupIdWithAuthFromDB.getId());
+        assertNotNull(updatedExtAuth);
+        assertNotNull(updatedExtAuth.getId());
+        assertNull(updatedExtAuth.getTrayAuthenticationId());
+        assertNull(updatedExtAuth.getSolutionInstanceId());
+        assertNull(updatedExtAuth.getTrayWorkflowEnabled());
     }
 
 }

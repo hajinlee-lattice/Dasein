@@ -74,7 +74,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
         String targetPath = PathBuilder
                 .buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace))
-                .append(orphanRecordsType.getOrphanType()).toString();
+                .append(NamingUtils.timestamp(orphanRecordsType.getOrphanType())).toString();
         log.info("Use targetPath=" + targetPath);
 
         DataCollectionArtifact artifact = new DataCollectionArtifact();
@@ -99,14 +99,29 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, orphanRecordsType.getOrphanType());
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 
-        String transactionTableName = getTable(TableRoleInCollection.ConsolidatedRawTransaction,
-                request.getArtifactVersion()).getName();
-        String accountTableName = getTable(TableRoleInCollection.ConsolidatedAccount,
-                request.getArtifactVersion()).getName();
-        String contactTableName = getTable(TableRoleInCollection.ConsolidatedContact,
-                request.getArtifactVersion()).getName();
-        String productTableName = getTable(TableRoleInCollection.ConsolidatedProduct,
-                request.getArtifactVersion()).getName();
+        String transactionTableName = getTableName(TableRoleInCollection.ConsolidatedRawTransaction,
+                request.getArtifactVersion());
+        String accountTableName = getTableName(TableRoleInCollection.ConsolidatedAccount,
+                request.getArtifactVersion());
+        String contactTableName = getTableName(TableRoleInCollection.ConsolidatedContact,
+                request.getArtifactVersion());
+        String productTableName = getTableName(TableRoleInCollection.ConsolidatedProduct,
+                request.getArtifactVersion());
+
+        if (orphanRecordsType == OrphanRecordsType.TRANSACTION &&
+                !validateTableNames(new String[] { transactionTableName, accountTableName, productTableName })) {
+            return null;
+        }
+
+        if (orphanRecordsType == OrphanRecordsType.CONTACT &&
+                !validateTableNames(new String[] { contactTableName, accountTableName })) {
+            return null;
+        }
+
+        if (orphanRecordsType == OrphanRecordsType.UNMATCHED_ACCOUNT &&
+                !validateTableNames(new String[] { accountTableName })) {
+            return null;
+        }
 
         OrphanRecordsExportWorkflowConfiguration wfConfig = new OrphanRecordsExportWorkflowConfiguration.Builder()
                 .customer(getCustomerSpace()) //
@@ -136,13 +151,12 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         return workflowJobService.submit(wfConfig, pidWrapper.getPid());
     }
 
-    private Table getTable(TableRoleInCollection tableRoleInCollection, DataCollection.Version version) {
+    private String getTableName(TableRoleInCollection tableRoleInCollection, DataCollection.Version version) {
         Table table = dataCollectionProxy.getTable(getCustomerSpace().toString(), tableRoleInCollection, version);
         if (table == null) {
-            throw new RuntimeException(
-                    String.format("Cannot get table %s from version %s.", tableRoleInCollection, version));
+            return null;
         }
-        return table;
+        return table.getName();
     }
 
     private List<Attribute> getImportAttributes(String source, String dataFeedType, String entity) {
@@ -154,5 +168,14 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         }
 
         return task.getImportTemplate().getAttributes();
+    }
+
+    private boolean validateTableNames(String[] tableNames) {
+        for (String tableName : tableNames) {
+            if (StringUtils.isBlank(tableName)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

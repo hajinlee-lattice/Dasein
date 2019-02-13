@@ -1,4 +1,4 @@
-export default function($stateProvider, $urlRouterProvider, $locationProvider) {
+export default function ($stateProvider, $urlRouterProvider, $locationProvider) {
     'ngInject';
 
     $locationProvider.html5Mode(true);
@@ -7,20 +7,20 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
     $stateProvider
         .state('home', {
             url: '/tenant/:tenantName',
-            onEnter: function(SidebarStore) {
+            onEnter: function (SidebarStore) {
                 SidebarStore.set(null);
             },
             params: {
                 tenantName: { dynamic: true, value: '' }
             },
             resolve: {
-                ClientSession: function(BrowserStorageUtility) {
+                ClientSession: function (BrowserStorageUtility) {
                     return BrowserStorageUtility.getClientSession();
                 },
-                WidgetConfig: function($q, ConfigService) {
+                WidgetConfig: function ($q, ConfigService) {
                     var deferred = $q.defer();
 
-                    ConfigService.GetWidgetConfigDocument().then(function(
+                    ConfigService.GetWidgetConfigDocument().then(function (
                         result
                     ) {
                         deferred.resolve();
@@ -28,16 +28,16 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                FeatureFlags: function($q, FeatureFlagService) {
+                FeatureFlags: function ($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
-                    FeatureFlagService.GetAllFlags().then(function() {
+                    FeatureFlagService.GetAllFlags().then(function () {
                         deferred.resolve();
                     });
 
                     return deferred.promise;
                 },
-                ResourceStrings: function(
+                ResourceStrings: function (
                     $q,
                     ResourceStringsService,
                     ClientSession
@@ -46,17 +46,17 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     ResourceStringsService.GetInternalResourceStringsForLocale(
                         ClientSession.Locale
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
                 // placeholder for when this is set to /ulysses in insights iframe
-                ApiHost: function() {
+                ApiHost: function () {
                     return '/pls'; // don't remove this. -Lazarus
                 },
-                CollectionStatus: function(
+                CollectionStatus: function (
                     $q,
                     FeatureFlags,
                     FeatureFlagService,
@@ -66,7 +66,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         flags = FeatureFlagService.Flags();
 
                     if (FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)) {
-                        QueryStore.getCollectionStatus().then(function(result) {
+                        QueryStore.getCollectionStatus().then(function (result) {
                             deferred.resolve(result);
                         });
 
@@ -96,7 +96,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
         })
         .state('home.models', {
             url: '/models',
-            onEnter: function($state, FilterService) {
+            onEnter: function ($state, FilterService) {
                 if (['home.models'].indexOf($state.current.name) < 0) {
                     FilterService.clear();
                 }
@@ -106,10 +106,10 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageIcon: 'ico-model'
             },
             resolve: {
-                ModelList: function($q, ModelStore) {
+                ModelList: function ($q, ModelStore) {
                     var deferred = $q.defer();
 
-                    ModelStore.getModels(true).then(function(result) {
+                    ModelStore.getModels(true).then(function (result) {
                         deferred.resolve(result);
                     });
 
@@ -153,7 +153,8 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 modelId: '',
                 rating_id: '',
                 viewingIteration: false,
-                toggleRatings: false
+                toggleRatings: false,
+                newConfiguration: false
             },
             onEnter: [
                 '$stateParams',
@@ -161,7 +162,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 'Model',
                 'RatingEngine',
                 'BackStore',
-                function($stateParams, IsCdl, Model, RatingEngine, BackStore) {
+                function ($stateParams, IsCdl, Model, RatingEngine, BackStore) {
                     if ($stateParams.viewingIteration) {
                         var backState = 'home.ratingsengine.dashboard',
                             backParams = {
@@ -188,14 +189,14 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 }
             ],
             resolve: {
-                IsCdl: function(FeatureFlagService) {
+                IsCdl: function (FeatureFlagService) {
                     var flags = FeatureFlagService.Flags();
                     var cdl = FeatureFlagService.FlagIsEnabled(
                         flags.ENABLE_CDL
                     );
                     return cdl;
                 },
-                RatingEngine: function(
+                RatingEngine: function (
                     $q,
                     $stateParams,
                     RatingsEngineStore,
@@ -205,7 +206,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         var deferred = $q.defer(),
                             id = $stateParams.rating_id;
 
-                        RatingsEngineStore.getRating(id).then(function(engine) {
+                        RatingsEngineStore.getRating(id).then(function (engine) {
                             deferred.resolve(engine);
                         });
 
@@ -214,23 +215,23 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         return null;
                     }
                 },
-                Model: function($q, $stateParams, ModelStore) {
+                Model: function ($q, $stateParams, ModelStore) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
 
-                    ModelStore.getModel(id).then(function(result) {
+                    ModelStore.getModel(id).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                IsRatingEngine: function(Model) {
+                IsRatingEngine: function (Model) {
                     return Model.ModelDetails.Name.substring(0, 2) == 'ai';
                 },
-                IsPmml: function(Model) {
+                IsPmml: function (Model) {
                     return Model.ModelDetails.ModelType == 'PmmlModel';
                 },
-                HasRatingsAvailable: function(
+                HasRatingsAvailable: function (
                     $q,
                     $stateParams,
                     ModelRatingsService
@@ -238,7 +239,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
 
-                    ModelRatingsService.HistoricalABCDBuckets(id).then(function(
+                    ModelRatingsService.HistoricalABCDBuckets(id).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -276,108 +277,101 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 }
             }
         })
-        .state('home.model.attributes', {
-            url: '/attributes',
+        .state('home.model.datacloud', {
+            url: '/datacloud/:aiModel',
             params: {
+                section: 're.model_iteration',
                 pageIcon: 'ico-attributes',
                 pageTitle: 'View Iteration',
-                gotoNonemptyCategory: true
+                gotoNonemptyCategory: true,
+                viewingIteration: true
             },
             resolve: {
-                Enrichments: [
-                    '$q',
-                    'DataCloudStore',
-                    'ApiHost',
-                    function($q, DataCloudStore, ApiHost) {
-                        var deferred = $q.defer();
+                ReviewData: function (
+                    $q,
+                    $stateParams,
+                    Model,
+                    ModelReviewStore,
+                    DataCloudStore
+                ) {
+                    var deferred = $q.defer(),
+                        modelId = $stateParams.modelId;
 
-                        DataCloudStore.setHost(ApiHost);
+                    ModelReviewStore.GetReviewData(
+                        modelId
+                    ).then(function (result) {
+                        console.log('### ReviewData result', result);
+                        var warnings = {};
+                        result.forEach(item => {
+                            warnings[item.name] = item;
+                        });
+                        DataCloudStore.setWarnings(warnings);
+                        deferred.resolve(result);
+                    });
 
-                        DataCloudStore.getAllEnrichmentsConcurrently().then(
-                            function(result) {
-                                deferred.resolve(result);
+                    return deferred.promise;
+                },
+                Enrichments: function ($q, $stateParams, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer(),
+                        ratingId = $stateParams['rating_id'],
+                        aiModel = $stateParams['aiModel'],
+                        opts = {
+                            url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata`
+                        };
+
+                    // clear DataCloudStore (tried this in onEnter, didn't work right)                   
+                    DataCloudStore.clear();
+                    DataCloudStore.ratingIterationFilter = 'all';
+
+                    DataCloudStore.getAllEnrichmentsConcurrently(opts, true).then((result) => {
+                        result.forEach((item) => {
+                            if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
+                                item.HasWarnings = true;
                             }
+                        })
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                EnrichmentTopAttributes: function ($q, $stateParams, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer(),
+                        ratingId = $stateParams['rating_id'],
+                        aiModel = $stateParams['aiModel'],
+                        opts = {
+                            url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/topn`
+                        };
+
+                    DataCloudStore.getAllTopAttributes(opts, true).then((result) => {
+                        deferred.resolve(
+                            result['Categories'] || result || {}
                         );
+                    });
 
-                        return deferred.promise;
-                    }
-                ],
-                EnrichmentTopAttributes: [
-                    '$q',
-                    'DataCloudStore',
-                    'ApiHost',
-                    function($q, DataCloudStore, ApiHost) {
-                        var deferred = $q.defer();
+                    return deferred.promise;
+                },
+                EnrichmentPremiumSelectMaximum: function ($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
 
-                        DataCloudStore.setHost(ApiHost);
+                    DataCloudStore.getPremiumSelectMaximum().then((result) => {
+                        deferred.resolve(result);
+                    });
 
-                        DataCloudStore.getAllTopAttributes().then(function(
-                            result
-                        ) {
-                            deferred.resolve(
-                                result['Categories'] || result || {}
-                            );
-                        });
+                    return deferred.promise;
+                },
+                EnrichmentSelectMaximum: function ($q, DataCloudStore) {
+                    var deferred = $q.defer();
 
-                        return deferred.promise;
-                    }
-                ],
-                EnrichmentPremiumSelectMaximum: [
-                    '$q',
-                    'DataCloudStore',
-                    'ApiHost',
-                    function($q, DataCloudStore, ApiHost) {
-                        var deferred = $q.defer();
+                    DataCloudStore.getSelectMaximum().then((result) => {
+                        deferred.resolve(result);
+                    });
 
-                        DataCloudStore.setHost(ApiHost);
-
-                        DataCloudStore.getPremiumSelectMaximum().then(function(
-                            result
-                        ) {
-                            deferred.resolve(result);
-                        });
-
-                        return deferred.promise;
-                    }
-                ],
-                EnrichmentSelectMaximum: [
-                    '$q',
-                    'DataCloudStore',
-                    function($q, DataCloudStore) {
-                        var deferred = $q.defer();
-
-                        DataCloudStore.getSelectMaximum().then(function(
-                            result
-                        ) {
-                            deferred.resolve(result);
-                        });
-
-                        return deferred.promise;
-                    }
-                ],
-                // below resolves are needed. Do not removed
-                // override at child state when needed
-                LookupResponse: [
-                    function() {
-                        return { attributes: null };
-                    }
-                ],
-                QueryRestriction: [
-                    function() {
-                        return null;
-                    }
-                ],
-                CurrentConfiguration: [
-                    function() {
-                        return null;
-                    }
-                ],
-                // end duplicates
-                RatingsEngineModels: [
-                    function() {
-                        return null;
-                    }
-                ]
+                    return deferred.promise;
+                },
+                LookupResponse: () => { return { attributes: null } },
+                QueryRestriction: () => { return null },
+                CurrentConfiguration: () => { return null },
+                RatingsEngineModels: () => { return null }
             },
             views: {
                 'main@': {
@@ -394,31 +388,31 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 }
             }
         })
-        // .state('home.model.attributes', {
-        //     url: '/attributes',
-        //     params: {
-        //         pageIcon: 'ico-attributes',
-        //         pageTitle: 'Attributes'
-        //     },
-        //     views: {
-        //         'main@': {
-        //             controller: function(
-        //                 $scope,
-        //                 $compile,
-        //                 ModelStore
-        //             ) {
-        //                 $scope.data = ModelStore.data;
-        //                 $compile(
-        //                     $('#modelDetailContainer').html(
-        //                         '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
-        //                     )
-        //                 )($scope);
-        //             },
-        //             template:
-        //                 '<div id="modelDetailContainer" class="model-details"></div>'
-        //         }
-        //     }
-        // })
+        .state('home.model.attributes', {
+            url: '/attributes',
+            params: {
+                pageIcon: 'ico-attributes',
+                pageTitle: 'Attributes'
+            },
+            views: {
+                'main@': {
+                    controller: function (
+                        $scope,
+                        $compile,
+                        ModelStore
+                    ) {
+                        $scope.data = ModelStore.data;
+                        $compile(
+                            $('#modelDetailContainer').html(
+                                '<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'
+                            )
+                        )($scope);
+                    },
+                    template:
+                        '<div id="modelDetailContainer" class="model-details"></div>'
+                }
+            }
+        })
         .state('home.model.performance', {
             url: '/performance',
             params: {
@@ -427,7 +421,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'main@': {
-                    controller: function($scope, $compile, ModelStore) {
+                    controller: function ($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile(
                             $('#modelDetailContainer').html(
@@ -444,7 +438,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
         .state('home.model.ratings', {
             url: '/ratings',
             resolve: {
-                CurrentConfiguration: function(
+                CurrentConfiguration: function (
                     $q,
                     $stateParams,
                     ModelRatingsService
@@ -453,14 +447,14 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         id = $stateParams.modelId;
 
                     ModelRatingsService.MostRecentConfiguration(id).then(
-                        function(result) {
+                        function (result) {
                             deferred.resolve(result);
                         }
                     );
 
                     return deferred.promise;
                 },
-                RatingsSummary: function(
+                RatingsSummary: function (
                     $q,
                     $stateParams,
                     ModelRatingsService
@@ -469,14 +463,14 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         id = $stateParams.modelId;
 
                     ModelRatingsService.GetBucketedScoresSummary(id).then(
-                        function(result) {
+                        function (result) {
                             deferred.resolve(result);
                         }
                     );
 
                     return deferred.promise;
                 },
-                HistoricalABCDBuckets: function(
+                HistoricalABCDBuckets: function (
                     $q,
                     $stateParams,
                     ModelRatingsService
@@ -484,7 +478,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
 
-                    ModelRatingsService.HistoricalABCDBuckets(id).then(function(
+                    ModelRatingsService.HistoricalABCDBuckets(id).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -509,7 +503,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
         .state('home.model.ratings.history', {
             url: '/history',
             resolve: {
-                ScoringHistory: function(
+                ScoringHistory: function (
                     $q,
                     $stateParams,
                     ModelRatingsService
@@ -517,7 +511,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     var deferred = $q.defer(),
                         id = $stateParams.rating_id;
 
-                    ModelRatingsService.ScoringHistory(id).then(function(
+                    ModelRatingsService.ScoringHistory(id).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -541,10 +535,10 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
         .state('home.model.ratings-demo', {
             url: '/ratings-demo',
             resolve: {
-                FeatureFlags: function($q, FeatureFlagService) {
+                FeatureFlags: function ($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
-                    FeatureFlagService.GetAllFlags().then(function(result) {
+                    FeatureFlagService.GetAllFlags().then(function (result) {
                         deferred.resolve(result);
                     });
 
@@ -557,7 +551,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'main@': {
-                    controller: function(FeatureFlags) {
+                    controller: function (FeatureFlags) {
                         this.cdlIsEnabled = FeatureFlags.EnableCdl; //vm.cdlIsEnabled
                     },
                     controllerAs: 'vm',
@@ -573,7 +567,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'main@': {
-                    controller: function($scope, $compile, ModelStore) {
+                    controller: function ($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile(
                             $('#modelDetailContainer').html(
@@ -594,7 +588,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'main@': {
-                    controller: function($scope, $compile, ModelStore, IsPmml) {
+                    controller: function ($scope, $compile, ModelStore, IsPmml) {
                         $scope.data = ModelStore.data;
                         $scope.IsPmml = IsPmml;
                     },
@@ -610,7 +604,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: ''
             },
             resolve: {
-                ModelAlertsTmp: function($q, Model, ModelService) {
+                ModelAlertsTmp: function ($q, Model, ModelService) {
                     var deferred = $q.defer(),
                         data = Model,
                         id = data.ModelDetails.ModelID,
@@ -618,7 +612,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     var suppressedCategories = data.SuppressedCategories;
 
-                    ModelService.GetModelAlertsByModelId(id).then(function(
+                    ModelService.GetModelAlertsByModelId(id).then(function (
                         result
                     ) {
                         if (result !== null && result.success === true) {
@@ -640,7 +634,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'main@': {
-                    controller: function($scope, Model, ModelStore) {
+                    controller: function ($scope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
                     },
                     templateUrl:
@@ -655,7 +649,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: ''
             },
             resolve: {
-                ReviewData: function(
+                ReviewData: function (
                     $q,
                     $stateParams,
                     $http,
@@ -670,7 +664,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     ModelReviewStore.GetReviewData(
                         modelId,
                         eventTableName
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
@@ -719,11 +713,11 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Remodel'
             },
             resolve: {
-                DataRules: function($q, $stateParams, $http, RemodelStore) {
+                DataRules: function ($q, $stateParams, $http, RemodelStore) {
                     var deferred = $q.defer(),
                         modelId = $stateParams.modelId;
 
-                    RemodelStore.GetModelReviewDataRules(modelId).then(function(
+                    RemodelStore.GetModelReviewDataRules(modelId).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -731,12 +725,12 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                Attributes: function($q, $stateParams, RemodelStore) {
+                Attributes: function ($q, $stateParams, RemodelStore) {
                     var deferred = $q.defer(),
                         modelId = $stateParams.modelId;
 
                     RemodelStore.GetModelReviewAttributes(modelId).then(
-                        function(result) {
+                        function (result) {
                             deferred.resolve(result);
                         }
                     );
@@ -758,11 +752,11 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
         .state('home.model.notes', {
             url: '/notes',
             resolve: {
-                Notes: function($q, $stateParams, NotesService) {
+                Notes: function ($q, $stateParams, NotesService) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
 
-                    NotesService.GetNotes(id).then(function(result) {
+                    NotesService.GetNotes(id).then(function (result) {
                         deferred.resolve(result);
                     });
 
@@ -788,7 +782,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             url: '/marketosettings',
             redirectto: 'home.marketosettings.apikey',
             resolve: {
-                urls: function($q, $http) {
+                urls: function ($q, $http) {
                     var deferred = $q.defer();
 
                     $http({
@@ -821,19 +815,19 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                FeatureFlags: function($q, FeatureFlagService) {
+                FeatureFlags: function ($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
-                    FeatureFlagService.GetAllFlags().then(function() {
+                    FeatureFlagService.GetAllFlags().then(function () {
                         deferred.resolve();
                     });
 
                     return deferred.promise;
                 },
-                MarketoCredentials: function($q, MarketoService) {
+                MarketoCredentials: function ($q, MarketoService) {
                     var deferred = $q.defer();
 
-                    MarketoService.GetMarketoCredentials().then(function(
+                    MarketoService.GetMarketoCredentials().then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -844,7 +838,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'navigation@home': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $state,
                         FeatureFlagService,
@@ -853,7 +847,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     ) {
                         DataCloudStore.setHost(ApiHost);
 
-                        FeatureFlagService.GetAllFlags().then(function() {
+                        FeatureFlagService.GetAllFlags().then(function () {
                             var flags = FeatureFlagService.Flags();
                             $scope.latticeIsEnabled = FeatureFlagService.FlagIsEnabled(
                                 flags.LATTICE_MARKETO_PAGE
@@ -884,13 +878,13 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles > Create New Marketo Profile'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_MARKETO_APIKEY';
                 }
             },
             views: {
                 'summary@': {
-                    controller: function($scope, $state, ResourceUtility) {
+                    controller: function ($scope, $state, ResourceUtility) {
                         $scope.isCreateForm = true;
                         $scope.ResourceUtility = ResourceUtility;
                     },
@@ -910,23 +904,23 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles > Edit Profile'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_MARKETO_APIKEY';
                 },
-                FeatureFlags: function($q, FeatureFlagService) {
+                FeatureFlags: function ($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
-                    FeatureFlagService.GetAllFlags().then(function(result) {
+                    FeatureFlagService.GetAllFlags().then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                MarketoCredential: function($q, $stateParams, MarketoService) {
+                MarketoCredential: function ($q, $stateParams, MarketoService) {
                     var deferred = $q.defer();
                     var id = $stateParams.id;
 
-                    MarketoService.GetMarketoCredentials(id).then(function(
+                    MarketoService.GetMarketoCredentials(id).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -937,7 +931,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'summary@': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $stateParams,
                         $state,
@@ -963,23 +957,23 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles > Enrichment'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_MARKETO_APIKEY';
                 },
-                EnrichmentData: function($q, DataCloudStore) {
+                EnrichmentData: function ($q, DataCloudStore) {
                     var deferred = $q.defer();
 
-                    DataCloudStore.getEnrichments().then(function(result) {
+                    DataCloudStore.getEnrichments().then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                MarketoCredential: function($q, $stateParams, MarketoService) {
+                MarketoCredential: function ($q, $stateParams, MarketoService) {
                     var deferred = $q.defer();
                     var id = $stateParams.id;
 
-                    MarketoService.GetMarketoCredentials(id).then(function(
+                    MarketoService.GetMarketoCredentials(id).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -987,7 +981,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                MarketoMatchFields: function(
+                MarketoMatchFields: function (
                     $q,
                     MarketoService,
                     MarketoCredential
@@ -996,7 +990,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     MarketoService.GetMarketoMatchFields(
                         MarketoCredential
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result.data);
                     });
 
@@ -1005,7 +999,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'summary@': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $stateParams,
                         $state,
@@ -1031,13 +1025,13 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_MARKETO_MODELS';
                 },
-                FeatureFlags: function($q, FeatureFlagService) {
+                FeatureFlags: function ($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
-                    FeatureFlagService.GetAllFlags().then(function(result) {
+                    FeatureFlagService.GetAllFlags().then(function (result) {
                         deferred.resolve(result);
                     });
 
@@ -1048,7 +1042,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 'FeatureFlags',
                 '$state',
                 '$stateParams',
-                function(FeatureFlags, $state, $stateParams) {
+                function (FeatureFlags, $state, $stateParams) {
                     var useMarketoLatticeIntegration =
                         FeatureFlags.LatticeMarketoScoring;
                     if (useMarketoLatticeIntegration) {
@@ -1061,7 +1055,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             ],
             views: {
                 'summary@': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $stateParams,
                         $state,
@@ -1077,14 +1071,14 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 'main@': {
-                    controller: function(urls, $scope, $stateParams) {
+                    controller: function (urls, $scope, $stateParams) {
                         $scope.id = $stateParams.id;
                         $('#sureshot_iframe_container').html(
                             '<iframe src="' +
-                                urls.scoring_settings_url +
-                                '&credentialId=' +
-                                $scope.id +
-                                '"></iframe>'
+                            urls.scoring_settings_url +
+                            '&credentialId=' +
+                            $scope.id +
+                            '"></iframe>'
                         );
 
                         changeIframeHeight();
@@ -1094,7 +1088,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                             window.addEventListener(
                                 'message',
-                                function(event) {
+                                function (event) {
                                     // verify the origin is sureshot, if not just return
                                     var origin =
                                         event.origin ||
@@ -1132,12 +1126,12 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                ActiveModels: function($q, MarketoStore, MarketoService) {
+                ActiveModels: function ($q, MarketoStore, MarketoService) {
                     var deferred = $q.defer();
 
                     var storedActiveModels = MarketoStore.getActiveModels();
                     if (!storedActiveModels || storedActiveModels.length == 0) {
-                        MarketoService.GetActiveModels().then(function(result) {
+                        MarketoService.GetActiveModels().then(function (result) {
                             deferred.resolve(result);
                         });
                     } else {
@@ -1146,7 +1140,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                ScoringRequestSummaries: function(
+                ScoringRequestSummaries: function (
                     $q,
                     $stateParams,
                     MarketoStore
@@ -1156,7 +1150,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     MarketoStore.getScoringRequestList(
                         $stateParams.credentialId,
                         false
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
@@ -1165,7 +1159,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'summary@': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $stateParams,
                         $state,
@@ -1188,7 +1182,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                MarketoCredentials: function(
+                MarketoCredentials: function (
                     $q,
                     $stateParams,
                     MarketoStore,
@@ -1198,13 +1192,13 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     MarketoStore.getMarketoCredential(
                         $stateParams.credentialId
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                ScoringRequestSummaries: function(
+                ScoringRequestSummaries: function (
                     $q,
                     $stateParams,
                     MarketoStore
@@ -1214,20 +1208,20 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     MarketoStore.getScoringRequestList(
                         $stateParams.credentialId,
                         false
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                PrimaryAttributeFields: function(
+                PrimaryAttributeFields: function (
                     $q,
                     MarketoStore,
                     MarketoService
                 ) {
                     var deferred = $q.defer();
 
-                    MarketoStore.getPrimaryAttributeFields().then(function(
+                    MarketoStore.getPrimaryAttributeFields().then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -1235,7 +1229,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                MarketoFields: function(
+                MarketoFields: function (
                     $q,
                     MarketoService,
                     MarketoCredentials
@@ -1249,7 +1243,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             MarketoCredentials.soap_encryption_key
                     };
 
-                    MarketoService.GetMarketoMatchFields(params).then(function(
+                    MarketoService.GetMarketoMatchFields(params).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -1257,18 +1251,18 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                ScoringFields: function($q, $stateParams, MarketoService) {
+                ScoringFields: function ($q, $stateParams, MarketoService) {
                     var deferred = $q.defer();
 
                     MarketoService.GetScoringFields(
                         $stateParams.modelUuid
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                ExistingScoringRequest: function(
+                ExistingScoringRequest: function (
                     $q,
                     $stateParams,
                     MarketoStore,
@@ -1277,9 +1271,9 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     var deferred = $q.defer();
 
                     var existingScoringRequest = ScoringRequestSummaries
-                        ? ScoringRequestSummaries.find(function(x) {
-                              return x.modelUuid === $stateParams.modelUuid;
-                          })
+                        ? ScoringRequestSummaries.find(function (x) {
+                            return x.modelUuid === $stateParams.modelUuid;
+                        })
                         : null;
 
                     if (existingScoringRequest) {
@@ -1287,7 +1281,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             false,
                             $stateParams.credentialId,
                             existingScoringRequest.configId
-                        ).then(function(result) {
+                        ).then(function (result) {
                             deferred.resolve(result);
                         });
                     } else {
@@ -1299,7 +1293,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'summary@': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $stateParams,
                         $state,
@@ -1322,7 +1316,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                MarketoCredentials: function(
+                MarketoCredentials: function (
                     $q,
                     $stateParams,
                     MarketoStore,
@@ -1332,13 +1326,13 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     MarketoStore.getMarketoCredential(
                         $stateParams.credentialId
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                ScoringRequest: function(
+                ScoringRequest: function (
                     $q,
                     $stateParams,
                     MarketoStore,
@@ -1355,16 +1349,16 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         useCache,
                         $stateParams.credentialId,
                         $stateParams.configId
-                    ).then(function(result) {
+                    ).then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                Model: function($q, $stateParams, ScoringRequest, ModelStore) {
+                Model: function ($q, $stateParams, ScoringRequest, ModelStore) {
                     var deferred = $q.defer();
 
-                    ModelStore.getModel(ScoringRequest.modelUuid).then(function(
+                    ModelStore.getModel(ScoringRequest.modelUuid).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -1375,7 +1369,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             views: {
                 'summary@': {
-                    controller: function(
+                    controller: function (
                         $scope,
                         $stateParams,
                         $state,
@@ -1398,23 +1392,23 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_MARKETO_MODELS';
                 }
             },
             views: {
                 'summary@': {
-                    controller: function($scope, $stateParams, $state) {
+                    controller: function ($scope, $stateParams, $state) {
                         $scope.state = $state.current.name;
                     },
                     templateUrl: 'app/navigation/summary/SureShotTabs.html'
                 },
                 'main@': {
-                    controller: function(urls) {
+                    controller: function (urls) {
                         $('#sureshot_iframe_container').html(
                             '<iframe src="' +
-                                urls.scoring_settings_url +
-                                '"></iframe>'
+                            urls.scoring_settings_url +
+                            '"></iframe>'
                         );
 
                         changeIframeHeight();
@@ -1424,7 +1418,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                             window.addEventListener(
                                 'message',
-                                function(event) {
+                                function (event) {
                                     // verify the origin is sureshot, if not just return
                                     var origin =
                                         event.origin ||
@@ -1462,19 +1456,19 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_MARKETO_APIKEY';
                 }
             },
             views: {
                 'summary@': {
-                    controller: function($scope, $state) {
+                    controller: function ($scope, $state) {
                         $scope.state = 'home.marketosettings.edit';
                     },
                     templateUrl: 'app/navigation/summary/SureShotTabs.html'
                 },
                 'main@': {
-                    controller: function(urls) {
+                    controller: function (urls) {
                         $('#sureshot_iframe_container').html(
                             '<iframe src="' + urls.creds_url + '"></iframe>'
                         );
@@ -1486,7 +1480,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                             window.addEventListener(
                                 'message',
-                                function(event) {
+                                function (event) {
                                     // verify the origin is sureshot, if not just return
                                     var origin =
                                         event.origin ||
@@ -1525,7 +1519,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             },
             redirectto: 'eloquasettings.apikey',
             resolve: {
-                urls: function($q, $http) {
+                urls: function ($q, $http) {
                     var deferred = $q.defer();
 
                     $http({
@@ -1566,7 +1560,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Eloqua Settings'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_ELOQUA_APIKEY';
                 }
             },
@@ -1580,7 +1574,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     templateUrl: 'app/navigation/summary/EloquaTabs.html'
                 },
                 'main@': {
-                    controller: function(urls) {
+                    controller: function (urls) {
                         if (urls && urls.creds_url) {
                             $('#sureshot_iframe_container').html(
                                 '<iframe src="' + urls.creds_url + '"></iframe>'
@@ -1594,7 +1588,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                             window.addEventListener(
                                 'message',
-                                function(event) {
+                                function (event) {
                                     // verify the origin is sureshot, if not just return
                                     var origin =
                                         event.origin ||
@@ -1632,7 +1626,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Eloqua Settings'
             },
             resolve: {
-                ResourceString: function() {
+                ResourceString: function () {
                     return 'SUMMARY_ELOQUA_MODELS';
                 }
             },
@@ -1646,12 +1640,12 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     templateUrl: 'app/navigation/summary/EloquaTabs.html'
                 },
                 'main@': {
-                    controller: function(urls) {
+                    controller: function (urls) {
                         if (urls && urls.scoring_settings_url) {
                             $('#sureshot_iframe_container').html(
                                 '<iframe src="' +
-                                    urls.scoring_settings_url +
-                                    '"></iframe>'
+                                urls.scoring_settings_url +
+                                '"></iframe>'
                             );
 
                             changeIframeHeight();
@@ -1662,7 +1656,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                             window.addEventListener(
                                 'message',
-                                function(event) {
+                                function (event) {
                                     // verify the origin is sureshot, if not just return
                                     var origin =
                                         event.origin ||
@@ -1704,12 +1698,12 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     templateUrl: 'app/navigation/summary/EloquaTabs.html'
                 },
                 'main@': {
-                    controller: function(urls) {
+                    controller: function (urls) {
                         if (urls && urls.enrichment_settings_url) {
                             $('#sureshot_iframe_container').html(
                                 '<iframe src="' +
-                                    urls.enrichment_settings_url +
-                                    '"></iframe>'
+                                urls.enrichment_settings_url +
+                                '"></iframe>'
                             );
                             changeIframeHeight();
                         }
@@ -1719,7 +1713,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                             window.addEventListener(
                                 'message',
-                                function(event) {
+                                function (event) {
                                     // verify the origin is sureshot, if not just return
                                     var origin =
                                         event.origin ||
@@ -1757,28 +1751,28 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: ''
             },
             resolve: {
-                featureflags: function($q, FeatureFlagService) {
+                featureflags: function ($q, FeatureFlagService) {
                     var deferred = $q.defer();
 
-                    FeatureFlagService.GetAllFlags().then(function(result) {
+                    FeatureFlagService.GetAllFlags().then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                externaltypes: function($q, SfdcStore) {
+                externaltypes: function ($q, SfdcStore) {
                     var deferred = $q.defer();
 
-                    SfdcStore.getExternalTypes().then(function(result) {
+                    SfdcStore.getExternalTypes().then(function (result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                accountids: function($q, SfdcStore, externaltypes) {
+                accountids: function ($q, SfdcStore, externaltypes) {
                     var deferred = $q.defer();
 
-                    SfdcStore.getAccountIds(externaltypes).then(function(
+                    SfdcStore.getAccountIds(externaltypes).then(function (
                         result
                     ) {
                         deferred.resolve(result);
@@ -1786,7 +1780,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
 
                     return deferred.promise;
                 },
-                orgs: function(
+                orgs: function (
                     $q,
                     SfdcService,
                     SfdcStore,
@@ -1796,8 +1790,8 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     var deferred = $q.defer(),
                         orgs = [];
 
-                    SfdcStore.getOrgs().then(function(result) {
-                        externaltypes.forEach(function(type) {
+                    SfdcStore.getOrgs().then(function (result) {
+                        externaltypes.forEach(function (type) {
                             if (result[type] != undefined) {
                                 orgs = orgs.concat(result[type]);
                             }
@@ -1837,7 +1831,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 'main@': {
-                    controller: function(LoginService) {
+                    controller: function (LoginService) {
                         ShowSpinner('Logging Out...');
                         LoginService.Logout();
                     }
@@ -1851,10 +1845,10 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 pageTitle: 'Manage Users'
             },
             resolve: {
-                UserList: function($q, UserManagementService) {
+                UserList: function ($q, UserManagementService) {
                     var deferred = $q.defer();
 
-                    UserManagementService.GetUsers().then(function(result) {
+                    UserManagementService.GetUsers().then(function (result) {
                         if (result.Success) {
                             deferred.resolve(result.ResultObj);
                         } else {
@@ -1907,13 +1901,13 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         '<br><div class="lookup-summary ten columns offset-one"><div class="lookup-back" ui-sref="home.insights"><ico class="fa fa-arrow-left"></ico>NEW LOOKUP</div></div></div>'
                 },
                 'main@': {
-                    controller: function($scope, LookupStore, $stateParams) {
+                    controller: function ($scope, LookupStore, $stateParams) {
                         var host = '/insights/';
 
                         $('#sureshot_iframe_container').html(
                             '<iframe id="insights_iframe" src="' +
-                                host +
-                                '" style="border: 1px inset"></iframe>'
+                            host +
+                            '" style="border: 1px inset"></iframe>'
                         );
 
                         var childWindow = document.getElementById(
@@ -1942,7 +1936,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             }
                         }
 
-                        $scope.$on('$destroy', function() {
+                        $scope.$on('$destroy', function () {
                             window.removeEventListener(
                                 'message',
                                 handleMessage
@@ -1983,7 +1977,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                     template: '<br>'
                 },
                 'main@': {
-                    controller: function($scope, LookupStore, $stateParams) {
+                    controller: function ($scope, LookupStore, $stateParams) {
                         // var sin  = '?sin=33b905c6-faa8-42f8-af3a-4e2eaf64ca61';
                         // var surl = '&serverurl=https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com';
                         // var rec  = '&Recommendation=df0b96b0-4f22-4854-9b95-e8e98e379fc6';
@@ -2011,10 +2005,13 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                         var host =
                             '/dante/?sin=e95f1069-09b5-4cf4-8f9d-9de2c5f62d19&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000000hjkMAAQ&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pliu%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20true%2C%22HideTabs%22%3A%20true%2C%22HideHeader%22%3A%20true%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=hierarchy_acct3';
 
+                        var host =
+                            '/dante/?sin=7877bc5e-4a27-4374-9ddd-7197228a6d5b&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=005f4000000eArMAAU&Recommendation=c4b5f07a-b7cf-43d3-9625-5895d589c3a7&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pgavade%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20true%2C%22HideTabs%22%3A%20false%2C%22HideHeader%22%3A%20false%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=001f4000006IDmxAAG';
+
                         $('#sureshot_iframe_container').html(
                             "<iframe id='dante_iframe' src='" +
-                                host +
-                                "'></iframe>"
+                            host +
+                            "'></iframe>"
                         );
 
                         var childWindow = document.getElementById(
@@ -2031,9 +2028,15 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             var split = event.data.split('=');
                             console.log('receiving from Dante:', split);
                             // setTimeout(function() {
-                            //     console.log('posting to Dante:', 'CrmTabSelectedEvent=TalkingPoints');
-                            //     childWindow.postMessage('CrmTabSelectedEvent=TalkingPoints','*');
-                            // },5000);
+                            //     console.log(
+                            //         'posting to Dante:',
+                            //         'CrmTabSelectedEvent=TalkingPoints'
+                            //     );
+                            //     childWindow.postMessage(
+                            //         'CrmTabSelectedEvent=TalkingPoints',
+                            //         '*'
+                            //     );
+                            // }, 5000);
                             if (split[0] == 'IFrameResizeEvent') {
                                 document.getElementById(
                                     'dante_iframe'
@@ -2041,7 +2044,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             }
                         }
 
-                        $scope.$on('$destroy', function() {
+                        $scope.$on('$destroy', function () {
                             window.removeEventListener(
                                 'message',
                                 handleMessage

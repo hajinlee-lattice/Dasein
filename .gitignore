@@ -3,7 +3,7 @@
 *.project
 *.pydevproject
 .settings/
-
+*.factorypath
 # Intellij
 .idea/
 *.iml
@@ -37,6 +37,10 @@ jacoco/
 **/dist/**
 **/.sass-cache/**
 **/.vscode/
+**/storybook-static/
+**/uicomponents/.cache
 
 # tez
 *.dot
+
+/le-ui.tar.gz

@@ -92,11 +92,11 @@ public class DataIntegrationStatusMonitor
     private String workflowRequestId;
 
     @JsonProperty("sourceFile")
-    @Column(name = "SOURCE_FILE", nullable = true)
+    @Column(name = "SOURCE_FILE", nullable = true, length = 4096)
     private String sourceFile;
 
     @JsonProperty("errorFile")
-    @Column(name = "ERROR_FILE", nullable = true)
+    @Column(name = "ERROR_FILE", nullable = true, length = 4096)
     private String errorFile;
 
     @JsonProperty("status")

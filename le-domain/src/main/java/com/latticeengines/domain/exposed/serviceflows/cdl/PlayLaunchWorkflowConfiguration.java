@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
@@ -37,8 +36,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             return this;
         }
 
-        public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean enableExport) {
-            boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch.getDestinationSysType());
+        public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
             if (!canBeLaunchedToExternal) {
                 exportFilesToS3Conf.setSkipStep(true);
                 exportFileGeneratorConf.setSkipStep(true);
@@ -51,15 +49,6 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
             exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
             return this;
-        }
-
-        private boolean isValidDestination(CDLExternalSystemType destinationSysType) {
-            switch (destinationSysType) {
-            case MAP:
-                return true;
-            default:
-                return false;
-            }
         }
 
         public Builder workflow(String workflowName) {

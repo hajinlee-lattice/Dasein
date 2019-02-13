@@ -208,6 +208,23 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipSteps(Set<BusinessEntity> entities, boolean skipAPS) {
+            processStepConfiguration.setSkipEntities(entities);
+            awsPythonDataConfiguration.setSkipStep(skipAPS);
+            return this;
+        }
+
+        public Builder dataQuotaLimit(Long dataQuotaLimit, BusinessEntity businessEntity) {
+            switch (businessEntity) {
+                case Account: processAccountWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
+                case Contact: processContactWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
+                case Product: processProductWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
+                case Transaction: processTransactionWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
+                default:break;
+            }
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

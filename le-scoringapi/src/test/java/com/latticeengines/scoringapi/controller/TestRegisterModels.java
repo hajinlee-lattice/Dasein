@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
@@ -36,12 +37,12 @@ public class TestRegisterModels {
     public static final String DISPLAY_NAME_PREFIX = "Display Name ";
 
     public TestModelArtifactDataComposition createModels(Configuration yarnConfiguration,
-                                                         BucketedScoreProxy bucketedScoreProxy,
-                                                         Tenant tenant, TestModelConfiguration modelConfiguration,
-                                                         CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser,
-                                                         String hdfsSubPathForModel, ModelSummaryProxy modelSummaryProxy) throws IOException {
-        ModelSummary modelSummary = createModel(tenant, modelConfiguration, customerSpace,
-                testModelSummaryParser, modelSummaryProxy);
+            BucketedScoreProxy bucketedScoreProxy, ColumnMetadataProxy columnMetadataProxy, Tenant tenant,
+            TestModelConfiguration modelConfiguration, CustomerSpace customerSpace, MetadataProxy metadataProxy,
+            TestModelSummaryParser testModelSummaryParser, String hdfsSubPathForModel,
+            ModelSummaryProxy modelSummaryProxy) throws IOException {
+        ModelSummary modelSummary = createModel(tenant, modelConfiguration, customerSpace, testModelSummaryParser,
+                modelSummaryProxy, columnMetadataProxy);
         createBucketMetadata(bucketedScoreProxy, modelSummary.getId(), customerSpace.toString());
         TestModelArtifactDataComposition testModelArtifactDataComposition = setupHdfsArtifacts(yarnConfiguration,
                 tenant, modelConfiguration, hdfsSubPathForModel);
@@ -50,17 +51,16 @@ public class TestRegisterModels {
         return testModelArtifactDataComposition;
     }
 
-    private void createBucketMetadata(BucketedScoreProxy bucketedScoreProxy, String modelGuid,
-                                      String customerSpace) {
+    private void createBucketMetadata(BucketedScoreProxy bucketedScoreProxy, String modelGuid, String customerSpace) {
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
         request.setModelGuid(modelGuid);
         request.setBucketMetadataList(ScoringApiTestUtils.generateDefaultBucketMetadataList());
         bucketedScoreProxy.createABCDBuckets(customerSpace, request);
     }
 
-    private ModelSummary createModel(Tenant tenant,
-            TestModelConfiguration modelConfiguration, CustomerSpace customerSpace,
-            TestModelSummaryParser testModelSummaryParser, ModelSummaryProxy modelSummaryProxy) throws IOException {
+    private ModelSummary createModel(Tenant tenant, TestModelConfiguration modelConfiguration,
+            CustomerSpace customerSpace, TestModelSummaryParser testModelSummaryParser,
+            ModelSummaryProxy modelSummaryProxy, ColumnMetadataProxy columnMetadataProxy) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
@@ -72,10 +72,17 @@ public class TestRegisterModels {
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
+// called for getting latest data cloud version
+        String dataCloudVersion = columnMetadataProxy
+                .latestVersion(//
+                        null)//
+                .getVersion();
+        modelSummary.setDataCloudVersion(dataCloudVersion);
 
         testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelSummaryJsonLocalpath());
 
-        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(), modelConfiguration.getModelId());
+        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(),
+                modelConfiguration.getModelId());
         if (retrievedSummary != null) {
             modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
@@ -97,18 +104,18 @@ public class TestRegisterModels {
         String enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
 
         InputStream eventTableDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(modelConfiguration.getLocalModelPath()
-                + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+                .getResourceAsStream(modelConfiguration.getLocalModelPath() + "eventtable-"
+                        + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         InputStream modelJsonUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(modelConfiguration.getModelSummaryJsonLocalpath());
         InputStream rfpmmlUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
         InputStream dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(modelConfiguration.getLocalModelPath()
-                + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+                .getResourceAsStream(modelConfiguration.getLocalModelPath() + "datascience-"
+                        + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         InputStream scoreDerivationUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(
-                modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
+                        modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -129,8 +136,8 @@ public class TestRegisterModels {
                 enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         eventTableDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(modelConfiguration.getLocalModelPath()
-                        + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+                .getResourceAsStream(modelConfiguration.getLocalModelPath() + "eventtable-"
+                        + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         String eventTableDataCompositionContents = IOUtils.toString(eventTableDataCompositionUrl,
                 Charset.defaultCharset());
         TestModelArtifactDataComposition testModelArtifactDataComposition = new TestModelArtifactDataComposition();
@@ -138,8 +145,8 @@ public class TestRegisterModels {
                 JsonUtils.deserialize(eventTableDataCompositionContents, DataComposition.class));
 
         dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(modelConfiguration.getLocalModelPath()
-                        + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+                .getResourceAsStream(modelConfiguration.getLocalModelPath() + "datascience-"
+                        + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         String dataScienceDataCompositionContents = IOUtils.toString(dataScienceDataCompositionUrl,
                 Charset.defaultCharset());
         testModelArtifactDataComposition.setDataScienceDataComposition(
