@@ -511,18 +511,33 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.saveIteration(engineId, iteration).then(function(result){
 
             var modelId = result.AI.id,
-                attributes = {};
-                
-            DataCloudStore.getEnrichments().then(function(result){
-                attributes = result;
-            })
+                attributes = RatingsEngineStore.getRemodelAttributes();
 
+            // Sanitize attributes to remove OriginalApprovedUsage (used when toggling Enable/Disable in Attributes screen)
+            angular.forEach(attributes, function(category){
+                var modifiedAttributes = category.filter(function(attribute) {
+                    return attribute.OriginalApprovedUsage;
+                });
+                if(modifiedAttributes.length > 0){
+                    angular.forEach(modifiedAttributes, function(attribute){
+                        delete attribute.OriginalApprovedUsage; 
+                    });
+                }
+                var hasWarningAttributes = category.filter(function(attribute) {
+                    return attribute.hasWarning;
+                });
+                if(hasWarningAttributes.length > 0){
+                    angular.forEach(hasWarningAttributes, function(attribute){
+                        delete attribute.hasWarning; 
+                    });
+                }
+            }); 
             RatingsEngineStore.setValidation(stateToValidate, false);
             // Validate Model
             RatingsEngineService.validateModel(engineId, modelId, RatingsEngineStore.getRatingEngine()).then(function(result) {
                 var success = result.data == true;
-                if (success) {                    
-
+                if (success) {
+                    // Launch Model
                     RatingsEngineService.launchModeling(engineId, modelId, attributes).then(function(applicationId){
 
                         RatingsEngineStore.setApplicationId(applicationId);
@@ -533,9 +548,12 @@ angular.module('lp.ratingsengine')
                             showProgress: false
                         }
                         deferred.resolve(result);
+
+                        // console.log('Model Launched', id, nextState);
+                        // if(nextState) {
+                        //     $state.go(nextState, { ai_model_job_id: applicationid });
+                        // }
                     });
-
-
                 } else {
                     var errorResult = {
                         result: result,
