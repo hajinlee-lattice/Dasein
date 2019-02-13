@@ -27,10 +27,10 @@ class ViewAllComponent extends Component {
             data = this.props.RatingsEngineStore.getIterations();
             tableConfig = {
                 name: "creation-history",
-                // sorting:{
-                //     initial: 'none',
-                //     direction: 'none'
-                // },
+                sorting:{
+                    initial: 'iteration',
+                    direction: 'dis'
+                },
                 pagination:{
                     perPage: 10,
                     startPage: 1
@@ -39,7 +39,7 @@ class ViewAllComponent extends Component {
                   {
                       name: "iteration",
                       displayName: "Iteration",
-                      sortable: false
+                      sortable: true
                   },
                   {
                       name: "status",
@@ -49,7 +49,7 @@ class ViewAllComponent extends Component {
                   {
                       name: "creationStatus",
                       displayName: "Creation Status",
-                      sortable: false
+                      sortable: true
                   },
                   {
                       name: "viewModel",
@@ -64,7 +64,7 @@ class ViewAllComponent extends Component {
                       template: cell => {
                         if (cell.props.rowData) {
                           return (
-                            cell.props.rowData.iteration
+                            <span>{cell.props.rowData.iteration}</span>
                           )
                         } else {
                           return null;
@@ -72,39 +72,69 @@ class ViewAllComponent extends Component {
                       }
                   },
                   {
-                      // onlyTemplate: true,
-                      colSpan: 1,
-                      // template: cell => {
-                      //   let isActive = true;
-                      //   if (isActive) {
-                      //       return (
-                      //           <p className="green-text">
-                      //               Scoring Active
-                      //           </p>
-                      //       )
-                      //   } else {
-                      //       return (
-                      //           <a>
-                      //               Activate
-                      //           </a>
-                      //       )
-                      //   }
-                      // }
+                      onlyTemplate: true,
+                      colSpan: 2,
+                      template: cell => {
+
+                        let isActive = false;
+                        let iterationId = cell.props.rowData.id;
+                        let iterationCompleted = cell.props.rowData.modelingJobStatus == 'Completed';
+                        let ratingEngine = this.props.RatingsEngineStore.getRatingEngine();
+
+                        if (ratingEngine.scoring_iteration != null) {
+                            if (ratingEngine.scoring_iteration.AI.id == iterationId) {
+                                isActive = true;
+                            } else {
+                                isActive = false;
+                            }
+                        } else {
+                            isActive = false;
+                        }
+
+                        if (isActive) {
+                            return (
+                                <p className="green-text">
+                                    Scoring Active
+                                </p>
+                            )
+                        } else if (!isActive && iterationCompleted) {
+                            return (
+                                <LeButton
+                                    name="activate"
+                                    callback={() => {
+                                        console.log(this.props.$stateParams);
+                                        this.props.$state.go('home.model.ratings', { rating_id: this.props.$stateParams.rating_id, modelId: cell.props.rowData.modelSummaryId, section: 'dashboard.ratings', ratingEngine: ratingEngine})
+                                    }}
+                                    config={{
+                                        label: "Activate",
+                                        classNames: "activate-button"
+                                    }}
+                                  />
+                            )
+                        } else {
+                            return '';
+                        }
+                      }
                   },
                   {
                     onlyTemplate: true,
-                    colSpan: 8,
+                    colSpan: 7,
                     template: cell => {
-                        if (cell.props.rowData.modelingJobStatus == 'Pending' || cell.props.rowData.modelingJobStatus == 'Running') {
+
+                        let pending = cell.props.rowData.modelingJobStatus == 'Pending';
+                        let running = cell.props.rowData.modelingJobStatus == 'Running';
+                        let completed = cell.props.rowData.modelingJobStatus == 'Completed';
+
+                        if (pending || running) {
                             return (
-                                <span>
+                                <span className="running">
                                     <span></span>
                                     <span>{cell.props.rowData.modelingJobStatus}</span>
                                 </span>
                             )
                         } else {
                             return (
-                                <span>
+                                <span className={(completed ? 'completed' : 'failed')}>
                                     <span>{cell.props.rowData.modelingJobStatus}</span>
                                 </span>
                             )
@@ -112,13 +142,23 @@ class ViewAllComponent extends Component {
                     }
                   },
                   {
-                      // onlyTemplate: true,
+                      onlyTemplate: true,
                       colSpan: 2,
-                      // template: cell => {
-                      //     return (
-                      //       <button className="button link-button">View Model</button>
-                      //     )
-                      // }
+                      template: cell => {
+                          return (
+                              <LeButton
+                                name="view-model"
+                                callback={() => {
+                                    console.log(this.props.$stateParams);
+                                    this.props.$state.go('home.model.datacloud', { rating_id: this.props.$stateParams.rating_id, modelId: cell.props.rowData.modelSummaryId, aiModel: cell.props.rowData.id})
+                                }}
+                                config={{
+                                    label: "View Model",
+                                    classNames: "link-button"
+                                }}
+                              />
+                          )
+                      }
                   }
                 ]
             };
@@ -196,12 +236,11 @@ class ViewAllComponent extends Component {
         this.state = {
             pageTitle: pageTitle,
             data: data,
-            tableConfig: tableConfig
+            tableConfig: tableConfig,
+            ratingId: '',
+            modelId: '',
+            aiModel: ''
         }
-    }
-
-    backToDashboard() {
-        console.log(this.props);
     }
 
     // <LeToolBar>
@@ -217,7 +256,9 @@ class ViewAllComponent extends Component {
                 <div className="header">
                     <LeButton
                         name="back"
-                        callback={this.backToDashboard}
+                        callback={() => {
+                            this.props.$state.go('home.ratingsengine.dashboard', { rating_id: this.props.$stateParams.rating_id, modelId: this.props.$stateParams.modelId})
+                        }}
                         config={{
                             label: "Back",
                             classNames: "back-link"
@@ -241,5 +282,5 @@ angular
   .module("le.ratingsengine.viewall", [])
   .component(
     "viewAllComponent",
-    react2angular(ViewAllComponent, [], ["$state", "RatingsEngineStore"])
+    react2angular(ViewAllComponent, [], ["$state", "$stateParams", "RatingsEngineStore"])
   );
