@@ -211,8 +211,7 @@ angular
                 }
 
                 vm.getWarning = function (warning) {
-                    let warnings = DataCloudStore.getWarnings();
-                    return warnings[warning];
+                    return DataCloudStore.warnings[warning];
                 }
 
                 vm.toggleApprovedUsage = function (item) {

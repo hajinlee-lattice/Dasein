@@ -107,6 +107,7 @@ angular
         }
 
         vm.checkIterationFilter = function (type) {
+            console.log(type, DataCloudStore.ratingIterationFilter);
             return DataCloudStore.ratingIterationFilter == type;
         }
 
@@ -279,9 +280,9 @@ angular
 
             vm.remodelingProgress = true;
 
-            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function (result) {
+            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function(result){            
                 RatingsEngineStore.setRemodelIteration(result);
-                RatingsEngineStore.saveIteration('attributes').then(function (result) {
+                RatingsEngineStore.saveIteration('attributes').then(function(result){
                     if (!result.result) {
                         Banner.success({
                             message:
@@ -299,10 +300,10 @@ angular
                 rating_id = $stateParams.rating_id,
                 url = 'home.ratingsengine.dashboard.training';
 
-            $state.go(url, {
-                rating_id: rating_id,
+            $state.go(url, { 
+                rating_id: rating_id, 
                 modelId: modelId
-            }, { reload: true });
+            },{ reload:true });
         }
 
         vm.inModel = function () {

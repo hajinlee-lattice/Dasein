@@ -71,7 +71,28 @@ angular.module('common.datacloud')
                 'Growth Trends',
                 'Website Keywords'
             ];
-            this.warnings = {};
+            this.warnings = {
+                "DistinctValueCount": {
+                    "displayName": "Too many category values",
+                    "description": "This attribute has more than 200 category values. Attributes with more than 200 different category values cannot be used in modeling. Where possible, replace with a picklist attribute instead of a free field.",
+                },
+                "ValuePercentage": {
+                    "displayName": "Too many identical values",
+                    "description": "This attribute has the same value for 98% or more records. This can lead to poor segments or inaccurate scores.",
+                },
+                "NullLift": {
+                    "displayName": "Prediction from missing data",
+                    "description": "This attribute brings prediction from missing data into the model. When unpopulated numbers or categories show signifiant prediction (less than 0.7 or greater than 1.2), later scores are often inaccurate. ",
+                },
+                "FutureInfo": {
+                    "displayName": "Prediction from later data (future information)",
+                    "description": "This attribute looks like it was populated later in the business cycle, often called future information. This warning comes when available values show good lift (greater than 1.5), but 80% or more records are unpopulated and have low lift (below 0.6).",
+                },
+                "DerivedAttribute": {
+                    "displayName": "Derived from a Removed Attribute",
+                    "description": "This attribute is derived from an attribute that has been flagged and removed by a rule, and it suffers from the same problem as the source attribute.",
+                }
+            };
         };
 
         this.init();
@@ -104,14 +125,6 @@ angular.module('common.datacloud')
                 }
             });
         };
-
-        this.setWarnings = function (warnings) {
-            this.warnings = warnings;
-        }
-
-        this.getWarnings = function () {
-            return this.warnings;
-        }
 
         this.getMetadata = function (name) {
             return getObj(name, this.metadata);
