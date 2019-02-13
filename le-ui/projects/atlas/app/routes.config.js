@@ -288,6 +288,7 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
             resolve: {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 // ReviewData: function (
                 //     $q,
                 //     $stateParams,
@@ -321,19 +322,18 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 ) {
                     var deferred = $q.defer(),
                         modelId = $stateParams.modelId;
+=======
+                Enrichments: [
+                    '$q',
+                    'DataCloudStore',
+                    'ApiHost',
+                    function($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+>>>>>>> be13581dd0cc03638426bc8c80a35cd6fe54bf4c
 
-                    ModelReviewStore.GetReviewData(
-                        modelId
-                    ).then(function (result) {
-                        console.log('### ReviewData result', result);
-                        var warnings = {};
-                        result.forEach(item => {
-                            warnings[item.name] = item;
-                        });
-                        DataCloudStore.setWarnings(warnings);
-                        deferred.resolve(result);
-                    });
+                        DataCloudStore.setHost(ApiHost);
 
+<<<<<<< HEAD
                     return deferred.promise;
                 },
 >>>>>>> 6f61db6d83... Revert "- View Remodel changes #432"
@@ -373,6 +373,12 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                             function(result) {
                                 deferred.resolve(result);
                             }
+=======
+                        DataCloudStore.getAllEnrichmentsConcurrently().then(
+                            function(result) {
+                                deferred.resolve(result);
+                            }
+>>>>>>> be13581dd0cc03638426bc8c80a35cd6fe54bf4c
                         );
 
                         return deferred.promise;
