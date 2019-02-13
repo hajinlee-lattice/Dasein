@@ -1022,10 +1022,9 @@ attr-categories,
                                             }
                                         }
                                     }
-                                    &.count, &.lift {
+                                    &.count {
                                         @include flex-item(0 1 auto);
                                         white-space: nowrap;
-                                        min-width: 3em;
                                         span {
                                             display: block;
                                             position: relative;
