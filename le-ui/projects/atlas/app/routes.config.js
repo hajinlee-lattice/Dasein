@@ -280,7 +280,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
         .state('home.model.attributes', {
             url: '/attributes',
             params: {
-                section: 'remodel_iteration',
+                section: 're.model_iteration',
                 pageIcon: 'ico-attributes',
                 pageTitle: 'View Iteration',
                 gotoNonemptyCategory: true,
