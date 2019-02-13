@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
@@ -14,6 +15,7 @@ import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.component.exposed.service.ComponentServiceBase;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
+import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
@@ -66,6 +69,15 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private DataUnitService dataUnitService;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customersBucket;
 
     public CDLComponentServiceImpl() {
         super(ComponentConstants.CDL);
@@ -130,8 +142,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
             if (dataFeed != null) {
                 // delete redshift tables
-                List<DataUnit> dataUnits = dataUnitEntityMgr.findAllByTypeFromReader(
-                        customerSpace, DataUnit.StorageType.Redshift);
+                List<DataUnit> dataUnits = dataUnitService.findAllByType(DataUnit.StorageType.Redshift);
                 if (dataUnits != null) {
                     for (DataUnit dataUnit : dataUnits) {
                         redshiftService.dropTable(dataUnit.getName());
@@ -140,6 +151,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
                 // delete s3
                 destroy(customerSpace);
+                s3Service.cleanupPrefix(customersBucket, cs.getContractId());
 
                 log.info("Clean up DataCollection(DataFeed_xxx)");
                 DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();
