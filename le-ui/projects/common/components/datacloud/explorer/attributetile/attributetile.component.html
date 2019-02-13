@@ -119,15 +119,8 @@
                                   !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                                   && enrichment.Entity !== 'Rating'">
             <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
-            <h5>
-                <label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
-                    'Attribute range' : 'Attribute values'}}
-                </label>
-                <label>
-                    <span ng-if="vm.section == 're.model_iteration'">Lift &nbsp; &nbsp; &nbsp;</span>
-                    Records
-                </label>
-            </h5>
+            <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
+                    'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
 
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
@@ -167,9 +160,6 @@
                             <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, highest, '%', 0)}" title="{{vm.percentage(stat.Cnt, highest, '%', 0)}}">
                                 <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                             </div>
-                        </li>
-                        <li class="lift" ng-if="stat.Lift">
-                            <span>{{stat.Lift|number:1}}x</span>
                         </li>
                         <li class="count">
                             <span>{{stat.Cnt|number}}</span>

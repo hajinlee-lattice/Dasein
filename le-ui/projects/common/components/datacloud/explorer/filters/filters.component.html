@@ -107,15 +107,12 @@
                 <label for="nulls">Include "No" Attributes</label></li>
         </ul>
     </li>
-    <li class="sort show-tooltip title-tooltip top right" ng-disabled="!vm.category" ng-if="vm.category && vm.section != 're.model_iteration'">
+    <li class="sort show-tooltip title-tooltip top right" ng-disabled="!vm.category" ng-if="vm.category">
         <div class="tooltip_"><span>Sorting</span></div>
         <button class="button borderless-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;"
             ng-init="vm.sortPrefix = '+';">
             <i class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></i>
         </button>
-    </li>
-    <li class="sort pull-right" ng-if="vm.section == 're.model_iteration'">
-        <menu-sort-by config="vm.header.sort_modeliteration" store="ratings.sort"></menu-sort-by>
     </li>
     <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
