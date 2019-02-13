@@ -107,6 +107,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("AssociatedDataRules")
     private List<String> AssociatedDataRules;
 
+    @JsonProperty("PredictivePower")
+    private Double predictivePower;
+
     @JsonProperty("LastDataRefresh")
     private String lastDataRefresh;
 
@@ -635,6 +638,10 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     public void setAssociatedDataRules(List<String> associatedDataRules) {
         AssociatedDataRules = associatedDataRules;
     }
+
+    public Double getPredictivePower() { return predictivePower; }
+
+    public void setPredictivePower(Double predictivePower) { this.predictivePower = predictivePower;    }
 
     public String getLastDataRefresh() {
         return lastDataRefresh;
