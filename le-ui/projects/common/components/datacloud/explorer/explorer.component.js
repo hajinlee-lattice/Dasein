@@ -1897,7 +1897,9 @@ angular
                         (DataCloudStore.ratingIterationFilter == 'used' &&
                             !('ImportanceOrdering' in item)) ||
                         (DataCloudStore.ratingIterationFilter == 'warnings' &&
-                            !item.HasWarnings)
+                            !item.HasWarnings) ||
+                        (DataCloudStore.ratingIterationFilter == 'disabled' &&
+                            item.ApprovedUsage[0] != 'None')
                     ) {
                         continue;
                     }

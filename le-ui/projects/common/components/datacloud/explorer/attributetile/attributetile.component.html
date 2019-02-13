@@ -119,15 +119,23 @@
                                   !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                                   && enrichment.Entity !== 'Rating'">
             <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
-            <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
-                    'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
+            <h5>
+                <label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
+                    'Attribute range' : 'Attribute values'}}
+                </label>
+                <label>
+                    <span ng-if="vm.section == 're.model_iteration'">Lift &nbsp; &nbsp; &nbsp;</span>
+                    Records
+                </label>
+            </h5>
 
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                     class="attribute attribute-stat delay top" ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
                                 'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0,
-                                'show-tooltip': vm.section == 'segment.analysis'
+                                'show-tooltip': vm.section == 'segment.analysis',
+                                'non-interactive': vm.section == 're.model_iteration'
                               }"
                     ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
                     ng-init="highest = vm.getHighestStat(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List)">
@@ -161,6 +169,9 @@
                                 <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                             </div>
                         </li>
+                        <li class="lift" ng-if="stat.Lift">
+                            <span>{{stat.Lift|number:1}}x</span>
+                        </li>
                         <li class="count">
                             <span>{{stat.Cnt|number}}</span>
                         </li>
@@ -192,9 +203,8 @@
         </div>
 
         <div class="attribute-modeliteration-toggle" ng-if="vm.section == 're.model_iteration'">
-            <i ng-click="vm.toggleApprovedUsage(enrichment)" class="fa" ng-class="{ 
-                    'fa-toggle-on': vm.checkApprovedUsage(enrichment),
-                    'fa-toggle-off': !vm.checkApprovedUsage(enrichment)
+            <i ng-click="vm.toggleApprovedUsage(enrichment)" class="fa fa-toggle-on" ng-class="{ 
+                    'fa-rotate-180': !vm.checkApprovedUsage(enrichment)
                 }">
             </i>
         </div>

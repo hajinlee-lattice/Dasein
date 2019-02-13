@@ -27,10 +27,10 @@ class ViewAllComponent extends Component {
             data = this.props.RatingsEngineStore.getIterations();
             tableConfig = {
                 name: "creation-history",
-                sorting:{
-                    initial: 'none',
-                    direction: 'none'
-                },
+                // sorting:{
+                //     initial: 'none',
+                //     direction: 'none'
+                // },
                 pagination:{
                     perPage: 10,
                     startPage: 1
@@ -39,7 +39,7 @@ class ViewAllComponent extends Component {
                   {
                       name: "iteration",
                       displayName: "Iteration",
-                      sortable: true
+                      sortable: false
                   },
                   {
                       name: "status",
@@ -49,7 +49,7 @@ class ViewAllComponent extends Component {
                   {
                       name: "creationStatus",
                       displayName: "Creation Status",
-                      sortable: true
+                      sortable: false
                   },
                   {
                       name: "viewModel",
@@ -59,6 +59,7 @@ class ViewAllComponent extends Component {
                 ],
                 columns: [
                   {
+                      onlyTemplate: true,
                       colSpan: 1,
                       template: cell => {
                         if (cell.props.rowData) {
@@ -71,31 +72,33 @@ class ViewAllComponent extends Component {
                       }
                   },
                   {
+                      // onlyTemplate: true,
                       colSpan: 1,
-                      template: cell => {
-                        let isActive = true;
-                        if (isActive) {
-                            return (
-                                <p className="green-text">
-                                    Scoring Active
-                                </p>
-                            )
-                        } else {
-                            return (
-                                <a>
-                                    Activate
-                                </a>
-                            )
-                        }
-                      }
+                      // template: cell => {
+                      //   let isActive = true;
+                      //   if (isActive) {
+                      //       return (
+                      //           <p className="green-text">
+                      //               Scoring Active
+                      //           </p>
+                      //       )
+                      //   } else {
+                      //       return (
+                      //           <a>
+                      //               Activate
+                      //           </a>
+                      //       )
+                      //   }
+                      // }
                   },
                   {
+                    onlyTemplate: true,
                     colSpan: 8,
                     template: cell => {
                         if (cell.props.rowData.modelingJobStatus == 'Pending' || cell.props.rowData.modelingJobStatus == 'Running') {
                             return (
                                 <span>
-                                    <span>Loading...</span>
+                                    <span></span>
                                     <span>{cell.props.rowData.modelingJobStatus}</span>
                                 </span>
                             )
@@ -109,12 +112,13 @@ class ViewAllComponent extends Component {
                     }
                   },
                   {
+                      // onlyTemplate: true,
                       colSpan: 2,
-                      template: cell => {
-                          return (
-                            <button className="button link-button">View Model</button>
-                          )
-                      }
+                      // template: cell => {
+                      //     return (
+                      //       <button className="button link-button">View Model</button>
+                      //     )
+                      // }
                   }
                 ]
             };
@@ -143,6 +147,7 @@ class ViewAllComponent extends Component {
                 ],
                 columns: [
                     {
+                        onlyTemplate: true,
                         colSpan: 2,
                         template: cell => {
                             if (cell.props.rowData) {
@@ -171,6 +176,7 @@ class ViewAllComponent extends Component {
                         }
                     },
                     {
+                        onlyTemplate: true,
                         colSpan: 10,
                         template: cell => {
                             if (cell.props.rowData) {
@@ -198,6 +204,13 @@ class ViewAllComponent extends Component {
         console.log(this.props);
     }
 
+    // <LeToolBar>
+    //     <div className="left">
+    //         Sort
+    //         Search
+    //     </div>
+    // </LeToolBar>
+
     render() {
         return (
             <div className="view-all">
@@ -212,12 +225,6 @@ class ViewAllComponent extends Component {
                     /> 
                     | {this.state.pageTitle} ({this.state.data.length})
                 </div>
-                <LeToolBar>
-                    <div className="left">
-                        Sort
-                        Search
-                    </div>
-                </LeToolBar>
                 <LeTable
                     name={this.state.tableConfig.name}
                     config={this.state.tableConfig}    

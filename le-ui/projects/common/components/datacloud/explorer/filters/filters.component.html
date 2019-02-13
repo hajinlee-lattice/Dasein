@@ -58,8 +58,7 @@
             <i class="fa fa-trash"></i>
         </button>
     </li>
-    <li ng-if="vm.section != 're.model_iteration'" class="filter dropdown-container show-tooltip title-tooltip top right"
-        ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+    <li class="filter dropdown-container show-tooltip title-tooltip top right" ng-if="['segment.analysis','wizard.ratingsengine_segment','re.model_iteration'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Filtering</span></div>
         <h2 class="button borderless-button" ng-class="{ selected: vm.isFilterSelected() }">
             <i class="fa fa-filter"></i>
@@ -107,18 +106,20 @@
                 <label for="nulls">Include "No" Attributes</label></li>
         </ul>
     </li>
-    <li class="sort show-tooltip title-tooltip top right" ng-disabled="!vm.category" ng-if="vm.category">
+    <li class="sort show-tooltip title-tooltip top right" ng-disabled="!vm.category" ng-if="vm.category && vm.section != 're.model_iteration'">
         <div class="tooltip_"><span>Sorting</span></div>
         <button class="button borderless-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;"
             ng-init="vm.sortPrefix = '+';">
             <i class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></i>
         </button>
     </li>
+    <li class="sort pull-right" ng-if="vm.section == 're.model_iteration'">
+        <menu-sort-by config="vm.header.sort_modeliteration" store="ratings.sort"></menu-sort-by>
+    </li>
     <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li ng-if="vm.section != 're.model_iteration'" class="download dropdown-container show-tooltip title-tooltip top right"
-        ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+    <li class="download dropdown-container show-tooltip title-tooltip top right" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment','re.model_iteration'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Download Attributes</span></div>
         <h2 class="button borderless-button">
             <i class="fa fa-download"></i>
