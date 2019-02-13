@@ -1,0 +1,133 @@
+package com.latticeengines.datacloud.match.service.impl;
+
+import java.time.Duration;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
+import com.latticeengines.domain.exposed.actors.VisitingHistory;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.security.Tenant;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
+@Lazy
+@Component("entityMatchMetricService")
+public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
+
+    private static final String BATCH_MATCH_MODE = "Batch";
+
+    /*
+     * metric names
+     */
+    private static final String METRIC_ENTITY_MATCH_ACTOR_VISIT = "match.entity.actor.microengine";
+    private static final String METRIC_ENTITY_MATCH_HISTORY = "match.entity.history";
+    private static final String METRIC_ENTITY_MATCH_NUM_TRIES = "match.entity.num.tries";
+    private static final String METRIC_ENTITY_MATCH_DISTRIBUTION_RETRY = "match.entity.num.tries.dist.retry";
+    private static final String METRIC_ENTITY_MATCH_HAVE_RETRY_NUM_TRIES = "match.entity.num.tries.count.retry";
+
+    /*
+     * tag names (TODO probably move to a unified constant class)
+     */
+    private static final String TAG_ACTOR = "Actor";
+    private static final String TAG_ENTITY = "Entity";
+    private static final String TAG_TENANT = "Tenant";
+    private static final String TAG_MATCH_MODE = "MatchMode";
+    private static final String TAG_MATCHED = "Matched";
+    private static final String TAG_ALLOCATE_ID_MODE = "AllocateId";
+
+    @Lazy
+    @Inject
+    @Qualifier("rootRegistry")
+    private MeterRegistry rootRegistry;
+
+    @Override
+    public void recordActorVisit(MatchTraveler traveler, VisitingHistory history) {
+        if (traveler == null || history == null || traveler.getMatchInput() == null) {
+            return;
+        }
+        if (!Boolean.FALSE.equals(history.getRejected())) {
+            // not recording rejected visit
+            return;
+        }
+        String tenantId = getTenantId(traveler);
+        if (!shouldRecord(tenantId, traveler)) {
+            return;
+        }
+
+        Timer.builder(METRIC_ENTITY_MATCH_ACTOR_VISIT) //
+                .tag(TAG_ACTOR, history.getSite()) //
+                .tag(TAG_ENTITY, traveler.getEntity()) //
+                .tag(TAG_MATCH_MODE, history.getActorSystemMode()) //
+                .tag(TAG_ALLOCATE_ID_MODE, String.valueOf(traveler.getMatchInput().isAllocateId())) //
+                .tag(TAG_TENANT, tenantId) //
+                .register(rootRegistry).record(Duration.ofMillis(history.getDuration()));
+    }
+
+    @Override
+    public void recordMatchHistory(FuzzyMatchHistory history) {
+        if (history == null || history.getFact() == null || history.getFact().getMatchInput() == null) {
+            return;
+        }
+        MatchTraveler traveler = history.getFact();
+        if (traveler.getTotalTravelTime() == null || traveler.isMatched() == null) {
+            return;
+        }
+        String tenantId = getTenantId(traveler);
+        if (!shouldRecord(tenantId, traveler)) {
+            return;
+        }
+
+        Timer.builder(METRIC_ENTITY_MATCH_HISTORY) //
+                .tag(TAG_ENTITY, traveler.getEntity()) //
+                .tag(TAG_MATCH_MODE, traveler.getMode()) //
+                .tag(TAG_MATCHED, String.valueOf(traveler.getResult() != null)) //
+                .tag(TAG_ALLOCATE_ID_MODE, String.valueOf(traveler.getMatchInput().isAllocateId())) //
+                .tag(TAG_TENANT, tenantId).register(rootRegistry) //
+                .record(Duration.ofMillis(traveler.getTotalTravelTime().longValue()));
+
+        if (BATCH_MATCH_MODE.equalsIgnoreCase(traveler.getMode()) && traveler.getMatchInput().isAllocateId()) {
+            int numTries = traveler.getRetries();
+            DistributionSummary.builder(METRIC_ENTITY_MATCH_NUM_TRIES) //
+                    .tag(TAG_ENTITY, traveler.getEntity()) //
+                    .register(rootRegistry) //
+                    .record(numTries);
+            DistributionSummary.builder(METRIC_ENTITY_MATCH_DISTRIBUTION_RETRY) //
+                    .tag(TAG_ENTITY, traveler.getEntity()) //
+                    .register(rootRegistry) //
+                    .record(numTries > 1 ? 1.0 : 0.0);
+            if (numTries > 1) {
+                // retry
+                Counter.builder(METRIC_ENTITY_MATCH_HAVE_RETRY_NUM_TRIES) //
+                        .register(rootRegistry) //
+                        .increment(1);
+            }
+        }
+    }
+
+    private boolean shouldRecord(String tenantId, @NotNull MatchTraveler traveler) {
+        // only record entity match visits
+        return OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())
+                && StringUtils.isNotBlank(tenantId);
+    }
+
+    private String getTenantId(@NotNull MatchTraveler traveler) {
+        Tenant tenant = traveler.getMatchInput().getTenant();
+        if (tenant == null || tenant.getId() == null) {
+            return null;
+        }
+        return EntityMatchUtils.newStandardizedTenant(tenant).getId();
+    }
+}

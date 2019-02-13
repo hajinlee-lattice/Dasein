@@ -210,6 +210,10 @@ public abstract class Traveler {
         this.retries++;
     }
 
+    public void descRetry() {
+        this.retries--;
+    }
+
     /********************
      * Business methods
      ********************/
