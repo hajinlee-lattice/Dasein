@@ -287,30 +287,28 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 viewingIteration: true
             },
             resolve: {
-                ReviewData: function (
-                    $q,
-                    $stateParams,
-                    Model,
-                    ModelReviewStore,
-                    DataCloudStore
-                ) {
-                    var deferred = $q.defer(),
-                        modelId = $stateParams.modelId;
+                // ReviewData: function (
+                //     $q,
+                //     $stateParams,
+                //     Model,
+                //     ModelReviewStore,
+                //     DataCloudStore
+                // ) {
+                //     var deferred = $q.defer(),
+                //         modelId = $stateParams.modelId,
+                //         eventTableName =
+                //             Model.EventTableProvenance.EventTableName;
 
-                    ModelReviewStore.GetReviewData(
-                        modelId
-                    ).then(function (result) {
-                        console.log('### ReviewData result', result);
-                        var warnings = {};
-                        result.forEach(item => {
-                            warnings[item.name] = item;
-                        });
-                        DataCloudStore.setWarnings(warnings);
-                        deferred.resolve(result);
-                    });
+                //     console.log('### resolve ReviewData', Model, modelId, eventTableName);
+                //     ModelReviewStore.GetReviewData(
+                //         modelId
+                //     ).then(function (result) {
+                //         console.log('### ReviewData result', result);
+                //         deferred.resolve(result);
+                //     });
 
-                    return deferred.promise;
-                },
+                //     return deferred.promise;
+                // },
                 Enrichments: function ($q, $stateParams, DataCloudStore, ApiHost) {
                     var deferred = $q.defer(),
                         ratingId = $stateParams['rating_id'],
