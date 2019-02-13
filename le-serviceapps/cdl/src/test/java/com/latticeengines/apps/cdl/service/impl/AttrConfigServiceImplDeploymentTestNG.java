@@ -85,7 +85,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 verifyFlags(config, cat, partition, //
                         Active, false, //
                         true, true, //
-                        exportByDefault, true, //
+                        exportByDefault, !exportByDefault, //
                         true, true, //
                         false, true, //
                         false, true);
@@ -141,7 +141,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 verifyFlags(config, cat, partition, //
                         Active, false, //
                         true, true, //
-                        exportByDefault, true, //
+                        exportByDefault, !exportByDefault, //
                         true, true, //
                         false, true, //
                         false, false);
@@ -178,23 +178,23 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             String partition = getProductSpentPartition(attrName);
             switch (partition) {
-                case Partition.HAS_PURCHASED:
-                    verifyFlags(config, cat, partition, //
-                            Active, false, //
-                            true, true, //
-                            false, false, //
-                            false, false, //
-                            false, false, //
-                            false, false);
-                    break;
-                case Partition.OTHERS:
-                    verifyFlags(config, cat, partition, //
-                            Active, false, //
-                            true, true, //
-                            false, true, //
-                            true, true, //
-                            false, true, //
-                            false, false);
+            case Partition.HAS_PURCHASED:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        false, false, //
+                        false, false, //
+                        false, false, //
+                        false, false);
+                break;
+            case Partition.OTHERS:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        false, true, //
+                        true, true, //
+                        false, true, //
+                        false, false);
             }
             return true;
         });
@@ -419,7 +419,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void checkAndVerifyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
         List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
-//        System.out.println(attrConfigs);
+        // System.out.println(attrConfigs);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
                 .map(verifier).sequential().count().block();
@@ -480,8 +480,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     private void verifyUsage(String logPrefix, AttrConfig attrConfig, String property, boolean expectedValue,
             boolean expectedChg) {
         boolean enabled = Boolean.TRUE.equals(attrConfig.getPropertyFinalValue(property, Boolean.class));
-        Assert.assertEquals(enabled, expectedValue,
-                String.format("%s enabled for %s usage", logPrefix, property));
+        Assert.assertEquals(enabled, expectedValue, String.format("%s enabled for %s usage", logPrefix, property));
         boolean chg = attrConfig.getProperty(property).isAllowCustomization();
         Assert.assertEquals(chg, expectedChg, String.format("%s allow change %s usage", logPrefix, property));
     }

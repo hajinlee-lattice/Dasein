@@ -1,5 +1,35 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.eclipse.jetty.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.Counter;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.SegmentExportContextBuilder;
@@ -34,36 +64,9 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.eclipse.jetty.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class SegmentExportProcessor {
 
@@ -140,24 +143,6 @@ public abstract class SegmentExportProcessor {
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
 
-            Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
-                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Account) //
-                    .map(tuple -> {
-                        Attribute attribute = new Attribute();
-                        attribute.setName(BusinessEntity.Account.name() + SEPARATOR + tuple.getMiddle());
-                        attribute.setDisplayName(tuple.getRight());
-                        attribute.setSourceLogicalDataType("");
-                        attribute.setPhysicalDataType(Type.STRING.name());
-                        return attribute;
-                    }) //
-                    .collect(Collectors.toMap(Attribute::getName, att -> att));
-
-            configuredAccountAttributes.forEach(attr -> defaultAccountAttributesMap.remove(attr.getName()));
-
-            if (MapUtils.isNotEmpty(defaultAccountAttributesMap)) {
-                configuredAccountAttributes.addAll(defaultAccountAttributesMap.values());
-            }
-
             configuredRatingAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Rating));
             configuredPurHistoryAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.PurchaseHistory));
             configuredCuratedAccAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.CuratedAccount));
@@ -175,25 +160,6 @@ public abstract class SegmentExportProcessor {
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT
                 || exportType == MetadataSegmentExportType.ORPHAN_CONTACT) {
             configuredContactAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Contact));
-
-            Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
-            exportType.getDefaultAttributeTuples().stream() //
-                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact) //
-                    .map(tuple -> {
-                        Attribute attribute = new Attribute();
-                        attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());
-                        attribute.setDisplayName(tuple.getRight());
-                        attribute.setSourceLogicalDataType("");
-                        attribute.setPhysicalDataType(Type.STRING.name());
-                        return attribute;
-                    }) //
-                    .forEach(att -> defaultContactAttributesMap.put(att.getName(), att));
-
-            configuredContactAttributes.forEach(attr -> defaultContactAttributesMap.remove(attr.getName()));
-
-            if (MapUtils.isNotEmpty(defaultContactAttributesMap)) {
-                configuredContactAttributes.addAll(defaultContactAttributesMap.values());
-            }
 
             Map<String, String> customizedNameMapping = getCustomizedDisplayNames(tenant.getId(),
                     BusinessEntity.Contact);

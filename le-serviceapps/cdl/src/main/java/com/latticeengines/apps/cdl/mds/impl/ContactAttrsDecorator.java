@@ -26,7 +26,6 @@ public class ContactAttrsDecorator implements Decorator {
             .getDefaultExportAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
-
     private static Set<String> stdAttrs = SchemaRepository //
             .getStandardAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
@@ -54,6 +53,7 @@ public class ContactAttrsDecorator implements Decorator {
             // enable some attributes for Export
             if (exportAttributes.contains(cm.getAttrName())) {
                 cm.enableGroup(Enrichment);
+                cm.setCanEnrich(false);
             } else {
                 cm.disableGroup(Enrichment);
             }
@@ -61,7 +61,8 @@ public class ContactAttrsDecorator implements Decorator {
             cm.disableGroup(CompanyProfile);
             cm.disableGroup(Model);
             if (stdAttrs.contains(cm.getAttrName())) {
-                // a workaround due to Account Std and Contact Std attrs share AttrSpec
+                // a workaround due to Account Std and Contact Std attrs share
+                // AttrSpec
                 cm.setCanModel(false);
             }
         }
