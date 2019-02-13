@@ -29,12 +29,12 @@ angular
                         sort_modeliteration: {
                             label: 'Sort By',
                             icon: 'numeric',
-                            order: '-',
-                            property: 'updated',
+                            order: '',
+                            property: 'PredictivePower',
                             items: [
-                                { label: 'Display Name', icon: 'numeric', property: 'DisplayName' },
-                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' },
-                                { label: 'Predictive Power', icon: 'numeric', property: 'created' }
+                                { label: 'Predictive Power', icon: 'numeric', property: 'PredictivePower' },
+                                { label: 'Display Name', icon: 'alpha', property: 'DisplayName' },
+                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }
                             ]
                         },
                     },
@@ -62,10 +62,6 @@ angular
                 }
 
                 vm.init_filters = function () {
-                    if (vm.section == 're.model_iteration') {
-                        vm.orders.attribute = ['-HighlightHighlighted', 'ImportanceOrdering', 'DisplayName'];
-                    }
-
                     vm.download_button.items = [{
                         href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
                         label: vm.label.button_download,
@@ -228,7 +224,11 @@ angular
                 };
 
                 vm.sortOrder = function () {
-                    var sortPrefix = vm.sortPrefix.replace('+', '');
+                    if (vm.section == 're.model_iteration') {
+                        var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
+                    } else {
+                        var sortPrefix = vm.sortPrefix.replace('+', '');
+                    }
                     if (!vm.category) {
                         return handleFilterOrder(vm.orders.category);
                     } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
@@ -244,13 +244,31 @@ angular
 
                 var handleFilterOrder = function (order, sortPrefix) {
                     var sortPrefix = sortPrefix || vm.sortPrefix.replace('+', '');
+
                     if (typeof order === 'object') {
                         var sortArr = order,
                             retArr = [];
 
-                        sortArr.forEach(function (item, index) {
-                            retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
-                        });
+                        if (vm.section == 're.model_iteration') {
+                            var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
+                            var importance = 'ImportanceOrdering';
+                            var predictive = 'PredictivePower';
+                            var name = sortPrefix + 'DisplayName';
+
+                            if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
+                                retArr.push(importance);
+                            }
+
+                            if (vm.header.sort_modeliteration.property == 'PredictivePower') {
+                                retArr.push(predictive);
+                            }
+
+                            retArr.push(name);
+                        } else {
+                            sortArr.forEach(function (item, index) {
+                                retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
+                            });
+                        }
 
                         return retArr;
                     }

@@ -58,8 +58,7 @@
             <i class="fa fa-trash"></i>
         </button>
     </li>
-    <li ng-if="vm.section != 're.model_iteration'" class="filter dropdown-container show-tooltip title-tooltip top right"
-        ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+    <li class="filter dropdown-container show-tooltip title-tooltip top right" ng-if="['segment.analysis','wizard.ratingsengine_segment','re.model_iteration'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Filtering</span></div>
         <h2 class="button borderless-button" ng-class="{ selected: vm.isFilterSelected() }">
             <i class="fa fa-filter"></i>
@@ -120,8 +119,7 @@
     <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li ng-if="vm.section != 're.model_iteration'" class="download dropdown-container show-tooltip title-tooltip top right"
-        ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+    <li class="download dropdown-container show-tooltip title-tooltip top right" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment','re.model_iteration'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Download Attributes</span></div>
         <h2 class="button borderless-button">
             <i class="fa fa-download"></i>
