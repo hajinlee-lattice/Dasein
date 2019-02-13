@@ -38,16 +38,10 @@
 
                     <div class="dropdown-split-button">
 
-                        <div 
-                            class="dropdown"
-                            ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress || vm.gatheringAttributes}">
-                            <button 
-                                ng-click="vm.remodelIteration()"
-                                ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
-                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">Remodel 
-                            </button><button 
-                                ng-click="vm.toggleMenu($event)"
-                                ng-class="{disabled: vm.remodelingProgress}"
+                        <div class="dropdown" ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress || vm.gatheringAttributes}">
+                            <button ng-click="vm.remodelIteration()" ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
+                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">Remodel
+                            </button><button ng-click="vm.toggleMenu($event)" ng-class="{disabled: vm.remodelingProgress}"
                                 ng-disabled="vm.remodelingProgress">
                                 <span>
                                     Iteration {{ vm.selectedIteration.iteration }}
@@ -60,12 +54,12 @@
                             </ul>
                             <span>
                                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                                <span ng-if="!vm.gatheringAttributes">Remodling iteration {{ vm.selectedIteration.iteration }}</span>
-                                <span ng-if="vm.gatheringAttributes">Gathering  attributes</span>
+                                <span ng-if="!vm.gatheringAttributes">Remodling iteration {{
+                                    vm.selectedIteration.iteration }}</span>
+                                <span ng-if="vm.gatheringAttributes">Gathering attributes</span>
                             </span>
 
-                        </div><button ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')"
-                            ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
+                        </div><button ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')" ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes}"
                             ng-disabled="vm.remodelingProgress || vm.gatheringAttributes">
                             <i class="fa fa-cog" aria-hidden="true"></i>
                         </button>
@@ -297,9 +291,7 @@
 
                                 </td>
                                 <td>
-                                    <button 
-                                        class="button link-button" 
-                                        ng-click="vm.viewIteration('home.model.attributes', iteration)"
+                                    <button class="button link-button" ng-click="vm.viewIteration('home.model.datacloud', iteration)"
                                         ng-if="
                                             iteration.modelingJobStatus === 'Completed' && 
                                             iteration.modelSummaryId">View
@@ -328,9 +320,7 @@
                         <tbody>
                             <tr ng-repeat="item in vm.relatedItems | limitTo: 5">
                                 <td>
-                                    <span 
-                                        class="icon"
-                                        ng-class="{
+                                    <span class="icon" ng-class="{
                                             'ico-segment': item.type == 'Segment',
                                             'ico-campaign': item.type == 'Campaign',
                                             'ico-model': item.type == 'Model'
