@@ -171,9 +171,9 @@ public class ModelingFileUploadResource {
     @ApiOperation(value = "return supported date/time format and timezone.")
     public ResponseDocument<AvailableDateFormat> getSupportedDateTimeFormat() {
         AvailableDateFormat availableDateFormat = new AvailableDateFormat();
-        availableDateFormat.setDateFormats(TimeStampConvertUtils.SUPPORTED_USER_DATE_FORMATS);
-        availableDateFormat.setTimeFormats(TimeStampConvertUtils.SUPPORTED_USER_TIME_FORMATS);
-        availableDateFormat.setTimezones(TimeStampConvertUtils.SUPPORTED_USER_TIME_ZONES);
+        availableDateFormat.setDateFormats(TimeStampConvertUtils.getSupportedUserDateFormats());
+        availableDateFormat.setTimeFormats(TimeStampConvertUtils.getSupportedUserTimeFormats());
+        availableDateFormat.setTimezones(TimeStampConvertUtils.getSupportedUserTimeZones());
         return ResponseDocument.successResponse(availableDateFormat);
     }
 

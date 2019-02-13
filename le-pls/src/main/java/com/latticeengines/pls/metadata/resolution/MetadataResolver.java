@@ -494,7 +494,7 @@ public class MetadataResolver {
         UserDefinedType fundamentalType = null;
 
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
-        MutablePair<String, String> formatForDateAndTime = new MutablePair<String, String>();
+        MutablePair<String, String> formatForDateAndTime = new MutablePair<>();
         if (columnFields.isEmpty()) {
             fundamentalType = UserDefinedType.TEXT;
         } else if (isBooleanTypeColumn(columnFields)) {
@@ -505,18 +505,17 @@ public class MetadataResolver {
             fundamentalType = UserDefinedType.NUMBER;
         } else if (isDateTypeColumn(columnFields, formatForDateAndTime)) {
             fundamentalType = UserDefinedType.DATE;
+            fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
+            fieldMapping.setTimeFormatString(formatForDateAndTime.getRight());
         } else {
             fundamentalType = UserDefinedType.TEXT;
         }
 
-        if (fundamentalType == UserDefinedType.DATE) {
-            fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
-            fieldMapping.setTimeFormatString(formatForDateAndTime.getRight());
-        }
         return fundamentalType;
     }
 
     @VisibleForTesting
+    // Note that the returned data and time format are the user supported formats not the Java 8 formats.
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
@@ -529,8 +528,8 @@ public class MetadataResolver {
         }
         MutablePair<String, String> result = distinguishDateAndTime(columnFields);
         if (result != null) {
-            formatForDateAndTime.setLeft(result.getLeft());
-            formatForDateAndTime.setRight(result.getRight());
+            formatForDateAndTime.setLeft(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
+            formatForDateAndTime.setRight(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
         }
         return true;
     }
