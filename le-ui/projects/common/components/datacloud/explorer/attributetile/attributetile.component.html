@@ -1,30 +1,6 @@
-<<<<<<< HEAD
-<div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate" ng-class="{
-                    'active': enrichment.IsSelected,
-                    'has_warning': vm.section == 're.model_iteration'
-                }">
-    <div class="attribute-importance" ng-if="vm.section == 're.model_iteration'">
-        <div class="attribute-warning show-tooltip top" ng-if="enrichment.HasWarnings">
-            <div class="tooltip_">
-                <div class="cover" ng-repeat="warning in enrichment.AssociatedDataRules">
-                    <em>{{ vm.getWarning(warning).displayName + ' (' + warning + ')' || warning; }}</em>
-                    <p>{{ vm.getWarning(warning).description || 'description not found.'; }}</p>
-                </div>
-            </div>
-            <i class="fa fa-warning pull-left"></i>Warning
-        </div>
-        <span class="attribute-importance-label" ng-if="vm.checkImportance(enrichment)">
-            Feature Importance
-        </span>
-        <span class="attribute-importance-number" ng-if="vm.checkImportance(enrichment)">
-            {{ enrichment.ImportanceOrdering }}
-        </span>
-    </div>
-=======
 <div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
 <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
      ng-class="{'active': enrichment.IsSelected}">
->>>>>>> parent of 72e22223db... - View Remodel changes
     <span>
         <span class="attribute-count background-color show-tooltip delay bottom left" ng-if="(totalcount = vm.getAttributeRules(enrichment)).length > 0">
             <strong>{{ totalcount.length }}</strong>
@@ -129,23 +105,9 @@
                                   vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                                   !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                                   && enrichment.Entity !== 'Rating'">
-<<<<<<< HEAD
-            <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
-            <h5>
-                <label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
-                    'Attribute range' : 'Attribute values'}}
-                </label>
-                <label>
-                    <span ng-if="vm.section == 're.model_iteration'">Lift &nbsp; &nbsp; &nbsp;</span>
-                    Records
-                </label>
-            </h5>
-
-=======
     <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
             <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? 'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
             
->>>>>>> parent of 72e22223db... - View Remodel changes
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                     class="attribute attribute-stat delay top"
@@ -203,31 +165,6 @@
         </div>
 
         <!--  -->
-<<<<<<< HEAD
-        <div ng-if="vm.showFreeTextAttributeCard(enrichment)" class="free-text-attribute">
-            {{'Free Text Attribute' | uppercase}}
-            <div ng-if="vm.section != 're.model_iteration'">
-                <button class="{{vm.categoryClass(enrichment.Category)}} button attribute-count show-tooltip delay top left"
-                    ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
-                    <span ng-if="totalcount.length == 0" class="free-text fa fa-plus"></span>
-                    <span ng-if="totalcount.length == 1" class="free-text fa fa-check" ng-class="{'selected': totalcount.length == 1}"></span>
-                    <span ng-if="totalcount.length > 1" class="free-text" ng-class="{'selected': totalcount.length > 1}">
-                        {{totalcount.length}} </span>
-                    Add To Query
-                </button>
-            </div>
-        </div>
-        <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute">
-            {{'No Data Available' | uppercase}}
-        </div>
-
-        <div class="attribute-modeliteration-toggle" ng-if="vm.section == 're.model_iteration'">
-            <i ng-click="vm.toggleApprovedUsage(enrichment)" class="fa fa-toggle-on" ng-class="{ 
-                    'fa-rotate-180': !vm.checkApprovedUsage(enrichment)
-                }">
-            </i>
-        </div>
-=======
         <div ng-if="vm.showFreeTextAttributeCard(enrichment)" class="free-text-attribute"> 
                 {{'Free Text Attribute' | uppercase}}
                 <div>
@@ -242,7 +179,6 @@
         <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute"> 
                 {{'No Data Available' | uppercase}}
         </div> 
->>>>>>> parent of 72e22223db... - View Remodel changes
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode">
         <li class="control enrich" ng-if="vm.section == 'edit'">

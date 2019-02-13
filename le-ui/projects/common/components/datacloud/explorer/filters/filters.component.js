@@ -1,51 +1,4 @@
 angular
-<<<<<<< HEAD
-    .module('common.datacloud.explorer.filters', [])
-    .directive('explorerFilters', function () {
-        return {
-            restrict: 'EA',
-            scope: {
-                vm: '='
-            },
-            templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-            controller: function ($scope, $state, $timeout, $interval, DataCloudStore, QueryStore,
-                SegmentStore, RatingsEngineStore, FeatureFlagService, AuthorizationUtility) {
-                var vm = $scope.vm;
-
-                angular.extend(vm, {
-                    orders: {
-                        attributeLookupMode: ['-Value', 'DisplayName'],
-                        attribute: ['-HighlightHighlighted', 'DisplayName'],
-                        subcategory: 'toString()',
-                        category: 'toString()'
-                    },
-                    download_button: {
-                        class: 'orange-button select-label',
-                        icon: 'fa fa-download',
-                        iconclass: 'white-button select-more',
-                        iconrotate: false,
-                        tooltip: 'Download Enrichments'
-                    },
-                    header: {
-                        sort_modeliteration: {
-                            label: 'Sort By',
-                            icon: 'numeric',
-                            order: '',
-                            property: 'PredictivePower',
-                            items: [
-                                { label: 'Predictive Power', icon: 'numeric', property: 'PredictivePower' },
-                                { label: 'Display Name', icon: 'alpha', property: 'DisplayName' },
-                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }
-                            ]
-                        },
-                    },
-                    sortPrefix: '+',
-                    view: 'list',
-                    queryText: '',
-                    QueryStore: QueryStore,
-                    saved: false,
-                    hasDeleteAccessRights: ['segment.analysis'].indexOf(vm.section) != -1 ? AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) : false
-=======
 .module('common.datacloud.explorer.filters', [])
 .directive('explorerFilters',function() {
     return {
@@ -84,7 +37,6 @@ angular
             if (!vm.showHighlighting()) {
                 vm.orders.attribute = vm.orders.attribute.filter(function(item){
                     return item != '-HighlightHighlighted' && item != 'HighlightHighlighted'
->>>>>>> parent of 72e22223db... - View Remodel changes
                 });
             }
 
@@ -182,69 +134,6 @@ angular
                     if(buttons.length > 0 || find_dropdown_buttons_count > 5) {
                         $interval.cancel(find_dropdown_buttons);
                     }
-<<<<<<< HEAD
-                };
-
-                vm.hideMessage = function () {
-                    vm.saved = false;
-                };
-
-                vm.isFilterSelected = function () {
-                    return (vm.section !== 'insights' && vm.metadata.toggle.show.enabled) ||
-                        vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected ||
-                        vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium ||
-                        vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted ||
-                        vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls ||
-                        vm.metadata.toggle.show.internal;
-                };
-
-                vm.sortOrder = function () {
-                    if (vm.section == 're.model_iteration') {
-                        var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
-                    } else {
-                        var sortPrefix = vm.sortPrefix.replace('+', '');
-                    }
-                    if (!vm.category) {
-                        return handleFilterOrder(vm.orders.category);
-                    } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
-                        return handleFilterOrder(vm.orders.subcategory);
-                    } else {
-                        if (vm.lookupMode && vm.category == 'Technology Profile' || vm.category == 'Website Profile') {
-                            return handleFilterOrder(vm.orders.attributeLookupMode);
-                        } else {
-                            return handleFilterOrder(vm.orders.attribute);
-                        }
-                    }
-                };
-
-                var handleFilterOrder = function (order, sortPrefix) {
-                    var sortPrefix = sortPrefix || vm.sortPrefix.replace('+', '');
-
-                    if (typeof order === 'object') {
-                        var sortArr = order,
-                            retArr = [];
-
-                        if (vm.section == 're.model_iteration') {
-                            var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
-                            var importance = 'ImportanceOrdering';
-                            var predictive = 'PredictivePower';
-                            var name = sortPrefix + 'DisplayName';
-
-                            if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
-                                retArr.push(importance);
-                            }
-
-                            if (vm.header.sort_modeliteration.property == 'PredictivePower') {
-                                retArr.push(predictive);
-                            }
-
-                            retArr.push(name);
-                        } else {
-                            sortArr.forEach(function (item, index) {
-                                retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
-                            });
-                        }
-=======
                     buttons.click(function(e){
                         var button = angular.element(this),
                             toggle_on = !button.hasClass('active'),
@@ -262,7 +151,6 @@ angular
                         }
 
                         e.stopPropagation();
->>>>>>> parent of 72e22223db... - View Remodel changes
 
                     });
                 }
@@ -363,18 +251,9 @@ angular
                     filter.IsSelected = false;
                 }
 
-<<<<<<< HEAD
-                    if (DataCloudStore.ratingIterationFilter == 'disabled') {
-                        filter.ApprovedUsage = 'None';
-                    }
-
-                    return filter;
-                };
-=======
                 if (vm.metadata.toggle.show.premium && !vm.metadata.toggle.hide.premium) {
                     filter.IsPremium = true;
                 }
->>>>>>> parent of 72e22223db... - View Remodel changes
 
                 if (!vm.metadata.toggle.show.premium && vm.metadata.toggle.hide.premium) {
                     filter.IsPremium = false;

@@ -277,13 +277,8 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 }
             }
         })
-<<<<<<< HEAD
-        .state('home.model.datacloud', {
-            url: '/datacloud/:aiModel',
-=======
         .state('home.model.attributes', {
             url: '/attributes',
->>>>>>> parent of 72e22223db... - View Remodel changes
             params: {
                 pageIcon: 'ico-attributes',
                 pageTitle: 'View Iteration',
@@ -291,59 +286,12 @@ export default function($stateProvider, $urlRouterProvider, $locationProvider) {
                 viewingIteration: true
             },
             resolve: {
-<<<<<<< HEAD
-                ReviewData: function (
-                    $q,
-                    $stateParams,
-                    Model,
-                    ModelReviewStore,
-                    DataCloudStore
-                ) {
-                    var deferred = $q.defer(),
-                        modelId = $stateParams.modelId;
-
-                    ModelReviewStore.GetReviewData(
-                        modelId
-                    ).then(function (result) {
-                        console.log('### ReviewData result', result);
-                        var warnings = {};
-                        result.forEach(item => {
-                            warnings[item.name] = item;
-                        });
-                        DataCloudStore.setWarnings(warnings);
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                },
-                Enrichments: function ($q, $stateParams, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer(),
-                        ratingId = $stateParams['rating_id'],
-                        aiModel = $stateParams['aiModel'],
-                        opts = {
-                            url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata`
-                        };
-
-                    // clear DataCloudStore (tried this in onEnter, didn't work right)                   
-                    DataCloudStore.clear();
-                    DataCloudStore.ratingIterationFilter = 'all';
-
-                    DataCloudStore.getAllEnrichmentsConcurrently(opts, true).then((result) => {
-                        result.forEach((item) => {
-                            if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
-                                item.HasWarnings = true;
-                            }
-                        })
-                        deferred.resolve(result);
-                    });
-=======
                 Enrichments: [
                     '$q',
                     'DataCloudStore',
                     'ApiHost',
                     function($q, DataCloudStore, ApiHost) {
                         var deferred = $q.defer();
->>>>>>> parent of 72e22223db... - View Remodel changes
 
                         DataCloudStore.setHost(ApiHost);
 
