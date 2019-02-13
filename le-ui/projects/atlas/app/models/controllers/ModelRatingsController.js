@@ -446,9 +446,9 @@ angular.module('lp.models.ratings', [
         });
 
         var rating_id = $stateParams.rating_id,
-            modelId = vm.ratingModelId;
+            aiModelId = vm.ratingModelId;
             
-        ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
+        ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
             if (result != null && result.success === true) {
 
                 RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
