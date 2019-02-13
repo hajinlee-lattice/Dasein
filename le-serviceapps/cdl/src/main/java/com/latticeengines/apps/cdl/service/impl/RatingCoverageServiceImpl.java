@@ -580,6 +580,20 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 bucketCoverageCounts.add(coveragePair);
             }
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
+
+            // Populate Unscored counts
+            // unscored accounts
+            String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
+            Restriction unscoredRestriction =
+                    Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull().build();
+            Restriction unscoredAccountsInSegmentRest = Restriction.builder()
+                    .and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
+            FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
+            unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
+            unscoredFrontEndQuery.setAccountRestriction(new FrontEndRestriction(unscoredAccountsInSegmentRest));
+            unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
+            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
+
             boolean hasContactTable = dataCollectionProxy.hasContact(tenant.getId(), null);
             // TODO: this is not working as expected. Though contact table
             // exists, this api still returns false.
@@ -608,37 +622,21 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                         bucketCoverage.getBucket(), ex);
                             }
                         });
+
                     } else {
                         FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
                                 isRestrictNullLookupId, querySegment, lookupId, ratingEngineId, null);
                         Long contactCount = getContactCount(tenant, contactFrontEndQuery);
                         coverageInfo.setContactCount(contactCount);
                     }
+                    // unscored contacts
+                    unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+                    Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
+                    coverageInfo.setUnscoredContactCount(unscoredContactCount);
                 } catch (Exception ex) {
                     log.info("Got error in fetching contact count", ex);
                 }
             }
-
-            // Populate Unscored counts
-            // unscored accounts
-            String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
-            Restriction unscoredRestriction =
-                    Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull().build();
-            Restriction unscoredAccountsInSegmentRest = Restriction.builder()
-                    .and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
-            FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
-            unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
-            unscoredFrontEndQuery.setAccountRestriction(new FrontEndRestriction(unscoredAccountsInSegmentRest));
-            unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
-            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
-
-            // unscored contacts
-            if (hasContactTable && loadContactCount) {
-                unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
-                Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
-                coverageInfo.setUnscoredContactCount(unscoredContactCount);
-            }
-
             return coverageInfo;
         } catch (Exception ex) {
             throw ex;
@@ -767,7 +765,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         // return 0L;
         // }
         if (log.isDebugEnabled()) {
-            log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
+            log.debug("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
         }
         return entityProxy.getCount(tenant.getId(), contactFrontEndQuery);
     }
