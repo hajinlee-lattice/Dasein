@@ -198,7 +198,7 @@ Page Summary / Sub-Nav Headers
       padding: 40px 0;
       flex-wrap: nowrap;
       & > div {
-        // width: 25%;
+        width: 25%;
       }
     }
     @include media(">1140px") {
