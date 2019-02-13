@@ -28,13 +28,13 @@ angular
                     header: {
                         sort_modeliteration: {
                             label: 'Sort By',
-                            icon: 'numeric',
+                            icon: 'alpha',
                             order: '',
-                            property: 'PredictivePower',
+                            property: 'DisplayName',
                             items: [
-                                { label: 'Predictive Power', icon: 'numeric', property: 'PredictivePower' },
                                 { label: 'Display Name', icon: 'alpha', property: 'DisplayName' },
-                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }
+                                { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }//,
+                                //{ label: 'Predictive Power', icon: 'numeric', property: 'created' }
                             ]
                         },
                     },
@@ -252,15 +252,10 @@ angular
                         if (vm.section == 're.model_iteration') {
                             var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
                             var importance = 'ImportanceOrdering';
-                            var predictive = 'PredictivePower';
                             var name = sortPrefix + 'DisplayName';
 
                             if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
                                 retArr.push(importance);
-                            }
-
-                            if (vm.header.sort_modeliteration.property == 'PredictivePower') {
-                                retArr.push(predictive);
                             }
 
                             retArr.push(name);
