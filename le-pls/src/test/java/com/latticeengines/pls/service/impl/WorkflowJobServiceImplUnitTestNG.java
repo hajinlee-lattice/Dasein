@@ -311,17 +311,17 @@ public class WorkflowJobServiceImplUnitTestNG {
         workflowJobService.updateExpiredOrphanJobs(jobList);
         Assert.assertEquals(jobList.stream()
                 .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
-                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME").equals(OrphanRecordsType.TRANSACTION.getDisplayName())
+                        && job.getInputs().get("ARTIFACT_TYPE").equals(OrphanRecordsType.TRANSACTION.getOrphanType())
                         && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
                 .count(), 1);
         Assert.assertEquals(jobList.stream()
                 .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
-                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME").equals(OrphanRecordsType.CONTACT.getDisplayName())
+                        && job.getInputs().get("ARTIFACT_TYPE").equals(OrphanRecordsType.CONTACT.getOrphanType())
                         && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
                 .count(), 1);
         Assert.assertEquals(jobList.stream()
                 .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
-                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME").equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getDisplayName())
+                        && job.getInputs().get("ARTIFACT_TYPE").equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType())
                         && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
                 .count(), 1);
     }
@@ -362,7 +362,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         job.setStartTimestamp(new Date(startTimestamp));
         job.setJobStatus(JobStatus.COMPLETED);
         Map<String, String> inputContext = new HashMap<>();
-        inputContext.put("ARTIFACT_DISPLAY_NAME", artifactType.getDisplayName());
+        inputContext.put("ARTIFACT_TYPE", artifactType.getOrphanType());
         inputContext.put("EXPORT_ID", UUID.randomUUID().toString());
         job.setInputs(inputContext);
         return job;

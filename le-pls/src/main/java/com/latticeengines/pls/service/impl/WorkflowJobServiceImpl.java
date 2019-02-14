@@ -574,16 +574,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 .filter(job -> job.getJobType().equals(PA_JOB_TYPE))
                 .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
         Optional<Job> latestOrphanTrxJob = jobs.stream()
-                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
-                        .equals(OrphanRecordsType.TRANSACTION.getDisplayName()))
+                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && validateArtifactTypeAndOrphanType(
+                        job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.TRANSACTION))
                 .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
         Optional<Job> latestOrphanContactJob = jobs.stream()
-                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
-                        .equals(OrphanRecordsType.CONTACT.getDisplayName()))
+                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && validateArtifactTypeAndOrphanType(
+                        job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.CONTACT))
                 .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
         Optional<Job> latestUnmatchedAccountJob = jobs.stream()
-                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
-                        .equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getDisplayName()))
+                .filter(job -> job.getJobType().equals(ORPHAN_JOB_TYPE) && validateArtifactTypeAndOrphanType(
+                        job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.UNMATCHED_ACCOUNT))
                 .min((job1, job2) -> job2.getStartTimestamp().compareTo(job1.getStartTimestamp()));
 
         for (Job job : jobs) {
@@ -596,22 +596,22 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
                 // check by the same orphan types
                 if (latestOrphanTrxJob.isPresent()
-                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
-                        .equals(OrphanRecordsType.TRANSACTION.getDisplayName())
+                        && validateArtifactTypeAndOrphanType(
+                                job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.TRANSACTION)
                         && latestOrphanTrxJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
                     job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
                 }
 
                 if (latestOrphanContactJob.isPresent()
-                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
-                        .equals(OrphanRecordsType.CONTACT.getDisplayName())
+                        && validateArtifactTypeAndOrphanType(
+                                job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.CONTACT)
                         && latestOrphanContactJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
                     job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
                 }
 
                 if (latestUnmatchedAccountJob.isPresent()
-                        && job.getInputs().get("ARTIFACT_DISPLAY_NAME")
-                        .equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getDisplayName())
+                        && validateArtifactTypeAndOrphanType(
+                                job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.UNMATCHED_ACCOUNT)
                         && latestUnmatchedAccountJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
                     job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
                 }
@@ -629,6 +629,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setSubJobs(subJobs);
             }
         }
+    }
+
+    private boolean validateArtifactTypeAndOrphanType(String artifactType, OrphanRecordsType orphanRecordsType) {
+        return artifactType.equals(orphanRecordsType.name()) || artifactType.equals(orphanRecordsType.getOrphanType());
     }
 
     private void updateJobWithModelSummary(Job job) {
