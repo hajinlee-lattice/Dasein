@@ -108,7 +108,7 @@ export class ConnectorList extends Component {
         return (
             <div className="main-panel">
                 <LeHPanel hstretch={"true"} halignment={CENTER}>
-                    <h2 className="connectors-title">Select one of our many application connectors</h2>
+                    <h2 className="connectors-title">Select one of our application connectors</h2>
                 </LeHPanel>
                 <LeVPanel halignment={CENTER}>
                     

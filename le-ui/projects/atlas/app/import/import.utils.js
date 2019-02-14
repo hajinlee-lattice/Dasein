@@ -105,6 +105,13 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
             updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName]);
         });
     };
+    this.updateLatticeDateField = (fieldMapped, dateObject) => {
+        // console.log('UPDATE TO ==> ', dateObject);
+        fieldMapped.dateFormatString = dateObject.dateFormatString ? dateObject.dateFormatString : null;
+        fieldMapped.timeFormatString = dateObject.timeFormatString ? dateObject.timeFormatString : null;
+        fieldMapped.timezone = dateObject.timezone ? dateObject.timezone : null;
+        // console.log(fieldMapped);
+    };
 
     function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj){
         fieldsMapped.forEach(function(fieldMapped){
@@ -118,9 +125,9 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
 
     function updateFieldDate(fieldMapped, newTypeObj) {
         if(fieldMapped.fieldType !== 'DATE'){
-            fieldMapped.dateFormatString = null;
-            fieldMapped.timeFormatString = null
-            fieldMapped.timezone = null;
+            delete fieldMapped.dateFormatString;
+            delete fieldMapped.timeFormatString;
+            delete fieldMapped.timezone;
         }else{
             fieldMapped.dateFormatString = newTypeObj.dateFormatString;
             fieldMapped.timeFormatString = newTypeObj.timeFormatString;
@@ -144,6 +151,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
             }
+            updateFieldDate(fieldsMapped[mapped], savedObj);
         });
     }
     
