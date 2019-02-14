@@ -305,13 +305,13 @@ angular
                 },
                 AnalysisFields: function() {
                     return [
-                        { name: 'Type' },
+                        { name: 'Type', type: 'TEXT' },
                         { name: 'Industry' },
-                        { name: 'SpendAnalyticsSegment', displayName: 'Account Business Segment' },
-                        { name: 'AnnualRevenue', displayName: 'Estimated Yearly Revenue' },
-                        { name: 'Longitude' },
-                        { name: 'AnnualRevenueCurrency', displayName: 'Estimated Yearly Revenue Currency' },
-                        { name: 'Latitude' }
+                        { name: 'SpendAnalyticsSegment', displayName: 'Account Business Segment',type: 'TEXT' },
+                        { name: 'AnnualRevenue', displayName: 'Estimated Yearly Revenue', type: 'TEXT' },
+                        { name: 'Longitude', type: 'TEXT' },
+                        { name: 'AnnualRevenueCurrency', displayName: 'Estimated Yearly Revenue Currency', type: 'TEXT' },
+                        { name: 'Latitude', type: 'TEXT' }
                         //{ name: 'NumberOfEmployees', displayName: 'Number Of Employees' },
                     ];
                 }
@@ -493,15 +493,15 @@ angular
                         // { name: 'Website', displayName: '' },
                    ];
                 },
-               AnalysisFields: function() {
+               AnalysisFields: function(ImportWizardStore) {
                     return [
-                        { name: 'LeadStatus', displayName: 'Lead Status' },
-                        { name: 'LeadSource', displayName: 'Lead Source' },
-                        { name: 'LeadType', displayName: 'Lead Type' },
-                        { name: 'CreatedDate', displayName: 'Created Date' },
-                        { name: 'LastModifiedDate', displayName: 'Last Modified Date' },
-                        { name: 'DoNotMail', displayName: 'Has Opted Out of Email' },
-                        { name: 'DoNotCall', displayName: 'Has Opted Out of Phone Calls' }
+                        { name: 'LeadStatus', displayName: 'Lead Status', type: 'TEXT'},
+                        { name: 'LeadSource', displayName: 'Lead Source', type: 'TEXT'},
+                        { name: 'LeadType', displayName: 'Lead Type', type: 'TEXT'},
+                        { name: 'CreatedDate', displayName: 'Created Date', type: 'DATE' },
+                        { name: 'LastModifiedDate', displayName: 'Last Modified Date', type: 'DATE'},
+                        { name: 'DoNotMail', displayName: 'Has Opted Out of Email',  type: 'TEXT' },
+                        { name: 'DoNotCall', displayName: 'Has Opted Out of Phone Calls', type: 'TEXT' }
                     ];
                 }
             },

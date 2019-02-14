@@ -4,6 +4,7 @@ angular.module('lp.import')
     var ImportWizardStore = this;
 
     this.init = function() {
+        this.tooltipDateTxt = 'Date Format is important for our database to map your data correctly. This is only valid for Date Type data.';
         this.csvFileName = null;
         this.fieldDocument = null;
         this.userFieldsType = {};
@@ -300,6 +301,7 @@ angular.module('lp.import')
             this.fieldDocumentSaved[nextState] = copyFormer;
             $state.go(nextState);
         }
+        // console.log(this.fieldDocumentSaved);
     }
 
     /**
@@ -466,7 +468,7 @@ angular.module('lp.import')
         this.importOnly = importOnly;
     }
     this.getImportOnly = function() {
-        console.log(this.importOnly);
+        // console.log(this.importOnly);
         return this.importOnly;
     }
 
@@ -542,6 +544,20 @@ angular.module('lp.import')
         return data;
     }
 
+    this.updateSavedObjects = (object) => {
+        let name = $state.current.name;
+        let saved = this.saveObjects[name];
+        Object.keys(saved).forEach(num => {
+            if(saved[num].mappedField === object.name){
+                ImportUtils.updateLatticeDateField(saved[num], object);
+                return;
+            }
+        });
+        this.setSaveObjects(saved);
+        // console.log(this.saveObjects);
+         
+    }
+
     this.setSaveObjects = function(object, key) {
         var key = key || $state.current.name || 'unknown';
         this.saveObjects[key] = object;
@@ -553,6 +569,7 @@ angular.module('lp.import')
         return formerState;
     }
     this.saveDocumentFields = function(state){
+        // console.log('Saved OBJ ', this.saveObjects);
         if(this.saveObjects[state]){
             var copy = this.getSavedDocumentCopy(getFormerState(state));// this.getFieldDocument(true).fieldMappings;
             ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
