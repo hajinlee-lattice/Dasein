@@ -101,6 +101,12 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     @Value("${admin.test.deployment.api:http://localhost:8085}")
     private String adminApiHostPort;
 
+    @Value("${testframework.clean.redshift.enabled:false}")
+    private boolean redshiftCleanEnabled;
+
+    @Value("${testframework.clean.s3.enabled:false}")
+    private boolean s3CleanEnabled;
+
     private Map<String, String> multiTenantDocStores;
     private Camille camille;
     private String podId;
@@ -136,8 +142,16 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             }
         }
 
-        cleanupRedshift();
-        cleanupS3();
+        if (redshiftCleanEnabled) {
+            cleanupRedshift();
+        } else {
+            log.info("Redshift clean is disabled");
+        }
+        if (s3CleanEnabled) {
+            cleanupS3();
+        } else {
+            log.info("S3 clean is disabled");
+        }
         cleanupTenantsInDocumentStores();
         cleanupTenantsInHdfs();
         cleanupZK();
