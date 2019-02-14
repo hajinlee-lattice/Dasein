@@ -8,8 +8,10 @@ angular.module('lp.import.wizard.latticefields', [])
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
+    // console.log(alreadySaved)
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
+        // vm.updateAnalysisFields();
     }
     var makeList = function(object) {
         var list = [];
@@ -44,10 +46,11 @@ angular.module('lp.import.wizard.latticefields', [])
         unavailableFields: [],
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
-        keyMap: {}
+        keyMap: {},
+        fieldDateTooltip: ImportWizardStore.tooltipDateTxt
     });
-
-
+    
+    // console.log('======>>>>>÷>>>>>> ', vm.fieldMappings);
     vm.latticeFieldsDescription =  function(type) {
         switch (type) {
             case 'Account': return "Lattice uses several account fields that you should provide for each record, if possible. Please review the fields below to make sure everything is mapping correctly."; 
@@ -59,6 +62,7 @@ angular.module('lp.import.wizard.latticefields', [])
     }
     
     vm.init = function() {
+        // vm.updateAnalysisFields();
         ImportWizardStore.setValidation('latticefields', false);
 
         vm.matchingFieldsArr = [];
@@ -89,8 +93,19 @@ angular.module('lp.import.wizard.latticefields', [])
                 vm.availableFields.push(fieldMapping);
             });
         }
+       
     };
     
+    vm.noDate = () => {
+        let noDate = true;
+        vm.analysisFields.forEach(element => {
+            if(element.type == 'DATE'){
+                noDate = false;
+                return;
+            }
+        });
+        return noDate;
+    };
     /**
      * NOTE: The delimiter could cause a problem if the column name has : as separator 
      * @param {*} string 
@@ -180,4 +195,42 @@ angular.module('lp.import.wizard.latticefields', [])
     if (FieldDocument) {
         vm.init();
     }
+
+    vm.chageDateFormat = (fieldMapping) => {
+        // console.log('UPDATING ==> ',fieldMapping);
+        ImportWizardStore.updateSavedObjects(fieldMapping);
+        vm.updateAnalysisList();
+    }
+    vm.updateDateFormats = (field) => {
+        Object.keys(vm.fieldMappings).forEach(key =>{
+            if(vm.fieldMappings[key].mappedField == field.name){
+                let mapped = vm.fieldMappings[key];
+                field.dateFormatString = mapped.dateFormatString ? mapped.dateFormatString : null;
+                field.timeFormatString = mapped.timeFormatString ? mapped.timeFormatString : null;
+                field.timezone = mapped.timezone ? mapped.timezone : null;
+                return;
+            }
+        });
+    }
+
+    vm.updateAnalysisList = () => {
+        vm.analysisFieldsList.forEach(field => {
+            vm.updateDateFormats(field);
+        });
+        // console.log('LIST UPDTAED ', vm.analysisFieldsList);
+    };
+
+    vm.getAnalysisField = (field) => {
+        if(field.type == 'DATE'){
+            // console.log('======================');
+            // console.log(field);
+            vm.updateDateFormats(field);
+            
+            // console.log(field);
+            // console.log('======================');
+        }
+        // console.log('FIELD ~~~> ',field);
+        return field;
+    }
+    
 });

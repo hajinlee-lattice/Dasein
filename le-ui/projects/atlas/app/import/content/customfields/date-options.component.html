@@ -1,30 +1,29 @@
 <div class="date-options">
     <div class="date-format-container">
-        <select class="form-control" ng-model="$ctrl.dateFormat" ng-change="$ctrl.changeDateFormat()" ng-disabled="$ctrl.disabeld === true">
+        <select class="form-control" ng-model="$ctrl.dateFormat" ng-change="$ctrl.changeDateFormat($ctrl.dateFormat)" ng-disabled="$ctrl.disabeld === true">
             <option value="{{ list }}" class="default-value">(Date Format)</option>
             <option ng-repeat="list in $ctrl.dateFormats" value="{{ list }}">{{ list }}</option>
         </select>
-        <div>
+        <div ng-if="$ctrl.getTooltip() != undefined">
             <span class="more-info">&#105;
                 <div class="tooltip_">
                     <div class="cover">
                         <p>
-                            Date Format is important for our database to map your
-                            data correctly. This is only valid for Date Type data.
+                            {{$ctrl.getTooltip()}}
                         </p>
                     </div>
                 </div>
             </span>
         </div>
     </div>
-    <select class="form-control" ng-model="$ctrl.timeFormat" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.changeTimeFormat()">
+    <select class="form-control time-format" ng-model="$ctrl.timeFormat" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.changeTimeFormat($ctrl.timeFormat)">
         <option value="{{ list }}" class="default-value">(Time Format)</option>
         <option ng-repeat="list in $ctrl.timeFormats" value="{{ list }}">{{ list }}</option>
     </select>
 
     <div class="time-zones">
-        <select class="form-control" ng-model="$ctrl.timezone" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.changeTimezone()">
-            <option value="{{ list }}" class="">(Timezone)</option>
+        <select class="form-control" ng-model="$ctrl.timezone" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.changeTimezone($ctrl.timezone)">
+            <option value="{{ list }}" class="">(Time Zone)</option>
             <option ng-repeat="list in $ctrl.timeZones" value="{{ list }}">{{ list }}</option>
         </select>
     </div>

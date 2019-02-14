@@ -1,7 +1,7 @@
 export default class DateUtils {
-    static getDateFormat(field) {
+    static getDateFormat(field, listSupported) {
         let date = field.dateFormatString;
-        if (date == null) {
+        if (date == null || !DateUtils.isFormatSupporte(listSupported, field.dateFormatString)) {
             return '';
         }
         return date;
@@ -10,16 +10,29 @@ export default class DateUtils {
         field.dateFormatString = newFormat;
     }
 
-    static getTimeFormat(field) {
+    static getTimeFormat(field, listSupported) {
         let time = field.timeFormatString;
-        if (time == null) {
+        if (time == null || !DateUtils.isFormatSupporte(listSupported, field.timeFormatString)) {
             return '';
         }
         return time;
     }
-
-    static getTimezone(field) {
-        if (field.timezone != null) {
+    static isFormatSupporte(listSupported, format){
+        let supported = false;
+        if(listSupported){
+            listSupported.forEach(element => {
+                if(element == format){
+                    supported = true;
+                    return;
+                }
+            });
+        }
+        // console.log('FORMAT SUPORTED ==> ', format, listSupported , supported);
+        return supported;
+    }
+    static getTimezone(field, listSupported) {
+        // console.log('UTIL TZ => ', field);
+        if (field.timezone != null && DateUtils.isFormatSupporte(listSupported, field.timezone)) {
             return field.timezone;
         }
         return '';

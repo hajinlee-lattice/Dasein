@@ -18,9 +18,18 @@ angular.module('lp.import.wizard.customfields', [])
         fieldMappings: FieldDocument.fieldMappings,
         mergedFields: mergedFieldDocument.main || mergedFieldDocument,
         fieldMappingIgnore: {},
-        defaultsIgnored: []
+        defaultsIgnored: [],
+        fieldDateTooltip : ImportWizardStore.tooltipDateTxt
     });
-
+    // console.log('STORE TOOLTIP ', vm.fieldDateTooltip)
+    vm.getTooltip = () => {
+        // console.log(vm.fieldDateTooltip);
+        return vm.fieldDateTooltip;
+    }
+    vm.getToolTipDate = () => {
+        // console.log(vm.fieldDateTooltip);
+        return vm.fieldDateTooltip;
+    }
     vm.init = function() {
         vm.size = vm.AvailableFields.length;
         if(vm.mergedFields) {

@@ -12,7 +12,6 @@ import Message, {
 class ConnectorService {
     constructor() {
         if (!ConnectorService.instance) {
-            console.log('============>Creating instance');
             ConnectorService.instance = this;
             this.userInfo = { validated: false };
             this.connectorInfo = {
