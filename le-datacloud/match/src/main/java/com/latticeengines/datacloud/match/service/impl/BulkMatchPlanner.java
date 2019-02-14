@@ -39,20 +39,9 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
         MatchOutput output;
         ColumnSelection columnSelection;
-        if (isCdlLookup(input)) {
-            context.setCdlLookup(true);
-            if (metadatas == null) {
-                metadatas = parseCDLMetadata(input);
-            }
-            columnSelection = new ColumnSelection();
-            List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
-                    .collect(Collectors.toList());
-            columnSelection.setColumns(columns);
-            context.setColumnSelection(columnSelection);
-            context.setCustomAccountDataUnit(parseCustomAccount(input));
-            context.setCustomDataUnits(parseCustomDynamo(input));
-            output = initializeMatchOutput(input, columnSelection, metadatas);
-        } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+
+        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            // Handle Entity Match metadata and column selection setup.
             context.setCdlLookup(false);
             if (metadatas == null) {
                 metadatas = parseEntityMetadata(input);
@@ -61,13 +50,31 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
                     .collect(Collectors.toList());
             columnSelection.setColumns(columns);
-            output = initializeMatchOutput(input, columnSelection, metadatas);
         } else {
-            context.setCdlLookup(false);
-            columnSelection = parseColumnSelection(input);
-            output = initializeMatchOutput(input, columnSelection, null);
+            // Handle Legacy Match metadata and column selection setup.
+            if (isCdlLookup(input)) {
+                context.setCdlLookup(true);
+                if (metadatas == null) {
+                    metadatas = parseCDLMetadata(input);
+                }
+                columnSelection = new ColumnSelection();
+                List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
+                        .collect(Collectors.toList());
+                columnSelection.setColumns(columns);
+                context.setCustomAccountDataUnit(parseCustomAccount(input));
+                context.setCustomDataUnits(parseCustomDynamo(input));
+            } else {
+                context.setCdlLookup(false);
+                columnSelection = parseColumnSelection(input);
+                // TODO(dzheng, ysong): Should this be here?  It is missing in real time case.
+                metadatas = null;
+            }
         }
         context.setColumnSelection(columnSelection);
+        // TODO(dzheng, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
+        //     metadatas is always set to null but not in real time.
+        output = initializeMatchOutput(input, columnSelection, metadatas);
+
         logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumns().size()));
         context.setOutput(output);
         if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {

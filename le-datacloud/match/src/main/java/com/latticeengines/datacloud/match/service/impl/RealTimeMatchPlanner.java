@@ -51,25 +51,26 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         }
         MatchOutput output;
 
+        ColumnSelection columnSelection;
         if (isCdlLookup(input)) {
             context.setCdlLookup(true);
             if (metadatas == null) {
                 metadatas = parseCDLMetadata(input);
             }
-            ColumnSelection columnSelection = new ColumnSelection();
+            columnSelection = new ColumnSelection();
             List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
                     .collect(Collectors.toList());
             columnSelection.setColumns(columns);
-            context.setColumnSelection(columnSelection);
             context.setCustomAccountDataUnit(parseCustomAccount(input));
             context.setCustomDataUnits(parseCustomDynamo(input));
-            output = initializeMatchOutput(input, columnSelection, metadatas);
         } else {
             context.setCdlLookup(false);
-            ColumnSelection columnSelection = parseColumnSelection(input);
-            context.setColumnSelection(columnSelection);
-            output = initializeMatchOutput(input, columnSelection, metadatas);
+            columnSelection = parseColumnSelection(input);
         }
+        context.setColumnSelection(columnSelection);
+        // TODO(dzheng, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
+        //     metadatas is always set to null but not in real time.
+        output = initializeMatchOutput(input, columnSelection, metadatas);
 
         context.setInput(input);
         context.setOutput(output);
