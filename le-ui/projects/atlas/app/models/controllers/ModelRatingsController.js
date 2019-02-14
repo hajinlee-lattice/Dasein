@@ -233,9 +233,10 @@ angular.module('lp.models.ratings', [
             vm.totalLeads = vm.rightLeads - vm.leftLeads;
             vm.totalConverted = vm.rightConverted - vm.leftConverted;
 
-            var bucketLeads = 0;
-            var bucketRevenue = 0;
-            var bucketConverted = 0; 
+            var bucketLeads = 0,
+                bucketRevenue = 0,
+                firstVal = 0, 
+                secondVal = 0; 
 
             var score = null;
 
@@ -245,10 +246,14 @@ angular.module('lp.models.ratings', [
 
                 bucketLeads += score.num_leads;
                 bucketRevenue += score.expected_revenue;
-                bucketConverted += (score.num_converted * score.num_leads);
+
+                firstVal += (score.num_converted * score.num_leads);
+                secondVal += (score.num_leads * score.num_leads);
+                
             }
 
-            bucket.conversionRate = (bucketConverted / (bucketLeads * bucketLeads)) * 100;
+            bucket.conversionRate = (firstVal / secondVal) * 100;
+            bucket.bucket_name = vm.bucketNames[i];
             bucket.bucketAvgRevenue = bucketRevenue / bucketLeads;
             bucket.avg_expected_revenue = bucket.bucketAvgRevenue;
             bucket.num_leads = vm.rightLeads - vm.leftLeads;
@@ -267,8 +272,6 @@ angular.module('lp.models.ratings', [
                     bucket.lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
                 }
             }
-
-            bucket.bucket_name = vm.bucketNames[i];
         }
     }
 
