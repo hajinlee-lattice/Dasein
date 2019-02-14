@@ -68,7 +68,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
             columnSelection = parseColumnSelection(input);
         }
         context.setColumnSelection(columnSelection);
-        // TODO(dzheng, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
+        // TODO(lming, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
         //     metadatas is always set to null but not in real time.
         output = initializeMatchOutput(input, columnSelection, metadatas);
 

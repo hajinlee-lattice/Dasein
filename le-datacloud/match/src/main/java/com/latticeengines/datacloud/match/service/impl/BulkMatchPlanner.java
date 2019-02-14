@@ -37,9 +37,9 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             context.setSeekingIdOnly(true);
         }
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
+
         MatchOutput output;
         ColumnSelection columnSelection;
-
         if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
             // Handle Entity Match metadata and column selection setup.
             context.setCdlLookup(false);
@@ -66,12 +66,12 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             } else {
                 context.setCdlLookup(false);
                 columnSelection = parseColumnSelection(input);
-                // TODO(dzheng, ysong): Should this be here?  It is missing in real time case.
+                // TODO(lming, ysong): Should this be here?  It is missing in real time case.
                 metadatas = null;
             }
         }
         context.setColumnSelection(columnSelection);
-        // TODO(dzheng, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
+        // TODO(lming, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
         //     metadatas is always set to null but not in real time.
         output = initializeMatchOutput(input, columnSelection, metadatas);
 
