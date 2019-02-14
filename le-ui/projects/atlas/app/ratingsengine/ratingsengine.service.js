@@ -15,6 +15,8 @@ angular.module('lp.ratingsengine')
 
     this.init = function() {
 
+//         console.log('Test hot save');
+
         this.settings = {};
 
         this.validation = {
@@ -39,8 +41,6 @@ angular.module('lp.ratingsengine')
 
         this.currentRating = {};
         this.remodelIteration = null;
-        this.iterations = null;
-        this.usedBy = null;
         this.rule = null;
         this.rating = null;
         this.rating_id;
@@ -51,7 +51,6 @@ angular.module('lp.ratingsengine')
         this.predictionType = 'PROPENSITY';
         this.type = null;
         this.configFilters = {};
-        this.remodelAttributes = {};
         this.trainingSegment = null;
         this.trainingProducts = null;
         this.dataStores = [];
@@ -278,36 +277,9 @@ angular.module('lp.ratingsengine')
     this.getValidation = function(type) {
         return this.validation[type];
     }
+
     this.setValidation = function(type, value) {
         this.validation[type] = value;
-    }
-
-    this.getRemodelIteration = function() {
-        return this.remodelIteration;
-    }
-    this.setRemodelIteration = function(remodelIteration) {
-        this.remodelIteration = remodelIteration;
-    }
-
-    this.setRemodelAttributes = function() {
-        return this.remodelAttributes;
-    }
-    this.getRemodelAttributes = function(remodelAttributes) {
-        this.remodelAttributes = remodelAttributes;
-    }
-
-    this.getIterations = function() {
-        return this.iterations;
-    }
-    this.setIterations = function(iterations) {
-        this.iterations = iterations;
-    }
-
-    this.getUsedBy = function() {
-        return this.usedBy;
-    }
-    this.setUsedBy = function(usedBy) {
-        this.usedBy = usedBy;
     }
 
     this.getWizardProgressItems = function(step) {
@@ -480,77 +452,6 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-
-    this.saveIteration = function(stateToValidate) {
-
-        var deferred = $q.defer(),
-            ratingEngine = RatingsEngineStore.getRatingEngine(),
-            engineId = ratingEngine.id,
-            iteration = RatingsEngineStore.getRemodelIteration(),
-            clientSession = BrowserStorageUtility.getClientSession(),
-            createdBy = clientSession.EmailAddress;
-
-        iteration.AI.derived_from_rating_model = iteration.AI.id;
-        iteration.AI.createdBy = createdBy;
-
-        if(iteration.AI.advancedModelingConfig.cross_sell){
-            iteration.AI.trainingSegment = RatingsEngineStore.getTrainingSegment();
-            iteration.AI.advancedModelingConfig.cross_sell.filters = RatingsEngineStore.configFilters;// RatingsEngineStore.getConfigFilters();
-        } else {
-            iteration.AI.advancedModelingConfig.custom_event = RatingsEngineStore.configFilters;//RatingsEngineStore.getConfigFilters();
-        }
-
-        // Sanitize iteration to remove data
-        delete iteration.AI.pid;
-        delete iteration.AI.id;
-        delete iteration.AI.modelingJobId;
-        delete iteration.AI.modelingJobStatus;
-        delete iteration.AI.modelSummaryId;
-
-        // Save iteration
-        RatingsEngineService.saveIteration(engineId, iteration).then(function(result){
-
-            var modelId = result.AI.id,
-                attributes = {};
-                
-            DataCloudStore.getEnrichments().then(function(result){
-                attributes = result;
-            })
-
-            RatingsEngineStore.setValidation(stateToValidate, false);
-            // Validate Model
-            RatingsEngineService.validateModel(engineId, modelId, RatingsEngineStore.getRatingEngine()).then(function(result) {
-                var success = result.data == true;
-                if (success) {                    
-
-                    RatingsEngineService.launchModeling(engineId, modelId, attributes).then(function(applicationId){
-
-                        RatingsEngineStore.setApplicationId(applicationId);
-                        JobsStore.inProgressModelJobs[engineId] = null;
-
-                        var result = {
-                            applicationId: applicationId,
-                            showProgress: false
-                        }
-                        deferred.resolve(result);
-                    });
-
-
-                } else {
-                    var errorResult = {
-                        result: result,
-                        showProgress: false
-                    }
-                    deferred.resolve(errorResult);
-                    RatingsEngineStore.setValidation(stateToValidate, !success);
-                }
-            });
-        });
-
-        return deferred.promise;
-
-    };
-
     
     this.setRatings = function(ratings, ignoreGetCoverage) {
         
@@ -602,16 +503,6 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.getRatings(active).then(function(data) {
             RatingsEngineStore.setRatings(data);
             deferred.resolve(data);
-        });
-
-        return deferred.promise;
-    }
-
-    this.getScorableAccounts = function(ratingEngine, engineId, iterationId) {
-        var deferred = $q.defer();
-
-        RatingsEngineService.getScorableAccounts(ratingEngine, engineId, iterationId).then(function(result) {
-            deferred.resolve(result);
         });
 
         return deferred.promise;
@@ -1212,33 +1103,6 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    this.getScorableAccounts = function(ratingEngine, engineId, iterationId) {
-        var deferred = $q.defer();
-
-        $http({
-            method: 'POST',
-            url: '/pls/ratingengines/' + engineId + '/ratingmodels/' + iterationId + '/modelingquery/count',
-            data: ratingEngine,
-            params: {
-                querytype: 'TARGET'
-            },
-            cache: true
-        }).then(
-            function onSuccess(response) {
-                var result = response.data;
-                deferred.resolve(result);
-            }, function onError(response) {
-                if (!response.data) {
-                    response.data = {};
-                }
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
-            }
-        );
-
-        return deferred.promise;
-    }
-
     this.getSegmentsCounts = function(segmentIds) {
         var deferred = $q.defer();
 
@@ -1495,7 +1359,6 @@ angular.module('lp.ratingsengine')
 
         return deferred.promise;
     }
-
     this.updateRatingModel = function(ratingid, modelid, opts){
         var deferred = $q.defer();
 
@@ -1541,56 +1404,7 @@ angular.module('lp.ratingsengine')
     
         return deferred.promise;
     }
-    this.saveIteration = function(engineId, iteration){
-        var deferred = $q.defer();
 
-        $http({
-            method: 'POST',
-            url: '/pls/ratingengines/' + engineId + '/ratingmodels',
-            data: iteration
-        }).then(
-            function onSuccess(response) {
-                var result = response.data;
-                deferred.resolve(result);
-            }, function onError(response) {
-                if (!response.data) {
-                    response.data = {};
-                }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
-            }
-        );
-
-        return deferred.promise;
-    }
-
-    this.launchModeling = function(engineId, modelId, attributes){
-        var deferred = $q.defer();
-
-        $http({
-            method: 'POST',
-            url: '/pls/ratingengines/' + engineId + '/ratingmodels/' + modelId + '/model',
-            headers: {
-                'Accept': 'text/plain'
-            },
-            data: attributes
-        }).then(
-            function onSuccess(response) {
-                var result = response.data;
-                deferred.resolve(result);
-            }, function onError(response) {
-                if (!response.data) {
-                    response.data = {};
-                }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
-            }
-        );
-
-        return deferred.promise;
-    }
     this.getTrainingCounts = function(ratingId, modelId, ratingEngine, queryType){
         var deferred = $q.defer();
         $http({

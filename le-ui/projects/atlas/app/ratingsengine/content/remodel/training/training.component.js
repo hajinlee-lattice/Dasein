@@ -22,13 +22,15 @@ angular.module('lp.ratingsengine.remodel.training', [])
                     });
                     return deferred.promise;
                 }],
-                iteration: ['$q', '$stateParams', 'RatingsEngineStore', 'ratingEngine', function($q, $stateParams, RatingsEngineStore, ratingEngine){
+                iteration: ['$q', '$stateParams', 'RatingsEngineStore', 'AtlasRemodelStore', 'ratingEngine', function($q, $stateParams, RatingsEngineStore, AtlasRemodelStore, ratingEngine){
                     var deferred = $q.defer(),
                         engineId = $stateParams.engineId,
                         modelId = $stateParams.modelId;
 
+                    console.log($stateParams);
+
                     RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-                        RatingsEngineStore.setRemodelIteration(result);
+                        AtlasRemodelStore.setRemodelIteration(result);
                         RatingsEngineStore.setRatingEngine(ratingEngine);
 
                         deferred.resolve(result);

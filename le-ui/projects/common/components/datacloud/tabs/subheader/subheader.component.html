@@ -1,33 +1,39 @@
-<div class="success-message subheader-success-message" ng-if="vm.displayExportBanner">
+<div
+    class="success-message subheader-success-message"
+    ng-if="vm.displayExportBanner"
+>
     <h3>
         Your export request was accepted. You will receive an email with a
         download link once it is complete.
     </h3>
     <i class="fa fa-times fa-inverse" data-ng-click="vm.hideExportBanner()"></i>
 </div>
-<div ng-if="vm.checkState('model_iteration')">&nbsp</div>
+
 <div class="enrichment-wizard-container container explorer-subheader-tabs">
-    <ul class="subheader-tabs-links" ng-if="vm.checkState('builder') || vm.checkState('attributes')">
-        <li ng-click="vm.clickAttributes()" ng-class="{'active':vm.checkState('attributes')}">
+    <ul
+        class="subheader-tabs-links"
+        ng-if="vm.checkState('builder') || vm.checkState('attributes')"
+    >
+        <li
+            ng-click="vm.clickAttributes()"
+            ng-class="{'active':vm.checkState('attributes')}"
+        >
             Select Attributes
         </li>
         <li>|</li>
-        <li ng-click="vm.clickBuilder()" ng-class="{'active':vm.checkState('builder')}">
+        <li
+            ng-click="vm.clickBuilder()"
+            ng-class="{'active':vm.checkState('builder')}"
+        >
             Query Builder
         </li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('model_iteration')">
-        <li ng-click="vm.clickIterationFilter('all')" ng-class="{'active':vm.checkIterationFilter('all')}">Top
-            {{ vm.getIterationFilterNumber('all') }}</li>
+        <li class="active">Top Predictive Attributes (300)</li>
         <li>|</li>
-        <li ng-click="vm.clickIterationFilter('used')" ng-class="{'active':vm.checkIterationFilter('used')}">Used by
-            Model ({{ vm.getIterationFilterNumber('used') }})</li>
+        <li>Used by the Model (50)</li>
         <li>|</li>
-        <li ng-click="vm.clickIterationFilter('warnings')" ng-class="{'active':vm.checkIterationFilter('warnings')}">Warnings
-            ({{ vm.getIterationFilterNumber('warnings') }})</li>
-        <li>|</li>
-        <li ng-click="vm.clickIterationFilter('disabled')" ng-class="{'active':vm.checkIterationFilter('disabled')}">Disabled
-            ({{ vm.getIterationFilterNumber('disabled') }})</li>
+        <li>Warnings (2)</li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('accounts')">
         <li>Accounts</li>
@@ -36,7 +42,10 @@
         <li>Contacts</li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('picker')">
-        <li ng-click="vm.clickPickerBack()" ng-class="{'active':vm.checkState('builder')}">
+        <li
+            ng-click="vm.clickPickerBack()"
+            ng-class="{'active':vm.checkState('builder')}"
+        >
             Back
         </li>
         <li ng-if="vm.getPickerItem()">|</li>
@@ -44,30 +53,32 @@
     </ul>
     <ul class="subheader-tabs-buttons">
         <li class="save-segment" ng-if="vm.checkState('model_iteration')">
-            <div class="split-button">
-                <button 
-                    class="button orange-button"
-                    ng-class="{disabled: vm.remodelingProgress}"
-                    ng-disabled="vm.remodelingProgress"
-                    ng-click="vm.remodel()">
-                    <i ng-if="vm.remodelingProgress" class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                    Remodel</button><button 
-                    class="button orange-button"
-                    ng-class="{disabled: vm.remodelingProgress}"
-                    ng-disabled="vm.remodelingProgress"
-                    ng-click="vm.changeSettings()"><i class="fa fa-cog" aria-hidden="true"></i></button>
-            </div>
+            <button class="clear button orange-button">Remodel</button>
         </li>
         <li class="save-segment" ng-if="!vm.checkState('model_iteration')">
-            <span ng-if="vm.enableSaveSegmentMsg" class="confirmation-title"><i class="fa fa-check confermation-ok"
-                    aria-hidden="true"></i>Segment Saved</span>
-            <menu-dropdown config="vm.header.exportSegment" class="button export-button" ng-click="vm.disableExport()"></menu-dropdown>
+            <span ng-if="vm.enableSaveSegmentMsg" class="confirmation-title"
+                ><i class="fa fa-check confermation-ok" aria-hidden="true"></i
+                >Segment Saved</span
+            >
+            <menu-dropdown
+                config="vm.header.exportSegment"
+                class="button export-button"
+                ng-click="vm.disableExport()"
+            ></menu-dropdown>
             &nbsp;
-            <button class="clear button white-button" ng-click="vm.clearSegment()" ng-if="vm.segment == 'Create'">
+            <button
+                class="clear button white-button"
+                ng-click="vm.clearSegment()"
+                ng-if="vm.segment == 'Create'"
+            >
                 Clear
             </button>
             &nbsp;
-            <button class="save button blue-button" ng-click="vm.saveSegment()" ng-disabled="!vm.public.enableSaveSegmentButton">
+            <button
+                class="save button blue-button"
+                ng-click="vm.saveSegment()"
+                ng-disabled="!vm.public.enableSaveSegmentButton"
+            >
                 {{ vm.segment == 'Create' ? 'Creat' : 'Sav'
                 }}{{ vm.isSaving ? 'ing' : 'e' }} Segment
                 <i class="fa fa-spinner fa-spin fa-fw" ng-if="vm.isSaving"></i>
@@ -76,6 +87,6 @@
     </ul>
     <div ng-if="vm.checkState('model_iteration')">
         The top 50 most predictive attributes are used by the model.
-        <a href="#" ng-click="vm.clickedExport()"><i class="fa fa-download"></i> Download All Attributes</a>
+        <a href="#"><i class="fa fa-download"></i> Download All Attributes</a>
     </div>
 </div>
