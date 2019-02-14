@@ -95,7 +95,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                     }
                     if(vm.showItem('Date')){
-                        console.log('=== DATE ===');
+                        // console.log('=== DATE ===');
                     }
 
                     vm.string_operations = QueryTreeService.string_operations;
