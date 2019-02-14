@@ -225,6 +225,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder forceSkipRealculatePercentile(boolean forceSkip) {
+            recalculatePercentile.setSkipStep(forceEVSteps);
+            return this;
+        }
+
         public void eventColumn(String eventColumn) {
             cdlEventTable.setEventColumn(eventColumn);
         }
@@ -238,7 +243,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
             setMatchConfig();
             setAddStandardAttributesConfig();
-            recalculatePercentile.setSkipStep(forceEVSteps);
             recalculateExpectedRevenue.setSkipStep(!forceEVSteps);
             calculatePredictedRevenuePercentile.setSkipStep(!forceEVSteps);
             calculateExpectedRevenuePercentile.setSkipStep(!forceEVSteps);
