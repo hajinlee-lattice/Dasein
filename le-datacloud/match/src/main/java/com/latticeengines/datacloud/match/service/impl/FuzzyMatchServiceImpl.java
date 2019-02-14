@@ -243,7 +243,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), null);
                     matchTraveler.setInputDataRecord(matchRecord.getInput());
                     matchTraveler.setEntityKeyPositionMaps(matchRecord.getEntityKeyPositionMaps());
-                    matchTraveler.setEntityMatchKeyRecord(new EntityMatchKeyRecord());
+                    EntityMatchKeyRecord entityMatchKeyRecord = new EntityMatchKeyRecord();
+                    entityMatchKeyRecord.setOrigTenant(matchRecord.getOrigTenant());
+                    entityMatchKeyRecord.setParsedTenant(matchRecord.getParsedTenant());
+                    matchTraveler.setEntityMatchKeyRecord(entityMatchKeyRecord);
                     // 1st decision graph's entity is just final target entity
                     matchTraveler.setEntity(matchInput.getTargetEntity());
                 } else {
@@ -301,10 +304,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         internalRecord.setParsedDuns(entityRecord.getParsedDuns());
         internalRecord.setParsedNameLocation(entityRecord.getParsedNameLocation());
         internalRecord.setParsedEmail(entityRecord.getParsedEmail());
+        internalRecord.setParsedTenant(entityRecord.getParsedTenant());
         internalRecord.setOrigDomain(entityRecord.getOrigDomain());
         internalRecord.setOrigNameLocation(entityRecord.getOrigNameLocation());
         internalRecord.setOrigDuns(entityRecord.getOrigDuns());
         internalRecord.setOrigEmail(entityRecord.getOrigEmail());
+        internalRecord.setOrigTenant(entityRecord.getOrigTenant());
         internalRecord.setFailed(entityRecord.isFailed());
         internalRecord.setErrorMessages(entityRecord.getErrorMessages());
     }
