@@ -295,11 +295,39 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     private Object[][] domainPatchValidation() {
         Map<String, Object> map1 = new HashMap<>();
         map1.put(DataCloudConstants.ATTR_LDC_DOMAIN, "abc.com");
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put(DataCloudConstants.ATTR_LDC_DOMAIN, "def.com");
+        map2.put(DataCloudConstants.ATTR_LDC_INDUSTRY, "DEF");
         Map<String, Object> map3 = new HashMap<>();
         map3.put(DataCloudConstants.ATTR_LDC_DOMAIN, "google.com");
+        Map<String, Object> map4 = new HashMap<>();
+        map4.put(DataCloudConstants.ATTR_LDC_NAME, "AAA");
         return new Object[][] { {
                 new PatchBook[] {
                         // correct entry
+                        TestPatchBookUtils //
+                                .newPatchBook(2L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("514513113") //
+                                                        .build(),
+                                        map1),
+                        // error entry : patch items besides domain
+                        TestPatchBookUtils //
+                                .newPatchBook(7L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("232423133") //
+                                                        .build(),
+                                        map2),
+                        TestPatchBookUtils //
+                                .newPatchBook(8L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("323133313") //
+                                                        .build(),
+                                        map4),
+                        // error entry : duplicate duns
                         TestPatchBookUtils //
                                 .newPatchBook(1L,
                                         new MatchKeyTuple //
@@ -307,7 +335,6 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("123456789") //
                                                         .build(),
                                         map1),
-                        // error entry : duplicate duns
                         TestPatchBookUtils //
                                 .newPatchBook(3L,
                                         new MatchKeyTuple //
@@ -339,26 +366,31 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                 },
                 new PatchBookValidationError[] {
                         newError(PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO
-                                + "DUNS = 123456789 PatchDomain = abc.com", 1L,
-                                3L),
+                                + "DUNS = 123456789 PatchDomain = abc.com", 1L, 3L),
                         newError(
                                 PatchBookValidator.DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO
                                         + "DUNS = 333333333 PatchDomain = google.com",
-                                4L, 5L, 6L), }, } };
+                                4L, 5L, 6L),
+                        newError(
+                                PatchBookValidator.ERR_IN_PATCH_ITEMS, 7L, 8L) }, } };
     }
 
     @DataProvider(name = "patchBookMatchKeyDomainDunsSrc")
     private Object[][] patchBookMatchKeyDomainDunsSrc() {
         Map<String, Object> map1 = new HashMap<>();
         map1.put("AlexaAUPageViews", "100");
+        map1.put("AlexaUSRank", "110");
         Map<String, Object> map2 = new HashMap<>();
         map2.put("AlexaUSRank", "10");
         Map<String, Object> map3 = new HashMap<>();
-        map3.put("bemfab", "1");
+        map3.put("BEMFAB", "1");
         map3.put("DnB_CITY_CODE", "1111");
+        Map<String, Object> map4 = new HashMap<>();
+        map4.put("BEMFAB", "2");
         return new Object[][] { {
                 new PatchBook[] {
-                        // no conflict
+                        // Match key maps appropriately to domain / duns based
+                        // source attributes
                         TestPatchBookUtils //
                                 .newPatchBook(1L,
                                         new MatchKeyTuple //
@@ -367,7 +399,6 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("123456789") //
                                                         .build(),
                                         map1),
-                        // conflict with domain
                         TestPatchBookUtils //
                                 .newPatchBook(2L,
                                         new MatchKeyTuple //
@@ -384,7 +415,6 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("121331131") //
                                                         .build(),
                                         map2),
-                        // conflict with duns
                         TestPatchBookUtils //
                                 .newPatchBook(4L,
                                         new MatchKeyTuple //
@@ -393,6 +423,9 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("111111111") //
                                                         .build(),
                                         map1),
+                        // Match key doesnt match corresponding domain / duns
+                        // based source attributes
+                        // single attribute
                         TestPatchBookUtils //
                                 .newPatchBook(5L,
                                         new MatchKeyTuple //
@@ -400,6 +433,21 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("111111111") //
                                                         .build(),
                                         map2),
+                        TestPatchBookUtils //
+                                .newPatchBook(8L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDomain("yyt.com") //
+                                                        .build(),
+                                        map4),
+                        // multiple attributes
+                        TestPatchBookUtils //
+                                .newPatchBook(7L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("111111111") //
+                                                        .build(),
+                                        map1),
                         TestPatchBookUtils //
                                 .newPatchBook(6L,
                                         new MatchKeyTuple //
@@ -410,10 +458,14 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                         map3) },
                 "2.0.16",
                 new PatchBookValidationError[] {
+                        newError(PatchBookValidator.ATTRI_PATCH_DOM_BASED_SRC_ERR + "[AlexaUSRank]",
+                                5L),
                         newError(PatchBookValidator.ATTRI_PATCH_DUNS_BASED_SRC_ERR
-                                + "[AlexaUSRank]", 5L),
-                        newError(PatchBookValidator.ATTRI_PATCH_DOM_BASED_SRC_ERR
-                                + "[bemfab, DnB_CITY_CODE]", 6L) }, } };
+                                + "[BEMFAB, DnB_CITY_CODE]", 6L),
+                        newError(PatchBookValidator.ATTRI_PATCH_DOM_BASED_SRC_ERR + ""
+                                + "[AlexaAUPageViews, AlexaUSRank]", 7L),
+                        newError(PatchBookValidator.ATTRI_PATCH_DUNS_BASED_SRC_ERR
+                                + "[BEMFAB]", 8L) }, } };
     }
 
     private Object[][] provideLookupPatchBookValidationTestData() {
