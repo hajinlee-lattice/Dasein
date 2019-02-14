@@ -156,7 +156,7 @@ public class PipelineTransformationService extends AbstractTransformationService
         } else {
             succeeded = executeTransformSteps(progress, steps, workflowDir, transConf);
             if (succeeded || !transConf.getKeepTemp()) {
-                //cleanupTempSources(steps);
+                cleanupTempSources(steps);
             }
         }
         if (doPostProcessing(progress, workflowDir, false) && succeeded) {
