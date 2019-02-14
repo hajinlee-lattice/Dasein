@@ -32,7 +32,7 @@
                 </select>
             </li>
         </ul>
-        <div class="analysis-container">
+        <div class="analysis-container" ng-if="(vm.analysisFieldsList && vm.analysisFieldsList.length > 0)">
             <div>
                 <h3 class="analysis">Analysis Fields</h3>
                 <p>These optional fields are used for analysis and are useful if you can provide them.</p>
