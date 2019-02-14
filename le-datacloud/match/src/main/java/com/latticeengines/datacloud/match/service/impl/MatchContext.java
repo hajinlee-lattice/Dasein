@@ -36,6 +36,8 @@ public class MatchContext implements Fact, Dimension {
     private List<DynamoDataUnit> customDataUnits;
     private MatchEngine matchEngine;
 
+    // contextId should be unique for match context which has single record (not
+    // for merged context)
     @JsonIgnore
     private String contextId;
 

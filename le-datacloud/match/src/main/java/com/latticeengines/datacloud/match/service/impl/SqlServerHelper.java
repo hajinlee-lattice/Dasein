@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,13 +58,16 @@ public class SqlServerHelper implements DbHelper {
     private static final Integer MAX_RETRIES = 2;
 
     private static final Integer QUEUE_SIZE = 20000;
-    private static final Integer TIMEOUT_MINUTE_REALTIME = 1;
-    private static final Integer TIMEOUT_MINUTE_BULK = 8;
+    @Value("${datacloud.match.sqlfetch.realtime.timeout:1}")
+    private Integer realtimeTimeoutMins;
+    @Value("${datacloud.match.sqlfetch.bulk.timeout:8}")
+    private Integer bulkTimeoutMins;
 
-    private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-    private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
+    private final BlockingQueue<MatchContext> contextQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    // ContextId -> MatchContext
+    private final ConcurrentMap<String, MatchContext> contextMap = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Pair<Boolean, Long>> fetcherActivity = new ConcurrentHashMap<>();   // Pair<isWorking, timestamp>
-    private final Set<String> timeoutUids = new ConcurrentSkipListSet<>();
+    private final Set<String> timeoutContextIds = new ConcurrentSkipListSet<>(); // Set<ContextId>
     private ExecutorService executor;
 
     @Autowired
@@ -97,6 +102,7 @@ public class SqlServerHelper implements DbHelper {
     private void buildSourceColumnMapCache() {
         tableColumnsCache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
                 .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Set<String>>() {
+                    @Override
                     public Set<String> load(String key) {
                         JdbcTemplate jdbcTemplate = dataSourceService
                                 .getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
@@ -142,13 +148,13 @@ public class SqlServerHelper implements DbHelper {
         return matchContext;
     }
 
-    private void checkSlowFetcher(String rootUid) {
+    private void checkSlowFetcher(String rootUid, String contextId) {
         int slowNum = 0;
         List<String> slowFetchers = new ArrayList<>();
         synchronized (fetcherActivity) {
             for (Map.Entry<String, Pair<Boolean, Long>> entry : fetcherActivity.entrySet()) {
                 if (entry.getValue().getLeft() == Boolean.TRUE && System.currentTimeMillis()
-                        - entry.getValue().getRight() > TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_REALTIME)) {
+                        - entry.getValue().getRight() > TimeUnit.MINUTES.toMillis(realtimeTimeoutMins)) {
                     slowNum++;
                     slowFetchers.add(entry.getKey());
                 }
@@ -156,8 +162,9 @@ public class SqlServerHelper implements DbHelper {
         }
         if (slowNum > numSlowFetchers) {
             throw new RuntimeException(
-                    String.format("Dropping request due to some stuck fetchers. RootOperationUID=%s. Slow fetchers: %s",
-                            rootUid, String.join(",", slowFetchers)));
+                    String.format(
+                            "Dropping request due to some stuck fetchers. RootOperationUID=%s, ContextId=%s. Slow fetchers: %s",
+                            rootUid, contextId, String.join(",", slowFetchers)));
         }
     }
 
@@ -165,9 +172,12 @@ public class SqlServerHelper implements DbHelper {
     public MatchContext fetch(MatchContext matchContext) {
         if (enableFetchers) {
             init();
-            checkSlowFetcher(matchContext.getOutput().getRootOperationUID());
-            queue.add(matchContext);
-            return waitForResult(matchContext.getOutput().getRootOperationUID());
+            if (matchContext.getContextId() == null) {
+                matchContext.setContextId(UUID.randomUUID().toString());
+            }
+            checkSlowFetcher(matchContext.getOutput().getRootOperationUID(), matchContext.getContextId());
+            contextQueue.add(matchContext);
+            return waitForResult(matchContext.getOutput().getRootOperationUID(), matchContext.getContextId());
         } else {
             return fetchSync(matchContext);
         }
@@ -252,8 +262,14 @@ public class SqlServerHelper implements DbHelper {
         log.info("Enter executeBulk for " + contexts.size() + " match contexts.");
 
         init();
-        List<String> rootUids = enqueue(contexts);
-        return waitForResult(rootUids);
+        contexts.forEach(context -> {
+            if (context.getContextId() == null) {
+                context.setContextId(UUID.randomUUID().toString());
+            }
+        });
+        // Pair<ContextId, RootUID>
+        List<Pair<String, String>> ids = enqueue(contexts);
+        return waitForResult(ids);
     }
 
     @Override
@@ -613,34 +629,35 @@ public class SqlServerHelper implements DbHelper {
         for (int i = 0; i < numNewFetchers; i++) {
             executor.submit(new Fetcher());
         }
-        synchronized (timeoutUids) {
-            Iterator<String> iter = timeoutUids.iterator();
+        synchronized (timeoutContextIds) {
+            Iterator<String> iter = timeoutContextIds.iterator();
             while (iter.hasNext()) {
-                String rootUid = iter.next();
-                if (map.containsKey(rootUid)) {
-                    map.remove(rootUid);
+                String contextId = iter.next();
+                if (contextMap.containsKey(contextId)) {
+                    contextMap.remove(contextId);
                     iter.remove();
                 }
             }
         }
     }
 
-    private MatchContext waitForResult(String rootUid) {
-        log.debug("Waiting for result of RootOperationUID=" + rootUid);
+    private MatchContext waitForResult(String rootUid, String contextId) {
+        log.debug("Waiting for result of RootOperationUID={}, ContextId={}", rootUid, contextId);
         Long startTime = System.currentTimeMillis();
         do {
             try {
                 Thread.sleep(100L);
             } catch (Exception e) {
-                log.error("Interrupted when waiting for fetch result. RootOperationUID=" + rootUid, e);
+                // ignore
             }
-            if (map.containsKey(rootUid)) {
-                log.debug("Found fetch result for RootOperationUID=" + rootUid);
-                return map.remove(rootUid);
+            if (contextMap.containsKey(contextId)) {
+                log.debug("Found fetch result for RootOperationUID={}, ContextId={}", rootUid, contextId);
+                return contextMap.remove(contextId);
             }
-        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_REALTIME));
-        timeoutUids.add(rootUid);
-        throw new RuntimeException("Fetching timeout. RootOperationUID=" + rootUid);
+        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(realtimeTimeoutMins));
+        timeoutContextIds.add(contextId);
+        throw new RuntimeException(
+                String.format("Fetching timeout. RootOperationUID=%s, ContextId=%s", rootUid, contextId));
     }
 
     private class Fetcher implements Runnable {
@@ -653,16 +670,16 @@ public class SqlServerHelper implements DbHelper {
             while (true) {
                 try {
                     fetcherActivity.put(name, Pair.of(Boolean.TRUE, System.currentTimeMillis()));
-                    while (!queue.isEmpty()) {
+                    while (!contextQueue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
-                        int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 4));
+                        int thisGroupSize = Math.min(groupSize, Math.max(contextQueue.size() / 4, 4));
                         int inGroup = 0;
-                        while (inGroup < thisGroupSize && !queue.isEmpty()) {
+                        while (inGroup < thisGroupSize && !contextQueue.isEmpty()) {
                             try {
-                                MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
+                                MatchContext matchContext = contextQueue.poll(50, TimeUnit.MILLISECONDS);
                                 if (matchContext != null) {
-                                    if (timeoutUids.contains(matchContext.getOutput().getRootOperationUID())) {
-                                        timeoutUids.remove(matchContext.getOutput().getRootOperationUID());
+                                    if (timeoutContextIds.contains(matchContext.getContextId())) {
+                                        timeoutContextIds.remove(matchContext.getContextId());
                                         continue;
                                     }
                                     String version = matchContext.getInput().getDataCloudVersion();
@@ -680,7 +697,7 @@ public class SqlServerHelper implements DbHelper {
                                                 + matchContext.getInput().getDataCloudVersion()
                                                 + " different from that in current group, " + groupDataCloudVersion
                                                 + ". Putting it back to the queue");
-                                        queue.add(matchContext);
+                                        contextQueue.add(matchContext);
                                         break;
                                     }
                                 }
@@ -691,16 +708,16 @@ public class SqlServerHelper implements DbHelper {
 
                         if (matchContextList.size() == 1) {
                             MatchContext matchContext = fetchSync(matchContextList.get(0));
-                            map.putIfAbsent(matchContext.getOutput().getRootOperationUID(), matchContext);
-                            log.debug("Put the result for " + matchContext.getOutput().getRootOperationUID()
-                                    + " back into concurrent map.");
+                            contextMap.putIfAbsent(matchContext.getContextId(), matchContext);
+                            log.debug("Put the result for RootOperationUID={}, ContextId={} back into concurrent map.",
+                                    matchContext.getOutput().getRootOperationUID(), matchContext.getContextId());
                         } else {
                             fetchMultipleContexts(matchContextList);
                         }
                         fetcherActivity.put(name, Pair.of(Boolean.FALSE, System.currentTimeMillis()));
                     }
                 } catch (Exception e) {
-                    log.warn("Error from fetcher.");
+                    log.warn("Error from fetcher.", e);
                 } finally {
                     try {
                         Thread.sleep(50L);
@@ -718,9 +735,10 @@ public class SqlServerHelper implements DbHelper {
                     mergedContext = fetchSync(mergedContext);
                     splitContext(mergedContext, matchContextList);
                     for (MatchContext context : matchContextList) {
-                        String rootUid = context.getOutput().getRootOperationUID();
-                        map.putIfAbsent(rootUid, context);
-                        log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);
+                        contextMap.putIfAbsent(context.getContextId(), context);
+                        log.debug(
+                                "Put match context to concurrent map for RootOperationUID={}, ContextId={}",
+                                context.getOutput().getRootOperationUID(), context.getContextId());
                     }
                 }
             } catch (Exception e) {
@@ -730,65 +748,82 @@ public class SqlServerHelper implements DbHelper {
 
     }
 
-    private List<String> enqueue(List<MatchContext> matchContexts) {
-        List<String> rootUids = new ArrayList<>(matchContexts.size());
+    /**
+     * @param matchContexts
+     * @return Pair<ContextId, RootUID> (For bulk-realtime mode, match contexts
+     *         from single match input could have same RootUID, but different
+     *         ContextId)
+     */
+    private List<Pair<String, String>> enqueue(List<MatchContext> matchContexts) {
+        List<Pair<String, String>> ids = new ArrayList<>(matchContexts.size());
 
         if (enableFetchers) {
-            queue.addAll(matchContexts);
+            contextQueue.addAll(matchContexts);
             for (MatchContext context : matchContexts) {
-                rootUids.add(context.getOutput().getRootOperationUID());
+                ids.add(Pair.of(context.getContextId(), context.getOutput().getRootOperationUID()));
             }
         } else {
             for (MatchContext context : matchContexts) {
-                String uuid = context.getOutput().getRootOperationUID();
-                map.putIfAbsent(uuid, fetchSync(context));
-                rootUids.add(uuid);
+                contextMap.putIfAbsent(context.getContextId(), fetchSync(context));
+                ids.add(Pair.of(context.getContextId(), context.getOutput().getRootOperationUID()));
             }
         }
 
-        return rootUids;
+        return ids;
     }
 
-    private List<MatchContext> waitForResult(List<String> rootUids) {
+    /**
+     * @param ids: Pair<ContextId, RootUID>
+     * @return
+     */
+    private List<MatchContext> waitForResult(List<Pair<String, String>> ids) {
+        // ContextId -> MatchContext
         Map<String, MatchContext> intermediateResults = new HashMap<>();
 
         int foundResultCount = 0;
-        log.debug("Waiting for results of RootOperationUIDs=" + rootUids);
+
+        log.debug("Waiting for results of <ContextId, RootOperationUID>: {}", Arrays.toString(ids.toArray()));
         Long startTime = System.currentTimeMillis();
         do {
             try {
                 Thread.sleep(100L);
             } catch (Exception e) {
-                log.error("Interrupted when waiting for fetch result. RootOperationUID=" + rootUids, e);
+                // ignore
             }
 
-            for (String rootUid : rootUids) {
-                MatchContext storedResult = intermediateResults.get(rootUid);
-                if (storedResult == null && map.containsKey(rootUid)) {
-                    log.debug(foundResultCount + ": Found fetch result for RootOperationUID=" + rootUid);
-                    intermediateResults.put(rootUid, map.remove(rootUid));
+            for (Pair<String, String> idPair : ids) {
+                String contextId = idPair.getLeft();
+                String rootUID = idPair.getRight();
+                MatchContext storedResult = intermediateResults.get(contextId);
+                if (storedResult == null && contextMap.containsKey(contextId)) {
+                    log.debug("{}: Found fetch result for RootOperationUID={}, ContectId={}", foundResultCount, rootUID,
+                            contextId);
+                    intermediateResults.put(contextId, contextMap.remove(contextId));
                     foundResultCount++;
-
-                    if (foundResultCount >= rootUids.size()) {
-                        return convertResultMapToList(rootUids, intermediateResults);
+                    if (foundResultCount >= ids.size()) {
+                        return convertResultMapToList(
+                                ids.stream().map(idPair2 -> idPair2.getLeft()).collect(Collectors.toList()),
+                                intermediateResults);
                     }
                 }
 
             }
-        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_BULK));
-        for (String rootUid : rootUids) {
-            if (!intermediateResults.containsKey(rootUid)) {
-                timeoutUids.add(rootUid);
+        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(bulkTimeoutMins));
+        for (Pair<String, String> idPair : ids) {
+            String contextId = idPair.getLeft();
+            if (!intermediateResults.containsKey(contextId)) {
+                timeoutContextIds.add(contextId);
             }
         }
-        throw new RuntimeException("Fetching timeout. RootOperationUID=" + rootUids);
+        throw new RuntimeException(
+                "Fetching timeout. <ContextId, RootOperationUID> pairs: " + Arrays.toString(ids.toArray()));
     }
 
-    private List<MatchContext> convertResultMapToList(List<String> rootUids,
+    private List<MatchContext> convertResultMapToList(List<String> contextIds,
             Map<String, MatchContext> intermediateResults) {
-        List<MatchContext> results = new ArrayList<>(rootUids.size());
-        for (String rootUid : rootUids) {
-            results.add(intermediateResults.get(rootUid));
+        List<MatchContext> results = new ArrayList<>(contextIds.size());
+        for (String contextId : contextIds) {
+            results.add(intermediateResults.get(contextId));
         }
         return results;
     }
