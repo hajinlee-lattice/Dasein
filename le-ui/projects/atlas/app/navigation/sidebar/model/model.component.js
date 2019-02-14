@@ -6,7 +6,7 @@ angular
     'lp.ratingsengine'
 ])
 .controller('SidebarModelController', function(
-    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, RatingsEngineStore,
+    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, RatingsEngineStore, AtlasRemodelStore,
     StateHistory, Model, IsPmml, IsRatingEngine, RatingEngine, HasRatingsAvailable
 ) {
     var vm = this;
@@ -63,6 +63,7 @@ angular
             modelId = vm.model.ModelDetails.Name;
 
         RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+            AtlasRemodelStore.setRemodelIteration(result);
             RatingsEngineStore.setRatingEngine(vm.ratingEngine);
             $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
         });

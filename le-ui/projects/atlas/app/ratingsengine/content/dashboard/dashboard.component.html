@@ -1,18 +1,26 @@
-<section class="rating-engine dashboard {{ vm.modelingStrategy }}" ng-class="{noRatings: (vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0)}">
+<section 
+    class="rating-engine dashboard {{ vm.modelingStrategy }}"
+    ng-class="{noRatings: (vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0)}">
     <div class="container row summary-container">
         <div class="twelve columns">
 
 
             <div class="header">
                 <h2 class="pull-left">Model Dashboard</h2>
-
+                
                 <div class="actions pull-right">
                     <!-- ng-model="vm.status_toggle" -->
 
-                    <button class="button orange-button" ng-click="vm.deactivate()" ng-disabled="vm.disableButtonScoring()">
+                    <button
+                        class="button orange-button"
+                        ng-click="vm.deactivate()"
+                        ng-disabled="vm.disableButtonScoring()">
                         {{vm.getScoringButtonLable()}}
                     </button>
-                    <button class="button orange-button" ng-if="vm.isRulesBased && vm.playbookEnabled" ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })"
+                    <button
+                        class="button orange-button"
+                        ng-if="vm.isRulesBased && vm.playbookEnabled"
+                        ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })" 
                         ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata && !vm.status_toggle" -->
                         Create Campaign
@@ -20,73 +28,46 @@
 
                     <!-- <button
                         class="button orange-button"
+                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.latest_iteration.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
+                        ng-if="!vm.isRulesBased"
+                        ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0 || vm.isJobRunning()">
+                        {{ vm.publishOrActivateButtonLabel }}
+                    </button> -->
+                    <button
+                        class="button orange-button"
                         ui-sref="home.model.ratings({ 
                             rating_id: vm.ratingEngine.id,
                             modelId: vm.modelSummary,
                             section: 'dashboard.ratings',
-                            ratingEngine: vm.ratingEngine,
-                            newConfiguration: true
+                            ratingEngine: vm.ratingEngine
                         })"
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.activeIterations.length == 0">
                         {{ vm.publishOrActivateButtonLabel }}
-                    </button> -->
-                    <button class="button orange-button" ng-if="!vm.isRulesBased && vm.playbookEnabled" ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })"
+                    </button>
+                    <button
+                        class="button orange-button"
+                        ng-if="!vm.isRulesBased && vm.playbookEnabled"
+                        ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })"
                         ng-disabled="!vm.canCreatePlay()">
+                        <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'" -->
                         Create Campaign
                     </button>
-
-                    <div class="dropdown-split-button" ng-if="!vm.isRulesBased">
-
-                        <div class="dropdown" ng-class="{showMenu: vm.toggle, showProgress: vm.remodelingProgress || vm.gatheringAttributes}">
-                            <button 
-                                ng-click="vm.remodelIteration()" 
-                                ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0}"
-                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0">Remodel
-                            </button><button 
-                                ng-click="vm.toggleMenu($event)" 
-                                ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0}"
-                                ng-disabled="vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0">
-                                <span>
-                                    Iteration {{ vm.selectedIteration.iteration }}
-                                </span>
-                            </button>
-                            <ul>
-                                <li 
-                                    ng-repeat="iteration in vm.activeIterations | orderBy: -iteration" 
-                                    ng-click="vm.setRemodelIteration(iteration); vm.toggleMenu()">
-                                    Iteration {{ iteration.iteration }}
-                                </li>
-                            </ul>
-                            <span>
-                                <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                                <span ng-if="!vm.gatheringAttributes">Remodling iteration {{
-                                    vm.selectedIteration.iteration }}</span>
-                                <span ng-if="vm.gatheringAttributes">Gathering attributes</span>
-                            </span>
-
-                        </div><button 
-                            ng-click="vm.viewIteration('home.ratingsengine.dashboard.training')" 
-                            ng-class="{disabled: vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0}"
-                            ng-disabled="vm.remodelingProgress || vm.gatheringAttributes || vm.activeIterations.length == 0">
-                            <i class="fa fa-cog" aria-hidden="true"></i>
-                        </button>
-
-                    </div>
-
                 </div>
             </div>
             <div class="content">
                 <div ng-if="!vm.isRulesBased">
                     <h3>
-                        Creation Settings
+                        Creation Settings                        
                         <span ng-if="vm.isPublishedOrScored">
-                            <span ng-if="vm.isPublished">( Iteration {{
-                                vm.ratingEngine.published_iteration.AI.iteration }} )</span>
-                            <span ng-if="!vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration
-                                }} )</span>
-                            <span ng-if="vm.isPublished" class="published-header">Published</span>
-                            <span ng-if="!vm.isPublished" class="published-header">Scored</span>
+                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                            <span ng-if="!vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )</span>
+                            <span
+                                ng-if="vm.isPublished" 
+                                class="published-header">Published</span>
+                            <span
+                                ng-if="!vm.isPublished" 
+                                class="published-header">Scored</span>
                         </span>
                         <span ng-if="!vm.isPublishedOrScored">
                             ( Iteration {{ vm.ratingEngine.latest_iteration.AI.iteration }} )
@@ -103,27 +84,25 @@
                         <dt>Model Type:</dt>
                         <dd>{{ vm.ratingEngineType }}</dd>
                         <dt ng-if="vm.ratingEngine.segment">Segment:</dt>
-                        <dd ng-if="vm.ratingEngine.segment" class="text-ellipsis">{{
-                            vm.ratingEngine.segment.display_name }}</dd>
-
+                        <dd ng-if="vm.ratingEngine.segment" class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
+                        
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Products:</dt>
-                        <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'" ng-class="{'show-tooltip left delay': vm.multipleTargetProducts}">
+                        <dd 
+                            ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'"
+                            ng-class="{'show-tooltip left delay': vm.multipleTargetProducts}">
                             {{ vm.targetProducts }}
 
                             <div class="tooltip_ small" ng-if="vm.multipleTargetProducts">
                                 <div class="cover">
                                     <ul>
-                                        <li ng-repeat="product in vm.tooltipContent track by $index">{{
-                                            product.ProductName }}</li>
+                                        <li ng-repeat="product in vm.tooltipContent track by $index">{{ product.ProductName }}</li>
                                     </ul>
                                 </div>
                             </div>
                         </dd>
 
                         <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
-                        <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{
-                            vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }}
-                            {{vm.getPeriodType(vm.configFilters['PURCHASED_BEFORE_PERIOD'].value) | lowercase}}</dd>
+                        <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} {{vm.getPeriodType(vm.configFilters['PURCHASED_BEFORE_PERIOD'].value) | lowercase}}</dd>
 
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Prioritize by:</dt>
                         <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.prioritizeBy }}</dd>
@@ -131,59 +110,52 @@
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Available Attributes:</dt>
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT' && vm.getCustomEventAvailableAttributes(vm.model)">{{vm.getCustomEventAvailableAttributes(vm.model)}}</dd>
 
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT' && !vm.getCustomEventAvailableAttributes(vm.model)">No
-                            Attributes Selected</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT' && !vm.getCustomEventAvailableAttributes(vm.model)">No Attributes Selected</dd>
 
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Score External File:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.customEventModelingType
-                            == 'LPI' ? 'Yes' : 'No'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Training File:</dt>
-                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.sourceFileDisplayName
-                            ? vm.model.advancedModelingConfig.custom_event.sourceFileDisplayName :
-                            vm.model.advancedModelingConfig.custom_event.sourceFileName}}</dd>
+                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.sourceFileDisplayName ? vm.model.advancedModelingConfig.custom_event.sourceFileDisplayName : vm.model.advancedModelingConfig.custom_event.sourceFileName}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">One record per account:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{
-                            vm.model.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ?
-                            'Yes' : 'No'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{
-                            vm.model.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
-
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
+                        
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{
-                            (vm.model.advancedModelingConfig.custom_event.transformationGroup == 'NONE') ? 'No' :
-                            'Yes'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ (vm.model.advancedModelingConfig.custom_event.transformationGroup == 'NONE') ? 'No' : 'Yes'}}</dd>
 
                         <dt ng-if="vm.hasSettingsInfo">Training:</dt>
                         <dd ng-if="vm.hasSettingsInfo">
                             <ul>
-                                <li ng-if="vm.configFilters['SPEND_IN_PERIOD']">
-                                    Spend in the {{ vm.getPeriodType() | lowercase}} was {{ vm.spendCriteria }} ${{
-                                    vm.configFilters['SPEND_IN_PERIOD'].value | number }}
+                                <li 
+                                    ng-if="vm.configFilters['SPEND_IN_PERIOD']">
+                                    Spend in the {{ vm.getPeriodType() | lowercase}} was {{ vm.spendCriteria }} ${{ vm.configFilters['SPEND_IN_PERIOD'].value | number }}
                                 </li>
-                                <li ng-if="vm.configFilters['QUANTITY_IN_PERIOD']">
-                                    Quantity bought was {{ vm.quantityCriteria }} {{
-                                    vm.configFilters['QUANTITY_IN_PERIOD'].value | number }} units
+                                <li
+                                    ng-if="vm.configFilters['QUANTITY_IN_PERIOD']">
+                                    Quantity bought was {{ vm.quantityCriteria }} {{ vm.configFilters['QUANTITY_IN_PERIOD'].value | number }} units
                                 </li>
-                                <li ng-if="vm.configFilters['TRAINING_SET_PERIOD']">
-                                    {{ vm.configFilters['TRAINING_SET_PERIOD'].value }} {{
-                                    vm.getPeriodType(vm.configFilters['TRAINING_SET_PERIOD'].value) | lowercase }} of
-                                    historical records
+                                <li
+                                    ng-if="vm.configFilters['TRAINING_SET_PERIOD']">
+                                    {{ vm.configFilters['TRAINING_SET_PERIOD'].value }} {{ vm.getPeriodType(vm.configFilters['TRAINING_SET_PERIOD'].value) | lowercase }} of historical records
                                 </li>
-                                <li ng-if="vm.trainingSegment !== null">
+                                <li
+                                    ng-if="vm.trainingSegment !== null">
                                     Model with similar segment: {{ vm.trainingSegment.display_name }}
                                 </li>
-                                <li ng-if="vm.trainingProducts !== null">
-                                    Model with similar product(s):
-                                    <br />
+                                <li
+                                    ng-if="vm.trainingProducts !== null">
+                                    Model with similar product(s): 
+                                    <br/>
                                     <span ng-if="vm.oneTrainingProduct">{{ vm.trainingProducts.ProductName }}</span>
-                                    <span ng-if="!vm.oneTrainingProduct || vm.trainingProducts.length > 1" class="show-tooltip left delay">
+                                    <span 
+                                        ng-if="!vm.oneTrainingProduct || vm.trainingProducts.length > 1"
+                                        class="show-tooltip left delay">
                                         {{ vm.trainingProducts.length }} selected
                                         <div class="tooltip_ small">
                                             <div class="cover">
                                                 <ul>
-                                                    <li ng-repeat="product in vm.trainingProducts">{{
-                                                        product.ProductName }}</li>
+                                                    <li ng-repeat="product in vm.trainingProducts">{{ product.ProductName }}</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -195,12 +167,16 @@
                 </div>
                 <div>
                     <h3>
-                        Ratings
+                        Ratings 
                         <span ng-if="!vm.isRulesBased">
                             <span ng-if="vm.isPublishedOrScored">
                                 ( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )
-                                <span ng-if="vm.isPublished" class="published-header">Published</span>
-                                <span ng-if="!vm.isPublished" class="published-header">Scored</span>
+                                <span
+                                    ng-if="vm.isPublished" 
+                                    class="published-header">Published</span>
+                                <span
+                                    ng-if="!vm.isPublished" 
+                                    class="published-header">Scored</span>
                             </span>
                             <span ng-if="!vm.isPublishedOrScored">
                                 ( Iteration {{ vm.ratingEngine.latest_iteration.AI.iteration }} )
@@ -211,30 +187,21 @@
                                 <div class="tooltip_ small">
                                     <div class="cover">
                                         <p>
-                                            This chart shows the ratings for the iteration selected for scoring (marked
-                                            as active). It may take a while to update after changing it because the
-                                            analytics needs to be re-created.
+                                            This chart shows the ratings for the iteration selected for scoring (marked as active). It may take a while to update after changing it because the analytics needs to be re-created.
                                         </p>
                                     </div>
                                 </div>
                             </span>
                         </span>
                     </h3>
-                    <h4 ng-if="!vm.isPublished || (vm.dashboard.summary.bucketMetadata == null)" class="no-ratings-header">No
-                        Ratings Available</h4>
-                    <bar-chart ng-if="vm.isPublished && (vm.dashboard.summary.bucketMetadata != null)" config="vm.ratingEngine.chartConfig"
+                    <h4 ng-if="!vm.isPublished || (vm.dashboard.summary.bucketMetadata == null)" class="no-ratings-header">No Ratings Available</h4>
+                    <bar-chart ng-if="vm.isPublished && (vm.dashboard.summary.bucketMetadata != null)"
+                        config="vm.ratingEngine.chartConfig" 
                         bktlist="vm.dashboard.summary.bucketMetadata">
                     </bar-chart>
                 </div>
                 <div ng-if="!vm.isRulesBased">
-                    <h3>
-                        Creation History ({{ vm.dashboard.iterations.length }})
-                        <a ui-sref="home.ratingsengine.dashboard.viewall({
-                               type: 'iterations',
-                               data: vm.dashboard.iterations
-                            })"
-                            ng-if="vm.dashboard.iterations.length > 5" class="published-header link">View All</a>
-                    </h3>
+                    <h3>Creation History ({{ vm.dashboard.iterations.length }})</h3>
                     <table class="creation-history">
                         <thead>
                             <tr>
@@ -248,76 +215,72 @@
                                         </div>
                                     </span>
                                 </th>
+                                <th>Created</th>
+                                <th>User</th>
+                                <th>Scoring</th>
                                 <th>&nbsp;</th>
-                                <th>Creation Status</th>
-                                <th>&nbsp;</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"
-                                ng-class="{active: vm.isIterationActive(iteration.id) &&
-                                        vm.statusIsActive}">
-                                <!-- <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"> -->
-                                <td>
-                                    <p>{{ iteration.iteration }}</p>
+                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration'">
+                            <!-- <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"> -->
+                                <td>{{ iteration.iteration }}</td>
+                                <td>{{ iteration.created | date }}</td>
+                                <td class="text-ellipsis">{{ iteration.createdBy }}</td>
+                                <td class="green-text">
+                                    <span ng-if="
+                                        vm.isIterationActive(iteration.id) &&
+                                        vm.statusIsActive">ACTIVE</span>
                                 </td>
                                 <td>
-                                    <p class="green-text" ng-if="vm.isIterationActive(iteration.id) && vm.statusIsActive">
-                                        Scoring <br />Active
-                                    </p>
-                                    <a class="button" ng-if="
-                                            !vm.isIterationActive(iteration.id) && 
-                                            iteration.modelingJobStatus == 'Completed'"
-                                        ui-sref="home.model.ratings({ 
-                                                    rating_id: vm.ratingEngine.id,
-                                                    modelId: iteration.modelSummaryId,
-                                                    section: 'dashboard.ratings',
-                                                    ratingEngine: vm.ratingEngine
-                                                })">
-                                        Activate
-                                    </a>
-                                </td>
-                                <td ng-class="{
-                                        completed: iteration.modelingJobStatus === 'Completed',
-                                        failed: iteration.modelingJobStatus === 'Failed',
-                                        running: iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'
-                                    }">
-                                    <span ng-if="iteration.modelingJobStatus === 'Completed'">
-                                        Successfully created
+                                    <span 
+                                        ng-if="iteration.modelingJobStatus === 'Completed'" 
+                                        class="ico ico-check show-tooltip delay top">
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>Completed</p>
+                                            </div>
+                                        </div>
                                     </span>
-                                    <span ng-if="iteration.modelingJobStatus === 'Failed'">
-                                        Failed
+                                    <span 
+                                        ng-if="iteration.modelingJobStatus === 'Failed'" 
+                                        class="ico ico-warning show-tooltip delay top">
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>Failed</p>
+                                            </div>
+                                        </div>
                                     </span>
-                                    <span ng-if="iteration.modelingJobStatus === 'Completed' || iteration.modelingJobStatus === 'Failed'">
-                                        {{ iteration.created | date }}
+                                    <span 
+                                        ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'" 
+                                        class="fa fa-clock-o show-tooltip delay top">
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>{{ iteration.modelingJobStatus }}</p>
+                                            </div>
+                                        </div>
                                     </span>
-
-                                    <span ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'">
-                                        <span></span>
-                                        <span>Creating</span>
-                                    </span>
-
                                 </td>
                                 <td>
-                                    <button class="button link-button" ng-click="vm.viewIteration('home.model.datacloud', iteration)"
+                                    
+                                    <button 
+                                        class="button link-button" 
+                                        ng-click="vm.viewIteration(iteration)"
                                         ng-if="
                                             iteration.modelingJobStatus === 'Completed' && 
-                                            iteration.modelSummaryId">View
-                                        Model</button>
+                                            iteration.modelSummaryId">View</button>
+                                    <button 
+                                        class="button link-button" 
+                                        ng-click="vm.remodel(iteration)"
+                                        ng-if="iteration.modelingJobStatus == 'Completed'">Remodel</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div>
-                    <h3>
-                        Used by ({{ vm.relatedItems.length }})
-                        <a ui-sref="home.ratingsengine.dashboard.viewall({
-                               type: 'usedby',
-                               data: vm.relatedItems
-                            })"
-                            ng-if="vm.relatedItems.length > 5" class="published-header link">View All</a>
-                    </h3>
+                    <h3>Used by ({{ vm.relatedItems.length }})</h3>
                     <table ng-if="vm.relatedItems.length > 0">
                         <thead>
                             <tr>
@@ -326,15 +289,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="item in vm.relatedItems | limitTo: 5">
-                                <td>
-                                    <span class="icon" ng-class="{
-                                            'ico-segment': item.type == 'Segment',
-                                            'ico-campaign': item.type == 'Campaign',
-                                            'ico-model': item.type == 'Model'
-                                        }"><span></span></span>
-                                    {{ item.type }}
-                                </td>
+                            <tr ng-repeat="item in vm.relatedItems">
+                                <td>{{ item.type }}</td>
                                 <td>{{ item.name }}</td>
                             </tr>
                         </tbody>
