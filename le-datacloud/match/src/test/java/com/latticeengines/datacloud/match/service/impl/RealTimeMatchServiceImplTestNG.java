@@ -124,7 +124,6 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             inputs.add(input);
         }
         bulkMatchOutput = realTimeMatchService.matchBulk(bulkMatchInput);
-        // log.info(JsonUtils.serialize(bulkMatchOutput));
         Assert.assertNotNull(bulkMatchOutput);
         Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
         bulkMatchOutput.getOutputList().forEach(output -> {
