@@ -108,9 +108,32 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(bulkMatchOutput);
         Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
 
-        MatchOutput output = bulkMatchOutput.getOutputList().get(0);
-        Assert.assertNotNull(output.getResult());
-        Assert.assertEquals(output.getResult().size(), 3);
+        bulkMatchOutput.getOutputList().forEach(output -> {
+            Assert.assertNotNull(output.getResult());
+            Assert.assertEquals(output.getResult().size(), 3);
+        });
+
+        // Test correctness by checking matched domain
+        data = new Object[][] { //
+                { 1, null, "Facebook Inc", "Menlo Park", "California", "USA" },
+                { 2, null, "Alphabet Inc", "Mountain View", "California", "USA" },
+                { 3, null, "Amazon.com, Inc.", "Seattle", "Washington", "USA" } };
+        inputs.clear();
+        for (int i = 0; i < 50; i++) {
+            MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+            inputs.add(input);
+        }
+        bulkMatchOutput = realTimeMatchService.matchBulk(bulkMatchInput);
+        // log.info(JsonUtils.serialize(bulkMatchOutput));
+        Assert.assertNotNull(bulkMatchOutput);
+        Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
+        bulkMatchOutput.getOutputList().forEach(output -> {
+            Assert.assertNotNull(output.getResult());
+            Assert.assertEquals(output.getResult().size(), 3);
+            Assert.assertEquals(output.getResult().get(0).getMatchedDomain(), "facebook.com");
+            Assert.assertEquals(output.getResult().get(1).getMatchedDomain(), "google.com");
+            Assert.assertEquals(output.getResult().get(2).getMatchedDomain(), "amazon.com");
+        });
     }
 
     @Test(groups = "functional")
