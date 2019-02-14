@@ -278,10 +278,10 @@ public class MatchInputValidator {
                                 "MatchKey value list elements must be non-null and non-empty.");
                     } else if (!inputFields.contains(elem)) {
                         throw new IllegalArgumentException(
-                                "Cannot find MatchKey value element " + elem + " in claimed field list."
-                                        + "\n\nInput Fields contains: " + String.join(" ", inputFields)
-                                        + "\nMatchKey: " + entry.getKey() + " values: "
-                                        + String.join(" ", entry.getValue()));
+                                "$JAW$ Cannot find MatchKey value element " + elem + " in claimed field list." +
+                                        "\n\n$JAW$ Input Fields contains: " + String.join(" ", inputFields) +
+                                        "\n$JAW$ MatchKey: " + entry.getKey() + " values: " +
+                                        String.join(" ", entry.getValue()));
                     }
                 }
             }
