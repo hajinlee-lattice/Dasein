@@ -386,6 +386,8 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
             generateAIRating.forceEVSteps(expectedValue);
+            // force skip RealculatePercentile only when model type is EV model
+            generateAIRating.forceSkipRealculatePercentile(expectedValue);
             return this;
         }
 
