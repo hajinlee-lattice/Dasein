@@ -71,7 +71,7 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
             step1.setConfiguration(confParamStr1);
 
             // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(step1);
 
             // -----------
@@ -138,7 +138,7 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
                 // DateLastVerified; Verify calculation of
                 // Max_Location_Intensity and Location_Count
                 { "dom5.com", "Comp5", "CT5", "ST5", "CTRY5", "PID5", "VD5", "PRD5", "2017-11-15", "1", "CATPT_5",
-                        "CAT_5", "CATPT2_5", "CAT2_5", "ATTR5" }, // 
+                        "CAT_5", "CATPT2_5", "CAT2_5", "ATTR5" }, //
                 { "dom5.com", "Comp5", "CT5", "ST5", "CTRY5", "PID5", "VD5", "PRD5", "2017-11-01", "2", "CATPT_5",
                         "CAT_5", "CATPT2_5", "CAT2_5", "ATTR5" }, //
                 // Old DateLastVerifiedDate, but intensity is chosen as

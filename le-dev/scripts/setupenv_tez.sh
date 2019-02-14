@@ -2,12 +2,12 @@
 
 BOOTSTRAP_MODE=$1
 
-if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
+if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 
     TEZ_VERSION=0.9.0
 
-    if [ ! -f "$ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz" ]; then
+    if [[ ! -f "$ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz" ]]; then
         wget --trust-server-names "https://s3.amazonaws.com/latticeengines-dev/artifacts/tez/${TEZ_VERSION}/tez-${TEZ_VERSION}.tar.gz" \
             -O $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz
     fi
