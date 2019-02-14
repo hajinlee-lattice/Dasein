@@ -771,7 +771,12 @@ angular.module('common.datacloud.query.builder.tree.service', [
         this.getValues = function (bucketRestriction, type, subType) {
             switch(type){
                 case 'Date':
-                return bucketRestriction.bkt.Fltr.Vals;
+                    if(bucketRestriction.bkt.Fltr.Cmp == 'EVER'){
+                        return [];
+                    }else{
+                        return bucketRestriction.bkt.Fltr.Vals;
+                    }
+                
                 default: return [];
             }
          };
