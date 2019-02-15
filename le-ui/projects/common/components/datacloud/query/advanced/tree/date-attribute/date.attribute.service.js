@@ -86,10 +86,6 @@ angular
               displayName: element + "(s)"
             });
           });
-          QueryTreeDateAttributeStore.periods.push({
-            name: "Day",
-            displayName: "Day(s)"
-          });
         });
       }
       return QueryTreeDateAttributeStore.periods;
