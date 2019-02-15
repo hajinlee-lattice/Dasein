@@ -111,6 +111,7 @@ angular
       };
 
       this.changeCmp = function(value, type) {
+        let initialPeriod = this.periodsList[0].name;
         setTimeout(() => {
           let tmp = this.bucketrestriction.bkt.Fltr.Vals;
           let copy = [...tmp];
@@ -130,9 +131,10 @@ angular
               QueryTreeDateAttributeStore.changeCmp(
                 this.bucketrestriction.bkt,
                 value,
-                "Day",
+                initialPeriod,
                 this.bucketrestriction.bkt.Fltr.Vals
               );
+              this.resetTimeFramePeriod();
               break;
             case "IN_CURRENT_PERIOD":
               this.showTimeFrame = false;
@@ -145,9 +147,10 @@ angular
               QueryTreeDateAttributeStore.changeCmp(
                 this.bucketrestriction.bkt,
                 value,
-                this.timeframePeriod,
+                initialPeriod,
                 this.bucketrestriction.bkt.Fltr.Vals
               );
+              this.resetTimeFramePeriod();
               break;
             case "WITHIN":
               this.showTimeFrame = false;
@@ -160,9 +163,10 @@ angular
               QueryTreeDateAttributeStore.changeCmp(
                 this.bucketrestriction.bkt,
                 value,
-                this.timeframePeriod,
+                initialPeriod,
                 this.bucketrestriction.bkt.Fltr.Vals
               );
+              this.resetTimeFramePeriod();
               break;
             case "LAST":
               this.showTimeFrame = false;
@@ -178,6 +182,7 @@ angular
                 "Day",
                 this.bucketrestriction.bkt.Fltr.Vals
               );
+              this.resetTimeFramePeriod();
               break;
             case "BETWEEN":
               this.showTimeFrame = false;
@@ -190,14 +195,10 @@ angular
               QueryTreeDateAttributeStore.changeCmp(
                 this.bucketrestriction.bkt,
                 value,
-                'Day',
+                initialPeriod,
                 this.bucketrestriction.bkt.Fltr.Vals
               );
-              this.timeframePeriod = QueryTreeService.getPeriodValue(
-                this.bucketrestriction,
-                this.type,
-                "Date"
-              );
+              this.resetTimeFramePeriod();
               break;
             case "BETWEEN_DATE":
               this.showTimeFrame = true;
@@ -218,6 +219,7 @@ angular
               );
               this.periodTimeConfig.from.initial = copy[0];
               this.periodTimeConfig.to.initial = copy[1];
+              this.resetTimeFramePeriod();
               break;
 
             case "BEFORE":
@@ -243,6 +245,7 @@ angular
                 0
               ),
               this.periodTimeConfig.from.initial = copy[0];
+              this.resetTimeFramePeriod();
               break;
 
             case "AFTER":
@@ -263,10 +266,21 @@ angular
                 [copy[0]]
               );
               this.periodTimeConfig.from.initial = copy[0];
+              this.resetTimeFramePeriod();
               break;
           }
         }, 100);
       };
+
+      this.resetTimeFramePeriod = () => {
+        this.timeframePeriod = QueryTreeService.getPeriodValue(
+          this.bucketrestriction,
+          this.type,
+          "Date"
+        );
+        console.log(this.timeframePeriod);
+      };
+
       this.changePeriod = function() {
         QueryTreeService.changeTimeframePeriod(
           this.bucketrestriction,
