@@ -23,7 +23,7 @@ angular
         vm.launchHistoryDisabled = !launchedStatus.hasLaunchHistory;
 
         vm.segment = vm.play.segment;
-        vm.targetsDisabled = (vm.play.ratingEngine ? false : true);
+        vm.targetsDisabled = false; //(vm.play.ratingEngine ? false : true);
 
         if ($state.current.name === 'home.playbook.dashboard.launch_job') {
             vm.menuDisabled = true;

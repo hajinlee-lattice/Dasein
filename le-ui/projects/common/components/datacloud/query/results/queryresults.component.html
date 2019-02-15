@@ -216,7 +216,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody ng-if="!vm.loading && vm.selectedBuckets.length != 0">
+        <tbody ng-if="!vm.loading && (vm.selectedBuckets.length != 0 || vm.bypassBuckets)">
             <tr 
                 ng-repeat="account in (vm.tmpAccounts = vm.accounts)">
                 <td ng-class="{'gray-text': account.CompanyName === null}">{{account.CompanyName || 'None'}}</td>
@@ -224,7 +224,7 @@
                     <span ng-class="{'gray-text': account.Website === null}" ng-if="account.Website">{{account.Website || 'None'}}</span>
                     <span ng-if="!account.Website" class="gray-text">N/A</span>
                 </td>
-                <td>{{account.ScoreBucket}}</td>
+                <td>{{account.ScoreBucket||'Not&nbsp;Rated'}}</td>
             </tr>
         </tbody>
     </table>
@@ -266,7 +266,7 @@
         <p>No {{vm.page != 'Playbook' && vm.page != 'Campaign Overview' ? vm.page : 'Targets'}} Found<p>
     </div>
 
-    <ul class="filters pull-right" ng-if="vm.section !== 'wizard.targets' && vm.showAccountPagination">
+    <ul class="filters pull-right" ng-if="vm.section !== 'wizard.targets' && (vm.showAccountPagination || vm.bypassBuckets)">
         <li>
             <pd-pagination-controls
                 current="vm.current"

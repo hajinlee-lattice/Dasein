@@ -33,6 +33,7 @@ angular.module('lp.playbook')
         this.types = null;
         this.recommendationCounts = null;
         this.launchUnscored = false;
+        this.accountsDataCount = null;
 
         this.settings_form = {
             play_display_name: '',
@@ -772,6 +773,30 @@ angular.module('lp.playbook')
         return this.launchUnscored;
     }
 
+    this.getAccountsDataCount = function(query) {
+        if(query && query.page_filter) {
+            delete query.page_filter;
+        }
+        var deferred = $q.defer(),
+            accountsDataCount = PlaybookWizardStore.accountsDataCount;
+
+        if(accountsDataCount) {
+            deferred.resolve(accountsDataCount);
+        } else {
+            PlaybookWizardService.getAccountsData(query).then(function(results){
+                PlaybookWizardStore.setAccountsDataCount(results.data.length);
+                deferred.resolve(results.data.length);
+            });
+        }
+        // PlaybookWizardService.getAccountsCount(query).then(function(results){
+        //     console.log(results);
+        // });
+        return deferred.promise;
+    }
+
+    this.setAccountsDataCount = function(count) {
+        this.accountsDataCount = count;
+    }
 
 })
 .service('PlaybookWizardService', function($q, $http, $state, $timeout) {
@@ -1153,6 +1178,30 @@ angular.module('lp.playbook')
         );
         return deferred.promise;
     }
+
+    this.getAccountsData = function(query) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/accounts/data',
+            data: query
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    };
+
+    this.getAccountsCount = function(query) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/entities/counts',
+            data: query
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    };
 
     this.getTypes = function(engineId, query) {
         var deferred = $q.defer();
