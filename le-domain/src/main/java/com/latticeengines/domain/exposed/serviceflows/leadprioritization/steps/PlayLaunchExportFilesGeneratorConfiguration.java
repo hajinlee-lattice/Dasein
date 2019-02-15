@@ -1,11 +1,13 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 
 public class PlayLaunchExportFilesGeneratorConfiguration extends PlayLaunchInitStepConfiguration {
 
     private String destinationOrgId;
     private CDLExternalSystemType destinationSysType;
+    private CDLExternalSystemName destinationSysName;
 
     public String getDestinationOrgId() {
         return destinationOrgId;
@@ -21,6 +23,14 @@ public class PlayLaunchExportFilesGeneratorConfiguration extends PlayLaunchInitS
 
     public void setDestinationSysType(CDLExternalSystemType destinationSysType) {
         this.destinationSysType = destinationSysType;
+    }
+
+    public CDLExternalSystemName getDestinationSysName() {
+        return destinationSysName;
+    }
+
+    public void setDestinationSysName(CDLExternalSystemName destinationSysName) {
+        this.destinationSysName = destinationSysName;
     }
 
 }

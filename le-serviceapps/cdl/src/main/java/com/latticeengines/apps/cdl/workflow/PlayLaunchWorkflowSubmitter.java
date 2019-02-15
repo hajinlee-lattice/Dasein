@@ -35,28 +35,30 @@ public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "playLaunchWorkflow");
 
+        LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
+                playLaunch.getDestinationSysType());
+
         boolean enableExport = batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
-        boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch);
+        boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
 
         PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration.Builder()
-                .customer(getCustomerSpace()) //
-                .workflow("playLaunchWorkflow") //
-                .inputProperties(inputProperties) //
-                .playLaunch(playLaunch) //
+                .customer(getCustomerSpace())
+                .workflow("playLaunchWorkflow")
+                .inputProperties(inputProperties)
+                .playLaunch(playLaunch)
+                .lookupIdMap(lookupIdMap)
                 .exportPlayLaunch(playLaunch, canBeLaunchedToExternal)
                 .build();
         return workflowJobService.submit(configuration);
     }
 
-    private boolean isValidDestination(PlayLaunch playLaunch) {
+    private boolean isValidDestination(PlayLaunch playLaunch, LookupIdMap lookupIdMap) {
         if (StringUtils.isAllBlank(playLaunch.getDestinationOrgId()) || playLaunch.getDestinationSysType() == null) {
             log.debug("Skipping Data Export as Destination Org-{} or Destination Type-{} is empty",
                     playLaunch.getDestinationOrgId(), playLaunch.getDestinationSysType());
             return false;
         }
 
-        LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
-                playLaunch.getDestinationSysType());
         if (lookupIdMap == null || lookupIdMap.getIsRegistered() == null || !lookupIdMap.getIsRegistered()) {
             log.debug("Skipping Data Export as Destination org not found or de-registered - {}",
                     lookupIdMap != null ? lookupIdMap.getIsRegistered() : null);
