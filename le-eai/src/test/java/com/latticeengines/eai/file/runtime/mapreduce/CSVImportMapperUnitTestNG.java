@@ -53,13 +53,11 @@ public class CSVImportMapperUnitTestNG {
         return new Object[][] {
                 // valid number string tests
                 { " 1,135.00", 1135, true },
-                { "　275,416,298.00", 275416298.00, true },
                 { "1,233,445,212,314.00", 1233445212314L, true },
                 { "123,123.01", 123123.01f, true },
                 // invalid number string tests
                 { "123,123.01ac", null, false },
                 { "ac123,123.01", null, false },
-                { "123,1　23.01", null, false },
                 // scientific notation tests
                 { "4.86E+11", 486000000000.0, true },
                 { "4.86E-3", 0.00486, true },

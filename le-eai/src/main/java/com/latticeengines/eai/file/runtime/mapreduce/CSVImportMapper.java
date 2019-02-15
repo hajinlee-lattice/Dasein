@@ -63,8 +63,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
-import avro.shaded.com.google.common.base.CharMatcher;
-
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVImportMapper.class);
@@ -424,7 +422,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @VisibleForTesting
     Number parseStringToNumber(String inputStr) throws ParseException,NullPointerException {
-        inputStr = CharMatcher.WHITESPACE.trimFrom(inputStr);
+        inputStr = inputStr.trim();
         LOG.info("inputStr is " + inputStr);
         if (SCIENTIFIC_PTN.matcher(inputStr).matches()) {
             // handle scientific notation
