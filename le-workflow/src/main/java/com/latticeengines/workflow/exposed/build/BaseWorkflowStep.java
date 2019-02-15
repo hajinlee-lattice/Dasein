@@ -13,11 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -269,7 +271,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         putObjectInContext(WorkflowContextConstants.REPORTS, map);
 
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        proxy.registerReport(report, customerSpace.toString());
+        RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(
+                3, 5000L, 2.0, null);
+        template.execute(context -> {
+            if (context.getRetryCount() >= 1) {
+                log.warn("Last registering report for tenant {} failed. Retrying for {} times.",
+                        customerSpace, context.getRetryCount());
+            }
+            proxy.registerReport(report, customerSpace.toString());
+            return null;
+        });
     }
 
     protected Report retrieveReport(CustomerSpace space, ReportPurpose purpose) {
