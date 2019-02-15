@@ -30,6 +30,10 @@ public class PlayLaunchConfig {
 
     private Map<String, Boolean> featureFlags;
 
+    private String audienceId;
+
+    private String trayAuthenticationId;
+
     private PlayLaunchConfig() {
         testPlayCrud = true;
     }
@@ -93,6 +97,16 @@ public class PlayLaunchConfig {
             return this;
         }
 
+        public Builder audienceId(String audienceId) {
+            playLaunchConfig.audienceId = audienceId;
+            return this;
+        }
+
+        public Builder trayAuthenticationId(String authId) {
+            playLaunchConfig.trayAuthenticationId = authId;
+            return this;
+        }
+
         public PlayLaunchConfig build() {
             return playLaunchConfig;
         }
@@ -140,5 +154,21 @@ public class PlayLaunchConfig {
 
     public Map<String, Boolean> getFeatureFlags() {
         return featureFlags;
+    }
+
+    public String getAudienceId() {
+        return audienceId;
+    }
+
+    public void setAudienceId(String audienceId) {
+        this.audienceId = audienceId;
+    }
+
+    public String getTrayAuthenticationId() {
+        return trayAuthenticationId;
+    }
+
+    public void setTrayAuthenticationId(String trayAuthenticationId) {
+        this.trayAuthenticationId = trayAuthenticationId;
     }
 }

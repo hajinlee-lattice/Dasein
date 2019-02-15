@@ -92,6 +92,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
                 .testPlayCrud(false)
                 .destinationSystemType(CDLExternalSystemType.MAP)
                 .destinationSystemId("Marketo_"+System.currentTimeMillis())
+                .trayAuthenticationId(UUID.randomUUID().toString())
+                .audienceId(UUID.randomUUID().toString())
                 .topNCount(160L)
                 .featureFlags(featureFlags)
                 .build(); 
