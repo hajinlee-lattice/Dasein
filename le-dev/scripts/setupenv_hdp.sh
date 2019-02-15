@@ -63,13 +63,15 @@ echo "Configuring HDP ..."
 cp $WSHOME/le-dev/hadoop/hadoop-env.sh $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/mapred-site.xml $HADOOP_CONF_DIR
-cp $WSHOME/le-dev/hadoop/tez-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/yarn-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/kms-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/${CORE_SITE_XML} $HADOOP_CONF_DIR/core-site.xml
 cp $WSHOME/le-dev/hadoop/hdfs-site.xml $HADOOP_CONF_DIR
 sed -i".orig" "s|[$][{]HADOOP_NAMENODE_DATA_DIR[}]|${HADOOP_NAMENODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
 sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
+
+cp $WSHOME/le-dev/hadoop/tez-site.xml $HADOOP_CONF_DIR
+cp $WSHOME/le-dev/hadoop/log4j2-tez.xml $HADOOP_CONF_DIR
 
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     hdfs namenode -format

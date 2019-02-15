@@ -190,8 +190,13 @@ angular
               QueryTreeDateAttributeStore.changeCmp(
                 this.bucketrestriction.bkt,
                 value,
-                this.timeframePeriod,
+                'Day',
                 this.bucketrestriction.bkt.Fltr.Vals
+              );
+              this.timeframePeriod = QueryTreeService.getPeriodValue(
+                this.bucketrestriction,
+                this.type,
+                "Date"
               );
               break;
             case "BETWEEN_DATE":
