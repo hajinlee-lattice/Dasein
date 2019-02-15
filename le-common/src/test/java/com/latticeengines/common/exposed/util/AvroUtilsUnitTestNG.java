@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
+import com.latticeengines.common.exposed.transformer.RecommendationAvroToJsonFunction;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -164,17 +165,7 @@ public class AvroUtilsUnitTestNG {
     public void convertRecommendationsAvroToJSON() throws IOException {
         URL avroUrl = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
         File jsonFile = File.createTempFile("RecommendationsTest_", ".json");
-        AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile, new Function<GenericRecord, GenericRecord>() {
-            @Override
-            public GenericRecord apply(GenericRecord rec) {
-                Object obj = rec.get("CONTACTS");
-                if (obj != null && StringUtils.isNotBlank(obj.toString())) {
-                    obj = JsonUtils.deserialize(obj.toString(), new TypeReference<List<Map<String, String>>>(){});
-                    rec.put("CONTACTS", obj);
-                }
-                return rec;
-            }
-        });
+        AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile, new RecommendationAvroToJsonFunction());
 
         log.info("Created JON File at: " + jsonFile.getAbsolutePath());
         ObjectMapper om = new ObjectMapper();
