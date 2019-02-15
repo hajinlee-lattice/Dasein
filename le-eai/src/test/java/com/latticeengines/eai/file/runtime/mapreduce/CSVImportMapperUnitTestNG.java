@@ -59,6 +59,7 @@ public class CSVImportMapperUnitTestNG {
                 // invalid number string tests
                 { "123,123.01ac", null, false },
                 { "ac123,123.01", null, false },
+                { "123,1　23.01", null, false },
                 // scientific notation tests
                 { "4.86E+11", 486000000000.0, true },
                 { "4.86E-3", 0.00486, true },
