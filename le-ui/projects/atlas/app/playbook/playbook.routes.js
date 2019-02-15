@@ -366,17 +366,20 @@ angular
                     return null;
                 }],
                 AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
                     var deferred = $q.defer();
 
                     PlaybookWizardStore.getPlay($stateParams.play_name, {noSalesForceId: true}).then(function(data){
-                        var engineId = data.ratingEngine.id,
-                            engineIdObject = [{id: engineId}];
+                        if(data && data.ratingEngine && data.ratingEngine.id) {
+                            var engineId = data.ratingEngine.id,
+                                engineIdObject = [{id: engineId}];
 
-                        PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
-                            var accountCount = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount ? data.ratingEngineIdCoverageMap[engineId].accountCount : 0);
-                            deferred.resolve(accountCount);
-                        });
+                            PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
+                                var accountCount = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount ? data.ratingEngineIdCoverageMap[engineId].accountCount : 0);
+                                deferred.resolve(accountCount);
+                            });
+                        } else {
+                            deferred.resolve(null);
+                        }
                     });
 
                     return deferred.promise;

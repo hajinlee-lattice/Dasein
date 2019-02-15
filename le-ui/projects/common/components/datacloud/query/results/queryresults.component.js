@@ -45,7 +45,8 @@ angular.module('common.datacloud.query.results', [
         tmpAccounts: [],
         tmpContacts: [],
         recommendationCounts: {},
-        launchUnscored: PlaybookWizardStore.getLaunchUnscored()
+        launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
+        bypassBuckets: false
     });
 
     vm.init = function() {
@@ -115,10 +116,12 @@ angular.module('common.datacloud.query.results', [
                 PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
             } else if (vm.section === 'dashboard.targets') {
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
-                    var buckets = data.ratingEngine.bucketMetadata;
-                    buckets.forEach(function(bucket){
-                        vm.selectedBuckets.push(bucket.bucket_name);
-                    });
+                    if(data && data.ratingEngine && data.ratingEngine.bucketMetadata) {
+                        var buckets = data.ratingEngine.bucketMetadata;
+                        buckets.forEach(function(bucket){
+                            vm.selectedBuckets.push(bucket.bucket_name);
+                        });
+                    }
                 });
 
             }
@@ -252,10 +255,51 @@ angular.module('common.datacloud.query.results', [
 
                 // Get Account Data
                 if(engineId) {
-                    PlaybookWizardService.getTargetData(engineId, dataQuery).then(function(data){ 
-                        PlaybookWizardStore.setTargetData(data.data);
+                    PlaybookWizardService.getTargetData(engineId, dataQuery).then(function(results) { 
+                        PlaybookWizardStore.setTargetData(results.data);
                         vm.accounts = PlaybookWizardStore.getTargetData();
                     });
+                } else {
+                    var accountQuery = {
+                        "preexisting_segment_name": data.targetSegment.name,
+                        "lookups": [{
+                                "attribute": {
+                                    "entity": "Account",
+                                    "attribute": "AccountId"
+                                }
+                            },{
+                                "attribute": {
+                                    "entity": "Account",
+                                    "attribute": "LDC_Name"
+                                }
+                            },{
+                                "attribute": {
+                                    "entity": "Account",
+                                    "attribute": "CompanyName"
+                                }
+                            }, {
+                                "attribute": {
+                                    "entity": "Account",
+                                    "attribute": "Website"
+                                }
+                            }
+                        ],
+                        "page_filter": {
+                            "num_rows": vm.pagesize,
+                            "row_offset": offset
+                        }
+                    };
+                    var _accountQuery = angular.copy(accountQuery);
+                    
+                    PlaybookWizardStore.getAccountsDataCount(_accountQuery).then(function(count) { 
+                        vm.counts.accounts.value = count;
+                        PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 
+                            PlaybookWizardStore.setTargetData(results.data);
+                            vm.accounts = PlaybookWizardStore.getTargetData();
+                            vm.bypassBuckets = true;
+                        });
+                    });
+
                 }
 
                 // Get Account Counts for Pagination
@@ -297,22 +341,23 @@ angular.module('common.datacloud.query.results', [
                         };
 
                         if (vm.section === 'create.targets' || vm.section === 'dashboard.targets') {
-                            vm.counts = { 
-                                accounts: { 
-                                    value: calculateCountsFromFiltered(filteredAccountsCoverage) 
-                                },
-                                contacts: {
-                                    value: vm.accountsCoverage.contactCount
-                                }
-                            };
-
+                            if(!vm.bypassBuckets) {
+                                vm.counts = { 
+                                    accounts: { 
+                                        value: calculateCountsFromFiltered(filteredAccountsCoverage) 
+                                    },
+                                    contacts: {
+                                        value: (vm.accountsCoverage && vm.accountsCoverage.contactCount ? vm.accountsCoverage.contactCount : 0)
+                                    }
+                                };
+                            }
                         } else {
                             vm.counts = { 
                                 accounts: { 
                                     value: calculateCountsFromFiltered(filteredAccountsCoverage) 
                                 },
                                 contacts: {
-                                    value: vm.accountsCoverage.contactCount
+                                    value: (vm.accountsCoverage && vm.accountsCoverage.contactCount ? vm.accountsCoverage.contactCount : 0)
                                 }
                             };
                         }
