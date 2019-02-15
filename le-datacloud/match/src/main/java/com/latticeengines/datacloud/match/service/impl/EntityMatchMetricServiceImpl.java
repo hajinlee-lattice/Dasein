@@ -149,15 +149,19 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
             int numTries = traveler.getRetries();
             DistributionSummary.builder(METRIC_NUM_TRIES) //
                     .tag(TAG_ENTITY, traveler.getEntity()) //
+                    .tag(TAG_TENANT, tenantId) //
                     .register(rootRegistry) //
                     .record(numTries);
             DistributionSummary.builder(METRIC_DISTRIBUTION_RETRY) //
                     .tag(TAG_ENTITY, traveler.getEntity()) //
+                    .tag(TAG_TENANT, tenantId) //
                     .register(rootRegistry) //
                     .record(numTries > 1 ? 1.0 : 0.0);
             if (numTries > 1) {
                 // retry
                 Counter.builder(METRIC_HAVE_RETRY_NUM_TRIES) //
+                        .tag(TAG_ENTITY, traveler.getEntity()) //
+                        .tag(TAG_TENANT, tenantId) //
                         .register(rootRegistry) //
                         .increment(1);
             }
