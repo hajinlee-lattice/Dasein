@@ -51,7 +51,7 @@ public class ExportAccountFetcher {
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Value("${playmaker.workflow.segment.pagesize:100}")
+    @Value("${playmaker.workflow.segment.pagesize:200}")
     private long pageSize;
 
     public long getCount(SegmentExportContext segmentExportContext, DataCollection.Version version) {

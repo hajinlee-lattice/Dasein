@@ -136,7 +136,7 @@ public class PercentileLookupAverageEvHelper {
                 node = node.apply(
                         new LookupPercentileForRevenueFunction( //
                                 new Fields(node.getFieldNamesArray()), revenueFieldName, percentileFieldName,
-                                scoreDerivationMap.get(modelGuid).get(ScoreDerivationType.REVENUE)),
+                                scoreDerivationMap.get(modelGuid).get(ScoreDerivationType.EV)),
                         new FieldList(node.getFieldNamesArray()), node.getSchema(), null, Fields.REPLACE);
             }
 
