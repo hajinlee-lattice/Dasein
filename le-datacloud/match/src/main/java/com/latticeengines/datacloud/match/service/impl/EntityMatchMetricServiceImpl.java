@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -16,6 +17,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.micrometer.core.instrument.Counter;
@@ -32,11 +34,15 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     /*
      * metric names
      */
-    private static final String METRIC_ENTITY_MATCH_ACTOR_VISIT = "match.entity.actor.microengine";
-    private static final String METRIC_ENTITY_MATCH_HISTORY = "match.entity.history";
-    private static final String METRIC_ENTITY_MATCH_NUM_TRIES = "match.entity.num.tries";
-    private static final String METRIC_ENTITY_MATCH_DISTRIBUTION_RETRY = "match.entity.num.tries.dist.retry";
-    private static final String METRIC_ENTITY_MATCH_HAVE_RETRY_NUM_TRIES = "match.entity.num.tries.count.retry";
+    private static final String METRIC_ACTOR_VISIT = "match.entity.actor.microengine";
+    private static final String METRIC_HISTORY = "match.entity.history";
+    private static final String METRIC_NUM_TRIES = "match.entity.num.tries";
+    private static final String METRIC_DISTRIBUTION_RETRY = "match.entity.num.tries.dist.retry";
+    private static final String METRIC_HAVE_RETRY_NUM_TRIES = "match.entity.num.tries.count.retry";
+    private static final String METRIC_DYNAMO_THROTTLE = "match.entity.dynamo.throttling.count";
+    private static final String METRIC_DYNAMO_CALL_ERROR_DIST = "match.entity.dynamo.call.error.dist";
+    private static final String METRIC_DYNAMO_CALL_THROTTLE_DIST = "match.entity.dynamo.call.throttling.dist";
+    private static final String METRIC_DYNAMO_CALL_RETRY_DIST = "match.entity.dynamo.call.retry.dist";
 
     /*
      * tag names (TODO probably move to a unified constant class)
@@ -47,11 +53,41 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     private static final String TAG_MATCH_MODE = "MatchMode";
     private static final String TAG_MATCHED = "Matched";
     private static final String TAG_ALLOCATE_ID_MODE = "AllocateId";
+    private static final String TAG_ENV = "Environment";
+    private static final String TAG_DYNAMO_TABLE = "Table";
 
     @Lazy
     @Inject
     @Qualifier("rootRegistry")
     private MeterRegistry rootRegistry;
+
+    @Override
+    public void recordDynamoThrottling(EntityMatchEnvironment env, String tableName) {
+        if (env == null || tableName == null) {
+            return;
+        }
+        Counter.builder(METRIC_DYNAMO_THROTTLE) //
+                .tag(TAG_ENV, env.name()) //
+                .tag(TAG_DYNAMO_TABLE, tableName) //
+                .register(rootRegistry) //
+                .increment();
+    }
+
+    @Override
+    public void recordDynamoCall(EntityMatchEnvironment env, String tableName, RetryContext context,
+            boolean isThrottled) {
+        if (context == null || env == null || tableName == null) {
+            return;
+        }
+
+        recordDynamoDistri(METRIC_DYNAMO_CALL_ERROR_DIST, env, tableName, context.isExhaustedOnly());
+        recordDynamoDistri(METRIC_DYNAMO_CALL_THROTTLE_DIST, env, tableName, isThrottled);
+        DistributionSummary.builder(METRIC_DYNAMO_CALL_RETRY_DIST) //
+                .tag(TAG_ENV, env.name()) //
+                .tag(TAG_DYNAMO_TABLE, tableName) //
+                .register(rootRegistry) //
+                .record(context.getRetryCount());
+    }
 
     @Override
     public void recordActorVisit(MatchTraveler traveler, VisitingHistory history) {
@@ -67,7 +103,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
             return;
         }
 
-        Timer.builder(METRIC_ENTITY_MATCH_ACTOR_VISIT) //
+        Timer.builder(METRIC_ACTOR_VISIT) //
                 .tag(TAG_ACTOR, history.getSite()) //
                 .tag(TAG_ENTITY, traveler.getEntity()) //
                 .tag(TAG_MATCH_MODE, history.getActorSystemMode()) //
@@ -90,7 +126,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
             return;
         }
 
-        Timer.builder(METRIC_ENTITY_MATCH_HISTORY) //
+        Timer.builder(METRIC_HISTORY) //
                 .tag(TAG_ENTITY, traveler.getEntity()) //
                 .tag(TAG_MATCH_MODE, traveler.getMode()) //
                 .tag(TAG_MATCHED, String.valueOf(traveler.getResult() != null)) //
@@ -100,21 +136,30 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
         if (BATCH_MATCH_MODE.equalsIgnoreCase(traveler.getMode()) && traveler.getMatchInput().isAllocateId()) {
             int numTries = traveler.getRetries();
-            DistributionSummary.builder(METRIC_ENTITY_MATCH_NUM_TRIES) //
+            DistributionSummary.builder(METRIC_NUM_TRIES) //
                     .tag(TAG_ENTITY, traveler.getEntity()) //
                     .register(rootRegistry) //
                     .record(numTries);
-            DistributionSummary.builder(METRIC_ENTITY_MATCH_DISTRIBUTION_RETRY) //
+            DistributionSummary.builder(METRIC_DISTRIBUTION_RETRY) //
                     .tag(TAG_ENTITY, traveler.getEntity()) //
                     .register(rootRegistry) //
                     .record(numTries > 1 ? 1.0 : 0.0);
             if (numTries > 1) {
                 // retry
-                Counter.builder(METRIC_ENTITY_MATCH_HAVE_RETRY_NUM_TRIES) //
+                Counter.builder(METRIC_HAVE_RETRY_NUM_TRIES) //
                         .register(rootRegistry) //
                         .increment(1);
             }
         }
+    }
+
+    private void recordDynamoDistri(@NotNull String metricName, @NotNull EntityMatchEnvironment env,
+            @NotNull String tableName, boolean hasEvent) {
+        DistributionSummary.builder(metricName) //
+                .tag(TAG_ENV, env.name()) //
+                .tag(TAG_DYNAMO_TABLE, tableName) //
+                .register(rootRegistry) //
+                .record(hasEvent ? 1.0 : 0.0);
     }
 
     private boolean shouldRecord(String tenantId, @NotNull MatchTraveler traveler) {
