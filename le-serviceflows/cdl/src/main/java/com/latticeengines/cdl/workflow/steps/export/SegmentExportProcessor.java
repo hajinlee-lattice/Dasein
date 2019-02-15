@@ -92,7 +92,7 @@ public abstract class SegmentExportProcessor {
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
-    @Value("${playmaker.workflow.segment.pagesize:1000}")
+    @Value("${playmaker.workflow.segment.pagesize:100}")
     protected long pageSize;
 
     @Value("${yarn.pls.url}")
