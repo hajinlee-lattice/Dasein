@@ -334,8 +334,8 @@ public class EMRScalingRunnable implements Runnable {
 
     private AtomicLong getLastScaleOutTime() {
         lastScalingOutMap.putIfAbsent(clusterId, //
-                // 10 min ago
-                new AtomicLong(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(10)));
+                // 10 min cool down
+                new AtomicLong(System.currentTimeMillis() - SCALING_DOWN_COOL_DOWN + TimeUnit.MINUTES.toMillis(10)));
         return lastScalingOutMap.get(clusterId);
     }
 
