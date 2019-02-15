@@ -312,6 +312,13 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
                                                         .withDuns("514513113") //
                                                         .build(),
                                         map1),
+                        TestPatchBookUtils //
+                                .newPatchBook(9L,
+                                        new MatchKeyTuple //
+                                                .Builder() //
+                                                        .withDuns("333333333") //
+                                                        .build(),
+                                        map1),
                         // error entry : patch items besides domain
                         TestPatchBookUtils //
                                 .newPatchBook(7L,

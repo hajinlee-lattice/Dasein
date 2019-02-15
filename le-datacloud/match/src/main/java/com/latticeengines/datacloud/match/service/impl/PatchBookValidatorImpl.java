@@ -272,15 +272,8 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     && book.getPatchItems().size() == 1) {
                 // match key = duns and patchedItem domain
                 // check if match key = duns and patchedItem = domain, this combination is unique
-                if (!patchBooksWithSameDomDuns.containsKey(dunsKeyAndDomPatchItem)) {
-                    patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem,
-                            Arrays.asList(book.getPid()));
-                } else {
-                    List<Long> pids = new ArrayList<>(
-                            patchBooksWithSameDomDuns.get(dunsKeyAndDomPatchItem));
-                    pids.add(book.getPid());
-                    patchBooksWithSameDomDuns.put(dunsKeyAndDomPatchItem, pids);
-                }
+                patchBooksWithSameDomDuns.putIfAbsent(dunsKeyAndDomPatchItem, new ArrayList<>());
+                patchBooksWithSameDomDuns.get(dunsKeyAndDomPatchItem).add(book.getPid());
             } else {
                 errPatchItemsPids.add(book.getPid());
             }
@@ -325,8 +318,8 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             try {
                 source = mapper.readTree(argument).getPath("Source").asText();
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 Log.error("Error in reading Json.");
+                continue;
             }
             // populate set of attribute names for domain based sources
             if (DataCloudConstants.DOMAIN_BASED_SOURCES.contains(source)) {
@@ -348,16 +341,12 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                 String patchAttr = patchedItem.getKey();
                 if (StringUtils.isBlank(book.getDomain())
                         && attrNamesForDomBasedSources.contains(patchAttr)) {
-                    // Error : since domain match key is present and patch
-                    // attrName should be one of the attr names for domain
-                    // based sources
+                    // Error : No domain match key and wants to patch domain source attr
                     domBasedSrcAbsentAttrs.add(patchAttr);
                 }
                 if (StringUtils.isBlank(book.getDuns())
                         && attrNamesForDunsBasedSources.contains(patchAttr)) {
-                    // Error : since duns match key is present and patch
-                    // attrName should be one of the attr names for duns
-                    // based sources
+                    // Error : No duns match key and wants to patch duns source attr
                     dunsBasedSrcAbsentAttrs.add(patchAttr);
                 }
             }
