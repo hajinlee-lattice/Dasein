@@ -49,12 +49,22 @@ public class EMRScalingRunnable implements Runnable {
                     YarnApplicationState.ACCEPTED //
             ), YarnApplicationState.class);
 
+    private static final EnumSet<YarnApplicationState> ACTIVE_APP_STATES = //
+            Sets.newEnumSet(Arrays.asList(//
+                    YarnApplicationState.NEW, //
+                    YarnApplicationState.NEW_SAVING, //
+                    YarnApplicationState.SUBMITTED, //
+                    YarnApplicationState.ACCEPTED, //
+                    YarnApplicationState.RUNNING
+            ), YarnApplicationState.class);
+
     private long coreMb;
     private int coreVCores;
     private long taskMb;
     private int taskVCores;
     private long minAvailMemMb;
     private int minAvailVCores;
+    private boolean hasTezApp;
 
     private final String emrCluster;
     private final String clusterId;
@@ -91,6 +101,14 @@ public class EMRScalingRunnable implements Runnable {
             reqResource = getRequestingResources();
         } catch (Exception e) {
             log.error("Failed to retrieve requesting resource submitted to emr cluster "
+                    + emrCluster);
+            return;
+        }
+
+        try {
+            hasTezApp = hasActiveTezApps();
+        } catch (Exception e) {
+            log.error("Failed to check active TEZ applications in emr cluster "
                     + emrCluster);
             return;
         }
@@ -174,19 +192,19 @@ public class EMRScalingRunnable implements Runnable {
                 resetScaleInCounter();
             } else if (target < requested) {
                 // attempt to scale in
+                log.info(String.format(
+                        "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
+                        emrCluster, getScaleInAttempt().incrementAndGet(), running, requested,
+                        target));
                 if (getLastScaleOutTime().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
-                    log.info("Still in cool down period, won't attempt to scaling in.");
-                } else {
-                    log.info(String.format(
-                            "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                            emrCluster, getScaleInAttempt().incrementAndGet(), running, requested,
-                            target));
-                    if (getScaleInAttempt().get() >= 5) {
-                        log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
-                        // be conservative about terminating machines
-                        scale(target);
-                        resetScaleInCounter();
-                    }
+                    log.info("Still in cool down period, won't attempt to scale in.");
+                } else if (hasTezApp) {
+                    log.info("Has active TEZ applications, won't attempt to scale in.");
+                } else if (getScaleInAttempt().get() >= 5) {
+                    log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
+                    // be conservative about terminating machines
+                    scale(target);
+                    resetScaleInCounter();
                 }
             }
         }
@@ -208,6 +226,22 @@ public class EMRScalingRunnable implements Runnable {
                     yarnClient.start();
                     List<ApplicationReport> apps = yarnClient.getApplications(PENDING_APP_STATES);
                     return getReqs(apps);
+                }
+            } catch (IOException | YarnException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private boolean hasActiveTezApps() {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(context -> {
+            try {
+                try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+                    yarnClient.start();
+                    List<ApplicationReport> apps = yarnClient.getApplications(ACTIVE_APP_STATES);
+                    return apps.stream().anyMatch(appReport ->
+                            appReport.getApplicationType().equalsIgnoreCase("TEZ"));
                 }
             } catch (IOException | YarnException e) {
                 throw new RuntimeException(e);
