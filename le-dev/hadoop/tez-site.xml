@@ -35,10 +35,10 @@
     </property>
     <property>
         <name>tez.am.launch.cmd-opts</name>
-        <value>-XX:+UseNUMA -XX:+UseG1GC</value>
+        <value>-Dlog4j.configurationFile=${HADOOP_CONF_DIR}/log4j2-tez.xml -XX:+UseNUMA -XX:+UseG1GC</value>
     </property>
     <property>
         <name>tez.task.launch.cmd-opts</name>
-        <value>-XX:+UseNUMA -XX:+UseG1GC</value>
+        <value>-Dlog4j.configurationFile=${HADOOP_CONF_DIR}/log4j2-tez.xml -XX:+UseNUMA -XX:+UseG1GC</value>
     </property>
 </configuration>

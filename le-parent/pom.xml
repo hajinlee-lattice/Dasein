@@ -61,7 +61,7 @@
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <!--<spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> &lt;!&ndash; need ledp3 classifier &ndash;&gt;-->
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
-        <tez.version>0.9.0</tez.version>
+        <tez.version>0.9.1</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
         <guava.version>19.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
@@ -2251,7 +2251,6 @@
                 <groupId>org.apache.tez</groupId>
                 <artifactId>tez-api</artifactId>
                 <version>${tez.version}</version>
-                <classifier>ledp</classifier>
             </dependency>
 
             <!-- Web Applications -->
