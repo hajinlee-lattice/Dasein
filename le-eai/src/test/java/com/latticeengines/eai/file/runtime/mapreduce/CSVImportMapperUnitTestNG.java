@@ -1,5 +1,7 @@
 package com.latticeengines.eai.file.runtime.mapreduce;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -50,8 +52,8 @@ public class CSVImportMapperUnitTestNG {
     public Object[][] provideTestNumberStrings() {
         return new Object[][] {
                 // valid number string tests
-                { "1,135.00", 1135, true },
-                { "275,416,298.00", 275416298.00, true },
+                { " 1,135.00", 1135, true },
+                { "　275,416,298.00", 275416298.00, true },
                 { "1,233,445,212,314.00", 1233445212314L, true },
                 { "123,123.01", 123123.01f, true },
                 // invalid number string tests

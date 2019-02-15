@@ -421,12 +421,13 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     @VisibleForTesting
-    Number parseStringToNumber(String inputStr) throws ParseException {
+    Number parseStringToNumber(String inputStr) throws ParseException,NullPointerException {
+        inputStr = inputStr.replace("　", "").trim();
+        LOG.info("inputStr is " + inputStr);
         if (SCIENTIFIC_PTN.matcher(inputStr).matches()) {
             // handle scientific notation
             return Double.parseDouble(inputStr);
         }
-
         NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
         return numberFormatter.parse(inputStr, Locale.getDefault());
     }
