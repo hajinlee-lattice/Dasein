@@ -38,6 +38,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -48,7 +49,9 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -71,6 +74,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -114,6 +118,9 @@ public class TestPlayCreationHelper {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Inject
     private TalkingPointProxy talkingPointProxy;
@@ -248,6 +255,10 @@ public class TestPlayCreationHelper {
         createDefaultPlayAndTestCrud(playLaunchConfig);
         createPlayLaunch(playLaunchConfig);
 
+        if (playLaunchConfig.getTrayAuthenticationId() != null) {
+            createLookupIdMapping(playLaunchConfig);
+        }
+
         Assert.assertNotNull(play);
         Assert.assertNotNull(playLaunch);
 
@@ -324,6 +335,21 @@ public class TestPlayCreationHelper {
         assertPlayLaunch(playLaunch);
     }
 
+    public LookupIdMap createLookupIdMapping(PlayLaunchConfig playLaunchConfig) {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setTenant(tenant);
+        lookupIdMap.setExternalSystemType(playLaunchConfig.getDestinationSystemType());
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
+        lookupIdMap.setOrgName("OrgName_" + new Date().toString());
+        lookupIdMap.setOrgId(playLaunchConfig.getDestinationSystemId());
+        ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
+        extSysAuth.setTrayAuthenticationId(playLaunchConfig.getTrayAuthenticationId());
+        extSysAuth.setTrayWorkflowEnabled(true);
+        extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+        lookupIdMap.setExternalAuthentication(extSysAuth);
+        return lookupIdMappingProxy.registerExternalSystem(tenant.getId(), lookupIdMap);
+    }
+
     public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig) {
         playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(), playLaunchConfig.isPlayLaunchDryRun());
         if (playLaunchConfig.isPlayLaunchDryRun()) {
@@ -349,6 +375,7 @@ public class TestPlayCreationHelper {
         playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
         playLaunch.setTopNCount(playLaunchConfig.getTopNCount());
+        playLaunch.setAudienceId(playLaunchConfig.getAudienceId());
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
 
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepConfiguration {
@@ -8,7 +9,7 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     private String playLaunchId;
 
-    private String destinationOrgId;
+    private LookupIdMap lookupIdMap;
 
     public String getPlayName() {
         return playName;
@@ -26,12 +27,12 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
         this.playLaunchId = playLaunchId;
     }
 
-    public String getDestinationOrgId() {
-        return destinationOrgId;
+    public LookupIdMap getLookupIdMap() {
+        return lookupIdMap;
     }
 
-    public void setDestinationOrgId(String destinationOrgId) {
-        this.destinationOrgId = destinationOrgId;
+    public void setLookupIdMap(LookupIdMap lookupIdMap) {
+        this.lookupIdMap = lookupIdMap;
     }
 
 }

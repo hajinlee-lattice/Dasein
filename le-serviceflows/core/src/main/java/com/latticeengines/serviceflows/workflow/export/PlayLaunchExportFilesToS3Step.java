@@ -83,7 +83,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         PlayLaunchExportFilesToS3Configuration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
         String playLaunchId = config.getPlayLaunchId();
-        String externalSystemId = config.getDestinationOrgId();
+        String externalSystemId = config.getLookupIdMap().getOrgId();
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
 
         s3ExportFilePaths.stream().forEach(exportPath -> {
