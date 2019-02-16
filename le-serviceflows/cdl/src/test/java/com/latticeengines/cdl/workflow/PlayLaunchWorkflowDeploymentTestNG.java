@@ -25,8 +25,8 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -80,6 +80,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         return testPlayCreationHelper.getTenant();
     }
 
+    @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String existingTenant = null;//"LETest1547165867101";
@@ -91,6 +92,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
                 .mockRatingTable(false)
                 .testPlayCrud(false)
                 .destinationSystemType(CDLExternalSystemType.MAP)
+                .destinationSystemName(CDLExternalSystemName.Marketo)
                 .destinationSystemId("Marketo_"+System.currentTimeMillis())
                 .trayAuthenticationId(UUID.randomUUID().toString())
                 .audienceId(UUID.randomUUID().toString())
@@ -136,6 +138,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         config.setPlayLaunchId(defaultPlayLaunch.getId());
         config.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
         config.setDestinationSysType(playLaunchConfig.getDestinationSystemType());
+        config.setDestinationSysName(playLaunchConfig.getDestinationSystemName());
 
         PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
@@ -171,6 +174,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         }
     }
 
+    @Override
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
     }
