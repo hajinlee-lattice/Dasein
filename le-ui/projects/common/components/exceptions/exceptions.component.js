@@ -4,14 +4,14 @@ angular
         "common.modal",
         "common.notice"
     ])
-    .service("ServiceErrorUtility", function(
+    .service("ServiceErrorUtility", function (
         $timeout,
         $injector,
         Banner,
         Modal,
         Notice
     ) {
-        this.check = function(response) {
+        this.check = function (response) {
             if (!response || !response.data) {
                 return false;
             }
@@ -27,7 +27,7 @@ angular
             return uiErrorCheck || uiActionCheck;
         };
 
-        this.process = function(response) {
+        this.process = function (response) {
             if (this.check(response)) {
                 var config = response.config || { headers: {} },
                     params = (
@@ -78,7 +78,7 @@ angular
             }
         };
 
-        this.show = function(Service, response, options, callback) {
+        this.show = function (Service, response, options, callback) {
             if (!this.check(response)) {
                 return;
             }
@@ -106,7 +106,7 @@ angular
                 cbService = callback ? $injector.get(cbSplit[0]) : null,
                 cbMethod = callback ? cbSplit[1] : null;
 
-            $timeout(function() {
+            $timeout(function () {
                 Service[method](
                     opts,
                     cbMethod ? cbService[cbMethod].bind(cbService) : null
@@ -114,35 +114,35 @@ angular
             }, 1);
         };
 
-        this.hideBanner = function() {
+        this.hideBanner = function () {
             Banner.reset();
         };
     })
-    .service("ServiceErrorInterceptor", function($q, $injector) {
-        this.response = function(response) {
+    .service("ServiceErrorInterceptor", function ($q, $injector) {
+        this.response = function (response) {
             var ServiceErrorUtility = $injector.get("ServiceErrorUtility");
             ServiceErrorUtility.process(response);
             return response || $q.when(response);
         };
 
-        this.request = function(response) {
+        this.request = function (response) {
             var ServiceErrorUtility = $injector.get("ServiceErrorUtility");
             ServiceErrorUtility.process(response);
             return response || $q.when(response);
         };
 
-        this.responseError = function(rejection) {
+        this.responseError = function (rejection) {
             var ServiceErrorUtility = $injector.get("ServiceErrorUtility");
             ServiceErrorUtility.process(rejection);
             return $q.reject(rejection);
         };
 
-        this.requestError = function(rejection) {
+        this.requestError = function (rejection) {
             var ServiceErrorUtility = $injector.get("ServiceErrorUtility");
             ServiceErrorUtility.process(rejection);
             return $q.reject(rejection);
         };
     })
-    .config(function($httpProvider) {
+    .config(function ($httpProvider) {
         $httpProvider.interceptors.push("ServiceErrorInterceptor");
     });

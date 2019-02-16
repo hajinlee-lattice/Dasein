@@ -1,10 +1,8 @@
 import { Subject } from '../../network.vendor';
 
-let subject;
-
 const init = () => {
-    if (!subject) {
-        subject = new Subject();
+    if (!window['subject']) {
+        window['subject'] = new Subject();
     }
 };
 
@@ -16,13 +14,11 @@ const messagingService = {
         observables.removeObservable(observer.getName());
     },
     addSubscriber: observer => {
-        // console.log('ADD SUB TO MESSAGING');
-        subject.subscribe(observer);
+        window['subject'].subscribe(observer);
     },
-    removeSubscriber: observer => {},
+    removeSubscriber: observer => { },
     sendMessage: message => {
-        // console.log('SENDING');
-        subject.next(message);
+        window['subject'].next(message);
     }
 };
 init();
