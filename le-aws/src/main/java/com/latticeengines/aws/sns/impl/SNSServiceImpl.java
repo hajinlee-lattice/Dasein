@@ -75,6 +75,21 @@ public class SNSServiceImpl implements SNSService {
     }
 
     @Override
+    public PublishResult publishToTopic(String topicName, PublishRequest publishRequest) throws Exception {
+        String topicArn = getTopicArnByName(topicName);
+        if (StringUtils.isEmpty(topicArn)) {
+            throw new Exception("Missing topicArn from AWS SNS PublishRequest");
+        }
+        
+        publishRequest.setTopicArn(topicArn);
+
+        log.info(String.format("Publishing message to TopicArn %s : ", topicArn) + JsonUtils.serialize(publishRequest));
+        PublishResult publishResult = snsClient.publish(publishRequest);
+        log.info(String.format("Published messageId %s", publishResult.getMessageId()));
+        return publishResult;
+    }
+
+    @Override
     public ListTopicsResult getAllTopics() {
         return snsClient.listTopics();
     }

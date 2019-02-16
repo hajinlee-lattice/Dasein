@@ -33,6 +33,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             initStepConf.setPlayName(playLaunch.getPlay().getName());
             initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
+            exportFilesToS3Conf.setExternalAudienceId(playLaunch.getAudienceId());
             return this;
         }
 

@@ -50,7 +50,7 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
             url += "?" + StringUtils.join(params, "&");
         }
         log.info("url is " + url);
-        Map lookupIdConfigsRaw = (Map) get("getLookupIdsMapping", url, Map.class);
+        Map lookupIdConfigsRaw = get("getLookupIdsMapping", url, Map.class);
         if (lookupIdConfigsRaw == null) {
             return new HashMap<>();
         }
@@ -94,7 +94,7 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
             url += "?" + StringUtils.join(params, "&");
         }
         log.info("url is " + url);
-        Map allLookupIdsRaw = (Map) get("getAllLookupIds", url, Map.class);
+        Map allLookupIdsRaw = get("getAllLookupIds", url, Map.class);
         if (allLookupIdsRaw == null) {
             return new HashMap<>();
         }
@@ -147,5 +147,13 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
                     orgId, lookupIdColumn));
         }
         return lookupIdColumn;
+    }
+
+    public LookupIdMap getLookupIdMapByOrgId(String customerSpace, String orgId,
+            CDLExternalSystemType externalSystemType) {
+        String url = constructUrl(URL_PREFIX + "/org/{orgId}", shortenCustomerSpace(customerSpace), orgId);
+        url += "?externalSystemType=" + externalSystemType;
+        log.info("url is " + url);
+        return get("getLookupIdMapByOrgId", url, LookupIdMap.class);
     }
 }

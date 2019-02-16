@@ -3,6 +3,7 @@ package com.latticeengines.testframework.exposed.domain;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 
@@ -17,6 +18,8 @@ public class PlayLaunchConfig {
     private CDLExternalSystemType destinationSystemType;
 
     private String destinationSystemId;
+
+    private CDLExternalSystemName destinationSystemName;
 
     private boolean launchPlay;
 
@@ -59,6 +62,11 @@ public class PlayLaunchConfig {
 
         public Builder destinationSystemType(CDLExternalSystemType destinationSystemType) {
             playLaunchConfig.destinationSystemType = destinationSystemType;
+            return this;
+        }
+
+        public Builder destinationSystemName(CDLExternalSystemName destinationSystemName) {
+            playLaunchConfig.destinationSystemName = destinationSystemName;
             return this;
         }
 
@@ -126,6 +134,14 @@ public class PlayLaunchConfig {
 
     public CDLExternalSystemType getDestinationSystemType() {
         return destinationSystemType;
+    }
+
+    public CDLExternalSystemName getDestinationSystemName() {
+        return destinationSystemName;
+    }
+
+    public void setDestinationSystemName(CDLExternalSystemName destinationSystemName) {
+        this.destinationSystemName = destinationSystemName;
     }
 
     public String getDestinationSystemId() {
