@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
+
 public class AccountAttrsDecorator implements Decorator {
 
     private static Set<String> exportAttributes = SchemaRepository //
@@ -63,7 +64,6 @@ public class AccountAttrsDecorator implements Decorator {
         // enable some attributes for Export
         if (exportAttributes.contains(cm.getAttrName())) {
             cm.enableGroup(Enrichment);
-            cm.setCanEnrich(false);
         } else {
             cm.disableGroup(Enrichment);
         }
@@ -75,7 +75,7 @@ public class AccountAttrsDecorator implements Decorator {
             cm.setSubcategory("Account IDs");
         }
 
-        // TODO: should move allow change part to attr-specification
+        //TODO: should move allow change part to attr-specification
         // disable date attributes to be used in modeling
         if (LogicalDataType.Date.equals(cm.getLogicalDataType())) {
             cm.setCanModel(false);
@@ -95,7 +95,8 @@ public class AccountAttrsDecorator implements Decorator {
 
         // Set initial value of Export
         if (Boolean.TRUE.equals(cm.getCanEnrich())
-                && (Category.FIRMOGRAPHICS.equals(cm.getCategory()) || StringUtils.isNotBlank(cm.getDataLicense()))) {
+                && (Category.FIRMOGRAPHICS.equals(cm.getCategory())
+                || StringUtils.isNotBlank(cm.getDataLicense()))) {
             cm.enableGroup(Enrichment);
         } else {
             cm.disableGroup(Enrichment);
