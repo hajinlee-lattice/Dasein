@@ -5,6 +5,7 @@ import java.util.Map;
 import com.amazonaws.services.sns.model.CreateTopicResult;
 import com.amazonaws.services.sns.model.ListTopicsResult;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 
 public interface SNSService {
@@ -15,6 +16,8 @@ public interface SNSService {
 
     PublishResult publishToTopic(String topicArn, String message,
             Map<String, MessageAttributeValue> messageAttributes) throws Exception;
+
+    PublishResult publishToTopic(String topicArn, PublishRequest publishRequest) throws Exception;
 
     ListTopicsResult getAllTopics();
 
