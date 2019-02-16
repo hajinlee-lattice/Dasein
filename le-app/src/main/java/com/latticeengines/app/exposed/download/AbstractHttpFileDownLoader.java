@@ -56,14 +56,19 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
+    private static final Logger log = LoggerFactory.getLogger(AbstractHttpFileDownLoader.class);
+
     private String mimeType;
     protected ImportFromS3Service importFromS3Service;
     private CDLAttrConfigProxy cdlAttrConfigProxy;
     private DataCollectionProxy dataCollectionProxy;
     private MetadataProxy metadataProxy;
     private BatonService batonService;
+    private boolean shouldReformatDate = false;
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractHttpFileDownLoader.class);
+    public void setShouldReformatDate(boolean shouldReformatDate) {
+        this.shouldReformatDate = shouldReformatDate;
+    }
 
     protected abstract String getFileName() throws Exception;
 
@@ -88,7 +93,11 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             case MediaType.APPLICATION_OCTET_STREAM:
                 try (InputStream is = getFileInputStream()) {
                     try (OutputStream os = response.getOutputStream()) {
-                        GzipUtils.copyAndCompressStream(is, os);
+                        if (shouldReformatDate) {
+                            GzipUtils.copyAndCompressStream(processDates(is), os);
+                        } else {
+                            GzipUtils.copyAndCompressStream(is, os);
+                        }
                     }
                 }
                 break;
@@ -119,8 +128,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     }
 
     private InputStream processDates(InputStream inputStream) {
-        // process dates for CSV files only
-        if (!mimeType.equals("application/csv")) {
+        if (!shouldReformatDate) {
             return inputStream;
         }
 

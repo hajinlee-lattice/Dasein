@@ -55,6 +55,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
 
         Assert.assertNotNull(metadataSegmentExport.getPid());
         Assert.assertNotNull(metadataSegmentExport.getExportId());
+        System.out.println("ExportId=" + metadataSegmentExport.getExportId());
 
         String exportId = metadataSegmentExport.getExportId();
 
