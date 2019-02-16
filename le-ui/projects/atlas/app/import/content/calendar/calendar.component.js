@@ -159,7 +159,7 @@ angular.module('lp.import.calendar', [])
                 Modal.warning({
                     name: 'calendar_warning',
                     title: "Business Calendar",
-                    message: 'The Business Calendar will be updated throughout the tenant.',
+                    message: 'The <strong>Custom</strong> Calendar will be used to build accurate time based analytics through out the tenant.',
                     confirmtext: "Yes, Update"
                 }, vm.modalCallback);
             }
