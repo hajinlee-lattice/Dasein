@@ -65,10 +65,8 @@ export default function (
     }
 
     // add details to debug result
-    console.log(window.navigator.userAgent);
     LeMessaging.subscribe({
         next: message => {
-            // console.log("RECEIVED", message);
             if (message.isErrorUtility()) {
                 ServiceErrorUtility.process(message.getResponse());
                 $scope.$apply(() => { });
@@ -85,7 +83,7 @@ export default function (
                     case CLOSE_MODAL:
                         let modal = Modal.get(message.getName());
                         if (modal) {
-                            Modal.modalRemoveFromDOM(modal, {name: message.getName()});
+                            Modal.modalRemoveFromDOM(modal, { name: message.getName() });
                         }
                         break;
                     case MODAL:
@@ -142,4 +140,6 @@ export default function (
         // other browser
         return false;
     }
+
+    //console.log(window.navigator.userAgent);
 }
