@@ -1,17 +1,16 @@
 package com.latticeengines.ulysses.utils;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.codehaus.plexus.util.StringUtils;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import org.codehaus.plexus.util.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component(RecommendationDanteFormatter.Qualifier)
 public class RecommendationDanteFormatter implements DanteFormatter<Recommendation> {
@@ -162,7 +161,7 @@ public class RecommendationDanteFormatter implements DanteFormatter<Recommendati
 
         @JsonProperty(value = "Probability", index = 21)
         @JsonView(DanteFormatter.DanteFormat.class)
-        public double getProbability() {
+        public Double getProbability() {
             return recommendation.getLikelihood();
         }
 
