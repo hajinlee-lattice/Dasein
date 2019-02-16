@@ -253,9 +253,9 @@ export default class GridContainer extends Component {
                             minute: "2-digit"
                         };
                         var formatted = new Date(value);
-                        console.log(
-                            `grid formatted: ${formatted} value: ${value} options: ${options}`
-                        );
+                        // console.log(
+                        //     `grid formatted: ${formatted} value: ${value} options: ${options}`
+                        // );
                         var buh = "err";
                         try {
                             buh = formatted.toLocaleDateString(
