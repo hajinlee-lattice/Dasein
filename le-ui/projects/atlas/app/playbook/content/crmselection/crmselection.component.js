@@ -70,6 +70,12 @@ angular.module('lp.playbook.wizard.crmselection', [])
         }
 
         vm.calculateUnscoredCounts = function(form, segment, accountId){
+            if (!segment.account_restriction.restriction || !segment.account_restriction.restriction.length) {
+                vm.loadingCoverageCounts = false;
+                PlaybookWizardStore.setValidation('crmselection', form.$valid);
+                return;
+            }
+
             var template = {
                 //lookupId: accountId,
                 account_restriction: {
@@ -103,10 +109,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
                 vm.loadingCoverageCounts = false;
                 vm.notNullCount = result.Account;
-                console.log(result.Account);
-                console.log(vm.notNullCount);
                 vm.nullCount = vm.totalCount - vm.notNullCount;
-                console.log(vm.nullCount);
             });
         }
 
