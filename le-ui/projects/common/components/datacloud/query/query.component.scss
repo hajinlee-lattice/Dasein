@@ -133,6 +133,10 @@
             }
         }
     }
+    & > .error-message > h4{
+        font-size: 16px;
+        color: red;
+    }
 }
 
 .query-builder {

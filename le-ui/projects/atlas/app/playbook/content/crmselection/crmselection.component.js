@@ -13,11 +13,17 @@ angular.module('lp.playbook.wizard.crmselection', [])
         var vm = this;
         vm.showMAPSystems = vm.featureflags.EnableCdl;
         vm.externalIntegrationEnabled = vm.featureflags.EnableExternalIntegration;
-
+        this.showErrorApi = false;
         angular.extend(vm, {
             status: $stateParams.status
         });
-
+        vm.isEmpty = (obj) => {
+            for(var key in obj) {
+                if(obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
         vm.$onInit = function() {
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
@@ -162,10 +168,14 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
                         vm.loadingCoverageCounts = false;
-                        var scoredNotNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]] ? result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount : 0;
-                        var unscoredNotNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]] ? result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].unscoredAccountCount : 0;
-                        vm.notNullCount = scoredNotNullCount + unscoredNotNullCount;
-                        vm.nullCount = vm.totalCount - vm.notNullCount;
+                        if(vm.isEmpty(result.errorMap)){
+                            var scoredNotNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]] ? result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].accountCount : 0;
+                            var unscoredNotNullCount = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]] ? result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]].unscoredAccountCount : 0;
+                            vm.notNullCount = scoredNotNullCount + unscoredNotNullCount;
+                            vm.nullCount = vm.totalCount - vm.notNullCount;
+                        }else{
+                            vm.showErrorApi = true;
+                        }
                     });
                 } else {
                     vm.calculateUnscoredCounts(form, segment, accountId);

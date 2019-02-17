@@ -28,12 +28,14 @@ angular.module('common.datacloud.query.results', [
         pagesize: 10,
         showAccountPagination: false,
         showContactPagination: false,
+        showErrorApi: false,
         search: '',
         searchOptions: {
             updateOn: 'default blur',
             debounce: 1500
         },
-        accountsCoverage: AccountsCoverage,
+        accountsCoverage: AccountsCoverage.ratingModelsCoverageMap,
+
         excludeNonSalesForce: false,
         sortType: 'CompanyName',
         sortDesc: false,
@@ -48,13 +50,19 @@ angular.module('common.datacloud.query.results', [
         launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
         bypassBuckets: false
     });
-
+    vm.isEmpty = (obj) => {
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key))
+                return false;
+        }
+        return true;
+    }
     vm.init = function() {
         // Set Counts for Segment and PLay Targets
         if (vm.section === 'segment.analysis') {
             vm.counts = QueryStore.getCounts();
         } else {
-
+            vm.showErrorApi = !vm.isEmpty(AccountsCoverage.errorMap);
             vm.selectedBuckets = [];
             if (vm.section === 'wizard.targets') {
                 // var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
@@ -71,11 +79,13 @@ angular.module('common.datacloud.query.results', [
                 // }
                 
                 // Now instead we get sum of scored and unscored accounts
-                var numAccounts = (vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount);
+                var unscoredAccountCount = vm.accountsCoverage ? vm.accountsCoverage.unscoredAccountCount : 0;
+                var accountCount = vm.accountsCoverage ? vm.accountsCoverage.accountCount : 0;
+                var numAccounts = unscoredAccountCount + accountCount;
 
                 vm.unscoredAccounts = {
-                    total: vm.accountsCoverage.unscoredAccountCount,
-                    percentage: NumberUtility.MakePercentage(vm.accountsCoverage.unscoredAccountCount, (vm.accountsCoverage.unscoredAccountCount + vm.accountsCoverage.accountCount), '%', 1)
+                    total: unscoredAccountCount,
+                    percentage: NumberUtility.MakePercentage(unscoredAccountCount, (unscoredAccountCount + accountCount), '%', 1)
                 }
 
                 //setting defaults
@@ -94,26 +104,28 @@ angular.module('common.datacloud.query.results', [
 
                 // Create array (vm.selectedBuckets) of bucket names (e.g. ["A", "B", "C"]) 
                 // to be used when launching play, and assign percentage to the bucket for display purposes
-                vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
-                    if(bucketsToLaunch == null) {
-                        vm.selectedBuckets.push(bucket.bucket);
-                    }
-                    else if(bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
-                        vm.selectedBuckets.push(bucket.bucket);
-                    }
+                if(vm.accountsCoverage){
+                    vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
+                        if(bucketsToLaunch == null) {
+                            vm.selectedBuckets.push(bucket.bucket);
+                        }
+                        else if(bucketsToLaunch.length && bucketsToLaunch.indexOf(bucket.bucket) !== -1) {
+                            vm.selectedBuckets.push(bucket.bucket);
+                        }
 
 
-                    // Use this if you want to round up to nearest integer percentage
-                    // If you do use this, use this in the view HTML ({{ ::bucket.percentage }}%)
-                    // result is (1%) for 0.3%
-                    // bucket.percentage = Math.ceil((bucket.count / numAccounts) * 100);
+                        // Use this if you want to round up to nearest integer percentage
+                        // If you do use this, use this in the view HTML ({{ ::bucket.percentage }}%)
+                        // result is (1%) for 0.3%
+                        // bucket.percentage = Math.ceil((bucket.count / numAccounts) * 100);
 
-                    // Use this if you want more precise percentage in the display
-                    // If you do use this, use this in the view HTML ({{ ::bucket.percentage | percentage: 1 }})
-                    // result is (0.3%) for 0.3%
-                    bucket.percentage = bucket.count / numAccounts;               
-                });
-                PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
+                        // Use this if you want more precise percentage in the display
+                        // If you do use this, use this in the view HTML ({{ ::bucket.percentage | percentage: 1 }})
+                        // result is (0.3%) for 0.3%
+                        bucket.percentage = bucket.count / numAccounts;               
+                    });
+                    PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
+                }
             } else if (vm.section === 'dashboard.targets') {
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
                     if(data && data.ratingEngine && data.ratingEngine.bucketMetadata) {
@@ -352,12 +364,14 @@ angular.module('common.datacloud.query.results', [
                                 };
                             }
                         } else {
+                            let accountValue = calculateCountsFromFiltered(filteredAccountsCoverage);
+                            let contactsValue = vm.accountsCoverage ? vm.accountsCoverage.contactCount : 0;
                             vm.counts = { 
                                 accounts: { 
-                                    value: calculateCountsFromFiltered(filteredAccountsCoverage) 
+                                    value: accountValue
                                 },
                                 contacts: {
-                                    value: (vm.accountsCoverage && vm.accountsCoverage.contactCount ? vm.accountsCoverage.contactCount : 0)
+                                    value: contactsValue
                                 }
                             };
                         }
@@ -616,7 +630,7 @@ angular.module('common.datacloud.query.results', [
     vm.makeRecommendationCounts = function() {
         //var opts = opts || {};
 
-        if(!vm.accountsCoverage && !vm.accountsCoverage.bucketCoverageCounts) {
+        if(!vm.accountsCoverage || !vm.accountsCoverage.bucketCoverageCounts) {
             vm.recommendationCounts = null;
             return false;
         }
