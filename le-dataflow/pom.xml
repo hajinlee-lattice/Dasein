@@ -134,6 +134,7 @@
         <dependency>
             <groupId>org.apache.tez</groupId>
             <artifactId>tez-api</artifactId>
+            <classifier>ledp</classifier>
         </dependency>
 
         <!-- Flink Dependencies -->
