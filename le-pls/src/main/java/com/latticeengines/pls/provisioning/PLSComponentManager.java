@@ -2,7 +2,6 @@ package com.latticeengines.pls.provisioning;
 
 import java.util.Collection;
 import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
@@ -52,6 +52,14 @@ public class PLSComponentManager {
     @Inject
     private TenantConfigService tenantConfigService;
 
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customersBucket;
+
+    @Value("${pls.admin.operation.specialAdmin:}")
+    private String specialAdmin;
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -180,6 +188,7 @@ public class PLSComponentManager {
 
     public void discardTenant(String tenantId) {
         Tenant tenant = tenantService.findByTenantId(tenantId);
+        s3Service.cleanupPrefix(customersBucket, tenant.getContract());
         if (tenant != null) {
             discardTenant(tenant);
         }
