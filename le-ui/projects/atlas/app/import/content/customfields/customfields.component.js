@@ -35,7 +35,7 @@ angular.module('lp.import.wizard.customfields', [])
         if(vm.mergedFields) {
             vm.mergedFields.forEach(function(item) {
                 var appended = null;
-                if(item.mappedField == null) {
+                if(!item.mappedToLatticeField) {
                     if(mergedFieldDocument.appended) {
                         appended = mergedFieldDocument.appended.find(function(dup) {
                             return (item.userField === dup.userField);
