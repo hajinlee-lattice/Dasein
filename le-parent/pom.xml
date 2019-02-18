@@ -6,7 +6,7 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.14.0-SNAPSHOT</version>
+    <version>4.15.0-SNAPSHOT</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 
@@ -61,7 +61,7 @@
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <!--<spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> &lt;!&ndash; need ledp3 classifier &ndash;&gt;-->
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
-        <tez.version>0.9.1</tez.version>
+        <tez.version>0.9.0</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
         <guava.version>19.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
@@ -136,6 +136,7 @@
         <tinkerpop.version>3.3.4</tinkerpop.version>
         <springfox.swagger.version>2.8.0</springfox.swagger.version>
         <io.swagger.version>1.5.21</io.swagger.version>
+        <io.micrometer.version>1.1.1</io.micrometer.version>
 
         <!-- Confluent -->
         <kafka.version>0.11.0.0-cp1</kafka.version>
@@ -2251,6 +2252,7 @@
                 <groupId>org.apache.tez</groupId>
                 <artifactId>tez-api</artifactId>
                 <version>${tez.version}</version>
+                <classifier>ledp</classifier>
             </dependency>
 
             <!-- Web Applications -->

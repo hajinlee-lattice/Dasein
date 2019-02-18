@@ -3,6 +3,7 @@ package com.latticeengines.testframework.exposed.domain;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 
@@ -18,6 +19,8 @@ public class PlayLaunchConfig {
 
     private String destinationSystemId;
 
+    private CDLExternalSystemName destinationSystemName;
+
     private boolean launchPlay;
 
     private Set<RatingBucketName> bucketsToLaunch;
@@ -29,6 +32,10 @@ public class PlayLaunchConfig {
     private boolean playLaunchDryRun;
 
     private Map<String, Boolean> featureFlags;
+
+    private String audienceId;
+
+    private String trayAuthenticationId;
 
     private PlayLaunchConfig() {
         testPlayCrud = true;
@@ -55,6 +62,11 @@ public class PlayLaunchConfig {
 
         public Builder destinationSystemType(CDLExternalSystemType destinationSystemType) {
             playLaunchConfig.destinationSystemType = destinationSystemType;
+            return this;
+        }
+
+        public Builder destinationSystemName(CDLExternalSystemName destinationSystemName) {
+            playLaunchConfig.destinationSystemName = destinationSystemName;
             return this;
         }
 
@@ -93,6 +105,16 @@ public class PlayLaunchConfig {
             return this;
         }
 
+        public Builder audienceId(String audienceId) {
+            playLaunchConfig.audienceId = audienceId;
+            return this;
+        }
+
+        public Builder trayAuthenticationId(String authId) {
+            playLaunchConfig.trayAuthenticationId = authId;
+            return this;
+        }
+
         public PlayLaunchConfig build() {
             return playLaunchConfig;
         }
@@ -112,6 +134,14 @@ public class PlayLaunchConfig {
 
     public CDLExternalSystemType getDestinationSystemType() {
         return destinationSystemType;
+    }
+
+    public CDLExternalSystemName getDestinationSystemName() {
+        return destinationSystemName;
+    }
+
+    public void setDestinationSystemName(CDLExternalSystemName destinationSystemName) {
+        this.destinationSystemName = destinationSystemName;
     }
 
     public String getDestinationSystemId() {
@@ -140,5 +170,21 @@ public class PlayLaunchConfig {
 
     public Map<String, Boolean> getFeatureFlags() {
         return featureFlags;
+    }
+
+    public String getAudienceId() {
+        return audienceId;
+    }
+
+    public void setAudienceId(String audienceId) {
+        this.audienceId = audienceId;
+    }
+
+    public String getTrayAuthenticationId() {
+        return trayAuthenticationId;
+    }
+
+    public void setTrayAuthenticationId(String trayAuthenticationId) {
+        this.trayAuthenticationId = trayAuthenticationId;
     }
 }

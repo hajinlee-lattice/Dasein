@@ -39,6 +39,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
@@ -315,6 +316,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             InternalOutputRecord matchRecord = new InternalOutputRecord();
             matchRecord.setParsedDuns(duns);
             matchRecord.setParsedDomain(domain);
+            matchRecord.setParsedTenant(EntityMatchUtils.newStandardizedTenant(TENANT));
             // same order as matchInput.fields
             Object[] rawData = new Object[] { domain, duns };
             matchRecord.setInput(Arrays.asList(rawData));

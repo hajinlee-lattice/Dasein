@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.security.Tenant;
+
 public class EntityMatchKeyRecord {
 
     private String parsedDomain;
@@ -11,11 +13,13 @@ public class EntityMatchKeyRecord {
     private String parsedDuns;
     private NameLocation parsedNameLocation;
     private String parsedEmail;
+    private Tenant parsedTenant;
 
     private String origDomain;
     private NameLocation origNameLocation;
     private String origDuns;
     private String origEmail;
+    private Tenant origTenant;
 
     // TODO(jwinter): Fix handling of error messages which should be passed using the actor system.
     private Boolean failed = false;
@@ -69,6 +73,14 @@ public class EntityMatchKeyRecord {
         this.parsedEmail = parsedEmail;
     }
 
+    public Tenant getParsedTenant() {
+        return parsedTenant;
+    }
+
+    public void setParsedTenant(Tenant parsedTenant) {
+        this.parsedTenant = parsedTenant;
+    }
+
     public String getOrigDomain() {
         return origDomain;
     }
@@ -99,6 +111,14 @@ public class EntityMatchKeyRecord {
 
     public void setOrigEmail(String origEmail) {
         this.origEmail = origEmail;
+    }
+
+    public Tenant getOrigTenant() {
+        return origTenant;
+    }
+
+    public void setOrigTenant(Tenant origTenant) {
+        this.origTenant = origTenant;
     }
 
     public Boolean isFailed() {

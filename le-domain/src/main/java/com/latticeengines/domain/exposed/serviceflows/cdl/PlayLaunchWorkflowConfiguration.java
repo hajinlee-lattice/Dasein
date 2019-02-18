@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
@@ -32,7 +33,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             initStepConf.setPlayName(playLaunch.getPlay().getName());
             initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
-            exportFilesToS3Conf.setDestinationOrgId(playLaunch.getDestinationOrgId());
+            exportFilesToS3Conf.setExternalAudienceId(playLaunch.getAudienceId());
             return this;
         }
 
@@ -44,10 +45,19 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             }
             exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
             exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());
-            exportFileGeneratorConf.setDestinationSysType(playLaunch.getDestinationSysType());
-            exportFileGeneratorConf.setDestinationOrgId(playLaunch.getDestinationOrgId());
             exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
             exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
+            return this;
+        }
+        
+        public Builder lookupIdMap(LookupIdMap lookupIdMap) {
+            if (lookupIdMap == null) {
+                return this;
+            }
+            exportFileGeneratorConf.setDestinationSysType(lookupIdMap.getExternalSystemType());
+            exportFileGeneratorConf.setDestinationOrgId(lookupIdMap.getOrgId());
+            exportFileGeneratorConf.setDestinationSysName(lookupIdMap.getExternalSystemName());
+            exportFilesToS3Conf.setLookupIdMap(lookupIdMap);
             return this;
         }
 

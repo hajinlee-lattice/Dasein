@@ -5,6 +5,9 @@
 
 <div>
     <a href="assets/downloads/product-hierarchy-sample.csv" target="_self" class="download-link"><i class="fa fa-download"></i> Download a sample CSV file that has all of the required fields.</a>
+    
+    <p ng-if="$ctrl.calendarInfo.mode == 'NONE'" class="configure-calendar">Note: Business calendar is not configured. <a ui-sref="home.import.calendar">Click here to setup.</a></p>
+    <p ng-if="$ctrl.calendarInfo.mode !== 'NONE'" class="configure-calendar">Note: The current calendar used is {{$ctrl.calendarInfo.modeDisplayName}} Calendar. <a ui-sref="home.import.calendar">Click here to change, if required.</a></p>
 
     <p>{{$ctrl.ResourceUtility.getString('IMPORT_SAMPLE_FILE_LABEL')}}:</p>
     <div class="table example-table">

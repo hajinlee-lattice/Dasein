@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.datacloud;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -165,6 +169,18 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_AM_REFRESH_VER_UPDATER = "amRefreshVersionUpdater";
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
+
+    /*************************************************
+     * Constant sets for Domain and Duns Based Sources
+     *************************************************/
+    private static final String[] DOMAIN_SOURCES = new String[] { "AlexaMostRecent",
+            "Bombora30DayAgg", "BomboraSurgePivoted", "BuiltWithPivoted",
+            "BuiltWithTechIndicators", "FeaturePivoted", "HGDataPivoted", "HGDataTechIndicators", "HPANewPivoted",
+            "OrbIntelligenceMostRecent", "SemrushMostRecent" };
+    public static final Set<String> DOMAIN_BASED_SOURCES = new HashSet<>(
+            Arrays.asList(DOMAIN_SOURCES));
+    private static final String[] DUNS_SOURCES = new String[] { "DnBCacheSeed" };
+    public static final Set<String> DUNS_BASED_SOURCES = new HashSet<>(Arrays.asList(DUNS_SOURCES));
 
     /***********************************
      * Domain sources for AM

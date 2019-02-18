@@ -15,6 +15,7 @@ import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.TravelLog;
@@ -24,6 +25,7 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -59,6 +61,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Inject
     private DomainCollectService domainCollectService;
+
+    @Lazy
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
@@ -131,7 +137,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 setDnbReturnCode(traveler, matchRecord);
                 setDebugValues(traveler, matchRecord);
                 traveler.setBatchMode(actorSystem.isBatchMode());
-                fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
+                FuzzyMatchHistory history = new FuzzyMatchHistory(traveler);
+                fuzzyMatchHistories.add(history);
+                if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
+                    entityMatchMetricService.recordMatchHistory(history);
+                }
                 if (isMatchHistoryEnabled)
                     matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler));
                 traveler.finish();
@@ -243,7 +253,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), null);
                     matchTraveler.setInputDataRecord(matchRecord.getInput());
                     matchTraveler.setEntityKeyPositionMaps(matchRecord.getEntityKeyPositionMaps());
-                    matchTraveler.setEntityMatchKeyRecord(new EntityMatchKeyRecord());
+                    EntityMatchKeyRecord entityMatchKeyRecord = new EntityMatchKeyRecord();
+                    entityMatchKeyRecord.setOrigTenant(matchRecord.getOrigTenant());
+                    entityMatchKeyRecord.setParsedTenant(matchRecord.getParsedTenant());
+                    matchTraveler.setEntityMatchKeyRecord(entityMatchKeyRecord);
                     // 1st decision graph's entity is just final target entity
                     matchTraveler.setEntity(matchInput.getTargetEntity());
                 } else {
@@ -301,10 +314,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         internalRecord.setParsedDuns(entityRecord.getParsedDuns());
         internalRecord.setParsedNameLocation(entityRecord.getParsedNameLocation());
         internalRecord.setParsedEmail(entityRecord.getParsedEmail());
+        internalRecord.setParsedTenant(entityRecord.getParsedTenant());
         internalRecord.setOrigDomain(entityRecord.getOrigDomain());
         internalRecord.setOrigNameLocation(entityRecord.getOrigNameLocation());
         internalRecord.setOrigDuns(entityRecord.getOrigDuns());
         internalRecord.setOrigEmail(entityRecord.getOrigEmail());
+        internalRecord.setOrigTenant(entityRecord.getOrigTenant());
         internalRecord.setFailed(entityRecord.isFailed());
         internalRecord.setErrorMessages(entityRecord.getErrorMessages());
     }

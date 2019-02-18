@@ -7,6 +7,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
 .service('ImportUtils', function(ReduxService){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
+    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId'}};
     var latticeSchema = {};
 
     function setFields(fieldObj, field){
@@ -134,15 +135,27 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
             fieldMapped.timezone = newTypeObj.timezone;
         }
     }
+    
+    function removeUniqueIdsMapped( entity, fieldsMapped){
+        let unique = [];
+        Object.keys(fieldsMapped).forEach(index => {
+            let obj = fieldsMapped[index];
+            if(ImportUtils.uniqueIds[entity][obj.mappedField] && !isUniqueIdAlreadyAdded(unique, fieldsMapped[index].mappedField, fieldsMapped[index].userField)){
+                unique.push(Object.assign({}, fieldsMapped[index]));
+                delete fieldsMapped.index;
+            }
+        });
+        return unique;
+    }
 
     function setMapping(entity, savedObj, fieldsMapped){
         // let originalMapping = fieldsMapping ? fieldsMapping : {};
         var keysMapped = Object.keys(fieldsMapped);
         keysMapped.forEach(function(mapped){
             if(savedObj.mappedField === fieldsMapped[mapped].mappedField && 
-                savedObj.userField !== fieldsMapped[mapped].userField){
-                fieldsMapped[mapped].mappedField =  null;
-                fieldsMapped[mapped].mappedToLatticeField = false;
+                    savedObj.userField !== fieldsMapped[mapped].userField){
+                    fieldsMapped[mapped].mappedField =  null;
+                    fieldsMapped[mapped].mappedToLatticeField = false;
             }
             if(savedObj.userField === fieldsMapped[mapped].userField){
                 fieldsMapped[mapped].mappedField = savedObj.mappedField;
@@ -155,13 +168,46 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
     }
     
+    function updateUniqueIdMapping(uniqueIdsList, obj){
+        uniqueIdsList.forEach(uniqueId => {
+            if(uniqueId.mappedField == obj.mappedField){
+                uniqueId.userField = obj.userField;
+                return;
+            }
+        });
+    }
+    function updateUniqueIdsMapping(entity, savedObj, uniquiIdslist){
+        Object.keys(savedObj).forEach(index => {
+            if(ImportUtils.uniqueIds[entity][savedObj[index].mappedField]){
+                updateUniqueIdMapping(uniquiIdslist, savedObj[index]);
+            }
+        });
+
+    }
+    function isUniqueIdAlreadyAdded(uniqueIdsList, mappedField, userField){
+        let already = false;
+        uniqueIdsList.forEach((element) => {
+            if(element.mappedField == mappedField && element.userField == userField){
+                already = true;
+                return;
+            }
+        });
+        return already;
+    }
+
     this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
             var keysSaved = Object.keys(savedObj);
-            
+            let copyUniqueIds = removeUniqueIdsMapped(entity, fieldsMapping);
+            updateUniqueIdsMapping(entity,savedObj,copyUniqueIds);
             keysSaved.forEach(function(keySaved){
                 setMapping(entity, savedObj[keySaved], fieldsMapping);
             });
+            let ret =  fieldsMapping.concat(copyUniqueIds);
+            // console.log(ret);
+            return ret;
+        }else{
+            return fieldsMapping;
         }
     };
 });

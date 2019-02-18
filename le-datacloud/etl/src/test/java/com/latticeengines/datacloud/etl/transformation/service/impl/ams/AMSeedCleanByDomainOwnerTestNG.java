@@ -239,7 +239,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
         uploadBaseSourceData(orbSecClean.getSourceName(), baseSourceVersion, schema, data);
     }
 
-    Object[][] amSeedCleanedUpDeterministicValues = new Object[][] { //
+    Object[][] amSeedCleanedUpValues = new Object[][] { //
             // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
             // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
             // Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
@@ -293,13 +293,8 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             // Domain only entry : karlDuns2.com domain record got replaced with domain netappDuns1.com. Update corresponding alexaRank.
             { "netappDuns1.com", null, "DUNS28", null, 304500L, "2200", 1, "Media", 83,
                     "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=karlDuns2.com is orb sec domain]", null,
-                    DOMSRC_ORB }, };
-
-    Object[][] amSeedCleanedupNonDeterministicValues = new Object[][] {
-            // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd,
-            // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
-
-            // Case 1 :
+                    DOMSRC_ORB },
+            // Case 9 :
             // Domains present in domain ownership table with SINGLE_TREE type :
             // result = not cleaned up
             // amSeed domain exists in OrbSec.SecondaryDomain, then this domain
@@ -307,25 +302,15 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             // Primary domain already exists in AMSeed. The final result should
             // not have duplicate domain + duns entries.
             { "music.com", "DUNS37", null, null, 24178781L, "2343", 2, "Media", 213, null,
-                    null, DOMSRC_DNB },
-            { "music.com", "DUNS37", "DUNS39", "DUNS90", 2812732L, "1313", 2, "Legal", 11,
-                    "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=saavn.com is orb sec domain]",
-                    null, DOMSRC_ORB } };
+                    null, DOMSRC_DNB }, };
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        int nonDeterministicRecCount = 0;
-        Map<String, Object[]> amSeedDeterministicExpectedValues = new HashMap<>();
-        for (Object[] data : amSeedCleanedUpDeterministicValues) {
-            amSeedDeterministicExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]),
+        Map<String, Object[]> amSeedExpectedValues = new HashMap<>();
+        for (Object[] data : amSeedCleanedUpValues) {
+            amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]),
                     data);
-        }
-        Map<String, Object[]> amSeedNonDeterministicExpectedValues = new HashMap<>();
-        for (Object[] data : amSeedCleanedupNonDeterministicValues) {
-            amSeedNonDeterministicExpectedValues
-                    .put(String.valueOf(data[0]) + String.valueOf(data[1])
-                            + String.valueOf(data[2]), data);
         }
         String[] expectedValueOrder = { //
                 DataCloudConstants.AMS_ATTR_DOMAIN, //
@@ -345,21 +330,15 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             log.info("record : " + record);
             String domain = String.valueOf(record.get("Domain"));
             String duns = String.valueOf(record.get("DUNS"));
-            Object[] expectedVal = amSeedDeterministicExpectedValues.get(domain + duns);
-            if (expectedVal == null) {
-                String guDuns = String.valueOf(record.get("GLOBAL_ULTIMATE_DUNS_NUMBER"));
-                expectedVal = amSeedNonDeterministicExpectedValues.get(domain + duns + guDuns);
-                nonDeterministicRecCount++;
-            }
+            Object[] expectedVal = amSeedExpectedValues.get(domain + duns);
             for (int i = 0; i < expectedValueOrder.length; i++) {
                 Assert.assertTrue(isObjEquals(record.get(expectedValueOrder[i]), expectedVal[i]));
             }
-            amSeedDeterministicExpectedValues.remove(domain + duns);
+            amSeedExpectedValues.remove(domain + duns);
             rowCount++;
         }
-        Assert.assertTrue(amSeedDeterministicExpectedValues.size() == 0);
-        Assert.assertEquals(rowCount,
-                amSeedCleanedUpDeterministicValues.length + nonDeterministicRecCount);
+        Assert.assertTrue(amSeedExpectedValues.size() == 0);
+        Assert.assertEquals(rowCount, amSeedCleanedUpValues.length);
     }
 
     @Override

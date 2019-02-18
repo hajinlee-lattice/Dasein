@@ -6,12 +6,16 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.component.exposed.service.ComponentServiceBase;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -20,11 +24,14 @@ import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cdlComponentService")
@@ -52,6 +59,21 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private RedshiftService redshiftService;
+
+    @Inject
+    private SegmentService segmentService;
+
+    @Inject
+    private ActionService actionService;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customersBucket;
 
     public CDLComponentServiceImpl() {
         super(ComponentConstants.CDL);
@@ -125,10 +147,36 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
                 // delete s3
                 destroy(customerSpace);
+                s3Service.cleanupPrefix(customersBucket, cs.getContractId());
 
+                log.info("Clean up DataCollection(DataFeed_xxx)");
                 DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();
                 if (dataCollection != null) {
                     dataCollectionEntityMgr.delete(dataCollection);
+                }
+
+                log.info("Clean up MetadataSegment(RatingEngine,Play)");
+                List<MetadataSegment> segments = segmentService.getSegments();
+                if (segments != null) {
+                    for (MetadataSegment segment : segments) {
+                        segmentService.deleteSegmentByName(segment.getName(), true, true);
+                    }
+                }
+
+                log.info("Clean up Action");
+                List<Action> actions = actionService.findAll();
+                if (actions != null) {
+                    for (Action action : actions) {
+                        actionService.delete(action.getPid());
+                    }
+                }
+
+                log.info("Clean up ModelSummary");
+                List<ModelSummary> modelSummaries = modelSummaryProxy.getAllForTenant(tenant.getName());
+                if (modelSummaries != null) {
+                    for (ModelSummary modelSummary : modelSummaries) {
+                        modelSummaryProxy.deleteByModelId(cs.toString(), modelSummary.getId());
+                    }
                 }
 
                 Thread.sleep(1000);

@@ -25,8 +25,8 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -80,6 +80,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         return testPlayCreationHelper.getTenant();
     }
 
+    @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String existingTenant = null;//"LETest1547165867101";
@@ -91,7 +92,10 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
                 .mockRatingTable(false)
                 .testPlayCrud(false)
                 .destinationSystemType(CDLExternalSystemType.MAP)
+                .destinationSystemName(CDLExternalSystemName.Marketo)
                 .destinationSystemId("Marketo_"+System.currentTimeMillis())
+                .trayAuthenticationId(UUID.randomUUID().toString())
+                .audienceId(UUID.randomUUID().toString())
                 .topNCount(160L)
                 .featureFlags(featureFlags)
                 .build(); 
@@ -134,6 +138,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         config.setPlayLaunchId(defaultPlayLaunch.getId());
         config.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
         config.setDestinationSysType(playLaunchConfig.getDestinationSystemType());
+        config.setDestinationSysName(playLaunchConfig.getDestinationSystemName());
 
         PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
@@ -145,19 +150,31 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         // Get S3 Files for this PlayLaunch Config
         List<S3ObjectSummary> s3Objects = s3Service.listObjects(exportS3Bucket, s3FolderPath);
         assertNotNull(s3Objects);
-        assertEquals(s3Objects.size(), 1);
+        assertEquals(s3Objects.size(), 2);
         assertTrue(s3Objects.get(0).getKey().contains("Recommendations"));
+
+        boolean csvFileExists = false, jsonFileExists = false;
+        for (S3ObjectSummary s3Obj : s3Objects) {
+            if (s3Obj.getKey().contains(".csv")) {
+                csvFileExists = true;
+            }
+            if (s3Obj.getKey().contains(".json")) {
+                jsonFileExists = true;
+            }
+        }
+        assertTrue(csvFileExists, "CSV file doesnot exists");
+        assertTrue(jsonFileExists, "JSON file doesnot exists");
 
         log.info("Cleaning up S3 path " + s3FolderPath);
         try {
             s3Service.cleanupPrefix(exportS3Bucket, s3FolderPath);
             s3Service.cleanupPrefix(exportS3Bucket, dropboxFolderName);
         } catch (Exception ex) {
-            // Ignore the file deletion error
             log.error("Error while cleaning up dropbox files ", ex);
         }
     }
 
+    @Override
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
     }

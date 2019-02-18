@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.util;
+package com.latticeengines.serviceflows.dataflow;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,18 +15,19 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
-public class ProductUtilsUnitTestNG {
-    private static final Logger log = LoggerFactory.getLogger(ProductUtilsUnitTestNG.class);
+public class ProductUtilsFunctionalTestNG {
+    private static final Logger log = LoggerFactory.getLogger(ProductUtilsFunctionalTestNG.class);
     private YarnConfiguration yarnConfiguration;
     private final String PATH = "/tmp/ProductUtilsTestNG/";
     private List<Product> productList;
     private List<Product> loadedProductList;
 
-    @BeforeClass(groups = "unit")
+    @BeforeClass(groups = "functional")
     public void setup() throws IOException {
         yarnConfiguration = new YarnConfiguration();
 
@@ -101,20 +102,20 @@ public class ProductUtilsUnitTestNG {
                 dishwasherSpendingFamily, desktopGadgets, soap, dishwasher);
     }
 
-    @AfterClass(groups = "unit")
+    @AfterClass(groups = "functional")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, PATH);
         log.info(String.format("Test artifacts in %s are removed.", PATH));
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "functional")
     public void testSaveProducts() throws IOException {
         ProductUtils.saveProducts(yarnConfiguration, PATH, productList);
         Assert.assertEquals(productList.size(), 7);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, PATH));
     }
 
-    @Test(groups = "unit", dependsOnMethods = "testSaveProducts")
+    @Test(groups = "functional", dependsOnMethods = "testSaveProducts")
     public void testLoadProducts() {
         loadedProductList = ProductUtils.loadProducts(yarnConfiguration, PATH);
         Assert.assertEquals(loadedProductList.size(), productList.size());
@@ -160,14 +161,14 @@ public class ProductUtilsUnitTestNG {
         Assert.assertEquals(loadedProductList.get(6).getProductStatus(), ProductStatus.Active.name());
     }
 
-    @Test(groups = "unit", dependsOnMethods = "testLoadProducts")
+    @Test(groups = "functional", dependsOnMethods = "testLoadProducts")
     public void testGetProductMap() {
         Map<String, List<Product>> productMap = ProductUtils.getProductMap(loadedProductList);
         Assert.assertEquals(productMap.size(), 7);
         productMap.forEach((k, v) -> Assert.assertEquals(v.size(), 1));
     }
 
-    @Test(groups = "unit", dependsOnMethods = "testLoadProducts")
+    @Test(groups = "functional", dependsOnMethods = "testLoadProducts")
     public void testGetActiveProductMap() {
         Map<String, List<Product>> productMap = ProductUtils.getActiveProductMap(loadedProductList);
         Assert.assertEquals(productMap.size(), 7);
@@ -188,7 +189,7 @@ public class ProductUtilsUnitTestNG {
         loadedProductList.get(6).setProductStatus(ProductStatus.Active.name());
     }
 
-    @Test(groups = "unit", dependsOnMethods = "testLoadProducts")
+    @Test(groups = "functional", dependsOnMethods = "testLoadProducts")
     public void testGetActiveProductMapByTypes() {
         Map<String, List<Product>> productMap = ProductUtils.getActiveProductMap(loadedProductList,
                 ProductType.Analytic.name(), ProductType.Spending.name());
@@ -196,7 +197,7 @@ public class ProductUtilsUnitTestNG {
         productMap.forEach((k, v) -> Assert.assertEquals(v.size(), 1));
     }
 
-    @Test(groups = "unit", dependsOnMethods = "testLoadProducts")
+    @Test(groups = "functional", dependsOnMethods = "testLoadProducts")
     public void testGetProductMapByCompositeId() {
         Map<String, Product> productMap = ProductUtils.getProductMapByCompositeId(loadedProductList);
         Assert.assertEquals(productMap.size(), 7);

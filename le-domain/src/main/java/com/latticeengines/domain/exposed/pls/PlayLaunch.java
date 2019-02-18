@@ -435,4 +435,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
+    public String getAudienceId() {
+        return audienceId;
+    }
+
+    public void setAudienceId(String audienceId) {
+        this.audienceId = audienceId;
+    }
 }

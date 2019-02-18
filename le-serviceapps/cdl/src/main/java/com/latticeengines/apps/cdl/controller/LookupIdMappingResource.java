@@ -99,4 +99,13 @@ public class LookupIdMappingResource {
     public List<CDLExternalSystemType> getAllCDLExternalSystemType(@PathVariable String customerSpace) {
         return lookupIdMappingService.getAllCDLExternalSystemType();
     }
+
+    @GetMapping(value = "/org/{orgId}")
+    @ResponseBody
+    @ApiOperation(value = "Get lookup id map from org id")
+    public LookupIdMap getLookupIdMapByOrgId(@PathVariable String customerSpace,
+            @PathVariable String orgId, @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = true) //
+            CDLExternalSystemType externalSystemType) {
+        return lookupIdMappingService.getLookupIdMapByOrgId(orgId, externalSystemType);
+    }
 }
