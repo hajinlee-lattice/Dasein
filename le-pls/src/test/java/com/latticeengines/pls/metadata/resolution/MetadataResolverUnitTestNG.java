@@ -71,7 +71,8 @@ public class MetadataResolverUnitTestNG {
         Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
 
-        // case 7: M-d-yyyy 2 times and d/M/yyyy 2 times, hit M-d-yyyy => MM-DD-YYYY,
+        // case 7: M-d-yyyy 2 times and d/M/yyyy 2 times, hit d/M/yyy =>
+        // DD/MM/YYYY,
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11-4-2016", "12-05-2018", "23/04/2016", "23/05/2018"), formatForDateAndTime));
         Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");

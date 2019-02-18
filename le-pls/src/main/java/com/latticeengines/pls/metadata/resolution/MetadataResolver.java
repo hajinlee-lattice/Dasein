@@ -545,7 +545,7 @@ public class MetadataResolver {
                     DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
                     DateTime date = null;
                     try {
-                        date = dtf.parseDateTime(columnField);
+                        date = dtf.parseDateTime(columnField.trim());
                     } catch (Exception e) {
                         log.debug("Found columnField unparsable as date/time: " + columnField);
                     }
@@ -567,6 +567,8 @@ public class MetadataResolver {
                                 supportedDateTimeFormat.indexOf(entry2.getKey()))
                         : entry2.getValue().compareTo(entry1.getValue()));
         String expectedFormat = entries.get(0).getKey();
+        // legal date time formats are delimited by space defined in
+        // TimeStampConvertUtils
         int index = expectedFormat.indexOf(" ");
         if (index == -1) {
             return new MutablePair<String, String>(expectedFormat, null);

@@ -47,12 +47,8 @@ public class TimeStampConvertUtils {
     // List of all supported java date + time and date only formats.
     public static final List<String> SUPPORTED_JAVA_DATE_TIME_FORMATS = new ArrayList<>();
 
-    // joda Time date/time formatter
-    public static final DateTimeFormatter DATE_TIME_FORMATTER;
-
     // represent all legal date time format in system which generated according
     // to date format and time format
-
     public static final List<DateTimeFormatter> SUPPORTED_DATE_TIME_FORMATTERS = new ArrayList<>();
 
     // Set up static mappings from user exposed date and time format to Java 8 formats.
@@ -168,7 +164,6 @@ public class TimeStampConvertUtils {
             parsers[index++] = DateTimeFormat.forPattern(format.trim()).getParser();
             SUPPORTED_DATE_TIME_FORMATTERS.add(DateTimeFormat.forPattern(format.trim()));
         }
-        DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
 
     }
 
@@ -467,9 +462,8 @@ public class TimeStampConvertUtils {
     }
 
     /*
-     * write this method due to bug in SUPPORTED_DATE_TIME_FORMATER, I put 210
-     * formats to SUPPORTED_DATE_TIME_FORMATER,while it can't parse value whose
-     * format locate in last 30 positions
+     * DateTimeFormatter wasn't working with 210 formats added, used
+     * SUPPORTED_DATE_TIME_FORMATTERS which is a list of formatters instead
      */
     public static DateTime parseDateTime(String value) {
         DateTime dateTime = null;
