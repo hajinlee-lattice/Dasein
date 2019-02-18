@@ -17,14 +17,17 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.esotericsoftware.minlog.Log;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
@@ -32,6 +35,9 @@ import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
 import reactor.core.publisher.ParallelFlux;
@@ -45,6 +51,10 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     @Inject
     private CountryCodeService countryCodeService;
+
+    @Autowired
+    @Qualifier("sourceAttributeEntityMgr")
+    private SourceAttributeEntityMgr sourceAttributeEntityMgr;
 
     @Override
     public Pair<Integer, List<PatchBookValidationError>> validate(
@@ -107,27 +117,40 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         // Getting List from ParallelFlux
         List<AccountMasterColumn> amColsList = amCols.sequential().collectList().block();
         // Collected AMColumnIds that we need to compare into a set
-        Set<String> amColumnIds = new HashSet<>();
-        for(AccountMasterColumn a : amColsList){
-            amColumnIds.add(a.getAmColumnId());
+        Map<String, AccountMasterColumn> amColsMap = new HashMap<>();
+        for (AccountMasterColumn a : amColsList) { // mapping columnId to
+                                                   // accMasterColumn
+            amColsMap.put(a.getAmColumnId(), a);
         }
         Map<String, List<Long>> errNotInAmAndExcluded = new HashMap<>();
         // Iterate through input patch Books
         for (PatchBook book : books) {
+            List<String> encodedAttrs = new ArrayList<>();
             // Resetting the error message values as null
             List<String> keysNotInAm = new ArrayList<>();
             List<String> keysExcluded = new ArrayList<>();
             // Iterate through the patchItems map to verify if one of AMColumn or from excluded patch list item
             for (Map.Entry<String, Object> patchedItems : book.getPatchItems().entrySet()) {
-                if (!amColumnIds.contains(patchedItems.getKey())) {
-                    keysNotInAm.add(patchedItems.getKey());
+                String patchAttr = patchedItems.getKey();
+                if (!amColsMap.containsKey(patchAttr)) {
+                    keysNotInAm.add(patchAttr);
+                } else {
+                    if (amColsMap.get(patchAttr).getDecodeStrategy() != null) {
+                        // Doesn't support patching for encoded attributes
+                        encodedAttrs.add(patchAttr);
+                    }
                 }
-                if (excludePatchItems.contains(patchedItems.getKey())) {
-                    keysExcluded.add(patchedItems.getKey());
+                if (excludePatchItems.contains(patchAttr)) {
+                    keysExcluded.add(patchAttr);
                 }
             }
+            if (encodedAttrs.size() > 0) {
+                PatchBookValidationError error = new PatchBookValidationError();
+                error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
+                error.setPatchBookIds(Arrays.asList(book.getPid()));
+                patchBookValidErrorList.add(error);
+            }
             if (!keysNotInAm.isEmpty()) {
-
                 errNotInAmAndExcluded.putIfAbsent(PATCH_ITEM_NOT_IN_AM + keysNotInAm, new ArrayList<>());
                 errNotInAmAndExcluded.get(PATCH_ITEM_NOT_IN_AM + keysNotInAm).add(book.getPid());
             }
@@ -234,8 +257,127 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<PatchBookValidationError> errors = new ArrayList<>();
         errors.addAll(PatchBookUtils.validateDuplicateMatchKey(books));
         errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
-        // TODO add other specific check for attribute patch book entries here
+        errors.addAll(validateSourceAttribute(books, dataCloudVersion));
         return errors;
+    }
+
+    List<PatchBookValidationError> domainPatchValidate(@NotNull List<PatchBook> books) {
+        Map<Pair<String, String>, List<Long>> patchBooksWithSameDomDuns = new HashMap<>();
+        List<PatchBookValidationError> errorList = new ArrayList<>();
+        List<Long> errPatchItemsPids = new ArrayList<>();
+        for (PatchBook book : books) {
+            Pair<String, String> dunsKeyAndDomPatchItem = Pair.of(book.getDuns(),
+                    PatchBookUtils.getPatchDomain(book));
+            if (book.getPatchItems().containsKey(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Domain))
+                    && book.getPatchItems().size() == 1) {
+                // match key = duns and patchedItem domain
+                // check if match key = duns and patchedItem = domain, this combination is unique
+                patchBooksWithSameDomDuns.putIfAbsent(dunsKeyAndDomPatchItem, new ArrayList<>());
+                patchBooksWithSameDomDuns.get(dunsKeyAndDomPatchItem).add(book.getPid());
+            } else {
+                errPatchItemsPids.add(book.getPid());
+            }
+        }
+        for (Pair<String, String> domDuns : patchBooksWithSameDomDuns.keySet()) {
+            List<Long> pids = patchBooksWithSameDomDuns.get(domDuns);
+            if (pids.size() > 1) {
+                PatchBookValidationError error = new PatchBookValidationError();
+                error.setMessage(DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO + "DUNS = "
+                        + domDuns.getKey() + " PatchDomain = " + domDuns.getValue());
+                error.setPatchBookIds(pids);
+                errorList.add(error);
+            }
+        }
+        if (errPatchItemsPids.size() > 0) {
+            PatchBookValidationError error = new PatchBookValidationError();
+            error.setMessage(ERR_IN_PATCH_ITEMS);
+            System.out.println("error msg : " + error.getMessage());
+            error.setPatchBookIds(errPatchItemsPids);
+            errorList.add(error);
+        }
+        return errorList;
+    }
+
+    /*
+     * Enhancement of Attribute Patch Validation API based on domain / duns
+     * based sources
+     */
+    @SuppressWarnings("deprecation")
+    List<PatchBookValidationError> validateSourceAttribute(@NotNull List<PatchBook> books,
+            @NotNull String dataCloudVersion) {
+        /* extract attributes based on domain and duns based source */
+        List<SourceAttribute> sourceAttributes = sourceAttributeEntityMgr
+                .getAttributes("AccountMaster", "MapStage", "mapAttribute", null, false);
+        Set<String> attrNamesForDomBasedSources = new HashSet<>();
+        Set<String> attrNamesForDunsBasedSources = new HashSet<>();
+        for (SourceAttribute srcAttr : sourceAttributes) {
+            String argument = srcAttr.getArguments();
+            String attribute = srcAttr.getAttribute();
+            ObjectMapper mapper = new ObjectMapper();
+            String source = null;
+            try {
+                source = mapper.readTree(argument).getPath("Source").asText();
+            } catch (Exception e) {
+                Log.error("Error in reading Json.");
+                continue;
+            }
+            // populate set of attribute names for domain based sources
+            if (DataCloudConstants.DOMAIN_BASED_SOURCES.contains(source)) {
+                attrNamesForDomBasedSources.add(attribute);
+            }
+            // populate set of attribute names for duns based sources
+            if (DataCloudConstants.DUNS_BASED_SOURCES.contains(source)) {
+                attrNamesForDunsBasedSources.add(attribute);
+            }
+        }
+        List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
+        // Iterate through the patchItems to check patch item attribute is from
+        // domain based source or duns based source
+        for (PatchBook book : books) {
+            List<String> domBasedSrcAbsentAttrs = new ArrayList<>();
+            List<String> dunsBasedSrcAbsentAttrs = new ArrayList<>();
+            Map<String, Object> patchItems = book.getPatchItems();
+            for (Map.Entry<String, Object> patchedItem : patchItems.entrySet()) {
+                String patchAttr = patchedItem.getKey();
+                if (StringUtils.isBlank(book.getDomain())
+                        && attrNamesForDomBasedSources.contains(patchAttr)) {
+                    // Error : No domain match key and wants to patch domain source attr
+                    domBasedSrcAbsentAttrs.add(patchAttr);
+                }
+                if (StringUtils.isBlank(book.getDuns())
+                        && attrNamesForDunsBasedSources.contains(patchAttr)) {
+                    // Error : No duns match key and wants to patch duns source attr
+                    dunsBasedSrcAbsentAttrs.add(patchAttr);
+                }
+            }
+            PatchBookValidationError error = reportErrorsForAttrPatchValidator(
+                    domBasedSrcAbsentAttrs, dunsBasedSrcAbsentAttrs, book.getPid());
+            if (error.getMessage() != null) {
+                patchBookValidErrorList.add(error);
+            }
+        }
+        return patchBookValidErrorList;
+    }
+
+    private PatchBookValidationError reportErrorsForAttrPatchValidator(
+            List<String> domBasedSrcAbsentAttrs,
+            List<String> dunsBasedSrcAbsentAttrs, Long pid) {
+        List<Long> pids = new ArrayList<>();
+        PatchBookValidationError error = new PatchBookValidationError();
+        if (domBasedSrcAbsentAttrs.size() > 0) {
+            error.setMessage(ATTRI_PATCH_DOM_BASED_SRC_ERR + domBasedSrcAbsentAttrs.toString());
+            pids.add(pid);
+            domBasedSrcAbsentAttrs.clear();
+        }
+        if (dunsBasedSrcAbsentAttrs.size() > 0) {
+            error.setMessage(ATTRI_PATCH_DUNS_BASED_SRC_ERR + dunsBasedSrcAbsentAttrs.toString());
+            pids.add(pid);
+            dunsBasedSrcAbsentAttrs.clear();
+        }
+        if (pids.size() > 0) {
+            error.setPatchBookIds(pids);
+        }
+        return error;
     }
 
     private List<PatchBookValidationError> validateLookupPatchBook(
@@ -287,8 +429,9 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     private List<PatchBookValidationError> validateDomainPatchBook(
             @NotNull String dataCloudVersion, @NotNull List<PatchBook> books) {
-        // TODO implement
-        return Collections.emptyList();
+        List<PatchBookValidationError> errors = new ArrayList<>();
+        errors.addAll(domainPatchValidate(books));
+        return errors;
     }
 
     /*
