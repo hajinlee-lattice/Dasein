@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
@@ -69,9 +68,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-
-    @Inject
-    private DataUnitService dataUnitService;
 
     @Inject
     private S3Service s3Service;
