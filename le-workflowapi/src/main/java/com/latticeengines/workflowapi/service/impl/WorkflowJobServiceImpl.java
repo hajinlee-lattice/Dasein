@@ -650,9 +650,54 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                  */
                 if (!jobUpdate.getLastUpdateTime().equals(jobUpdate.getCreateTime())
                         && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
-                    // Before failing the job, check spring batch status first. If there is no spring-batch associated, or
-                    // spring-batch gives unsuccessful status, we fail the job.
-                    WorkflowStatus status = workflowService.getStatus(new WorkflowExecutionId(workflowJob.getWorkflowId()));
+                    // Check YARN container status. Fail the job if YARN container status is failed.
+                    String applicationId = workflowJob.getApplicationId();
+                    if (StringUtils.isBlank(applicationId)) {
+                        workflowJob.setStatus(JobStatus.FAILED.name());
+                        workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                        log.warn(String.format("Heartbeat is out-of-sync and failed to get applicationId. "
+                                        + "WorkflowId=%s. Heartbeat created time=%s. Heartbeat update time=%s. "
+                                        + "Heartbeat failure threshold=%s. Current time=%s. "
+                                        + "DiffBetweenLastUpdatedAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
+                                workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
+                                HEARTBEAT_FAILURE_THRESHOLD, currentTimeMillis,
+                                jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime(),
+                                currentTimeMillis - jobUpdate.getLastUpdateTime()));
+                        if (workflowJob.getWorkflowId() != null) {
+                            // invalidate cache entry
+                            jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                        }
+                        continue;
+                    }
+
+                    com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
+                            workflowContainerService.getJobStatus(applicationId);
+                    if (yarnStatus == null
+                            || JobStatus.fromYarnStatus(yarnStatus.getStatus(), yarnStatus.getState()) == JobStatus.FAILED) {
+                        workflowJob.setStatus(JobStatus.FAILED.name());
+                        workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                        log.warn(String.format("Heartbeat is out-of-sync. Either YARN container cannot be found on EMR "
+                                        + "or YARN container has failed. FinalApplicationStatus=%s. YarnApplicationState=%s. "
+                                        + "WorkflowId=%s. Heartbeat created time=%s. Heartbeat update time=%s. "
+                                        + "Heartbeat failure threshold=%s. Current time=%s. "
+                                        + "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
+                                yarnStatus == null ? "null" : yarnStatus.getStatus(),
+                                yarnStatus == null ? "null" : yarnStatus.getState(),
+                                workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
+                                HEARTBEAT_FAILURE_THRESHOLD, currentTimeMillis,
+                                jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime(),
+                                currentTimeMillis - jobUpdate.getLastUpdateTime()));
+                        if (workflowJob.getWorkflowId() != null) {
+                            // invalidate cache entry
+                            jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                        }
+                        continue;
+                    }
+
+                    // Check spring batch status. If there is no spring-batch associated, or spring-batch gives
+                    // unsuccessful status, we fail the job.
+                    WorkflowStatus status =
+                            workflowService.getStatus(new WorkflowExecutionId(workflowJob.getWorkflowId()));
                     if (status == null || status.getStatus().isUnsuccessful()) {
                         workflowJob.setStatus(JobStatus.FAILED.name());
                         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
@@ -684,11 +729,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     if (applicationId != null) {
                         com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
                                 workflowContainerService.getJobStatus(applicationId);
-
-                        // TODO: check if yarnStatus is empty (application_id comes from differnt EMR cluster), then log an warning.
-                        // if (yarnStatus is empty) {
-                        //     log.warn(...);
-                        // }
 
                         JobStatus status = JobStatus.fromString(yarnStatus.getStatus().name(), yarnStatus.getState());
                         if (status != null) {
@@ -728,7 +768,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                  */
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-                log.warn(String.format("Heartbeat is null, failing the job. WowkflowPid=%s. WorkflowId=%s.",
+                log.warn(String.format("Heartbeat is null, failing the job. WorkflowPid=%s. WorkflowId=%s.",
                         workflowJob.getPid(), workflowJob.getWorkflowId()));
                 if (workflowJob.getWorkflowId() != null) {
                     // invalidate cache entry
@@ -789,6 +829,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @VisibleForTesting
     void setWorkflowService(WorkflowService workflowService) {
         this.workflowService = workflowService;
+    }
+
+    @VisibleForTesting
+    void setWorkflowContainerService(WorkflowContainerService containerService) {
+        this.workflowContainerService = containerService;
     }
 
     @VisibleForTesting

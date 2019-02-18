@@ -161,6 +161,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             VisitingHistory visitingHistory = traveler.checkOut(getCurrentActorName(), getActorName(nextActorRef));
             visitingHistory.setRejected(rejected);
             writeVisitingHistory(visitingHistory);
+            handleVisits(traveler, visitingHistory);
         }
         if (log.isDebugEnabled()) {
             log.debug(self() + " is sending traveler " + traveler + " to " + nextActorRef);
@@ -187,6 +188,10 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             log.debug(self() + " is sending traveler " + traveler + " to " + anchorRef);
         }
         anchorRef.tell(traveler, self());
+    }
+
+    protected void handleVisits(Traveler traveler, VisitingHistory history) {
+        // by default do nothing
     }
 
     protected void writeVisitingHistory(VisitingHistory history) {

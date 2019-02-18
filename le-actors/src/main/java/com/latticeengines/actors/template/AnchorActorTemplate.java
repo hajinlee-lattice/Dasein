@@ -54,7 +54,9 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
             junctionRef.tell(response, self());
             return true;
         }
-        // Completed whole trip
+        // Completed whole trip, reduce retry count by one to compensate the increment
+        // at the start of this function
+        traveler.descRetry();
         return false;
     }
 

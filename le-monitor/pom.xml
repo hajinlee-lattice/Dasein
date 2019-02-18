@@ -48,6 +48,12 @@
             <version>${influxdb.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-influx</artifactId>
+            <version>${io.micrometer.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>

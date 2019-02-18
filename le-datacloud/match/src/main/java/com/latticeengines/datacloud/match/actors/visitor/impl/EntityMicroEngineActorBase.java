@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import static com.latticeengines.datacloud.match.util.EntityMatchUtils.newStandardizedTenant;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,11 +10,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
@@ -24,6 +25,8 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -41,6 +44,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActorTemplate>
         extends DataSourceMicroEngineTemplate<T> {
     private static final Logger log = LoggerFactory.getLogger(EntityMicroEngineActorBase.class);
+
+    @Lazy
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
 
     /**
      * Hook to decide whether this actor should process current request. If this method is invoked, all
@@ -93,7 +100,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      * @return created request object, will not be {@literal null}
      */
     protected EntityAssociationRequest prepareAssociationRequest(@NotNull MatchTraveler traveler) {
-        Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
+        Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getEntityMatchLookupResults()
                 .stream()
@@ -151,7 +158,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                         "Cannot associate to existing entity. Entity=%s, AssociationErrors=%s",
                         associationResponse.getEntity(), associationResponse.getAssociationErrors()));
             }
-            // TODO retry if (a) association failed and (b) allocateId flag is true
 
             if (CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors())) {
                 traveler.setEntityMatchErrors(associationResponse.getAssociationErrors());
@@ -170,9 +176,19 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      */
     protected EntityLookupRequest prepareLookupRequest(
             @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
-        Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
+        Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
         return new EntityLookupRequest(standardizedTenant, entity, tuple);
+    }
+
+    @Override
+    protected void handleVisits(Traveler traveler, VisitingHistory history) {
+        // for entity match actors, use micrometer for monitoring
+        if (!(traveler instanceof MatchTraveler)) {
+            return;
+        }
+
+        entityMatchMetricService.recordActorVisit((MatchTraveler) traveler, history);
     }
 
     /**

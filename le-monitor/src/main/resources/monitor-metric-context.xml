@@ -6,7 +6,8 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:annotation-config/>
-    <context:component-scan base-package="com.latticeengines.monitor.metric, com.latticeengines.monitor.exposed.metric"/>
+    <context:component-scan
+            base-package="com.latticeengines.monitor.metric, com.latticeengines.monitor.micrometer, com.latticeengines.monitor.exposed.metric"/>
 
     <import resource="classpath:common-component-context.xml" />
     <import resource="classpath:monitor-task-context.xml" />

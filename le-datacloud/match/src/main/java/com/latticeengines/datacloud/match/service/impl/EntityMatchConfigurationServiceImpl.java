@@ -1,5 +1,21 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
+import org.springframework.retry.listener.RetryListenerSupport;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ItemCollectionSizeLimitExceededException;
 import com.amazonaws.services.dynamodbv2.model.LimitExceededException;
@@ -11,14 +27,8 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
-import org.springframework.stereotype.Component;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component("entityMatchConfigurationService")
 public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigurationService {
@@ -65,6 +75,10 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private int maxAttempts;
     private volatile RetryTemplate retryTemplate;
     private volatile boolean isAllocateMode = false;
+
+    @Lazy
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
 
     @Override
     public String getTableName(@NotNull EntityMatchEnvironment environment) {
@@ -124,6 +138,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
                 if (retryTemplate == null) {
                     retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate(
                             maxAttempts, initialWaitMsec, multiplier, RETRY_EXCEPTIONS);
+                    retryTemplate.registerListener(getMetricsRetryListener(env));
                 }
             }
         }
@@ -163,5 +178,34 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     @VisibleForTesting
     public void setRetryTemplate(RetryTemplate retryTemplate) {
         this.retryTemplate = retryTemplate;
+    }
+
+    /*
+     * Listener to record dynamo read/write throttling metrics
+     */
+    private RetryListener getMetricsRetryListener(@NotNull EntityMatchEnvironment env) {
+        return new RetryListenerSupport() {
+            // TODO somehow differentiate between read/write dynamo request
+            @Override
+            public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
+                    Throwable throwable) {
+                if (isThrottleError(throwable)) {
+                    entityMatchMetricService.recordDynamoThrottling(env, getTableName(env));
+                }
+                super.onError(context, callback, throwable);
+            }
+
+            @Override
+            public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback,
+                    Throwable throwable) {
+                // NOTE retry template should only be used for dynamo call
+                entityMatchMetricService.recordDynamoCall(env, getTableName(env), context, isThrottleError(throwable));
+                super.close(context, callback, throwable);
+            }
+
+            private boolean isThrottleError(Throwable throwable) {
+                return ExceptionUtils.indexOfType(throwable, ProvisionedThroughputExceededException.class) != -1;
+            }
+        };
     }
 }
