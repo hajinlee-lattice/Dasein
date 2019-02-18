@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import static com.latticeengines.datacloud.match.util.EntityMatchUtils.newStandardizedTenant;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -93,7 +91,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      * @return created request object, will not be {@literal null}
      */
     protected EntityAssociationRequest prepareAssociationRequest(@NotNull MatchTraveler traveler) {
-        Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
+        Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getEntityMatchLookupResults()
                 .stream()
@@ -170,7 +168,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      */
     protected EntityLookupRequest prepareLookupRequest(
             @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
-        Tenant standardizedTenant = newStandardizedTenant(traveler.getMatchInput().getTenant());
+        Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
         return new EntityLookupRequest(standardizedTenant, entity, tuple);
     }

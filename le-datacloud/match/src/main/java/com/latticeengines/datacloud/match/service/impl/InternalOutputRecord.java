@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public class InternalOutputRecord extends OutputRecord {
 
@@ -20,10 +21,12 @@ public class InternalOutputRecord extends OutputRecord {
     private String parsedDuns;
     private NameLocation parsedNameLocation;
     private String parsedEmail;
+    private Tenant parsedTenant;
     private String origDomain;
     private NameLocation origNameLocation;
     private String origDuns;
     private String origEmail;
+    private Tenant origTenant;
 
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
@@ -99,6 +102,14 @@ public class InternalOutputRecord extends OutputRecord {
         this.parsedEmail = parsedEmail;
     }
 
+    public Tenant getParsedTenant() {
+        return parsedTenant;
+    }
+
+    public void setParsedTenant(Tenant parsedTenant) {
+        this.parsedTenant = parsedTenant;
+    }
+
     public String getOrigDomain() {
         return origDomain;
     }
@@ -129,6 +140,14 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setOrigEmail(String origEmail) {
         this.origEmail = origEmail;
+    }
+
+    public Tenant getOrigTenant() {
+        return origTenant;
+    }
+
+    public void setOrigTenant(Tenant origTenant) {
+        this.origTenant = origTenant;
     }
 
     public Map<String, Map<String, Object>> getResultsInPartition() {

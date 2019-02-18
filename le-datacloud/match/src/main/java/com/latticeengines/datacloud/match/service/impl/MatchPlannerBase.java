@@ -36,6 +36,7 @@ import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
@@ -244,11 +246,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Map<MatchKey, List<String>> keyMap = input.getEntityKeyMaps().get(input.getTargetEntity()).getKeyMap();
         Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps = MatchKeyUtils.getEntityKeyPositionMaps(input);
 
+        Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(input.getTenant());
         List<InternalOutputRecord> records = new ArrayList<>();
         Set<String> keyFields = getKeyFields(keyMap);
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanEntityInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
                     input, entityKeyPositionMaps);
+            record.setOrigTenant(input.getTenant());
+            // NOTE tenant in match input should be already validated
+            record.setParsedTenant(standardizedTenant);
             if (record != null) {
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);
