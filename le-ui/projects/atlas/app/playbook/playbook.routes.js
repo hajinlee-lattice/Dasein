@@ -985,7 +985,10 @@ angular
 
                             var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
                             PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], getSegmentsOpts).then(function(result) {
-                                var accountsCoverage = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
+                                var accountsCoverage = {};
+                                // result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
+                                accountsCoverage.errorMap = result.errorMap;
+                                accountsCoverage.ratingModelsCoverageMap = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
                                 deferred.resolve(accountsCoverage);
                             });
                         } else {

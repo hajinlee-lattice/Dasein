@@ -62,8 +62,11 @@
                         <span class="fa fa-spinner fa-pulse fa-fw"></span> Looking for blank account IDs for the selected System Org.
                     </div>
 
-                    <div ng-if="!$ctrl.loadingCoverageCounts && (!$ctrl.nullCount || $ctrl.nullCount === 0 || $ctrl.nullCount === null)">
+                    <div ng-if="!$ctrl.loadingCoverageCounts && !$ctrl.showErrorApi && (!$ctrl.nullCount || $ctrl.nullCount === 0 || $ctrl.nullCount === null)">
                         No blank account IDs found for this System Org.
+                    </div>
+                    <div ng-if="$ctrl.showErrorApi">
+                        For the above selected System Org, this time we can not find recommendations that have blank Account ID.
                     </div>
 
                     <div class="blank-ids" ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount && $ctrl.nullCount !== 0 && $ctrl.nullCount !== null">
