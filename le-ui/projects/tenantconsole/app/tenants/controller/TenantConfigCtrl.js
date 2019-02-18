@@ -168,6 +168,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             });
         }
         modifyComponentsAccordingToType();
+        // reselect components after the type change event
+        getSelectedComponents($scope.selectedProducts, $scope.components);
     };
 
    function modifyComponentsAccordingToType() {
