@@ -572,7 +572,7 @@ angular.module('lp.import')
         // console.log('Saved OBJ ', this.saveObjects);
         if(this.saveObjects[state]){
             var copy = this.getSavedDocumentCopy(getFormerState(state));// this.getFieldDocument(true).fieldMappings;
-            ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
+            copy = ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
             if(copy){
                 this.fieldDocumentSaved[state] = copy;
             }
