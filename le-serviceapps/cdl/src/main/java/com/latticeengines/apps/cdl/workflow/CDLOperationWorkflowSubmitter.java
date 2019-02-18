@@ -81,8 +81,13 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
         checkDelete(customerSpace, maintenanceOperationConfiguration);
-        executionId = dataFeedProxy.lockExecution(customerSpace.toString(),
-                DataFeedExecutionJobType.CDLOperation).toString();
+
+        Long var = dataFeedProxy.lockExecution(customerSpace.toString(),
+                DataFeedExecutionJobType.CDLOperation);
+        if (var != null) {
+            executionId = var.toString();
+        }
+
         log.info("executionId = " + executionId);
         if (StringUtils.isEmpty(executionId)) {
             String errorMessage;
