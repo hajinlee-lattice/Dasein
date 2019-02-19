@@ -185,7 +185,9 @@ public class CDLJobServiceImpl implements CDLJobService {
                     }
                 }
             } else {
-                dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), null);
+                if (dataFeed.getNextInvokeTime() != null) {
+                    dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), null);
+                }
             }
         }
 
