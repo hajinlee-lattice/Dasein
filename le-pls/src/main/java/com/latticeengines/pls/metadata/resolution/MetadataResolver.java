@@ -136,6 +136,15 @@ public class MetadataResolver {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
                         attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
+                        if (StringUtils.isNotEmpty(fieldMapping.getDateFormatString())) {
+                            attribute.setDateFormatString(fieldMapping.getDateFormatString());
+                        }
+                        if (StringUtils.isNotEmpty(fieldMapping.getTimeFormatString())) {
+                            attribute.setTimeFormatString(fieldMapping.getTimeFormatString());
+                        }
+                        if (StringUtils.isNotEmpty(fieldMapping.getTimezone())) {
+                            attribute.setTimezone(fieldMapping.getTimezone());
+                        }
                         break;
                     }
                 }
@@ -228,6 +237,9 @@ public class MetadataResolver {
                 knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
 
                 knownColumn.setMappedToLatticeField(true);
+                knownColumn.setDateFormatString(attribute.getDateFormatString());
+                knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                knownColumn.setTimezone(attribute.getTimezone());
 
                 result.fieldMappings.add(knownColumn);
                 headerFields.remove(attribute.getDisplayName());
@@ -244,6 +256,9 @@ public class MetadataResolver {
                         knownColumn.setMappedField(attribute.getName());
                         knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                         knownColumn.setMappedToLatticeField(true);
+                        knownColumn.setDateFormatString(attribute.getDateFormatString());
+                        knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                        knownColumn.setTimezone(attribute.getTimezone());
                         result.fieldMappings.add(knownColumn);
                         break;
                     }
