@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
@@ -55,12 +56,8 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
         TypedQuery<CollectionRequest> typedQuery = entityManager.createQuery(query);
         List<CollectionRequest> resultList = typedQuery.setMaxResults(upperLimit).getResultList();*/
         List<CollectionRequest> resultList = readerRepository
-                .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, CollectionRequest.STATUS_READY);
-        if (resultList.size() > upperLimit) {
-
-            resultList = resultList.subList(0, upperLimit);
-
-        }
+                .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, CollectionRequest.STATUS_READY,
+                        PageRequest.of(0, upperLimit));
 
         return resultList;
 
@@ -109,7 +106,7 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
         Timestamp ts = entityManager.createQuery(query).getSingleResult();*/
 
         List<CollectionRequest> resultList = readerRepository
-                .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, status);
+                .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, status, PageRequest.of(0, 1));
 
         if (resultList.size() == 0) {
 

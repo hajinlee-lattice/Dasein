@@ -8,7 +8,7 @@ import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 
 public interface RawCollectionRequestMgr extends BaseEntityMgrRepository<RawCollectionRequest, Long> {
 
-    List<RawCollectionRequest> getNonTransferred();
+    List<RawCollectionRequest> getNonTransferred(int limit);
 
     void saveRequests(Iterable<RawCollectionRequest> reqs);
 

@@ -1,10 +1,12 @@
 package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
+import java.awt.print.Pageable;
 import java.sql.Timestamp;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
@@ -33,9 +35,9 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
     }
 
     @Override
-    public List<RawCollectionRequest> getNonTransferred() {
+    public List<RawCollectionRequest> getNonTransferred(int limit) {
 
-        return readerRepository.findByTransferred(false);
+        return readerRepository.findByTransferred(false, PageRequest.of(0, limit));
 
     }
 
