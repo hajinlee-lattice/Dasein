@@ -162,7 +162,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     public void testCollection() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
-        collectionDBService.addNewDomains(domains, VendorConfig.VENDOR_BUILTWITH, UUID.randomUUID().toString().toUpperCase());
+        collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
         boolean finished = false;
         while (!finished) {
             finished = collectionDBService.collect();

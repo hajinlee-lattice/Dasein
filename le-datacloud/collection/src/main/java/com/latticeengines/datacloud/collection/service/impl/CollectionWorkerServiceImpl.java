@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
@@ -31,7 +32,7 @@ public class CollectionWorkerServiceImpl implements CollectionWorkerService {
     @Override
     public int getActiveWorkerCount(String vendor) {
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor)) {
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
 
             return -1;
 
@@ -52,7 +53,7 @@ public class CollectionWorkerServiceImpl implements CollectionWorkerService {
     public List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after) {
 
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor)) {
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
 
             return null;
 

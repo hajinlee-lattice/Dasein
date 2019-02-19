@@ -20,6 +20,7 @@ import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
 
 @Component
@@ -302,7 +303,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         //check vendor & list
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor) ||
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor) ||
                 CollectionUtils.isEmpty(finishedWorkers)) {
 
             return 0;
@@ -387,7 +388,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         //check vendor
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor)) {
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
 
             return new Timestamp(System.currentTimeMillis());
 
@@ -412,7 +413,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     public List<CollectionRequest> getReady(String vendor, int upperLimit) {
 
         vendor = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendor)) {
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
 
             return Collections.emptyList();
 
