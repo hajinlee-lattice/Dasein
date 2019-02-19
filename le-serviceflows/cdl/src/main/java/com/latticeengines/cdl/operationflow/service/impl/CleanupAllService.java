@@ -151,7 +151,7 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         log.info("Start cleanup all operation!");
         if (config.getCleanupOperationType() == CleanupOperationType.ALL) {
             log.info(String.format("begin to clean up attr config of CustomerSpace %s", customerSpace));
-            cdlAttrConfigProxy.removeAttrConfigByTenant(customerSpace);
+            cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace, entity);
             log.info(String.format("begin clean up cdl metadata of CustomerSpace %s", customerSpace));
             DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
             List<DataFeedTask> tasks = dataFeed.getTasks();

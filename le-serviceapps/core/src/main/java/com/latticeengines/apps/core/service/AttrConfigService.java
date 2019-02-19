@@ -27,4 +27,6 @@ public interface AttrConfigService {
 
     void removeAttrConfig(String tenantId);
 
+    void removeAttrConfigForEntity(String tenantId, BusinessEntity entity);
+
 }
