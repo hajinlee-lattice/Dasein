@@ -48,8 +48,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     if (!reset) {
                         
                         var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.from.position);
+                        // console.log('FROM ', fromNumerical);
                         vm.numericalConfiguration.from.value = (fromNumerical != null) ? Number(fromNumerical) : undefined;
                         var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.to.position);
+                        // console.log('TO ', toNumerical);
                         vm.numericalConfiguration.to.value = (toNumerical != null) ? Number(toNumerical) : undefined;
                         setTimeout(function(){
                             showNumericalRange();
@@ -69,10 +71,11 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.initVariables = function(){
                     vm.numericalConfiguration = {
-                        from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical', pattern:'\\\d+' },
-                        to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical', pattern:'\\\d+' }
+                        from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
+                        to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
                     };
                     
+                    // console.log('CCCCC ', vm.numericalConfiguration);
                     if(vm.showItem('Boolean') && !vm.showItem('Percent')){
                         vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
                     }
@@ -88,6 +91,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
                         vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
                         vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
+                        // console.log('NNN 0 ', vm.bktVals0);
+                        // console.log('NNN 1 ', vm.bktVals1);
                         vm.showFromNumerical = false;
                         vm.showToNumerical = false;
                         vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
@@ -105,9 +110,9 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.init = function () {
                     // console.log('INIT');
-                    setTimeout(() => {
+                    // setTimeout(() => {
                         vm.initVariables();
-                    },0);
+                    // },0);
                     
                 }
                 
