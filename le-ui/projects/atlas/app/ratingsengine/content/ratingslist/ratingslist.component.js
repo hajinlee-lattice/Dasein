@@ -305,8 +305,8 @@ angular.module('lp.ratingsengine.ratingslist', [
         vm.saveInProgress = true;
         var newStatus = (rating.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
         if(vm.isAIRating(rating)) {
-            var aiModelId = rating.latestIterationId;
-            ModelRatingsService.CreateABCDBucketsRatingEngine(rating.id, aiModelId, rating.bucketMetadata).then(function(result){
+            var modelId = rating.latestIterationId;
+            ModelRatingsService.CreateABCDBucketsRatingEngine(rating.id, modelId, rating.bucketMetadata).then(function(result){
                 if (result != null && result.success === true) {
                     updateRating(rating,{
                         id: rating.id,
