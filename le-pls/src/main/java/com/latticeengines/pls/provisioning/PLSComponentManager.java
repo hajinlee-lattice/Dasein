@@ -186,8 +186,8 @@ public class PLSComponentManager {
 
     public void discardTenant(String tenantId) {
         Tenant tenant = tenantService.findByTenantId(tenantId);
-        s3Service.cleanupPrefix(customersBucket, tenant.getContract());
         if (tenant != null) {
+            s3Service.cleanupPrefix(customersBucket, CustomerSpace.parse(tenant.getId()).getTenantId());
             discardTenant(tenant);
         }
     }
