@@ -12,11 +12,13 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.PartitionUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
@@ -35,10 +37,13 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     private ExecutorService uploadWorkers;
 
+    @Value("${datacloud.collection.req.transfer.batch}")
+    private int rawReqTransferBatch;
+
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
 
         final String vendorUpper = vendor.toUpperCase();
-        if (!vendorConfigService.getVendors().contains(vendorUpper)) {
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendorUpper)) {
 
             log.warn("invalid vendor name " + vendor + ", ignore it and return...");
             return false;
@@ -93,7 +98,7 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     public List<RawCollectionRequest> getNonTransferred() {
 
-        return rawCollectionRequestMgr.getNonTransferred();
+        return rawCollectionRequestMgr.getNonTransferred(rawReqTransferBatch);
 
     }
 

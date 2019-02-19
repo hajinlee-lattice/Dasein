@@ -194,10 +194,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         int spawnedTasks = 0;
 
-        List<String> vendors = vendorConfigService.getVendors();
         int maxRetries = vendorConfigService.getDefMaxRetries();
         int collectingBatch = vendorConfigService.getDefCollectionBatch();
-        for (String vendor : vendors) {
+        for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
 
             //fixme: is the earliest time of collecting reqs enough? may be ready reqs should also be considered?
             //get earliest active request time
