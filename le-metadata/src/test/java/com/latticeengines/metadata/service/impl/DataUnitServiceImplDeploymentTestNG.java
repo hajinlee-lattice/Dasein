@@ -102,8 +102,8 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
         log.info("ingestionDir is :" + ingestionDir);
         String content = "create test s3 data";
         InputStream is = new ByteArrayInputStream(content.getBytes());
-        s3Key = ingestionDir + "/" + "testS3.txt";
-        String linkedDir = "s3a://" + s3Bucket + ingestionDir;
+        s3Key = ingestionDir + "testS3.txt";
+        String linkedDir = "s3a://" + s3Bucket + "/" + ingestionDir;
         log.info("linkedDir is :" + linkedDir);
         s3Service.uploadInputStream(s3Bucket, s3Key, is, true);
         S3DataUnit s3DataUnit = new S3DataUnit();
