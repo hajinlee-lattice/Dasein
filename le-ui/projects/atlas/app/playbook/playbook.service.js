@@ -777,17 +777,11 @@ angular.module('lp.playbook')
         if(query && query.page_filter) {
             delete query.page_filter;
         }
-        var deferred = $q.defer(),
-            accountsDataCount = PlaybookWizardStore.accountsDataCount;
+        var deferred = $q.defer();
 
-        if(accountsDataCount) {
-            deferred.resolve(accountsDataCount);
-        } else {
-            PlaybookWizardService.getAccountsCount(query).then(function(result){
-                PlaybookWizardStore.setAccountsDataCount(result);
-                deferred.resolve(result);
-            });
-        }
+        PlaybookWizardService.getAccountsCount(query).then(function(result){
+            deferred.resolve(result);
+        });
         return deferred.promise;
     }
 
