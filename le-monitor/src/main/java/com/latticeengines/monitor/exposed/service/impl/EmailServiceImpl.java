@@ -981,20 +981,22 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo) {
         try {
-            log.info("Sending PLS action cancel success email to " + user.getEmail() + " started.");
-            EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_CANCEL_ACTION_SUCCESS);
+            if(user != null) {
+                log.info("Sending PLS action cancel success email to " + user.getEmail() + " started.");
+                EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                        EmailTemplateBuilder.Template.PLS_CANCEL_ACTION_SUCCESS);
 
-            builder.replaceToken("{{tenantname}}", cancelActionEmailInfo.getTenantName());
-            builder.replaceToken("{{username}}", user.getUsername());
-            builder.replaceToken("{{actionname}}", cancelActionEmailInfo.getActionName());
-            builder.replaceToken("{{actionusername}}", cancelActionEmailInfo.getActionUserName());
-            builder.replaceToken("{{url}}", hostport);
+                builder.replaceToken("{{tenantname}}", cancelActionEmailInfo.getTenantName());
+                builder.replaceToken("{{username}}", user.getUsername());
+                builder.replaceToken("{{actionname}}", cancelActionEmailInfo.getActionName());
+                builder.replaceToken("{{actionusername}}", cancelActionEmailInfo.getActionUserName());
+                builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
-            sendMultiPartEmail(EmailSettings.PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT, mp,
-                    Collections.singleton(user.getEmail()));
-            log.info("Sending PLS action cancel success email to " + user.getEmail() + " succeeded.");
+                Multipart mp = builder.buildMultipart();
+                sendMultiPartEmail(EmailSettings.PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT, mp,
+                        Collections.singleton(user.getEmail()));
+                log.info("Sending PLS action cancel success email to " + user.getEmail() + " succeeded.");
+            }
         } catch (Exception e) {
             log.error(
                     "Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
