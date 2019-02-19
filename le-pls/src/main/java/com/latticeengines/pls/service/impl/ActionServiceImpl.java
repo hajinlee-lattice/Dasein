@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,24 +78,31 @@ public class ActionServiceImpl implements ActionService {
             cancelActionEmailInfo.setTenantName(tenant.getName());
             cancelActionEmailInfo.setActionName(getActionName(action));
             log.info("paramArr is :" + cancelActionEmailInfo.toString());
-            if (!emailAddress.equals(SYSTEMEMAIL_ADDRESS)) {
-                emailService.sendPlsActionCancelSuccessEmail(actionUser, appPublicUrl, cancelActionEmailInfo);
-                if (!emailAddress.equals(action.getActionInitiator())) {
-                    User user_cancel = userService.findByEmail(action.getActionInitiator());
-                    emailService.sendPlsActionCancelSuccessEmail(user_cancel, appPublicUrl, cancelActionEmailInfo);
-                }
-            } else {
-                UserFilter filter = user -> {
-                    if (StringUtils.isEmpty(user.getAccessLevel())) {
-                        return false;
+            try {
+                if (!emailAddress.equals(SYSTEMEMAIL_ADDRESS)) {
+                    emailService.sendPlsActionCancelSuccessEmail(actionUser, appPublicUrl, cancelActionEmailInfo);
+                    if (!emailAddress.equals(action.getActionInitiator())) {
+                        User user_cancel = userService.findByEmail(action.getActionInitiator());
+                        emailService.sendPlsActionCancelSuccessEmail(user_cancel, appPublicUrl, cancelActionEmailInfo);
                     }
-                    AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
-                    return level.equals(AccessLevel.EXTERNAL_ADMIN);
-                };
-                List<User> users = userService.getUsers(tenant.getId(), filter);
-                for (User user : users) {
-                    emailService.sendPlsActionCancelSuccessEmail(user, appPublicUrl, cancelActionEmailInfo);
+                } else {
+                    UserFilter filter = user -> {
+                        if (StringUtils.isEmpty(user.getAccessLevel())) {
+                            return false;
+                        }
+                        AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
+                        return level.equals(AccessLevel.EXTERNAL_ADMIN);
+                    };
+                    List<User> users = userService.getUsers(tenant.getId(), filter);
+                    if (CollectionUtils.isNotEmpty(users)) {
+                        for (User user : users) {
+                            emailService.sendPlsActionCancelSuccessEmail(user, appPublicUrl, cancelActionEmailInfo);
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                log.error("email send failed!");
+                e.printStackTrace();
             }
         }
     }
