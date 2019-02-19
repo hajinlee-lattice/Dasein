@@ -54,7 +54,7 @@ angular
                     if (vm.tree.bucketRestriction) {
                         // console.log('BUCKET ',vm.tree.bucketRestriction.ignored);
                         if(vm.tree.bucketRestriction.ignored === undefined){
-                            vm.tree.bucketRestriction.ignored = true;
+                            vm.tree.bucketRestriction.ignored = false;
                         }
 
                         var bucket = vm.tree.bucketRestriction,
