@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import reactor.core.publisher.Flux;
 
+// External Lookup Ids for Account Category
+
 @Component
 public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataStore {
 
@@ -37,8 +39,7 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         // only account has external system ids now
         if (BusinessEntity.Account.equals(namespace.getCoord2())) {
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
-            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr
-                    .findExternalSystem(BusinessEntity.Account);
+            CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(BusinessEntity.Account);
 
             if (externalSystem != null) {
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
