@@ -378,7 +378,7 @@ angular
                                 deferred.resolve(accountCount);
                             });
                         } else {
-                            deferred.resolve(null);
+                            deferred.resolve({});
                         }
                     });
 

@@ -301,16 +301,25 @@ angular.module('common.datacloud.query.results', [
                             "row_offset": offset
                         }
                     };
+                    
                     var _accountQuery = angular.copy(accountQuery);
                     
-                    PlaybookWizardStore.getAccountsDataCount(_accountQuery).then(function(count) { 
-                        vm.counts.accounts.value = count;
+                    PlaybookWizardStore.getAccountsCount(_accountQuery).then(function(result){
+                        vm.counts.accounts.value = result;
                         PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 
                             PlaybookWizardStore.setTargetData(results.data);
                             vm.accounts = PlaybookWizardStore.getTargetData();
                             vm.bypassBuckets = true;
                         });
                     });
+                    // PlaybookWizardStore.getAccountsDataCount(_accountQuery).then(function(count) { 
+                    //     vm.counts.accounts.value = count;
+                    //     PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 
+                    //         PlaybookWizardStore.setTargetData(results.data);
+                    //         vm.accounts = PlaybookWizardStore.getTargetData();
+                    //         vm.bypassBuckets = true;
+                    //     });
+                    // });
 
                 }
 
