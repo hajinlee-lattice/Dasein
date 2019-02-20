@@ -127,14 +127,15 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
     }
 
-    private SourceFile getSourceFilewithRetry(String fileName) {
+    private SourceFile getSourceFilewithRetry(String fileName, boolean withTable) {
         int retry = 1;
         SourceFile sourceFile = sourceFileService.findByName(fileName);
-        while (sourceFile == null) {
+        while (sourceFile == null || (withTable && StringUtils.isEmpty(sourceFile.getTableName()))) {
             if (retry > MAX_RETRY) {
                 throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
             }
-            log.error(String.format("Cannot find source file with name: %s, retry count: %d", fileName, retry));
+            log.error(String.format("Cannot find source file with name: %s or table name is empty, retry count: %d",
+                    fileName, retry));
             try {
                 Thread.sleep(500);
                 retry++;
@@ -144,6 +145,10 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         }
         return sourceFile;
+    }
+
+    private SourceFile getSourceFilewithRetry(String fileName) {
+        return getSourceFilewithRetry(fileName, false);
     }
 
     @Override
@@ -223,7 +228,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         fieldMappingDocument.setFieldMappings(fieldMappings);
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument);
 
-        sourceFile = sourceFileService.findByName(sourceFile.getName());
+        sourceFile = getSourceFilewithRetry(sourceFile.getName(), true);
         Table template = getMetadata(sourceFile.getName());
         if (template == null) {
             throw new RuntimeException("Cannot resolve metadata from uploaded file!");
