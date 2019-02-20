@@ -773,24 +773,15 @@ angular.module('lp.playbook')
         return this.launchUnscored;
     }
 
-    this.getAccountsDataCount = function(query) {
+    this.getAccountsCount = function(query) {
         if(query && query.page_filter) {
             delete query.page_filter;
         }
-        var deferred = $q.defer(),
-            accountsDataCount = PlaybookWizardStore.accountsDataCount;
+        var deferred = $q.defer();
 
-        if(accountsDataCount) {
-            deferred.resolve(accountsDataCount);
-        } else {
-            PlaybookWizardService.getAccountsData(query).then(function(results){
-                PlaybookWizardStore.setAccountsDataCount(results.data.length);
-                deferred.resolve(results.data.length);
-            });
-        }
-        // PlaybookWizardService.getAccountsCount(query).then(function(results){
-        //     console.log(results);
-        // });
+        PlaybookWizardService.getAccountsCount(query).then(function(result){
+            deferred.resolve(result);
+        });
         return deferred.promise;
     }
 
@@ -1195,7 +1186,7 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         $http({
             method: 'POST',
-            url: this.host + '/entities/counts',
+            url: this.host + '/accounts/count',
             data: query
         }).then(function(response){
             deferred.resolve(response.data);

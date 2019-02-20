@@ -7,7 +7,7 @@ export default class SystemMappingComponent extends Component {
 
     constructor(props) {
         super(props);
-        console.log('THE MAPPING', this.props);
+        // console.log('THE MAPPING', this.props);
         this.state = { systemsAvailable: [], system: props.system };
         this.accountIdClickHandler = this.accountIdClickHandler.bind(this);
     }
@@ -30,7 +30,7 @@ export default class SystemMappingComponent extends Component {
                         data = data.concat(t);
                         // data.push(response.data[element]);
                     });
-                    console.log('????????????', data);
+                    // console.log('????????????', data);
 
                     this.setState({ systemsAvailable: data, accountIdSelectionLoaded: true });
                     httpService.unsubscribeObservable(observer);
@@ -43,10 +43,13 @@ export default class SystemMappingComponent extends Component {
 
     getSystemsAvailable() {
         let options = [];
-        console.log('AAAA ===> ', this.state.systemsAvailable);
+        // console.log('AAAA ===> ', this.state.systemsAvailable);
+        options.push(
+            <option value={''} key={0}>-- Select Account ID --</option>
+        );
         this.state.systemsAvailable.forEach((element, index) => {
             options.push(
-                <option value={element.fieldName} key={index}>{element.displayName}</option>
+                <option value={element.fieldName} key={(index+1)}>{element.displayName}</option>
             );
         });
         return options;
@@ -54,7 +57,7 @@ export default class SystemMappingComponent extends Component {
 
     accountIdClickHandler(event) {
         let systemCopy = Object.assign({}, this.state.system);
-        console.log('COPY IN MAPPING', systemCopy);
+        // console.log('COPY IN MAPPING', systemCopy);
         systemCopy.accountId = event.target.value;
         this.setState({system: systemCopy});
     }

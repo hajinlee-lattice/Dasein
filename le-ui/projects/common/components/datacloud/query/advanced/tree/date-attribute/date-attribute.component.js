@@ -10,7 +10,9 @@ angular
       bucketrestriction: "="
     },
     controller: function(QueryTreeService, QueryTreeDateAttributeStore) {
-      this.init = function() {};
+      this.init = function() {
+        QueryTreeDateAttributeStore.periodList();
+      };
 
       this.getCmp = function(subType) {
         var ret = QueryTreeService.getCmp(

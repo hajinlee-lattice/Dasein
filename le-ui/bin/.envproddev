@@ -4,6 +4,7 @@ ULYSSES_URL=https://api.lattice-engines.com
 API_URL=https://app.lattice-engines.com
 API_ADMIN_URL=https://admin.prod.lattice.local:8085/
 API_CON_URL=https://api.lattice-engines.com
+TRAY_API_URL=https://tray.io/graphql
 COMPRESSED=false,
 LOGGING=./server/log
 HTTP_PORT=3001,

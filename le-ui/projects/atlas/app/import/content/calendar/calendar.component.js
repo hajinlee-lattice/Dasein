@@ -159,7 +159,7 @@ angular.module('lp.import.calendar', [])
                 Modal.warning({
                     name: 'calendar_warning',
                     title: "Business Calendar",
-                    message: 'The <strong>Custom</strong> Calendar will be used to build accurate time based analytics through out the tenant.',
+                    message: 'The <strong>Custom</strong> Calendar will be updated throughout the product, including imported data.',
                     confirmtext: "Yes, Update"
                 }, vm.modalCallback);
             }
@@ -170,7 +170,7 @@ angular.module('lp.import.calendar', [])
         Modal.warning({
             name: 'standard_calendar_warning',
             title: "Standard Calendar",
-            message: 'The <strong>Standard</strong> Calendar will be used to build accurate time based analytics through out the tenant.',
+            message: 'The <strong>Standard</strong> Calendar will be updated throughout the tenant, including imported data.',
             confirmtext: "Yes, Update"
         }, vm.modalCallbackStandardCalendar);
     }

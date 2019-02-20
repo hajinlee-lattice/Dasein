@@ -133,9 +133,14 @@
             }
         }
     }
-    & > .error-message > h4{
-        font-size: 16px;
-        color: red;
+    & > .error-message{
+        display: flex;
+        align-items: center;
+        & > h4{
+            margin-left: 0.3em;
+            font-size: 16px;
+            color: red;
+        }   
     }
 }
 

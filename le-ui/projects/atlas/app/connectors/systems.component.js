@@ -4,7 +4,7 @@ import Observer from "common/app/http/observer";
 
 import SystemComponent from './system.component';
 
-
+import SystemsService from './systems.service';
 import ConnectorService from './connectors.service';
 
 import './systems.component.scss';
@@ -21,6 +21,7 @@ export default class SystemsComponent extends Component {
             new Observer(response => {
                 let connectors = response.data.CRM;
                 connectors = connectors.concat(response.data.MAP);
+                SystemsService.cleanupLookupId(connectors);
                 this.setState({ loading: false, connectors: connectors });
                 // console.log("BACK HERE ", response);
             })

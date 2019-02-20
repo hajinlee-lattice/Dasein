@@ -494,7 +494,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     MultiTenantContext.getCustomerSpace().toString());
             if (CollectionUtils.isNotEmpty(canceled_workflowJobPids) && CollectionUtils.isNotEmpty(workflowJobs)) {
                 for (Job job : workflowJobs) {
-                    if (canceled_workflowJobPids.contains(job.getId().toString())) {
+                    if (canceled_workflowJobPids.contains(job.getPid().toString())) {
                         job.setJobStatus(JobStatus.CANCELLED);
                     }
                 }
