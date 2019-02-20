@@ -460,6 +460,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
         Job job = new Job();
         job.setId(jobId);
+        job.setPid(jobId);
         job.setName("importMatchAndModelWorkflow");
         job.setDescription("importMatchAndModelWorkflow");
         job.setJobType("importMatchAndModelWorkflow");
