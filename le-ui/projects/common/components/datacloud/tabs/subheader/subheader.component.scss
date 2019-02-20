@@ -59,6 +59,26 @@ div.explorer-subheader-tabs {
     }
 }
 
+.split-button {
+    button {
+        &:first-of-type {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            &.disabled {
+                border-right: none;
+                i {
+                    font-size: 12px;
+                }   
+            }
+        }
+        &:last-of-type {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    }
+}
+
 div.subheader-success-message {
     margin: 20px 10px;
 }

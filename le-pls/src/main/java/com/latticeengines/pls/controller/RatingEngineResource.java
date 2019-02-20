@@ -97,7 +97,8 @@ public class RatingEngineResource {
             @RequestParam(value = "type", required = false) String type, //
             @RequestParam(value = "publishedratingsonly", required = false, defaultValue = "false") Boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, publishedRatingsOnly);
+        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type,
+                publishedRatingsOnly);
     }
 
     @GetMapping(value = "/deleted")
@@ -146,13 +147,14 @@ public class RatingEngineResource {
         descending = descending == null ? false : descending;
         Tenant tenant = MultiTenantContext.getTenant();
 
-        if (StringUtils.isBlank(freeFormTextSearch) && StringUtils.isNotBlank(freeFormTextSearch2)) {
+        if (StringUtils.isBlank(freeFormTextSearch)
+                && StringUtils.isNotBlank(freeFormTextSearch2)) {
             freeFormTextSearch = freeFormTextSearch2;
         }
 
-        return ratingEngineProxy.getEntityPreview(tenant.getId(), ratingEngineId, offset, maximum, entityType, sortBy,
-                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
-                selectedBuckets, lookupIdColumn);
+        return ratingEngineProxy.getEntityPreview(tenant.getId(), ratingEngineId, offset, maximum,
+                entityType, sortBy, descending, bucketFieldName, lookupFieldNames,
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, lookupIdColumn);
     }
 
     @GetMapping(value = "/{ratingEngineId}/entitypreview/count")
@@ -175,13 +177,15 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
     public RatingEngineDashboard getRatingsDashboard(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(), ratingEngineId);
+        return ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(),
+                ratingEngineId);
     }
 
     @GetMapping(value = "/{ratingEngineId}/publishedhistory", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a published bucket metadata per iteration of a rating engine given its id")
-    public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String ratingEngineId) {
+    public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(
+            @PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingEngineProxy.getPublishedHistory(tenant.getId(), ratingEngineId);
     }
@@ -197,10 +201,11 @@ public class RatingEngineResource {
         String user = MultiTenantContext.getEmailAddress();
         RatingEngine res;
         try {
-            res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
-                    createAction);
+            res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user,
+                    unlinkSegment, createAction);
         } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
+                    LedpCode.LEDP_40041);
         }
         return res;
     }
@@ -219,18 +224,20 @@ public class RatingEngineResource {
             if (ex instanceof LedpException) {
                 LedpException exp = (LedpException) ex;
                 if (exp.getCode() == LedpCode.LEDP_40042) {
-                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042,
-                            View.Modal, RATING_DELETE_FAILED_MODEL_IN_USE_TITLE, RATING_DELETE_FAILED_MODEL_IN_USE);
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
+                            LedpCode.LEDP_40042, View.Modal,
+                            RATING_DELETE_FAILED_MODEL_IN_USE_TITLE,
+                            RATING_DELETE_FAILED_MODEL_IN_USE);
                 } else if (exp.getCode() == LedpCode.LEDP_18181) {
-                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_18181,
-                            View.Modal, RATING_DELETE_FAILED_TITLE, null);
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
+                            LedpCode.LEDP_18181, View.Modal, RATING_DELETE_FAILED_TITLE, null);
                 } else {
-                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, exp.getCode(), View.Banner,
-                            RATING_DELETE_FAILED_TITLE, null);
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
+                            exp.getCode(), View.Banner, RATING_DELETE_FAILED_TITLE, null);
                 }
             } else {
-                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, null, View.Banner,
-                        RATING_DELETE_FAILED_TITLE, null);
+                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, null,
+                        View.Banner, RATING_DELETE_FAILED_TITLE, null);
             }
         }
 
@@ -249,7 +256,8 @@ public class RatingEngineResource {
     @PostMapping(value = "/coverage")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingsCountResponse getRatingEngineCoverageInfo(@RequestBody RatingsCountRequest ratingModelSegmentIds) {
+    public RatingsCountResponse getRatingEngineCoverageInfo(
+            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingCoverageProxy.getCoverageInfo(tenant.getId(), ratingModelSegmentIds);
     }
@@ -257,10 +265,12 @@ public class RatingEngineResource {
     @PostMapping(value = "/coverage/segment/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingEnginesCoverageResponse getRatingEngineCoverageInfo(@PathVariable String segmentName,
+    public RatingEnginesCoverageResponse getRatingEngineCoverageInfo(
+            @PathVariable String segmentName,
             @RequestBody RatingEnginesCoverageRequest ratingEnginesCoverageRequest) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingCoverageProxy.getCoverageInfoForSegment(tenant.getId(), segmentName, ratingEnginesCoverageRequest);
+        return ratingCoverageProxy.getCoverageInfoForSegment(tenant.getId(), segmentName,
+                ratingEnginesCoverageRequest);
     }
 
     @PostMapping(value = "/coverage/segment/products")
@@ -270,8 +280,8 @@ public class RatingEngineResource {
             @RequestParam(value = "purchasedbeforeperiod", required = false) Integer purchasedBeforePeriod,
             @RequestBody ProductsCoverageRequest productsCoverageRequest) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingCoverageProxy.getProductCoverageInfoForSegment(tenant.getId(), productsCoverageRequest,
-                purchasedBeforePeriod);
+        return ratingCoverageProxy.getProductCoverageInfoForSegment(tenant.getId(),
+                productsCoverageRequest, purchasedBeforePeriod);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels")
@@ -285,19 +295,23 @@ public class RatingEngineResource {
     @PostMapping(value = "/{ratingEngineId}/ratingmodels")
     @ResponseBody
     @ApiOperation(value = "Create a Rating Model iteration associated with a Rating Engine given its id")
-    public RatingModel createModelIteration(@PathVariable String ratingEngineId, @RequestBody RatingModel ratingModel) {
+    public RatingModel createModelIteration(@PathVariable String ratingEngineId,
+            @RequestBody RatingModel ratingModel) {
         Tenant tenant = MultiTenantContext.getTenant();
         try {
-            return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId, ratingModel);
+            return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId,
+                    ratingModel);
         } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
+                    LedpCode.LEDP_40041);
         }
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel getRatingModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
+    public RatingModel getRatingModel(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingEngineProxy.getRatingModel(tenant.getId(), ratingEngineId, ratingModelId);
     }
@@ -305,38 +319,42 @@ public class RatingEngineResource {
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}")
     @ResponseBody
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId) {
+    public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
         String user = MultiTenantContext.getEmailAddress();
         RatingModel res;
         try {
-            res = ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel, user);
+            res = ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId,
+                    ratingModel, user);
         } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
+                    LedpCode.LEDP_40041);
         }
         return res;
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
     @Deprecated
-    public Map<String, List<ColumnMetadata>> getIterationAttributes(@PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId, //
+    public Map<String, List<ColumnMetadata>> getIterationAttributes(
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
             @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationAttributes(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
+        return ratingEngineProxy.getIterationAttributes(tenant.getId(), ratingEngineId,
+                ratingModelId, dataStores);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
     public List<ColumnMetadata> getIterationMetadata(@PathVariable String ratingEngineId,
             @PathVariable String ratingModelId, //
             @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationMetadata(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
+        return ratingEngineProxy.getIterationMetadata(tenant.getId(), ratingEngineId, ratingModelId,
+                dataStores);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/cube", headers = "Accept=application/json")
@@ -346,17 +364,20 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId, //
             @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationMetadataCube(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
+        return ratingEngineProxy.getIterationMetadataCube(tenant.getId(), ratingEngineId,
+                ratingModelId, dataStores);
 
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata/topn", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get TopNTree for a given AIModel's iteration and data stores")
-    public TopNTree getIterationMetadataTopN(@PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+    public TopNTree getIterationMetadataTopN(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId, //
             @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationMetadataTopN(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
+        return ratingEngineProxy.getIterationMetadataTopN(tenant.getId(), ratingEngineId,
+                ratingModelId, dataStores);
 
     }
 
@@ -364,10 +385,11 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Set the given ratingmodel as the Scoring Iteration for the given rating engine")
     public void setScoringIteration(@PathVariable String ratingEngineId, //
-            @PathVariable String ratingModelId, @RequestBody(required = false) List<BucketMetadata> bucketMetadatas) {
+            @PathVariable String ratingModelId,
+            @RequestBody(required = false) List<BucketMetadata> bucketMetadatas) {
         Tenant tenant = MultiTenantContext.getTenant();
-        ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId, bucketMetadatas,
-                MultiTenantContext.getEmailAddress());
+        ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId,
+                bucketMetadatas, MultiTenantContext.getEmailAddress());
     }
 
     @GetMapping(value = "/{ratingEngineId}/notes")
@@ -375,34 +397,39 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get all notes for single rating engine via rating engine id.")
     public List<RatingEngineNote> getAllNotes(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s, tenant=%s", ratingEngineId,
-                tenant.getId()));
+        log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s, tenant=%s",
+                ratingEngineId, tenant.getId()));
         return ratingEngineProxy.getAllNotes(tenant.getId(), ratingEngineId);
     }
 
     @GetMapping(value = "/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<String, List<String>> getRatingEngineDependencies(@PathVariable String ratingEngineId) {
+    public Map<String, List<String>> getRatingEngineDependencies(
+            @PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
+        log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s",
+                ratingEngineId));
         return ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngineId);
     }
 
     @GetMapping(value = "/{ratingEngineId}/dependencies/modelAndView")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
+    public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(
+            @PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
-        Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
-                ratingEngineId);
-        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model is safe to edit", View.Notice,
-                Status.Success, null);
+        log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s",
+                ratingEngineId));
+        Map<String, List<String>> dependencies = ratingEngineProxy
+                .getRatingEngineDependencies(tenant.getId(), ratingEngineId);
+        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model is safe to edit",
+                View.Notice, Status.Success, null);
         if (MapUtils.isNotEmpty(dependencies)) {
-            String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies, "This model is in use.", null);
-            uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner, Status.Warning,
-                    message);
+            String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies,
+                    "This model is in use.", null);
+            uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner,
+                    Status.Warning, message);
         }
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
@@ -410,7 +437,8 @@ public class RatingEngineResource {
     @PostMapping(value = "/{ratingEngineId}/notes")
     @ResponseBody
     @ApiOperation(value = "Insert one note for a certain rating engine.")
-    public Boolean createNote(@PathVariable String ratingEngineId, @RequestBody NoteParams noteParams) {
+    public Boolean createNote(@PathVariable String ratingEngineId,
+            @RequestBody NoteParams noteParams) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("RatingEngineId=%s's note createdUser=%s, tenant=%s", ratingEngineId,
                 noteParams.getUserName(), tenant.getId()));
@@ -433,30 +461,32 @@ public class RatingEngineResource {
     public Boolean updateNote(@PathVariable String ratingEngineId, @PathVariable String noteId,
             @RequestBody NoteParams noteParams) {
         Tenant tenant = MultiTenantContext.getTenant();
-        log.info(String.format("RatingEngineNoteId=%s update by %s, tenant=%s", noteId, noteParams.getUserName(),
-                tenant.getId()));
+        log.info(String.format("RatingEngineNoteId=%s update by %s, tenant=%s", noteId,
+                noteParams.getUserName(), tenant.getId()));
         return ratingEngineProxy.updateNote(tenant.getId(), ratingEngineId, noteId, noteParams);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public EventFrontEndQuery getModelingQuery(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
+    public EventFrontEndQuery getModelingQuery(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
             @RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryByRating(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType, ratingEngine);
+        return ratingEngineProxy.getModelingQueryByRating(tenant.getId(), ratingEngineId,
+                ratingModelId, modelingQueryType, ratingEngine);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
     @ResponseBody
     @ApiOperation(value = "Return a the number of results for the modelingquerytype corresponding to the given rating engine, rating model")
-    public Long getModelingQueryCount(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
+    public Long getModelingQueryCount(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryCountByRatingId(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType);
+        return ratingEngineProxy.getModelingQueryCountByRatingId(tenant.getId(), ratingEngineId,
+                ratingModelId, modelingQueryType);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
@@ -466,30 +496,32 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId,
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryByRatingId(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType);
+        return ratingEngineProxy.getModelingQueryByRatingId(tenant.getId(), ratingEngineId,
+                ratingModelId, modelingQueryType);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
     @ResponseBody
     @ApiOperation(value = "Return a the number of results for the modelingquerytype corresponding to the given rating engine, rating model")
-    public Long getModelingQueryCountByRatingId(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
+    public Long getModelingQueryCountByRatingId(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
             @RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryCountByRating(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType, ratingEngine);
+        return ratingEngineProxy.getModelingQueryCountByRating(tenant.getId(), ratingEngineId,
+                ratingModelId, modelingQueryType, ratingEngine);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model")
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
-    public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestBody(required = false) Map<String, List<ColumnMetadata>> attributes) {
+    public String ratingEngineModel(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
+            @RequestBody(required = false) List<ColumnMetadata> attributes) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes,
-                    MultiTenantContext.getEmailAddress());
+            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId,
+                    ratingModelId, attributes, MultiTenantContext.getEmailAddress());
         } catch (LedpException e) {
             throw e;
         } catch (Exception ex) {
@@ -506,9 +538,11 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(), ratingEngineId, ratingModelId);
+            return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(),
+                    ratingEngineId, ratingModelId);
         } catch (LedpException e) {
-            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
+            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId,
+                    ratingEngineId), e);
             UIAction uiAction = new UIAction();
             uiAction.setTitle("Validation Error");
             uiAction.setView(View.Banner);
@@ -529,14 +563,16 @@ public class RatingEngineResource {
             @RequestBody RatingEngine ratingEngine) {
         RatingModel ratingModel = ratingEngine.getLatestIteration();
         if (ratingModel == null || !(ratingModel instanceof AIModel)) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "LatestIteration of the given Model is Null or unsupported for validation" });
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "LatestIteration of the given Model is Null or unsupported for validation" });
         }
         try {
             Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId, ratingEngine);
+            return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId,
+                    ratingModelId, ratingEngine);
         } catch (LedpException e) {
-            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
+            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId,
+                    ratingEngineId), e);
             UIAction uiAction = new UIAction();
             uiAction.setTitle("Validation Error");
             uiAction.setView(View.Banner);

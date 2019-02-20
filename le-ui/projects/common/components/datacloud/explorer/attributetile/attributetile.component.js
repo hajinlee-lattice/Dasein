@@ -12,7 +12,7 @@ angular
             controllerAs: 'vm',
             templateUrl: '/components/datacloud/explorer/attributetile/attributetile.component.html',
             controller: function (
-                $scope, $state, $document, $timeout, $interval, 
+                $scope, $state, $document, $timeout, $interval, Notice,
                 QueryStore, DataCloudStore, NumberUtility, QueryTreeService
             ) {
                 var vm = $scope.vm;
@@ -44,13 +44,13 @@ angular
                     var state = '';
 
                     switch ($state.current.name) {
-                        case 'home.ratingsengine.rulesprospects.segment.attributes.rules': 
-                            state = 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker'; 
+                        case 'home.ratingsengine.rulesprospects.segment.attributes.rules':
+                            state = 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker';
                             break;
-                        case 'home.ratingsengine.dashboard.segment.attributes.add': 
-                            state = 'home.ratingsengine.dashboard.segment.attributes.rules.picker'; 
+                        case 'home.ratingsengine.dashboard.segment.attributes.add':
+                            state = 'home.ratingsengine.dashboard.segment.attributes.rules.picker';
                             break;
-                        default: 
+                        default:
                             state = 'home.segment.explorer.enumpicker';
                     }
 
@@ -71,7 +71,7 @@ angular
                                 'top': 5,
                             },
                             'chart': {
-                                'header':'Attributes Value',
+                                'header': 'Attributes Value',
                                 'emptymsg': '',
                                 'usecolor': false,
                                 'color': '#2E6099',
@@ -105,7 +105,7 @@ angular
                                 'top': 5,
                             },
                             'chart': {
-                                'header':'Attributes Value',
+                                'header': 'Attributes Value',
                                 'emptymsg': '',
                                 'usecolor': false,
                                 'color': '#2E6099',
@@ -119,18 +119,18 @@ angular
                                 'suffix': 'x'
                             },
                             'columns': [{
-                                    'field': 'Lift',
-                                    'label': 'Lifts',
-                                    'type': 'string',
-                                    'suffix': 'x',
-                                    'chart': true
-                                },
-                                {
-                                    'field': 'Cnt',
-                                    'label': 'Records',
-                                    'type': 'number',
-                                    'chart': false,
-                                }
+                                'field': 'Lift',
+                                'label': 'Lifts',
+                                'type': 'string',
+                                'suffix': 'x',
+                                'chart': true
+                            },
+                            {
+                                'field': 'Cnt',
+                                'label': 'Records',
+                                'type': 'number',
+                                'chart': false,
+                            }
                             ]
                         };
                     }
@@ -140,10 +140,10 @@ angular
                 vm.getChartConfig = function (list) {
 
                     vm.bktlist = [];
-                    if(vm.cube) {
+                    if (vm.cube) {
                         vm.bktlist = vm.getData(vm.enrichment.Entity, vm.enrichment.ColumnId);
                     } else {
-                        DataCloudStore.getCube().then(function(result) {
+                        DataCloudStore.getCube().then(function (result) {
                             vm.cube = result;
                             vm.bktlist = vm.getData(vm.enrichment.Entity, vm.enrichment.ColumnId);
                         });
@@ -187,28 +187,52 @@ angular
                     return querySnippet;
                 }
 
-                vm.showFreeTextAttributeCard = function(enrichment) {
-                    return vm.cube && vm.isBktEmpty(enrichment) &&  DataCloudStore.validFreeTextTypes.indexOf(enrichment.FundamentalType) >= 0 &&
-                          (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)
+                vm.showFreeTextAttributeCard = function (enrichment) {
+                    return vm.cube && vm.isBktEmpty(enrichment) && DataCloudStore.validFreeTextTypes.indexOf(enrichment.FundamentalType) >= 0 &&
+                        (!vm.lookupMode && ['wizard.ratingsengine_segment', 'edit', 'team'].indexOf(vm.section) == -1)
                 }
 
-                vm.showInvalidAttributeCard = function(enrichment) {
+                vm.showInvalidAttributeCard = function (enrichment) {
                     return vm.cube && vm.isBktEmpty(enrichment) && DataCloudStore.validFreeTextTypes.indexOf(enrichment.FundamentalType) == -1 &&
-                          (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)
+                        (!vm.lookupMode && ['wizard.ratingsengine_segment', 'edit', 'team'].indexOf(vm.section) == -1)
                 }
 
-                vm.isBktEmpty = function(enrichment) {
-                    if(vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
-                        return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined 
-                                || vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List == undefined
-                                || !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
+                vm.isBktEmpty = function (enrichment) {
+                    if (vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
+                        return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined ||
+                            !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
                     }
                 }
 
                 vm.NumberUtility = NumberUtility;
 
-                vm.getBktListRating = function(enrichment){
+                vm.getBktListRating = function (enrichment) {
                     return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List;
+                }
+
+                vm.getWarning = function (warning) {
+                    let warnings = DataCloudStore.getWarnings();
+                    return warnings[warning];
+                }
+
+                vm.toggleApprovedUsage = function (item) {
+                    switch (item.ApprovedUsage[0]) {
+                        case 'None':
+                            Notice.success({ message: 'Enabled attribute for remodeling' })
+                            item.ApprovedUsage[0] = 'ModelAndAllInsights';
+                            break;
+                        default:
+                            Notice.warning({ message: 'Disabled attribute from remodeling' })
+                            item.ApprovedUsage[0] = 'None';
+                    }
+                }
+
+                vm.checkApprovedUsage = function (item) {
+                    return item.ApprovedUsage[0] != 'None';
+                }
+
+                vm.checkImportance = function (item) {
+                    return 'ImportanceOrdering' in item;
                 }
             }
         };
