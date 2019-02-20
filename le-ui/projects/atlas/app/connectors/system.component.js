@@ -93,7 +93,7 @@ export default class SystemComponent extends Component {
         );
     }
     render() {
-        console.log('Render', this.state.openModal);
+        // console.log('Render', this.state.openModal);
         return (
             <Aux>
                 <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} />
