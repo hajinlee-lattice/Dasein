@@ -1,10 +1,20 @@
 package com.latticeengines.ulysses.controller;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
+import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
+import com.latticeengines.ulysses.utils.AccountDanteFormatter;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,21 +26,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.service.DataLakeService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
-import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
-import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
-import com.latticeengines.ulysses.utils.AccountDanteFormatter;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import javax.inject.Inject;
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.List;
 
 @Api(value = "CDLAccounts", description = "Common REST resource to lookup CDL accounts")
 @RestController
@@ -71,12 +70,13 @@ public class DataLakeAccountResource {
             List<String> requiredAttributes = Collections.singletonList(InterfaceName.SpendAnalyticsSegment.name());
             DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup, requiredAttributes);
             if (accountRawData.getData().size() != 1) {
-                throw new LedpException(LedpCode.LEDP_39003,
-                        new String[] { "Account", "" + accountRawData.getData().size() });
+                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account", 0);
+                log.warn("Failed to get account data for account id: " + message);
+                return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
             return new FrontEndResponse<>(accountDanteFormatter.format(accountRawData.getData().get(0)));
         } catch (LedpException le) {
-            log.error("Failed to get account data for account id: " + accountId, le);
+            log.error("Failed to get account data for account id: " + accountId, le.getMessage());
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
             log.error("Failed to get account data for account id: " + accountId, e);
@@ -93,8 +93,9 @@ public class DataLakeAccountResource {
         try {
             DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup);
             if (accountRawData.getData().size() != 1) {
-                throw new LedpException(LedpCode.LEDP_39003,
-                        new String[] { "Account", "" + accountRawData.getData().size() });
+                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account", 0);
+                log.warn("Failed to get account data for account id: " + message);
+                return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
             return new FrontEndResponse<>(
                     Collections.singletonList(accountDanteFormatter.format(accountRawData.getData().get(0))));
