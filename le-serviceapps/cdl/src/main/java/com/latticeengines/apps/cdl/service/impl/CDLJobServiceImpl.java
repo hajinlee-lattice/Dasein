@@ -164,12 +164,14 @@ public class CDLJobServiceImpl implements CDLJobService {
         Date currentTime = new Date(currentTimeMillis);
 
         int runningProcessAnalyzeJobs = 0;
+        List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<SimpleDataFeed>();
         List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
             if (tenant.getStatus() == TenantStatus.ACTIVE) {
                 if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
                     runningProcessAnalyzeJobs++;
+                    processAnalyzingDataFeeds.add(dataFeed);
                 } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
                     MultiTenantContext.setTenant(tenant);
                     CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
@@ -193,6 +195,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         if (runningProcessAnalyzeJobs >= concurrentProcessAnalyzeJobs) {
             log.info("Running process analyze jobs count is more than concurrent process analyze jobs count.");
+            for (SimpleDataFeed dataFeed : processAnalyzingDataFeeds) {
+                log.info(String.format("Tenant %s is running PA job.", dataFeed.getTenant().getName()));
+            }
             return;
         }
 
@@ -321,7 +326,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             if ((cdlJobDetail == null) || (cdlJobDetail.getRetryCount() < processAnalyzeJobRetryCount)) {
                 return true;
             } else {
-                log.info("Tenant %s exceeds retry limit and skip failed exeuction", tenant.getName());
+                log.info(String.format("Tenant %s exceeds retry limit and skip failed exeuction", tenant.getName()));
             }
         }
         return false;
