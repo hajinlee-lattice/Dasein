@@ -112,7 +112,7 @@ public class SchemaRepository {
                 table = getAccountSchema(cdlSchema, withoutId);
                 break;
             case Contact:
-                table = getContactSchema();
+                table = getContactSchema(cdlSchema);
                 break;
             case Product:
                 table = getProductSchema();
@@ -156,7 +156,7 @@ public class SchemaRepository {
                 table = getAccountSchema(false, withoutId);
                 break;
             case Contact:
-                table = getContactSchema();
+                table = getContactSchema(false);
                 break;
             case Product:
                 table = getProductSchema();
@@ -632,7 +632,7 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getContactSchema() {
+    private Table getContactSchema(boolean cdlSchema) {
         Table table = createTable(SchemaInterpretation.Contact);
         table.setPrimaryKey(createPrimaryKey(InterfaceName.ContactId.name()));
 
@@ -754,21 +754,23 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
-        table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.CreatedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
-                .fundamentalType(FundamentalType.DATE.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
-        table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(
-                        Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) // )__
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
-                .fundamentalType(FundamentalType.DATE.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+        if (!cdlSchema) {
+            table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
+                    .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CreatedDate) //
+                    .logicalType(LogicalDataType.Timestamp) //
+                    .fundamentalType(FundamentalType.DATE.name()) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+            table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) // )__
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.LastModifiedDate) //
+                    .logicalType(LogicalDataType.Timestamp) //
+                    .fundamentalType(FundamentalType.DATE.name()) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+        }
         return table;
     }
 
