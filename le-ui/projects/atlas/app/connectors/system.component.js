@@ -71,18 +71,18 @@ export default class SystemComponent extends Component {
         }
     }
 
-    getSystemStatusClass(){
+    getSystemStatusClass() {
         let color = 'color-';
-        switch(this.state.system.isRegistered){
+        switch (this.state.system.isRegistered) {
             case true:
-            color = `${color}${'green'}`;
-            break;
+                color = `${color}${'green'}`;
+                break;
             default:
-            color = `${color}${'red'}`;
-            break;
+                color = `${color}${'red'}`;
+                break;
         }
         return color;
-        
+
     }
 
     getEditTemplate() {
@@ -92,8 +92,35 @@ export default class SystemComponent extends Component {
             <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
         );
     }
+
+    getValueDateFormatted(longValue) {
+        if (longValue && longValue != null) {
+            var options = {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            };
+            var formatted = new Date(longValue);
+
+            var ret = "err";
+            try {
+                ret = formatted.toLocaleDateString(
+                    "en-US",
+                    options
+                );
+            } catch (e) {
+                console.log(e);
+            }
+
+            return ret;
+        }else{
+            return '-';
+        }
+    }
+
+
     render() {
-        console.log('Render', this.state.openModal);
+        // console.log('Render', this.state.openModal);
         return (
             <Aux>
                 <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} />
@@ -107,58 +134,58 @@ export default class SystemComponent extends Component {
                         </div>
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
-                            <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col lable">
-                                    System Org Name
+                        <div className="le-layout-flex-grid">
+                            <div className="le-layout-flex-col lable">
+                                System Org Name
                                 </div>
-                                <div className="le-layout-flex-col color-blue content">
-                                    {this.state.system.orgName}
-                                </div>
+                            <div className="le-layout-flex-col color-blue content">
+                                {this.state.system.orgName}
                             </div>
-                            <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col lable">
-                                    System Org Id
+                        </div>
+                        <div className="le-layout-flex-grid">
+                            <div className="le-layout-flex-col lable">
+                                System Org Id
                             </div>
-                                <div className="le-layout-flex-col color-blue content">
-                                    {this.state.system.orgId}
-                                </div>
+                            <div className="le-layout-flex-col color-blue content">
+                                {this.state.system.orgId}
                             </div>
-                            <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col lable">
-                                    Account Id
+                        </div>
+                        <div className="le-layout-flex-grid">
+                            <div className="le-layout-flex-col lable">
+                                Account Id
                             </div>
-                                <div className="le-layout-flex-col color-blue content" title={this.state.system.accountId}>
-                                    {this.state.system.accountId}
-                                </div>
+                            <div className="le-layout-flex-col color-blue content" title={this.state.system.accountId}>
+                                {this.state.system.accountId}
                             </div>
-                            <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col lable">
-                                    Last Updated
+                        </div>
+                        <div className="le-layout-flex-grid">
+                            <div className="le-layout-flex-col lable">
+                                Last Updated
                             </div>
-                                <div className="le-layout-flex-col color-blue content">
-                                    {this.state.system.updated}
-                                </div>
+                            <div className="le-layout-flex-col color-blue content">
+                                {this.getValueDateFormatted(this.state.system.updated)}
                             </div>
-                            <div className="le-layout-flex-grid">
-                                <div className="le-layout-flex-col lable">
-                                    Status
+                        </div>
+                        <div className="le-layout-flex-grid">
+                            <div className="le-layout-flex-col lable">
+                                Status
                             </div>
-                                <div className="le-layout-flex-col content">
-                                    <span className={this.getSystemStatusClass()}>{this.getSystemStatus()}</span>
-                                </div>
+                            <div className="le-layout-flex-col content">
+                                <span className={this.getSystemStatusClass()}>{this.getSystemStatus()}</span>
                             </div>
+                        </div>
                     </LeTileBody>
                     <LeTileFooter classNames={'system-footer right-controlls'}>
 
-                                    <LeButton
-                                        name={`${"edit-mappings-"}${this.state.system.orgName}`}
-                                        disabled={this.state.saving || !this.state.system.isRegistered}
-                                        config={{
-                                            label: "Edit Mappings",
-                                            classNames: "blue-button"
-                                        }}
-                                        callback={this.editMappingClickHandler}
-                                    />
+                        <LeButton
+                            name={`${"edit-mappings-"}${this.state.system.orgName}`}
+                            disabled={this.state.saving || !this.state.system.isRegistered}
+                            config={{
+                                label: "Edit Mappings",
+                                classNames: "blue-button"
+                            }}
+                            callback={this.editMappingClickHandler}
+                        />
                     </LeTileFooter>
                 </LeTile>
             </Aux>

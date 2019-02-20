@@ -34,7 +34,7 @@ angular.module('common.datacloud.query.results', [
             updateOn: 'default blur',
             debounce: 1500
         },
-        accountsCoverage: AccountsCoverage.ratingModelsCoverageMap,
+        accountsCoverage: AccountsCoverage ? AccountsCoverage.ratingModelsCoverageMap : null,
 
         excludeNonSalesForce: false,
         sortType: 'CompanyName',
@@ -65,19 +65,6 @@ angular.module('common.datacloud.query.results', [
             vm.showErrorApi = !vm.isEmpty(AccountsCoverage.errorMap);
             vm.selectedBuckets = [];
             if (vm.section === 'wizard.targets') {
-                // var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
-                //                         PlaybookWizardStore.currentPlay.launchHistory && 
-                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch && 
-                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch ? 
-                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : []);
-                
-                // Get sum of non-suppressed buckets to calculate percentage for each bucket
-                // **Removed for below code**
-                // var numAccounts = 0;
-                // for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
-                //     numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
-                // }
-                
                 // Now instead we get sum of scored and unscored accounts
                 var unscoredAccountCount = vm.accountsCoverage ? vm.accountsCoverage.unscoredAccountCount : 0;
                 var accountCount = vm.accountsCoverage ? vm.accountsCoverage.accountCount : 0;

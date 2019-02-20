@@ -6,6 +6,7 @@ API_CON_URL=https://localhost:9073
 API_ADMIN_URL=https://localhost:9085
 API_MCSVC_URL=https://localhost:9080
 API_MATCHAPI_URL=https://localhost:9076
+TRAY_API_URL=https://tray.io/graphql
 COMPRESSED=false
 LOGGING=./server/log
 HTTP_PORT=3001
