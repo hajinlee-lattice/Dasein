@@ -11,6 +11,7 @@ import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
@@ -29,7 +30,7 @@ import io.micrometer.core.instrument.Timer;
 @Component("entityMatchMetricService")
 public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
-    private static final String BATCH_MATCH_MODE = "Batch";
+    private static final String BATCH_MATCH_MODE = MatchActorSystem.BATCH_MODE;
 
     /*
      * metric names

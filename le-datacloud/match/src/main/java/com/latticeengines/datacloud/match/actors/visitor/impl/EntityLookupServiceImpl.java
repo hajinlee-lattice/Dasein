@@ -138,7 +138,7 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
                 removeReq(requestId);
                 sendResponse(requestId, lookupResponse, returnAddress);
             });
-            log.info("Lookup entity for tenant (ID={}), size = {} successfully", tenantId, pairs.size());
+            log.debug("Lookup entity for tenant (ID={}), size = {} successfully", tenantId, pairs.size());
         } catch (Exception e) {
             log.error("Lookup entity for tenant (ID={}), size = {} failed, error = {}",
                     tenantId, pairs.size(), e.getMessage());
