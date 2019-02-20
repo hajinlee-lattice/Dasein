@@ -68,9 +68,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     public void discardTenant(String customerSpace) {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         attrConfigEntityMgr.cleanupTenant(tenantId);
-        dataUnitService.cleanupByTenant();
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         MultiTenantContext.setTenant(tenant);
+        dataUnitService.cleanupByTenant();
         dropBoxService.delete();
     }
 
