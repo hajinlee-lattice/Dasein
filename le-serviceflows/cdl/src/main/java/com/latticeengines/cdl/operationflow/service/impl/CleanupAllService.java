@@ -81,27 +81,33 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         }
         String customerSpace = config.getCustomerSpace();
         BusinessEntity entity = config.getEntity();
+        if (CleanupOperationType.ALLDATA.equals(config.getCleanupOperationType())) {
+            deleteData(config, entity, customerSpace);
+        } else if (CleanupOperationType.ALL.equals(config.getCleanupOperationType())) {
+            deleteData(config, entity, customerSpace);
+            deleteMetadata(entity, customerSpace);
+        } else if (CleanupOperationType.ALLATTRCONFIG.equals(config.getCleanupOperationType())) {
+            deleteAttrConfig(entity, customerSpace);
+        }
+        return report;
+    }
+
+    private void deleteData(CleanupAllConfiguration config, BusinessEntity entity, String customerSpace) {
         log.info(String.format("begin clean up cdl data of CustomerSpace %s", customerSpace));
         if (entity == null) {
             cleanupRedshift(config.getCustomerSpace(),
-                    Arrays.asList(BusinessEntity.Account.getBatchStore(),
-                        BusinessEntity.Contact.getBatchStore(),
-                        BusinessEntity.Product.getBatchStore(),
-                        TableRoleInCollection.ConsolidatedRawTransaction,
-                        TableRoleInCollection.ConsolidatedDailyTransaction,
-                        TableRoleInCollection.ConsolidatedPeriodTransaction),
-                    Arrays.asList(DataCollection.Version.Blue,
-                        DataCollection.Version.Green));
-
-            cleanupS3(config.getCustomerSpace(),
-                    Arrays.asList(BusinessEntity.Account.getBatchStore(),
-                            BusinessEntity.Contact.getBatchStore(),
-                            BusinessEntity.Product.getBatchStore(),
-                            TableRoleInCollection.ConsolidatedRawTransaction,
+                    Arrays.asList(BusinessEntity.Account.getBatchStore(), BusinessEntity.Contact.getBatchStore(),
+                            BusinessEntity.Product.getBatchStore(), TableRoleInCollection.ConsolidatedRawTransaction,
                             TableRoleInCollection.ConsolidatedDailyTransaction,
                             TableRoleInCollection.ConsolidatedPeriodTransaction),
-                    Arrays.asList(DataCollection.Version.Blue,
-                            DataCollection.Version.Green));
+                    Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
+
+            cleanupS3(config.getCustomerSpace(),
+                    Arrays.asList(BusinessEntity.Account.getBatchStore(), BusinessEntity.Contact.getBatchStore(),
+                            BusinessEntity.Product.getBatchStore(), TableRoleInCollection.ConsolidatedRawTransaction,
+                            TableRoleInCollection.ConsolidatedDailyTransaction,
+                            TableRoleInCollection.ConsolidatedPeriodTransaction),
+                    Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
 
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Account.getBatchStore());
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Contact.getBatchStore());
@@ -117,14 +123,12 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                     Arrays.asList(TableRoleInCollection.ConsolidatedRawTransaction,
                             TableRoleInCollection.ConsolidatedDailyTransaction,
                             TableRoleInCollection.ConsolidatedPeriodTransaction),
-                    Arrays.asList(DataCollection.Version.Blue,
-                            DataCollection.Version.Green));
+                    Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
             cleanupS3(config.getCustomerSpace(),
                     Arrays.asList(TableRoleInCollection.ConsolidatedRawTransaction,
                             TableRoleInCollection.ConsolidatedDailyTransaction,
                             TableRoleInCollection.ConsolidatedPeriodTransaction),
-                    Arrays.asList(DataCollection.Version.Blue,
-                            DataCollection.Version.Green));
+                    Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
             dataCollectionProxy.resetTable(config.getCustomerSpace(), TableRoleInCollection.ConsolidatedRawTransaction);
             dataCollectionProxy.resetTable(config.getCustomerSpace(),
                     TableRoleInCollection.ConsolidatedDailyTransaction);
@@ -133,14 +137,10 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             dataFeedProxy.resetImportByEntity(customerSpace, entity.name());
         } else if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact
                 || entity == BusinessEntity.Product) {
-            cleanupRedshift(config.getCustomerSpace(),
-                    Arrays.asList(config.getEntity().getBatchStore()),
-                    Arrays.asList(DataCollection.Version.Blue,
-                            DataCollection.Version.Green));
-            cleanupS3(config.getCustomerSpace(),
-                    Arrays.asList(config.getEntity().getBatchStore()),
-                    Arrays.asList(DataCollection.Version.Blue,
-                            DataCollection.Version.Green));
+            cleanupRedshift(config.getCustomerSpace(), Arrays.asList(config.getEntity().getBatchStore()),
+                    Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
+            cleanupS3(config.getCustomerSpace(), Arrays.asList(config.getEntity().getBatchStore()),
+                    Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
             dataCollectionProxy.resetTable(config.getCustomerSpace(), config.getEntity().getBatchStore());
             dataFeedProxy.resetImportByEntity(customerSpace, entity.name());
         } else {
@@ -148,30 +148,32 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             throw new RuntimeException(String.format("current Business entity is %s, unsupported", entity.name()));
         }
 
-        log.info("Start cleanup all operation!");
-        if (config.getCleanupOperationType() == CleanupOperationType.ALL) {
-            log.info(String.format("begin to clean up attr config of CustomerSpace %s", customerSpace));
-            cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace, entity);
-            log.info(String.format("begin clean up cdl metadata of CustomerSpace %s", customerSpace));
-            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-            List<DataFeedTask> tasks = dataFeed.getTasks();
-            for (DataFeedTask task : tasks) {
-                Table dataTable = task.getImportData();
-                Table templateTable = task.getImportTemplate();
-                if (entity == null) {
-                    if (dataTable != null) {
-                        metadataProxy.deleteTable(customerSpace, dataTable.getName());
-                    }
-                    metadataProxy.deleteImportTable(customerSpace, templateTable.getName());
-                } else if (entity.name().equals(task.getEntity())) {
-                    if (dataTable != null) {
-                        metadataProxy.deleteTable(customerSpace, dataTable.getName());
-                    }
-                    metadataProxy.deleteImportTable(customerSpace, templateTable.getName());
+    }
+
+    private void deleteMetadata(BusinessEntity entity, String customerSpace) {
+        log.info(String.format("begin clean up cdl metadata of CustomerSpace %s", customerSpace));
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        List<DataFeedTask> tasks = dataFeed.getTasks();
+        for (DataFeedTask task : tasks) {
+            Table dataTable = task.getImportData();
+            Table templateTable = task.getImportTemplate();
+            if (entity == null) {
+                if (dataTable != null) {
+                    metadataProxy.deleteTable(customerSpace, dataTable.getName());
                 }
+                metadataProxy.deleteImportTable(customerSpace, templateTable.getName());
+            } else if (entity.name().equals(task.getEntity())) {
+                if (dataTable != null) {
+                    metadataProxy.deleteTable(customerSpace, dataTable.getName());
+                }
+                metadataProxy.deleteImportTable(customerSpace, templateTable.getName());
             }
         }
-        return report;
+    }
+
+    private void deleteAttrConfig(BusinessEntity entity, String customerSpace) {
+        log.info(String.format("begin to clean up attr config of CustomerSpace %s", customerSpace));
+        cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace, entity);
     }
 
     private Map<String, Long> getReportInfo(String customerSpace, BusinessEntity entity) {
