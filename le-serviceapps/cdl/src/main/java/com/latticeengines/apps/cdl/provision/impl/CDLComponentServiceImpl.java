@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.provision.impl;
 
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -111,9 +112,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
             String tenantId = cs.getTenantId();
             attrConfigEntityMgr.cleanupTenant(tenantId);
-            dataUnitService.cleanupByTenant();
             Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
             MultiTenantContext.setTenant(tenant);
+            dataUnitService.cleanupByTenant();
             dropBoxService.delete();
         } catch (Exception e) {
             log.error(String.format("Uninstall CDL component for: %s failed. %s", customerSpace, e.toString()));
