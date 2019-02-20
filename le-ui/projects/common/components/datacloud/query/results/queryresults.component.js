@@ -299,27 +299,28 @@ angular.module('common.datacloud.query.results', [
 
                 // Get Account Counts for Pagination
                 if (!vm.search) {
+                    vm.noBuckets = [{
+                        bucket: 'A',
+                        count: 0,
+                    },{
+                        bucket: 'B',
+                        count: 0,
+                    },{
+                        bucket: 'C',
+                        count: 0,
+                    },{
+                        bucket: 'D',
+                        count: 0,
+                    },{
+                        bucket: 'E',
+                        count: 0,
+                    },{
+                        bucket: 'F',
+                        count: 0,
+                    }];
                     if(engineIdObject.length) {
                         PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                            vm.noBuckets = [{
-                                bucket: 'A',
-                                count: 0,
-                            },{
-                                bucket: 'B',
-                                count: 0,
-                            },{
-                                bucket: 'C',
-                                count: 0,
-                            },{
-                                bucket: 'D',
-                                count: 0,
-                            },{
-                                bucket: 'E',
-                                count: 0,
-                            },{
-                                bucket: 'F',
-                                count: 0,
-                            }];
+
                             var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : {bucketCoverageCounts: []});
                             
                             var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {

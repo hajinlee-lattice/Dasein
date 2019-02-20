@@ -1023,23 +1023,19 @@ angular
                                     }
                                 });
                                 QueryStore.getEntitiesCounts(template).then(function(result) {
-                                    deferred.resolve({
-                                        accountCount: 0,
-                                        unscoredAccountCount: result.Account || 0,
-                                        contactCount: 0,
-                                        unscoredContactCount: result.Contact || 0,
-                                        bucketCoverageCounts: []
-                                    });
+                                    deferred.resolve(
+                                        PlaybookWizardStore.getCoverageMap({
+                                            accounts: result.Account || 0,
+                                            contacts: esult.Contact || 0,
+                                        }));
                                 });
                             }
                             else{
-                                deferred.resolve({
-                                    accountCount: 0,
-                                    unscoredAccountCount: segment.accounts || 0,
-                                    contactCount: 0,
-                                    unscoredContactCount: segment.contacts || 0,
-                                    bucketCoverageCounts: []
-                                });
+                                deferred.resolve(
+                                    PlaybookWizardStore.getCoverageMap({
+                                        accounts: segment.accounts || 0,
+                                        contacts: segment.contacts || 0
+                                    }));
                             }
                         }
                     });
