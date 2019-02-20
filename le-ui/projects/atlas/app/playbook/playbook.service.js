@@ -21,6 +21,20 @@ angular.module('lp.playbook')
     this.audienceId = null;
     this.excludeItems = false;
 
+    this.getCoverageMap = (obj) => {
+        var ret = {
+            errorMap : {},
+            ratingModelsCoverageMap : {
+                accountCount: 0,
+                unscoredAccountCount: obj.accounts,
+                contactCount: 0,
+                unscoredContactCount: obj.contacts,
+                bucketCoverageCounts: []
+            }
+        }
+         return ret;  
+    }
+
     this.init = function() {
 
         this.settings = {};
