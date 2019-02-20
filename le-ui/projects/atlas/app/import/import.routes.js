@@ -306,7 +306,7 @@ angular
                 AnalysisFields: function() {
                     return [
                         { name: 'Type', type: 'TEXT' },
-                        { name: 'Industry' },
+                        { name: 'Industry', type: 'TEXT' },
                         { name: 'SpendAnalyticsSegment', displayName: 'Account Business Segment',type: 'TEXT' },
                         { name: 'AnnualRevenue', displayName: 'Estimated Yearly Revenue', type: 'TEXT' },
                         { name: 'Longitude', type: 'TEXT' },
