@@ -5,11 +5,13 @@ import java.time.Duration;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Component;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -18,13 +20,16 @@ import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 
 @Lazy
 @Component("entityMatchMetricService")
@@ -45,6 +50,8 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     private static final String METRIC_DYNAMO_CALL_ERROR_DIST = "match.entity.dynamo.call.error.dist";
     private static final String METRIC_DYNAMO_CALL_THROTTLE_DIST = "match.entity.dynamo.call.throttling.dist";
     private static final String METRIC_DYNAMO_CALL_RETRY_DIST = "match.entity.dynamo.call.retry.dist";
+    private static final String METRIC_LOOKUP_CACHE = "match.entity.cache.lookup";
+    private static final String METRIC_SEED_CACHE = "match.entity.cache.seed";
 
     /*
      * tag names (TODO probably move to a unified constant class)
@@ -63,6 +70,14 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     @Inject
     @Qualifier("rootRegistry")
     private MeterRegistry rootRegistry;
+
+    @Lazy
+    @Inject
+    @Qualifier("rootHostRegistry")
+    private MeterRegistry rootHostRegistry;
+
+    @Inject
+    private MatchActorSystem matchActorSystem;
 
     @Override
     public void recordDynamoThrottling(EntityMatchEnvironment env, String tableName) {
@@ -167,6 +182,35 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
                         .increment(1);
             }
         }
+    }
+
+    @Override
+    public void registerLookupCache(Cache<Pair<String, EntityLookupEntry>, String> cache, boolean isAllocateMode) {
+        if (cache == null) {
+            return;
+        }
+
+        monitorCache(cache, METRIC_LOOKUP_CACHE, getMatchMode(), isAllocateMode);
+    }
+
+    @Override
+    public void registerSeedCache(Cache<Pair<Pair<String, String>, String>, EntityRawSeed> cache) {
+        if (cache == null) {
+            return;
+        }
+
+        monitorCache(cache, METRIC_SEED_CACHE, getMatchMode(), false);
+    }
+
+    private <K, V> void monitorCache(@NotNull Cache<K, V> cache, @NotNull String metricName, @NotNull String matchMode,
+            boolean isAllocateMode) {
+        // use the host registry since cache is related to single instance
+        CaffeineCacheMetrics.monitor(rootHostRegistry, cache, metricName, //
+                TAG_ALLOCATE_ID_MODE, String.valueOf(isAllocateMode), TAG_MATCH_MODE, matchMode);
+    }
+
+    private String getMatchMode() {
+        return matchActorSystem.isBatchMode() ? MatchActorSystem.BATCH_MODE : MatchActorSystem.REALTIME_MODE;
     }
 
     private void recordDynamoDistri(@NotNull String metricName, @NotNull EntityMatchEnvironment env,
