@@ -75,7 +75,7 @@ export class ConnectorList extends Component {
                     this.setState({ userValidated: true, userInfo: response.data });
                     httpService.unsubscribeObservable(observer);
                 } else {
-                    this.setState({ userValidated: false, userInfo: new User('No user') });
+                    this.setState({ userValidated: false, userInfo: {} });
                 }
             },
             error => {
