@@ -199,7 +199,7 @@ angular
 
                 vm.isBktEmpty = function (enrichment) {
                     if (vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
-                        return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined || !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List ||
+                        return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined || vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List == undefined ||
                             !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
                     }
                 }
