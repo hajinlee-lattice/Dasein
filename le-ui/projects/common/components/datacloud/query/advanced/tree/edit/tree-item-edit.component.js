@@ -13,6 +13,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 var vm = $scope.vm;
                 vm.booleanChanged = false;
                 vm.presetOperation;
+                vm.showFromNumerical = false;
+                vm.showToNumerical = false;
                 // console.log(vm.tree.bucketRestriction);
 
                 function showNumericalRange() {
@@ -47,35 +49,29 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 function initNumericalRange(reset) {
                     if (!reset) {
                         
-                        var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.from.position);
-                        // console.log('FROM ', fromNumerical);
-                        vm.numericalConfiguration.from.value = (fromNumerical != null) ? Number(fromNumerical) : undefined;
-                        var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.to.position);
-                        // console.log('TO ', toNumerical);
-                        vm.numericalConfiguration.to.value = (toNumerical != null) ? Number(toNumerical) : undefined;
-                        setTimeout(function(){
-                            showNumericalRange();
-                        },0);
+                        var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, 0);
+                        let from = (fromNumerical != null) ? Number(fromNumerical) : undefined;
+                        var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, 1);
+                        let to = (toNumerical != null) ? Number(toNumerical) : undefined;
+                        vm.numericalConfiguration = {
+                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical' },
+                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical' }
+                        };
+                        showNumericalRange();
                         
                     } else {
                         vm.showFromNumerical = false;
                         vm.showToNumerical = false;
-                        vm.numericalConfiguration.from.value = undefined;
-                        vm.numericalConfiguration.to.value = undefined;
+                        vm.numericalConfiguration = {
+                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
+                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
+                        };
                         QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
-                        setTimeout(function () {
-                            showNumericalRange();
-                        }, 0);
+                        showNumericalRange();
                     }
                 }
 
                 vm.initVariables = function(){
-                    vm.numericalConfiguration = {
-                        from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
-                        to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
-                    };
-                    
-                    // console.log('CCCCC ', vm.numericalConfiguration);
                     if(vm.showItem('Boolean') && !vm.showItem('Percent')){
                         vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
                     }
@@ -89,14 +85,12 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     }
                     if(vm.showItem('Numerical')){
                         vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
-                        vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
-                        vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
-                        // console.log('NNN 0 ', vm.bktVals0);
-                        // console.log('NNN 1 ', vm.bktVals1);
                         vm.showFromNumerical = false;
                         vm.showToNumerical = false;
                         vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
-                        initNumericalRange();
+                        // setTimeout(() => {
+                            initNumericalRange();
+                        // });
 
                     }
                     if(vm.showItem('Date')){
@@ -109,10 +103,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 };
 
                 vm.init = function () {
-                    // console.log('INIT');
-                    // setTimeout(() => {
+                    // console.log('INIT ',vm.tree.bucketRestriction);
+                    setTimeout(() => {
                         vm.initVariables();
-                    // },0);
+                    },0);
                     
                 }
                 
@@ -181,38 +175,6 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             vm.vals.length = 0;
                             break;
                     }
-
-                    // switch (vm.enumCmpModel) {
-                    //     case 'is empty': 
-                    //         vm.enumCmpModel = 'IS_NULL'; 
-                    //         vm.vals.length = 0; 
-                    //         break;
-                    //     case 'is present': 
-                    //         vm.enumCmpModel = 'IS_NOT_NULL'; 
-                    //         vm.vals.length = 0; 
-                    //         break;
-                    //     case 'is': 
-                    //         vm.enumCmpModel = vm.vals.length == 1 
-                    //             ? 'EQUAL' 
-                    //             : 'IN_COLLECTION'; 
-                    //         break;
-                    //     case 'is not': 
-                    //         vm.enumCmpModel = vm.vals.length == 1 
-                    //             ? 'NOT_EQUAL' 
-                    //             : 'NOT_IN_COLLECTION';
-                    //         break;
-                    // }
-
-
-                    // if (vm.enumCmpModel == 'is empty') {
-                    //     vm.enumCmpModel = 'IS_NULL';
-                    //     vm.vals.length = 0;
-                    // } else if (vm.enumCmpModel == 'is') {
-                    //     vm.enumCmpModel = vm.vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION';
-                    // } else if (vm.enumCmpModel == 'is not') {
-                    //     vm.enumCmpModel = vm.vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION';
-                    // }
-
                     QueryTreeService.changeEnumCmpValue(vm.tree.bucketRestriction, vm.enumCmpModel);
                 }
 
