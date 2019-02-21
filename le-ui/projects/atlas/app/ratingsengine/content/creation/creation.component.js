@@ -14,7 +14,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             checkJobStatus;
 
         angular.extend(vm, {
-            hasSettingsInfo: true,
             status: 'Preparing Modeling Job',
             progress: '1%',
             modelSettingsSummary: {

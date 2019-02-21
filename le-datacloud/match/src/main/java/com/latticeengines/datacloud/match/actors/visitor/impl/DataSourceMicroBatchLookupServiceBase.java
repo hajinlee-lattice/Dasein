@@ -1,19 +1,20 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 
 /**
  * Micro batch asynchronous lookup requests and process batches in background.
@@ -27,6 +28,7 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceMicroBatchLookupServiceBase.class);
 
+    private volatile String className = getClass().getSimpleName();
     private volatile boolean initialized;
     private final Queue<String> pendingRequestIds = new ConcurrentLinkedQueue<>();
     private ExecutorService executorService;
@@ -92,6 +94,11 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
                 });
     }
 
+    @Override
+    protected boolean enableMonitoring() {
+        return true;
+    }
+
     /*
      * Worker that handle micro-batched requests in the background
      */
@@ -118,7 +125,11 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
                         requestIds.add(pendingRequestIds.poll());
                     }
                 }
+
                 try {
+                    if (enableMonitoring()) {
+                        matchMetricService.recordBatchRequestSize(className, isBatchMode(), requestIds.size());
+                    }
                     handleRequests(requestIds);
                 } catch (Exception e) {
                     log.error("Failed to handle requests in fetcher", e);
@@ -141,10 +152,10 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
             }
 
             String poolName = getThreadPoolName();
-            int nTreads = getThreadCount();
-            log.info("Initializing fetcher for {}, nThreads = {}, ", poolName, nTreads);
-            executorService = ThreadPoolUtils.getFixedSizeThreadPool(poolName, nTreads);
-            IntStream.range(0, nTreads).forEach(idx -> executorService.execute(new Fetcher()));
+            int nThreads = getThreadCount();
+            log.info("Initializing fetcher for {}, nThreads = {}, ", poolName, nThreads);
+            executorService = ThreadPoolUtils.getFixedSizeThreadPool(poolName, nThreads);
+            IntStream.range(0, nThreads).forEach(idx -> executorService.execute(new Fetcher()));
 
             initialized = true;
         }

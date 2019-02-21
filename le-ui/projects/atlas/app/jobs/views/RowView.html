@@ -47,13 +47,13 @@
         <span class="columns two">
             <span ng-if="(jobCompleted || jobFailed) && job.id != null">
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button"
-                      ng-if="jobType == 'fitModelWorkflow'">
+                      ng-if="jobType == 'fitModelWorkflow' && isCustomEvent">
                     <a ui-sref="home.jobs.status.ready({jobId: job.id})">
                         <i class="fa fa-list-alt"></i>Report
                     </a>
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button"
-                      ng-if="jobType == 'importMatchAndModelWorkflow' || jobType == 'customEventModelingWorkflow' || jobType == 'crossSellImportMatchAndModelWorkflow'">
+                      ng-if="jobType == 'importMatchAndModelWorkflow' || jobType == 'customEventModelingWorkflow' || jobType == 'crossSellImportMatchAndModelWorkflow' && isCustomEvent">
                     <a ui-sref="home.jobs.status.csv({jobId: job.id})">
                         <i class="fa fa-list-alt"></i>Report
                     </a>

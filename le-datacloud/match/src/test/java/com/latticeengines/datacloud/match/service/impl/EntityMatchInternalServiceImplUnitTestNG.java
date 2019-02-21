@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
@@ -261,13 +262,14 @@ public class EntityMatchInternalServiceImplUnitTestNG {
                     // result doesn't matter
                     return true;
                 });
-        return new EntityMatchInternalServiceImpl(lookupEntryService, null, null);
+        EntityMatchMetricService metricService = Mockito.mock(EntityMatchMetricService.class);
+        return new EntityMatchInternalServiceImpl(lookupEntryService, null, null, null);
     }
 
     /*
      * all dependent services to null
      */
     private EntityMatchInternalServiceImpl newService() {
-        return new EntityMatchInternalServiceImpl(null, null, null);
+        return new EntityMatchInternalServiceImpl(null, null, null, null);
     }
 }

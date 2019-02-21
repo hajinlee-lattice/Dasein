@@ -176,6 +176,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             angular.forEach(selectedProducts, function(product){
                 vm.trainingProducts.push(product.ProductId);
             });
+
+            vm.trainingProducts = selectedProducts.length == 0 ? null : vm.trainingProducts;
             vm.updateProductsSelected(vm.trainingProducts);
             RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
             vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;

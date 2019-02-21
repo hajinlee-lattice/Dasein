@@ -1,5 +1,8 @@
 package com.latticeengines.monitor.micrometer;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,17 +31,27 @@ public class MeterRegistryConfig {
     @Bean(name = "rootRegistry")
     @Primary
     public MeterRegistry rootRegistry(@Lazy @Qualifier("influxMeterRegistry") MeterRegistry influxRegistry) {
-        CompositeMeterRegistry registry = new CompositeMeterRegistry();
         log.info("Initializing root meter registry, micrometer monitoring enabled = {}", enableMonitoring);
-        if (!enableMonitoring) {
+        return getCompositeRegistry(influxRegistry);
+    }
+
+    @Lazy
+    @Bean(name = "rootHostRegistry")
+    public MeterRegistry rootHostRegistry(
+            @Lazy @Qualifier("influxHostMeterRegistry") MeterRegistry influxHostRegistry) {
+        log.info("Initializing root host meter registry, micrometer monitoring enabled = {}", enableMonitoring);
+        return getCompositeRegistry(influxHostRegistry);
+    }
+
+    private MeterRegistry getCompositeRegistry(MeterRegistry... registries) {
+        CompositeMeterRegistry compositeRegistry = new CompositeMeterRegistry();
+        if (!enableMonitoring || registries == null) {
             // return a noop registry
-            return registry;
+            return compositeRegistry;
         }
 
-        if (influxRegistry != null) {
-            registry.add(influxRegistry);
-        }
-        return registry;
+        Arrays.stream(registries).filter(Objects::nonNull).forEach(compositeRegistry::add);
+        return compositeRegistry;
     }
 
     @Lazy
