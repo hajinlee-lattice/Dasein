@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.util.PmmlModelUtils;
-import com.latticeengines.modeling.workflow.steps.CreatePMMLModel;
 
 public class CreatePMMLModelUnitTestNG {
 
@@ -150,7 +149,7 @@ public class CreatePMMLModelUnitTestNG {
         Map.Entry<String[], String> featuresAndTarget = createPMMLModel.getFeaturesAndTarget(pmmlFields, pivotValues);
         assertNotNull(featuresAndTarget.getValue());
     }
-    
+
     @Test(groups = "unit")
     public void getMetadataArtifacts() throws Exception {
         Map<ArtifactType, String> result = createPMMLModel.getMetadataArtifacts();

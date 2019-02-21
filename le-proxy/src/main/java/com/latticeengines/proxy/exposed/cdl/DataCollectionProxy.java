@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +79,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "?version={version}";
             args.add(version);
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         return get("get dataCollection status", url, DataCollectionStatus.class);
     }
 
@@ -116,7 +114,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "?version={version}";
             args.add(version);
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         return getKryo("get stats", url, StatisticsContainer.class);
     }
 
@@ -133,7 +131,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "&version={version}";
             args.add(version);
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         return get("getTable", url, Table.class);
     }
 
@@ -146,7 +144,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "&version={version}";
             args.add(version);
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         List<?> list = get("getTables", url, List.class);
         return JsonUtils.convertList(list, Table.class);
     }
@@ -185,7 +183,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         if (CollectionUtils.isNotEmpty(conditions)) {
             urlPattern += "?" + StringUtils.join(conditions, "&");
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         List<?> list = get("getTableNames", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }
@@ -216,7 +214,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "&version={version}";
             args.add(version);
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTable", url, null, null);
     }
 
@@ -231,7 +229,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "&version={version}";
             args.add(version);
         }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTables", url, null, null);
     }
 

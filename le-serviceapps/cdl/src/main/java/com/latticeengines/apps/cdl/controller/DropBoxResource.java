@@ -1,11 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
-
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

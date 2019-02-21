@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })

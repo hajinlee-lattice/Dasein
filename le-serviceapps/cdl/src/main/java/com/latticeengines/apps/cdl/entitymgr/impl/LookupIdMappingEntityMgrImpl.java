@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.ExternalSystemAuthenticationDao;
 import com.latticeengines.apps.cdl.dao.LookupIdMappingDao;
-import com.latticeengines.apps.cdl.entitymgr.ExternalSystemAuthenticationEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.LookupIdMappingRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -73,11 +72,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
                     .filter(c -> externalSystemType == null || c.getExternalSystemType() == externalSystemType)
                     .forEach(c -> {
                         CDLExternalSystemType type = c.getExternalSystemType();
-                        List<LookupIdMap> listForType = result.get(type.name());
-                        if (listForType == null) {
-                            listForType = new ArrayList<>();
-                            result.put(type.name(), listForType);
-                        }
+                        List<LookupIdMap> listForType = result.computeIfAbsent(type.name(), k -> new ArrayList<>());
                         listForType.add(c);
                     });
         }
@@ -85,7 +80,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LookupIdMap createExternalSystem(LookupIdMap lookupIdsMap) {
         Tenant tenant = MultiTenantContext.getTenant();
         lookupIdsMap.setTenant(tenant);
@@ -116,7 +111,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LookupIdMap updateLookupIdMap(String id, LookupIdMap lookupIdMap) {
         Tenant tenant = MultiTenantContext.getTenant();
 
@@ -124,7 +119,8 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
             if (StringUtils.isBlank(lookupIdMap.getExternalAuthentication().getId())) {
                 throw new LedpException(LedpCode.LEDP_40051);
             }
-            ExternalSystemAuthentication updatedAuth = extSysAuthenticationDao.updateAuthentication(lookupIdMap.getExternalAuthentication());
+            ExternalSystemAuthentication updatedAuth = //
+                    extSysAuthenticationDao.updateAuthentication(lookupIdMap.getExternalAuthentication());
             lookupIdMap.setExternalAuthentication(updatedAuth);
         }
 
@@ -136,7 +132,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteLookupIdMap(String id) {
         LookupIdMap existingLookupIdMap = lookupIdMappingRepository.findById(id);
         getDao().delete(existingLookupIdMap);

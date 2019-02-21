@@ -8,7 +8,6 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIE
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -34,15 +33,14 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private static final Logger log = LoggerFactory.getLogger(AbstractProcessEntityChoreographer.class);
 
+    boolean enforceRebuild = false;
+    boolean hasSchemaChange = false;
+    boolean hasActiveServingStore = false;
+    boolean hasImports = false;
+    boolean hasManyUpdate = false;
+    boolean jobImpacted = false;
     private boolean initialized = false;
-    protected boolean hasBatchStore = false;
-    protected boolean enforceRebuild = false;
-    protected boolean hasSchemaChange = false;
-    protected boolean hasActiveServingStore = false;
-    protected boolean hasImports = false;
-    protected boolean hasManyUpdate = false;
-    protected boolean jobImpacted = false;
-    protected boolean skipWorkflow = false;
+    private boolean hasBatchStore = false;
 
     boolean rebuild = false;
     boolean update = false;
@@ -54,7 +52,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     /**
      * Steps that can be skipped based on common entity processing pattern
      */
-    protected boolean isCommonSkip(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+    boolean isCommonSkip(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         String msg = String.format("Skip step [%d] %s", seq, step.name());
 
         if (isMergeStep(step)) {
@@ -122,12 +120,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return step.name().endsWith(resetStep().name());
     }
 
-    protected boolean belongsToUpdate(int seq) {
+    boolean belongsToUpdate(int seq) {
         String namespace = getStepNamespace(seq);
         return updateWorkflow() != null && namespace.contains(updateWorkflow().name());
     }
 
-    protected boolean belongsToRebuild(int seq) {
+    boolean belongsToRebuild(int seq) {
         String namespace = getStepNamespace(seq);
         return rebuildWorkflow() != null && namespace.contains(rebuildWorkflow().name());
     }
@@ -236,12 +234,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         long diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
-        if (existingCount != null && existingCount.longValue() != 0L) {
+        if (existingCount != null && existingCount != 0L) {
             hasManyUpdate = (diffCount * 1.0F / existingCount) >= 0.3;
         }
     }
 
-    protected boolean shouldMerge() {
+    boolean shouldMerge() {
         return hasImports;
     }
 
@@ -290,7 +288,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
-    protected boolean hasAnyChange() {
+    boolean hasAnyChange() {
         return rebuild || update;
     }
 

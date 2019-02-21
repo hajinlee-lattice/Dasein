@@ -7,7 +7,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
-import com.latticeengines.domain.exposed.util.TypeConversionUtil;
 
 public class TypeConversionUtilTestNG {
     private static final Logger log = LoggerFactory.getLogger(TypeConversionUtilTestNG.class);

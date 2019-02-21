@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import cascading.tuple.Fields;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -20,6 +16,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
+import cascading.tuple.Fields;
+
 // Description:  Transformation class for calculating the number of contacts associated with each account and
 //     generating a table of account ID and count of associated contacts.
 @Component(NumberOfContactsFlow.DATAFLOW_BEAN_NAME)
@@ -28,8 +26,8 @@ public class NumberOfContactsFlow extends ConfigurableFlowBase<NumberOfContactsC
     public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
     public static final String DATAFLOW_BEAN_NAME = "NumberOfContactsFlow";
     public static final String ACCOUNT_ID = InterfaceName.AccountId.name();
-    public static final String CONTACT_ID = InterfaceName.ContactId.name();
-    public static final String NUMBER_OF_CONTACTS = InterfaceName.NumberOfContacts.name();
+    static final String NUMBER_OF_CONTACTS = InterfaceName.NumberOfContacts.name();
+    private static final String CONTACT_ID = InterfaceName.ContactId.name();
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {

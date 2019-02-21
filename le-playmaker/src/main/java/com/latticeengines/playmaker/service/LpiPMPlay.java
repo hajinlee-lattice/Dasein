@@ -3,7 +3,6 @@ package com.latticeengines.playmaker.service;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 
 public interface LpiPMPlay {

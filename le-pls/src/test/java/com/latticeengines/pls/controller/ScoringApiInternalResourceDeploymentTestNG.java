@@ -3,21 +3,15 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
-import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
@@ -27,13 +21,13 @@ public class ScoringApiInternalResourceDeploymentTestNG extends PlsDeploymentTes
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
-    
-    public String getScoringApiInternalUrl() {
+
+    private String getScoringApiInternalUrl() {
         return getRestAPIHostPort() + "/pls/scoringapi-internal";
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testWithDomain() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment")
+    public void testWithDomain() {
         String url = getScoringApiInternalUrl() + "/record/apiconsole/debug";
 
         ScoreRequest scoreRequest = new ScoreRequest();
@@ -53,8 +47,8 @@ public class ScoringApiInternalResourceDeploymentTestNG extends PlsDeploymentTes
         assertTrue(nonNullEnrichmentValues > 5000, "Actual : " + nonNullEnrichmentValues);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testWithDUNS() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment")
+    public void testWithDUNS() {
         String url = getScoringApiInternalUrl() + "/record/apiconsole/debug";
 
         ScoreRequest scoreRequest = new ScoreRequest();

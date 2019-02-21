@@ -1,14 +1,13 @@
 package com.latticeengines.admin.service.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.inject.Inject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.ProspectingUserService;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;

@@ -17,7 +17,6 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -44,8 +43,8 @@ import io.swagger.annotations.ApiModel;
         @NamedAttributeNode("ratingEngine"), @NamedAttributeNode("trainingSegment") }) })
 @ApiModel("Represents AIModel JSON Object")
 public class AIModel extends RatingModel {
-    public static final String AI_MODEL_PREFIX = "ai";
-    public static final String AI_MODEL_FORMAT = "%s_%s";
+    private static final String AI_MODEL_PREFIX = "ai";
+    private static final String AI_MODEL_FORMAT = "%s_%s";
 
     private PredictionType predictionType;
 

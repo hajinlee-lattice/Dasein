@@ -10,22 +10,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -37,7 +32,7 @@ import au.com.bytecode.opencsv.CSVReader;
 public class AvroUtilsUnitTestNG {
 
     private static Logger log = LoggerFactory.getLogger(AvroUtilsUnitTestNG.class);
-    
+
     @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void combineSchemas() throws Exception {
@@ -64,8 +59,8 @@ public class AvroUtilsUnitTestNG {
         assertEquals("abc,abc,xyz", uuids);
     }
 
-    @Test(groups = "unit", dataProvider = "avscFileProvider", enabled = true)
-    public void generateHiveCreateTableStatement(String avscFileName) throws Exception {
+    @Test(groups = "unit", dataProvider = "avscFileProvider")
+    public void generateHiveCreateTableStatement(String avscFileName) {
         URL url = ClassLoader.getSystemResource(
                 String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
         File avscFile = new File(url.getFile());
@@ -74,7 +69,7 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testAlignFields() throws Exception {
+    public void testAlignFields() {
         Schema schema1 = new Schema.Parser()
                 .parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\"," + "\"fields\":[" //
                         + "{\"name\":\"Field1\",\"type\":[\"int\",\"null\"]}," //
@@ -82,7 +77,7 @@ public class AvroUtilsUnitTestNG {
                         + "{\"name\":\"Field3\",\"type\":[\"int\",\"null\"]}," //
                         + "{\"name\":\"Field4\",\"type\":[\"int\",\"null\"]}," //
                         + "{\"name\":\"Field5\",\"type\":[\"int\",\"null\"]}]}");
-        Schema schema = AvroUtils.removeFields(schema1, new String[]{ "Field1", "Field2", "Field3" });
+        Schema schema = AvroUtils.removeFields(schema1, "Field1", "Field2", "Field3");
         List<Schema.Field> fieldList = schema.getFields();
         Assert.assertEquals(fieldList.size(), 2);
         Assert.assertEquals(fieldList.get(0).name(), "Field4");
@@ -90,7 +85,7 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testRemoveFields() throws Exception {
+    public void testRemoveFields() {
         Schema schema1 = new Schema.Parser()
                 .parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\"," + "\"fields\":[" //
                         + "{\"name\":\"Field2\",\"type\":\"int\"}," //
@@ -107,7 +102,7 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testGetType() throws Exception {
+    public void testGetType() {
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
                 + "{\"name\":\"Field1\",\"type\":\"int\"}," + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
@@ -127,7 +122,7 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void isAvroFriendlyFieldName() throws Exception {
+    public void isAvroFriendlyFieldName() {
         Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("abc"));
         Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("_abc"));
         Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("1abc"));
@@ -149,6 +144,7 @@ public class AvroUtilsUnitTestNG {
     public void testReadSchema() throws Exception {
         InputStream is = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
+        Assert.assertNotNull(is);
         Schema schema = AvroUtils.readSchemaFromInputStream(is);
         System.out.println(schema.toString(true));
         Assert.assertNotNull(schema);
@@ -156,9 +152,7 @@ public class AvroUtilsUnitTestNG {
         is = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
         List<GenericRecord> records = AvroUtils.readFromInputStream(is);
-        records.forEach(record -> {
-            System.out.println(record.toString());
-        });
+        records.forEach(record -> System.out.println(record.toString()));
     }
 
     @Test(groups = "unit")
@@ -187,7 +181,6 @@ public class AvroUtilsUnitTestNG {
         AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile, new RecommendationAvroToCsvTransformer());
 
         log.info("Created CSV File at: " + csvFile.getAbsolutePath());
-        int totalRows = 0;
         try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             List<String[]> csvRows = reader.readAll();
             log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));

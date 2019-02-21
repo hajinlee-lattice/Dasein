@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -16,7 +14,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.SSLUtils;
-import com.latticeengines.domain.exposed.playmaker.PlaymakerSyncLookupSource;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
@@ -24,9 +21,6 @@ import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
 public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(RecommendationResourceDeploymentTestNG.class);
-
-    @Inject
-    private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
 
     private OAuth2RestTemplate restTemplate = null;
 
@@ -45,16 +39,6 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         testGetRecommendations(restTemplate);
     }
 
-    
-//    @Test(groups = "deployment")
-//    public void testRecommendationsMetricPublish() {
-//        long start = 1500510063;
-//        int offset = 0;
-//        int maximum = 10;
-//        int syncDestination = 1;
-//        playmakerRecommendationMgr.getRecommendations(newTenant.getTenantName(),
-//                PlaymakerSyncLookupSource.V1.toString(), start, offset, maximum, syncDestination, null, null);
-//    }
 
     private void testGetRecommendations(OAuth2RestTemplate authRestTemplate) {
         String url = apiHostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100&destination=SFDC";

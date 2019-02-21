@@ -75,7 +75,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
-import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 @Component(ProfilePurchaseHistory.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -87,7 +86,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     private int curateStep, pivotStep, profileStep, bucketStep;
     private Map<String, List<Product>> productMap;
-    private String dailyTableName;
     private String accountTableName;
     private String productTableName;
     private List<String> periodTableNames;
@@ -178,7 +176,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         super.initializeConfiguration();
         loadProductMap();
 
-        dailyTableName = getDailyTableName();
+        String dailyTableName = getDailyTableName();
         if (StringUtils.isBlank(dailyTableName)) {
             throw new IllegalStateException("Cannot find daily table.");
         }

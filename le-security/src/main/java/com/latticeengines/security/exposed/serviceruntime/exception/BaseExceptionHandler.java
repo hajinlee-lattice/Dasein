@@ -6,11 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableMap;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -29,7 +24,7 @@ public abstract class BaseExceptionHandler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected void logWarning(String message) {
+    void logWarning(String message) {
         HttpServletRequest request = getCurrentRequest();
         log.warn("Request for " + request.getRequestURL() + " failed:\n" + message);
     }
@@ -48,7 +43,7 @@ public abstract class BaseExceptionHandler {
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
     }
 
-    protected void triggerCriticalAlert(Exception e) {
+    void triggerCriticalAlert(Exception e) {
         String stackTrace = ExceptionUtils.getStackTrace(e);
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("stackTrace", stackTrace));
@@ -63,7 +58,7 @@ public abstract class BaseExceptionHandler {
         alertService.triggerCriticalEvent(message, null, dedupKey, details);
     }
 
-    protected String emptyStringIfNull(Object o) {
+    String emptyStringIfNull(Object o) {
         return o != null ? o.toString() : "";
     }
 

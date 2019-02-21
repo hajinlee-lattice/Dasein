@@ -13,15 +13,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
@@ -38,12 +31,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 
-//@Component
 public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
-    public final String POD_ID = "Default";//this.getClass().getSimpleName();
-
-    @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory.getLogger(IngestionBWRawDeploymentTestNG.class);
+    private final String POD_ID = "Default"; //this.getClass().getSimpleName();
 
     @Autowired
     private IngestionEntityMgr ingestionEntityMgr;
@@ -92,23 +81,22 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
         //prepareCleanPod(POD_ID);
         Object[] ingestionData = getIngestions();
         Object[] data = ingestionData;
-        {
-            Ingestion existing = ingestionEntityMgr.getIngestionByName((String) data[0]);
-            if (existing != null) {
-                ingestionEntityMgr.delete(existing);
-            }
-
-            Ingestion ingestion = new Ingestion();
-            ingestion.setIngestionName((String) data[0]);
-            ingestion.setConfig((String) data[1]);
-            ingestion.setSchedularEnabled(Boolean.TRUE);
-            ingestion.setNewJobRetryInterval(10000L);
-            ingestion.setNewJobMaxRetry(1);
-            ingestion.setIngestionType((Ingestion.IngestionType) data[2]);
-            ingestionEntityMgr.save(ingestion);
-            ingestions.add(ingestionEntityMgr.getIngestionByName(ingestion.getIngestionName()));
+        Ingestion existing = ingestionEntityMgr.getIngestionByName((String) data[0]);
+        if (existing != null) {
+            ingestionEntityMgr.delete(existing);
         }
-        Ingestion ingestion = ingestionEntityMgr.getIngestionByName(INGESTION);
+
+        Ingestion ingestion = new Ingestion();
+        ingestion.setIngestionName((String) data[0]);
+        ingestion.setConfig((String) data[1]);
+        ingestion.setSchedularEnabled(Boolean.TRUE);
+        ingestion.setNewJobRetryInterval(10000L);
+        ingestion.setNewJobMaxRetry(1);
+        ingestion.setIngestionType((Ingestion.IngestionType) data[2]);
+        ingestionEntityMgr.save(ingestion);
+        ingestions.add(ingestionEntityMgr.getIngestionByName(ingestion.getIngestionName()));
+
+        ingestion = ingestionEntityMgr.getIngestionByName(INGESTION);
         BWRawConfiguration config = (BWRawConfiguration)ingestion.getProviderConfiguration();
     }
 

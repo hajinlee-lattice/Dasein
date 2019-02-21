@@ -1,19 +1,15 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class BucketAlgorithmUnitTestNG {
-    private static final Logger log = LoggerFactory.getLogger(BucketAlgorithmUnitTestNG.class);
 
     @Test(groups = "unit")
     public void test() {

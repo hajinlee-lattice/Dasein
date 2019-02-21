@@ -1,15 +1,20 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 
-import java.util.*;
-
 public class TestDataGenerator {
     public static final String TEST_SUB_CATEGORY = "TestSubCateghory";
-    public static final String INTERNAL_ATTR_PREFIX = "InternalAttr_";
+    private static final String INTERNAL_ATTR_PREFIX = "InternalAttr_";
     public static final String EXTERNAL_ATTR_PREFIX = "ExternalAttr_";
 
     /**
