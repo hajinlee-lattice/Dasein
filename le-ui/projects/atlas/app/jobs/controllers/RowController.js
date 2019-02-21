@@ -20,8 +20,6 @@ angular
         controller: function($scope, $state, JobsStore, JobsService, CancelJobModal, RatingsEngineStore, BrowserStorageUtility) {
             var job = $scope.job;
 
-            // console.log(job);
-
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
             $scope.jobRunning = false;
@@ -33,8 +31,6 @@ angular
             $scope.isRatingEngine = (job.inputs.RATING_ENGINE_ID != undefined);
             $scope.isPMML = job.modelType === 'PmmlModel';
 
-            
-
             if ($scope.job.rating_id && JobsStore.cancelledJobs[$scope.job.rating_id] != undefined) {
                 $scope.cancelling[job.id] = true;
             }
@@ -42,16 +38,11 @@ angular
             job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
 
-            // if ($scope.isRatingEngine) {
-            //     console.log(job, job.inputs.RATING_ENGINE_ID, ' -- ',job.inputs.RATING_MODEL_ID);
-            //     RatingsEngineStore.getRatingModel(job.inputs.RATING_ENGINE_ID, job.inputs.RATING_MODEL_ID).then(function(model){                
-            //         console.log('RET ', model);    
-            //         var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
-            //             modelingJobId = model.AI.modelingJobId;
-
-            //         $scope.job.modelId = modelId;
-            //     });
-            // }
+            if ($scope.isRatingEngine) {
+                RatingsEngineStore.getRatingModel(job.inputs.RATING_ENGINE_ID, job.inputs.RATING_MODEL_ID).then(function(model){
+                    $scope.isCustomEvent = model.AI.advancedModelingConfig.custom_event ? true : false;
+                });
+            }
 
             var clientSession = BrowserStorageUtility.getClientSession();
             $scope.TenantId = clientSession.Tenant.Identifier;
