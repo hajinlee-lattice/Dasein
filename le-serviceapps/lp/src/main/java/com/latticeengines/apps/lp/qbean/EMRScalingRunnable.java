@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.google.common.collect.Sets;
 import com.latticeengines.aws.emr.EMRService;
@@ -34,9 +35,10 @@ public class EMRScalingRunnable implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
 
+    private static final int MAX_TASK_CORE_RATIO = 2;
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
-    private static final long SCALING_DOWN_COOL_DOWN = TimeUnit.MINUTES.toMillis(50);
+    private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT = TimeUnit.MINUTES.toMillis(50);
 
     private static final ConcurrentMap<String, AtomicLong> lastScalingOutMap = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, AtomicInteger> scalingDownAttemptMap = new ConcurrentHashMap<>();
@@ -73,8 +75,11 @@ public class EMRScalingRunnable implements Runnable {
     private final int minTaskNodes;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
+
     private InstanceGroup taskGrp;
-    private InstanceGroup coreGrp = null;
+    private InstanceGroup coreGrp;
+    private InstanceFleet taskFleet;
+    private InstanceFleet coreFleet;
 
     EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, EMRService emrService, //
                        EMREnvService emrEnvService) {
@@ -105,17 +110,15 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
-        try {
-            hasTezApp = hasActiveTezApps();
-        } catch (Exception e) {
-            log.error("Failed to check active TEZ applications in emr cluster "
-                    + emrCluster);
-            return;
+        taskFleet = emrService.getTaskFleet(clusterId);
+        if (taskFleet != null) {
+            taskVCores = getInstanceVCores(taskFleet);
+            taskMb = getInstanceMemory(taskFleet);
+        } else {
+            taskGrp = emrService.getTaskGroup(clusterId);
+            taskVCores = getInstanceVCores(taskGrp);
+            taskMb = getInstanceMemory(taskGrp);
         }
-
-        taskGrp = emrService.getTaskGroup(clusterId);
-        taskVCores = getInstanceVCores(taskGrp);
-        taskMb = getInstanceMemory(taskGrp);
         log.debug(String.format("taskMb=%d, taskVCores=%d", taskMb, taskVCores));
 
         // -512 mb and -1 vcore to avoid flapping scaling out/in
@@ -139,8 +142,8 @@ public class EMRScalingRunnable implements Runnable {
 
         long availableMB = metrics.availableMB;
         int availableVCores = metrics.availableVirtualCores;
-        int running = taskGrp.getRunningInstanceCount();
-        int requested = taskGrp.getRequestedInstanceCount();
+        int running = getRunningTaskNodes();
+        int requested = getRequestedTaskNodes();
 
         boolean scale;
         if (reqResource.reqMb > 0 || reqResource.reqVCores > 0) {
@@ -175,44 +178,44 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void attemptScale() {
-        int running = taskGrp.getRunningInstanceCount();
-        int requested = taskGrp.getRequestedInstanceCount();
-        if (running > requested) {
-            // during scaling in
-            log.info("Still in the process of scaling in, won't attempt to take any action now");
-        } else {
-            // during scaling out or no action
-            int target = getTargetTaskNodes();
-            if (target > requested) {
-                // attempt to scale out
-                log.info(String.format("Scale out %s, running=%d, requested=%d, target=%d", //
-                        emrCluster, running, requested, target));
+        int running = getRunningTaskNodes();
+        int requested = getRequestedTaskNodes();
+        int target = getTargetTaskNodes();
+        if (target > requested) {
+            // attempt to scale out
+            log.info(String.format("Scale out %s, running=%d, requested=%d, target=%d", //
+                    emrCluster, running, requested, target));
+            scale(target);
+            getLastScaleOutTime().set(System.currentTimeMillis());
+            resetScaleInCounter();
+        } else if (target < requested) {
+            // attempt to scale in
+            log.info(String.format(
+                    "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
+                    emrCluster, getScaleInAttempt().incrementAndGet(), running, requested,
+                    target));
+            if (getLastScaleOutTime().get() + SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT > System.currentTimeMillis()) {
+                log.info("Still in cool down period, won't attempt to scale in.");
+            } else if (running > requested) {
+                log.info("Still in the process of scaling in, won't attempt to scale in again.");
+            } else if (hasActiveTezApps()) {
+                log.info("Has active TEZ applications, won't attempt to scale in.");
+            } else if (getScaleInAttempt().get() >= 5) {
+                log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
+                // be conservative about terminating machines
                 scale(target);
-                getLastScaleOutTime().set(System.currentTimeMillis());
                 resetScaleInCounter();
-            } else if (target < requested) {
-                // attempt to scale in
-                log.info(String.format(
-                        "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                        emrCluster, getScaleInAttempt().incrementAndGet(), running, requested,
-                        target));
-                if (getLastScaleOutTime().get() + SCALING_DOWN_COOL_DOWN > System.currentTimeMillis()) {
-                    log.info("Still in cool down period, won't attempt to scale in.");
-                } else if (hasTezApp) {
-                    log.info("Has active TEZ applications, won't attempt to scale in.");
-                } else if (getScaleInAttempt().get() >= 5) {
-                    log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
-                    // be conservative about terminating machines
-                    scale(target);
-                    resetScaleInCounter();
-                }
             }
         }
     }
 
     private void scale(int target) {
         try {
-            emrService.scaleTaskGroup(clusterId, target);
+            if (taskFleet != null) {
+                emrService.scaleTaskFleet(taskFleet, 0, target);
+            } else {
+                emrService.scaleTaskGroup(taskGrp, target);
+            }
         } catch (Exception e) {
             log.error("Failed to scale " + emrCluster + " to " + target, e);
         }
@@ -235,18 +238,23 @@ public class EMRScalingRunnable implements Runnable {
 
     private boolean hasActiveTezApps() {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(context -> {
-            try {
-                try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
-                    yarnClient.start();
-                    List<ApplicationReport> apps = yarnClient.getApplications(ACTIVE_APP_STATES);
-                    return apps.stream().anyMatch(appReport ->
-                            appReport.getApplicationType().equalsIgnoreCase("TEZ"));
+        try {
+            return retry.execute(context -> {
+                try {
+                    try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+                        yarnClient.start();
+                        List<ApplicationReport> apps = yarnClient.getApplications(ACTIVE_APP_STATES);
+                        return apps.stream().anyMatch(appReport ->
+                                appReport.getApplicationType().equalsIgnoreCase("TEZ"));
+                    }
+                } catch (IOException | YarnException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (IOException | YarnException e) {
-                throw new RuntimeException(e);
-            }
-        });
+            });
+        } catch (Exception e) {
+            log.error("Failed to check active TEZ applications in emr cluster " + emrCluster, e);
+            return false;
+        }
     }
 
     private ReqResource getReqs(List<ApplicationReport> apps) {
@@ -335,7 +343,7 @@ public class EMRScalingRunnable implements Runnable {
     private AtomicLong getLastScaleOutTime() {
         lastScalingOutMap.putIfAbsent(clusterId, //
                 // 10 min cool down
-                new AtomicLong(System.currentTimeMillis() - SCALING_DOWN_COOL_DOWN + TimeUnit.MINUTES.toMillis(10)));
+                new AtomicLong(System.currentTimeMillis() - SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT + TimeUnit.MINUTES.toMillis(10)));
         return lastScalingOutMap.get(clusterId);
     }
 
@@ -344,22 +352,29 @@ public class EMRScalingRunnable implements Runnable {
         return scalingDownAttemptMap.get(clusterId);
     }
 
-    private InstanceGroup getCoreGrp() {
-        if (coreGrp == null) {
-            coreGrp = emrService.getCoreGroup(clusterId);
-            coreMb = getInstanceMemory(coreGrp);
-            coreVCores = getInstanceVCores(coreGrp);
-            log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
-        }
-        return coreGrp;
-    }
-
     private int getMaxTaskNodes() {
-        return getCoreCount() * 3;
+        return getCoreCount() * MAX_TASK_CORE_RATIO;
     }
 
     private int getCoreCount() {
-        return getCoreGrp().getRunningInstanceCount();
+        if (coreFleet == null && coreGrp == null) {
+            coreFleet = emrService.getCoreFleet(clusterId);
+            if (coreFleet != null) {
+                coreMb = getInstanceMemory(coreFleet);
+                coreVCores = getInstanceVCores(coreFleet);
+                log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
+            } else {
+                coreGrp = emrService.getCoreGroup(clusterId);
+                coreMb = getInstanceMemory(coreGrp);
+                coreVCores = getInstanceVCores(coreGrp);
+                log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
+            }
+        }
+        if (coreFleet != null) {
+            return coreFleet.getProvisionedOnDemandCapacity() + coreFleet.getProvisionedSpotCapacity();
+        } else {
+            return coreGrp.getRunningInstanceCount();
+        }
     }
 
     private long getMaxAvailMemMb() {
@@ -378,18 +393,65 @@ public class EMRScalingRunnable implements Runnable {
         return maxAvailVCores;
     }
 
+    private int getInstanceVCores(InstanceFleet fleet) {
+        EC2InstanceType instanceType = getFleetInstanceType(fleet);
+        return instanceType.getvCores();
+    }
+
+    private long getInstanceMemory(InstanceFleet fleet) {
+        EC2InstanceType instanceType = getFleetInstanceType(fleet);
+        long mem = (long) (instanceType.getMemGb() - 8) * 1024;
+        if (mem < 1024 * 4) {
+            throw new IllegalArgumentException("Instance type " + instanceType + " is too small");
+        }
+        return mem;
+    }
+
+    private EC2InstanceType getFleetInstanceType(InstanceFleet fleet) {
+        String instanceTypeName = fleet.getInstanceTypeSpecifications().get(0).getInstanceType();
+        EC2InstanceType instanceType = EC2InstanceType.fromName(instanceTypeName);
+        if (instanceType == null) {
+            throw new UnsupportedOperationException("Instance type " + instanceTypeName + " is not defined.");
+        }
+        return instanceType;
+    }
+
     private int getInstanceVCores(InstanceGroup grp) {
-        EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
+        EC2InstanceType instanceType = getGroupInstanceType(grp);
         return instanceType.getvCores();
     }
 
     private long getInstanceMemory(InstanceGroup grp) {
-        EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
+        EC2InstanceType instanceType = getGroupInstanceType(grp);
         long mem = (long) (instanceType.getMemGb() - 8) * 1024;
         if (mem < 1024 * 4) {
             throw new IllegalArgumentException("Instance type " + grp.getInstanceType() + " is too small");
         }
         return mem;
+    }
+
+    private EC2InstanceType getGroupInstanceType(InstanceGroup grp) {
+        EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
+        if (instanceType == null) {
+            throw new UnsupportedOperationException("Instance type " + instanceType + " is not defined.");
+        }
+        return instanceType;
+    }
+
+    private int getRunningTaskNodes() {
+        if (taskFleet != null) {
+            return taskFleet.getProvisionedOnDemandCapacity() + taskFleet.getProvisionedSpotCapacity();
+        } else {
+            return taskGrp.getRunningInstanceCount();
+        }
+    }
+
+    private int getRequestedTaskNodes() {
+        if (taskFleet != null) {
+            return taskFleet.getTargetOnDemandCapacity() + taskFleet.getTargetSpotCapacity();
+        } else {
+            return taskGrp.getRequestedInstanceCount();
+        }
     }
 
     private static class ReqResource {
