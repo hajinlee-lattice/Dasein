@@ -33,6 +33,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -44,6 +45,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
@@ -76,6 +78,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private final EntityLookupEntryService entityLookupEntryService;
     private final EntityRawSeedService entityRawSeedService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
+    private final EntityMatchMetricService entityMatchMetricService;
 
     // flag to indicate whether background workers should keep running
     private volatile boolean shouldTerminate = false;
@@ -92,10 +95,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @Inject
     public EntityMatchInternalServiceImpl(
             EntityLookupEntryService entityLookupEntryService, EntityRawSeedService entityRawSeedService,
-            EntityMatchConfigurationService entityMatchConfigurationService) {
+            EntityMatchConfigurationService entityMatchConfigurationService,
+            @Lazy EntityMatchMetricService entityMatchMetricService) {
         this.entityLookupEntryService = entityLookupEntryService;
         this.entityRawSeedService = entityRawSeedService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
+        this.entityMatchMetricService = entityMatchMetricService;
     }
 
     @Override
@@ -645,7 +650,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         .maximumWeight(getMaxSeedCacheWeight())
                         // expire after idle for a certain amount of time
                         .expireAfterAccess(entityMatchConfigurationService.getMaxSeedCacheIdleDuration())
+                        .recordStats() //
                         .build();
+                entityMatchMetricService.registerSeedCache(seedCache);
             }
         }
     }
@@ -692,7 +699,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         .maximumSize(getMaxLookupCacheSize())
                         // expire after idle for a certain amount of time
                         .expireAfterAccess(entityMatchConfigurationService.getMaxLookupCacheIdleDuration())
+                        .recordStats() //
                         .build();
+                entityMatchMetricService.registerLookupCache(lookupCache,
+                        entityMatchConfigurationService.isAllocateMode());
             }
         }
     }
