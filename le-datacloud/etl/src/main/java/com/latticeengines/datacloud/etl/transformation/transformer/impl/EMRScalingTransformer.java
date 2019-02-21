@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
@@ -66,25 +67,36 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
             EMRScalingConfig config = getConfiguration(step.getConfig());
             EMRScalingConfig.Operation op = config.getOperation();
             String clusterId = emrCacheService.getClusterId();
-            InstanceGroup taskGrp = emrService.getTaskGroup(clusterId);
-            if (taskGrp == null || taskGrp.getRequestedInstanceCount() == 0) {
-                log.error("There is no task group ready for scaling.");
+            InstanceFleet taskFleet = emrService.getTaskFleet(clusterId);
+            InstanceGroup taskGrp = null;
+            if (taskFleet == null) {
+                taskGrp = emrService.getTaskGroup(clusterId);
+            }
+            if (taskGrp == null && taskFleet == null) {
+                log.error("There is no task fleet or group ready for scaling.");
                 return false;
             } else {
+                int requested = (taskFleet != null) ? //
+                        taskFleet.getTargetOnDemandCapacity() + taskFleet.getTargetSpotCapacity() : //
+                        taskGrp.getRequestedInstanceCount();
                 int target;
                 switch (op) {
                     case ScaleOut:
-                        target = scaleOut(config, taskGrp);
+                        target = scaleOut(config, requested);
                         break;
                     case ScaleIn:
-                        target = scaleIn(config, taskGrp);
+                        target = scaleIn(config, requested);
                         break;
                     default:
                         log.error("Unknown operation: " + op);
                         return false;
                 }
-                log.info("Scaling task group from " + taskGrp.getRequestedInstanceCount() + " to " + target);
-                emrService.scaleTaskGroup(taskGrp, target);
+                log.info("Scaling task group from " + requested + " to " + target);
+                if (taskFleet != null) {
+                    emrService.scaleTaskFleet(taskFleet, 0, target);
+                } else {
+                    emrService.scaleTaskGroup(taskGrp, target);
+                }
             }
         } else {
             log.info("This stack is not using emr, skip scaling operation.");
@@ -95,17 +107,15 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
     }
 
 
-    private int scaleOut(EMRScalingConfig config, InstanceGroup taskGrp) {
+    private int scaleOut(EMRScalingConfig config, int requested) {
         // only support delta mode for now
         int delta = config.getDelta();
-        int requested = taskGrp.getRequestedInstanceCount();
         return Math.max(1, requested + delta);
     }
 
-    private int scaleIn(EMRScalingConfig config, InstanceGroup taskGrp) {
+    private int scaleIn(EMRScalingConfig config, int requested) {
         // only support delta mode for now
         int delta = config.getDelta();
-        int requested = taskGrp.getRequestedInstanceCount();
         return Math.max(1, requested - delta);
     }
 
