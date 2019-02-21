@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
 

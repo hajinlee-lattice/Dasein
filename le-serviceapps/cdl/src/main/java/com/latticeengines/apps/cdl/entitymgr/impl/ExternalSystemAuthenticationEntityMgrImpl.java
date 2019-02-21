@@ -14,7 +14,6 @@ import com.latticeengines.apps.cdl.dao.ExternalSystemAuthenticationDao;
 import com.latticeengines.apps.cdl.entitymgr.ExternalSystemAuthenticationEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.repository.ExternalSystemAuthenticationRepository;
-import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -28,7 +27,7 @@ public class ExternalSystemAuthenticationEntityMgrImpl
 
     @Inject
     private ExternalSystemAuthenticationEntityMgrImpl _self;
-    
+
     @Inject
     private ExternalSystemAuthenticationDao extSysAuthenticationEntityMgrDao;
 
@@ -40,7 +39,7 @@ public class ExternalSystemAuthenticationEntityMgrImpl
 
     @Resource(name = "externalSystemAuthenticationReaderRepository")
     private ExternalSystemAuthenticationRepository extSysAuthenticationReaderRepository;
-    
+
     @Override
     public ExternalSystemAuthenticationDao getDao() {
         return extSysAuthenticationEntityMgrDao;

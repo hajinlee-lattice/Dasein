@@ -6,6 +6,8 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,7 +16,6 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -22,6 +23,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(MultiTenantRatingEngineEntityMgrImplTestNG.class);
 
     private static final String SEGMENT_NAME = "MultiTenantRESegment";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
@@ -88,7 +91,7 @@ public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTes
         try {
             Thread.sleep(500); // wait for writing to propagate
         } catch (InterruptedException e) {
-            // ignore
+            log.warn("Interrupted!", e);
         }
 
         DBConnectionContext.setReaderConnection(true);

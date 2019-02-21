@@ -20,6 +20,10 @@
         <!-- Annotations -->
         <module name="PackageAnnotation"/>
 
+        <!-- Imports -->
+        <module name="UnusedImports"/>
+        <module name="RedundantImport"/>
+
     </module>
 
 </module>

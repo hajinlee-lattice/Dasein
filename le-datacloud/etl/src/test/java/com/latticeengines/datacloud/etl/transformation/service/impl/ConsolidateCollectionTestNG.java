@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.InputStream;
-import java.sql.SQLSyntaxErrorException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

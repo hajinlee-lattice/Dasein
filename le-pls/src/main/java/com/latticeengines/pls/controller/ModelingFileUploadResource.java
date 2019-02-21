@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +78,7 @@ public class ModelingFileUploadResource {
     public ResponseDocument<SourceFile> uploadFile( //
             @RequestParam("fileName") String fileName, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
-            @RequestParam(value = "displayName", required = true) String csvFileName, //
+            @RequestParam(value = "displayName") String csvFileName, //
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam("file") MultipartFile file,
@@ -93,7 +92,7 @@ public class ModelingFileUploadResource {
     @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
     public ResponseDocument<SourceFile> uploadFile( //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
-            @RequestParam(value = "displayName", required = true) String csvFileName, //
+            @RequestParam(value = "displayName") String csvFileName, //
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
             @RequestParam(value = "entity", required = false) String entity, //
             @RequestParam("file") MultipartFile file,
@@ -129,7 +128,7 @@ public class ModelingFileUploadResource {
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
-            @RequestParam(value = "displayName", required = true) String csvFileName,
+            @RequestParam(value = "displayName") String csvFileName,
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam(value = "source", required = false, defaultValue = "") String source,
             @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,

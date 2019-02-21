@@ -1,12 +1,13 @@
 package com.latticeengines.eai.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,6 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-
-import javax.inject.Inject;
 
 @Component("eaiCredentialValidationService")
 public class EaiCredentialValidationServiceImpl implements EaiCredentialValidationService {

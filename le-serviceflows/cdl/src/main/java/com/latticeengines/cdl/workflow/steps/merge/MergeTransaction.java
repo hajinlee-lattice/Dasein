@@ -43,7 +43,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
@@ -70,11 +69,11 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     @Inject
     private EMREnvService emrEnvService;
 
-    List<String> stringFields;
-    List<String> longFields;
-    List<String> intFields;
+    private List<String> stringFields;
+    private List<String> longFields;
+    private List<String> intFields;
 
-    boolean schemaChanged;
+    private boolean schemaChanged;
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -238,7 +237,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return step;
     }
 
-    TransformationStepConfig mergeRaw() {
+    private TransformationStepConfig mergeRaw() {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources;
         Map<String, SourceTable> baseTables;

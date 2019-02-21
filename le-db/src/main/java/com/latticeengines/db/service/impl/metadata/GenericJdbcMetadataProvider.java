@@ -3,8 +3,8 @@ package com.latticeengines.db.service.impl.metadata;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 
 public class GenericJdbcMetadataProvider extends MetadataProvider {
 

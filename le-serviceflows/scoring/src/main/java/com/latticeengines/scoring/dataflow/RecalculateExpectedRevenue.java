@@ -1,7 +1,6 @@
 package com.latticeengines.scoring.dataflow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,12 +80,11 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
 
         List<String> returnedFields = new ArrayList<>(node.getFieldNames());
         List<FieldMetadata> returnedMetadata = new ArrayList<>(node.getSchema());
-        Node calculatePercentileAndFittedExpectedRevenue = node.apply(
+
+        return node.apply(
                 new CalculateExpectedRevenueFunction(new Fields(returnedFields.toArray(new String[0])),
                         percentileFieldName, predictedRevenuePercentileFieldName, expectedRevenueFieldName,
                         evFitFunctionParameterStr),
                 null, returnedMetadata, new FieldList(returnedFields), Fields.REPLACE);
-        
-        return calculatePercentileAndFittedExpectedRevenue;
     }
 }

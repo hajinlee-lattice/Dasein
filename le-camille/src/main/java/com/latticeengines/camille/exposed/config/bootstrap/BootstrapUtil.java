@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.domain.exposed.camille.bootstrap.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.zookeeper.KeeperException;
@@ -20,10 +19,14 @@ import com.latticeengines.camille.exposed.CamilleTransaction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
 public class BootstrapUtil {
 
@@ -37,11 +40,11 @@ public class BootstrapUtil {
 
         // Initialize the service directory
         camille.upsert(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        boolean serviceDirectoryExists = false;
+        boolean serviceDirectoryExists;
         int numRetry = 3;
         do {
             serviceDirectoryExists = camille.exists(serviceDirectoryPath);
-            if (serviceDirectoryExists == false) {
+            if (!serviceDirectoryExists) {
                 numRetry--;
                 log.info(String.format("Create path %s, %d out of 3 retries remained", serviceDirectoryPath.toString(), numRetry));
                 try {
@@ -51,7 +54,7 @@ public class BootstrapUtil {
                 }
             }
 
-        } while (serviceDirectoryExists == false && numRetry > 0);
+        } while (!serviceDirectoryExists && numRetry > 0);
 
         BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
         if (state.state == State.INITIAL) {
@@ -226,8 +229,8 @@ public class BootstrapUtil {
                 PathConstants.BOOTSTRAP_LOCK).toString());
     }
 
-    public static interface InstallerAdaptor {
-        public DocumentDirectory install(int dataVersion);
+    public interface InstallerAdaptor {
+        DocumentDirectory install(int dataVersion);
     }
 
     public static class CustomerSpaceServiceInstallerAdaptor implements InstallerAdaptor {
@@ -236,8 +239,8 @@ public class BootstrapUtil {
         private final CustomerSpaceServiceInstaller installer;
         private final Map<String, String> properties;
 
-        public CustomerSpaceServiceInstallerAdaptor(CustomerSpaceServiceInstaller installer, CustomerSpace space,
-                String service, Map<String, String> properties) {
+        CustomerSpaceServiceInstallerAdaptor(CustomerSpaceServiceInstaller installer, CustomerSpace space,
+                                             String service, Map<String, String> properties) {
             this.space = space;
             this.service = service;
             Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
@@ -276,7 +279,7 @@ public class BootstrapUtil {
         private final CustomerSpaceServiceUpgrader upgrader;
         private final Map<String, String> properties;
 
-        public UpgraderAdaptor(CustomerSpaceServiceUpgrader upgrader, CustomerSpace space, String service,
+        UpgraderAdaptor(CustomerSpaceServiceUpgrader upgrader, CustomerSpace space, String service,
                 Map<String, String> properties) {
             this.space = space;
             this.service = service;
@@ -291,12 +294,12 @@ public class BootstrapUtil {
         }
     }
 
-    public static class DestroyerAdaptor {
+    static class DestroyerAdaptor {
         private final CustomerSpace space;
         private final String service;
         private final CustomerSpaceServiceDestroyer destroyer;
 
-        public DestroyerAdaptor(CustomerSpaceServiceDestroyer destroyer, CustomerSpace space, String service) {
+        DestroyerAdaptor(CustomerSpaceServiceDestroyer destroyer, CustomerSpace space, String service) {
             this.space = space;
             this.service = service;
             Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
@@ -305,7 +308,7 @@ public class BootstrapUtil {
 
         }
 
-        public boolean destory() {
+        boolean destory() {
             return destroyer.destroy(space, service);
         }
     }
@@ -336,60 +339,47 @@ public class BootstrapUtil {
 
     public static CustomerSpaceServiceUpgrader sandbox(final CustomerSpaceServiceUpgrader upgrader,
             final Path serviceDirectoryPath) {
-        return new CustomerSpaceServiceUpgrader() {
+        return (space, serviceName, sourceVersion, targetVersion, source, properties) -> {
+            DocumentDirectory sourceCopy = new DocumentDirectory(source);
 
-            @Override
-            public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion,
-                    int targetVersion, DocumentDirectory source, Map<String, String> properties) {
-                DocumentDirectory sourceCopy = new DocumentDirectory(source);
-
-                sourceCopy.makePathsLocal();
-                BootstrapUtil.removeSystemFiles(sourceCopy);
-                if (upgrader == null) {
-                    sourceCopy.makePathsAbsolute(serviceDirectoryPath);
-                    return sourceCopy;
-                }
-
-                DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion,
-                        sourceCopy, properties);
-                if (toReturn == null) {
-                    toReturn = new DocumentDirectory();
-                }
-                BootstrapUtil.removeSystemFiles(toReturn);
-                toReturn.makePathsAbsolute(serviceDirectoryPath);
-                return toReturn;
+            sourceCopy.makePathsLocal();
+            BootstrapUtil.removeSystemFiles(sourceCopy);
+            if (upgrader == null) {
+                sourceCopy.makePathsAbsolute(serviceDirectoryPath);
+                return sourceCopy;
             }
+
+            DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion,
+                    sourceCopy, properties);
+            if (toReturn == null) {
+                toReturn = new DocumentDirectory();
+            }
+            BootstrapUtil.removeSystemFiles(toReturn);
+            toReturn.makePathsAbsolute(serviceDirectoryPath);
+            return toReturn;
         };
     }
 
     public static CustomerSpaceServiceDestroyer sandbox(final CustomerSpaceServiceDestroyer destroyer,
             final Path serviceDirectoryPath) {
-        return new CustomerSpaceServiceDestroyer() {
-            @Override
-            public boolean destroy(CustomerSpace space, String serviceName) {
-                return destroyer.destroy(space, serviceName);
-            }
-        };
+        return destroyer::destroy;
     }
 
     public static ServiceInstaller sandbox(final ServiceInstaller installer, final Path serviceDirectoryPath) {
-        return new ServiceInstaller() {
-            @Override
-            public DocumentDirectory install(String serviceName, int dataVersion, Map<String, String> properties) {
-                DocumentDirectory toReturn;
-                if (installer == null) {
-                    toReturn = new DocumentDirectory();
-                } else {
-                    toReturn = installer.install(serviceName, dataVersion, properties);
-                }
-                if (toReturn == null) {
-                    toReturn = new DocumentDirectory();
-                }
-
-                BootstrapUtil.removeSystemFiles(toReturn);
-                toReturn.makePathsAbsolute(serviceDirectoryPath);
-                return toReturn;
+        return (serviceName, dataVersion, properties) -> {
+            DocumentDirectory toReturn;
+            if (installer == null) {
+                toReturn = new DocumentDirectory();
+            } else {
+                toReturn = installer.install(serviceName, dataVersion, properties);
             }
+            if (toReturn == null) {
+                toReturn = new DocumentDirectory();
+            }
+
+            BootstrapUtil.removeSystemFiles(toReturn);
+            toReturn.makePathsAbsolute(serviceDirectoryPath);
+            return toReturn;
         };
     }
 

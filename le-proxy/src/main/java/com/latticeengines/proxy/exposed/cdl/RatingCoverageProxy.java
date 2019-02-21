@@ -2,8 +2,6 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;

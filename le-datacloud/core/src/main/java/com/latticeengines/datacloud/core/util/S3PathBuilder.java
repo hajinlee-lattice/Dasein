@@ -3,14 +3,12 @@ package com.latticeengines.datacloud.core.util;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-import org.springframework.stereotype.Component;
-
 import com.latticeengines.domain.exposed.camille.Path;
 
 public final class S3PathBuilder {
 
     public static final String SUCCESS_FILE = "_SUCCESS";
-    public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     public static final String UTC = "UTC";
     public static final String VERSION_FILE = "_CURRENT_VERSION";
 

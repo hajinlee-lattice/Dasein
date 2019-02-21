@@ -3,11 +3,12 @@ package com.latticeengines.app.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
@@ -26,19 +27,18 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.TenantConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("appTenantConfigService")
 public class CommonTenantConfigServiceImpl implements CommonTenantConfigService {
-    public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
-    public static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
+    private static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
+    private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final Logger log = LoggerFactory.getLogger(CommonTenantConfigServiceImpl.class);
     public static final String PLS = "PLS";
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Override

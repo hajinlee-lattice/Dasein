@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class S3DataUnit extends DataUnit {

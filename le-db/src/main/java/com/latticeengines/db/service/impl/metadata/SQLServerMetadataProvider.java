@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 
 public class SQLServerMetadataProvider extends MetadataProvider {
 

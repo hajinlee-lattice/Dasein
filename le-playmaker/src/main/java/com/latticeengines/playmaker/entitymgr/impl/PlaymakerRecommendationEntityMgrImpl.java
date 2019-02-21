@@ -3,28 +3,27 @@ package com.latticeengines.playmaker.entitymgr.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.String;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
-import com.latticeengines.playmakercore.dao.impl.RecommendationDaoImpl;
-import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
 
-    static final int MAXIMUM_DESCRIPTION_LENGTH = 255;
-    
+    private static final int MAXIMUM_DESCRIPTION_LENGTH = 255;
+
     private static final Logger log = LoggerFactory.getLogger(PlaymakerRecommendationEntityMgrImpl.class);
-    
-    @Autowired
+
+    @Inject
     private PlaymakerDaoFactory daoFactory;
 
     @Override
@@ -38,8 +37,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         truncateDescriptionLength(recommendations);
 
-        Map<String, Object> result = wrapResult(recommendations);
-        return result;
+        return wrapResult(recommendations);
     }
 
     @Override
@@ -60,22 +58,20 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         truncateDescriptionLength(plays);
 
-        Map<String, Object> result = wrapResult(plays);
-        return result;
+        return wrapResult(plays);
     }
 
-    public void truncateDescriptionLength(List<Map<String, Object>> maps) {
+    void truncateDescriptionLength(List<Map<String, Object>> maps) {
         String postfix = "...";
         if (CollectionUtils.isEmpty(maps)) {
             return;
         }
-        for (int i = 0; i < maps.size(); i++) {
-            Map<String, Object> map = maps.get(i);
+        for (Map<String, Object> map : maps) {
             String description = (String) map.get(PlaymakerConstants.Description);
             if (description != null) {
                 if (description.length() > MAXIMUM_DESCRIPTION_LENGTH) {
-                    String sub_description = new String(
-                            description.substring(0, MAXIMUM_DESCRIPTION_LENGTH - postfix.length()) + postfix);
+                    String sub_description = description.substring(0, MAXIMUM_DESCRIPTION_LENGTH - postfix.length()) //
+                            + postfix;
                     map.put(PlaymakerConstants.Description, sub_description);
                 }
             }
@@ -100,15 +96,13 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum, accountIds, filterBy,
                 recStart, columns, hasSfdcContactId, orgInfo);
-        Map<String, Object> result = wrapResult(extensions);
-        return result;
+        return wrapResult(extensions);
     }
 
     @Override
     public Map<String, Object> getAccountExtensionCount(String tenantName, String lookupSource, Long start,
             List<String> accountIds, String filterBy, Long recStart, Map<String, String> orgInfo) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
-        ;
 
         Map<String, Object> result = new HashMap<>();
         result.put(COUNT_KEY, dao.getAccountExtensionCount(start, accountIds, filterBy, recStart, orgInfo));
@@ -119,8 +113,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     public List<Map<String, Object>> getAccountExtensionSchema(String tenantName, String lookupSource) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
-        List<Map<String, Object>> schemas = dao.getAccountExtensionSchema(tenantName);
-        return schemas;
+        return dao.getAccountExtensionSchema(tenantName);
     }
 
     @Override
@@ -164,8 +157,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         List<Map<String, Object>> extensions = dao.getContactExtensions(start, offset, maximum, accountIds, recStart,
                 orgInfo, appId);
-        Map<String, Object> result = wrapResult(extensions);
-        return result;
+        return wrapResult(extensions);
     }
 
     @Override
@@ -181,8 +173,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public List<Map<String, Object>> getContactExtensionSchema(String tenantName, String lookupSource) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
-        List<Map<String, Object>> schemas = dao.getContactExtensionSchema(tenantName);
-        return schemas;
+        return dao.getContactExtensionSchema(tenantName);
     }
 
     @Override
@@ -200,8 +191,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         List<Map<String, Object>> values = dao.getPlayValues(start, offset, maximum, playgroupIds);
-        Map<String, Object> result = wrapResult(values);
-        return result;
+        return wrapResult(values);
     }
 
     @Override

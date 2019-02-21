@@ -1,19 +1,17 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Table;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -27,8 +25,6 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 
-
-
 public class DataCollectionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DataCollectionResourceDeploymentTestNG.class);
 
@@ -37,9 +33,6 @@ public class DataCollectionResourceDeploymentTestNG extends CDLDeploymentTestNGB
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private DataCollectionService dataCollectionService;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
