@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.latticeengines.domain.exposed.camille.bootstrap.*;
-
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +14,19 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.CustomerSpaceServiceInstallerAdaptor;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.DestroyerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.UpgraderAdaptor;
-import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.DestroyerAdaptor;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
@@ -97,13 +100,13 @@ public class CustomerSpaceServiceBootstrapManager {
         Path servicesDirectoryPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), space);
         Camille camille = CamilleEnvironment.getCamille();
 
-        List<AbstractMap.SimpleEntry<String, BootstrapState>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, BootstrapState>>();
+        List<AbstractMap.SimpleEntry<String, BootstrapState>> toReturn = new ArrayList<>();
         try {
             List<AbstractMap.SimpleEntry<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
             for (AbstractMap.SimpleEntry<Document, Path> child : children) {
                 String serviceName = child.getValue().getSuffix();
                 BootstrapState state = getBootstrapState(serviceName, space);
-                toReturn.add(new AbstractMap.SimpleEntry<String, BootstrapState>(serviceName, state));
+                toReturn.add(new AbstractMap.SimpleEntry<>(serviceName, state));
             }
         } catch (Exception e) {
             throw new Exception(String.format("Error encountered retrieving bootstrap states for space %s", space), e);
@@ -166,9 +169,9 @@ public class CustomerSpaceServiceBootstrapManager {
         private final String logPrefix;
         private final Map<String, String> bootstrapProperties;
 
-        public CustomerBootstrapper(CustomerSpace space, String serviceName, CustomerSpaceServiceInstaller installer,
-                CustomerSpaceServiceUpgrader upgrader, CustomerSpaceServiceDestroyer destroyer,
-                Map<String, String> bootstrapProperties) {
+        CustomerBootstrapper(CustomerSpace space, String serviceName, CustomerSpaceServiceInstaller installer,
+                             CustomerSpaceServiceUpgrader upgrader, CustomerSpaceServiceDestroyer destroyer,
+                             Map<String, String> bootstrapProperties) {
             this.space = space;
             this.serviceName = serviceName;
             this.installer = installer;
