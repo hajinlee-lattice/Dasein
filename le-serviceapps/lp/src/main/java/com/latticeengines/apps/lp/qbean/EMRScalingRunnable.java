@@ -66,7 +66,6 @@ public class EMRScalingRunnable implements Runnable {
     private int taskVCores;
     private long minAvailMemMb;
     private int minAvailVCores;
-    private boolean hasTezApp;
 
     private final String emrCluster;
     private final String clusterId;
