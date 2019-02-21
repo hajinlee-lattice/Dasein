@@ -23,7 +23,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
@@ -40,12 +42,16 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     @Inject
     private RedshiftService redshiftService;
 
+    @Inject
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
+
     private Map<BusinessEntity, String> tablename = new HashMap();
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        verifyCleanupAllAttrConfig();
         verifyCleanup();
         processAnalyze();
         verifyProcess();
@@ -72,6 +78,22 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         ApplicationId appId = cdlProxy.cleanupAllData(customerSpace, entity, MultiTenantContext.getEmailAddress());
         return appId;
 
+    }
+
+    private void verifyCleanupAllAttrConfig() {
+        ApplicationId appId = cdlProxy.cleanupAllAttrConfig(customerSpace, BusinessEntity.Contact,
+                MultiTenantContext.getEmailAddress());
+        verifyStatus(appId);
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace, BusinessEntity.Contact,
+                false);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
+
+
+        log.info("cleaning up all attr config " + customerSpace);
+        appId = cdlProxy.cleanupAllAttrConfig(customerSpace, null, MultiTenantContext.getEmailAddress());
+        verifyStatus(appId);
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace, BusinessEntity.Transaction, false);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
     }
 
     private void verifyStatus(ApplicationId appId) {

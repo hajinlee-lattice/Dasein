@@ -7,7 +7,9 @@ public enum CleanupOperationType {
     BYUPLOAD_ID("ByUpload_Id", true), //
     BYUPLOAD_ACPD("ByUpload_ACPD", true), //
     BYUPLOAD_MINDATE("ByUpload_MinDate", true), //
-    BYUPLOAD_MINDATEANDACCOUNT("ByUpload_MinDateAndAccount", true);
+    BYUPLOAD_MINDATEANDACCOUNT("ByUpload_MinDateAndAccount", true), //
+    ALLATTRCONFIG("AllAttrConfig", false), //
+    ALLDATAANDMETADATA("AllDataAndMetaData", false);//
 
     private String operationType;
     private boolean needTransFlow;

@@ -539,6 +539,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         attrConfigEntityMgr.cleanupTenant(tenantId);
     }
 
+    public void removeAttrConfigForEntity(String tenantId, BusinessEntity entity) {
+        attrConfigEntityMgr.deleteAllForEntity(tenantId, entity);
+    }
+
     @SuppressWarnings("unchecked")
     public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfigs) {
         if (systemMetadata == null) {

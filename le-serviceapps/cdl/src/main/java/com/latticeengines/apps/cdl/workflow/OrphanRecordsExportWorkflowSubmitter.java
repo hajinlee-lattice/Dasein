@@ -72,9 +72,10 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         }
         log.info("Use artifact version=" + request.getArtifactVersion().name());
 
+        String targetPathSuffix = NamingUtils.timestamp(orphanRecordsType.getOrphanType());
         String targetPath = PathBuilder
                 .buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace))
-                .append(NamingUtils.timestamp(orphanRecordsType.getOrphanType())).toString();
+                .append(targetPathSuffix).toString();
         log.info("Use targetPath=" + targetPath);
 
         DataCollectionArtifact artifact = new DataCollectionArtifact();
@@ -96,7 +97,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_TYPE, orphanRecordsType.name());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_DISPLAY_NAME,
                 orphanRecordsType.getDisplayName());
-        inputProperties.put(ExportProperty.TARGET_FILE_NAME, orphanRecordsType.getOrphanType());
+        inputProperties.put(ExportProperty.TARGET_FILE_NAME, targetPathSuffix);
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 
         String transactionTableName = getTableName(TableRoleInCollection.ConsolidatedRawTransaction,

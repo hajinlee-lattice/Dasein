@@ -193,10 +193,16 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testDeleteConfigWhenEmptyProps" })
     public void testCleanupAttrConfigForTenant() throws Exception {
-        cdlAttrConfigProxy.removeAttrConfigByTenant(mainTestTenant.getId());
+        cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(mainTestTenant.getId(), BusinessEntity.Account);
+        Thread.sleep(500L);
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
+                BusinessEntity.Account, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
+
+        cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(mainTestTenant.getId(), null);
         Thread.sleep(500L);
 
-        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
                 BusinessEntity.Account, false);
         assertEquals(request.getAttrConfigs().size(), 0);
 
