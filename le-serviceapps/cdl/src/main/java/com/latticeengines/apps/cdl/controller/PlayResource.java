@@ -1,10 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
@@ -297,7 +295,7 @@ public class PlayResource {
         playLaunch.setTableName(createTable(playLaunch));
 
         Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
-                
+
         playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
         playLaunch.setAccountsSuppressed(0L);
         playLaunch.setAccountsErrored(0L);

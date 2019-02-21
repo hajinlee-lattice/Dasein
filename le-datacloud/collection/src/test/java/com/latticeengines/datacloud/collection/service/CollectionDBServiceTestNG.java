@@ -37,7 +37,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
-import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @DirtiesContext
 @ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})

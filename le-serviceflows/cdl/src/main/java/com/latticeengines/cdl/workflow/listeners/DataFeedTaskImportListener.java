@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -30,7 +28,6 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -46,7 +43,7 @@ import com.latticeengines.workflow.listener.LEJobListener;
 @Component("dataFeedTaskImportListener")
 public class DataFeedTaskImportListener extends LEJobListener {
 
-    private final static Logger log = LoggerFactory.getLogger(DataFeedTaskImportListener.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskImportListener.class);
 
     private static final String ERROR_FILE = "error.csv";
 

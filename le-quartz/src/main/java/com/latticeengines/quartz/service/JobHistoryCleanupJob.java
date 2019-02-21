@@ -1,9 +1,13 @@
 package com.latticeengines.quartz.service;
 
-import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
-import org.quartz.*;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+
+import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 public class JobHistoryCleanupJob extends QuartzJobBean {
 
@@ -11,13 +15,13 @@ public class JobHistoryCleanupJob extends QuartzJobBean {
 
     private JobHistoryEntityMgr jobHistoryEntityMgr;
 
-    public void init(ApplicationContext appCtx) {
+    private void init(ApplicationContext appCtx) {
         jobHistoryEntityMgr = (JobHistoryEntityMgr) appCtx.getBean("jobHistoryEntityMgr");
     }
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        SchedulerContext sc = null;
+    protected void executeInternal(JobExecutionContext context) {
+        SchedulerContext sc;
         try {
             sc = context.getScheduler().getContext();
         } catch (SchedulerException e) {

@@ -5,12 +5,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -25,6 +23,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component
 public class CloneTableService {

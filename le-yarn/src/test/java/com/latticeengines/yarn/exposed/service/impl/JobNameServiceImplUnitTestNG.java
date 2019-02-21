@@ -5,14 +5,12 @@ import static org.testng.Assert.assertNotEquals;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.yarn.exposed.service.impl.JobNameServiceImpl;
-
 public class JobNameServiceImplUnitTestNG {
 
     private JobNameServiceImpl jobNameService = new JobNameServiceImpl();
 
     @Test(groups = "unit")
-    public void testDelimitedJobName() throws Exception {
+    public void testDelimitedJobName() {
         final String customer = "Dell";
         final String jobType = "python";
 

@@ -9,22 +9,28 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.bootstrap.*;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
 public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScope> {
-    public static final int INITIAL_VERSION = 1;
-    public static final int UPGRADED_VERSION = 2;
+    static final int INITIAL_VERSION = 1;
+    static final int UPGRADED_VERSION = 2;
 
-    public static final String INITIAL_VERSION_STRING = "1.0";
-    public static final String UPGRADED_VERSION_STRING = "1.1";
+    private static final String INITIAL_VERSION_STRING = "1.0";
+    private static final String UPGRADED_VERSION_STRING = "1.1";
 
-    public static final ServiceProperties INITIAL_VERSION_PROPERTIES = new ServiceProperties(INITIAL_VERSION,
+    static final ServiceProperties INITIAL_VERSION_PROPERTIES = new ServiceProperties(INITIAL_VERSION,
             INITIAL_VERSION_STRING);
-    public static final ServiceProperties UPGRADED_VERSION_PROPERTIES = new ServiceProperties(UPGRADED_VERSION,
+    static final ServiceProperties UPGRADED_VERSION_PROPERTIES = new ServiceProperties(UPGRADED_VERSION,
             UPGRADED_VERSION_STRING);
+
+    private static final Semaphore semaphore = new Semaphore(1);
 
     public void lock() throws Exception {
         // Force synchronous execution of all unit tests because of the nature
@@ -32,7 +38,7 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         semaphore.acquire();
     }
 
-    public void unlock() throws Exception {
+    public void unlock() {
         semaphore.release();
     }
 
@@ -106,25 +112,25 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
     }
 
-    public static DocumentDirectory getInitialConfiguration() {
+    private static DocumentDirectory getInitialConfiguration() {
         DocumentDirectory directory = new DocumentDirectory(new Path("/"));
         directory.add(new Path("/a"));
-        directory.add(new Path("/a/b"), new Document(new Integer(INITIAL_VERSION).toString()));
+        directory.add(new Path("/a/b"), new Document(Integer.toString(INITIAL_VERSION)));
         directory.add(new Path("/a/c"));
-        directory.add(new Path("/a/c/d"), new Document(new Integer(INITIAL_VERSION).toString()));
+        directory.add(new Path("/a/c/d"), new Document(Integer.toString(INITIAL_VERSION)));
         return directory;
     }
 
-    public static DocumentDirectory getUpgradedConfiguration() {
+    private static DocumentDirectory getUpgradedConfiguration() {
         DocumentDirectory directory = new DocumentDirectory(new Path("/"));
         directory.add(new Path("/a"));
-        directory.add(new Path("/a/b"), new Document(new Integer(UPGRADED_VERSION).toString()));
-        directory.add(new Path("/a/d"), new Document(new Integer(UPGRADED_VERSION).toString()));
-        directory.add(new Path("/a/e"), new Document(new Integer(UPGRADED_VERSION).toString()));
+        directory.add(new Path("/a/b"), new Document(Integer.toString(UPGRADED_VERSION)));
+        directory.add(new Path("/a/d"), new Document(Integer.toString(UPGRADED_VERSION)));
+        directory.add(new Path("/a/e"), new Document(Integer.toString(UPGRADED_VERSION)));
         return directory;
     }
 
-    public static DocumentDirectory getConfiguration(int version) {
+    private static DocumentDirectory getConfiguration(int version) {
         switch (version) {
         case INITIAL_VERSION:
             return getInitialConfiguration();
@@ -135,11 +141,11 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
     }
 
-    protected boolean serviceIsInState(State state, int desiredAndInstalledVersion) throws Exception {
+    boolean serviceIsInState(State state, int desiredAndInstalledVersion) throws Exception {
         return serviceIsInState(state, desiredAndInstalledVersion, desiredAndInstalledVersion);
     }
 
-    protected boolean serviceIsInState(State state, int desiredVersion, int installedVersion) throws Exception {
+    boolean serviceIsInState(State state, int desiredVersion, int installedVersion) throws Exception {
         T scope = getTestScope();
         // Retrieve state
         BootstrapState retrieved = getState();
@@ -164,6 +170,4 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         DocumentDirectory sourceConfiguration = getConfiguration(retrieved.installedVersion);
         return equivalentState && configuration.equals(sourceConfiguration);
     }
-
-    private final static Semaphore semaphore = new Semaphore(1);
 }

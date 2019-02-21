@@ -5,9 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,14 +34,12 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_MarketoCredentials_Simplified')")
 public class MarketoCredentialResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelSummaryResource.class);
-
     @Inject
     private MarketoCredentialService marketoCredentialService;
-    
+
     @Inject
     private ScoringRequestConfigService scoringRequestConfigService;
-    
+
     @Inject
     private MarketoSoapService marketoSoapService;
 
@@ -98,9 +93,9 @@ public class MarketoCredentialResource {
     @ResponseBody
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public List<LeadField> getMatchFieldForMarketoCredential(
-            @RequestParam(value = "marketoSoapEndpoint", required = true) String marketoSoapEndpoint,
-            @RequestParam(value = "marketoSoapUserId", required = true) String marketoSoapUserId,
-            @RequestParam(value = "marketoSoapEncryptionKey", required = true) String marketoSoapEncryptionKey) {
+            @RequestParam(value = "marketoSoapEndpoint") String marketoSoapEndpoint,
+            @RequestParam(value = "marketoSoapUserId") String marketoSoapUserId,
+            @RequestParam(value = "marketoSoapEncryptionKey") String marketoSoapEncryptionKey) {
         return marketoSoapService.getLeadFields(marketoSoapEndpoint, marketoSoapUserId,
                 marketoSoapEncryptionKey);
     }
@@ -131,7 +126,7 @@ public class MarketoCredentialResource {
     /*
      * ScoringRequestConfig resources
      * */
-    
+
     @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Get list of ScoringRequest Configurations")
     @ResponseBody
@@ -159,7 +154,7 @@ public class MarketoCredentialResource {
                     new String[] { "ScoringRequest mapped to invalid configuration" });
         }
     }
-    
+
     @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Creates new ScoringRequestConfiguration")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")

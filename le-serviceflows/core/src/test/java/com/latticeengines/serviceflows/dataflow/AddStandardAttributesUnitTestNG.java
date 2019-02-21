@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
-import com.latticeengines.serviceflows.dataflow.AddStandardAttributes;
 
 public class AddStandardAttributesUnitTestNG {
 
