@@ -50,7 +50,7 @@ angular.module('lp.import.wizard.customfields', [])
             });
             setTimeout(function(){
                 setDefaultIgnore();
-            },0);
+            },250);
         }
     };
 
