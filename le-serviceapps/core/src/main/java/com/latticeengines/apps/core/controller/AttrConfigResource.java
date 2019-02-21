@@ -93,8 +93,13 @@ public class AttrConfigResource {
     @DeleteMapping(value = "")
     @ResponseBody
     @ApiOperation("delete attribute for tenant")
-    public void removeAttrConfig(@PathVariable String customerSpace) {
-        attrConfigService.removeAttrConfig(MultiTenantContext.getShortTenantId());
+    public void removeAttrConfig(@PathVariable String customerSpace,
+            @RequestParam(required = false, value = "entity") BusinessEntity entity) {
+        if (entity == null) {
+            attrConfigService.removeAttrConfig(MultiTenantContext.getShortTenantId());
+        } else {
+            attrConfigService.removeAttrConfigForEntity(MultiTenantContext.getShortTenantId(), entity);
+        }
     }
 
     // Deprecated before M23

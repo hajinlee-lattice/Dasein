@@ -260,6 +260,30 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public ApplicationId cleanupAllAttrConfig(String customerSpace, BusinessEntity entity, String initiator) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
+        String url = constructUrl(urlPattern, customerSpace);
+        CleanupAllConfiguration cleanupAllConfiguration = new CleanupAllConfiguration();
+        cleanupAllConfiguration.setOperationType(MaintenanceOperationType.DELETE);
+        cleanupAllConfiguration.setCleanupOperationType(CleanupOperationType.ALLATTRCONFIG);
+        cleanupAllConfiguration.setEntity(entity);
+        cleanupAllConfiguration.setCustomerSpace(customerSpace);
+        cleanupAllConfiguration.setOperationInitiator(initiator);
+        ResponseDocument<String> responseDoc = post("cleanup all attr Config", url, cleanupAllConfiguration,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to cleanupAllAttrConfig: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
             BusinessEntity entity, String initiator) throws ParseException {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
