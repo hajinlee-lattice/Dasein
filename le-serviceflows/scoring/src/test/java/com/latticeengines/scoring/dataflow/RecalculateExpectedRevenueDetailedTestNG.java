@@ -17,18 +17,15 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculateExpectedRevenueParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
-public class CalculatePredictedRevenuePercentileDetailedTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class RecalculateExpectedRevenueDetailedTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCalculationPredictedRevenuePercentile() {
-        CalculatePredictedRevenuePercentileParameters parameters = prepareInputWithPredictedRevenue();
+        RecalculateExpectedRevenueParameters parameters = prepareInputWithPredictedRevenue();
         executeDataFlow(parameters);
         verifyResults();
     }
@@ -39,6 +36,7 @@ public class CalculatePredictedRevenuePercentileDetailedTestNG extends ServiceFl
         List<GenericRecord> outputRecords = readOutput();
 
         assertEquals(outputRecords.size(), inputRecords.size());
+        assertEquals(outputRecords.size(), expectedResultsRecords.size());
 
         String[] modelGuids = { "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz" };
 
@@ -119,49 +117,19 @@ public class CalculatePredictedRevenuePercentileDetailedTestNG extends ServiceFl
         super.postProcessSourceTable(table);
     }
 
-    private CalculatePredictedRevenuePercentileParameters prepareInputWithPredictedRevenue() {
-        CalculatePredictedRevenuePercentileParameters parameters = new CalculatePredictedRevenuePercentileParameters();
-        String rawScoreField = ScoreResultField.RawScore.displayName;
-        String predictedRevenueField = ScoreResultField.PredictedRevenue.displayName;
+    private RecalculateExpectedRevenueParameters prepareInputWithPredictedRevenue() {
 
-        String modelGuidField = ScoreResultField.ModelId.displayName;
-
-        String scoreField = ScoreResultField.PredictedRevenuePercentile.displayName;
-        String evModelGuid = "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz";
-
-        Map<String, String> rawScoreFieldMap = new HashMap<>();
-        rawScoreFieldMap.put(evModelGuid, predictedRevenueField);
-
-        parameters.setInputTableName("detailed");
-        parameters.setPercentileFieldName(scoreField);
-        parameters.setOriginalScoreFieldMap(rawScoreFieldMap);
-        parameters.setModelGuidField(modelGuidField);
-        parameters.setPercentileLowerBound(5);
-        parameters.setPercentileUpperBound(99);
-
-        setDummyScoreDerivationMap(parameters, evModelGuid);
-
-        return parameters;
-    }
-
-    private void setDummyScoreDerivationMap(CalculatePredictedRevenuePercentileParameters parameters,
-            String modelGuid) {
         InputStream inputStream = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("calculateExpectedRevenuePercentile/detailed/params.json");
-        CalculateExpectedRevenuePercentileParameters tempParameters = JsonUtils.deserialize(inputStream,
-                CalculateExpectedRevenuePercentileParameters.class);
-        Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps = new HashMap<>();
-        for (Map<ScoreDerivationType, ScoreDerivation> scoreDerivationMap : tempParameters.getScoreDerivationMaps()
-                .values()) {
-            scoreDerivationMaps.put(modelGuid, scoreDerivationMap);
-            break;
-        }
-        parameters.setScoreDerivationMaps(scoreDerivationMaps);
+                .getResourceAsStream("recalculateExpectedRevenue/multiModel/params.json");
+        RecalculateExpectedRevenueParameters parameters = JsonUtils.deserialize(inputStream,
+                RecalculateExpectedRevenueParameters.class);
+        parameters.setInputTableName("detailed");
+        return parameters;
     }
 
     @Override
     protected String getFlowBeanName() {
-        return "calculatePredictedRevenuePercentile";
+        return "recalculateExpectedRevenue";
     }
 
     @Override
