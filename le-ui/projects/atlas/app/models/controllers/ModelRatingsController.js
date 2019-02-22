@@ -250,9 +250,8 @@ angular.module('lp.models.ratings', [
 
             var bucketLeads = 0,
                 bucketRevenue = 0,
-                bucketConverted = 0; 
-
-            var score = null;
+                bucketConverted = 0,
+                score = null;
 
             for (var index = vm.leftScore; index > vm.rightScore; index--) {
                 score = vm.ratingsSummary.bucketed_scores[index];
