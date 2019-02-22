@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,6 +133,18 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByTenantAndWorkflowPids(Tenant tenant, List<Long> workflowPids) {
         return workflowJobDao.findByTenantAndWorkflowPids(tenant, workflowPids);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
+            List<String> statuses) {
+        if (StringUtils.isBlank(clusterId) && CollectionUtils.isEmpty(workflowTypes)
+                && CollectionUtils.isEmpty(statuses)) {
+            // just in case
+            return workflowJobDao.findAll();
+        }
+        return workflowJobDao.findByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
     }
 
     @Override

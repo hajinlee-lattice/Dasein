@@ -79,4 +79,22 @@ public interface WorkflowJobService {
     WorkflowJob deleteWorkflowJobByApplicationId(String customerSpace, String applicationId);
 
     List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime);
+
+    /*
+     * cross-tenant methods
+     */
+
+    /**
+     * Retrieve the number of jobs in current cluster that are not in terminal
+     * state. An optional list of job type filter can be applied.
+     *
+     * @param customerSpace
+     *            current customer space
+     * @param types
+     *            list of job types for filtering, {@literal null} to retrieve any
+     *            type
+     * @return number of jobs that satisfy all conditions
+     */
+    int getNonTerminalJobCount(String customerSpace, List<String> types);
+
 }
