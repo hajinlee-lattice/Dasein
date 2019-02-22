@@ -104,9 +104,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 entity, source, feedType));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+        if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
+            sourceFile.setSchemaInterpretation(schemaInterpretation);
+            sourceFileService.update(sourceFile);
+        }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        FieldMappingDocument fieldMappingFromSchemaRepo = getFieldMappingDocumentBestEffort(sourceFileName,
-                schemaInterpretation, null, withoutId);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
+        Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
+        FieldMappingDocument fieldMappingFromSchemaRepo = resolver.getFieldMappingsDocumentBestEffort(table);
         generateExtraFieldMappingInfo(fieldMappingFromSchemaRepo, true);
         FieldMappingDocument resultDocument;
         if (dataFeedTask == null) {
@@ -481,8 +486,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
-            SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
-            return getSchemaToLatticeSchemaFields(schemaInterpretation);
+            boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+            Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
+            return table.getAttributes().stream().map(this::getLatticeFieldFromTableAttribute).collect(Collectors.toList());
         } else {
             List<LatticeSchemaField> templateSchemaFields = new ArrayList<>();
             List<Attribute> attributes = dataFeedTask.getImportTemplate().getAttributes();

@@ -25,6 +25,51 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     }
 
     @Test(groups = "deployment")
+    public void testContactDate() {
+        baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+
+        String feedType = ENTITY_CONTACT + FEED_TYPE_SUFFIX;
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(baseContactFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("Created Date")) {
+                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
+                Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
+            } else if (fieldMapping.getUserField().equals("LastModifiedDate")) {
+                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
+                Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(baseContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                feedType);
+        baseContactFile = sourceFileService.findByName(baseContactFile.getName());
+
+        String dfIdExtra = cdlService.createS3Template(customerSpace, baseContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX, null, ENTITY_CONTACT + "Data");
+        Assert.assertNotNull(baseContactFile);
+        Assert.assertNotNull(dfIdExtra);
+
+        fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(baseContactFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("Created Date")) {
+                Assert.assertTrue(fieldMapping.isMappedToLatticeField());
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
+                Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
+            } else if (fieldMapping.getUserField().equals("LastModifiedDate")) {
+                Assert.assertTrue(fieldMapping.isMappedToLatticeField());
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
+                Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
+            }
+        }
+
+    }
+
+    @Test(groups = "deployment")
     public void testDateFormat() {
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String dateFormatString1 = "DD/MM/YYYY";
