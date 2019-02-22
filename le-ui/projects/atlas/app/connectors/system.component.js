@@ -65,9 +65,9 @@ export default class SystemComponent extends Component {
     getSystemStatus() {
         switch (this.state.system.isRegistered) {
             case true:
-                return 'Registered';
+                return 'Connected';
             case false:
-                return 'Unmapped';
+                return 'Disconnected';
         }
     }
 
@@ -134,6 +134,7 @@ export default class SystemComponent extends Component {
                         </div>
                     </LeTileHeader>
                     <LeTileBody classNames={'system-body'}>
+                        <div>
                         <div className="le-layout-flex-grid">
                             <div className="le-layout-flex-col lable">
                                 System Org Name
@@ -173,6 +174,7 @@ export default class SystemComponent extends Component {
                             <div className="le-layout-flex-col content">
                                 <span className={this.getSystemStatusClass()}>{this.getSystemStatus()}</span>
                             </div>
+                        </div>
                         </div>
                     </LeTileBody>
                     <LeTileFooter classNames={'system-footer right-controlls'}>
