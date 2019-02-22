@@ -159,25 +159,25 @@ public class EMRServiceImpl implements EMRService {
     }
 
     @Override
-    public void scaleTaskGroup(InstanceGroup taskGrp, int targetCount) {
+    public void scaleTaskGroup(String clusterId, InstanceGroup taskGrp, int targetCount) {
         AmazonElasticMapReduce emr = getEmr();
         InstanceGroupModifyConfig modifyConfig = new InstanceGroupModifyConfig()
                 .withInstanceGroupId(taskGrp.getId())
                 .withInstanceCount(targetCount);
         ModifyInstanceGroupsRequest request = //
-                new ModifyInstanceGroupsRequest().withInstanceGroups(modifyConfig);
+                new ModifyInstanceGroupsRequest().withClusterId(clusterId).withInstanceGroups(modifyConfig);
         ModifyInstanceGroupsResult result = emr.modifyInstanceGroups(request);
         log.info("Sent emr scaling request, got response: " + result);
     }
 
     @Override
-    public void scaleTaskFleet(InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount) {
+    public void scaleTaskFleet(String clusterId, InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount) {
         AmazonElasticMapReduce emr = getEmr();
         InstanceFleetModifyConfig modifyConfig = new InstanceFleetModifyConfig()
                 .withInstanceFleetId(taskFleet.getId())
                 .withTargetOnDemandCapacity(targetOnDemandCount)
                 .withTargetSpotCapacity(targetSpotCount);
-        ModifyInstanceFleetRequest request = new ModifyInstanceFleetRequest().withInstanceFleet(modifyConfig);
+        ModifyInstanceFleetRequest request = new ModifyInstanceFleetRequest().withClusterId(clusterId).withInstanceFleet(modifyConfig);
         ModifyInstanceFleetResult result = emr.modifyInstanceFleet(request);
         log.info("Sent emr scaling request, got response: " + result);
     }

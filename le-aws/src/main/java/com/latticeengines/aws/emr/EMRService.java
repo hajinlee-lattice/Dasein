@@ -27,9 +27,9 @@ public interface EMRService {
 
     InstanceFleet getCoreFleet(String clusterId);
 
-    void scaleTaskFleet(InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount);
+    void scaleTaskFleet(String clusterId, InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount);
 
-    void scaleTaskGroup(InstanceGroup taskGrp, int targetCount);
+    void scaleTaskGroup(String clusterId, InstanceGroup taskGrp, int targetCount);
 
     List<ClusterSummary> findClusters(Predicate<ClusterSummary> filter);
 
