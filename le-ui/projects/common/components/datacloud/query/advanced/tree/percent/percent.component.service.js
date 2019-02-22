@@ -76,8 +76,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
                     'position': 0,
                     'type': 'Avg',
                     'min': '0',
-                    'max': '',
-                    'pattern': '\\\d*'
+                    'max': ''
                 },
                 'to': {
                     'name': 'to-period-percent',
@@ -85,8 +84,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
                     'position': 1,
                     'type': 'Avg',
                     'min': '0',
-                    'max': '',
-                    'pattern': '\\\d*'
+                    'max': ''
                 }
             };
         };
