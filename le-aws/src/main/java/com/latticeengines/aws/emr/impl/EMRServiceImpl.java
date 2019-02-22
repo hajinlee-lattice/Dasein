@@ -33,6 +33,7 @@ import com.amazonaws.services.elasticmapreduce.model.InstanceFleetType;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupModifyConfig;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupType;
+import com.amazonaws.services.elasticmapreduce.model.InvalidRequestException;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsRequest;
@@ -257,30 +258,48 @@ public class EMRServiceImpl implements EMRService {
     private InstanceGroup getInstanceGroup(String clusterId, InstanceGroupType groupType) {
         AmazonElasticMapReduce emr = getEmr();
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
-                Collections.singleton(NoSuchEntityException.class));
-        ListInstanceGroupsResult result = retryTemplate.execute(context -> {
-            ListInstanceGroupsRequest listGrpRequest = new ListInstanceGroupsRequest().withClusterId(clusterId);
-            return emr.listInstanceGroups(listGrpRequest);
-        });
-        return result.getInstanceGroups().stream() //
-                .filter(grp -> //
-                        grp.getRequestedInstanceCount() > 0 && groupType.name().equals(grp.getInstanceGroupType())) //
-                .findFirst().orElse(null);
+                Arrays.asList(NoSuchEntityException.class, InvalidRequestException.class));
+        try {
+            ListInstanceGroupsResult result = retryTemplate.execute(context -> {
+                ListInstanceGroupsRequest listGrpRequest = new ListInstanceGroupsRequest().withClusterId(clusterId);
+                return emr.listInstanceGroups(listGrpRequest);
+            });
+            return result.getInstanceGroups().stream() //
+                    .filter(grp -> //
+                            grp.getRequestedInstanceCount() > 0 && groupType.name().equals(grp.getInstanceGroupType())) //
+                    .findFirst().orElse(null);
+        } catch (InvalidRequestException e) {
+            if (e.getMessage().contains("mutually exclusive")) {
+                // it is an instance fleet cluster
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     private InstanceFleet getInstanceFleet(String clusterId, InstanceFleetType fleetType) {
         AmazonElasticMapReduce emr = getEmr();
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
-                Collections.singleton(NoSuchEntityException.class));
-        ListInstanceFleetsResult result = retryTemplate.execute(context -> {
-            ListInstanceFleetsRequest listGrpRequest = new ListInstanceFleetsRequest().withClusterId(clusterId);
-            return emr.listInstanceFleets(listGrpRequest);
-        });
-        return result.getInstanceFleets().stream() //
-                .filter(grp -> //
-                        Math.max(grp.getTargetOnDemandCapacity(), grp.getTargetSpotCapacity()) > 0 //
-                                && fleetType.name().equals(grp.getInstanceFleetType())) //
-                .findFirst().orElse(null);
+                Arrays.asList(NoSuchEntityException.class, InvalidRequestException.class));
+        try {
+            ListInstanceFleetsResult result = retryTemplate.execute(context -> {
+                ListInstanceFleetsRequest listGrpRequest = new ListInstanceFleetsRequest().withClusterId(clusterId);
+                return emr.listInstanceFleets(listGrpRequest);
+            });
+            return result.getInstanceFleets().stream() //
+                    .filter(grp -> //
+                            Math.max(grp.getTargetOnDemandCapacity(), grp.getTargetSpotCapacity()) > 0 //
+                                    && fleetType.name().equals(grp.getInstanceFleetType())) //
+                    .findFirst().orElse(null);
+        } catch (InvalidRequestException e) {
+            if (e.getMessage().contains("mutually exclusive")) {
+                // it is an instance group cluster
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
 }
