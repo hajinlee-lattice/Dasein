@@ -88,7 +88,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         Assert.assertEquals(actualTime, 1517443200000L);
 
         actualTime = TimeStampConvertUtils.convertToLong("Feb.01.2018",
-                "MMM.DD.YYYY", "", "UTC-8     America/Los Angeles, America/Vancouver");
+                "MMM.DD.YYYY", "", "America/Los_Angeles");
         Assert.assertEquals(actualTime, 1517472000000L);
 
         actualTime = TimeStampConvertUtils.convertToLong("2018/Feb/01",
@@ -96,7 +96,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         Assert.assertEquals(actualTime, 1517443200000L);
 
         actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018 01-23-45 Pm",
-                "MMM-DD-YYYY", "00-00-00 12H", "UTC       Europe/London, Africa/Accra");
+                "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
         Assert.assertEquals(actualTime, 1522758225000L);
     }
 
@@ -116,7 +116,7 @@ public class TimeStampConvertUtilsUnitTestNG {
 
         // Test Case 3: Simple date with format YYYY.MM.DD, America/Los_Angeles timezone.
         actualTime = TimeStampConvertUtils.convertToLong("2017.03.04",
-                "YYYY.MM.DD", "", "UTC-8     America/Los Angeles, America/Vancouver");
+                "YYYY.MM.DD", "", "America/Los_Angeles");
         Assert.assertEquals(actualTime, 1488614400000L);
 
         // Test Case 4: Date only, with two digit year, format DD-MM-YY, default timezone (UTC).  Test post 2000 date
@@ -134,17 +134,17 @@ public class TimeStampConvertUtilsUnitTestNG {
         // Test Case 6: Simple date with single digit day and month, Europe/Berlin timezone (UTC+2).  Note Paris is in
         // Central European Time and in day light savings at this point and therefore ahead of UTC by 2 hours.
         actualTime = TimeStampConvertUtils.convertToLong("5.6.2018",
-                "DD.MM.YYYY", "", "UTC+1     Europe/Berlin, Africa/Lagos");
+                "DD.MM.YYYY", "", "Europe/Berlin");
         Assert.assertEquals(actualTime, 1528149600000L);
 
         // Test Case 7: Date/time with format MM.DD.YY 00:00:00 12H, in timezone America/Los_Angeles.
         actualTime = TimeStampConvertUtils.convertToLong("11.02.18 11:11:11 AM",
-                "MM.DD.YY", "00:00:00 12H", "UTC-8     America/Los Angeles, America/Vancouver");
+                "MM.DD.YY", "00:00:00 12H", "America/Los_Angeles");
         Assert.assertEquals(actualTime, 1541182271000L);
 
         // Test Case 8: Date/time with format DD/MM/YYYY 00 00 00 24H, in timezone America/New_York.
         actualTime = TimeStampConvertUtils.convertToLong("08/09/2018 07 07 07",
-                "DD/MM/YYYY", "00 00 00 24H", "UTC-5     America/New York, America/Lima");
+                "DD/MM/YYYY", "00 00 00 24H", "America/New_York");
                 Assert.assertEquals(actualTime, 1536404827000L);
 
         // Test Case 9: Date/time with single digit month and day, in format MM-DD-YYYY 00-00-00 12H, in default
@@ -161,13 +161,13 @@ public class TimeStampConvertUtilsUnitTestNG {
 
         // Test Case 11: Date/time with single digit hour, in format YYYY/MM/DD 00 00 00, in timezone America/Sao_Paulo.
         actualTime = TimeStampConvertUtils.convertToLong("2018/12/11 4 56 12",
-                "YYYY/MM/DD",  "00 00 00 24H", "UTC-3     America/Sao Paulo, America/Buenos Aires");
+                "YYYY/MM/DD",  "00 00 00 24H", "America/Sao_Paulo");
         Assert.assertEquals(actualTime, 1544511372000L);
 
         // Test Case 12: Date/time with single digit month, day, hour, minute, and second, in format
         // DD/MM/YY 00-00-00 24H, in timezone America/Los_Angeles.
         actualTime = TimeStampConvertUtils.convertToLong("2/2/22 2-2-2",
-                "DD/MM/YY",  "00-00-00 24H", "UTC-8     America/Los Angeles, America/Vancouver");
+                "DD/MM/YY",  "00-00-00 24H", "America/Los_Angeles");
         Assert.assertEquals(actualTime, 1643796122000L);
 
         // Test Case 13: Date/time with single digit month and day, in format MM-DD-YYYY 00:00:00 12H, with lowercase
@@ -214,7 +214,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         exceptionFound = false;
         try {
             TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "DD.MMM.YY", "00 00 00 24H",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);
@@ -244,7 +244,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         exceptionFound = false;
         try {
             TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "DD.MMMM.YY", "00 00 00 24H",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);
@@ -259,7 +259,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         exceptionFound = false;
         try {
             TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "MM/DD/YY", "00-00-00 12H",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);
@@ -275,7 +275,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         exceptionFound = false;
         try {
             TimeStampConvertUtils.convertToLong("11/11/11 11 11 11", "MM/DD/YY", "00/00/00 12H",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);
@@ -306,7 +306,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         long actualTime = 0;
         try {
             actualTime = TimeStampConvertUtils.convertToLong("11/11/11", "MM/DD/YY", "00-00-00 12H",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);
@@ -330,7 +330,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         actualTime = 0;
         try {
             actualTime = TimeStampConvertUtils.convertToLong("11/11/11 11:11:11 AM", "MM/DD/YY", "00-00-00 12H",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);
@@ -350,7 +350,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         actualTime = 0;
         try {
             actualTime = TimeStampConvertUtils.convertToLong("11/11/11 11:11:11 AM", "MM/DD/YY", "",
-                    "UTC+8     Asia/Shanghai, Australia/Perth");
+                    "Asia/Shanghai");
         } catch (Exception e) {
             exceptionFound = true;
             Assert.assertTrue(e instanceof IllegalArgumentException);

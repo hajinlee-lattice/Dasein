@@ -73,10 +73,10 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     public void testDateFormat() {
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String dateFormatString1 = "DD/MM/YYYY";
-        String timezone1 = "UTC-5     America/New York, America/Lima";
+        String timezone1 = "America/New_York";
         String dateFormatString2 = "MM.DD.YY";
         String timeFormatString2 = "00:00:00 24H";
-        String timezone2 = "UTC+8     Asia/Shanghai, Australia/Perth";
+        String timezone2 = "Asia/Shanghai";
 
         Assert.assertNotNull(baseAccountFile);
 
