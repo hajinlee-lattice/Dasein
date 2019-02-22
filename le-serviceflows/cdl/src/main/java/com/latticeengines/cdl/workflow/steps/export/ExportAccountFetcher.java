@@ -108,6 +108,10 @@ public class ExportAccountFetcher {
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, List<Object> internalAccountIds,
             List<Column> fields) {
+        if (CollectionUtils.isEmpty(internalAccountIds)) {
+            return null;
+        }
+
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
         List<String> lookupField = Collections.singletonList(InterfaceName.AccountId.name());
