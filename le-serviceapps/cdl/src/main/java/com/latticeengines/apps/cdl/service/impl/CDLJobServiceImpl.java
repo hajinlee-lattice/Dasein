@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -29,6 +28,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -52,6 +52,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static final String LE_STACK = "LE_STACK";
     private static final String QUARTZ_STACK = "quartz";
+    private static final String USERID = "Auto Scheduled";
 
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
@@ -164,14 +165,25 @@ public class CDLJobServiceImpl implements CDLJobService {
         Date currentTime = new Date(currentTimeMillis);
 
         int runningProcessAnalyzeJobs = 0;
+        boolean haveAutoScheduledPAJob = false;
         List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<SimpleDataFeed>();
         List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
+
+        List<String> types = new ArrayList<>();
+        types.add("ProcessAnalyzeWorkflow");
+        List<String> jobStatuses = new ArrayList<>();
+        jobStatuses.add(JobStatus.RUNNING.getName());
+
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
             if (tenant.getStatus() == TenantStatus.ACTIVE) {
                 if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
                     runningProcessAnalyzeJobs++;
                     processAnalyzingDataFeeds.add(dataFeed);
+
+                    if (!haveAutoScheduledPAJob) {
+                        haveAutoScheduledPAJob = isAutoScheduledPAJob(types, jobStatuses, tenant);
+                    }
                 } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
                     MultiTenantContext.setTenant(tenant);
                     CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
@@ -193,11 +205,12 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
 
-        if (runningProcessAnalyzeJobs >= concurrentProcessAnalyzeJobs) {
+        for (SimpleDataFeed dataFeed : processAnalyzingDataFeeds) {
+            log.info(String.format("Tenant %s is running PA job.", dataFeed.getTenant().getName()));
+        }
+
+        if (runningProcessAnalyzeJobs >= concurrentProcessAnalyzeJobs && haveAutoScheduledPAJob) {
             log.info("Running process analyze jobs count is more than concurrent process analyze jobs count.");
-            for (SimpleDataFeed dataFeed : processAnalyzingDataFeeds) {
-                log.info(String.format("Tenant %s is running PA job.", dataFeed.getTenant().getName()));
-            }
             return;
         }
 
@@ -205,10 +218,11 @@ public class CDLJobServiceImpl implements CDLJobService {
         for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
             SimpleDataFeed dataFeed = entry.getValue().getKey();
             CDLJobDetail processAnalyzeJobDetail = entry.getValue().getValue();
-            if (runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs)
+            if (runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs || !haveAutoScheduledPAJob)
             {
                 if (submitProcessAnalyzeJob(dataFeed.getTenant(), processAnalyzeJobDetail)) {
                     runningProcessAnalyzeJobs++;
+                    haveAutoScheduledPAJob = true;
                     log.info(String.format("submitted invoke time: %s, tenant name: %s", entry.getKey(),
                              dataFeed.getTenant().getName()));
                 }
@@ -297,7 +311,10 @@ public class CDLJobServiceImpl implements CDLJobService {
             if (retry) {
                 applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
             } else {
-                applicationId = cdlProxy.processAnalyze(tenant.getId(), null);
+                ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+                request.setUserId(USERID);
+
+                applicationId = cdlProxy.processAnalyze(tenant.getId(), request);
             }
             cdlJobDetail.setApplicationId(applicationId.toString());
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.RUNNING);
@@ -361,4 +378,12 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
+    private boolean isAutoScheduledPAJob (List<String> types, List<String> jobStatuses, Tenant tenant) {
+        List<Job> jobs = workflowProxy.getJobs(null, types, jobStatuses, false, tenant.getId());
+        if(jobs != null && jobs.size() == 1) {
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(jobs.get(0).getApplicationId(), tenant.getId());
+            return job != null && job.getUser() == USERID;
+        }
+        return false;
+    }
 }
