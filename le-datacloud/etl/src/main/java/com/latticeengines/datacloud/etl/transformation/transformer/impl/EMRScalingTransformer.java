@@ -93,9 +93,9 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
                 }
                 log.info("Scaling task group from " + requested + " to " + target);
                 if (taskFleet != null) {
-                    emrService.scaleTaskFleet(taskFleet, 0, target);
+                    emrService.scaleTaskFleet(clusterId, taskFleet, 0, target);
                 } else {
-                    emrService.scaleTaskGroup(taskGrp, target);
+                    emrService.scaleTaskGroup(clusterId, taskGrp, target);
                 }
             }
         } else {

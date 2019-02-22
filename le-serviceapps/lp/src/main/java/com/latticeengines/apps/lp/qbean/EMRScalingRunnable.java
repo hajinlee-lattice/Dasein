@@ -211,9 +211,9 @@ public class EMRScalingRunnable implements Runnable {
     private void scale(int target) {
         try {
             if (taskFleet != null) {
-                emrService.scaleTaskFleet(taskFleet, 0, target);
+                emrService.scaleTaskFleet(clusterId, taskFleet, 0, target);
             } else {
-                emrService.scaleTaskGroup(taskGrp, target);
+                emrService.scaleTaskGroup(clusterId, taskGrp, target);
             }
         } catch (Exception e) {
             log.error("Failed to scale " + emrCluster + " to " + target, e);
