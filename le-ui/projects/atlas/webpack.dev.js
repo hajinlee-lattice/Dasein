@@ -20,7 +20,7 @@ module.exports = merge(common, {
     plugins: [
         //new HardSourceWebpackPlugin(),
         new MiniCssExtractPlugin({
-            filename: '[name].css'
+            filename: '[name].' + Date.now() + '.css'
         })
     ],
     module: {

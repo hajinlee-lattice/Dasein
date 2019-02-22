@@ -9,15 +9,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -45,17 +49,19 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     private String tenantId1;
     private String tenantId2;
+    private Tenant tenant1;
+    private Tenant tenant2;
 
     @BeforeClass(groups = "functional")
     @Override
-    public void setup() {
+    public void setup() throws Exception {
         tenantId1 = this.getClass().getSimpleName() + "1";
         tenantId2 = this.getClass().getSimpleName() + "2";
-        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
+        tenant1 = tenantService.findByTenantId(tenantId1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
+        tenant2 = tenantService.findByTenantId(tenantId2);
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
@@ -73,11 +79,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     @AfterClass(groups = "functional")
     public void teardown() {
-        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
@@ -406,7 +410,40 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.size(), 0);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindByTenantAndWorkflowPids")
+    @Test(groups = "functional", dependsOnMethods = "testFindByTenantAndWorkflowPids", dataProvider = "provideQueryByClusterIDData")
+    private void testFindByClusterIDAndTypesAndStatuses(WorkflowJob[] workflowJobs, ClusterIdQuery[] queries)
+            throws Exception {
+        try {
+            Arrays.stream(workflowJobs).forEach(workflowJobEntityMgr::create);
+            Thread.sleep(2000L);
+
+            Arrays.stream(queries).forEach(this::queryAndVerify);
+        } finally {
+            Arrays.stream(workflowJobs).forEach(workflowJobEntityMgr::delete);
+            Thread.sleep(2000L);
+        }
+    }
+
+    private void queryAndVerify(ClusterIdQuery query) {
+        String clusterId = query.clusterId;
+        List<String> types = query.types;
+        List<String> statuses = query.statuses;
+        List<WorkflowJob> jobs = workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, types, statuses);
+        Assert.assertNotNull(jobs);
+        jobs.forEach(job -> {
+            if (StringUtils.isNotBlank(clusterId)) {
+                Assert.assertEquals(job.getEmrClusterId(), clusterId);
+            }
+            if (CollectionUtils.isNotEmpty(types)) {
+                Assert.assertTrue(types.contains(job.getType()));
+            }
+            if (CollectionUtils.isNotEmpty(statuses)) {
+                Assert.assertTrue(statuses.contains(job.getStatus()));
+            }
+        });
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testFindByClusterIDAndTypesAndStatuses")
     public void testUpdateReport() {
         Tenant tenant2 = tenantService.findByTenantId(tenantId2);
         WorkflowJob workflowJob = new WorkflowJob();
@@ -452,5 +489,77 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.updateOutput(workflowJob2);
         WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
         assertEquals(workflowJob2.getOutputContextString(), workflowJob3.getOutputContextString());
+    }
+
+    @DataProvider(name = "provideQueryByClusterIDData")
+    private Object[][] provideQueryClusterIdData() {
+        return new Object[][] { //
+                { //
+                        new WorkflowJob[] { //
+                                newJob("c1", "PA", "RUNNING"), //
+                                newJob("c1", "PA", "FAILED"), //
+                                newJob("c1", "PA", "PENDING"), //
+                                newJob("c1", "PA", "COMPLETED"), //
+                                newJob("c1", "PA", "RUNNING"), //
+                                newJob("c1", "PA", "RUNNING"), //
+
+                                newJob("c1", "Import", "RUNNING"), //
+                                newJob("c1", "Import", "RUNNING"), //
+                                newJob("c1", "Import", "FAILED"), //
+                                newJob("c1", "Import", "COMPLETED"), //
+
+                                newJob("c2", "PA", "RUNNING"), //
+                                newJob("c2", "PA", "FAILED"), //
+                                newJob("c2", "PA", "PENDING"), //
+                                newJob("c2", "PA", "COMPLETED"), //
+
+                                newJob("c2", "Import", "RUNNING"), //
+                                newJob("c2", "Import", "PENDING"), //
+
+                                newJob(null, "PA", "PENDING"), //
+                                newJob(null, "PA", "PENDING"), //
+                        }, //
+                        new ClusterIdQuery[] { //
+                                new ClusterIdQuery("c1", null, null), //
+                                new ClusterIdQuery("c1", Collections.singletonList("PA"), null), //
+                                new ClusterIdQuery("c1", Collections.singletonList("PA"),
+                                        Arrays.asList("RUNNING", "PENDING")), //
+                                new ClusterIdQuery("c1", null, Arrays.asList("RUNNING", "PENDING")), //
+                                new ClusterIdQuery(null, Collections.singletonList("PA"),
+                                        Arrays.asList("RUNNING", "PENDING")), //
+                                new ClusterIdQuery(null, null, Arrays.asList("RUNNING", "PENDING")), //
+                                new ClusterIdQuery(null, null, null), //
+                                new ClusterIdQuery("c1", Arrays.asList("PA", "Import", "Nothing"),
+                                        Arrays.asList("RUNNING", "PENDING")), //
+                                new ClusterIdQuery(null, Arrays.asList("PA", "Import", "Nothing"),
+                                        Arrays.asList("RUNNING", "PENDING")), //
+                                new ClusterIdQuery(null, Collections.singletonList("PA"), null), //
+                        } //
+                }
+                // TODO add more test cases
+        };
+    }
+
+    private class ClusterIdQuery {
+        String clusterId;
+        List<String> types;
+        List<String> statuses;
+
+        public ClusterIdQuery(String clusterId, List<String> types, List<String> statuses) {
+            this.clusterId = clusterId;
+            this.types = types;
+            this.statuses = statuses;
+        }
+    }
+
+    private WorkflowJob newJob(String clusterId, String type, String status) {
+        WorkflowJob job = new WorkflowJob();
+        job.setApplicationId("app_" + UUID.randomUUID().toString());
+        job.setTenant(tenant1);
+        job.setType(type);
+        job.setEmrClusterId(clusterId);
+        job.setStatus(status);
+        job.setUserId(WorkflowUser.DEFAULT_USER.name());
+        return job;
     }
 }

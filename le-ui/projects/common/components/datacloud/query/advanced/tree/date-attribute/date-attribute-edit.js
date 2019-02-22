@@ -107,14 +107,23 @@ angular
           { name: "AFTER", displayName: "After" },
           { name: "IS_EMPTY", displayName: "Is Empty" }
         ];
-        this.changeCmp(this.timeCmp);
+        this.changeCmp(this.timeCmp, true);
       };
 
-      this.changeCmp = function(value, type) {
+      this.changeCmp = function(value, init) {
         let initialPeriod = this.periodsList[0].name;
+        
         setTimeout(() => {
-          let tmp = this.bucketrestriction.bkt.Fltr.Vals;
-          let copy = [...tmp];
+          // let tmp = this.bucketrestriction.bkt.Fltr.Vals;
+          let values = this.bucketrestriction.bkt.Fltr.Vals
+          if(!init){
+            this.periodNumberConfig.from.value = undefined;
+            this.periodNumberConfig.to.value = undefined;
+            this.periodTimeConfig.from.initial = undefined;
+            this.periodTimeConfig.to.initial = undefined;
+            values = [];
+          }
+          // let copy = values;
           switch (value) {
             case "EVER":
             case "IS_EMPTY":
@@ -132,7 +141,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 initialPeriod,
-                this.bucketrestriction.bkt.Fltr.Vals
+                values
               );
               this.resetTimeFramePeriod();
               break;
@@ -148,7 +157,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 initialPeriod,
-                this.bucketrestriction.bkt.Fltr.Vals
+                values
               );
               this.resetTimeFramePeriod();
               break;
@@ -164,7 +173,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 initialPeriod,
-                this.bucketrestriction.bkt.Fltr.Vals
+                values
               );
               this.resetTimeFramePeriod();
               break;
@@ -180,7 +189,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 "Day",
-                this.bucketrestriction.bkt.Fltr.Vals
+                values
               );
               this.resetTimeFramePeriod();
               break;
@@ -196,7 +205,7 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 initialPeriod,
-                this.bucketrestriction.bkt.Fltr.Vals
+                values
               );
               this.resetTimeFramePeriod();
               break;
@@ -215,10 +224,10 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 "Date",
-                copy
+                values
               );
-              this.periodTimeConfig.from.initial = copy[0];
-              this.periodTimeConfig.to.initial = copy[1];
+              // this.periodTimeConfig.from.initial = copy[0];
+              // this.periodTimeConfig.to.initial = copy[1];
               this.resetTimeFramePeriod();
               break;
 
@@ -236,15 +245,10 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 "Date",
-                [copy[0]]
+                values
               );
-              this.periodTimeConfig.from.initial = QueryTreeDateAttributeStore.getVal(
-                "Date",
-                this.timeCmp,
-                this.bucketrestriction.bkt,
-                0
-              ),
-              this.periodTimeConfig.from.initial = copy[0];
+              this.periodTimeConfig.from.initial = values[0] ? values [0] : undefined;
+              // this.periodTimeConfig.from.initial = copy[0];
               this.resetTimeFramePeriod();
               break;
 
@@ -263,9 +267,10 @@ angular
                 this.bucketrestriction.bkt,
                 value,
                 "Date",
-                [copy[0]]
+                values
               );
-              this.periodTimeConfig.from.initial = copy[0];
+              this.periodTimeConfig.from.initial = values[0] ? values [0] : undefined;
+              // this.periodTimeConfig.from.initial = copy[0];
               this.resetTimeFramePeriod();
               break;
           }

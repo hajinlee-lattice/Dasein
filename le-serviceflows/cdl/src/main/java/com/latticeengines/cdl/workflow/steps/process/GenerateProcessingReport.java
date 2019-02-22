@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -367,25 +369,25 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
+
         final int NUM_RETRIES = 3;
-        int retries = 0;
-        while (retries < NUM_RETRIES) {
+        RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(
+                NUM_RETRIES, 5000L, 2.0, null);
+        return template.execute(context -> {
+            if (context.getRetryCount() > 1) {
+                log.warn(String.format(
+                        "Retries=%d of %d. Exception in getting count from serving store for entity %s with version %s",
+                        context.getRetryCount(), NUM_RETRIES, entity.name(), inactive.name()),
+                        context.getLastThrowable());
+            }
             try {
                 return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
-            } catch (Exception ex) {
-                log.error(String.format(
-                        "Retries=%d of %d. Exception in getting count from serving store for entity %s with version %s",
-                        retries + 1, NUM_RETRIES, entity.name(), inactive.name()), ex);
-                retries++;
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
+            } catch (Exception exc) {
+                throw new RuntimeException(String.format(
+                        "Fail to get count from serving store for entity %s with version %s.",
+                        entity.name(), inactive.name()), exc);
             }
-        }
-        throw new RuntimeException(String.format("Fail to get count from serving store for entity %s with version %s.",
-                entity.name(), inactive.name()));
+        });
     }
 
     private Map<BusinessEntity, Long> getDeletedCount() {

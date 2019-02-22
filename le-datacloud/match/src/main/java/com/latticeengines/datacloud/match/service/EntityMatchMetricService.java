@@ -1,11 +1,15 @@
 package com.latticeengines.datacloud.match.service;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.retry.RetryContext;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
 /**
  * Service for recording entity match related metrics
@@ -55,4 +59,24 @@ public interface EntityMatchMetricService {
      *            entire entity match history
      */
     void recordMatchHistory(FuzzyMatchHistory history);
+
+    /**
+     * Start gathering cache metrics for given cache instance. Noop if the input
+     * cache is {@literal null}
+     *
+     * @param cache
+     *            target lookup cache
+     * @param isAllocateMode
+     *            true if it is allocateId mode, false if lookup mode
+     */
+    void registerLookupCache(Cache<Pair<String, EntityLookupEntry>, String> cache, boolean isAllocateMode);
+
+    /**
+     * Start gathering cache metrics for given cache instance. Noop if the input
+     * cache is {@literal null}
+     *
+     * @param cache
+     *            target entity seed cache
+     */
+    void registerSeedCache(Cache<Pair<Pair<String, String>, String>, EntityRawSeed> cache);
 }

@@ -30,7 +30,7 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.init = function() {
         var flags = FeatureFlagService.Flags();
-        vm.importWithoutId = FeatureFlagService.FlagIsEnabled(flags.IMPORT_WITHOUT_ID);
+        vm.importWithoutIds = FeatureFlagService.FlagIsEnabled(flags.IMPORT_WITHOUT_IDS);
 
         vm.UnmappedFields = UnmappedFields;
         ImportWizardStore.setUnmappedFields(UnmappedFields);

@@ -599,7 +599,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("YYYY-MM-DD");
                     fieldMapping.setTimeFormatString(null);
-                    fieldMapping.setTimezone("UTC-8     America/Los Angeles, America/Vancouver");
+                    fieldMapping.setTimezone("America/Los_Angeles");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
@@ -608,7 +608,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("DD.MM.YY");
                     fieldMapping.setTimeFormatString("00:00:00 24H");
-                    fieldMapping.setTimezone("UTC+8     Asia/Shanghai, Australia/Perth");
+                    fieldMapping.setTimezone("Asia/Shanghai");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
@@ -617,7 +617,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("MM/DD/YYYY");
                     fieldMapping.setTimeFormatString("00-00-00 12H");
-                    fieldMapping.setTimezone("UTC+5:30  Asia/Kolkata, Asia/Colombo");
+                    fieldMapping.setTimezone("Asia/Kolkata");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
@@ -638,7 +638,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("DD-MMM-YY");
                     fieldMapping.setTimeFormatString("00 00 00 24H");
-                    fieldMapping.setTimezone("UTC+1     Europe/Berlin, Africa/Lagos");
+                    fieldMapping.setTimezone("Europe/Berlin");
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 

@@ -143,6 +143,14 @@ public class WorkflowResource {
         }
     }
 
+    @GetMapping(value = "/clusters/current/jobs/count", headers = "Accept=application/json")
+    @ApiOperation(value = "Get the number of workflow jobs that are not in terminal state in current cluster.")
+    public Integer getNonTerminalJobCount( //
+            @RequestParam(required = false) String customerSpace, //
+            @RequestParam(value = "type", required = false) List<String> types) {
+        return workflowJobService.getNonTerminalJobCount(customerSpace, types);
+    }
+
     @PostMapping(value = "/jobsByPid", headers = "Accept=application/json")
     @ApiOperation(value = "Get list of workflow jobs by given list of workflowPid or job types.")
     public List<Job> getJobsByPid(@RequestBody JobRequest request) {

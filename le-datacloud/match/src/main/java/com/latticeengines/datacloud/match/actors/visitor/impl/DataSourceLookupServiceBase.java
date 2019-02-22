@@ -7,9 +7,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.TravelException;
@@ -17,10 +20,15 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
+import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
 public abstract class DataSourceLookupServiceBase implements DataSourceLookupService {
     private static final Logger log = LoggerFactory.getLogger(DataSourceLookupServiceBase.class);
+
+    @Lazy
+    @Inject
+    protected MatchMetricService matchMetricService;
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -29,6 +37,8 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     private final ConcurrentMap<String, DataSourceLookupRequest> reqs = new ConcurrentHashMap<>();
 
+    private volatile boolean instantiated = false;
+
     abstract protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
 
     abstract protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
@@ -36,6 +46,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     @Override
     public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
+        registerForMonitoring();
         ExecutorService executor = actorSystem.getDataSourceServiceExecutor();
         Runnable task = createLookupRunnable(lookupRequestId, request, returnAddress);
         executor.execute(task);
@@ -65,6 +76,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     @Override
     public Response syncLookup(Object request) {
+        registerForMonitoring();
         Response response = new Response();
         if (request instanceof DataSourceLookupRequest) {
             ((DataSourceLookupRequest) request).setTimestamp(System.currentTimeMillis());
@@ -123,6 +135,15 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         return actorSystem;
     }
 
+    /**
+     * Whether to monitor stats of this service.
+     *
+     * @return flag to enable/disable monitoring
+     */
+    protected boolean enableMonitoring() {
+        return false;
+    }
+
     @Override
     public Map<String, Integer> getTotalPendingReqStats() {
         Map<String, Integer> res = new HashMap<>();
@@ -133,5 +154,23 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         res.put(MatchConstants.QUEUED_REQ_NUM,
                 executor == null || executor.getQueue() == null ? 0 : executor.getQueue().size());
         return res;
+    }
+
+    /*
+     * register self for monitoring after the first request
+     */
+    private void registerForMonitoring() {
+        if (instantiated) {
+            return;
+        }
+
+        synchronized (this) {
+            if (!instantiated) {
+                if (enableMonitoring()) {
+                    matchMetricService.registerDataSourceLookupService(this, actorSystem.isBatchMode());
+                }
+                instantiated = true;
+            }
+        }
     }
 }

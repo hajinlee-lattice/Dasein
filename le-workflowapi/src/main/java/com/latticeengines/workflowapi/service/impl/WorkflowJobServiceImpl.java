@@ -49,6 +49,9 @@ import com.latticeengines.workflowapi.service.WorkflowJobService;
 public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
 
+    private static final List<String> NON_TERMINAL_JOB_STATUSES = Job.NON_TERMINAL_JOB_STATUS.stream()
+            .map(JobStatus::getName).collect(Collectors.toList());
+
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String atimelineServiceUrl;
 
@@ -307,6 +310,23 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
                 leJobExecutionRetriever, getLpUrl(), workflowJob, includeDetails)).collect(Collectors.toList());
+    }
+
+    @Override
+    @WithCustomerSpace
+    public int getNonTerminalJobCount(String customerSpace, List<String> types) {
+        String clusterId = workflowContainerService.getCurrentClusterId();
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, types,
+                NON_TERMINAL_JOB_STATUSES);
+
+        List<Long> pids = workflowJobs.stream() //
+                .filter(Objects::nonNull) //
+                .map(WorkflowJob::getPid) //
+                .filter(Objects::nonNull) //
+                .collect(Collectors.toList());
+        log.debug("Following workflow jobs of types = {} are not in terminal state. ClusterID={}, PIDs={}", types,
+                clusterId, pids);
+        return CollectionUtils.size(workflowJobs);
     }
 
     @WithCustomerSpace
