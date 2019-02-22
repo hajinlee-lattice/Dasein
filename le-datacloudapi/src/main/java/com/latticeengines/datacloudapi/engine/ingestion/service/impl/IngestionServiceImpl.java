@@ -128,6 +128,7 @@ public class IngestionServiceImpl implements IngestionService {
             } catch (Exception e) {
                 log.error("Failed to track application status for " + progress.getApplicationId(), e);
                 if (e instanceof ApplicationNotFoundException) {
+                    // ApplicationId no longer exist in RM
                     progress = ingestionProgressService.updateProgress(progress)
                             .status(ProgressStatus.FAILED)
                             .errorMessage(e.getMessage())
