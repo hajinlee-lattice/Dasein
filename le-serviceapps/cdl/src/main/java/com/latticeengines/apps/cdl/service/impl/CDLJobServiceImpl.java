@@ -96,7 +96,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private CDLProxy cdlProxy;
 
-    private List<String> types = Collections.singletonList("ProcessAnalyzeWorkflow");
+    private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
     private List<String> jobStatuses = Collections.singletonList(JobStatus.RUNNING.getName());
 
     @PostConstruct
