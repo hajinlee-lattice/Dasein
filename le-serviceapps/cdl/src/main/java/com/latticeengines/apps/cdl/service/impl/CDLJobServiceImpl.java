@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,6 +96,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private CDLProxy cdlProxy;
 
+    private List<String> types = Collections.singletonList("ProcessAnalyzeWorkflow");
+    private List<String> jobStatuses = Collections.singletonList(JobStatus.RUNNING.getName());
+
     @PostConstruct
     public void initialize() {
         if (isQuartzStack) {
@@ -168,12 +172,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         boolean haveAutoScheduledPAJob = false;
         List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<SimpleDataFeed>();
         List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
-
-        List<String> types = new ArrayList<>();
-        types.add("ProcessAnalyzeWorkflow");
-        List<String> jobStatuses = new ArrayList<>();
-        jobStatuses.add(JobStatus.RUNNING.getName());
-
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
             if (tenant.getStatus() == TenantStatus.ACTIVE) {
@@ -182,7 +180,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                     processAnalyzingDataFeeds.add(dataFeed);
 
                     if (!haveAutoScheduledPAJob) {
-                        haveAutoScheduledPAJob = isAutoScheduledPAJob(types, jobStatuses, tenant);
+                        haveAutoScheduledPAJob = isAutoScheduledPAJob(tenant.getId());
                     }
                 } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
                     MultiTenantContext.setTenant(tenant);
@@ -378,11 +376,14 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private boolean isAutoScheduledPAJob (List<String> types, List<String> jobStatuses, Tenant tenant) {
-        List<Job> jobs = workflowProxy.getJobs(null, types, jobStatuses, false, tenant.getId());
-        if(jobs != null && jobs.size() == 1) {
-            Job job = workflowProxy.getWorkflowJobFromApplicationId(jobs.get(0).getApplicationId(), tenant.getId());
-            return job != null && job.getUser() == USERID;
+    private boolean isAutoScheduledPAJob (String tenantId) {
+        List<Job> jobs = workflowProxy.getJobs(null, types, jobStatuses, false, tenantId);
+        if(jobs != null) {
+            if (jobs.size() == 1) {
+                return USERID.equals(jobs.get(0).getUser());
+            } else {
+                log.warn(String.format("There are more than one running PA jobs for tenant %s", tenantId));
+            }
         }
         return false;
     }
