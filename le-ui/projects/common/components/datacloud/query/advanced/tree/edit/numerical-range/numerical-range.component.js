@@ -92,7 +92,7 @@ angular
                         case 1: {
                             var fromVal = $scope.values.from.value;
                             if (fromVal) {
-                                return fromVal + 1;
+                                return fromVal + 0.1;
                             } else {
                                 return conf.min != undefined ? conf.min : '';
                             }
@@ -122,7 +122,7 @@ angular
                         case 0: {
                             var toVal = $scope.values.to.value;
                             if (toVal) {
-                                return toVal - 1;
+                                return toVal - 0.1;
                             } else {
                                 return conf.max != undefined ? conf.max : '';
                             }
