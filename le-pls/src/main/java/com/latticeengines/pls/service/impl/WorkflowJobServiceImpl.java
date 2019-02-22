@@ -22,6 +22,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,6 +102,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Value("${pls.pa.max.concurrent.limit}")
+    private int maxActivePA;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -393,7 +397,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Job job = new Job();
         job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
         job.setName(PA_JOB_TYPE);
-        job.setJobStatus(JobStatus.READY);
+        // set to disable if there are too many PAs running at the moment
+        job.setJobStatus(getNumActivePA() < maxActivePA ? JobStatus.READY : JobStatus.DISABLED);
         job.setJobType(PA_JOB_TYPE);
         String tenantId = MultiTenantContext.getShortTenantId();
         List<Action> actions = actionProxy.getActionsByOwnerId(tenantId, null);
@@ -410,6 +415,19 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
         return job;
+    }
+
+    /*
+     * retrieve number of PA in non-terminal state in current system
+     */
+    private int getNumActivePA() {
+        // not failing anything if we cannot get the count since this is frontend
+        if (MultiTenantContext.getCustomerSpace() == null) {
+            return 0;
+        }
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        Integer nActivePA = workflowProxy.getNonTerminalJobCount(customerSpace, Collections.singletonList(PA_JOB_TYPE));
+        return nActivePA == null ? 0 : nActivePA;
     }
 
     private Boolean isVisibleAction(Action action) {

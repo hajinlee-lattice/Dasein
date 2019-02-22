@@ -41,6 +41,11 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("SkipAPS")
     private boolean skipAPS = false;
 
+    // flag to force start another PA disregarding the number of currently running
+    // PA in the cluster
+    @JsonProperty("ForceRun")
+    private Boolean forceRun;
+
     /*
      * flag to inherit all import actions from last failed PA
      */
@@ -131,5 +136,13 @@ public class ProcessAnalyzeRequest {
 
     public void setImportActionPidsToInherit(List<Long> importActionPidsToInherit) {
         this.importActionPidsToInherit = importActionPidsToInherit;
+    }
+
+    public Boolean getForceRun() {
+        return forceRun;
+    }
+
+    public void setForceRun(Boolean forceRun) {
+        this.forceRun = forceRun;
     }
 }

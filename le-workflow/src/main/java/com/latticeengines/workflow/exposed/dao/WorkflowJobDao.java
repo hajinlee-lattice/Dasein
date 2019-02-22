@@ -40,6 +40,21 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     List<WorkflowJob> findByTenantAndWorkflowPids(Tenant tenant, List<Long> workflowPids);
 
+    /**
+     * Retrieve all jobs with given cluster ID, one of the given types and one of
+     * the given statuses.
+     *
+     * @param clusterId
+     *            target cluster ID
+     * @param workflowTypes
+     *            target list of workflow types
+     * @param statuses
+     *            target list of workflow statuses
+     * @return non-null list of all jobs satisfying all criteria
+     */
+    List<WorkflowJob> findByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
+            List<String> statuses);
+
     void updateStatus(WorkflowJob workflowJob);
 
     void updateStatusAndStartTime(WorkflowJob workflowJob);

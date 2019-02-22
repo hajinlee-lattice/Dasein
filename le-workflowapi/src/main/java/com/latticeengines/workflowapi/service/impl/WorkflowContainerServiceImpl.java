@@ -364,6 +364,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
     }
 
+    @Override
+    public String getCurrentClusterId() {
+        return jobService.getEmrClusterId();
+    }
+
     private String ambariAppHistoryUrl(String appId) {
         return String.format("%s/app/%s", ambariTimelineServiceAddress, appId);
     }
