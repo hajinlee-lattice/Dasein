@@ -67,6 +67,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
+    private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
+
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
@@ -78,6 +80,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
+
+    @Value("${cdl.pa.max.concurrent.limit}")
+    private int maxConcurrentPA;
 
     @Value("${cdl.account.dataquota.limit:5000000}")
     private Long defaultAccountQuotaLimit;
@@ -127,6 +132,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
         if (dataCollection == null) {
             throw new LedpException(LedpCode.LEDP_37014);
+        }
+
+        // make sure currently not-terminated PA jobs do not exceed limit
+        if (!Boolean.TRUE.equals(request.getForceRun())) {
+            Integer nActivePA = workflowProxy.getNonTerminalJobCount(customerSpace,
+                    Collections.singletonList(PA_JOB_TYPE));
+            Preconditions.checkNotNull(nActivePA);
+            if (nActivePA >= maxConcurrentPA) {
+                log.info("There are {} non-terminal PA at the moment, cannot start another one. Limit = {}", nActivePA,
+                        maxConcurrentPA);
+                throw new LedpException(LedpCode.LEDP_40054);
+            }
         }
 
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
