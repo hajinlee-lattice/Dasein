@@ -287,6 +287,11 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             return this;
         }
 
+        public IngestionProgressUpdaterImpl retries(int retries) {
+            this.progress.setRetries(retries);
+            return this;
+        }
+
         public IngestionProgress commit(boolean persistent) {
             progress.setLatestStatusUpdate(new Date());
             if (persistent) {

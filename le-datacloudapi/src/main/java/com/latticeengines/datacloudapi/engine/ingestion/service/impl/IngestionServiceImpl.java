@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -127,11 +128,14 @@ public class IngestionServiceImpl implements IngestionService {
                 }
             } catch (Exception e) {
                 log.error("Failed to track application status for " + progress.getApplicationId(), e);
-                if (e instanceof ApplicationNotFoundException) {
-                    // ApplicationId no longer exist in RM
+                if (ExceptionUtils.indexOfThrowable(e, ApplicationNotFoundException.class) > -1) {
+                    // ApplicationId no longer exist in RM.
+                    // ApplicationNotFoundException is nested exception inside
+                    // YarnSystemException
                     progress = ingestionProgressService.updateProgress(progress)
                             .status(ProgressStatus.FAILED)
-                            .errorMessage(e.getMessage())
+                            .retries(1000) // Should not retry for this case
+                            .errorMessage("Application doesn't exist in RM")
                             .commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }
