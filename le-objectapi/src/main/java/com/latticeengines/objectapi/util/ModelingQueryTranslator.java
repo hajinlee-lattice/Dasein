@@ -50,8 +50,9 @@ public class ModelingQueryTranslator extends QueryTranslator {
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
         QueryBuilder queryBuilder = Query.builder();
-        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false);
-        restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
+        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser, false);
+        restriction = translateInnerRestriction(frontEndQuery, timeTranslator, sqlUser, BusinessEntity.Account,
+                restriction);
 
         if (frontEndQuery.getSegmentQuery() != null) {
             Restriction segmentRestriction = translateSegmentQuery(frontEndQuery.getSegmentQuery(), timeTranslator,
@@ -103,12 +104,14 @@ public class ModelingQueryTranslator extends QueryTranslator {
         return frontEndRestriction == null || frontEndRestriction.getRestriction() == null;
     }
 
-    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery, TimeFilterTranslator timeTranslator, String sqlUser) {
+    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery, TimeFilterTranslator timeTranslator,
+            String sqlUser) {
         FrontEndRestriction segmentAccountRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
                 segmentQuery);
         Restriction segmentRestriction = translateFrontEndRestriction(segmentAccountRestriction, timeTranslator,
-                                                                      sqlUser, true);
-        segmentRestriction = translateInnerRestriction(segmentQuery, BusinessEntity.Account, segmentRestriction);
+                sqlUser, true);
+        segmentRestriction = translateInnerRestriction(segmentQuery, timeTranslator, sqlUser, BusinessEntity.Account,
+                segmentRestriction);
         return segmentRestriction;
     }
 
