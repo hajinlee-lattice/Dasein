@@ -125,8 +125,8 @@ abstract class QueryTranslator {
         return restriction;
     }
 
-    Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            Restriction outerRestriction) {
+    Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
+            String sqlUser, BusinessEntity outerEntity, Restriction outerRestriction) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:
@@ -139,7 +139,8 @@ abstract class QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, true);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser,
+                true);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
