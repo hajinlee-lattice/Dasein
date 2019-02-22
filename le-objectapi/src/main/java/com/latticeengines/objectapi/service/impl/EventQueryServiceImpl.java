@@ -1,11 +1,5 @@
 package com.latticeengines.objectapi.service.impl;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -23,6 +17,11 @@ import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {
@@ -30,6 +29,7 @@ public class EventQueryServiceImpl implements EventQueryService {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(EventQueryServiceImpl.class);
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
+    private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
 
     private final QueryEvaluatorService queryEvaluatorService;
 
@@ -71,7 +71,6 @@ public class EventQueryServiceImpl implements EventQueryService {
         return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event, version);
     }
 
-
     private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
             DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
@@ -79,10 +78,11 @@ public class EventQueryServiceImpl implements EventQueryService {
         try {
             ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(
                     queryEvaluatorService.getQueryFactory(), attrRepo);
-            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(
-                    transactionService, frontEndQuery.getSegmentQuery());
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
-            return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
+            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
+                    frontEndQuery.getSegmentQuery());
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator,
+                    SEGMENT_USER);
+            return queryEvaluatorService.getCount(attrRepo, query, SEGMENT_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
@@ -95,8 +95,8 @@ public class EventQueryServiceImpl implements EventQueryService {
         try {
             ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(
                     queryEvaluatorService.getQueryFactory(), attrRepo);
-            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(
-                    transactionService, frontEndQuery.getSegmentQuery());
+            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
+                    frontEndQuery.getSegmentQuery());
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
             return queryEvaluatorService.getData(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
