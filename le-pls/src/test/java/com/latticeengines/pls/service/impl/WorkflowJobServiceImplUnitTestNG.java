@@ -20,7 +20,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.joda.time.DateTime;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -99,7 +98,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     private static final String INITIATOR = "test@lattice-engines.com";
 
     @BeforeClass(groups = "unit")
-    public void setup() throws Exception {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
         mockWorkflowProxy();
         mockSourceFileEntityManager();
@@ -108,7 +107,6 @@ public class WorkflowJobServiceImplUnitTestNG {
         mockDataFeedProxy();
         mockModelSummaryProxy();
 
-        FieldUtils.writeField(workflowJobService, "maxActivePA", 5, true);
         Tenant tenant = tenantEntityMgr.findByTenantId("tenant");
         MultiTenantContext.setTenant(tenant);
     }
@@ -376,7 +374,6 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Job> jobs = new ArrayList<>();
         jobs.add(createJob(jobIds[0]));
         jobs.add(createJob(jobIds[1]));
-        when(workflowProxy.getNonTerminalJobCount(anyString(), anyList())).thenReturn(0);
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(jobs);
         when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(jobs);
     }

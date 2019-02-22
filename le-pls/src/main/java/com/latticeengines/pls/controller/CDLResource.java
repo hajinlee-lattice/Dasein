@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -88,6 +89,10 @@ public class CDLResource {
             return ResponseDocument.successResponse(result.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit processAnalyze job: %s", e.getMessage()));
+            if (e instanceof UIActionException) {
+                // rethrow UI action exception to show error message
+                throw e;
+            }
             return ResponseDocument.failedResponse(
                     new LedpException(LedpCode.LEDP_18182, new String[] { "ProcessAnalyze", e.getMessage() }));
         }
