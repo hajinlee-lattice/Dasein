@@ -821,6 +821,9 @@ angular.module('lp.import')
             // var tmp = $state.get('home.import').data.redux;
             // tmp.fetch(FileName, entity, feedType, source);
             // console.log(tmp);
+
+            console.log(params);
+
 	        $http({
 	            method: 'POST',
 	            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings',

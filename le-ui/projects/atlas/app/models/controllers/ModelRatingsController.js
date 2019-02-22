@@ -217,6 +217,9 @@ angular.module('lp.models.ratings', [
             'Past Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
 
 
+        console.log(vm.buckets);
+        console.log(vm.ratingsSummary.bucketed_scores);
+
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
             var bucket = vm.buckets[i];
@@ -235,6 +238,7 @@ angular.module('lp.models.ratings', [
             }
 
             vm.rightScore = bucket.right_bound_score - 1;
+            
             vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
             vm.rightConverted = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_converted;
             vm.leftScore = bucket.left_bound_score;
@@ -246,24 +250,23 @@ angular.module('lp.models.ratings', [
 
             var bucketLeads = 0,
                 bucketRevenue = 0,
-                firstVal = 0, 
-                secondVal = 0; 
-
-            var score = null;
-
+                bucketConverted = 0,
+                score = null;
 
             for (var index = vm.leftScore; index > vm.rightScore; index--) {
                 score = vm.ratingsSummary.bucketed_scores[index];
 
                 bucketLeads += score.num_leads;
+                bucketConverted += score.num_converted;
                 bucketRevenue += score.expected_revenue;
 
-                firstVal += (score.num_converted * score.num_leads);
-                secondVal += (score.num_leads * score.num_leads);
-
+                // firstVal += (score.num_converted * score.num_leads);
+                // secondVal += (score.num_leads * score.num_leads);
             }
 
-            bucket.conversionRate = (firstVal / secondVal) * 100;
+            bucket.conversionRate = (bucketConverted / bucketLeads) * 100;
+
+            // bucket.conversionRate = (firstVal / secondVal) * 100;
             bucket.bucket_name = vm.bucketNames[i];
             bucket.bucketAvgRevenue = bucketRevenue / bucketLeads;
             bucket.avg_expected_revenue = bucket.bucketAvgRevenue;
