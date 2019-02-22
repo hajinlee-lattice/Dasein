@@ -14,7 +14,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,8 +113,8 @@ public class IngestionServiceImpl implements IngestionService {
         fields.put("Status", ProgressStatus.PROCESSING);
         List<IngestionProgress> progresses = ingestionProgressService.getProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
-            ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
             try {
+                ApplicationId appId = ApplicationId.fromString(progress.getApplicationId());
                 ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
                 if (report == null || report.getYarnApplicationState() == null
                         || report.getYarnApplicationState().equals(YarnApplicationState.FAILED)
