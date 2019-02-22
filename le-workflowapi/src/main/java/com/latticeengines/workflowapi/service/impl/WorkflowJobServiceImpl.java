@@ -324,7 +324,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 .map(WorkflowJob::getPid) //
                 .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
-        log.info("Following workflow jobs of types = {} are not in terminal state. ClusterID={}, PIDs={}", types,
+        log.debug("Following workflow jobs of types = {} are not in terminal state. ClusterID={}, PIDs={}", types,
                 clusterId, pids);
         return CollectionUtils.size(workflowJobs);
     }
