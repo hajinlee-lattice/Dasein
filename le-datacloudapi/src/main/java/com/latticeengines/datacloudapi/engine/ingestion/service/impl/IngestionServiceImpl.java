@@ -1,6 +1,5 @@
 package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.exceptions.YarnException;
+import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,13 +125,12 @@ public class IngestionServiceImpl implements IngestionService {
                             .commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }
-            } catch (YarnException | IOException e) {
-                log.error("Failed to track application status for " + progress.getApplicationId()
-                        + ". Error: " + e.toString());
-                if (e.getMessage().contains("doesn't exist in the timeline store")) {
+            } catch (Exception e) {
+                log.error("Failed to track application status for " + progress.getApplicationId(), e);
+                if (e instanceof ApplicationNotFoundException) {
                     progress = ingestionProgressService.updateProgress(progress)
                             .status(ProgressStatus.FAILED)
-                            .errorMessage("Failed to track application status in the scan")
+                            .errorMessage(e.getMessage())
                             .commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }
