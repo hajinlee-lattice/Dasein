@@ -392,6 +392,7 @@ public class CDLServiceImpl implements CDLService {
     private UIAction getSystemBusyUIAction() {
         UIAction action = new UIAction();
         action.setView(View.Banner);
+        action.setTitle("");
         action.setMessage(LedpCode.LEDP_40054.getMessage());
         action.setStatus(Status.Error);
         return action;
