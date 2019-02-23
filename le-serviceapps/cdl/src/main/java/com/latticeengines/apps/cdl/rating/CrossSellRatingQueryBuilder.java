@@ -174,6 +174,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
         ratingFrontEndQuery.setEvaluationPeriodId(evaluationPeriodId);
         ratingFrontEndQuery.setSegmentQuery(getAccountFiltererSegmentQuery());
+        ratingFrontEndQuery.setContactRestriction(null);
     }
 
     protected Restriction buildFinalQueryRestriction() {
