@@ -17,16 +17,18 @@ import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEnt
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.testframework.TestIngestionService;
 import com.latticeengines.datacloudapi.engine.ingestion.service.IngestionService;
+import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
-public class IngestionServiceTestNG {
+public class IngestionServiceTestNG extends PropDataEngineFunctionalTestNGBase {
 
     private final static String PREFIX = IngestionServiceTestNG.class.getSimpleName();
-    private static final String FILE_NAME = "FakedFileName";
+    private static final String FILE_NAME = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
     private static final String TEST_SUBMITTER = PropDataConstants.SCAN_SUBMITTER;
+    private static final String VERSION = "2019-01-01_00-00-00_UTC";
 
     @Inject
     private TestIngestionService testIngestionService;
@@ -58,17 +60,23 @@ public class IngestionServiceTestNG {
     @Test(groups = "functional", dataProvider = "ProgressAppIds")
     public void testKillFailedProgresses(String appId) {
         IngestionProgress progress = progressService.createDraftProgress(ingestion, TEST_SUBMITTER, FILE_NAME,
-                null);
+                VERSION);
         progress.setApplicationId(appId);
         progress.setStatus(ProgressStatus.PROCESSING);
         progress = progressService.saveProgress(progress);
         Assert.assertNotNull(progress.getPid());
         ingestionService.killFailedProgresses();
         progress = progressEntityMgr.findProgress(progress);
-        Assert.assertEquals(progress.getStatus(), ProgressStatus.FAILED);
+        // Only valid ApplicationId which doesn't exist in RM is killed
+        // Other invalid ApplicationIds just log exception in service,
+        // expectation is they should not cause method to fail
+        if (appId != null && appId.startsWith("application")) {
+            Assert.assertEquals(progress.getStatus(), ProgressStatus.FAILED);
+            Assert.assertEquals(progress.getRetries(), IngestionServiceImpl.ULTIMATE_RETRIES);
+        }
     }
 
-    @DataProvider(name = "ProgressAppIds", parallel = true)
+    @DataProvider(name = "ProgressAppIds")
     private Object[][] getProgressAppIds() {
         return new Object[][] { //
                 // Valid ApplicationId format
@@ -85,11 +93,11 @@ public class IngestionServiceTestNG {
     }
 
     private void createIngestion() {
-        // Didn't provide valid ingestion config since current test doesn't need
-        // it. Could fix it if necessary in future
         ingestion = testIngestionService
                 .createIngestions(
-                        Collections.singletonList(Triple.of(PREFIX + "_Ingestion", "", IngestionType.SFTP)))
+                        Collections.singletonList(Triple.of(PREFIX + "_Ingestion",
+                                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                                IngestionType.SFTP)))
                 .get(0);
         Assert.assertNotNull(ingestion.getPid());
     }
