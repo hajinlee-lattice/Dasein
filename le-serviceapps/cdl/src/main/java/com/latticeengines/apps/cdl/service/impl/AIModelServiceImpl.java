@@ -214,13 +214,22 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             ModelingQueryType modelingQueryType, DataCollection.Version version) {
         CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+        Set<String> attributeMetadata = servingStoreProxy
+                .getDecoratedMetadataFromCache(customerSpace, BusinessEntity.Account).stream()
+                .filter(ColumnMetadata::isDateAttribute).map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+
+        if (CollectionUtils.isEmpty(attributeMetadata)) {
+            log.warn("No metadata attribute metadata found for tenant: " + customerSpace);
+            // Initilize an empty map so that modeling query generation does not fail
+            attributeMetadata = new HashSet<>();
+        }
 
         if (advancedConf != null
                 && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
             PeriodStrategy strategy = periodService.getApsRollupPeriod(version);
             int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder.getCrossSellRatingQueryBuilder(
-                    ratingEngine, aiModel, modelingQueryType, strategy.getName(), maxPeriod);
+                    ratingEngine, aiModel, modelingQueryType, strategy.getName(), maxPeriod, attributeMetadata);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,

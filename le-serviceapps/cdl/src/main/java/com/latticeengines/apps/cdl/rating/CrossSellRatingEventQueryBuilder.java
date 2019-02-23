@@ -1,11 +1,5 @@
 package com.latticeengines.apps.cdl.rating;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-
-import org.apache.commons.collections4.CollectionUtils;
-
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -21,11 +15,18 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilder {
 
-    protected CrossSellRatingEventQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName, int evaluationPeriod) {
-        super(ratingEngine, aiModel, periodTypeName, evaluationPeriod);
+    protected CrossSellRatingEventQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName,
+            int evaluationPeriod, Set<String> attributeMetadata) {
+        super(ratingEngine, aiModel, periodTypeName, evaluationPeriod, attributeMetadata);
     }
 
     @Override
@@ -84,26 +85,24 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
         }
 
         switch (advancedConf.getModelingStrategy()) {
-        case CROSS_SELL_REPEAT_PURCHASE:
-            ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD);
-            if (configFilter == null) {
-                throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
-            }
+            case CROSS_SELL_REPEAT_PURCHASE:
+                ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD);
+                if (configFilter == null) {
+                    throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
+                }
 
-            // Not Purchased In Past X Periods
-            crossSellRestriction = (configFilter.getValue() == null || configFilter.getValue() < 1)
-                    ? null
-                    : new TransactionRestriction(productIds,
-                            TimeFilter.priorOnly(configFilter.getValue() - 1, periodTypeName),
-                            false, null, null);
-            break;
-        case CROSS_SELL_FIRST_PURCHASE:
-            // Never Purchased Including Current Period
-            crossSellRestriction = new TransactionRestriction(productIds, TimeFilter.ever(periodTypeName), true, null,
-                    null);
-            break;
-        default:
-            throw new LedpException(LedpCode.LEDP_40017);
+                // Not Purchased In Past X Periods
+                crossSellRestriction = (configFilter.getValue() == null || configFilter.getValue() < 1) ? null
+                        : new TransactionRestriction(productIds,
+                                TimeFilter.priorOnly(configFilter.getValue() - 1, periodTypeName), false, null, null);
+                break;
+            case CROSS_SELL_FIRST_PURCHASE:
+                // Never Purchased Including Current Period
+                crossSellRestriction = new TransactionRestriction(productIds, TimeFilter.ever(periodTypeName), true,
+                        null, null);
+                break;
+            default:
+                throw new LedpException(LedpCode.LEDP_40017);
         }
 
         productTxnRestriction = Restriction.builder() //

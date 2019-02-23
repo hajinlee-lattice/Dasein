@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -188,7 +189,15 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     @Override
     public com.latticeengines.domain.exposed.dataplatform.JobStatus getJobStatus(String applicationId) {
-        return jobService.getJobStatus(applicationId);
+        try {
+            return jobService.getJobStatus(applicationId);
+        } catch (Exception e) {
+            if (ExceptionUtils.indexOfThrowable(e, ApplicationNotFoundException.class) > -1) {
+                // return null when application does not exist in RM
+                return null;
+            }
+            throw e;
+        }
     }
 
     private JobRequest createJobRequest(WorkflowConfiguration workflowConfig) {
