@@ -108,6 +108,13 @@
             <artifactId>commons-csv</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-etl</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
