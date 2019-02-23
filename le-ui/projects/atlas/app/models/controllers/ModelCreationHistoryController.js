@@ -1,6 +1,6 @@
 angular.module('mainApp.models.controllers.ModelCreationHistoryController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.ImportModelModal'

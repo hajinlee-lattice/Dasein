@@ -14,9 +14,9 @@ var mainApp = angular.module('insightsApp', [
     'angulartics', 
     'angulartics.mixpanel',
 
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.services.ResourceStringsService',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.login.services.LoginService'
 ])
 .config(function($httpProvider) {

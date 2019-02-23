@@ -2,7 +2,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.utilities.URLUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.core.services.DanteWidgetService',

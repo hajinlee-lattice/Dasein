@@ -1,6 +1,4 @@
-angular
-.module('common.datacloud.explorer.companyprofile', [])
-.directive('explorerCompanyProfile',function() {
+export default function () {
     return {
         restrict: 'A',
         scope: {
@@ -8,9 +6,11 @@ angular
         },
         templateUrl: '/components/datacloud/explorer/companyprofile/companyprofile.component.html',
         controllerAs: 'vm',
-        controller: function ($scope, $document, $timeout, $interval, DataCloudStore) {
+        controller: function ($scope) {
+            'ngInject';
+
             var vm = $scope.vm;
-            
+
             angular.extend(vm, {
                 company_info: $scope.vm.LookupResponse.companyInfo
             });
@@ -40,7 +40,7 @@ angular
                         }
 
                         if (info.LDC_ZipCode) {
-                            address.push(info.LDC_ZipCode.substr(0,5) + ',');
+                            address.push(info.LDC_ZipCode.substr(0, 5) + ',');
                         }
 
                         if (info.LE_COUNTRY) {
@@ -60,7 +60,7 @@ angular
                     case 'range':
                         if (value) {
                             var range = value;
-                            range = range.replace('-',' - ');
+                            range = range.replace('-', ' - ');
                             return range;
                         }
 
@@ -69,4 +69,4 @@ angular
             }
         }
     };
-});
+};

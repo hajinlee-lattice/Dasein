@@ -1,7 +1,7 @@
 angular.module('mainApp.leads.controllers.LeadDetailsController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.core.services.DanteWidgetService',
     'mainApp.core.services.NotionService'

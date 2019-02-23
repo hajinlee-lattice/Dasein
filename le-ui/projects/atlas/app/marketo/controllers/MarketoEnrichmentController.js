@@ -1,5 +1,5 @@
 angular.module('lp.marketo.enrichment', [
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 .controller('MarketoEnrichmentController', function($scope, $interval, $timeout, $state, $stateParams, $filter, $q,
     BrowserStorageUtility, EnrichmentData, MarketoCredential, MarketoMatchFields, MarketoService) {

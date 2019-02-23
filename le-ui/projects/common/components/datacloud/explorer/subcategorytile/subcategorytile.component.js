@@ -1,6 +1,4 @@
-angular
-.module('common.datacloud.explorer.subcategorytile', [])
-.directive('explorerSubcategoryTile',function() {
+export default function () {
     return {
         restrict: 'A',
         scope: {
@@ -10,13 +8,15 @@ angular
         },
         controllerAs: 'vm',
         templateUrl: '/components/datacloud/explorer/subcategorytile/subcategorytile.component.html',
-        controller: function ($scope, $document, $timeout, $interval, DataCloudStore) {
+        controller: function ($scope) {
+            'ngInject';
+
             var vm = $scope.vm;
-            
-            angular.extend(vm, { });
+
+            angular.extend(vm, {});
 
 
-            vm.inSubcategory = function(enrichment){
+            vm.inSubcategory = function (enrichment) {
                 var category = vm.selected_categories[enrichment.Category],
                     subcategories = (category && category['subcategories'] ? category['subcategories'] : []),
                     subcategory = enrichment.Subcategory;
@@ -33,11 +33,11 @@ angular
                 return selected;
             }
 
-            vm.subcategoryClick = function(subcategory, $event) {
+            vm.subcategoryClick = function (subcategory, $event) {
                 var target = angular.element($event.target),
                     currentTarget = angular.element($event.currentTarget);
 
-                if(target.closest("[ng-click]:not(.ignore-ngclick)")[0] !== currentTarget[0]) {
+                if (target.closest("[ng-click]:not(.ignore-ngclick)")[0] !== currentTarget[0]) {
                     // do nothing, user is clicking something with it's own click event
                 } else {
                     vm.setSubcategory((vm.subcategory === subcategory ? '' : subcategory));
@@ -47,4 +47,4 @@ angular
             }
         }
     };
-});
+};

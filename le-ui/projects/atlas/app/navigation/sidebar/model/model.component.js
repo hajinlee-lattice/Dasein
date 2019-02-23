@@ -2,7 +2,7 @@ angular
 .module('lp.navigation.sidebar.model', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'lp.ratingsengine'
 ])
 .controller('SidebarModelController', function(

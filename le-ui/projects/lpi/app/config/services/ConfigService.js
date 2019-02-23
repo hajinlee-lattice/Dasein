@@ -1,5 +1,5 @@
 angular.module('mainApp.config.services.ConfigService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.URLUtility',
     'mainApp.core.services.SessionService'

@@ -1,7 +1,7 @@
 angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.appCommon.utilities.NumberUtility'
+    'common.utilities.number'
 ])
 .service('AnalyticAttributeUtility', function (ResourceUtility, DateTimeFormatUtility, NumberUtility) {
 

@@ -5,12 +5,12 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.userManagement.modals.AddUserModal',
     'mainApp.userManagement.modals.DeleteUserModal',
     'mainApp.userManagement.modals.EditUserModal',
     'mainApp.userManagement.services.UserManagementService',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 .controller('UserManagementWidgetController', function (
     $scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, 

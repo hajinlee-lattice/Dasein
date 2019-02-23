@@ -1,4 +1,4 @@
-angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', 'mainApp.core.utilities.BrowserStorageUtility'])
+angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', 'common.utilities.browserstorage'])
 .component('sales', {
     templateUrl: 'app/sfdc/sfdcsettings.component.html',
     bindings: {
