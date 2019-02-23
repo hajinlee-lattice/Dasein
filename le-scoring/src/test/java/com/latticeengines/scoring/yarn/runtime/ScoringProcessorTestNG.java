@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,6 @@ import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.csv.CSVParser;
@@ -60,6 +60,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private String dir;
 
+    private URL uploadedAvro;
+
     private String filePath;
 
     private String modelGuidString;
@@ -68,6 +70,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        uploadedAvro = ClassLoader
+                .getSystemResource("com/latticeengines/scoring/data/allTest_with_lattice_accountId.avro");
         dir = customerBaseDir + "/test_customer/scoring/data/some_random_directory";
         modelGuidString = "modelGuid";
         HdfsUtils.rmdir(yarnConfiguration, dir);
@@ -82,8 +86,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
-        URL uploadedAvro = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/data/allTest_with_lattice_accountId.avro"); //
         HdfsUtils.mkdir(yarnConfiguration, dir);
         filePath = dir + "/allTest_with_lattice_accountId.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), filePath);
@@ -98,10 +100,10 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testConvertAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
         List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
-        FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
+        Iterator<GenericRecord> iterator = bulkScoringProcessor.instantiateIteratorForBulkScoreRequest(dir);
         BulkRecordScoreRequest scoreRequest = null;
         do {
-            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(iterator, rtsBulkScoringConfig);
             if (scoreRequest == null) {
                 break;
             }
@@ -125,6 +127,34 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
     }
 
+    @Test(groups = "functional")
+    public void testConvertMultipleAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
+        // upload anther avro file
+        String anotherFilePath = dir + "/allTest_with_lattice_accountId_1.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), anotherFilePath);
+
+        List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
+        Iterator<GenericRecord> iterator = bulkScoringProcessor.instantiateIteratorForBulkScoreRequest(dir);
+        BulkRecordScoreRequest scoreRequest = null;
+        do {
+            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(iterator, rtsBulkScoringConfig);
+            if (scoreRequest == null) {
+                break;
+            }
+            scoreRequestList.add(scoreRequest);
+        } while (scoreRequest != null);
+
+        Assert.assertEquals(scoreRequestList.size(), 9);
+        BulkRecordScoreRequest bulkRecordScoreRequest = scoreRequestList.get(0);
+        Assert.assertNotNull(bulkRecordScoreRequest.getRecords());
+        Assert.assertEquals(bulkRecordScoreRequest.getSource(), ScoringProcessor.RECORD_SOURCE);
+
+        Record record = bulkRecordScoreRequest.getRecords().get(0);
+        Assert.assertEquals(record.getIdType(), ScoringProcessor.DEFAULT_ID_TYPE);
+        Assert.assertEquals(bulkRecordScoreRequest.getRecords().size(), 100);
+        Assert.assertEquals(scoreRequestList.get(8).getRecords().size(), 52);
+    }
+
     @Test(groups = "functional", dependsOnMethods = "testConvertAvroToBulkScoreRequest")
     public void testConvertAvroToBulkScoreRequestWithScoreTestFileOff() throws IllegalArgumentException, Exception {
         List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
@@ -143,10 +173,10 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         }
         System.out.println("internalPlusMustHaveAttributeNames is " + internalPlusMustHaveAttributeNames);
 
-        FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
+        Iterator<GenericRecord> iterator = bulkScoringProcessor.instantiateIteratorForBulkScoreRequest(dir);
         rtsBulkScoringConfig.setMetadataTable(metadataTable);
 
-        scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+        scoreRequest = bulkScoringProcessor.getBulkScoreRequest(iterator, rtsBulkScoringConfig);
         scoreRequestList.add(scoreRequest);
 
         Assert.assertEquals(scoreRequestList.size(), 1);
@@ -274,7 +304,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         }
     }
 
-    @SuppressWarnings("unused")
     private void checkErrorCSV(String filePath) throws IOException {
         try (CSVParser parser = new CSVParser(
                 new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, filePath)), LECSVFormat.format)) {
