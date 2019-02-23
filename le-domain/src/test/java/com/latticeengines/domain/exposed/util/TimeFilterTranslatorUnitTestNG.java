@@ -56,6 +56,9 @@ public class TimeFilterTranslatorUnitTestNG {
                 ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(1));
         TimeFilter last7Days = new TimeFilter(//
                 ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(7));
+        TimeFilter last1DayV2 = TimeFilter.last(1, null);
+        TimeFilter last7DaysV2 = TimeFilter.last(7, PeriodStrategy.Template.Day.name());
+
         return new Object[][] { //
                 { TimeFilter.ever(), null }, //
                 { TimeFilter.isEmpty(), null }, //
@@ -72,6 +75,8 @@ public class TimeFilterTranslatorUnitTestNG {
                 { afterDate, Pair.of("2018-02-01", null) }, //
                 { last1Day, Pair.of("2018-02-17", "2018-02-17") }, //
                 { last7Days, Pair.of("2018-02-11", "2018-02-17") }, //
+                { last1DayV2, Pair.of("2018-02-17", "2018-02-17") }, //
+                { last7DaysV2, Pair.of("2018-02-11", "2018-02-17") }, //
         };
     }
 
