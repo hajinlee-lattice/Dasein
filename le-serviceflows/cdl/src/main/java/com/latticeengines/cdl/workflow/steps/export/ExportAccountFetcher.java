@@ -115,15 +115,15 @@ public class ExportAccountFetcher {
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
         List<String> lookupField = Collections.singletonList(InterfaceName.AccountId.name());
-        Map<MatchKey, List<String>> kepMap = new HashMap<>();
-        kepMap.put(MatchKey.LookupId, lookupField);
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.LookupId, lookupField);
 
         Tenant tenant = new Tenant(customerSpace);
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(tenant);
         matchInput.setFields(lookupField);
         matchInput.setData(data);
-        matchInput.setKeyMap(new HashMap<>());
+        matchInput.setKeyMap(keyMap);
         ColumnSelection customFieldSelection = new ColumnSelection();
         customFieldSelection.setColumns(fields);
         matchInput.setCustomSelection(customFieldSelection);
