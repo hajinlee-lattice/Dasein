@@ -1,5 +1,18 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,18 +26,6 @@ import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -639,9 +640,13 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         AssociatedDataRules = associatedDataRules;
     }
 
-    public Double getPredictivePower() { return predictivePower; }
+    public Double getPredictivePower() {
+        return predictivePower;
+    }
 
-    public void setPredictivePower(Double predictivePower) { this.predictivePower = predictivePower;    }
+    public void setPredictivePower(Double predictivePower) {
+        this.predictivePower = predictivePower;
+    }
 
     public String getLastDataRefresh() {
         return lastDataRefresh;
@@ -649,6 +654,12 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setLastDataRefresh(String lastDataRefresh) {
         this.lastDataRefresh = lastDataRefresh;
+    }
+
+    public boolean isDateAttribute() {
+        return FundamentalType.DATE.equals(this.getFundamentalType())
+                || LogicalDataType.Date.equals(this.getLogicalDataType())
+                || LogicalDataType.Timestamp.equals(this.getLogicalDataType());
     }
 
     public ColumnMetadata clone() {
