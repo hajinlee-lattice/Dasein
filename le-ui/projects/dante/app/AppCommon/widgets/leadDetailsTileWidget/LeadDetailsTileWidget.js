@@ -1,7 +1,7 @@
 angular.module('mainApp.appCommon.widgets.LeadDetailsTileWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.services.WidgetFrameworkService'
 ])
 

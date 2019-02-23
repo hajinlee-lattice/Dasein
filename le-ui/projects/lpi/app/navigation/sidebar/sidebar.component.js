@@ -4,7 +4,7 @@ angular
     'lp.navigation.sidebar.model',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'common.datacloud'
 ])
 .controller('SidebarController', function($rootScope, $stateParams, $transitions) {

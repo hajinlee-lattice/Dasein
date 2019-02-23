@@ -1,5 +1,5 @@
 angular.module('mainApp.appCommon.widgets.PlayListTileWidget', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.PlayTileService'
 ])

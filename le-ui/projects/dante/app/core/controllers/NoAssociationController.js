@@ -1,6 +1,6 @@
 angular.module('mainApp.core.controllers.NoAssociationController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.MetadataUtility'
 ])
 .controller('NoAssociationController', function ($scope, ResourceUtility, BrowserStorageUtility, MetadataUtility) {

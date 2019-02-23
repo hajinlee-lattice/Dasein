@@ -1,6 +1,6 @@
 angular.module('mainApp.plays.services.PlayService', [
     'mainApp.appCommon.utilities.MetadataUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.services.DanteWidgetService',
     'mainApp.core.services.NotionService'
 ])

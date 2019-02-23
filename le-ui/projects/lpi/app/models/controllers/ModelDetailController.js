@@ -1,7 +1,7 @@
 angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.widgets.ModelDetailsWidget',

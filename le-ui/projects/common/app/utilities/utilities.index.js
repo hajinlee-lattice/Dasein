@@ -19,10 +19,10 @@ import './URLUtility';
 
 export default angular.module('com.le.common.utilities', [
     'mainApp.core.utilities.AuthorizationUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.appCommon.utilities.NumberUtility',
+    'common.utilities.number',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.RightsUtility',

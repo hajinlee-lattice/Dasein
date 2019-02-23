@@ -1,5 +1,5 @@
 angular.module('mainApp.core.services.DanteWidgetService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.utilities.MetadataUtility'
 ])

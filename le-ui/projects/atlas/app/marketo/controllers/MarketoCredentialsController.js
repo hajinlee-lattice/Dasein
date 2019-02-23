@@ -1,5 +1,5 @@
 angular.module('lp.marketo', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.marketo.modals.DeleteCredentialModal'

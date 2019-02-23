@@ -14,7 +14,7 @@ describe('AnalyticAttributeUtility Tests', function () {
     beforeEach(function () {
         module('mainApp.appCommon.utilities.ResourceUtility');
         module('mainApp.appCommon.utilities.DateTimeFormatUtility');
-        module('mainApp.appCommon.utilities.NumberUtility');
+        module('common.utilities.number');
         module('mainApp.appCommon.utilities.AnalyticAttributeUtility');
         module('test.testData.AnalyticAttributeTestDataService');
         inject(['ResourceUtility', 'DateTimeFormatUtility', 'NumberUtility', 'AnalyticAttributeUtility', 'AnalyticAttributeTestDataService',

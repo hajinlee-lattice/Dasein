@@ -1,5 +1,5 @@
 angular.module('common.utilities.SessionTimeout', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.login.services.LoginService'
 ])
 .service('SessionTimeoutUtility', function (

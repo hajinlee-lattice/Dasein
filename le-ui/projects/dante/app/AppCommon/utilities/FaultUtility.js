@@ -1,7 +1,7 @@
 angular.module('mainApp.appCommon.utilities.FaultUtility', [
     'mainApp.appCommon.utilities.ConfigConstantUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.modals.SimpleModal'
 ])                                                                                                                                                                        
 .service('FaultUtility', function (ResourceUtility, BrowserStorageUtility, SimpleModal) {

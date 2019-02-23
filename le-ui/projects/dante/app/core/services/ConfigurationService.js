@@ -1,5 +1,5 @@
 angular.module('mainApp.core.services.ConfigurationService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.ServiceErrorUtility'
 ])
 .service('ConfigurationService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility) {

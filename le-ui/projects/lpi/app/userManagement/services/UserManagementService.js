@@ -1,5 +1,5 @@
 var app = angular.module('mainApp.userManagement.services.UserManagementService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',

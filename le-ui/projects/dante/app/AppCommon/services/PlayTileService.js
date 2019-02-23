@@ -2,7 +2,7 @@ angular.module('mainApp.appCommon.services.PlayTileService', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.appCommon.utilities.NumberUtility'
+    'common.utilities.number'
 ])
 .service('PlayTileService', function (ResourceUtility, MetadataUtility, DateTimeFormatUtility, NumberUtility) {
     

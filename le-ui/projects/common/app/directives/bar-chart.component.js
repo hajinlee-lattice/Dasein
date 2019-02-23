@@ -1,5 +1,5 @@
 angular
-    .module('common.datacloud.explorer.attributetile.bar.chart', [])
+    .module('common.directives.tilebarchart', [])
     .directive('barChart', function () {
         return {
             restrict: 'E',
@@ -14,14 +14,14 @@ angular
             },
             templateUrl: '/components/charts/bar-chart.component.html',
             controller: function ($scope, $filter, $timeout) {
-                
+
                 /**
                  * Return the number with decimals truncated to the maxDigits.
                  * If not provided the maxDigits is 1
                  * @param {*} value 
                  * @param {number} maxDigits
                  */
-                function  getTruncatedValue(value, maxDigits){
+                function getTruncatedValue(value, maxDigits) {
                     var numb = Number(value);
                     var max = maxDigits ? maxDigits : 1;
                     var ret = parseFloat(numb.toFixed(max));
@@ -39,13 +39,13 @@ angular
                     }
                     return highest;
                 }
-                function getHighestRounded(){
-                    var decimal =  getRoundedNumber(($scope.highest % 1), 1);
+                function getHighestRounded() {
+                    var decimal = getRoundedNumber(($scope.highest % 1), 1);
                     var ret = $scope.highest;
                     var add = 0;
-                    if(decimal > 0 && decimal > 0.5) {
+                    if (decimal > 0 && decimal > 0.5) {
                         add = 1 - decimal;
-                    }else if(decimal > 0 && decimal < 0.5){
+                    } else if (decimal > 0 && decimal < 0.5) {
                         add = 0.5 - decimal;
                     }
                     ret = $scope.highest + add;
@@ -144,22 +144,22 @@ angular
                         $scope.config.columns = {};
                     }
                 }
-           
-                function getRoundedNumber(value, decimal){
-                    var rounded = Number(Math.round(value+'e'+decimal)+'e-'+decimal);
+
+                function getRoundedNumber(value, decimal) {
+                    var rounded = Number(Math.round(value + 'e' + decimal) + 'e-' + decimal);
                     return rounded;
                 }
 
-                function validateData(){
+                function validateData() {
                     if ($scope.bktlist == undefined) {
                         $scope.bktlist = [];
                     }
-                    $scope.bktlist.forEach(function(element){
-                        if(element.lift){
+                    $scope.bktlist.forEach(function (element) {
+                        if (element.lift) {
                             element.lift = getRoundedNumber(element.lift, $scope.decimal);
                         }
                     });
-                   
+
                 }
 
                 /**
@@ -169,9 +169,9 @@ angular
                  * color: color for the rows
                  * showfield: name field to show
                  */
-                
-                $scope.$watch('bktlist', function() {
-                    if($scope.bktlist.length > 0) {
+
+                $scope.$watch('bktlist', function () {
+                    if ($scope.bktlist.length > 0) {
                         $scope.init();
                     }
                 });
@@ -305,14 +305,14 @@ angular
                         return 0;
                     }
                     switch ($scope.chartType) {
-                    case 'decimal':
-                        {
-                            return getHorizontalPercentageSubDec(stat, column.field, limit);
-                        }
-                    default:
-                        {
-                            return getHorizontalPercentage(stat, column.field, limit);
-                        }
+                        case 'decimal':
+                            {
+                                return getHorizontalPercentageSubDec(stat, column.field, limit);
+                            }
+                        default:
+                            {
+                                return getHorizontalPercentage(stat, column.field, limit);
+                            }
                     }
                 };
 
@@ -323,7 +323,7 @@ angular
                     if ($scope.vertcalLines === undefined) {
                         var lines = [];
                         var max = $scope.highest;//getMaxRounded();
-                        if(max > 0) {
+                        if (max > 0) {
                             if ($scope.bktlist.length == 1) {
                                 lines.push({
                                     'perc': Number(100 / 2) + '%',

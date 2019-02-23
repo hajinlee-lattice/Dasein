@@ -10,7 +10,7 @@ import './ResourceStringsService';
 
 export default angular.module('com.le.common.services', [
     'mainApp.config.services.ConfigService',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.core.services.HelpService',
     'mainApp.login.services.LoginService',
     'mainApp.setup.services.MetadataService',

@@ -1,6 +1,6 @@
 angular.module('mainApp.appCommon.widgets.PlayDetailsTileWidget', [
     'mainApp.appCommon.utilities.WidgetEventConstantUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.PlayTileService'
 ])

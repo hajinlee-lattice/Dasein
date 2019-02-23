@@ -2,8 +2,8 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.services.FeatureFlagService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.services.featureflag',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.NavUtility'
 ])
 .controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, NavUtility) {

@@ -1,5 +1,5 @@
 angular.module('login', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.services.ResourceStringsService'
 ])
 .run(function($transitions) {

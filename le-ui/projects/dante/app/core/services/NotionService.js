@@ -1,5 +1,5 @@
 angular.module('mainApp.core.services.NotionService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.utilities.ResourceUtility'

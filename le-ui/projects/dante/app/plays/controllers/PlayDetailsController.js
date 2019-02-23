@@ -4,7 +4,7 @@ angular.module('mainApp.plays.controllers.PlayDetailsController', [
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.utilities.URLUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.services.DanteWidgetService',
     'mainApp.core.services.NotionService',
     'mainApp.core.controllers.MainHeaderController',

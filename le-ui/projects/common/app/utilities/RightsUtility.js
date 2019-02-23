@@ -1,6 +1,6 @@
 var app = angular.module('mainApp.core.utilities.RightsUtility',
     ['mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.core.utilities.BrowserStorageUtility']);
+    'common.utilities.browserstorage']);
 
 app.service('RightsUtility', function (_, BrowserStorageUtility) {
 

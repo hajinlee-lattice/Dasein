@@ -2,7 +2,7 @@ angular.module('mainApp.appCommon.widgets.TabWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 
 .controller('TabWidgetController', function ($scope, $element, ResourceUtility, MetadataUtility, WidgetFrameworkService, BrowserStorageUtility) {
