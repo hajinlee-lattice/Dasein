@@ -1,7 +1,7 @@
 angular.module('lp.jobs.model', [
     'lp.jobs.status',
     'lp.navigation.pagination',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.services.HealthService',
     '720kb.tooltips'
 ])

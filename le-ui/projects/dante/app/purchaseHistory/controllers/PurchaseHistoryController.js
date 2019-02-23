@@ -1,7 +1,7 @@
 angular.module('mainApp.purchaseHistory.controllers.PurchaseHistoryController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.services.DanteWidgetService'
 ])
 .controller('PurchaseHistoryController', function ($scope, $rootScope, WidgetConfigUtility, 

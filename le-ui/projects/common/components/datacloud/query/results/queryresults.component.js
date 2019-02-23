@@ -1,5 +1,5 @@
 angular.module('common.datacloud.query.results', [
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 .controller('QueryResultsCtrl', function(
     $q, $scope, $state, $stateParams, $filter, $rootScope, $timeout, 

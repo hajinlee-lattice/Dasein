@@ -1,7 +1,7 @@
 angular.module('mainApp.plays.controllers.PlayListController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.services.DanteWidgetService',
     'mainApp.core.services.NotionService',
     'mainApp.core.controllers.MainHeaderController',

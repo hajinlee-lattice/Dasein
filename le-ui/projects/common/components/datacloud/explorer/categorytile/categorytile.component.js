@@ -1,6 +1,4 @@
-angular
-.module('common.datacloud.explorer.categorytile', [])
-.directive('explorerCategoryTile',function() {
+export default function () {
     return {
         restrict: 'A',
         scope: {
@@ -10,22 +8,24 @@ angular
         },
         controllerAs: 'vm',
         templateUrl: '/components/datacloud/explorer/categorytile/categorytile.component.html',
-        controller: function ($scope, $document, $timeout, $interval, DataCloudStore, QueryStore, moment) {
+        controller: function ($scope, DataCloudStore, QueryStore, moment) {
+            'ngInject';
+
             var vm = $scope.vm;
 
-            angular.extend(vm, { });
+            angular.extend(vm, {});
 
-            vm.setCategory = function(category) {
+            vm.setCategory = function (category) {
                 vm.category = category;
                 DataCloudStore.setMetadata('category', category);
             }
 
-            vm.categoryClass = function(category) {
+            vm.categoryClass = function (category) {
                 var category = 'category-' + category.toLowerCase().replace(/\s/g, "-");
                 return category;
             }
 
-            vm.categoryIcon = function(category) {
+            vm.categoryIcon = function (category) {
                 var path = '/assets/images/enrichments/subcategories/',
                     category = vm.subcategoryRenamer(category, ''),
                     icon = category + '.png';
@@ -40,13 +40,13 @@ angular
              * @param {*} category 
              * @param {*} subcategory 
              */
-            vm.subcategoryIcon = function(category, subcategory){
+            vm.subcategoryIcon = function (category, subcategory) {
                 var path = '/assets/images/enrichments/subcategories/',
                     category = vm.subcategoryRenamer(category),
                     subcategory = vm.subcategoryRenamer(subcategory),
-                    icon = category + (subcategory ? '-'+subcategory : '') + '.png';
-                
-                switch(category){
+                    icon = category + (subcategory ? '-' + subcategory : '') + '.png';
+
+                switch (category) {
                     case 'latticeratings': {
                         icon = 'latticeratings.png';
                         break;
@@ -59,51 +59,51 @@ angular
                 return path + icon;
             }
 
-            vm.categoryStartFrom = function() {
+            vm.categoryStartFrom = function () {
                 var size = vm.category ? vm.categorySize : vm.pagesize,
                     current = vm.metadata.currentCategory - 1,
                     items = vm.categoriesMenu,
                     length = items ? items.length : 0,
                     result = (current * size + size) > length
-                        ? length - size 
+                        ? length - size
                         : current * size;
 
                 return (result < 0 ? 0 : result);
             }
 
-            vm.categoryLimitTo = function() {
+            vm.categoryLimitTo = function () {
                 return vm.category ? vm.categorySize : vm.pagesize;
             }
 
-            vm.categoryOrderBy = function(category, subcategory, attr) {
+            vm.categoryOrderBy = function (category, subcategory, attr) {
                 var YesCategories = [
-                        'Technology Profile',
-                        'Website Profile',
-                        'Product Spend Profile'
-                    ];
+                    'Technology Profile',
+                    'Website Profile',
+                    'Product Spend Profile'
+                ];
 
                 if (vm.section == 'segment.analysis') {
                     var order = [];
 
                     if (category && YesCategories.indexOf(category) >= 0) {
-                        order.push(function(attribute) {
+                        order.push(function (attribute) {
                             return attribute.TopBkt && attribute.TopBkt.Lbl == 'Yes' ? -1 : 1;
                         });
                     }
 
-                    order = order.concat(['!TopBkt','!ImportanceOrdering','-ImportanceOrdering','-TopBkt.Cnt','-Value']);
+                    order = order.concat(['!TopBkt', '!ImportanceOrdering', '-ImportanceOrdering', '-TopBkt.Cnt', '-Value']);
                 } else {
                     var order = !vm.showHighlighting()
                         ? ['-ImportanceOrdering']
-                        : ['-HighlightHighlighted','!ImportanceOrdering','-ImportanceOrdering'];
+                        : ['-HighlightHighlighted', '!ImportanceOrdering', '-ImportanceOrdering'];
 
                     if (vm.lookupMode) {
-                        order.push(function(attribute) {
+                        order.push(function (attribute) {
                             return attribute.Value == 'Yes' ? -1 : 1;
                         });
                     }
 
-                    order = order.concat(['-Count','-Value']);
+                    order = order.concat(['-Count', '-Value']);
                 }
 
                 // if (category == 'Product Spend Profile') {
@@ -113,24 +113,24 @@ angular
                 return order;
             }
 
-            vm.categoryClick = function(category, $event) {
+            vm.categoryClick = function (category, $event) {
                 var target = angular.element($event.target),
                     currentTarget = angular.element($event.currentTarget);
-                if(target.closest("[ng-click]:not(.ignore-ngclick)")[0] !== currentTarget[0]) {
+                if (target.closest("[ng-click]:not(.ignore-ngclick)")[0] !== currentTarget[0]) {
                     // do nothing, user is clicking something with it's own click event
                 } else {
                     var category = category || '';
-                    if(vm.subcategory && vm.category == category) {
+                    if (vm.subcategory && vm.category == category) {
                         vm.setSubcategory('');
-                        if(vm.subcategoriesExclude.indexOf(category) >= 0) { // don't show subcategories
+                        if (vm.subcategoriesExclude.indexOf(category) >= 0) { // don't show subcategories
                             vm.setSubcategory(vm.subcategories[category][0]);
                         }
-                    } else if(vm.category == category) {
+                    } else if (vm.category == category) {
                         vm.setSubcategory('');
                         //vm.category = '';
                     } else {
                         vm.setSubcategory('');
-                        if(vm.subcategoriesExclude.indexOf(category)) {
+                        if (vm.subcategoriesExclude.indexOf(category)) {
                             vm.setSubcategory(vm.subcategories[category][0]);
                         }
                         vm.setCategory(category);
@@ -142,7 +142,7 @@ angular
                 }
             }
 
-            vm.getAttributeStat = function(attribute) {
+            vm.getAttributeStat = function (attribute) {
                 var enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     index = vm.enrichmentsMap[attribute.Entity + '.' + enrichmentKey],
                     enrichment = vm.enrichments[index],
@@ -159,7 +159,7 @@ angular
                 if (stats && stats.length > 1) {
                     for (var i in stats) {
                         if (stats[i] && stats[i].Rng) {
-                            if (vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stats[i].Rng)]) {
+                            if (vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, stats[i].Rng)]) {
                                 stat = stats[i];
                                 break;
                             }
@@ -170,14 +170,14 @@ angular
 
                 return stat;
             }
-            
-            vm.getAttributeRange = function(attribute) {
+
+            vm.getAttributeRange = function (attribute) {
                 var stat = vm.getAttributeStat(attribute),
                     range = (stat && stat.Rng ? stat.Rng : {});
                 return range;
             }
 
-            vm.displayAttributeValue = function(attribute, property) {
+            vm.displayAttributeValue = function (attribute, property) {
                 var property = property || 'Lbl',
                     enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     attributeEntity = attribute.Entity,
@@ -186,45 +186,45 @@ angular
                 /**
                  * sort stats by record count if there are more then 1
                  */
-                if(stats && stats.length > 1) {
-                    stats = _.sortBy(stats, function(item){
+                if (stats && stats.length > 1) {
+                    stats = _.sortBy(stats, function (item) {
                         return parseInt(item.Cnt);
                     });
                 }
 
                 var stat = vm.getAttributeStat(attribute);
 
-                if(stat && stat[property]) {
-                    if(property === 'Lift') {
+                if (stat && stat[property]) {
+                    if (property === 'Lift') {
                         return stat[property].toFixed(1) + 'x';
                     }
                     return stat[property];
                 }
             }
 
-            vm.generateBucketOperation = function(bkt) {
-                var ret = bkt.Cmp == 'NOT_EQUAL' ? 'is not' : 'is';                
+            vm.generateBucketOperation = function (bkt) {
+                var ret = bkt.Cmp == 'NOT_EQUAL' ? 'is not' : 'is';
 
                 return ret;
             }
 
-            vm.generateBucketLabel = function(bkt) {
+            vm.generateBucketLabel = function (bkt) {
                 var bkt = QueryStore.generateBucketLabel(bkt);
 
                 return bkt.Lbl || 'empty';
             }
 
-            vm.getTitleTooltip = function(attribute) {
-                if(attribute.Entity === 'PurchaseHistory'){
+            vm.getTitleTooltip = function (attribute) {
+                if (attribute.Entity === 'PurchaseHistory') {
                     return attribute.Subcategory;
                 }
             }
 
-            vm.getDateMap = function(category) {
+            vm.getDateMap = function (category) {
                 var categoryKey = category, //.toUpperCase().replace(' ','_'),
                     timestamp = (vm.collectionStatus && vm.collectionStatus.DateMap ? vm.collectionStatus.DateMap[categoryKey] : ''),
                     lastDataRefresh = '';
-                if(timestamp) {
+                if (timestamp) {
                     lastDataRefresh = 'Last Data Refresh: ' + moment(timestamp).format('MMMM DD, YYYY');
                     return lastDataRefresh;
                 }
@@ -232,4 +232,4 @@ angular
             }
         }
     };
-});
+};

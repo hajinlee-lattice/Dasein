@@ -5,7 +5,7 @@ angular.module('mainApp', [
     'ngAnimate',
     'ngDropdowns',
     'templates-main',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.StringUtility',

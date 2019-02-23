@@ -1,6 +1,6 @@
 angular.module('mainApp.userManagement.controllers.UserManagementController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.userManagement.services.UserManagementService'
 ])

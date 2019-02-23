@@ -140,7 +140,7 @@ export class ConnectorList extends Component {
 }
 
 angular
-    .module("le.connectors.list", ['lp.sfdc', 'mainApp.core.utilities.BrowserStorageUtility', 'mainApp.core.services.FeatureFlagService', 'common.modal'])
+    .module("le.connectors.list", ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
     .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
         let ConnectorsService = this;
         this.getConnector = function () {

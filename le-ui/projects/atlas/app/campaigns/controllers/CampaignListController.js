@@ -1,5 +1,5 @@
 angular.module('lp.campaigns', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.campaigns.modals.DeleteCampaignModal'
 ])

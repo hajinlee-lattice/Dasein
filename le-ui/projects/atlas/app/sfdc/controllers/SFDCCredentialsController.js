@@ -1,5 +1,5 @@
 angular.module('lp.sfdc.credentials.controller', [
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 .controller('sfdcCredentialsController', function($scope, $q, $http, BrowserStorageUtility) {
         $scope.showTokenMessage = false;

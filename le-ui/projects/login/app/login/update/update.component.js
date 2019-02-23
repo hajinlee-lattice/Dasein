@@ -1,6 +1,6 @@
 angular.module('login.update', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.login.services.LoginService'

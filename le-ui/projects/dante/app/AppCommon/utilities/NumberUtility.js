@@ -1,4 +1,4 @@
-angular.module('mainApp.appCommon.utilities.NumberUtility', [])
+angular.module('common.utilities.number', [])
 .service('NumberUtility', function () {
    
     /*

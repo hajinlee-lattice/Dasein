@@ -14,7 +14,7 @@ import './ArcChartDirective';
 
 export default angular.module("com.le.common.directive", [
   "mainApp.appCommon.directives.chips",
-  'common.datacloud.explorer.attributetile.bar.chart',
+  'common.directives.tilebarchart',
   'mainApp.appCommon.directives.barchart',
   'mainApp.appCommon.directives.formOnChange',
   'mainApp.appCommon.directives.ngQtipDirective',

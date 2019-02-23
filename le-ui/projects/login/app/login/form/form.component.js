@@ -3,7 +3,7 @@ angular
         "mainApp.appCommon.directives.ngEnterDirective",
         "mainApp.appCommon.utilities.ResourceUtility",
         "mainApp.appCommon.utilities.TimestampIntervalUtility",
-        "mainApp.core.utilities.BrowserStorageUtility",
+        "common.utilities.browserstorage",
         "mainApp.login.services.LoginService"
     ])
     .component("loginForm", {

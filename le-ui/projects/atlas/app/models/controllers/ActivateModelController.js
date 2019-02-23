@@ -1,6 +1,6 @@
 angular.module('mainApp.models.controllers.ActivateModelController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.AddSegmentModal'
 ])

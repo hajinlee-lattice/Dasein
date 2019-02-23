@@ -5,7 +5,7 @@ describe('NumberUtility Tests', function () {
     var numberUtility;
 
     beforeEach(function () {
-        module('mainApp.appCommon.utilities.NumberUtility');
+        module('common.utilities.number');
         inject(['NumberUtility', 
             function (NumberUtility) {
                 numberUtility = NumberUtility;

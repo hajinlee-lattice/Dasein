@@ -2,11 +2,11 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.appCommon.directives.ngEnterDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.NavUtility',
     'mainApp.login.services.LoginService',
     'mainApp.core.services.HelpService',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.login.modals.TenantSelectionModal',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.config.services.ConfigService'
