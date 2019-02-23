@@ -237,13 +237,10 @@ public class StatsCubeUtils {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
-        // Date buckets are cumulative. Hence, the "within" comparison type is used
-        // which covers the day boundary
-        // forward to the current time.
         List<Integer> dayBoundaries = algo.getDayBoundaries();
         Integer dayBound = bktId == dayBoundaries.size() + 1 ? null : dayBoundaries.get(bktId - 1);
         if (dayBound != null) {
-            bucket.setDateFilter(TimeFilter.within(dayBound, PeriodStrategy.Template.Day.name()));
+            bucket.setDateFilter(TimeFilter.last(dayBound, PeriodStrategy.Template.Day.name()));
         } else {
             bucket.setDateFilter(TimeFilter.ever(PeriodStrategy.Template.Day.name()));
         }
