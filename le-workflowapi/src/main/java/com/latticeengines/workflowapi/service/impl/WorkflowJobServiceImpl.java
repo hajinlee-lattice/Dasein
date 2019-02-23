@@ -750,7 +750,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
                                 workflowContainerService.getJobStatus(applicationId);
 
-                        JobStatus status = JobStatus.fromString(yarnStatus.getStatus().name(), yarnStatus.getState());
+                        // TODO: check if yarnStatus is empty (application_id comes from differnt EMR cluster), then log an warning.
+                        // if (yarnStatus is empty) {
+                        //     log.warn(...);
+                        // }
+
+                        JobStatus status = yarnStatus == null ? null
+                                : JobStatus.fromString(yarnStatus.getStatus().name(), yarnStatus.getState());
                         if (status != null) {
                             workflowJob.setStatus(status.name());
                         } else {
