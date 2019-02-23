@@ -70,6 +70,8 @@ public class IngestionServiceImpl implements IngestionService {
     @Resource(name = "ingestionBWRawProviderService")
     private IngestionProviderService bwRawProviderService;
 
+    public static final int ULTIMATE_RETRIES = 1000;
+
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
@@ -127,14 +129,15 @@ public class IngestionServiceImpl implements IngestionService {
                     log.info("Killed progress: " + progress.toString());
                 }
             } catch (Exception e) {
-                log.error("Failed to track application status for " + progress.getApplicationId(), e);
+                log.error("Failed to track application status for {}", progress.getApplicationId(), e);
                 if (ExceptionUtils.indexOfThrowable(e, ApplicationNotFoundException.class) > -1) {
                     // ApplicationId no longer exist in RM.
                     // ApplicationNotFoundException is nested exception inside
                     // YarnSystemException
                     progress = ingestionProgressService.updateProgress(progress)
                             .status(ProgressStatus.FAILED)
-                            .retries(1000) // Should not retry for this case
+                            // Should not retry for this case
+                            .retries(ULTIMATE_RETRIES)
                             .errorMessage("Application doesn't exist in RM")
                             .commit(true);
                     log.info("Killed progress: " + progress.toString());
