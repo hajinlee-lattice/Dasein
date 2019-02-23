@@ -1,24 +1,5 @@
 package com.latticeengines.playmaker.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
-import javax.inject.Inject;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -36,7 +17,6 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
-import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -47,8 +27,24 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 @Component("lpiPMAccountExtension")
 public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
@@ -373,10 +369,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                     .map(metadata -> {
                         Map<String, Object> metadataInfoMap = new HashMap<>();
                         metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
-                        metadataInfoMap.put(PlaymakerConstants.Type,
-                                PlaymakerUtils.convertToSFDCFieldType(
-                                        StatsCubeUtils.isDateAttribute(metadata) ? PlaymakerConstants.DateTime
-                                                : metadata.getJavaClass()));
+                        metadataInfoMap.put(PlaymakerConstants.Type, PlaymakerUtils.convertToSFDCFieldType(
+                                metadata.isDateAttribute() ? PlaymakerConstants.DateTime : metadata.getJavaClass()));
                         metadataInfoMap.put(PlaymakerConstants.StringLength,
                                 PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
                         metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());
