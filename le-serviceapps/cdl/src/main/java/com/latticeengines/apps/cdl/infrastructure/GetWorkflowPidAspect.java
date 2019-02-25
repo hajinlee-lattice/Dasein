@@ -2,18 +2,15 @@ package com.latticeengines.apps.cdl.infrastructure;
 
 import javax.inject.Inject;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Aspect
 public class GetWorkflowPidAspect {
-    private static final Logger log = LoggerFactory.getLogger(GetWorkflowPidAspect.class);
 
     @Inject
     private WorkflowProxy workflowProxy;

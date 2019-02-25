@@ -1,11 +1,11 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.entitymgr.DunsGuideBookEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
-
-import java.util.List;
 
 /**
  * Manage multiple {@link DunsGuideBookEntityMgr} that are associated with different {@link DataCloudVersion#getVersion()}.

@@ -4,21 +4,17 @@ package com.latticeengines.apps.cdl.end2end;
 import java.util.Collections;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public class S3ImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(S3ImportEnd2EndDeploymentTestNG.class);
-
     private static final String S3_BUCKET = "latticeengines-test-artifacts";
     private static final String ENTITY_ACCOUNT = "Account";
     private static final String FEED_TYPE_SUFFIX = "Schema";

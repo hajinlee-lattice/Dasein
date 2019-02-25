@@ -1,11 +1,9 @@
 package com.latticeengines.datacloud.match.testframework;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import org.apache.commons.lang3.tuple.Pair;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDomainCountry;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDuns;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromExternalSystem;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromNameCountry;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,21 +16,24 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDomainCountry;
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDuns;
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromExternalSystem;
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromNameCountry;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class TestEntityMatchUtils {
 
     /*
      * default testing variables
      */
-    public static final String TEST_SEED_ID = TestEntityMatchUtils.class.getSimpleName();
-    public static final String TEST_ENTITY = BusinessEntity.Account.name();
-    public static final String EXTERNAL_SYSTEM_SFDC = "SFDC";
-    public static final String EXTERNAL_SYSTEM_MKTO = "MKTO";
-    public static final String EXTERNAL_SYSTEM_ELOQUA = "ELOQUA";
+    private static final String TEST_SEED_ID = TestEntityMatchUtils.class.getSimpleName();
+    private static final String TEST_ENTITY = BusinessEntity.Account.name();
+    private static final String EXTERNAL_SYSTEM_SFDC = "SFDC";
+    private static final String EXTERNAL_SYSTEM_MKTO = "MKTO";
+    private static final String EXTERNAL_SYSTEM_ELOQUA = "ELOQUA";
 
 
     /**

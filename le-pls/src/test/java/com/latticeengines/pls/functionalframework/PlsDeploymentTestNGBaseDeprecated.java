@@ -1,5 +1,7 @@
 package com.latticeengines.pls.functionalframework;
 
+import static com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated.usersInitialized;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -28,8 +30,6 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
-
-import static com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated.usersInitialized;
 
 public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDeprecated {
 

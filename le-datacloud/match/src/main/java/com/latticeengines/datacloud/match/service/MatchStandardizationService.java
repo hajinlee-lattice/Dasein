@@ -1,13 +1,13 @@
 package com.latticeengines.datacloud.match.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public interface MatchStandardizationService {
 

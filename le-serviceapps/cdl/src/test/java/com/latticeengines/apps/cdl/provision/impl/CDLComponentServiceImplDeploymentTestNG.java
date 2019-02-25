@@ -1,11 +1,10 @@
 package com.latticeengines.apps.cdl.provision.impl;
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,16 +17,11 @@ import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.proxy.exposed.component.ComponentProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class CDLComponentServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(CDLComponentServiceImplDeploymentTestNG.class);
 
     @Inject
     private ComponentProxy componentProxy;
-
-    @Inject
-    private RedshiftService redshiftService;
 
     @Inject
     private DataUnitProxy dataUnitProxy;

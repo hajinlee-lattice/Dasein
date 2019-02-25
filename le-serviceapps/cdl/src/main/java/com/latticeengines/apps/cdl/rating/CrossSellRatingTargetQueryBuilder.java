@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.rating;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -12,9 +15,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-
-import java.util.Map;
-import java.util.Set;
 
 public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuilder {
 

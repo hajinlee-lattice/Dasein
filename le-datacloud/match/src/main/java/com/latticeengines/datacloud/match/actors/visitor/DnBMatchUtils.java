@@ -1,9 +1,10 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import org.apache.commons.lang3.StringUtils;
 
 /*
  * NOTE: Requires knowledge of actors, therefore put in the actor package and not outside, should only be used

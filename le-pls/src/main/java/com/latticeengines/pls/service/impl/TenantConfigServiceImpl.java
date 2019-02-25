@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -170,7 +171,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     /**
      * If flag already has a value, using oldValue & newValue. Otherwise, use
      * newValue
-     * 
+     *
      * @param flags
      * @param flagId
      * @param value
