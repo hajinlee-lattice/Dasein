@@ -415,6 +415,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public List<SimpleDataFeed> getAllSimpleDataFeedsForActiveTenant() {
+        return datafeedEntityMgr.getAllSimpleDataFeedsForActiveTenant();
+    }
+
+    @Override
     public void resetImportByEntity(String customerSpace, String datafeedName, String entity) {
         DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (dataFeed == null) {

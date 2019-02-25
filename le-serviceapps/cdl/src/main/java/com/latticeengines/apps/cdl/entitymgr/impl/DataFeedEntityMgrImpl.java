@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedEntityMgr")
@@ -256,6 +257,17 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         List<DataFeed> dataFeeds = findAll();
         return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<SimpleDataFeed> getAllSimpleDataFeedsForActiveTenant() {
+        List<DataFeed> dataFeeds = findAll();
+        return dataFeeds
+                .stream()
+                .filter(df -> TenantStatus.ACTIVE.equals(df.getTenant().getStatus()))
+                .map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
                 .collect(Collectors.toList());
     }
 

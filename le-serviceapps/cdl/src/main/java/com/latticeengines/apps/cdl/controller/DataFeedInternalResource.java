@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +15,6 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "datafeed_internal", description = "REST resource for metadata data feed internal operations")
 @RestController
@@ -38,6 +38,14 @@ public class DataFeedInternalResource {
     @ApiOperation(value = "get all simple data feeds.")
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         return dataFeedService.getAllSimpleDataFeeds();
+    }
+
+    @RequestMapping(value = "/simpledatafeedlistforactivetenant", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @NoCustomerSpace
+    @ApiOperation(value = "get all simple data feeds.")
+    public List<SimpleDataFeed> getAllSimpleDataFeedsForActiveTenant() {
+        return dataFeedService.getAllSimpleDataFeedsForActiveTenant();
     }
 
 }
