@@ -165,6 +165,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             cpds.setDebugUnreturnedConnectionStackTraces(true);
         }
 
+        log.info("Created c3p0 connection pool for {}", cpds.toString());
         return cpds;
     }
 
