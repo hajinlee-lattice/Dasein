@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+
 import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,11 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 

@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,7 +17,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 public class DefaultDataFeedControllerDeploymentTestNG extends CDLDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(DefaultDataFeedControllerDeploymentTestNG.class);
 
     private static final String TABLE_NAME = NamingUtils.timestamp("Table");
 
