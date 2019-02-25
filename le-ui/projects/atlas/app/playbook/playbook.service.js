@@ -956,12 +956,9 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    var canceler = $q.defer();
-
     this.playLaunches = function(params) {
 
-        canceler.resolve("cancelled");
-        canceler = $q.defer();
+        var deferred = $q.defer();
 
         $http({
             method: 'GET',
@@ -970,17 +967,17 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                canceler.resolve(result);
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                canceler.reject(errorMsg);
+                deferred.reject(errorMsg);
             }
         );
-        return canceler.promise;
+        return deferred.promise;
     }
 
     this.launchPlay = function(play, opts) {
