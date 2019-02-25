@@ -1,12 +1,12 @@
 package com.latticeengines.datacloud.match.service;
 
+import java.util.Map;
+
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-
-import java.util.Map;
 
 public interface DnBMatchPostProcessor {
 
