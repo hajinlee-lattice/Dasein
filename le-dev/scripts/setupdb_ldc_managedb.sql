@@ -201,7 +201,8 @@ VALUES
   ('2.0.13', '2018-07-24', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.15', '2018-10-27', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.16', '2018-12-10', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.16', '2018-12-10', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.17', '2019-02-25', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -331,5 +332,12 @@ SET
   `AccountLookupHdfsVersion` = '2018-12-06_00-00-00_UTC',
   `EnrichmentStatsVersion`   = '2018-12-06_00-00-00_UTC'
 WHERE `Version` = '2.0.16';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2019-02-20_00-00-00_UTC',
+  `AccountLookupHdfsVersion` = '2019-02-20_00-00-00_UTC',
+  `EnrichmentStatsVersion`   = '2018-12-06_00-00-00_UTC'
+WHERE `Version` = '2.0.17';
 
 SET SQL_SAFE_UPDATES = 1;
