@@ -1,13 +1,17 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertEquals;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -25,20 +29,16 @@ import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertEquals;
-
 public class ScoringJobServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String TENANT1 = "TestTenant_QuoteProtectionScoringResult";
     private static final String TESTFILENAME = "scoreResult.csv";
     private Tenant tenant;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private ScoringJobService scoringJobService;
 
     @Inject

@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("plsFeatureFlagService")
 public class PlsFeatureFlagServiceImpl implements PlsFeatureFlagService {

@@ -1,5 +1,22 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -11,21 +28,6 @@ import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Component("dunsGuideBookService")
 public class DunsGuideBookServiceImpl implements DunsGuideBookService {
@@ -34,13 +36,13 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
 
     private Map<String, DunsGuideBookEntityMgr> entityMgrMap = new ConcurrentHashMap<>(); // key is DataCloudVersion#getVersion
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     private FabricDataService dataService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
 

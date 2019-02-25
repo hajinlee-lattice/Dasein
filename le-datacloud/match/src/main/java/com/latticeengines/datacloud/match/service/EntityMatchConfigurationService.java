@@ -1,10 +1,11 @@
 package com.latticeengines.datacloud.match.service;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import java.time.Duration;
+
 import org.springframework.retry.support.RetryTemplate;
 
-import java.time.Duration;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 
 /**
  * Central place to manage all entity match related configurations

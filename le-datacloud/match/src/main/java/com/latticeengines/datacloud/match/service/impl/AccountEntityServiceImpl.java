@@ -5,14 +5,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.AccountEntityService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.domain.exposed.datacloud.match.entity.AccountSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("accountEntityService")

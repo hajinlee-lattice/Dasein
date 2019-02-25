@@ -1,27 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.testng.Assert;
-import org.mockito.Mockito;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.merge;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_3;
@@ -56,12 +37,32 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_4;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.Seed.EMPTY;
-import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
-import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.merge;
-import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
 public class EntityRawSeedServiceImplUnitTestNG {
 

@@ -1,15 +1,11 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.datacloud.match.entitymgr.DunsGuideBookEntityMgr;
-import com.latticeengines.datacloud.match.entitymgr.impl.DunsGuideBookEntityMgrImpl;
-import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,11 +19,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.match.entitymgr.DunsGuideBookEntityMgr;
+import com.latticeengines.datacloud.match.entitymgr.impl.DunsGuideBookEntityMgrImpl;
+import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 
 @ContextConfiguration(locations = { "classpath:test-datacloud-match-context.xml" })
 public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextTests {

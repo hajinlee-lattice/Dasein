@@ -1,5 +1,13 @@
 package com.latticeengines.apps.cdl.rating;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -20,24 +28,17 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder {
 
-    protected final String periodTypeName;
+    final String periodTypeName;
     private final int targetPeriodId;
     protected AIModel aiModel;
-    protected MetadataSegment baseSegment;
-    protected String productIds;
-    protected Restriction productTxnRestriction;
-    protected EventFrontEndQuery ratingFrontEndQuery;
-    protected int evaluationPeriodId;
+    MetadataSegment baseSegment;
+    String productIds;
+    Restriction productTxnRestriction;
+    EventFrontEndQuery ratingFrontEndQuery;
+    int evaluationPeriodId;
     private Set<String> dateAttributes;
 
     private List<ComparisonType> comparisonTypesToBeIgnored = Arrays.asList(ComparisonType.BEFORE, ComparisonType.AFTER,

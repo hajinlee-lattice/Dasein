@@ -1,5 +1,9 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +15,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 // TOOD: Waiting to be covnerted to deployment test, with proper setup
 public class SegmentResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
@@ -31,7 +31,7 @@ public class SegmentResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDepr
         switchToSuperAdmin();
         restTemplate.setErrorHandler(statusErrorHandler);
     }
-    
+
     @Test(groups = { "deployment", "deployment" }, enabled = false)
     public void delete() {
         restTemplate.delete(getRestAPIHostPort() + "/pls/segments/SMB", new HashMap<>());

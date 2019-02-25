@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.PlayType;

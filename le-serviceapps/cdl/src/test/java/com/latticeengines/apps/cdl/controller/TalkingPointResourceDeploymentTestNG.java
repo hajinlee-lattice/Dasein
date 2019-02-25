@@ -2,7 +2,9 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.apps.cdl.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientUtils;

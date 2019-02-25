@@ -1,9 +1,9 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
-
-import java.util.Map;
 
 public interface DunsGuideBookLookupService {
     /**

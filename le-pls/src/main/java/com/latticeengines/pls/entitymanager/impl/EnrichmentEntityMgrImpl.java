@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Enrichment;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 import com.latticeengines.domain.exposed.pls.MarketoMatchFieldName;
@@ -14,8 +16,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.EnrichmentDao;
 import com.latticeengines.pls.entitymanager.EnrichmentEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("enrichmentEntityMgr")
 public class EnrichmentEntityMgrImpl extends BaseEntityMgrImpl<Enrichment>

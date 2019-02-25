@@ -1,6 +1,9 @@
 package com.latticeengines.pls.controller;
 
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +16,6 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class ReportResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 

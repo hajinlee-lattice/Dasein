@@ -1,5 +1,12 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.io.InputStream;
 import java.util.List;
 
@@ -21,21 +28,14 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 public class MetadataFileUploadServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
-    
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         MetadataProxy proxy = mock(MetadataProxy.class);
@@ -80,8 +80,8 @@ public class MetadataFileUploadServiceImplDeploymentTestNG extends PlsDeployment
         }
         assertEquals(exceptionThrown, exception);
     }
-    
-    @DataProvider(name = "fileScenarios") 
+
+    @DataProvider(name = "fileScenarios")
     public Object[][] getFileScenarios() {
         return new Object[][] {
                 new Object[] { ArtifactType.PMML.getUrlToken(), //
@@ -89,7 +89,7 @@ public class MetadataFileUploadServiceImplDeploymentTestNG extends PlsDeployment
                         "pmml1", //
                         getInputStreamFromResource("rfpmml.xml"), //
                         false, //
-                        "/Metadata/module1/PMMLFiles/pmml1.xml" // 
+                        "/Metadata/module1/PMMLFiles/pmml1.xml" //
                 },
                 new Object[] { ArtifactType.PMML.getUrlToken(), //
                         "module1", //
@@ -106,18 +106,18 @@ public class MetadataFileUploadServiceImplDeploymentTestNG extends PlsDeployment
                         "transform1", //
                         getInputStreamFromResource("a.py"), //
                         false, //
-                        "/Metadata/module2/PythonModules/transform1.py" // 
+                        "/Metadata/module2/PythonModules/transform1.py" //
                 },
                 new Object[] { ArtifactType.PivotMapping.getUrlToken(), //
                         "module3", //
                         "sfdc_pmml_mapping", //
                         getInputStreamFromResource("sfdc_pmml_mapping.txt"), //
                         false, //
-                        "/Metadata/module3/PivotMappings/sfdc_pmml_mapping.csv" // 
+                        "/Metadata/module3/PivotMappings/sfdc_pmml_mapping.csv" //
                 },
         };
     }
-    
+
     private InputStream getInputStreamFromResource(String fileName) {
         return ClassLoader.getSystemResourceAsStream("com/latticeengines/pls/service/impl/metadatafileuploadserviceimpl/" + fileName);
     }
