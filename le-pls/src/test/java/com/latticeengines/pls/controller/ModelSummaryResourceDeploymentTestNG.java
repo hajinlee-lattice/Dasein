@@ -1,5 +1,10 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -35,28 +40,23 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 /**
  * This test has two users with particular privileges:
- * 
+ *
  * rgonzalez - View_PLS_Reporting for tenant1 bnguyen - View_PLS_Reporting,
  * View_PLS_Models for tenant2
- * 
+ *
  * It ensures that rgonzalez cannot access any model summaries since it does not
  * have the View_PLS_Models right.
- * 
+ *
  * It also ensures that bnguyen can indeed access the model summaries since it
  * does have the View_PLS_Models right.
- * 
+ *
  * It also ensures that updates can only be done by bnguyen since this user has
  * Edit_PLS_Models right.
- * 
+ *
  * @author rgonzalez
- * 
+ *
  */
 public class ModelSummaryResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 

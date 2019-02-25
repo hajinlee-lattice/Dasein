@@ -1,5 +1,15 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -51,16 +61,6 @@ import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 

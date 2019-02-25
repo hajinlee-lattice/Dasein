@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -21,7 +22,6 @@ import com.latticeengines.liaison.exposed.service.QueryColumn;
 import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.service.PdSegmentService;
 import com.latticeengines.pls.service.TenantConfigService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 

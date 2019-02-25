@@ -3,7 +3,9 @@ package com.latticeengines.pls.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.inject.Inject;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;

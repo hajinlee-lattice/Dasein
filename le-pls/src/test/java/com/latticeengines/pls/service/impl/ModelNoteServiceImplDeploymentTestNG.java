@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.InputStream;
 import java.util.List;
 
@@ -21,8 +23,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-
-import static org.testng.Assert.assertEquals;
 
 public class ModelNoteServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 

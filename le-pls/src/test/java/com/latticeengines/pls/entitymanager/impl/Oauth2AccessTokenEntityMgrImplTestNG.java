@@ -7,11 +7,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBase {

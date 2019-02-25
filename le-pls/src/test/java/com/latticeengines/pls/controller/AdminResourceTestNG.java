@@ -1,5 +1,11 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,12 +41,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 public class AdminResourceTestNG extends PlsDeploymentTestNGBaseDeprecated {
 

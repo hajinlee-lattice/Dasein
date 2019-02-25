@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
@@ -17,6 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointsAttributesProxy;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
