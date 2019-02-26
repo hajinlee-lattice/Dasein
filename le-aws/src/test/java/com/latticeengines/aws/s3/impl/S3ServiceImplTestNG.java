@@ -1,5 +1,7 @@
 package com.latticeengines.aws.s3.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +30,8 @@ import com.amazonaws.auth.policy.conditions.StringCondition;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.util.Md5Utils;
 import com.latticeengines.aws.s3.S3Service;
 
 @DirtiesContext
@@ -35,6 +39,8 @@ import com.latticeengines.aws.s3.S3Service;
 public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     private static String DROP_FOLDER = "dropfolder";
+
+    private static final String SOURCE_S3_BUCKET = "latticeengines-test-artifacts";
 
     @Inject
     private S3Service s3Service;
@@ -79,6 +85,32 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void teardown() {
         s3Service.cleanupPrefix(testBucket, dropBoxDir);
         s3Client.deleteBucketPolicy(testBucket);
+    }
+
+    @Test(groups = "functional")
+    public void testCopyLargeObject() throws IOException {
+        String sourceKey = "le-serviceapps/cdl/end2end/large_csv/1/Accounts.csv";
+        String destKey = "copyLargeObjectTest/Accounts.csv";
+        if (!s3Service.objectExist(SOURCE_S3_BUCKET, sourceKey)) {
+            //skip test if file is not there.
+            return;
+        }
+        if (s3Service.objectExist(testBucket, destKey)) {
+            s3Service.cleanupPrefix(testBucket, destKey);
+            Assert.assertFalse(s3Service.objectExist(testBucket, destKey));
+        }
+        s3Service.copyLargeObjects(SOURCE_S3_BUCKET, sourceKey, testBucket, destKey);
+        Assert.assertTrue(s3Service.objectExist(testBucket, destKey));
+        ObjectMetadata sourceMeta = s3Client.getObjectMetadata(SOURCE_S3_BUCKET, sourceKey);
+        ObjectMetadata destMeta = s3Client.getObjectMetadata(testBucket, destKey);
+        Assert.assertEquals(sourceMeta.getContentLength(), destMeta.getContentLength());
+        try (InputStream destSteam = s3Service.readObjectAsStream(testBucket, destKey)) {
+            String destMd5 = Md5Utils.md5AsBase64(destSteam);
+            try (InputStream sourceSteam = s3Service.readObjectAsStream(SOURCE_S3_BUCKET, sourceKey)) {
+                String sourceMd5 = Md5Utils.md5AsBase64(sourceSteam);
+                Assert.assertEquals(destMd5, sourceMd5);
+            }
+        }
     }
 
     @Test(groups = "manual", enabled = false)
