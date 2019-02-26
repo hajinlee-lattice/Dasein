@@ -1,11 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
-
 import java.util.Date;
-
+import java.util.List;
 import javax.inject.Inject;
 
 import org.joda.time.DateTime;
@@ -29,7 +25,14 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.security.exposed.service.TenantService;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -41,6 +44,9 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
+
+    @Inject
+    private TenantService tenantService;
 
     private static final String DATA_FEED_NAME = "datafeed";
 
@@ -131,6 +137,21 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
+    public void getAllSimpleDataFeedsForActiveTenant() {
+        mainTestTenant.setStatus(TenantStatus.INACTIVE);
+        tenantService.updateTenant(mainTestTenant);
+
+        List<SimpleDataFeed> simpleDataFeeds = datafeedEntityMgr.getSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE);
+        assertEquals(simpleDataFeeds.size(), 0);
+
+        mainTestTenant.setStatus(TenantStatus.ACTIVE);
+        tenantService.updateTenant(mainTestTenant);
+
+        simpleDataFeeds = datafeedEntityMgr.getAllSimpleDataFeeds();
+        assertEquals(simpleDataFeeds.size(), 1);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "getAllSimpleDataFeedsForActiveTenant")
     public void updateStatus() {
         assertEquals(DataFeed.Status.ProcessAnalyzing, datafeed.getStatus());
         datafeed.setStatus(DataFeed.Status.Active);

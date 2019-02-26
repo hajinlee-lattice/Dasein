@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
@@ -164,7 +165,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void orchestrateJob() {
-        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeedsForActiveTenant();
+        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE);
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis);
 

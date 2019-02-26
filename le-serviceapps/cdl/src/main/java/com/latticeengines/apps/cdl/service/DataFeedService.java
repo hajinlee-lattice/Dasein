@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 
 public interface DataFeedService {
 
@@ -56,7 +57,7 @@ public interface DataFeedService {
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
 
-    List<SimpleDataFeed> getAllSimpleDataFeedsForActiveTenant();
+    List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status);
 
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 

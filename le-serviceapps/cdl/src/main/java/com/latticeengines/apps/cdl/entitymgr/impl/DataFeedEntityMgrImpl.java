@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -262,12 +261,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<SimpleDataFeed> getAllSimpleDataFeedsForActiveTenant() {
-        List<DataFeed> dataFeeds = findAll();
-        return dataFeeds
-                .stream()
-                .filter(df -> TenantStatus.ACTIVE.equals(df.getTenant().getStatus()))
-                .map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
+    public List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status) {
+        List<DataFeed> dataFeeds = datafeedRepository.getDataFeedsByTenantStatus(status);
+        return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
                 .collect(Collectors.toList());
     }
 

@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
@@ -55,9 +56,9 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
-    public List<SimpleDataFeed> getAllSimpleDataFeedsForActiveTenant() {
-        String url = constructUrl("/datafeed/internal/simpledatafeedlistforactivetenant");
-        List<?> list = get("get all simple data feeds for active tenant", url, List.class);
+    public List<SimpleDataFeed> getAllSimpleDataFeedsByTenantStatus(TenantStatus status) {
+        String url = constructUrl(String.format("/datafeed/internal/simpledatafeedlist?status=%s", status.name()));
+        List<?> list = get("get all simple data feeds", url, List.class);
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
