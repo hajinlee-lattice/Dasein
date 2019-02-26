@@ -142,13 +142,16 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         tenantService.updateTenant(mainTestTenant);
 
         List<SimpleDataFeed> simpleDataFeeds = datafeedEntityMgr.getSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE);
-        assertEquals(simpleDataFeeds.size(), 0);
+        int size_1 = simpleDataFeeds != null ? simpleDataFeeds.size() : 0;
 
         mainTestTenant.setStatus(TenantStatus.ACTIVE);
         tenantService.updateTenant(mainTestTenant);
 
-        simpleDataFeeds = datafeedEntityMgr.getAllSimpleDataFeeds();
-        assertEquals(simpleDataFeeds.size(), 1);
+        simpleDataFeeds = datafeedEntityMgr.getSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE);
+        if (simpleDataFeeds != null) {
+            int size_2 = simpleDataFeeds != null ? simpleDataFeeds.size() : 0;
+            assertTrue(size_2 > size_1);
+        }
     }
 
     @Test(groups = "functional", dependsOnMethods = "getAllSimpleDataFeedsForActiveTenant")
