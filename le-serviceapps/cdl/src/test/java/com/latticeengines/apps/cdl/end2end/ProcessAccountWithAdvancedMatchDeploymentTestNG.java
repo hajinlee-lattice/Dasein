@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 
@@ -14,6 +15,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
 
     @BeforeClass(groups = { "end2end" })
+    @Override
     public void setup() throws Exception {
         log.error("$JAW$ Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
@@ -22,4 +24,11 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         log.error("$JAW$ Setup Complete!");
     }
 
+
+    //@Test(groups = "end2end")
+    @Test(groups = "end2end", enabled = false)
+    @Override
+    public void runTest() throws Exception {
+        super.runTest();
+    }
 }

@@ -75,8 +75,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             // slimInputStep = 1;
             matchStep = 1;
             if (configuration.isEntityMatchEnabled()) {
-                log.error("$JAW$ Entity Match is Enabled! (1)");
-
                 fetchOnlyMatchStep = 2;
                 // slimDiffStep = 3;
                 upsertMasterStep = 3;
@@ -235,9 +233,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
 
         if (configuration.isEntityMatchEnabled()) {
-            log.error("$JAW$ Entity Match is Enabled! (2)");
-
-
             matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
             matchInput.setSkipKeyResolution(true);
             matchInput.setTargetEntity(BusinessEntity.Account.name());
@@ -284,8 +279,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.Seed);
         matchInput.setAllocateId(false);
         matchInput.setFetchOnly(true);
-        // TODO(jwinter): Should we be setting the field for BulkMatch?
-        //matchInput.setFields(Arrays.asList(InterfaceName.EntityId.name()));
 
         // Prepare Entity Key Map for Fetch Oly Match.
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(Arrays.asList(InterfaceName.EntityId.name()));
