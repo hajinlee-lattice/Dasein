@@ -34,7 +34,7 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ScoringSer
         return "TEZ";
     }
 
-    @Test(groups = "functional", enabled=false)
+    @Test(groups = "functional", enabled = false)
     public void testCalculationExpectedRevenuePercentile() {
         CalculateExpectedRevenuePercentileParameters parameters = prepareInputWithExpectedRevenue();
         executeDataFlow(parameters);
@@ -59,10 +59,8 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ScoringSer
                 nonEvRecordCount.getAndIncrement();
             }
         });
-        System.out.println("evRecordCount = " + evRecordCount.get());
-        System.out.println("nonEvRecordCount = " + nonEvRecordCount.get());
-        Assert.assertTrue(evRecordCount.get() > 0);
-        Assert.assertTrue(nonEvRecordCount.get() > 0);
+        Assert.assertEquals(evRecordCount.get(), 19179);
+        Assert.assertEquals(nonEvRecordCount.get(), 103457);
     }
 
     @Override

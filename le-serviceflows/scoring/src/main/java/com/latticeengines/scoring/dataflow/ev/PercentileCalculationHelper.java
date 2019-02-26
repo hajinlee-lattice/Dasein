@@ -24,7 +24,7 @@ public class PercentileCalculationHelper {
     @Inject
     private NodeSplitter nodeSplitter;
 
-    public Node calculate(ParsedContext context, Node mergedScoreCount) {
+    public Node calculate(ParsedContext context, Node mergedScoreCount, boolean trySecondarySort) {
         Map<String, Node> nodes = nodeSplitter.split(mergedScoreCount, context.originalScoreFieldMap,
                 context.modelGuidFieldName);
         Node merged = null;
@@ -34,9 +34,11 @@ public class PercentileCalculationHelper {
 
             String originalScoreField = context.originalScoreFieldMap.getOrDefault(modelGuid,
                     InterfaceName.RawScore.name());
+            String secondarySortFieldName = trySecondarySort ? context.outputExpRevFieldName : null;
 
             Node output = calculatePercentileByFieldName(context.modelGuidFieldName, context.scoreCountFieldName,
-                    originalScoreField, context.percentileFieldName, context.minPct, context.maxPct, node);
+                    originalScoreField, context.percentileFieldName, secondarySortFieldName, context.minPct,
+                    context.maxPct, node);
             if (merged == null) {
                 merged = output;
             } else {
@@ -47,7 +49,8 @@ public class PercentileCalculationHelper {
     }
 
     private Node calculatePercentileByFieldName(String modelGuidFieldName, String scoreCountFieldName,
-            String originalScoreFieldName, String percentileFieldName, int minPct, int maxPct, Node node) {
+            String originalScoreFieldName, String percentileFieldName, String secondarySortFieldName, int minPct,
+            int maxPct, Node node) {
         if (ScoreResultField.RawScore.displayName.equals(originalScoreFieldName)) {
             return node;
         }
@@ -55,11 +58,17 @@ public class PercentileCalculationHelper {
         node = node.addColumnWithFixedValue(percentileFieldName, null, Integer.class);
         List<String> returnedFields = new ArrayList<>(node.getFieldNames());
         List<FieldMetadata> returnedMetadata = new ArrayList<>(node.getSchema());
-        Node calculatePercentile = node
-                .groupByAndBuffer(new FieldList(modelGuidFieldName), new FieldList(originalScoreFieldName),
-                        new CalculatePercentile(new Fields(returnedFields.toArray(new String[0])), minPct, maxPct,
-                                percentileFieldName, scoreCountFieldName, originalScoreFieldName),
-                        true, returnedMetadata);
+        FieldList sortFieldList = null;
+        if (secondarySortFieldName == null || secondarySortFieldName.equals(originalScoreFieldName)) {
+            sortFieldList = new FieldList(originalScoreFieldName);
+        } else {
+            sortFieldList = new FieldList(originalScoreFieldName, secondarySortFieldName);
+        }
+
+        Node calculatePercentile = node.groupByAndBuffer(new FieldList(modelGuidFieldName),
+                sortFieldList, new CalculatePercentile(new Fields(returnedFields.toArray(new String[0])), minPct,
+                        maxPct, percentileFieldName, scoreCountFieldName, originalScoreFieldName),
+                true, returnedMetadata);
         return calculatePercentile;
     }
 }
