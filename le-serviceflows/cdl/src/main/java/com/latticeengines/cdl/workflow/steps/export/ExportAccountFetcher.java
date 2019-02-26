@@ -146,8 +146,7 @@ public class ExportAccountFetcher {
 
         Map<String, Object> data = null;
         if (matchOutput != null //
-                && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
-                && matchOutput.getResult().get(0) != null) {
+                && CollectionUtils.isNotEmpty(matchOutput.getResult())) {
 
             if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
                 log.info("Didn't find any match from lattice data cloud. "
@@ -159,15 +158,19 @@ public class ExportAccountFetcher {
 
             final Map<String, Object> tempDataRef = new HashMap<>();
             List<String> fields = matchOutput.getOutputFields();
-            List<Object> values = matchOutput.getResult().get(0).getOutput();
-            IntStream.range(0, fields.size()) //
-                    .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
-            data = tempDataRef;
+            for (OutputRecord r : matchOutput.getResult()) {
+
+                List<Object> values = r.getOutput();
+                IntStream.range(0, fields.size()) //
+                        .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
+                data = tempDataRef;
+                if (MapUtils.isNotEmpty(data)) {
+                    dataPage.getData().add(data);
+                }
+
+            }
         }
 
-        if (MapUtils.isNotEmpty(data)) {
-            dataPage.getData().add(data);
-        }
         return dataPage;
     }
 
