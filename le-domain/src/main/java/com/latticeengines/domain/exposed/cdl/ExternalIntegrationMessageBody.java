@@ -1,15 +1,18 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.List;
+import java.util.Map;
 
 public class ExternalIntegrationMessageBody {
 
     // Tray User ID
     private String trayTenantId;
 
-    private List<ExportFileConfig> sourceFiles;
+    private Map<String, List<ExportFileConfig>> sourceFiles;
 
     private String externalAudienceId;
+
+    private String externalAudienceName;
 
     private String workflowRequestId;
 
@@ -23,11 +26,11 @@ public class ExternalIntegrationMessageBody {
         this.trayTenantId = trayTenantId;
     }
 
-    public List<ExportFileConfig> getSourceFiles() {
+    public Map<String, List<ExportFileConfig>> getSourceFiles() {
         return sourceFiles;
     }
 
-    public void setSourceFiles(List<ExportFileConfig> sourceFiles) {
+    public void setSourceFiles(Map<String, List<ExportFileConfig>> sourceFiles) {
         this.sourceFiles = sourceFiles;
     }
 
@@ -37,6 +40,14 @@ public class ExternalIntegrationMessageBody {
 
     public void setExternalAudienceId(String externalAudienceId) {
         this.externalAudienceId = externalAudienceId;
+    }
+
+    public String getExternalAudienceName() {
+        return externalAudienceName;
+    }
+
+    public void setExternalAudienceName(String externalAudienceName) {
+        this.externalAudienceName = externalAudienceName;
     }
 
     public String getWorkflowRequestId() {

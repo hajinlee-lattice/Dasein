@@ -180,6 +180,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "AUDIENCE_ID", nullable = true)
     private String audienceId;
 
+    @JsonProperty("audienceName")
+    @Column(name = "AUDIENCE_NAME", nullable = true)
+    private String audienceName;
+
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
@@ -442,5 +446,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
+    }
+
+    public String getAudienceName() {
+        return audienceName;
+    }
+
+    public void setAudienceName(String audienceName) {
+        this.audienceName = audienceName;
     }
 }
