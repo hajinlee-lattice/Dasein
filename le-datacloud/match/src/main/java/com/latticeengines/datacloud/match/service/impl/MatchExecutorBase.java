@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,13 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.firehose.FirehoseService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -60,14 +61,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
 
-    @Resource(name = "genericFabricMessageManager")
-    private GenericFabricMessageManager<MatchHistory> fabricEntityManager;
+    @Value("${datacloud.match.history.delivery.stream.name}")
+    private String deliveryStreamName;
+
+    @Inject
+    private FirehoseService firehoseService;
 
     @PostConstruct
     public void init() {
-        if (isMatchHistoryEnabled) {
-            fabricEntityManager.createOrGetNamedBatchId(FABRIC_MATCH_HISTORY, null, false);
-        }
     }
 
     @MatchStep
@@ -132,8 +133,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             MatchInput matchInput = matchContext.getInput();
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {
-                    matchHistory.setTenantId(matchInput.getTenant().getId()).setRootOperationUid(
-                            matchInput.getRootOperationUid());
+                    matchHistory.setTenantId(matchInput.getTenant().getId())
+                            .setRootOperationUid(matchInput.getRootOperationUid());
                 }
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
@@ -157,10 +158,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             recordRequest.setId(UUID.randomUUID().toString());
             matchHistory.setId(recordRequest.getId());
             recordRequest.setStores(Collections.singletonList(FabricStoreEnum.S3))
-                    .setRepositories(Collections.singletonList(FABRIC_MATCH_HISTORY))
-                    .setBatchId(FABRIC_MATCH_HISTORY);
-            fabricEntityManager.publishEntity(recordRequest, matchHistory, MatchHistory.class);
+                    .setRepositories(Collections.singletonList(FABRIC_MATCH_HISTORY)).setBatchId(FABRIC_MATCH_HISTORY);
         }
+        List<String> histories = new ArrayList<>();
+        matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
+        firehoseService.sendBatch(deliveryStreamName, histories);
     }
 
     @VisibleForTesting
@@ -170,8 +172,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
-        boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput()
-                .getExcludePublicDomain());
+        boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -205,7 +206,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             Map<String, Object> results = internalRecord.getQueryResult();
 
             // NOTE for entity match, check for entityId
-            // otherwise, check for latticeAccountId to determine if we have a match or not
+            // otherwise, check for latticeAccountId to determine if we have a
+            // match or not
             boolean matchedRecord = internalRecord.isMatched()
                     || (!isEntityMatch && (internalRecord.getLatticeAccountId() != null))
                     || (isEntityMatch && StringUtils.isNotBlank(internalRecord.getEntityId()));
@@ -213,7 +215,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
-                String field = column.getExternalColumnId() == null ? column.getColumnName() : column.getExternalColumnId();
+                String field = column.getExternalColumnId() == null ? column.getColumnName()
+                        : column.getExternalColumnId();
 
                 Object value = null;
 
@@ -222,7 +225,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     value = internalRecord.getEntityId();
                 } else if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
-                    value = StringStandardizationUtils.getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
+                    value = StringStandardizationUtils
+                            .getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
                 } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
