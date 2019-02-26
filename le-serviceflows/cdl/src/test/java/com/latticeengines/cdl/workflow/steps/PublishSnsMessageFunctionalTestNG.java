@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -18,7 +19,6 @@ import org.testng.annotations.Test;
 
 import com.amazonaws.services.sns.model.PublishResult;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -47,10 +47,6 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
 
     private String workflowRequestId = UUID.randomUUID().toString();
 
-    private CDLExternalSystemType destinationSystemType = CDLExternalSystemType.MAP;
-
-    private String destinationSystemId = "Marketo_" + System.currentTimeMillis();
-
     private String audienceId = UUID.randomUUID().toString();
 
     @Override
@@ -58,7 +54,8 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         exportStep.setDropBoxProxy(dropboxProxy);
-        exportStep.setLookupIdMappingProxy(lookupIdMappingProxy);
+        exportStep.setS3ExportFiles(Arrays.asList("lattice-engines-test/dropfolder/example.csv",
+                "lattice-engines-test/dropfolder/example.json"));
 
         PlayLaunchExportFilesToS3Configuration config = new PlayLaunchExportFilesToS3Configuration();
         LookupIdMap lookupIdMap = new LookupIdMap();
@@ -68,6 +65,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
 
         config.setLookupIdMap(lookupIdMap);
         config.setExternalAudienceId(audienceId);
+        config.setExternalAudienceName("externalAudienceName");
 
         exportStep.setConfiguration(config);
     }
@@ -78,8 +76,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         dropbox.setDropBox(UUID.randomUUID().toString());
         when(dropboxProxy.getDropBox(anyString())).thenReturn(dropbox);
 
-        PublishResult publishResult = exportStep.publishToSnsTopic(customerSpace, workflowRequestId,
-                "/dropfolder/test/s3/export/file");
+        PublishResult publishResult = exportStep.publishToSnsTopic(customerSpace, workflowRequestId);
         log.info(JsonUtils.serialize(publishResult));
         Assert.assertNotNull(publishResult);
     }

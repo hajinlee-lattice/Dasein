@@ -105,7 +105,17 @@ public class CalculateExpectedRevenuePercentileDetailedTestNG extends ScoringSer
             GenericRecord expectedResultRecord = expectedResultsRecordsMap.get(k);
 
             expectedResultRecord.getSchema().getFields().stream().forEach(f -> {
-                assertEquals(outputRecord.get(f.name()), expectedResultRecord.get(f.name()), f.name());
+                if (f.name().equals("ExpectedRevenuePercentile") || f.name().equals("Score")) {
+                    assertTrue(
+                            Math.abs(Integer.parseInt(outputRecord.get(f.name()).toString())
+                                    - Integer.parseInt(expectedResultRecord.get(f.name()).toString())) == 0,
+                            String.format("record = %s, f.name() = %s, val = %s, expected = %s",
+                                    expectedResultRecord.get(keyColumn).toString(), f.name(),
+                                    Integer.parseInt(outputRecord.get(f.name()).toString()),
+                                    Integer.parseInt(expectedResultRecord.get(f.name()).toString())));
+                } else {
+                    assertEquals(outputRecord.get(f.name()), expectedResultRecord.get(f.name()), f.name());
+                }
             });
         });
     }
@@ -117,7 +127,6 @@ public class CalculateExpectedRevenuePercentileDetailedTestNG extends ScoringSer
 
     private CalculateExpectedRevenuePercentileParameters prepareInputWithExpectedRevenue() {
         CalculateExpectedRevenuePercentileParameters parameters = new CalculateExpectedRevenuePercentileParameters();
-        String rawScoreField = ScoreResultField.RawScore.displayName;
         String predictedRevenueField = ScoreResultField.ExpectedRevenue.displayName;
 
         String modelGuidField = ScoreResultField.ModelId.displayName;

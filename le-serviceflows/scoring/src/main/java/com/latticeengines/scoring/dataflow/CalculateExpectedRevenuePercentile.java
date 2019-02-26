@@ -71,7 +71,7 @@ public class CalculateExpectedRevenuePercentile
             // sort based on ExpectedRevenue column (and using number of
             // rows) calculate percentile and put value in new
             // ExpectedRevenuePercentile field
-            Node calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount);
+            Node calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount, false);
 
             calculatePercentile = calculatePercentile.retain(retainedFields);
             log.info(String.format("percentileFieldName '%s', standardScoreField '%s'", context.percentileFieldName,
@@ -100,6 +100,7 @@ public class CalculateExpectedRevenuePercentile
                 context.fitFunctionParametersMap = ExpectedRevenueDataFlowUtil.getEVFitFunctionParametersMap(
                         context.customerSpace, yarnConfiguration, modelSummaryProxy, context.originalScoreFieldMap,
                         parameters.getFitFunctionParametersMap());
+
                 log.info(String.format("fitFunctionParametersMap = %s",
                         JsonUtils.serialize(context.fitFunctionParametersMap)));
 
@@ -114,33 +115,56 @@ public class CalculateExpectedRevenuePercentile
                 // copy values of ExpectedRevenuePercentile in original
                 // percentile column ("Score") as downstream processing expects
                 // final percentiles into original percentile column
-                calculatePercentile = calculateFittedExpectedRevenueHelper.calculate(context, calculatePercentile,
-                        retainedFields);
 
-                calculatePercentile = calculatePercentile.addColumnWithFixedValue(context.percentileFieldName, null,
-                        Integer.class);
+                calculatePercentile = calculateFittedExpectedRevenue(retainedFields, calculatePercentile);
 
-                mergedScoreCount = mergeCount(context, calculatePercentile);
-
-                calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount)
-                        .retain(retainedFields);
-
-                calculatePercentile = calculatePercentile //
-                        .addFunction(
-                                String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
-                                        context.percentileFieldName, context.standardScoreField), //
-                                new FieldList(context.percentileFieldName, context.standardScoreField), //
-                                new FieldMetadata(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField,
-                                        Integer.class));
-                calculatePercentile = calculatePercentile.discard(context.standardScoreField);
-                calculatePercentile = calculatePercentile.rename(
-                        new FieldList(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField),
-                        new FieldList(context.standardScoreField));
+                calculatePercentile = calculateFinalPercentile(retainedFields, calculatePercentile,
+                        EV_PERCENTILE_EXPRESSION);
 
             }
             return calculatePercentile;
         }
         return addPercentileColumn;
+    }
+
+    @SuppressWarnings("deprecation")
+    private Node calculateFinalPercentile(FieldList retainedFields, Node calculatePercentile,
+            String EV_PERCENTILE_EXPRESSION) {
+        Node mergedScoreCount;
+        calculatePercentile = calculatePercentile.addColumnWithFixedValue(context.percentileFieldName, null,
+                Integer.class);
+
+        mergedScoreCount = mergeCount(context, calculatePercentile);
+
+        calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount, true)
+                .retain(retainedFields);
+
+        calculatePercentile = calculatePercentile //
+                .addFunction(
+                        String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
+                                context.percentileFieldName, context.standardScoreField), //
+                        new FieldList(context.percentileFieldName, context.standardScoreField), //
+                        new FieldMetadata(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField, Integer.class));
+        calculatePercentile = calculatePercentile.discard(context.standardScoreField);
+        calculatePercentile = calculatePercentile.rename(
+                new FieldList(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField),
+                new FieldList(context.standardScoreField));
+        return calculatePercentile;
+    }
+
+    @SuppressWarnings("deprecation")
+    private Node calculateFittedExpectedRevenue(FieldList retainedFields, Node calculatePercentile) {
+        String COPY_INERMEDIATE_EV = "%s";
+        calculatePercentile = calculatePercentile //
+                .addFunction(String.format(COPY_INERMEDIATE_EV, context.expectedRevenueField), //
+                        new FieldList(context.expectedRevenueField), //
+                        new FieldMetadata(context.outputExpRevFieldName, Double.class));
+
+        List<String> tempRetainedFieldList = new ArrayList<>(retainedFields.getFieldsAsList());
+        tempRetainedFieldList.add(context.outputExpRevFieldName);
+        FieldList tempRetainedFields = new FieldList(tempRetainedFieldList);
+
+        return calculateFittedExpectedRevenueHelper.calculate(context, calculatePercentile, tempRetainedFields);
     }
 
     private Node mergeCount(ParsedContext context, Node node) {
