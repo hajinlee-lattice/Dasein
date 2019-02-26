@@ -1026,7 +1026,7 @@ angular
                                     deferred.resolve(
                                         PlaybookWizardStore.getCoverageMap({
                                             accounts: result.Account || 0,
-                                            contacts: esult.Contact || 0,
+                                            contacts: result.Contact || 0,
                                         }));
                                 });
                             }
