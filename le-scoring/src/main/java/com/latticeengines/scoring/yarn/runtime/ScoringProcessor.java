@@ -235,8 +235,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
         long endTime = System.currentTimeMillis();
         long oneBatchTime = endTime - startTime;
-        log.info(String.format("Bulk score request with %d records took %d sec", scoreRequest.getRecords().size(),
-                (oneBatchTime / 1000)));
+        log.info(String.format("Bulk score request with %d records took %d sec",
+                recordScoreResponse != null ? recordScoreResponse.size() : 0, (oneBatchTime / 1000)));
 
         return recordScoreResponse;
     }
