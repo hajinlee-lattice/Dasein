@@ -12,7 +12,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -162,18 +161,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
-                CSVFormat format = LECSVFormat.format.withHeader(headers);
+            CSVFormat format = LECSVFormat.format.withHeader(headers).withFirstRecordAsHeader();
             try (CSVParser parser = new CSVParser(
                     new BufferedReader(new InputStreamReader(new FileInputStream(csvFileName), StandardCharsets.UTF_8)),
                     format)) {
-                Iterator<CSVRecord> iter = parser.iterator();
-                while (iter.hasNext()) {
+                for (CSVRecord csvRecord : parser) {
                     if (failMapper) {
                         throw new CriticalImportException("There's critical exception in import, will fail the job!");
                     }
                     LOG.info("Start to processing line: " + lineNum);
                     beforeEachRecord();
-                    CSVRecord csvRecord = iter.next();
                     GenericRecord avroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
                     if (errorMap.size() == 0 && duplicateMap.size() == 0) {
                         dataFileWriter.append(avroRecord);
