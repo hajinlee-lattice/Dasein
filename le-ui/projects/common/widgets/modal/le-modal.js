@@ -58,7 +58,7 @@ export default class LeModal extends Component {
                         <LeButton
                             name={`${"modal-cancel"}`}
                             config={{
-                                label: "CANCEL",
+                                label: "Cancel",
                                 classNames: "gray-button"
                             }}
                             callback={() => { return this.clickHandler('close') }}
