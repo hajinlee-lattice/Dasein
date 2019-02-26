@@ -137,6 +137,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             this.idColumnName = rtsBulkScoringConfig.getIdColumnName();
         }
         log.info("Inside the rts bulk scoring processor.");
+        log.info(String.format("idColumnName is %s", idColumnName));
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
@@ -477,6 +478,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             log.info("Lead enrichment is not enabled for this tenant.");
         }
 
+        int count = 0;
         for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
             List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
             String id = scoreResponse.getId();
@@ -533,7 +535,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 }
                 GenericData.Record record = builder.build();
                 dataFileWriter.append(record);
+                count++;
             }
+            log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
+                    recordScoreResponseList.size(), count));
         }
     }
 
@@ -628,8 +633,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 BulkRecordScoreRequest scoreRequest = null;
                 synchronized (iterator) {
                     scoreRequest = ScoringProcessor.this.getBulkScoreRequest(iterator, rtsBulkScoringConfig);
-                    if (log.isDebugEnabled()) {
-                        log.debug("scoreRequest is " + scoreRequest);
+                    if (log.isInfoEnabled()) {
+                        log.info("scoreRequest is " + scoreRequest);
                     }
                     if (scoreRequest == null) {
                         break;
