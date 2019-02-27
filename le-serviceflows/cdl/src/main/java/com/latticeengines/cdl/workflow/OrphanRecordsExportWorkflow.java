@@ -12,7 +12,7 @@ import com.latticeengines.cdl.workflow.steps.ComputeOrphanRecordsStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.export.ExportOrphansRecordsToS3;
-import com.latticeengines.serviceflows.workflow.export.ImportTablesFromS3;
+import com.latticeengines.serviceflows.workflow.export.ImportTablesForOrphanReportFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -22,7 +22,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class OrphanRecordsExportWorkflow extends AbstractWorkflow<OrphanRecordsExportWorkflowConfiguration> {
     @Inject
-    private ImportTablesFromS3 importTablesFromS3;
+    private ImportTablesForOrphanReportFromS3 importTablesForOrphanReportFromS3;
 
     @Inject
     private ComputeOrphanRecordsStep computeOrphanRecords;
@@ -39,7 +39,7 @@ public class OrphanRecordsExportWorkflow extends AbstractWorkflow<OrphanRecordsE
     @Override
     public Workflow defineWorkflow(OrphanRecordsExportWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config)
-                .next(importTablesFromS3)
+                .next(importTablesForOrphanReportFromS3)
                 .next(computeOrphanRecords)
                 .next(exportData)
                 .next(exportOrphansRecordsToS3)

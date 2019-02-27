@@ -15,10 +15,10 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-@Component("importTablesFromS3")
+@Component("importTablesForOrphanReportFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ImportTablesFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(ImportTablesFromS3.class);
+public class ImportTablesForOrphanReportFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(ImportTablesForOrphanReportFromS3.class);
 
     @Override
     protected void buildRequests(List<ImportExportRequest> importExportRequests) {
