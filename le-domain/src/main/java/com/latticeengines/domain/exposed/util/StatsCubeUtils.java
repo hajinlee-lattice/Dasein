@@ -596,6 +596,16 @@ public class StatsCubeUtils {
                 continue;
             }
             AttributeStats statsInCube = attrStatsMap.get(name);
+            if (statsInCube.getBuckets() == null) {
+                // skip attr without Buckets field
+                continue;
+            } else if ( //
+                    (Long.valueOf(0).equals(statsInCube.getNonNullCount()) //
+                    || CollectionUtils.isEmpty(statsInCube.getBuckets().getBucketList()) //
+                    ) && !BucketType.Enum.equals(statsInCube.getBuckets().getType())) {
+                // no buckets and not Enum
+                continue;
+            }
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
             String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
             // create map entries if not there
