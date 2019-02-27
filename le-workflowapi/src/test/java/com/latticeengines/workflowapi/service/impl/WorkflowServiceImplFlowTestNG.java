@@ -7,17 +7,20 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -88,6 +91,9 @@ public class WorkflowServiceImplFlowTestNG extends WorkflowApiFunctionalTestNGBa
 
     @Inject
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
+
+    @Resource(name = "jdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
 
     private WorkflowConfiguration failableWorkflowConfig;
 
@@ -251,6 +257,21 @@ public class WorkflowServiceImplFlowTestNG extends WorkflowApiFunctionalTestNGBa
         assertEquals(status, BatchStatus.COMPLETED);
         assertEquals(SuccessfulListener.calls, successfulListenerCalls + 1);
         assertEquals(FailingListener.calls, failureListenerCalls + 1);
+    }
+
+    @Test(groups = "functional")
+    public void testSleepableWF() throws Exception {
+        sleepableStep.setSleepTime(80000L);
+
+        List<Map<String, Object>> props = jdbcTemplate.queryForList("show variables like '%wait_timeout%'");
+        log.info("Wait Timeout Properties for DB: " + props);
+        WorkflowExecutionId workflowId = workflowService.start(sleepableWorkflowConfig);
+        this.workflowId = workflowId.getId();
+        BatchStatus status = workflowService.getStatus(workflowId).getStatus();
+        assertTrue(status.equals(BatchStatus.STARTING) || status.equals(BatchStatus.STARTED));
+
+        status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 3000).getStatus();
+        assertEquals(status, BatchStatus.COMPLETED);
     }
 
     @Test(groups = "functional")

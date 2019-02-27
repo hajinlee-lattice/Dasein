@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -57,8 +59,10 @@ public class WorkflowTranslator {
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
+    @Resource(name = "resourceLessTransactionManager")
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private FinalJobListener finalJobListener;
@@ -69,6 +73,7 @@ public class WorkflowTranslator {
     public void init() {
         jobBuilderFactory = new LEJobBuilderFactory(jobRepository, finalJobListener, new LogJobListener(),
                 new FailureReportingListener(workflowJobEntityMgr));
+        stepBuilderFactory = new StepBuilderFactory(jobRepository, transactionManager);
     }
 
     public Job buildWorkflow(String name, Workflow workflow) {

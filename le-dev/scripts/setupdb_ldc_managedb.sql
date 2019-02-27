@@ -185,70 +185,11 @@ AND (AMColumnID LIKE 'Bmbr30%');
 
 INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, Mode, MetadataRefreshDate, RefreshVersion)
 VALUES
-  ('2.0.0', '2016-08-28', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.1', '2016-11-19', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.2', '2016-12-15', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.3', '2017-02-14', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.4', '2017-05-22', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.5', '2017-06-29', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.6', '2017-09-01', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.7', '2017-10-09', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.8', '2017-11-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.9', '2018-01-28', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.10', '2018-03-02', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.11', '2018-04-24', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.12', '2018-05-15', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.13', '2018-07-24', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.15', '2018-10-27', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.16', '2018-12-10', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.17', '2019-02-25', '2.0', 'APPROVED', 'FULL', NOW(), '0');
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2016-10-15_14-37-09_UTC',
-  `AccountLookupHdfsVersion` = '2016-10-10_17-40-35_UTC',
-  `DynamoTableSignature`        = '20161015',
-  `DynamoTableSignature_Lookup` = '20161015'
-WHERE `Version` = '2.0.0';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2016-11-19_20-32-21_UTC',
-  `AccountLookupHdfsVersion` = '2016-11-19_05-33-46_UTC'
-WHERE `Version` = '2.0.1';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2017-01-24_23-14-40_UTC',
-  `AccountLookupHdfsVersion` = '2017-01-04_04-49-12_UTC',
-  `DynamoTableSignature` = '20170126'
-WHERE `Version` = '2.0.2';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2017-02-14_07-28-18_UTC',
-  `AccountLookupHdfsVersion` = '2017-02-14_17-20-41_UTC',
-  `DynamoTableSignature`        = '20170301',
-  `DynamoTableSignature_Lookup` = '20170604'
-WHERE `Version` = '2.0.3';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2017-05-18_12-54-37_UTC',
-  `AccountLookupHdfsVersion` = '2017-05-17_17-30-29_UTC',
-  `DynamoTableSignature`        = '20170604',
-  `DynamoTableSignature_Lookup` = '20170604'
-WHERE `Version` = '2.0.4';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2017-06-30_01-18-36_UTC',
-  `AccountLookupHdfsVersion` = '2017-06-03_00-14-03_UTC',
-  `DynamoTableSignature`        = '20170629',
-  `DynamoTableSignature_Lookup` = '20170629',
-  `EnrichmentStatsVersion`      = '2017-07-22_04-52-07_UTC'
-WHERE `Version` = '2.0.5';
 
 UPDATE `DataCloudVersion`
 SET
@@ -258,58 +199,6 @@ SET
   `DynamoTableSignature_Lookup` = '20170830',
   `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
 WHERE `Version` = '2.0.6';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2017-10-08_19-08-20_UTC',
-  `AccountLookupHdfsVersion` = '2017-10-08_20-01-11_UTC',
-  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
-WHERE `Version` = '2.0.7';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2017-11-16_05-41-36_UTC',
-  `AccountLookupHdfsVersion` = '2017-11-16_05-41-36_UTC',
-  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
-WHERE `Version` = '2.0.8';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2018-01-10_05-41-36_UTC',
-  `AccountLookupHdfsVersion` = '2018-01-10_05-41-36_UTC',
-  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
-WHERE `Version` = '2.0.9';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2018-02-28_00-00-00_UTC',
-  `AccountLookupHdfsVersion` = '2018-02-28_00-00-00_UTC',
-  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
-WHERE `Version` = '2.0.10';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2018-04-20_00-00-00_UTC',
-  `AccountLookupHdfsVersion` = '2018-04-20_00-00-00_UTC',
-  `DynamoTableSignature`        = '20180420',
-  `DynamoTableSignature_Lookup` = '20180420',
-  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
-WHERE `Version` = '2.0.11';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2018-05-23_05-41-11_UTC',
-  `AccountLookupHdfsVersion` = '2018-05-10_00-00-00_UTC',
-  `EnrichmentStatsVersion`   = '2018-05-10_00-00-00_UTC',
-  `DynamoTableSignature` = '20180523'
-WHERE `Version` = '2.0.12';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2018-07-20_00-00-00_UTC',
-  `AccountLookupHdfsVersion` = '2018-07-18_00-00-00_UTC',
-  `EnrichmentStatsVersion`   = '2018-05-10_00-00-00_UTC'
-WHERE `Version` = '2.0.13';
 
 UPDATE `DataCloudVersion`
 SET
