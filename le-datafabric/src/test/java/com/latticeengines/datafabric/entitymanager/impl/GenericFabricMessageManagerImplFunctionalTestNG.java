@@ -68,7 +68,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         HdfsUtils.rmdir(yarnConfiguration, BASE_DIR + "/testGenericFile2");
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "functional", enabled = false)
     public void tearDown() throws Exception {
         for (String batchId : batchIds) {
             try {
@@ -81,7 +81,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         cleanHDFS();
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void createBatchId() throws Exception {
         String id = entityManager.createUniqueBatchId(5L);
         batchIds.add(id);
@@ -99,7 +99,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void createOrGetBatchName() throws Exception {
         String name = entityManager.createOrGetNamedBatchId("connectors", 6L, true);
         batchIds.add(name);
@@ -114,7 +114,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void updateBatchCountFinished() throws Exception {
         // bulk use case
         String name = entityManager.createOrGetNamedBatchId("connectors", 10L, true);
@@ -189,7 +189,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         Assert.assertEquals(batchStatus.getProgress(), new Float(0.01f));
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void updateBatchCountNotFinished() throws Exception {
         // bulk use case
         String name = entityManager.createOrGetNamedBatchId("connectors", 10L, true);
@@ -236,7 +236,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     }
 
-    @Test(groups = "manual", enabled = true)
+    @Test(groups = "manual", enabled = false)
     public void publishEntity() throws Exception {
 
         long RECORD_COUNT = 1;
@@ -268,7 +268,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     }
 
-    @Test(groups = "manual", enabled = true)
+    @Test(groups = "manual", enabled = false)
     public void publishRecord() throws Exception {
 
         long RECORD_COUNT = 10;
@@ -311,7 +311,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     }
 
-    @Test(groups = "manual", enabled = true)
+    @Test(groups = "manual", enabled = false)
     public void performance() throws Exception {
 
         cleanHDFS();

@@ -1,6 +1,6 @@
 angular.module('lp.apiconsole.ScoringRequestController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'lp.apiconsole.APIConsoleService'
 ])
 .directive('scoringRequest', function () {

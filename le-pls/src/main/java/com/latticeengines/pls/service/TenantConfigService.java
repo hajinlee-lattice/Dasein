@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
-import com.latticeengines.domain.exposed.pls.TenantConfiguration;
 
 public interface TenantConfigService {
 

@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 
 @Component("dunsGuideBookLookupActor")
 @Scope("prototype")

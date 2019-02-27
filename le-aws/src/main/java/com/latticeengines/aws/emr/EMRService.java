@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 
 public interface EMRService {
@@ -22,9 +23,13 @@ public interface EMRService {
 
     InstanceGroup getCoreGroup(String clusterId);
 
-    void scaleTaskGroup(String clusterId, int targetCount);
+    InstanceFleet getTaskFleet(String clusterId);
 
-    void scaleTaskGroup(InstanceGroup taskGrp, int targetCount);
+    InstanceFleet getCoreFleet(String clusterId);
+
+    void scaleTaskFleet(String clusterId, InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount);
+
+    void scaleTaskGroup(String clusterId, InstanceGroup taskGrp, int targetCount);
 
     List<ClusterSummary> findClusters(Predicate<ClusterSummary> filter);
 

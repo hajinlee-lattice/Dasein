@@ -3,7 +3,7 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.core.utilities.NavUtility',
     'mainApp.models.services.ModelService',
-    'mainApp.core.services.FeatureFlagService'
+    'common.services.featureflag'
 ])
 .controller('AdminInfoController', function ($scope, $rootScope, $http, ResourceUtility, NavUtility, ModelService, FeatureFlagService, ModelStore) {
     $scope.ResourceUtility = ResourceUtility;

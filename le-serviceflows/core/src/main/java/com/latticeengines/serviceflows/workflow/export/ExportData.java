@@ -91,8 +91,11 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
         log.info("MergedFileName=" + mergedFileName);
 
         try {
-            String pathToLookFor = mergeToPath.substring(0, mergeToPath.lastIndexOf('/'));
-            String filePrefix = mergedFileName.substring(0, mergedFileName.lastIndexOf(".csv"));
+            int lastSlashPos = mergeToPath.lastIndexOf('/');
+            String pathToLookFor = mergeToPath.substring(0, lastSlashPos);
+            String filePrefix = mergeToPath.substring(lastSlashPos + 1);
+            log.info("PathToLookFor=" + pathToLookFor);
+            log.info("FilePrefix=" + filePrefix);
             List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, pathToLookFor,
                     filePrefix + "_.*.csv$");
             log.info("HDFS CSV files=" + JsonUtils.serialize(csvFiles));
@@ -106,6 +109,7 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
 
             for (String file : csvFiles) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, file, localCsvFilesPath);
+                HdfsUtils.moveFile(yarnConfiguration, file, mergeToPath);
             }
 
             File localOutputCSV = new File(localCsvFilesPath, mergedFileName);
@@ -120,6 +124,8 @@ public class ExportData extends BaseExportData<ExportStepConfiguration> {
             if (files == null) {
                 throw new RuntimeException("Cannot list files in dir " + localCsvDir);
             }
+
+            log.info("Local CSV files=" + JsonUtils.serialize(files));
 
             boolean hasHeader = false;
             for (File file : files) {

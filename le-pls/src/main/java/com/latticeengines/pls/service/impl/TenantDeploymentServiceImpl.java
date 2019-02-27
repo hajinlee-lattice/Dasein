@@ -9,6 +9,7 @@ import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
@@ -18,7 +19,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.TenantDeploymentEntityMgr;
 import com.latticeengines.pls.service.TenantDeploymentService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;

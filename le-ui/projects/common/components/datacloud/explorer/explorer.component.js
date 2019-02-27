@@ -1,21 +1,12 @@
-// grid view multple of 12 (24), dynamic across
-angular.module('common.datacloud.explorer', [
-    'common.datacloud.explorer.utils',
-    'common.datacloud.explorer.filters',
-    'common.datacloud.explorer.companyprofile',
-    'common.datacloud.explorer.latticeratingcard',
-    'common.datacloud.explorer.categorytile',
-    'common.datacloud.explorer.subcategorytile',
-    'common.datacloud.explorer.attributetile',
-    'mainApp.core.utilities.BrowserStorageUtility'
-])
-.controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $rootScope, 
-    Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
-    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
-    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, LookupResponse, 
-    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, ConfigureAttributesStore, Notice
-){
+export default function (
+    $scope, $filter, $timeout, $interval, $q, $state, $stateParams, LookupStore,
+    Enrichments, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService,
+    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum,
+    QueryRestriction, CurrentConfiguration, LookupResponse, QueryStore, ConfigureAttributesStore,
+    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, Notice
+) {
+    'ngInject';
+
     var vm = this,
         flags = FeatureFlagService.Flags();
 
@@ -30,7 +21,7 @@ angular.module('common.datacloud.explorer', [
             button_select: 'Enrichment Disabled',
             button_selected: 'Enrichment Enabled',
             button_deselect: 'Enrichment Enabled',
-            button_import_data: 'Import Data', 
+            button_import_data: 'Import Data',
             deselected_messsage: 'Attribute will be turned off for enrichment',
             categories_see_all: 'See All Categories',
             categories_select_all: 'All Categories',
@@ -54,7 +45,7 @@ angular.module('common.datacloud.explorer', [
         LookupResponse: LookupStore.response,
         no_lookup_results_message: false,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
-        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : (Enrichments || []).length),        
+        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : (Enrichments || []).length),
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         show_segmentation: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),
@@ -100,24 +91,24 @@ angular.module('common.datacloud.explorer', [
 
     function getDatacollectionPrecheck() {
         vm.datacollectionPrechecking = true; // spinner
-        ConfigureAttributesStore.getPrecheck().then(function(result) {
+        ConfigureAttributesStore.getPrecheck().then(function (result) {
             vm.datacollectionPrecheck = result;
             vm.datacollectionPrechecking = false;
         });
     }
 
-    vm.init = function() {
+    vm.init = function () {
         // leo();
-        if(['segment.analysis'].indexOf(vm.section) != -1) { // only run on 'my data' page
+        if (['segment.analysis'].indexOf(vm.section) != -1) { // only run on 'my data' page
             getDatacollectionPrecheck();
         }
 
         if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add' || $state.current.name === 'home.ratingsengine.rulesprospects.segment.attributes.add') {
             vm.mode = 'dashboardrules';
         }
-        
+
         if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
-//            vm.section = 'segment.analysis';
+            //            vm.section = 'segment.analysis';
             vm.inWizard = true;
         }
         if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add') {
@@ -135,7 +126,7 @@ angular.module('common.datacloud.explorer', [
             $state.go('home.datacloud.explorer');
         }
 
-        DataCloudStore.getCube().then(function(result) {
+        DataCloudStore.getCube().then(function (result) {
             vm.cube = result;
         });
 
@@ -155,14 +146,14 @@ angular.module('common.datacloud.explorer', [
         // for Advanced Query Builder
         vm.addBucketTreeRoot = QueryStore.getAddBucketTreeRoot();
 
-        $scope.$on("$destroy", function() {
+        $scope.$on("$destroy", function () {
             delete (vm.addBucketTreeRoot = QueryStore.setAddBucketTreeRoot(null));
         });
 
         DataCloudStore.setFeedbackModal(false);
 
         if (vm.section == 'segment.analysis') {
-            QueryStore.getCollectionStatus().then(function(result) {
+            QueryStore.getCollectionStatus().then(function (result) {
                 vm.collectionStatus = result;
             });
         }
@@ -171,7 +162,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     /* some rules that might hide the page */
-    vm.hidePage = function() {
+    vm.hidePage = function () {
         if (vm.lookupMode && typeof vm.lookupMode === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
             return true;
         }
@@ -187,7 +178,7 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
-    vm.relanding = function() {
+    vm.relanding = function () {
         vm.TileTableItems = {};
 
         if (vm.metadataSegments || QueryRestriction) {
@@ -195,16 +186,16 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.filter = function(items, property, value, debug) {
+    vm.filter = function (items, property, value, debug) {
         if (property.indexOf('.') > -1) {
             var propsList = property.split('.');
-            var walkObject = function(obj, j) {
+            var walkObject = function (obj, j) {
                 if (obj && j) {
                     return obj[j];
                 }
             };
 
-            for (var i=0, result=[], item; i < items.length; i++) {
+            for (var i = 0, result = [], item; i < items.length; i++) {
                 item = propsList.reduce(walkObject, items[i]);
 
                 if (typeof item != 'undefined' && item == value) {
@@ -212,7 +203,7 @@ angular.module('common.datacloud.explorer', [
                 }
             }
         } else {
-            var result = items.filter(function(item) {
+            var result = items.filter(function (item) {
                 return item[property] == value;
             });
         }
@@ -224,7 +215,7 @@ angular.module('common.datacloud.explorer', [
         return result;
     }
 
-    vm.closeHighlighterButtons = function(index) {
+    vm.closeHighlighterButtons = function (index) {
         var index = index || '';
 
         for (var i in vm.openHighlighter) {
@@ -240,12 +231,12 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.setSubcategory = function(subcategory) {
+    vm.setSubcategory = function (subcategory) {
         vm.subcategory = subcategory;
         DataCloudStore.setMetadata('subcategory', subcategory);
     }
 
-    vm.getAttributes = function(category){
+    vm.getAttributes = function (category) {
         var attributes = vm.enrichmentsObj[category];
         // console.log('*******************************************');
         // console.log(attributes);
@@ -253,15 +244,15 @@ angular.module('common.datacloud.explorer', [
 
         var subcategory = DataCloudStore.getMetadata('subcategory');
         var ret = [];
-        for(var i = 0; i<attributes.length ; i++){
-            if(attributes[i].Subcategory === subcategory){
+        for (var i = 0; i < attributes.length; i++) {
+            if (attributes[i].Subcategory === subcategory) {
                 ret.push(attributes[i]);
             }
         }
         return ret;
     }
 
-    vm.subcategoryRenamer = function(string, replacement){
+    vm.subcategoryRenamer = function (string, replacement) {
         if (string) {
             var replacement = replacement || '';
 
@@ -271,30 +262,30 @@ angular.module('common.datacloud.explorer', [
         return '';
     }
 
-    vm.checkEmptyCategory = function(category, count, isEnabled) {
+    vm.checkEmptyCategory = function (category, count, isEnabled) {
         if (vm.category && !vm.categoryCount(vm.category) && count && isEnabled) {
             vm.setCategory(category);
         }
         return false;
     }
 
-    vm.updateStateParams = function() {
+    vm.updateStateParams = function () {
         $state.go('.', {
             category: vm.category,
             subcategory: vm.subcategory
         });
     }
 
-    var stopNumbersInterval = function(){
+    var stopNumbersInterval = function () {
         if (numbersInterval) {
             $interval.cancel(numbersInterval);
             vm.placeholderTotal = null;
         }
     }
 
-    vm.processEnrichments = function(enrichments) {
+    vm.processEnrichments = function (enrichments) {
         if (vm.lookupFiltered !== null) {
-            for (var i=0, _enrichments=[]; i<enrichments.length; i++) {
+            for (var i = 0, _enrichments = []; i < enrichments.length; i++) {
                 if (vm.lookupFiltered && vm.lookupFiltered[enrichments[i].ColumnId]) {
                     _enrichments.push(enrichments[i]);
                 }
@@ -303,13 +294,13 @@ angular.module('common.datacloud.explorer', [
             var _enrichments = enrichments;
         }
 
-        for (var i=0, enrichment; i<_enrichments.length; i++) {
+        for (var i = 0, enrichment; i < _enrichments.length; i++) {
             enrichment = _enrichments[i];
 
             if (!enrichment) {
                 continue;
             }
-            
+
             if (!vm.enrichmentsObj[enrichment.Category]) {
                 vm.enrichmentsObj[enrichment.Category] = [];
             }
@@ -344,11 +335,11 @@ angular.module('common.datacloud.explorer', [
         vm.premiumSelectedTotal = DataCloudStore.getMetadata('premiumSelectedTotal');
     }
 
-    vm.generateTree = function(isComplete) {
+    vm.generateTree = function (isComplete) {
         var timestamp = new Date().getTime();
         var obj = {};
 
-        vm.enrichments.forEach(function(item, index) {
+        vm.enrichments.forEach(function (item, index) {
             var category = item.Category;
             var subcategory = item.Subcategory;
 
@@ -379,13 +370,13 @@ angular.module('common.datacloud.explorer', [
         // console.info('generateTree();\t\t\t', (timestamp2 - timestamp) + 'ms');
 
         if (isComplete) {
-            vm.categories.forEach(function(category, item) {
+            vm.categories.forEach(function (category, item) {
                 if (obj[category]) {
                     getEnrichmentSubcategories(category, Object.keys(obj[category]));
                 }
             });
 
-            if(vm.section === 'wizard.ratingsengine_segment' || vm.section === 'dashboard.rules') {
+            if (vm.section === 'wizard.ratingsengine_segment' || vm.section === 'dashboard.rules') {
                 var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
                 DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
                 RatingsEngineStore.setValidation('attributes', (SelectedForRatingsEngine.length > 0));
@@ -400,7 +391,7 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    var getEnrichmentSubcategories = function(category, subcategories) {
+    var getEnrichmentSubcategories = function (category, subcategories) {
         vm._subcategories[category] = subcategories;
         vm.subcategories[category] = subcategories;
 
@@ -411,7 +402,7 @@ angular.module('common.datacloud.explorer', [
         vm.filterEmptySubcategories();
     }
 
-    vm.removeFromArray = function(array, item) {
+    vm.removeFromArray = function (array, item) {
         if (array && item) {
             var index = array.indexOf(item);
             if (index > -1) {
@@ -420,9 +411,9 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.filterEmptySubcategories = function() {
+    vm.filterEmptySubcategories = function () {
         if (vm._subcategories[vm.category]) {
-            for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
+            for (var i = 0, newCategories = []; i < vm._subcategories[vm.category].length; i++) {
                 var subcategory = vm._subcategories[vm.category][i];
 
                 if (vm.subcategoryCount(vm.category, subcategory) > 0) {
@@ -447,14 +438,14 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    var addUniqueToArray = function(array, item) {
+    var addUniqueToArray = function (array, item) {
         if (array && item && !array.indexOf(item)) {
             array.push(item);
         }
     }
 
-    var breakOnFirstEncounter = function(items, property, value, returnObj) {
-        for (var i=0,item; i<items.length; i++) {
+    var breakOnFirstEncounter = function (items, property, value, returnObj) {
+        for (var i = 0, item; i < items.length; i++) {
             if (value === null) {
                 if (typeof items[i][property] !== 'undefined') {
                     if (returnObj) {
@@ -491,10 +482,10 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
-    var getHighlightMetadata = function() {
+    var getHighlightMetadata = function () {
         var timestamp = new Date().getTime();
         //console.log(vm.categories);
-        vm.categories.forEach(function(category) {
+        vm.categories.forEach(function (category) {
             if (vm.enrichmentsObj && vm.enrichmentsObj[category]) {
                 vm.highlightMetadata.categories[category] = {};
 
@@ -502,7 +493,7 @@ angular.module('common.datacloud.explorer', [
                     disabled = breakOnFirstEncounter(items, 'HighlightHidden', true),
                     enabled = breakOnFirstEncounter(items, 'HighlightHidden', false),
                     dirty = breakOnFirstEncounter(items, 'AttributeFlagsMap', {});
-                
+
                 vm.highlightMetadata.categories[category].enabled = enabled ? 1 : 0;
                 vm.highlightMetadata.categories[category].disabled = disabled ? 1 : 0;
                 vm.highlightMetadata.categories[category].dirty = dirty ? 1 : 0;
@@ -510,7 +501,7 @@ angular.module('common.datacloud.explorer', [
                 if (vm.subcategories[category] && vm.subcategories[category].length > 1) {
                     vm.highlightMetadata.categories[category].subcategories = {};
 
-                    vm.subcategories[category].forEach(function(subcategory){
+                    vm.subcategories[category].forEach(function (subcategory) {
                         vm.highlightMetadata.categories[category].subcategories[subcategory] = {};
 
                         var items = vm.filter(vm.enrichmentsObj[category], 'Subcategory', subcategory),
@@ -541,11 +532,11 @@ angular.module('common.datacloud.explorer', [
         disabled: vm.highlightTypes.disabled
     }
 
-    vm.showHighlighting = function() {
+    vm.showHighlighting = function () {
         return (vm.section == 'team' || vm.section == 'insights' || vm.section == 'lookup');
     }
 
-    vm.highlightTypesCategoryLabel = function(category, subcategory) {
+    vm.highlightTypesCategoryLabel = function (category, subcategory) {
         var category = category || '',
             subcategory = subcategory || '',
             metadata = {},
@@ -554,16 +545,16 @@ angular.module('common.datacloud.explorer', [
 
         if (category) {
             metadata = vm.highlightMetadata.categories[category];
-            if(subcategory && vm.highlightMetadata.categories[category].subcategories) {
+            if (subcategory && vm.highlightMetadata.categories[category].subcategories) {
                 metadata = vm.highlightMetadata.categories[category].subcategories[subcategory];
             }
         }
 
         if (metadata) {
-            if(metadata.enabled && metadata.disabled) {
+            if (metadata.enabled && metadata.disabled) {
                 type = 'dirty';
                 label = 'Some Enabled for Sales Team';
-            } else if(!metadata.enabled) {
+            } else if (!metadata.enabled) {
                 type = 'disabled';
                 label = vm.highlightTypesCategory[type];
             }
@@ -575,8 +566,8 @@ angular.module('common.datacloud.explorer', [
         };
     }
 
-    var highlightOptionsInitState = function(enrichment) {
-        var ret = {type: 'enabled', label: '', highlighted: false, enabled: false};
+    var highlightOptionsInitState = function (enrichment) {
+        var ret = { type: 'enabled', label: '', highlighted: false, enabled: false };
 
         if (!enrichment.AttributeFlagsMap || !enrichment.AttributeFlagsMap.CompanyProfile) {
             ret.type = 'enabled';
@@ -615,14 +606,14 @@ angular.module('common.datacloud.explorer', [
         return ret;
     }
 
-    var getRatingsEngineRule = function(RatingsEngineModels) {
+    var getRatingsEngineRule = function (RatingsEngineModels) {
         var data = RatingsEngineModels,
             rule = (data && data.rule ? data.rule : {}),
             rule = rule || {};
         return rule;
     }
 
-    var ratingsEngineAttributeState = function(item) {
+    var ratingsEngineAttributeState = function (item) {
         var rule = getRatingsEngineRule(RatingsEngineModels),
             ratingsEngineAttributes = rule.selectedAttributes || [];
 
@@ -633,39 +624,39 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
-    vm.getArray = function(number) {
+    vm.getArray = function (number) {
         return new Array(number);
     }
 
-    var getFlags = function(opts) {
+    var getFlags = function (opts) {
         var deferred = $q.defer();
 
-        DataCloudStore.getFlags(opts).then(function(result) {
+        DataCloudStore.getFlags(opts).then(function (result) {
             deferred.resolve(result);
         });
 
         return deferred.promise;
     }
 
-    var setFlags = function(opts, flags) {
+    var setFlags = function (opts, flags) {
         var deferred = $q.defer();
 
-        DataCloudService.setFlags(opts, flags).then(function(result) {
+        DataCloudService.setFlags(opts, flags).then(function (result) {
             deferred.resolve(result);
         });
 
         return deferred.promise;
     }
 
-    vm.setFlags = function(type, enrichment) {
+    vm.setFlags = function (type, enrichment) {
         if (type === enrichment.HighlightState.type) {
             return false;
         }
 
         var flags = {
-                "hidden": true,
-                "highlighted": false
-            },
+            "hidden": true,
+            "highlighted": false
+        },
             label = vm.highlightTypes[type] || 'unknown type',
             enabled = false,
             opts = {
@@ -680,18 +671,18 @@ angular.module('common.datacloud.explorer', [
         } else if (type === 'disabled') {
             flags.hidden = true;
             flags.highlighted = false;
-        }  
-        vm.statusMessage(vm.label.saving_alert, {wait: 0});
+        }
+        vm.statusMessage(vm.label.saving_alert, { wait: 0 });
 
-        setFlags(opts, flags).then(function(){
-            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+        setFlags(opts, flags).then(function () {
+            vm.statusMessage(vm.label.saved_alert, { type: 'saved' });
             vm.closeHighlighterButtons();
 
-            enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
+            enrichment.HighlightState = { type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted };
             enrichment.HighlightHidden = flags.hidden;
             enrichment.HighlightHighlighted = flags.highlighted;
 
-            vm.enrichments.find(function(i){return i.ColumnId === enrichment.ColumnId;}).AttributeFlagsMap = {
+            vm.enrichments.find(function (i) { return i.ColumnId === enrichment.ColumnId; }).AttributeFlagsMap = {
                 CompanyProfile: flags
             };
             DataCloudStore.updateEnrichments(vm.enrichments);
@@ -707,15 +698,15 @@ angular.module('common.datacloud.explorer', [
         });
     }
 
-    var setFlagsByCategory = function(opts, flags) {
+    var setFlagsByCategory = function (opts, flags) {
         var deferred = $q.defer();
 
-        if(opts.subcategoryName) {
-            DataCloudService.setFlagsBySubcategory(opts, flags).then(function(result) {
+        if (opts.subcategoryName) {
+            DataCloudService.setFlagsBySubcategory(opts, flags).then(function (result) {
                 deferred.resolve(result);
             });
-        } else if(opts.categoryName) {
-            DataCloudService.setFlagsByCategory(opts, flags).then(function(result) {
+        } else if (opts.categoryName) {
+            DataCloudService.setFlagsByCategory(opts, flags).then(function (result) {
                 deferred.resolve(result);
             });
         }
@@ -723,33 +714,33 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    vm.setFlagsByCategory = function(type, category, subcategory){
+    vm.setFlagsByCategory = function (type, category, subcategory) {
         var opts = {
             categoryName: category,
             subcategoryName: subcategory
         },
-        flags = {
-            hidden: (type === 'enabled' ? false : true),
-        },
-        settings_changed = vm.highlightTypesCategoryLabel(category, subcategory).type !== type;
+            flags = {
+                hidden: (type === 'enabled' ? false : true),
+            },
+            settings_changed = vm.highlightTypesCategoryLabel(category, subcategory).type !== type;
 
-        if(!settings_changed) {
+        if (!settings_changed) {
             return false;
         }
 
-        if(!vm.highlightMetadata.categories[category][type]) {
+        if (!vm.highlightMetadata.categories[category][type]) {
             var changed = true;
         }
 
-        if(type === 'disabled') {
+        if (type === 'disabled') {
             flags.highlighted = false;
         }
 
 
-        vm.statusMessage(vm.label.saving_alert, {wait: 0});
+        vm.statusMessage(vm.label.saving_alert, { wait: 0 });
 
-        setFlagsByCategory(opts, flags).then(function(){
-            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+        setFlagsByCategory(opts, flags).then(function () {
+            vm.statusMessage(vm.label.saved_alert, { type: 'saved' });
             vm.closeHighlighterButtons();
             var enrichments = vm.filter(vm.enrichments, 'Category', category);
 
@@ -759,15 +750,15 @@ angular.module('common.datacloud.explorer', [
 
             for (var i in enrichments) {
                 var enrichment = enrichments[i],
-                flags = {},
-                label = (enrichment.HighlightHighlighted ? enrichment.HighlightState.label : vm.highlightTypes[type]),
-                wasHighlighted = enrichment.HighlightHighlighted,
-                _type = type;
+                    flags = {},
+                    label = (enrichment.HighlightHighlighted ? enrichment.HighlightState.label : vm.highlightTypes[type]),
+                    wasHighlighted = enrichment.HighlightHighlighted,
+                    _type = type;
 
-                if(!enrichment.AttributeFlagsMap) {
+                if (!enrichment.AttributeFlagsMap) {
                     enrichment.AttributeFlagsMap = {};
                 }
-                if(!enrichment.AttributeFlagsMap.CompanyProfile) {
+                if (!enrichment.AttributeFlagsMap.CompanyProfile) {
                     enrichment.AttributeFlagsMap.CompanyProfile = {};
                 }
 
@@ -808,7 +799,7 @@ angular.module('common.datacloud.explorer', [
         });
     }
 
-    vm.filterLookupFiltered = function(item, type) {
+    vm.filterLookupFiltered = function (item, type) {
         if (item === undefined || item === null) {
             return item;
         }
@@ -843,20 +834,20 @@ angular.module('common.datacloud.explorer', [
         return item;
     }
 
-    var getTopAttributes = function(opts) {
+    var getTopAttributes = function (opts) {
         var opts = opts || {},
             category = opts.category;
 
-        DataCloudStore.getAllTopAttributes().then(function(result){
+        DataCloudStore.getAllTopAttributes().then(function (result) {
             var timestamp = new Date().getTime();
 
-            Object.keys(EnrichmentTopAttributes).forEach(function(catKey, catItem) {
+            Object.keys(EnrichmentTopAttributes).forEach(function (catKey, catItem) {
                 var category = EnrichmentTopAttributes[catKey]['Subcategories'];
 
-                Object.keys(category).forEach(function(subcategory) {
+                Object.keys(category).forEach(function (subcategory) {
                     var items = category[subcategory];
 
-                    items.forEach(function(item) {
+                    items.forEach(function (item) {
 
                         var enrichment = vm.enrichments[vm.enrichmentsMap[item.Entity + '.' + item.Attribute]];
 
@@ -882,32 +873,32 @@ angular.module('common.datacloud.explorer', [
         context[j] = temp;
     }
 
-    vm.removeNullsFromArray = function(array) {
+    vm.removeNullsFromArray = function (array) {
         var ret = [];
-        array.forEach(function(item, index) {
-            if(item) {
+        array.forEach(function (item, index) {
+            if (item) {
                 ret.push(item);
             }
         });
         return ret;
     }
 
-    vm.removeEmptyCategories = function(categories) {
+    vm.removeEmptyCategories = function (categories) {
         var ret = [];
-        categories.forEach(function(category, index) {
-            if(vm.categoryCount(category)) {
+        categories.forEach(function (category, index) {
+            if (vm.categoryCount(category)) {
                 ret.push(category);
             }
         });
         return ret;
     }
 
-    vm.processCategories = function() {
+    vm.processCategories = function () {
         //console.log(EnrichmentTopAttributes);
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
 
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
-            DataCloudStore.topCategories.forEach(function(category, index) {
+            DataCloudStore.topCategories.forEach(function (category, index) {
                 if (vm.categories.indexOf(category) >= 0) {
                     swap(vm.categories, vm.categories.indexOf(category), index);
                 }
@@ -919,7 +910,7 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
+    vm.getTileTableItems = function (category, subcategory, segment, limit, debug) {
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
 
@@ -939,17 +930,17 @@ angular.module('common.datacloud.explorer', [
             var timestamp_a = new Date().getTime();
 
             if (!subcategory) { //PLS-4922
-                Object.keys(vm.topAttributes[category].Subcategories).forEach(function(key, index) {
+                Object.keys(vm.topAttributes[category].Subcategories).forEach(function (key, index) {
                     items = items.concat(vm.topAttributes[category].Subcategories[key]);
                 });
             } else {
                 items = vm.topAttributes[category].Subcategories[subcategory];
             }
-            
+
             var timestamp_b = new Date().getTime();
 
             if (items) {
-                items.forEach(function(item, itemKey) {
+                items.forEach(function (item, itemKey) {
                     var index = vm.enrichmentsMap[item.Entity + '.' + item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
@@ -970,15 +961,15 @@ angular.module('common.datacloud.explorer', [
                         ];
 
                     if (enrichment) {
-                        if(!vm.lookupMode) {
-                            map.forEach(function(key){
+                        if (!vm.lookupMode) {
+                            map.forEach(function (key) {
                                 item[key] = enrichment[key];
                             });
 
                             enrichment.Count = item.Count;
                         }
                         item.Hide = false;
-                        if(!vm.searchFields(enrichment)) {
+                        if (!vm.searchFields(enrichment)) {
                             item.Hide = true;
                         }
                         enrichment.Hide = item.Hide;
@@ -994,7 +985,7 @@ angular.module('common.datacloud.explorer', [
             items = vm.enrichmentsObj[category];
 
             if (subcategory || vm.isYesNoCategory(category, true)) {
-                items = items.filter(function(item) {
+                items = items.filter(function (item) {
                     var isSubcategory = subcategory ? item.Subcategory == subcategory : true,
                         attrValue = (vm.lookupFiltered ? vm.lookupFiltered[item.ColumnId] : item.AttributeValue);
 
@@ -1053,11 +1044,11 @@ angular.module('common.datacloud.explorer', [
         //         'vm.metadata.toggle': vm.metadata.toggle
         //     }
         // );
-        
+
         return items;
     }
 
-    vm.filterHideTrue = function(item) {
+    vm.filterHideTrue = function (item) {
         if (item.Hide === true) {
             return false;
         } else {
@@ -1066,7 +1057,7 @@ angular.module('common.datacloud.explorer', [
 
     }
 
-    vm.generateTileTableLabel = function(items) {
+    vm.generateTileTableLabel = function (items) {
         if (items) {
             if (vm.section == 'segment.analysis') {
                 return 'Attribute';
@@ -1078,7 +1069,7 @@ angular.module('common.datacloud.explorer', [
         return '';
     }
 
-    vm.inCategory = function(enrichment){
+    vm.inCategory = function (enrichment) {
         if (enrichment.DisplayName && !(_.size(vm.selected_categories))) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
             return true;
         }
@@ -1088,14 +1079,14 @@ angular.module('common.datacloud.explorer', [
         return selected;
     };
 
-    vm.selectEnrichment = function(enrichment){
+    vm.selectEnrichment = function (enrichment) {
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
 
         if (enrichment.IsPremium) {
             vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
-            if(vm.premiumSelectedTotal > vm.premiumSelectLimit && enrichment.IsSelected) {
+            if (vm.premiumSelectedTotal > vm.premiumSelectLimit && enrichment.IsSelected) {
                 vm.premiumSelectedTotal = vm.premiumSelectLimit;
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
@@ -1114,7 +1105,7 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
 
-        if (enrichment.IsSelected){
+        if (enrichment.IsSelected) {
             vm.userSelectedCount++;
             vm.statusMessage(vm.label.changed_alert);
         } else {
@@ -1126,7 +1117,7 @@ angular.module('common.datacloud.explorer', [
                 vm.disabled_count = vm.filter(notselected, 'IsDirty', true).length;
                 vm.label.disabled_alert = '<p><strong>You have disabled ' + vm.disabled_count + ' attribute' + (vm.disabled_count > 1 ? 's' : '') + '</strong>. If you are using any of these attributes for real-time scoring, these attributes will no longer be updated in your system.</p>';
                 vm.label.disabled_alert += '<p>No changes will be saved until you press the \'Save\' button.</p>';
-                vm.statusMessage(vm.label.disabled_alert, {type: 'disabling', wait: 0});
+                vm.statusMessage(vm.label.disabled_alert, { type: 'disabling', wait: 0 });
             }
         }
 
@@ -1140,7 +1131,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     var status_timer;
-    vm.statusMessage = function(message, opts, callback) {
+    vm.statusMessage = function (message, opts, callback) {
         var opts = opts || {},
             wait = (opts.wait || opts.wait === 0 ? opts.wait : 1500),
             type = opts.type || 'alert';
@@ -1152,23 +1143,23 @@ angular.module('common.datacloud.explorer', [
         vm.status_alert.show = true;
 
         if (wait) {
-            status_timer = $timeout(function(){
+            status_timer = $timeout(function () {
                 vm.status_alert.show = false;
                 vm.status_alert.message = '';
-                if(typeof callback === 'function') {
+                if (typeof callback === 'function') {
                     callback();
                 }
             }, wait);
         }
     }
 
-    vm.closeStatusMessage = function() {
+    vm.closeStatusMessage = function () {
         $timeout.cancel(status_timer);
         vm.status_alert.show = false;
         vm.status_alert.message = '';
     }
 
-    vm.saveSelected = function(){
+    vm.saveSelected = function () {
         var dirtyEnrichments = vm.filter(vm.enrichments, 'IsDirty', true),
             selectedObj = vm.filter(dirtyEnrichments, 'IsSelected', true),
             deselectedObj = vm.filter(dirtyEnrichments, 'IsSelected', false),
@@ -1179,13 +1170,13 @@ angular.module('common.datacloud.explorer', [
         vm.selectDisabled = (selectedObj.length ? 0 : 1);
 
         for (var i in selectedObj) {
-            if(selectedObj[i].ColumnId) {
+            if (selectedObj[i].ColumnId) {
                 selected.push(selectedObj[i].ColumnId);
             }
         }
 
         for (var i in deselectedObj) {
-            if(deselectedObj[i].ColumnId) {
+            if (deselectedObj[i].ColumnId) {
                 deselected.push(deselectedObj[i].ColumnId);
             }
         }
@@ -1198,41 +1189,41 @@ angular.module('common.datacloud.explorer', [
         vm.saveDisabled = 1;
         vm.hasSaved = 0;
 
-        vm.statusMessage(vm.label.saving_alert, {wait: 0});
+        vm.statusMessage(vm.label.saving_alert, { wait: 0 });
 
-        DataCloudService.setEnrichments(data).then(function(result){
-            if(result.errorCode) {
-                vm.statusMessage(vm.label.saved_error, {type: 'error'});
+        DataCloudService.setEnrichments(data).then(function (result) {
+            if (result.errorCode) {
+                vm.statusMessage(vm.label.saved_error, { type: 'error' });
             } else {
-                vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+                vm.statusMessage(vm.label.saved_alert, { type: 'saved' });
             }
             vm.saveDisabled = 1;
 
             if (selectedObj.length > 0 || deselectedObj.length > 0) {
                 var dirtyObj = vm.filter(vm.enrichments, 'IsDirty', true);
 
-                for (var i in dirtyObj){
+                for (var i in dirtyObj) {
                     dirtyObj[i].IsDirty = false;
                 }
             }
         });
     }
 
-    vm.fieldType = function(fieldType){
+    vm.fieldType = function (fieldType) {
         var fieldType = fieldType.replace(/[0-9]+/g, '*');
         var fieldTypes = {
-            'default':'Text/String',
-            'NVARCHAR(*)':'Text/String',
-            'FLOAT':'Number/Float',
-            'INT':'Number/Int',
-            'BOOLEAN':'Boolean'
+            'default': 'Text/String',
+            'NVARCHAR(*)': 'Text/String',
+            'FLOAT': 'Number/Float',
+            'INT': 'Number/Int',
+            'BOOLEAN': 'Boolean'
         };
 
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
     /* jumps you to non-empty category when you filter */
-    var gotoNonemptyCategory = function() { 
+    var gotoNonemptyCategory = function () {
         var treeRoot = QueryStore.getAddBucketTreeRoot();
 
         if (treeRoot) {
@@ -1241,7 +1232,7 @@ angular.module('common.datacloud.explorer', [
 
         var categories = [],
             category = '';
-        
+
         if (vm.categoryCounts) {
             for (var i in vm.categoryCounts) {
                 if (vm.categoryCounts[i] > 0) {
@@ -1250,18 +1241,18 @@ angular.module('common.datacloud.explorer', [
             }
         }
 
-        if(categories.length <= 1 && !vm.lookupMode) {
+        if (categories.length <= 1 && !vm.lookupMode) {
             vm.setCategory(categories[0]);
         }
     }
 
-    vm.setCategory = function(category) {
+    vm.setCategory = function (category) {
         vm.category = category;
         DataCloudStore.setMetadata('category', category);
     }
 
-    vm.isYesNoCategory = function(category, includeKeywords) {
-        var list = ['Website Profile','Technology Profile', 'Product Spend Profile'];
+    vm.isYesNoCategory = function (category, includeKeywords) {
+        var list = ['Website Profile', 'Technology Profile', 'Product Spend Profile'];
 
         if (includeKeywords) {
             list.push('Website Keywords');
@@ -1271,15 +1262,15 @@ angular.module('common.datacloud.explorer', [
         return list.indexOf(category) >= 0;
     }
 
-    vm.hasSubcategories = function(category) {
+    vm.hasSubcategories = function (category) {
         return vm._subcategories[category].length != 1 || vm._subcategories[category][0] != 'Other';
     }
 
-    vm.checkSelectedRatingEngineAttrs = function() {
+    vm.checkSelectedRatingEngineAttrs = function () {
         return (typeof vm.metadata.toggle.show.selected_ratingsengine_attributes === 'undefined') ? false : vm.metadata.toggle.show.selected_ratingsengine_attributes;
     }
 
-    vm.percentage = function(number, total, suffix, limit) {
+    vm.percentage = function (number, total, suffix, limit) {
         var suffix = suffix || '',
             percentage = 0;
 
@@ -1289,34 +1280,34 @@ angular.module('common.datacloud.explorer', [
             if (typeof limit != 'undefined') {
                 percentage = percentage.toFixed(limit);
             }
-            
+
             return percentage + suffix;
         }
 
         return 0;
     }
 
-    var ObjectValues = function(obj) {
+    var ObjectValues = function (obj) {
         var ar = [];
-        if(obj && typeof obj ==='object') {
-            for(var i in obj) {
+        if (obj && typeof obj === 'object') {
+            for (var i in obj) {
                 ar.push(obj[i]);
             }
         }
         return ar;
     }
 
-    vm.getHighestStat = function(stats) {
+    vm.getHighestStat = function (stats) {
         var highest = 0;
-        stats.forEach(function(stat) {
-            if(stat.Cnt > highest) {
+        stats.forEach(function (stat) {
+            if (stat.Cnt > highest) {
                 highest = stat.Cnt;
             }
         })
         return highest;
     }
 
-    vm.makeSegmentsRangeKey = function(enrichment, range, label){
+    vm.makeSegmentsRangeKey = function (enrichment, range, label) {
         var fieldName = enrichment.Attribute || enrichment.ColumnId,
             values = ObjectValues(range),
             key = fieldName + (range ? values.join('') : label);
@@ -1324,8 +1315,8 @@ angular.module('common.datacloud.explorer', [
         return key;
     }
 
-    var getBucketRestrictions = function(tree, arr) {
-        tree.forEach(function(branch) {
+    var getBucketRestrictions = function (tree, arr) {
+        tree.forEach(function (branch) {
             if (branch && branch.bucketRestriction) {
                 arr.push(branch);
             }
@@ -1336,7 +1327,7 @@ angular.module('common.datacloud.explorer', [
         });
     }
 
-    var getExplorerSegments = function(enrichments) {
+    var getExplorerSegments = function (enrichments) {
 
         if (vm.metadataSegment != undefined) {
             var accountRestrictions = vm.metadataSegments.accountRestrictions,
@@ -1351,12 +1342,12 @@ angular.module('common.datacloud.explorer', [
             return;
         }
 
-        accountRestrictions = accountRestrictions 
-            ? angular.copy(accountRestrictions.restriction.logicalRestriction.restrictions) 
+        accountRestrictions = accountRestrictions
+            ? angular.copy(accountRestrictions.restriction.logicalRestriction.restrictions)
             : [];
 
-        contactRestrictions = contactRestrictions 
-            ? angular.copy(contactRestrictions.restriction.logicalRestriction.restrictions) 
+        contactRestrictions = contactRestrictions
+            ? angular.copy(contactRestrictions.restriction.logicalRestriction.restrictions)
             : [];
 
         var restrictions = [];
@@ -1370,7 +1361,7 @@ angular.module('common.datacloud.explorer', [
         //console.log('getExplorerSegments', accountRestrictions, contactRestrictions, restrictions);
 
         // FIXME: this should be recursive... -Lazarus
-        for (var i=0; i < restrictions.length; i++) {
+        for (var i = 0; i < restrictions.length; i++) {
             var restriction = restrictions[i];
 
             if (!restriction || !restriction.bucketRestriction || !restriction.bucketRestriction.bkt) {
@@ -1383,7 +1374,7 @@ angular.module('common.datacloud.explorer', [
                 key = restriction.attr.split(".")[1],
                 enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
                 index = vm.enrichmentsMap[restriction.attr];
-            
+
             if (index || index === 0) {
                 vm.enrichments[index].SegmentChecked = true;
                 vm.enrichments[index].SegmentRangesChecked = {};
@@ -1393,19 +1384,19 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    var textSearch = function(haystack, needle, case_insensitive) {
+    var textSearch = function (haystack, needle, case_insensitive) {
         var case_insensitive = (case_insensitive === false ? false : true);
 
         if (case_insensitive) {
             var haystack = haystack.toLowerCase(),
-            needle = needle.toLowerCase();
+                needle = needle.toLowerCase();
         }
 
         // .indexOf is faster and more supported than .includes
         return (haystack.indexOf(needle) >= 0);
     }
 
-    vm.searchFields = function(enrichment){
+    vm.searchFields = function (enrichment) {
         if (vm.query) {
             if (enrichment.DisplayName && textSearch(enrichment.DisplayName, vm.query)) {
                 return true;
@@ -1421,7 +1412,7 @@ angular.module('common.datacloud.explorer', [
         return true;
     }
 
-    vm.subcategoryCount = function(category, subcategory) {
+    vm.subcategoryCount = function (category, subcategory) {
         var filtered = vm.enrichmentsObj[category];
 
         vm.hasCategoryCount = 0;
@@ -1430,22 +1421,22 @@ angular.module('common.datacloud.explorer', [
             return 0;
         }
 
-        for (var i=0, result=[]; i < filtered.length; i++) {
+        for (var i = 0, result = []; i < filtered.length; i++) {
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category)
-                || (item.Subcategory != subcategory)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
-                || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
+                    || (item.Subcategory != subcategory)
+                    || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
+                    || (vm.metadata.toggle.show.selected && !item.IsSelected)
+                    || (vm.metadata.toggle.hide.selected && item.IsSelected)
+                    || (vm.metadata.toggle.show.premium && !item.IsPremium)
+                    || (vm.metadata.toggle.hide.premium && item.IsPremium)
+                    || (!vm.metadata.toggle.show.internal && item.IsInternal)
+                    || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
+                    || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
+                    || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
+                    || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
+                    || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
                     continue;
                 }
                 result.push(item);
@@ -1455,35 +1446,35 @@ angular.module('common.datacloud.explorer', [
         return result.length;
     }
 
-    vm.categoryCount = function(category) {
+    vm.categoryCount = function (category) {
         var filtered = vm.enrichmentsObj[category];
         if (!filtered) {
             return 0;
         }
 
-        for (var i=0, result=[]; i < filtered.length; i++) {
+        for (var i = 0, result = []; i < filtered.length; i++) {
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
-                || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
+                    || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
+                    || (vm.metadata.toggle.show.selected && !item.IsSelected)
+                    || (vm.metadata.toggle.hide.selected && item.IsSelected)
+                    || (vm.metadata.toggle.show.premium && !item.IsPremium)
+                    || (vm.metadata.toggle.hide.premium && item.IsPremium)
+                    || (!vm.metadata.toggle.show.internal && item.IsInternal)
+                    || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
+                    || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
+                    || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
+                    || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
+                    || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
                     continue;
                 }
                 result.push(item);
             }
         }
         vm.categoryCounts[item.Category] = result.length;
-        
-        if($stateParams.gotoNonemptyCategory) {
+
+        if ($stateParams.gotoNonemptyCategory) {
             gotoNonemptyCategory();
         }
 
@@ -1494,21 +1485,21 @@ angular.module('common.datacloud.explorer', [
         return result.length;
     }
 
-    var lookupSyncNewTotal = function() {
+    var lookupSyncNewTotal = function () {
 
         var categories = vm.highlightMetadata.categories,
             highlightedCategories = [],
             total = 0;
 
         for (var key in categories) {
-            if(categories[key].enabled === 1){
+            if (categories[key].enabled === 1) {
                 highlightedCategories.push(key);
             }
         };
 
-        highlightedCategories.forEach(function(category) {
-            for (var key in vm.categoryCounts){
-                if(key === category){
+        highlightedCategories.forEach(function (category) {
+            for (var key in vm.categoryCounts) {
+                if (key === category) {
                     total += vm.categoryCounts[key];
                 }
             };
@@ -1518,11 +1509,11 @@ angular.module('common.datacloud.explorer', [
     }
 
 
-    var getSegmentBucketInputs = function() {
+    var getSegmentBucketInputs = function () {
         var buckets = {},
             metadataSegments = vm.metadataSegments || QueryRestriction;
-        if(metadataSegments && metadataSegments.all) {
-            metadataSegments.all.forEach(function(item){
+        if (metadataSegments && metadataSegments.all) {
+            metadataSegments.all.forEach(function (item) {
                 var bucketId = item.bucketRestriction.lhs.columnLookup.column_name + item.bucketRestriction.range.max;
 
                 buckets[bucketId] = true;
@@ -1533,14 +1524,14 @@ angular.module('common.datacloud.explorer', [
 
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
-    vm.selectSegmentAttribute = function(attribute) {
+    vm.selectSegmentAttribute = function (attribute) {
         if (!vm.cube) {
             Notice.warning({
                 delay: 1500,
                 message: 'Your data is still loading. One moment please.'
             });
         }
-        
+
         if (!attribute.TopBkt && !vm.inWizard) {
             vm.addFreeTextAttribute(attribute, vm.cube.data[attribute.Entity].Stats[attribute.Attribute]);
             return;
@@ -1552,10 +1543,10 @@ angular.module('common.datacloud.explorer', [
             attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},
             attributeRangeKey = (stat.Lbl ? vm.makeSegmentsRangeKey(attribute, stat.Rng, stat.Lbl) : ''),
-            
+
             index = vm.enrichmentsMap[attribute.Entity + '.' + attributeKey],
             enrichment = vm.enrichments[index],
-            
+
             entity = attribute.Entity,
             topBkt = attribute.TopBkt,
             segmentName = $stateParams.segment;
@@ -1566,11 +1557,11 @@ angular.module('common.datacloud.explorer', [
         if (attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
-        
+
         var addEntity = entity == 'Rating' || entity == 'LatticeAccount' || entity == 'CuratedAccount' ? 'Account' : entity;
 
         var attributeData = {
-            columnName: attributeKey, 
+            columnName: attributeKey,
             resourceType: entity
         };
 
@@ -1586,7 +1577,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
-    vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
+    vm.selectSegmentAttributeRange = function (enrichment, stat, disable) {
         var disable = disable || false,
             attributeKey = enrichment.Attribute || enrichment.ColumnId || enrichment.ColumnId,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng, stat.Lbl),
@@ -1600,7 +1591,7 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
         var bucketToAdd = entity;
-        if (entity === 'LatticeAccount' || entity === 'Transaction' || entity === 'Rating' || entity === 'CuratedAccount'){
+        if (entity === 'LatticeAccount' || entity === 'Transaction' || entity === 'Rating' || entity === 'CuratedAccount') {
             bucketToAdd = 'Account';
         }
 
@@ -1610,8 +1601,8 @@ angular.module('common.datacloud.explorer', [
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
         QueryStore['add' + bucketToAdd + 'Restriction']({
-            columnName: attributeKey, 
-            resourceType: entity, 
+            columnName: attributeKey,
+            resourceType: entity,
             bkt: angular.copy(stat)
         });
 
@@ -1625,7 +1616,7 @@ angular.module('common.datacloud.explorer', [
 
     }
 
-    vm.addFreeTextAttribute = function(enrichment, cube) {
+    vm.addFreeTextAttribute = function (enrichment, cube) {
         var count = cube ? cube.Cnt : 0;
         var bkt = { //default bucket for free-text attributes added in My Data or Add step of rules-based rating engine
             'Cmp': 'IS_NOT_NULL',
@@ -1640,11 +1631,11 @@ angular.module('common.datacloud.explorer', [
         vm.selectSegmentAttributeRange(enrichment, bkt, false);
     }
 
-    var getSegmentBucketInputs = function() {
+    var getSegmentBucketInputs = function () {
         var buckets = {},
             metadataSegments = vm.metadataSegments || QueryRestriction;
-        if(metadataSegments && metadataSegments.all) {
-            metadataSegments.all.forEach(function(item){
+        if (metadataSegments && metadataSegments.all) {
+            metadataSegments.all.forEach(function (item) {
                 var bucketId = item.bucketRestriction.lhs.columnLookup.column_name + item.bucketRestriction.range.max;
                 buckets[bucketId] = true;
             });
@@ -1653,37 +1644,37 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.segmentBucketInput = getSegmentBucketInputs();
-    vm.selectBucketInput = function(id, bucket) {
+    vm.selectBucketInput = function (id, bucket) {
         // console.log('Explorer ', id, ' === ',bucket);
         var bucketId = id + bucket,
-            range = {min: bucket, max: bucket, is_null_only: false};
+            range = { min: bucket, max: bucket, is_null_only: false };
 
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
-        
+
         QueryStore.setPublicProperty('enableSaveSegmentButton', true);
         //QueryStore.saveSegmentEnabled = true;
         if (vm.segmentBucketInput[bucketId] === true) {
-            QueryStore.addAccountRestriction({columnName: id, range: range});
+            QueryStore.addAccountRestriction({ columnName: id, range: range });
         } else {
-            QueryStore.removeAccountRestriction({columnName: id, range: range});
+            QueryStore.removeAccountRestriction({ columnName: id, range: range });
         }
 
     }
 
-    vm.inModel = function() {
+    vm.inModel = function () {
         var name = $state.current.name.split('.');
         return name[1] == 'model';
     }
 
-    vm.refineQuery = function() {
+    vm.refineQuery = function () {
         if (vm.inModel()) {
             $state.go('home.model.analysis.explorer.builder');
-        } else{
+        } else {
             $state.go('home.segment.explorer.builder');
         }
     }
 
-    vm.checkSaveButtonState = function(){
+    vm.checkSaveButtonState = function () {
         var oldVal = QueryStore.getDefaultRestrictions(),
             newAccountVal = JSON.stringify(QueryStore.getAccountRestriction()),
             newContactVal = JSON.stringify(QueryStore.getContactRestriction()),
@@ -1693,29 +1684,29 @@ angular.module('common.datacloud.explorer', [
     };
 
 
-    vm.selectRatingsEngineAttribute = function(enrichment) {
+    vm.selectRatingsEngineAttribute = function (enrichment) {
         var treeRoot = QueryStore.getAddBucketTreeRoot();
 
         if (treeRoot) {
 
             var enrichments = vm.topAttributes[enrichment.Category].Subcategories[enrichment.Subcategory],
-                attribute = enrichments.filter(function(item) { return item.Attribute == enrichment.ColumnId })[0];
-            
+                attribute = enrichments.filter(function (item) { return item.Attribute == enrichment.ColumnId })[0];
+
             vm.selectSegmentAttribute(attribute);
 
             RatingsEngineStore.setValidation('add', true);
-            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            vm.statusMessage(vm.label.saved_alert, { type: 'saved' });
         } else {
 
-            vm.statusMessage(vm.label.saving_alert, {wait: 0});
+            vm.statusMessage(vm.label.saving_alert, { wait: 0 });
 
             var rule = getRatingsEngineRule(RatingsEngineModels);
             var entity = enrichment.Entity;
             var attr = enrichment.ColumnId;
-            DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.Entity + '.' + enrichment.ColumnId]).then(function(response) {
+            DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.Entity + '.' + enrichment.ColumnId]).then(function (response) {
                 ExplorerUtils.removeAddAttrFromRule(!enrichment.IsRatingsEngineAttribute, rule, entity, attr);
                 enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
-                
+
                 var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
 
                 DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
@@ -1725,16 +1716,16 @@ angular.module('common.datacloud.explorer', [
                 }
 
                 RatingsEngineStore.setValidation('attributes', true);
-                vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+                vm.statusMessage(vm.label.saved_alert, { type: 'saved' });
             });
         }
     }
 
-    vm.getAttributeRules = function(attribute, bucket) {
+    vm.getAttributeRules = function (attribute, bucket) {
         var getEmptyBuckets = vm.mode == 'dashboardrules';
         var attributes = QueryStore.getDataCloudAttributes(true, getEmptyBuckets); // second parm is getEmptyBuckets
 
-        attributes = attributes.filter(function(item) {
+        attributes = attributes.filter(function (item) {
             var restriction = item.bucketRestriction,
                 isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
                 isSameBucket = true,
@@ -1753,7 +1744,7 @@ angular.module('common.datacloud.explorer', [
         return attributes;
     }
 
-    vm.formatAttributeValue = function(attribute, rules) {
+    vm.formatAttributeValue = function (attribute, rules) {
         var label = attribute.TopBkt ? attribute.TopBkt.Lbl : attribute.Value;
 
         if (!vm.cube || !rules || rules.length == 0) {
@@ -1764,7 +1755,7 @@ angular.module('common.datacloud.explorer', [
         var cubeMatches = [];
         var cubeLabels = [];
         var matches = [];
-        var filtered = rules.filter(function(item) {
+        var filtered = rules.filter(function (item) {
             var Lbl = item.bucketRestriction.bkt.Lbl;
 
             cubeLabels.push(Lbl);
@@ -1772,7 +1763,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         if (cube.Bkt) {
-             matches = cube.Bkts.List.filter(function(item) { 
+            matches = cube.Bkts.List.filter(function (item) {
                 if (cubeLabels.indexOf(item.Lbl) >= 0) {
                     cubeMatches.push(item);
                 }
@@ -1795,7 +1786,7 @@ angular.module('common.datacloud.explorer', [
         return label;
     }
 
-    vm.formatAttributeRecords = function(type, value) {
+    vm.formatAttributeRecords = function (type, value) {
         switch (type) {
             case 'MULTIPLE USES':
                 return '*';
@@ -1803,175 +1794,19 @@ angular.module('common.datacloud.explorer', [
                 return '*';
             case 'SELECTED':
                 return "*";
-            default: 
+            default:
                 return value;
         }
     }
 
-    vm.isSpecialAttributeValue = function(value) {
+    vm.isSpecialAttributeValue = function (value) {
         var map = ['SELECTED', 'CUSTOMIZED', 'MULTIPLE USES'];
         return map.indexOf(value) >= 0;
     }
 
-    vm.hideLookupResponse = function() {
+    vm.hideLookupResponse = function () {
         return LookupStore.hideLookupResponse(LookupResponse);
     }
 
     vm.init();
-})
-.directive('fallbackSrc', function () {
-    var fallbackSrc = {
-        link: function postLink(scope, iElement, iAttrs) {
-            iElement.bind('error', function() {
-                angular.element(this).attr("src", iAttrs.fallbackSrc);
-                angular.element(this).css({display: 'initial'}); // removes onerror hiding image
-            });
-        }
-    }
-
-    return fallbackSrc;
-})
-.directive('attributeFeedbackModal', function() {
-    return {
-        restrict: 'EA',
-        templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackmodal.component.html',
-        scope: {
-            lookupResponse: '=?',
-        },
-        controller: ['$scope', '$document', '$timeout', '$window', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, $timeout, $window, LookupStore, DataCloudStore, BrowserStorageUtility) { 
-            // test on LETest1503428538807_LPI
-            var vm = $scope,
-                lookupStore = LookupStore.get('request'),
-                $modal = angular.element('attribute-feedback-modal');
-
-            $scope.modal = DataCloudStore.getFeedbackModal();
-            $scope.close = function() {
-                DataCloudStore.setFeedbackModal(false);
-            }
-
-            var clientSession = BrowserStorageUtility.getClientSession();
-
-            $scope.showLookupStore = $scope.modal.context.showLookupStore;
-            if($scope.showLookupStore) {
-                $scope.lookupStore = lookupStore;
-            }
-
-            $scope.icon = $scope.modal.context.icon;
-            $scope.label = $scope.modal.context.label || $scope.modal.context.attribute.DisplayName;
-            $scope.value = $scope.modal.context.value;
-            $scope.categoryClass = $scope.modal.context.categoryClass;
-            $scope.reported = false;
-
-            $scope.report = function() {
-                $scope.sendingReport = true;
-                var form_fields = $scope.input || {}
-                var report = {
-                    Attribute: $scope.modal.context.attributeKey || $scope.modal.context.attribute.ColumnId || '',
-                    MatchedValue: $scope.value,
-                    CorrectValue: form_fields.value || '',
-                    Comment: form_fields.comment || '',
-                    InputKeys: lookupStore.record,
-                    MatchedKeys: {
-                        "LDC_Name": $scope.lookupResponse.attributes.LDC_Name,
-                        "LDC_Domain": $scope.lookupResponse.attributes.LDC_Domain,
-                        "LDC_City": $scope.lookupResponse.attributes.LDC_City,
-                        "LDC_State": $scope.lookupResponse.attributes.LDC_State,
-                        "LDC_ZipCode": $scope.lookupResponse.attributes.LDC_ZipCode,
-                        "LDC_Country": $scope.lookupResponse.attributes.LDC_Country,
-                        "LDC_DUNS": $scope.lookupResponse.attributes.LDC_DUNS
-                    },
-                    MatchLog: $scope.lookupResponse.matchLogs
-                };
-
-                $scope.sendingReport = false;
-                $scope.reported = true;
-                $timeout(function() {
-                    $scope.close();
-                }, 1000 * 5);
-                DataCloudStore.sendFeedback(report, $scope.modal.context.type);
-            }
-            
-            var setHeight = function() {
-                var height = $(window).height() -20;
-                $modal.css({maxHeight: height});
-                $modal.find('.attribute-feedback-container').css({maxHeight: height});
-            }
-
-            $scope.setHeight = function() { // gets called by ng-inits so that the data is there and heights make sense
-                setHeight();
-            }
-
-            var _handleDocumentResize = _.debounce(handleDocumentResize, 300);
-            $(window).on('resize', _handleDocumentResize);
-
-            function handleDocumentResize(evt) {
-                setHeight();
-            }
-
-            $document.on('click', handleDocumentClick);
-
-            function handleDocumentClick(evt) {
-                var target = angular.element(evt.target),
-                    clickedModal = target.parents('attribute-feedback-modal').length;
-
-                if(!clickedModal) {
-                    $scope.close();
-                    $scope.$apply();
-                }
-            }
-
-            $scope.$on('$destroy', function() {
-                $document.off('click', handleDocumentClick);
-                $(window).off('resize', _handleDocumentResize)
-            });
-        }]
-    };
-})
-.directive('attributeFeedbackButton', function() {
-    return {
-        restrict: 'EA',
-        templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackbutton.component.html',
-        scope: {
-            buttonType: '=?',
-            attribute: '=',
-            attributeKey: '=?',
-            value: '=',
-            iconImage: '=?',
-            iconFont: '=?',
-            categoryClass: '=?',
-            label: '=?',
-            showLookupStore: '=?',
-            type: '=?'
-        },
-        controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
-            $scope.buttonType = $scope.buttonType || 'infodot';
-
-            $scope.menuClick = function($event) {
-                $event.stopPropagation();
-                $scope.showMenu = !$scope.showMenu;
-            }
-
-            $scope.closeMenu = function($event) {
-                $scope.showMenu = false;
-            }
-            
-            $scope.open = function($event) {
-                $event.stopPropagation();
-                $scope.closeMenu($event);
-                DataCloudStore.setFeedbackModal(true, {
-                    attribute: $scope.attribute,
-                    attributeKey: $scope.attributeKey,
-                    value: $scope.value,
-                    icon: {
-                        image: $scope.iconImage || '',
-                        font: $scope.iconFont || ''
-                    },
-                    categoryClass: $scope.categoryClass,
-                    label: $scope.label || '',
-                    showLookupStore: $scope.showLookupStore,
-                    type: $scope.type
-                });
-            }
-        }]
-    };
-});
+};

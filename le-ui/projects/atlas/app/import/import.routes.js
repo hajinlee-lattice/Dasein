@@ -225,7 +225,7 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -306,7 +306,7 @@ angular
                 AnalysisFields: function() {
                     return [
                         { name: 'Type', type: 'TEXT' },
-                        { name: 'Industry' },
+                        { name: 'Industry', type: 'TEXT' },
                         { name: 'SpendAnalyticsSegment', displayName: 'Account Business Segment',type: 'TEXT' },
                         { name: 'AnnualRevenue', displayName: 'Estimated Yearly Revenue', type: 'TEXT' },
                         { name: 'Longitude', type: 'TEXT' },
@@ -407,8 +407,8 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
-                        // console.log(result.Result);
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
+                        console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -587,7 +587,7 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });

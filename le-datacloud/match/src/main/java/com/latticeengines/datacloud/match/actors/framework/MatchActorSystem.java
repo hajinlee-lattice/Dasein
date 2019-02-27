@@ -61,8 +61,8 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(MatchActorSystem.class);
 
-    private static final String BATCH_MODE = "batch";
-    private static final String REALTIME_MODE = "realtime";
+    public static final String BATCH_MODE = "batch";
+    public static final String REALTIME_MODE = "realtime";
 
     private static final int MAX_ALLOWED_RECORD_COUNT_SYNC = 200;
     private static final int MAX_ALLOWED_RECORD_COUNT_ASYNC = 10000;

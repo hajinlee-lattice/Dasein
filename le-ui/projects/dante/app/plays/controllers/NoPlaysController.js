@@ -1,6 +1,6 @@
 angular.module('mainApp.plays.controllers.NoPlaysController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 .controller('NoPlaysController', function ($scope, ResourceUtility, BrowserStorageUtility) {
     

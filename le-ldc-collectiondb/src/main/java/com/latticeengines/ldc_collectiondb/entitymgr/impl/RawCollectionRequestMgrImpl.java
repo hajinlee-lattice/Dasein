@@ -1,6 +1,5 @@
 package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
-import java.awt.print.Pageable;
 import java.sql.Timestamp;
 import java.util.List;
 

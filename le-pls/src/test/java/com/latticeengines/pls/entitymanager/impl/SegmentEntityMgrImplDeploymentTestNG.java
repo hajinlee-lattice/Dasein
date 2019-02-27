@@ -1,5 +1,9 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +16,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class SegmentEntityMgrImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 

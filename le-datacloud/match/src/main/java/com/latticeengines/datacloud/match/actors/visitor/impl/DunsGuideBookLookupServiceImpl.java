@@ -1,20 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
-import com.latticeengines.datacloud.match.actors.visitor.DunsGuideBookLookupService;
-import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
-import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
-import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +10,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.actors.visitor.DunsGuideBookLookupService;
+import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
+import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 /**
  * Service to batch {@link DunsGuideBook} retrieval request

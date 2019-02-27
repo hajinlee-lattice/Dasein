@@ -1,8 +1,8 @@
 angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.DeleteModelModal',
     'mainApp.models.modals.StaleModelModal',

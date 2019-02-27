@@ -1,6 +1,6 @@
 angular.module('mainApp.setup.services.MetadataService', [
     'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.services.SessionService'

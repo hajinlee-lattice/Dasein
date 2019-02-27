@@ -3,9 +3,6 @@ package com.latticeengines.domain.exposed.period;
 
 import org.testng.annotations.DataProvider;
 
-import com.latticeengines.domain.exposed.period.NaturalYearPeriodBuilder;
-import com.latticeengines.domain.exposed.period.PeriodBuilder;
-
 public class NaturalYearPeriodBuilderUnitTestNG extends NaturalPeriodBuilderUnitTestNGBase {
 
     @DataProvider(name = PERIOD_ID_DATA_PROVIDER)

@@ -1,39 +1,5 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.support.CompositeCacheManager;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
@@ -72,8 +38,39 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.support.CompositeCacheManager;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component("dataLakeService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -200,7 +197,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
                 Collections.singletonList(accountId), lookupIdColumn);
-        String internalAccountId = internalAccountIds.size() > 0 ? internalAccountIds.get(0) : null;
+        String internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
 
         DataPage dataPage;
 
@@ -324,18 +321,18 @@ public class DataLakeServiceImpl implements DataLakeService {
         return null;
     }
 
-    private List<String> getInternalAccountsIdViaObjectApi(String customerSpace,
-            List<String> accountIds, String lookupIdColumn) {
+    private List<String> getInternalAccountsIdViaObjectApi(String customerSpace, List<String> accountIds,
+            String lookupIdColumn) {
 
         DataPage entityData;
         try {
-            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                    accountIds, lookupIdColumn, null, true);
-              log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
+            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
+                    lookupIdColumn, null, true);
+            log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getData(customerSpace, frontEndQuery);
         } catch (Exception e) {
-            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                    accountIds, lookupIdColumn, null, false);
+            FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
+                    lookupIdColumn, null, false);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getData(customerSpace, frontEndQuery);
         }
@@ -343,20 +340,18 @@ public class DataLakeServiceImpl implements DataLakeService {
         return AccountExtensionUtil.extractAccountIds(entityData);
     }
 
-    private DataPage getAccountByIdViaMatchApi(String customerSpace,
-            List<String> internalAccountIds, ColumnSelection.Predefined predefined) {
+    private DataPage getAccountByIdViaMatchApi(String customerSpace, List<String> internalAccountIds,
+            ColumnSelection.Predefined predefined) {
 
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace,
-                internalAccountIds, predefined, dataCloudVersion);
+        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, predefined,
+                dataCloudVersion);
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
         List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);
-        List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream()
-                .filter(cm -> StatsCubeUtils.isDateAttribute(cm))
+        List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream().filter(ColumnMetadata::isDateAttribute)
                 .collect(Collectors.toList());
-        return AccountExtensionUtil.processMatchOutputResults(customerSpace,
-                dateAttributesMetadata, matchOutput);
+        return AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata, matchOutput);
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
@@ -472,9 +467,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId,
                 BusinessEntity.Account);
         accountAttrs = accountAttrs.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
-                // Hack to limit attributes for talking points temporarily PLS-7065
+        // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
-                || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
+                        || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(accountAttrs)) {
             accountAttrs = new ArrayList<>();

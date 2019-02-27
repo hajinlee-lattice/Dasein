@@ -5,10 +5,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;

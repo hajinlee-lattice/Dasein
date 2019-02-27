@@ -22,8 +22,8 @@ angular
             },
             params: {
                 tenantName: { dynamic: true, value: '' },
-                pageIcon: 'ico-cog',
-                pageTitle: 'Connect Applications'
+                pageIcon: 'ico-connectors',
+                pageTitle: 'Connections'
             },
             
             views: {

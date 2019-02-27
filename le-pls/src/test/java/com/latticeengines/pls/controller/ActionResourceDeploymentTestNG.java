@@ -1,40 +1,46 @@
 package com.latticeengines.pls.controller;
 
-import com.latticeengines.domain.exposed.pls.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.OptionalInt;
+import java.util.Random;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ActivityMetricsActionConfiguration;
+import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.Random;
 
 public class ActionResourceDeploymentTestNG  extends PlsDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ActionResourceDeploymentTestNG.class);
+    private static final String ACTION_INITIATOR = "jxiao@lattice-engines.com";
 
-    @Autowired
+    @Inject
     private ActionService actionService;
 
     private Action testAction;
 
-    private Tenant tenant;
-
-    private static final String ACTION_INITIATOR = "jxiao@lattice-engines.com";
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
-        tenant = deploymentTestBed.getMainTestTenant();
+        Tenant tenant = deploymentTestBed.getMainTestTenant();
         deploymentTestBed.loginAndAttach(TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN),
                 TestFrameworkUtils.GENERAL_PASSWORD, tenant);
         MultiTenantContext.setTenant(tenant);
@@ -64,9 +70,14 @@ public class ActionResourceDeploymentTestNG  extends PlsDeploymentTestNGBase {
         action.setActionInitiator(ACTION_INITIATOR);
         action.setTenant(mainTestTenant);
         Random r = new Random();
-        int trackingId = r.ints(0, (10000 + 1)).findFirst().getAsInt();
-        action.setTrackingPid((long) trackingId);
-        return action;
+        OptionalInt optionalInt = r.ints(0, (10000 + 1)).findFirst();
+        if (optionalInt.isPresent()) {
+            int trackingId = optionalInt.getAsInt();
+            action.setTrackingPid((long) trackingId);
+            return action;
+        } else {
+            throw new RuntimeException("Failed to get a random int.");
+        }
     }
 
     private ActionConfiguration generateActionConfig(int n) {

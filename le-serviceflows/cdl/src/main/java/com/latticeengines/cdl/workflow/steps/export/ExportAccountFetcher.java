@@ -95,7 +95,7 @@ public class ExportAccountFetcher {
 
         if (accountPage == null || CollectionUtils.isEmpty(accountPage.getData())
                 || accountPage.getData().size() != accountIds.size()) {
-            log.info("Failed to match adequately, back to old logic for extracting account data from Redshift");
+            log.info("Failed to match adequately, reverting to old logic for extracting account data from Redshift");
             accountFrontEndQuery.setLookups(originalLookups);
             accountPage = entityProxy.getDataFromObjectApi( //
                     segmentExportContext.getCustomerSpace().toString(), //
@@ -108,18 +108,22 @@ public class ExportAccountFetcher {
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, List<Object> internalAccountIds,
             List<Column> fields) {
+        if (CollectionUtils.isEmpty(internalAccountIds)) {
+            return null;
+        }
+
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
         List<String> lookupField = Collections.singletonList(InterfaceName.AccountId.name());
-        Map<MatchKey, List<String>> kepMap = new HashMap<>();
-        kepMap.put(MatchKey.LookupId, lookupField);
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.LookupId, lookupField);
 
         Tenant tenant = new Tenant(customerSpace);
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(tenant);
         matchInput.setFields(lookupField);
         matchInput.setData(data);
-        matchInput.setKeyMap(new HashMap<>());
+        matchInput.setKeyMap(keyMap);
         ColumnSelection customFieldSelection = new ColumnSelection();
         customFieldSelection.setColumns(fields);
         matchInput.setCustomSelection(customFieldSelection);
@@ -137,32 +141,32 @@ public class ExportAccountFetcher {
 
     private DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = new DataPage();
-        List<Map<String, Object>> dataList = new ArrayList<>();
-        dataPage.setData(dataList);
 
-        Map<String, Object> data = null;
+        Map<String, Object> data;
         if (matchOutput != null //
-                && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
-                && matchOutput.getResult().get(0) != null) {
-
-            if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
-                log.info("Didn't find any match from lattice data cloud. "
-                        + "Still continue to process the result as we may "
-                        + "have found partial match in my data table.");
+                && CollectionUtils.isNotEmpty(matchOutput.getResult())) {
+            long unmatched = matchOutput.getResult().stream().filter(output -> !output.isMatched()).count();
+            if (unmatched != 0) {
+                log.info("Unable to fully match given accounts, " + unmatched + " accounts of "
+                        + matchOutput.getResult().size() + "were not matched");
+                return null;
             } else {
                 log.info("Found full match from lattice data cloud as well as from my data table.");
             }
 
+            List<Map<String, Object>> dataList = new ArrayList<>();
+            dataPage.setData(dataList);
             final Map<String, Object> tempDataRef = new HashMap<>();
             List<String> fields = matchOutput.getOutputFields();
-            List<Object> values = matchOutput.getResult().get(0).getOutput();
-            IntStream.range(0, fields.size()) //
-                    .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
-            data = tempDataRef;
-        }
-
-        if (MapUtils.isNotEmpty(data)) {
-            dataPage.getData().add(data);
+            for (OutputRecord r : matchOutput.getResult()) {
+                List<Object> values = r.getOutput();
+                IntStream.range(0, fields.size()) //
+                        .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
+                data = tempDataRef;
+                if (MapUtils.isNotEmpty(data)) {
+                    dataPage.getData().add(data);
+                }
+            }
         }
         return dataPage;
     }

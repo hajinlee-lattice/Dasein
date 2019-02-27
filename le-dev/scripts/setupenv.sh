@@ -13,11 +13,9 @@ BOOTSTRAP_MODE=$1
 
 bash $WSHOME/le-dev/scripts/setupenv_anaconda.sh $BOOTSTRAP_MODE && \
 bash $WSHOME/le-dev/scripts/setupenv_aws.sh && \
-bash $WSHOME/le-dev/scripts/setupenv_git.sh && \
 bash $WSHOME/le-dev/scripts/setupenv_tomcat.sh $BOOTSTRAP_MODE && \
 bash $WSHOME/le-dev/scripts/setupenv_hdp.sh $BOOTSTRAP_MODE &&
 bash $WSHOME/le-dev/scripts/setupenv_spark.sh $BOOTSTRAP_MODE && \
 bash $WSHOME/le-dev/scripts/setupenv_docker.sh $BOOTSTRAP_MODE || true
 
 pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
-echo "REVIEWBOARD_URL='http://bodcdevvrvw65.lattice.local/rb'" > ~/.reviewboardrc

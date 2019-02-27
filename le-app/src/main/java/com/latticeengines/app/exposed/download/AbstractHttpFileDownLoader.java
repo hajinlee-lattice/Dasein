@@ -39,6 +39,7 @@ import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -136,6 +137,8 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
 
         List<String> dateAttributes = getDateAttributes();
+        log.info("dateAttributes=" + JsonUtils.serialize(dateAttributes));
+
         if (CollectionUtils.isNotEmpty(dateAttributes)) {
             Map<String, String> dateToFormats = new HashMap<>();
             dateAttributes.forEach(attrib -> dateToFormats.put(attrib, DATE_FORMAT));
@@ -176,7 +179,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         }
         for (ColumnMetadata metadata : metadatas) {
             if (LogicalDataType.Date.equals(metadata.getLogicalDataType())) {
-                dateAttributes.add(metadata.getAttrName());
+                dateAttributes.add(metadata.getDisplayName());
             }
         }
 
@@ -186,6 +189,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     @VisibleForTesting
     InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats) {
         log.info("Start to reformat date for tenant " + MultiTenantContext.getShortTenantId());
+        log.info("dateToFormats=" + JsonUtils.serialize(dateToFormats));
 
         StringBuilder sb = new StringBuilder();
         try (InputStreamReader reader = new InputStreamReader(
@@ -208,7 +212,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                 if (StringUtils.isNotBlank(columnValue) && dateToFormats.containsKey(columnName)) {
                                     String dateFormat = dateToFormats.get(columnName);
                                     SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                                    formatter.setTimeZone(TimeZone.getTimeZone("PST"));
+                                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
                                     String dateInString = columnValue;
                                     try {
                                         dateInString = formatter.format(new Date(Long.valueOf(columnValue)));

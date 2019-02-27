@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.dao.impl;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.dao.DnbMatchCommandDao;

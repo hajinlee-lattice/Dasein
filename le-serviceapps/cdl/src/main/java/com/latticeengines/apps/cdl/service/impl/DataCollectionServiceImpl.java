@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.amazonaws.util.IOUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.util.IOUtils;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionArtifactEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
@@ -636,8 +636,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
 
         DataCollectionArtifact artifact = artifacts.get(0);
-        String artifactKey = getArtifactKey(customerSpace, exportId, artifact.getName());
+        String artifactKey = getArtifactKey(s3Bucket, artifact.getUrl());
         log.info("S3 artifactKey=" + artifactKey);
+
         InputStream inputStream = s3Service.readObjectAsStream(s3Bucket, artifactKey);
         try {
             if (inputStream != null) {
@@ -652,9 +653,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
     }
 
-    private String getArtifactKey(String customerSpace, String exportId, String artifactName) {
-        return String.format("%s/atlas/Data/Files/Exports/%s/%s/%s.csv",
-                customerSpace, artifactName, exportId, artifactName).replace("//", "/");
+    private String getArtifactKey(String s3Bucket, String url) {
+        String prefix = "s3a://";
+        return url.substring(prefix.length() + s3Bucket.length() + 1);
     }
 
     private TableRoleInCollection getTableRoleFromStore(BusinessEntity entity, BusinessEntity.DataStore dataStore) {

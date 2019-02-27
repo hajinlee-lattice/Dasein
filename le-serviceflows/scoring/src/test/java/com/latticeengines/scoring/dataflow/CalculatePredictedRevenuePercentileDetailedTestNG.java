@@ -35,12 +35,32 @@ public class CalculatePredictedRevenuePercentileDetailedTestNG extends ServiceFl
 
     private void verifyResults() {
         List<GenericRecord> inputRecords = readInput("detailed");
+        List<GenericRecord> expectedResultsRecords = readInput("expectedResult");
         List<GenericRecord> outputRecords = readOutput();
 
         assertEquals(outputRecords.size(), inputRecords.size());
 
         String[] modelGuids = { "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz" };
 
+        Map<String, List<GenericRecord>> modelRecordMap = calculateModelRecordMap(outputRecords, modelGuids);
+        Map<String, List<GenericRecord>> modelRecordMapExpectedResult = calculateModelRecordMap(expectedResultsRecords,
+                modelGuids);
+
+        assertEquals(9465, modelRecordMap.get("ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz").size());
+        assertEquals(9465,
+                modelRecordMapExpectedResult.get("ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz").size());
+
+        String[] evModelGuids = { "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz", };
+
+        for (String modelGuid : evModelGuids) {
+            verifyPerModelOutput(modelGuid, modelRecordMap.get(modelGuid), true,
+                    modelRecordMapExpectedResult.get(modelGuid));
+        }
+
+    }
+
+    private Map<String, List<GenericRecord>> calculateModelRecordMap(List<GenericRecord> outputRecords,
+            String[] modelGuids) {
         Map<String, List<GenericRecord>> modelRecordMap = new HashMap<>();
         Stream.of(modelGuids).forEach((guid) -> modelRecordMap.put(guid, new ArrayList<>()));
 
@@ -51,22 +71,21 @@ public class CalculatePredictedRevenuePercentileDetailedTestNG extends ServiceFl
                 perModelRecords.add(record);
             }
         }
-
-        assertEquals(9465, modelRecordMap.get("ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz").size());
-
-        String[] evModelGuids = { "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz", };
-
-        for (String modelGuid : evModelGuids) {
-            verifyPerModelOutput(modelGuid, modelRecordMap.get(modelGuid), true);
-        }
-
+        return modelRecordMap;
     }
 
-    private void verifyPerModelOutput(String modelGuid, List<GenericRecord> outputRecords, boolean expectedValue) {
+    private void verifyPerModelOutput(String modelGuid, List<GenericRecord> outputRecords, boolean expectedValue,
+            List<GenericRecord> expectedResultsRecords) {
         Double prevRawScore = (expectedValue) ? Double.MAX_VALUE : 1.0;
         String scoreFieldName = (expectedValue) ? ScoreResultField.PredictedRevenue.displayName
                 : ScoreResultField.RawScore.displayName;
         Integer prevPct = 99;
+
+        String keyColumn = "__Composite_Key__";
+        Map<String, GenericRecord> outputRecordsMap = new HashMap<>();
+        outputRecords.stream().forEach(r -> outputRecordsMap.put(r.get(keyColumn).toString(), r));
+        Map<String, GenericRecord> expectedResultsRecordsMap = new HashMap<>();
+        expectedResultsRecords.stream().forEach(r -> expectedResultsRecordsMap.put(r.get(keyColumn).toString(), r));
 
         for (GenericRecord record : outputRecords) {
             String recordModelGuid = record.get(ScoreResultField.ModelId.displayName).toString();
@@ -83,6 +102,16 @@ public class CalculatePredictedRevenuePercentileDetailedTestNG extends ServiceFl
             prevPct = curPct;
             prevRawScore = curRawScore;
         }
+
+        assertEquals(outputRecordsMap.size(), expectedResultsRecordsMap.size());
+        expectedResultsRecordsMap.keySet().forEach(k -> {
+            GenericRecord outputRecord = outputRecordsMap.get(k);
+            GenericRecord expectedResultRecord = expectedResultsRecordsMap.get(k);
+
+            expectedResultRecord.getSchema().getFields().stream().forEach(f -> {
+                assertEquals(outputRecord.get(f.name()), expectedResultRecord.get(f.name()), f.name());
+            });
+        });
     }
 
     @Override

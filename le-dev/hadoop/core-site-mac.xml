@@ -26,10 +26,6 @@
    <value>hdfs://localhost:9000</value>
  </property>
 <property>
-    <name>hadoop.security.key.provider.path</name>
-    <value>kms://http@localhost:16000/kms</value>
-</property>
-<property>
     <name>io.compression.codec.bzip2.library</name>
     <value>libbz2.dylib</value>
 </property>

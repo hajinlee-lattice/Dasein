@@ -1,7 +1,7 @@
 package com.latticeengines.pls.dao.impl;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;

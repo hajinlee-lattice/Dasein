@@ -18,19 +18,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
-import com.latticeengines.playmakercore.dao.impl.RecommendationDaoImpl;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
-    
+
     private static final Logger log = LoggerFactory.getLogger(LpiPMRecommendationDaoAdapterImpl.class);
 
     private static final String ACC_EXT_LAST_MODIFIED_FIELD_NAME = "LastModified";

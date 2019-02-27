@@ -1,19 +1,21 @@
-angular
-.module('common.datacloud.explorer.filters', [])
-.directive('explorerFilters',function() {
+export default function () {
     return {
         restrict: 'EA',
         scope: {
-            vm:'='
+            vm: '='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, 
-            DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility, FeatureFlagService, AuthorizationUtility) {
+        controller: function (
+            $scope, $state, $timeout, $interval, FeatureFlagService, QueryStore,
+            DataCloudStore, SegmentStore, RatingsEngineStore, AuthorizationUtility
+        ) {
+            'ngInject';
+
             var vm = $scope.vm;
 
             angular.extend(vm, {
                 orders: {
-                    attributeLookupMode: [ '-Value', 'DisplayName'],
+                    attributeLookupMode: ['-Value', 'DisplayName'],
                     attribute: ['-HighlightHighlighted', 'DisplayName'],
                     subcategory: 'toString()',
                     category: 'toString()'
@@ -35,25 +37,25 @@ angular
 
             // remove highlighting
             if (!vm.showHighlighting()) {
-                vm.orders.attribute = vm.orders.attribute.filter(function(item){
+                vm.orders.attribute = vm.orders.attribute.filter(function (item) {
                     return item != '-HighlightHighlighted' && item != 'HighlightHighlighted'
                 });
             }
 
-            var clearFilters = function() {
-                for(var i in vm.metadata.toggle) {
-                    for(var j in vm.metadata.toggle[i]) {
+            var clearFilters = function () {
+                for (var i in vm.metadata.toggle) {
+                    for (var j in vm.metadata.toggle[i]) {
                         vm.metadata.toggle[i][j] = '';
                     }
                 }
             }
 
-            vm.init_filters = function() {
+            vm.init_filters = function () {
                 vm.download_button.items = [{
                     href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
                     label: vm.label.button_download,
                     icon: 'fa fa-file-o'
-                },{
+                }, {
                     href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
                     label: vm.label.button_download_selected,
                     icon: 'fa fa-file-o'
@@ -73,7 +75,7 @@ angular
                     'vm.metadata.toggle.show.enabled',
                     'vm.metadata.toggle.show.highlighted',
                     'vm.metadata.toggle.show.selected_ratingsengine_attributes'
-                ], function(newValues, oldValues, scope) {
+                ], function (newValues, oldValues, scope) {
                     vm.filterEmptySubcategories();
                     vm.TileTableItems = {};
                 });
@@ -81,12 +83,12 @@ angular
                 $scope.$watchGroup([
                     'vm.premiumSelectedTotal',
                     'vm.generalSelectedTotal'
-                ], function(newValues, oldValues, scope) {
+                ], function (newValues, oldValues, scope) {
                     DataCloudStore.setMetadata('generalSelectedTotal', vm.generalSelectedTotal);
                     DataCloudStore.setMetadata('premiumSelectedTotal', vm.premiumSelectedTotal);
                 });
 
-                $scope.$watch('vm.queryText', function(newvalue, oldvalue){
+                $scope.$watch('vm.queryText', function (newvalue, oldvalue) {
                     vm.queryInProgress = true;
 
                     if (vm.queryTimeout) {
@@ -94,7 +96,7 @@ angular
                     }
 
                     // debounce timeout to speed things up
-                    vm.queryTimeout = $timeout(function() {
+                    vm.queryTimeout = $timeout(function () {
                         if (!vm.category && newvalue) {
                             vm.setCategory(vm.categories[0]);
                             vm.updateStateParams();
@@ -107,8 +109,8 @@ angular
                         }
 
                         // maybe this will fix the issues where they dont drill down??
-                        $timeout(function() {
-                            var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
+                        $timeout(function () {
+                            var categories = Object.keys(vm.categoryCounts).filter(function (value, index) {
                                 return vm.categoryCounts[value] > 0;
                             });
 
@@ -131,10 +133,10 @@ angular
                 function dropdown_buttons() {
                     var buttons = angular.element('.dropdown-container > h2');
                     find_dropdown_buttons_count++;
-                    if(buttons.length > 0 || find_dropdown_buttons_count > 5) {
+                    if (buttons.length > 0 || find_dropdown_buttons_count > 5) {
                         $interval.cancel(find_dropdown_buttons);
                     }
-                    buttons.click(function(e){
+                    buttons.click(function (e) {
                         var button = angular.element(this),
                             toggle_on = !button.hasClass('active'),
                             parent = button.closest('.dropdown-container');
@@ -144,7 +146,7 @@ angular
                         buttons.parents().find('.dropdown-container').removeClass('active');
                         buttons.siblings('ul.dropdown').removeClass('open');
 
-                        if(toggle_on) {
+                        if (toggle_on) {
                             parent.addClass('active');
                             button.addClass('active');
                             button.siblings('ul.dropdown').addClass('open');
@@ -155,20 +157,20 @@ angular
                     });
                 }
 
-                angular.element(document).click(function(event) {
+                angular.element(document).click(function (event) {
                     var target = angular.element(event.target),
                         el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown, .button ul.button-dropdown'),
                         has_parent = target.parents().is('.dropdown-container'),
                         parent = el.parents().find('.dropdown-container'),
                         is_visible = el.is(':visible');
 
-                    if(!has_parent) {
+                    if (!has_parent) {
                         vm.closeHighlighterButtons();
                         el.removeClass('open');
                         parent.removeClass('active');
                         el.siblings('.button.active').removeClass('active');
                     }
-                    if(is_visible && !has_parent) {
+                    if (is_visible && !has_parent) {
                         $scope.$digest(); //ben -- hrmmm, works for now
                     }
 
@@ -179,7 +181,7 @@ angular
                 vm.premiumSelectLimit = DataCloudStore.getMetadata('premiumSelectLimit'); //(vm.EnrichmentPremiumSelectMaximum.data && vm.EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
                 vm.generalSelectLimit = DataCloudStore.getMetadata('generalSelectLimit');
 
-                if(vm.show_internal_filter) {
+                if (vm.show_internal_filter) {
                     /*
                      * this is the default for the internal filter
                      * this also effectivly hides internal attributes when the filter is hidden
@@ -189,7 +191,7 @@ angular
                     vm.metadata.toggle.show.internal = false;
                 }
 
-                if(vm.section === 'insights') {
+                if (vm.section === 'insights') {
                     /* hide disabled for sales team from iframe */
                     vm.metadata.toggle.show.enabled = true;
                 } else {
@@ -197,21 +199,21 @@ angular
                 }
             };
 
-            vm.hideMessage = function() {
+            vm.hideMessage = function () {
                 vm.saved = false;
             };
 
-            vm.isFilterSelected = function() {
-                return  (vm.section !== 'insights'          && vm.metadata.toggle.show.enabled)     ||
-                        vm.metadata.toggle.show.selected    || vm.metadata.toggle.hide.selected     ||
-                        vm.metadata.toggle.show.premium     || vm.metadata.toggle.hide.premium      ||
-                        vm.metadata.toggle.hide.enabled     || vm.metadata.toggle.show.highlighted  ||
-                        vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls        ||
-                        vm.metadata.toggle.show.internal;
+            vm.isFilterSelected = function () {
+                return (vm.section !== 'insights' && vm.metadata.toggle.show.enabled) ||
+                    vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected ||
+                    vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium ||
+                    vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted ||
+                    vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls ||
+                    vm.metadata.toggle.show.internal;
             };
 
-            vm.sortOrder = function() {
-                var sortPrefix = vm.sortPrefix.replace('+','');
+            vm.sortOrder = function () {
+                var sortPrefix = vm.sortPrefix.replace('+', '');
                 if (!vm.category) {
                     return handleFilterOrder(vm.orders.category);
                 } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
@@ -225,13 +227,13 @@ angular
                 }
             };
 
-            var handleFilterOrder = function(order, sortPrefix) {
-                var sortPrefix = sortPrefix || vm.sortPrefix.replace('+','');
-                if(typeof order === 'object') {
+            var handleFilterOrder = function (order, sortPrefix) {
+                var sortPrefix = sortPrefix || vm.sortPrefix.replace('+', '');
+                if (typeof order === 'object') {
                     var sortArr = order,
                         retArr = [];
 
-                    sortArr.forEach(function(item, index) {
+                    sortArr.forEach(function (item, index) {
                         retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
                     });
 
@@ -240,7 +242,7 @@ angular
                 return sortPrefix + order;
             };
 
-            vm.enrichmentsFilter = function() {
+            vm.enrichmentsFilter = function () {
                 var filter = {};
 
                 if (vm.metadata.toggle.show.selected && !vm.metadata.toggle.hide.selected) {
@@ -276,15 +278,15 @@ angular
                     filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
                 }
 
-                if(vm.section == 'wizard.ratingsengine_segment') {
+                if (vm.section == 'wizard.ratingsengine_segment') {
                     filter.IsRatingsEngineAttribute = (vm.metadata.toggle.show.selected_ratingsengine_attributes ? true : '');
                 }
 
                 return filter;
             };
 
-            vm.subcategoryFilter = function(subcategory) {
-                if(!vm.enrichments_completed) {
+            vm.subcategoryFilter = function (subcategory) {
+                if (!vm.enrichments_completed) {
                     return true;
                 }
                 var category = vm.category,
@@ -293,31 +295,31 @@ angular
                 return (count ? true : false);
             };
 
-            vm.goBackToModelRules = function() {
-                SegmentStore.sanitizeRuleBuckets( RatingsEngineStore.getRule().rule, true)
+            vm.goBackToModelRules = function () {
+                SegmentStore.sanitizeRuleBuckets(RatingsEngineStore.getRule().rule, true)
                 $state.go('home.ratingsengine.dashboard.segment.attributes.rules');
             };
 
-            vm.showAtributeAdmin = function() {
-                if (vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment'){
+            vm.showAtributeAdmin = function () {
+                if (vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment') {
                     return false;
-                } 
-                
+                }
+
                 return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
             };
 
-            vm.showFileImport = function() {
+            vm.showFileImport = function () {
                 var flags = FeatureFlagService.Flags();
                 var featureFlags = {};
                 featureFlags[flags.VDB_MIGRATION] = false;
                 featureFlags[flags.ENABLE_FILE_IMPORT] = true;
 
                 return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard &&
-                        AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && AuthorizationUtility.checkFeatureFlags(featureFlags);
-                                
+                    AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && AuthorizationUtility.checkFeatureFlags(featureFlags);
+
             }
 
             vm.init_filters();
         }
     };
-});
+};

@@ -2,7 +2,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.URLUtility',
     'mainApp.appCommon.utilities.MetadataUtility',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 
 .controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, URLUtility, BrowserStorageUtility, MetadataUtility) {

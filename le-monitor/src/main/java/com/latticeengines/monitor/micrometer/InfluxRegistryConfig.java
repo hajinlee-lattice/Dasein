@@ -11,8 +11,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
+import com.latticeengines.common.exposed.util.MetricUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
+import com.latticeengines.monitor.util.MonitoringUtils;
 
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -48,13 +51,50 @@ public class InfluxRegistryConfig {
     @Value("${monitor.metrics.micrometer.influxdb.autocreatedb:false}")
     private boolean autoCreateDb;
 
+    @Value("${monitor.influxdb.environment:Local}")
+    private String environment;
+
+    @Value("${monitor.influxdb.stack:unknown}")
+    private String stack;
+
+    private String hostname = MonitoringUtils.getHostName();
+
     // use one month retention policy for now
     private RetentionPolicy policy = RetentionPolicyImpl.ONE_MONTH;
 
     @Lazy
     @Bean(name = "influxMeterRegistry")
     public MeterRegistry influxRegistry() {
-        InfluxConfig config = new InfluxConfig() {
+        InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName());
+        log.info("Instantiating InfluxMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+                config.enabled(), config.step());
+        return getInfluxRegistry(config);
+    }
+
+    @Lazy
+    @Bean(name = "influxHostMeterRegistry")
+    public MeterRegistry influxHostRegistry() {
+        InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName());
+        MeterRegistry registry = getInfluxRegistry(config);
+        log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+                config.enabled(), config.step());
+        // set hostname tags
+        registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
+        return registry;
+    }
+
+    /*
+     * helper to set env & stack common tags
+     */
+    private MeterRegistry getInfluxRegistry(@NotNull InfluxConfig config) {
+        MeterRegistry registry = new InfluxMeterRegistry(config, Clock.SYSTEM);
+        // set common tags
+        registry.config().commonTags(MetricUtils.TAG_ENVIRONMENT, environment, MetricUtils.TAG_STACK, stack);
+        return registry;
+    }
+
+    private InfluxConfig getInfluxConfig(@NotNull String db) {
+        return new InfluxConfig() {
 
             @Override
             public String uri() {
@@ -63,7 +103,7 @@ public class InfluxRegistryConfig {
 
             @Override
             public String db() {
-                return MetricDB.LDC_Match.getDbName();
+                return db;
             }
 
             @Override
@@ -116,8 +156,5 @@ public class InfluxRegistryConfig {
                 return null;
             }
         };
-        log.info("Instantiating InfluxMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
-                config.enabled(), config.step());
-        return new InfluxMeterRegistry(config, Clock.SYSTEM);
     }
 }

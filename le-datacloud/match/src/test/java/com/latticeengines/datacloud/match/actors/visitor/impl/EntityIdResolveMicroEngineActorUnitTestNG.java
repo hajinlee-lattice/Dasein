@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.datacloud.match.service.impl.EntityMatchConfigurationServiceImpl;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.Mockito;
@@ -15,6 +13,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.impl.EntityMatchConfigurationServiceImpl;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class EntityIdResolveMicroEngineActorUnitTestNG {

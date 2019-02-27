@@ -20,6 +20,7 @@ public class Job implements HasId<Long>, HasName {
 
     public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED,
             JobStatus.CANCELLED, JobStatus.FAILED, JobStatus.SKIPPED);
+    public static final EnumSet<JobStatus> NON_TERMINAL_JOB_STATUS = EnumSet.complementOf(TERMINAL_JOB_STATUS);
 
     private Long pid;
     private Long id;

@@ -1,6 +1,6 @@
 angular.module('mainApp.appCommon.widgets.AnalyticAttributeTileWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 
 .controller('AnalyticAttributeTileWidgetController', function ($scope, ResourceUtility, BrowserStorageUtility) {

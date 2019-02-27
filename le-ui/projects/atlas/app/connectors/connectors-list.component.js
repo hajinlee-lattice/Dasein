@@ -75,7 +75,7 @@ export class ConnectorList extends Component {
                     this.setState({ userValidated: true, userInfo: response.data });
                     httpService.unsubscribeObservable(observer);
                 } else {
-                    this.setState({ userValidated: false, userInfo: new User('No user') });
+                    this.setState({ userValidated: false, userInfo: {} });
                 }
             },
             error => {
@@ -140,7 +140,7 @@ export class ConnectorList extends Component {
 }
 
 angular
-    .module("le.connectors.list", ['lp.sfdc', 'mainApp.core.utilities.BrowserStorageUtility', 'mainApp.core.services.FeatureFlagService', 'common.modal'])
+    .module("le.connectors.list", ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
     .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
         let ConnectorsService = this;
         this.getConnector = function () {

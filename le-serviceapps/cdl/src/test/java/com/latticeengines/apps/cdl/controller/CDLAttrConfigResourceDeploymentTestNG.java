@@ -18,7 +18,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -193,10 +192,16 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testDeleteConfigWhenEmptyProps" })
     public void testCleanupAttrConfigForTenant() throws Exception {
-        cdlAttrConfigProxy.removeAttrConfigByTenant(mainTestTenant.getId());
+        cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(mainTestTenant.getId(), BusinessEntity.Account);
+        Thread.sleep(500L);
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
+                BusinessEntity.Account, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
+
+        cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(mainTestTenant.getId(), null);
         Thread.sleep(500L);
 
-        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
                 BusinessEntity.Account, false);
         assertEquals(request.getAttrConfigs().size(), 0);
 

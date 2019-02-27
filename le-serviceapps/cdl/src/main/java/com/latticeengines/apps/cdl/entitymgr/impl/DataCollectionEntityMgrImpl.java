@@ -2,13 +2,17 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static com.latticeengines.domain.exposed.metadata.DataCollection.Version.Blue;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,9 +116,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
-    public Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version){
-        Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> tableNames = dataCollectionDao.findTableNamesOfAllRole(collectionName,tableRole,version);
-        return tableNames;
+    public Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole( //
+            String collectionName, TableRoleInCollection tableRole, DataCollection.Version version){
+        return dataCollectionDao.findTableNamesOfAllRole(collectionName,tableRole,version);
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)

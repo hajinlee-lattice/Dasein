@@ -33,8 +33,10 @@ public class CalculateFittedExpectedRevenueHelper {
 
             if (ScoreResultField.ExpectedRevenue.displayName //
                     .equals(context.originalScoreFieldMap.get(modelGuid))) {
-                node = node.apply(new CalculateFittedExpectedRevenueFunction(new Fields(node.getFieldNamesArray()),
-                        context.outputExpRevFieldName, context.outputPercentileFieldName, evFitFunctionParamsStr),
+                node = node.apply(
+                        new CalculateFittedExpectedRevenueFunction(new Fields(node.getFieldNamesArray()),
+                                context.expectedRevenueField, //
+                                context.outputPercentileFieldName, evFitFunctionParamsStr),
                         new FieldList(node.getFieldNamesArray()), node.getSchema(), null, Fields.REPLACE);
             }
 
@@ -48,9 +50,6 @@ public class CalculateFittedExpectedRevenueHelper {
         return merged.discard(context.standardScoreField)//
                 .rename(new FieldList(context.outputPercentileFieldName), //
                         new FieldList(context.standardScoreField)) //
-                .discard(context.expectedRevenueField) //
-                .rename(new FieldList(context.outputExpRevFieldName), //
-                        new FieldList(context.expectedRevenueField)) //
                 .retain(retainedFields);
     }
 }

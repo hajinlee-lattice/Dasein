@@ -1,9 +1,9 @@
 angular.module('lp.navigation.header', [
     'mainApp.core.utilities.NavUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'common.exceptions',
     'mainApp.core.services.ResourceStringsService',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.login.services.LoginService',
     'mainApp.login.controllers.UpdatePasswordController',
     'mainApp.models.controllers.ModelCreationHistoryController',

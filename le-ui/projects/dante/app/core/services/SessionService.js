@@ -1,6 +1,6 @@
 angular.module('mainApp.core.services.SessionService', [
     'mainApp.appCommon.utilities.URLUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.AuthenticationUtility'
 ])

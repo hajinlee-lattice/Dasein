@@ -1,6 +1,5 @@
 package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +8,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.exceptions.YarnException;
-import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +70,8 @@ public class IngestionServiceImpl implements IngestionService {
     @Resource(name = "ingestionBWRawProviderService")
     private IngestionProviderService bwRawProviderService;
 
+    public static final int ULTIMATE_RETRIES = 1000;
+
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
@@ -114,8 +115,8 @@ public class IngestionServiceImpl implements IngestionService {
         fields.put("Status", ProgressStatus.PROCESSING);
         List<IngestionProgress> progresses = ingestionProgressService.getProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
-            ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
             try {
+                ApplicationId appId = ApplicationId.fromString(progress.getApplicationId());
                 ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
                 if (report == null || report.getYarnApplicationState() == null
                         || report.getYarnApplicationState().equals(YarnApplicationState.FAILED)
@@ -127,13 +128,17 @@ public class IngestionServiceImpl implements IngestionService {
                             .commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }
-            } catch (YarnException | IOException e) {
-                log.error("Failed to track application status for " + progress.getApplicationId()
-                        + ". Error: " + e.toString());
-                if (e.getMessage().contains("doesn't exist in the timeline store")) {
+            } catch (Exception e) {
+                log.error("Failed to track application status for {}", progress.getApplicationId(), e);
+                if (ExceptionUtils.indexOfThrowable(e, ApplicationNotFoundException.class) > -1) {
+                    // ApplicationId no longer exist in RM.
+                    // ApplicationNotFoundException is nested exception inside
+                    // YarnSystemException
                     progress = ingestionProgressService.updateProgress(progress)
                             .status(ProgressStatus.FAILED)
-                            .errorMessage("Failed to track application status in the scan")
+                            // Should not retry for this case
+                            .retries(ULTIMATE_RETRIES)
+                            .errorMessage("Application doesn't exist in RM")
                             .commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }

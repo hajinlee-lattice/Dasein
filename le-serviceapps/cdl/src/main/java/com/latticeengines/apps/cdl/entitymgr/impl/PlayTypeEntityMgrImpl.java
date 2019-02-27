@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.PlayTypeDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
@@ -12,8 +14,6 @@ import com.latticeengines.apps.cdl.repository.writer.PlayTypeWriterRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.PlayType;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component("playTypeEntityMgr")
 public class PlayTypeEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayTypeRepository, PlayType, Long>

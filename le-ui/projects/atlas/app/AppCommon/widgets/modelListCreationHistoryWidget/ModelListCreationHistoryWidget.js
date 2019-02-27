@@ -2,7 +2,7 @@ var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidg
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.models.modals.ImportModelModal'
 ])
 .controller('ModelListCreationHistoryWidgetController', function (

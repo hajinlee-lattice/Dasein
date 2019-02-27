@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -36,7 +37,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.repository.writer.SourceFileWriterRepository;
 
 public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -62,15 +62,14 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         sourceFileRepository.deleteAll();
     }
 
-    private ResponseDocument<SourceFile> submitFile(boolean unnamed, String filePath, boolean compressed)
-            throws Exception {
+    private ResponseDocument<SourceFile> submitFile(boolean unnamed, String filePath, boolean compressed) {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", new ClassPathResource(filePath));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         String displayName = filePath.substring(StringUtils.lastIndexOf(filePath, '/') + 1);
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(
                 map, headers);
         if (unnamed) {
             String uri = String.format("/pls/models/uploadfile/unnamed?schema=%s&compressed=%s&displayName=%s&entity=%s",
@@ -98,7 +97,8 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         assertTrue(response.isSuccess());
         SourceFile fileResponse = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, fileResponse.getPath());
-        String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
+        String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()), //
+                Charset.defaultCharset());
         assertEquals(contents, expectedContents);
 
         List<SourceFile> files = sourceFileRepository.findAll();
@@ -113,7 +113,8 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         assertTrue(response.isSuccess());
         String path = response.getResult().getPath();
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-        String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
+        String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()), //
+                Charset.defaultCharset());
         assertEquals(contents, expectedContents);
 
         List<SourceFile> files = sourceFileRepository.findAll();
@@ -140,7 +141,7 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
     @Test(groups = "deployment")
     public void testGetAvailableFormat() {
         switchToExternalAdmin();
-        String uri = String.format("/pls/models/uploadfile/dateformat");
+        String uri = "/pls/models/uploadfile/dateformat";
         ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.GET,
                 null, String.class);
         ResponseDocument<AvailableDateFormat> responseDocument = JsonUtils.deserialize(result.getBody(),

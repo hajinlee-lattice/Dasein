@@ -1,6 +1,6 @@
 angular
     .module('mainApp.appCommon.utilities.PurchaseHistoryUtility', [
-        'mainApp.appCommon.utilities.NumberUtility',
+        'common.utilities.number',
         'mainApp.appCommon.utilities.ResourceUtility'
     ])
     .service('PurchaseHistoryUtility', function(

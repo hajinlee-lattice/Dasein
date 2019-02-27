@@ -1,9 +1,11 @@
 package com.latticeengines.admin.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,10 +35,9 @@ import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.component.ComponentConstants;
+import com.latticeengines.proxy.exposed.component.ComponentProxy;
 import com.latticeengines.security.exposed.Constants;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
@@ -52,6 +53,9 @@ public class TenantResource {
 
     @Inject
     private DynamicOptionsService dynamicOptionsService;
+
+    @Inject
+    private ComponentProxy componentProxy;
 
     @PostMapping("/{tenantId}")
     @ResponseBody
@@ -212,5 +216,16 @@ public class TenantResource {
             @PathVariable String tenantId, //
             @RequestBody TenantInfo tenantInfo) {
         return tenantService.updateTenantInfo(contractId, tenantId, tenantInfo);
+    }
+
+    @PostMapping("/{tenantId}/reset")
+    @ResponseBody
+    @ApiOperation(value = "Reset tenant")
+    public boolean resetTenant(@PathVariable String tenantId) {
+        boolean result_cdl = componentProxy.reset(tenantId, ComponentConstants.CDL);
+        boolean result_lp = componentProxy.reset(tenantId, ComponentConstants.LP);
+        boolean result_metadata = componentProxy.reset(tenantId, ComponentConstants.METADATA);
+
+        return result_cdl && result_lp && result_metadata;
     }
 }

@@ -1,7 +1,7 @@
 angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.appCommon.utilities.NumberUtility',
+    'common.utilities.number',
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 

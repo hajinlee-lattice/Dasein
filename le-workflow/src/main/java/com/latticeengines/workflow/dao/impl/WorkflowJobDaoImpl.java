@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
@@ -239,6 +240,51 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.setParameter("tenantPid", tenant.getPid());
         query.setParameter("pids", workflowPids);
         return query.list();
+    }
+
+    @Override
+    public List<WorkflowJob> findByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
+            List<String> statuses) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        StringBuilder sb = new StringBuilder().append(String.format("from %s workflowjob", entityClz.getSimpleName()));
+        boolean hasClause = false;
+        // build query when condition is provided
+        if (StringUtils.isNotBlank(clusterId)) {
+            appendWhereClause(sb, hasClause, " workflowjob.emrClusterId=:clusterId");
+            hasClause = true;
+        }
+        if (CollectionUtils.isNotEmpty(workflowTypes)) {
+            appendWhereClause(sb, hasClause, " workflowjob.type in :types");
+            hasClause = true;
+        }
+        if (CollectionUtils.isNotEmpty(statuses)) {
+            appendWhereClause(sb, hasClause, " workflowjob.status in :statuses");
+            hasClause = true;
+        }
+
+        Query<WorkflowJob> query = session.createQuery(sb.toString(), entityClz);
+        // set parameter values
+        if (StringUtils.isNotBlank(clusterId)) {
+            query.setParameter("clusterId", clusterId);
+        }
+        if (CollectionUtils.isNotEmpty(workflowTypes)) {
+            query.setParameter("types", workflowTypes);
+        }
+        if (CollectionUtils.isNotEmpty(statuses)) {
+            query.setParameter("statuses", statuses);
+        }
+
+        return query.list();
+    }
+
+    private void appendWhereClause(StringBuilder sb, boolean hasClause, String clause) {
+        if (hasClause) {
+            sb.append(" and");
+        } else {
+            sb.append(" where");
+        }
+        sb.append(clause);
     }
 
     @Override

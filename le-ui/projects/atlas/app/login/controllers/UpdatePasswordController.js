@@ -2,7 +2,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.login.services.LoginService'

@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.pls.VdbMetadataConstants;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.pls.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;

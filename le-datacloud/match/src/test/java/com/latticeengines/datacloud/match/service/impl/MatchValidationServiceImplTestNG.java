@@ -1,8 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.datacloud.match.entitymgr.DecisionGraphEntityMgr;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,7 +11,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import com.latticeengines.datacloud.match.entitymgr.DecisionGraphEntityMgr;
+import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 
 public class MatchValidationServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 

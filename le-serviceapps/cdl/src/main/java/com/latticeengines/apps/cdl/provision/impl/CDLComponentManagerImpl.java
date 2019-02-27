@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitService;
 
 @Component
@@ -49,6 +48,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     private S3Service s3Service;
 
 
+    @Override
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
         String camilleTenantId = space.getTenantId();
@@ -65,12 +65,13 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         dropBoxService.createTenantDefaultFolder(space.toString());
     }
 
+    @Override
     public void discardTenant(String customerSpace) {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         attrConfigEntityMgr.cleanupTenant(tenantId);
-        dataUnitService.cleanupByTenant();
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         MultiTenantContext.setTenant(tenant);
+        dataUnitService.cleanupByTenant();
         dropBoxService.delete();
     }
 

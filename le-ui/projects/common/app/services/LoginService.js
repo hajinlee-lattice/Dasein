@@ -1,5 +1,5 @@
 angular.module('mainApp.login.services.LoginService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',

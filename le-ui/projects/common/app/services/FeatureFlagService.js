@@ -1,9 +1,9 @@
-angular.module('mainApp.core.services.FeatureFlagService', [
+angular.module('common.services.featureflag', [
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ]).service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
 
-    this.GetAllFlags = function(ApiHost) {
+    this.GetAllFlags = function (ApiHost) {
         var deferred = $q.defer();
         GetAllFlagsAsync(deferred, ApiHost);
         return deferred.promise;
@@ -14,7 +14,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
     /**
      * @return {boolean}
      */
-    this.UserIs = function(levels){
+    this.UserIs = function (levels) {
         var sessionDoc = BrowserStorageUtility.getClientSession(),
             levels = levels || '',
             levelsAr = levels.split(',');
@@ -32,10 +32,10 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         // ===================================
         // BEGIN: flags governed by user level
         // ===================================
-        VIEW_SAMPLE_LEADS : 'View_Sample_Leads',
-        VIEW_REFINE_CLONE : 'View_Refine_Clone',
-        EDIT_REFINE_CLONE : 'Edit_Refine_Clone',
-        VIEW_REMODEL : 'View_Remodel',
+        VIEW_SAMPLE_LEADS: 'View_Sample_Leads',
+        VIEW_REFINE_CLONE: 'View_Refine_Clone',
+        EDIT_REFINE_CLONE: 'Edit_Refine_Clone',
+        VIEW_REMODEL: 'View_Remodel',
         CHANGE_MODEL_NAME: 'ChangeModelNames',
         DELETE_MODEL: 'DeleteModels',
         REVIEW_MODEL: 'ReviewModel',
@@ -58,7 +58,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         // ====================
         // These are actually product flag (whether the customer has purchased the product or not)
         ENABLE_CDL: 'EnableCdl',
-        IMPORT_WITHOUT_ID: 'ImportWithoutId',
+        IMPORT_WITHOUT_IDS: 'ImportWithoutIds',
         // ====================
         // END: product flags
         // ====================
@@ -77,7 +77,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         // ================
 
         REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
-        ALLOW_PIVOT_FILE:'AllowPivotFile',
+        ALLOW_PIVOT_FILE: 'AllowPivotFile',
         ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
         LATTICE_INSIGHTS: 'LatticeInsights',
         VDB_MIGRATION: 'VDBMigration',
@@ -101,7 +101,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2',
     };
 
-    this.Flags = function(){ return flags; };
+    this.Flags = function () { return flags; };
 
     var flagValues = {};
     var purchasedProducts = [];
@@ -118,8 +118,8 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         $http({
             method: 'GET',
             url: url
-        }).success(function(data) {
-            for(var key in data['FeatureFlags']) {
+        }).success(function (data) {
+            for (var key in data['FeatureFlags']) {
                 flagValues[key] = data['FeatureFlags'][key];
             }
 
@@ -136,7 +136,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
             }
 
             promise.resolve(flagValues);
-        }).error(function() {
+        }).error(function () {
             // if cannot get feature flags from backend
             SetFlag(flags.ALLOW_PIVOT_FILE, false);
             SetFlag(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
@@ -154,7 +154,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
 
             // product flags
             SetFlag(flags.ENABLE_CDL, false);
-            SetFlag(flags.IMPORT_WITHOUT_ID, true);
+            SetFlag(flags.IMPORT_WITHOUT_IDS, true);
 
             // update user-level flags
             if (ApiHost !== '/ulysses') {
@@ -202,7 +202,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         UpdateFlag(flags.VIEW_SAMPLE_LEADS, RightsUtility.currentUserMay("View", "Sample_Leads"));
         UpdateFlag(flags.VIEW_REFINE_CLONE, RightsUtility.currentUserMay("View", "Refine_Clone"));
         UpdateFlag(flags.EDIT_REFINE_CLONE, RightsUtility.currentUserMay("Edit", "Refine_Clone"));
-        
+
         UpdateFlag(flags.VIEW_REMODEL, RightsUtility.currentUserMay("View", "Remodel"));
 
         UpdateFlag(flags.CHANGE_MODEL_NAME, RightsUtility.currentUserMay("Edit", "Models"));

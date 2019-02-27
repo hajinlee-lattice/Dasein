@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
-import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -37,12 +36,12 @@ public class PatchBookUtilsTestNG {
     public void testDuplicateMatchKey() {
         Object[][] inputData = provideBatchData();
         List<PatchBook> patchBookList = new ArrayList<>();
-        for (int row = 0; row < inputData.length; row++) {
+        for (Object[] inputDatum : inputData) {
             PatchBook patchBook = new PatchBook();
-            patchBook.setType((Type) inputData[row][0]);
-            patchBook.setPid((Long) inputData[row][1]);
-            patchBook.setDomain((String) inputData[row][2]);
-            patchBook.setDuns((String) (inputData[row][3]));
+            patchBook.setType((Type) inputDatum[0]);
+            patchBook.setPid((Long) inputDatum[1]);
+            patchBook.setDomain((String) inputDatum[2]);
+            patchBook.setDuns((String) (inputDatum[3]));
             patchBookList.add(patchBook);
         }
         List<PatchBookValidationError> errorList = PatchBookUtils.validateDuplicateMatchKey(patchBookList);

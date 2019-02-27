@@ -1,5 +1,5 @@
 angular.module('lp.models.list', [
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.widgets.ModelListTileWidget',
     'mainApp.appCommon.services.HealthService',

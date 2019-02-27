@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -16,6 +17,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -91,6 +93,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.transaction.dataquota.limit:20000000}")
     private Long defaultTransactionQuotaLimit;
 
+    @Inject
+    @Named("jdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
+
     private final DataCollectionProxy dataCollectionProxy;
 
     private final DataFeedProxy dataFeedProxy;
@@ -133,6 +139,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
+
+        try {
+            List<Map<String, Object>> props = jdbcTemplate.queryForList("show variables like '%wait_timeout%'");
+            log.info("Timeout Configuration from DB Session: " + props);
+        } catch(Exception e) {
+            //Ignore. It is only for logging purpose
+        }
 
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
                 request.isInheritAllCompleteImportActions(), request.getImportActionPidsToInherit());

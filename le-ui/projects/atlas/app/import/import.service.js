@@ -61,9 +61,6 @@ angular.module('lp.import')
                 backState: 'home.importtemplates',
                 nextLabel: 'Next, Add Other IDs',
                 nextFn: function(nextState) {
-
-                    console.log(ImportWizardStore.getPostBody());
-
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -788,7 +785,7 @@ angular.module('lp.import')
                                 errorMsg: errors[0]
                             };
 
-                        console.log("????????????????????", response);
+                        // console.log("????????????????????", response);
                         deferred.resolve(response.errorMsg);
                     }
 
@@ -824,6 +821,9 @@ angular.module('lp.import')
             // var tmp = $state.get('home.import').data.redux;
             // tmp.fetch(FileName, entity, feedType, source);
             // console.log(tmp);
+
+            console.log(params);
+
 	        $http({
 	            method: 'POST',
 	            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings',
@@ -924,15 +924,16 @@ angular.module('lp.import')
 	    };
 
 	    this.templateDataIngestion = function(fileName, importOnly, autoImportData, postBody) {
+
 	        var deferred = $q.defer(),
                 result,
                 url = importOnly ? '/pls/cdl/s3/template/import' : '/pls/cdl/s3/template',
                 params = { 
                     'templateFileName':fileName,
     	            'source': 'File',
-                    'importData': autoImportData
-    	            // 'entity': entity,
-                    // 'feedType': feedType || entity + 'Schema'
+                    'importData': autoImportData,
+                    'feedType': postBody.FeedType || ''
+    	            // 'entity': entity
                 };
 
             // console.log(fileName, importOnly, autoImportData, postBody);

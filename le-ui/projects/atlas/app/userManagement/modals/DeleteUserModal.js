@@ -2,7 +2,7 @@ var app = angular.module('mainApp.userManagement.modals.DeleteUserModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.NavUtility',

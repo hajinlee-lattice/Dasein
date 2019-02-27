@@ -1,7 +1,6 @@
 package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.velocity.shaded.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConf
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
 import com.latticeengines.proxy.exposed.cdl.DataIntegrationMonitoringProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
-import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 @Component("playLaunchExportFilesToS3Step")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -58,13 +57,12 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
     private TenantEntityMgr tenantEntityMgr;
 
     @Inject
-    private LookupIdMappingProxy lookupIdMappingProxy;
-
-    @Inject
     private DropBoxProxy dropBoxProxy;
 
     @Inject
     private DataIntegrationMonitoringProxy dataIntegrationMonitoringProxy;
+
+    private Map<String, List<ExportFileConfig>> sourceFiles = new HashMap<String, List<ExportFileConfig>>();
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
@@ -94,29 +92,26 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         LookupIdMap lookupIdMap = config.getLookupIdMap();
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
 
-        s3ExportFilePaths.stream().forEach(exportPath -> {
-            DataIntegrationStatusMonitorMessage message = new DataIntegrationStatusMonitorMessage();
-            String workflowRequestId = UUID.randomUUID().toString();
-            message.setWorkflowRequestId(workflowRequestId);
-            message.setTenantId(tenant.getName());
-            message.setOperation(ExternalIntegrationWorkflowType.EXPORT.toString());
-            message.setEntityId(playLaunchId);
-            message.setEntityName(PlayLaunch.class.getSimpleName());
-            message.setExternalSystemId(lookupIdMap.getOrgId());
-            message.setSourceFile(exportPath.substring(exportPath.indexOf("dropfolder")));
-            message.setEventType(DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
-            message.setEventTime(new Date());
-            message.setMessageType(MessageType.EVENT.toString());
-            message.setMessage(
-                    String.format("Workflow Request Id has been launched to %s", workflowRequestId,
-                            lookupIdMap.getOrgId()));
-            dataIntegrationMonitoringProxy.createOrUpdateStatus(message);
-            log.info(JsonUtils.serialize(message));
-            publishToSnsTopic(customerSpace.toString(), workflowRequestId, exportPath);
-        });
+        DataIntegrationStatusMonitorMessage message = new DataIntegrationStatusMonitorMessage();
+        String workflowRequestId = UUID.randomUUID().toString();
+        message.setWorkflowRequestId(workflowRequestId);
+        message.setTenantId(tenant.getName());
+        message.setOperation(ExternalIntegrationWorkflowType.EXPORT.toString());
+        message.setEntityId(playLaunchId);
+        message.setEntityName(PlayLaunch.class.getSimpleName());
+        message.setExternalSystemId(lookupIdMap.getOrgId());
+        message.setSourceFile(s3ExportFilePaths.toString());
+        message.setEventType(DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
+        message.setEventTime(new Date());
+        message.setMessageType(MessageType.EVENT.toString());
+        message.setMessage(String.format("Workflow Request Id has been launched to %s", workflowRequestId,
+                lookupIdMap.getOrgId()));
+        dataIntegrationMonitoringProxy.createOrUpdateStatus(message);
+        log.info(JsonUtils.serialize(message));
+        publishToSnsTopic(customerSpace.toString(), workflowRequestId);
     }
 
-    public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId, String exportPath) {
+    public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId) {
         PlayLaunchExportFilesToS3Configuration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
 
@@ -126,17 +121,25 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
                 new MessageAttributeValue().withDataType(STRING)
                         .withStringValue("Marketo"));
 
-        ExportFileConfig sourceFile = new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")),
-                exportS3Bucket);
+        s3ExportFilePaths.stream().forEach(exportPath -> {
+            List<ExportFileConfig> fileConfigs = sourceFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
+                    new ArrayList<ExportFileConfig>());
+            fileConfigs.add(new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")),
+                    exportS3Bucket));
+            sourceFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
+        });
+
+
         DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
         ExternalIntegrationMessageBody messageBody = new ExternalIntegrationMessageBody();
         messageBody.setWorkflowRequestId(workflowRequestId);
-        messageBody.setSourceFiles(Collections.singletonList(sourceFile));
+        messageBody.setSourceFiles(sourceFiles);
         messageBody.setTrayTenantId(dropboxSummary.getDropBox());
         if (lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null) {
             messageBody.setSolutionInstanceId(lookupIdMap.getExternalAuthentication().getSolutionInstanceId());
         }
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
+        messageBody.setExternalAudienceName(config.getExternalAudienceName());
 
         Map<String, Object> jsonMessage = new HashMap<>();
         jsonMessage.put("default", JsonUtils.serialize(messageBody));
@@ -167,8 +170,8 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
     }
 
     @VisibleForTesting
-    public void setLookupIdMappingProxy(LookupIdMappingProxy lookupIdMappingProxy) {
-        this.lookupIdMappingProxy = lookupIdMappingProxy;
+    public void setS3ExportFiles(List<String> exportFiles) {
+        s3ExportFilePaths = exportFiles;
     }
 
 }

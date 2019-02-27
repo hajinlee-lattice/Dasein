@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,7 +24,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -34,7 +34,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -139,6 +138,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             this.idColumnName = rtsBulkScoringConfig.getIdColumnName();
         }
         log.info("Inside the rts bulk scoring processor.");
+        log.info(String.format("idColumnName is %s", idColumnName));
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
@@ -178,13 +178,12 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         log.info(String.format("schema is %s", schema));
 
         try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath())) {
-            try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
-                    DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
-                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                execute(rtsBulkScoringConfig, reader, dataFileWriter, builder, leadEnrichmentAttributeMap,
-                        csvFilePrinter, recordCount, fieldNameMapping, enrichmentEnabledForInternalAttributes,
-                        enableMatching);
-            }
+            Iterator<GenericRecord> iterator = instantiateIteratorForBulkScoreRequest(path);
+            DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName);
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            execute(rtsBulkScoringConfig, iterator, dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter,
+                    recordCount, fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching);
+
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
@@ -238,8 +237,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
         long endTime = System.currentTimeMillis();
         long oneBatchTime = endTime - startTime;
-        log.info(String.format("Bulk score request with %d records took %d sec", scoreRequest.getRecords().size(),
-                (oneBatchTime / 1000)));
+        log.info(String.format("Bulk score request with %d records took %d sec",
+                recordScoreResponse != null ? recordScoreResponse.size() : 0, (oneBatchTime / 1000)));
 
         return recordScoreResponse;
     }
@@ -298,15 +297,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     }
 
     @VisibleForTesting
-    FileReader<GenericRecord> instantiateReaderForBulkScoreRequest(String path) throws IOException {
-        String fileName = getAvroFileName(path);
-        return AvroUtils.getAvroFileReader(yarnConfiguration, new Path(fileName));
+    Iterator<GenericRecord> instantiateIteratorForBulkScoreRequest(String path) {
+        return AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
     }
 
     @VisibleForTesting
-    BulkRecordScoreRequest getBulkScoreRequest(FileReader<GenericRecord> reader,
+    BulkRecordScoreRequest getBulkScoreRequest(Iterator<GenericRecord> iterator,
             RTSBulkScoringConfiguration rtsBulkScoringConfig) throws IOException {
-        if (!reader.hasNext()) {
+        if (!iterator.hasNext()) {
             return null;
         }
 
@@ -316,8 +314,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         scoreRequest.setRecords(records);
 
         int recordCount = 1;
-        while (reader.hasNext() && recordCount <= bulkRecordSize) {
-            GenericRecord avroRecord = reader.next();
+        while (iterator.hasNext() && recordCount <= bulkRecordSize) {
+            GenericRecord avroRecord = iterator.next();
             Schema schema = avroRecord.getSchema();
             List<Schema.Field> fields = schema.getFields();
 
@@ -386,18 +384,21 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @VisibleForTesting
     long checkForInternalIdAndCountRecords(String path) throws IOException {
         long count = 0;
-        try (FileReader<GenericRecord> preReader = instantiateReaderForBulkScoreRequest(path);) {
-            GenericRecord avroRecord = preReader.next();
-            count++;
-            Object idObj = avroRecord.get(idColumnName);
-            if (idObj == null) {
-                throw new LedpException(LedpCode.LEDP_20034, new String[] { idColumnName });
-            }
-            while (preReader.hasNext()) {
-                preReader.next();
-                count++;
-            }
+        Iterator<GenericRecord> preIterator = instantiateIteratorForBulkScoreRequest(path);
+        if (!preIterator.hasNext()) {
+            return count;
         }
+        GenericRecord avroRecord = preIterator.next();
+        count++;
+        Object idObj = avroRecord.get(idColumnName);
+        if (idObj == null) {
+            throw new LedpException(LedpCode.LEDP_20034, new String[] { idColumnName });
+        }
+        while (preIterator.hasNext()) {
+            preIterator.next();
+            count++;
+        }
+
         log.info(String.format("There are %d total records in the input avro", count));
         return count;
     }
@@ -448,7 +449,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         if (leadEnrichmentAttributeMap != null) {
             Iterator<Entry<String, Type>> it = leadEnrichmentAttributeMap.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<String, Schema.Type> pair = (Entry<String, Type>) it.next();
+                Map.Entry<String, Schema.Type> pair = it.next();
                 String leadEnrichmentAttrName = pair.getKey();
                 Type avroType = pair.getValue();
                 Attribute attr = new Attribute();
@@ -478,6 +479,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             log.info("Lead enrichment is not enabled for this tenant.");
         }
 
+        int count = 0;
         for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
             List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
             String id = scoreResponse.getId();
@@ -534,7 +536,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 }
                 GenericData.Record record = builder.build();
                 dataFileWriter.append(record);
+                count++;
             }
+            // TODO ygao will delete this
+            if (recordScoreResponseList.size() != count) {
+                log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
+            }
+
+            log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
+                    recordScoreResponseList.size(), count));
         }
     }
 
@@ -554,16 +564,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
     }
 
-    private String getAvroFileName(String path) throws IOException {
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path, ".*.avro");
-        String fileName = files.size() > 0 ? files.get(0) : null;
-        if (fileName == null) {
-            throw new LedpException(LedpCode.LEDP_12003, new String[] { path });
-        }
-        return fileName;
-    }
-
-    private void execute(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
+    private void execute(RTSBulkScoringConfiguration rtsBulkScoringConfig, Iterator<GenericRecord> iterator,
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
             Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, long recordCount,
             Map<String, String> fieldNameMapping, boolean enrichmentEnabledForInternalAttributes,
@@ -574,7 +575,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         final AtomicLong counter = new AtomicLong(0);
 
         for (int i = 0; i < threadpoolSize; i++) {
-            futures.add(scoreExecutorService.submit(new BulkScoreApiCallable(rtsBulkScoringConfig, reader,
+            futures.add(scoreExecutorService.submit(new BulkScoreApiCallable(rtsBulkScoringConfig, iterator,
                     dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter, counter, recordCount,
                     fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching)));
         }
@@ -592,13 +593,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         try {
             scoreExecutorService.awaitTermination(threadPoolTimeoutMin, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
+            // ignore
+            log.error("Interrupted.");
         }
     }
 
     class BulkScoreApiCallable implements Callable<Integer> {
 
         private RTSBulkScoringConfiguration rtsBulkScoringConfig;
-        private FileReader<GenericRecord> reader;
+        private Iterator<GenericRecord> iterator;
         private DataFileWriter<GenericRecord> dataFileWriter;
         private GenericRecordBuilder builder;
         private Map<String, Schema.Type> leadEnrichmentAttributeMap;
@@ -610,7 +613,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         private boolean enrichmentEnabledForInternalAttributes;
         private boolean enableMatching;
 
-        BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
+        BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, Iterator<GenericRecord> iterator,
                 DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
                 Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, AtomicLong counter,
                 long recordCount, Map<String, String> fieldNameMapping, boolean enrichmentEnabledForInternalAttributes,
@@ -618,7 +621,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
             super();
             this.rtsBulkScoringConfig = rtsBulkScoringConfig;
-            this.reader = reader;
+            this.iterator = iterator;
             this.dataFileWriter = dataFileWriter;
             this.builder = builder;
             this.leadEnrichmentAttributeMap = leadEnrichmentAttributeMap;
@@ -634,10 +637,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         public Integer call() throws Exception {
             while (true) {
                 BulkRecordScoreRequest scoreRequest = null;
-                synchronized (reader) {
-                    scoreRequest = ScoringProcessor.this.getBulkScoreRequest(reader, rtsBulkScoringConfig);
-                    if (log.isDebugEnabled()) {
-                        log.debug("scoreRequest is " + scoreRequest);
+                synchronized (iterator) {
+                    scoreRequest = ScoringProcessor.this.getBulkScoreRequest(iterator, rtsBulkScoringConfig);
+                    if (log.isInfoEnabled()) {
+                        log.info("scoreRequest is " + scoreRequest);
                     }
                     if (scoreRequest == null) {
                         break;
@@ -654,6 +657,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
                 log.info(String.format("Scored %d out of %d total records",
                         counter.addAndGet(scoreRequest.getRecords().size()), recordCount));
+                // TODO ygao will delete this
+                if (scoreResponseList.size() != scoreRequest.getRecords().size()) {
+                    log.info("Not all records are scored for " + scoreRequest);
+                }
                 synchronized (dataFileWriter) {
                     ScoringProcessor.this.appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder,
                             leadEnrichmentAttributeMap, csvFilePrinter);

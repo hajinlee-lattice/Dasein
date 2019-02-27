@@ -27,15 +27,23 @@ import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
 import com.amazonaws.services.elasticmapreduce.model.Instance;
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleetModifyConfig;
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleetType;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupModifyConfig;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupType;
+import com.amazonaws.services.elasticmapreduce.model.InvalidRequestException;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
+import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsRequest;
+import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsResult;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceGroupsResult;
 import com.amazonaws.services.elasticmapreduce.model.ListInstancesRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
+import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceFleetRequest;
+import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceFleetResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsResult;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
@@ -133,35 +141,45 @@ public class EMRServiceImpl implements EMRService {
 
     @Override
     public InstanceGroup getTaskGroup(String clusterId) {
-        return getInstancekGroup(clusterId, InstanceGroupType.TASK);
+        return getInstanceGroup(clusterId, InstanceGroupType.TASK);
     }
 
     @Override
     public InstanceGroup getCoreGroup(String clusterId) {
-        return getInstancekGroup(clusterId, InstanceGroupType.CORE);
+        return getInstanceGroup(clusterId, InstanceGroupType.CORE);
     }
 
     @Override
-    public void scaleTaskGroup(String clusterId, int targetCount) {
-        if (targetCount > 0) {
-            InstanceGroup taskGrp = getTaskGroup(clusterId);
-            if (taskGrp != null) {
-                scaleTaskGroup(taskGrp, targetCount);
-            }
-        } else {
-            log.info("Illegal target count " + targetCount);
-        }
+    public InstanceFleet getTaskFleet(String clusterId) {
+        return getInstanceFleet(clusterId, InstanceFleetType.TASK);
     }
 
     @Override
-    public void scaleTaskGroup(InstanceGroup taskGrp, int targetCount) {
+    public InstanceFleet getCoreFleet(String clusterId) {
+        return getInstanceFleet(clusterId, InstanceFleetType.CORE);
+    }
+
+    @Override
+    public void scaleTaskGroup(String clusterId, InstanceGroup taskGrp, int targetCount) {
         AmazonElasticMapReduce emr = getEmr();
         InstanceGroupModifyConfig modifyConfig = new InstanceGroupModifyConfig()
                 .withInstanceGroupId(taskGrp.getId())
                 .withInstanceCount(targetCount);
         ModifyInstanceGroupsRequest request = //
-                new ModifyInstanceGroupsRequest().withInstanceGroups(modifyConfig);
+                new ModifyInstanceGroupsRequest().withClusterId(clusterId).withInstanceGroups(modifyConfig);
         ModifyInstanceGroupsResult result = emr.modifyInstanceGroups(request);
+        log.info("Sent emr scaling request, got response: " + result);
+    }
+
+    @Override
+    public void scaleTaskFleet(String clusterId, InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount) {
+        AmazonElasticMapReduce emr = getEmr();
+        InstanceFleetModifyConfig modifyConfig = new InstanceFleetModifyConfig()
+                .withInstanceFleetId(taskFleet.getId())
+                .withTargetOnDemandCapacity(targetOnDemandCount)
+                .withTargetSpotCapacity(targetSpotCount);
+        ModifyInstanceFleetRequest request = new ModifyInstanceFleetRequest().withClusterId(clusterId).withInstanceFleet(modifyConfig);
+        ModifyInstanceFleetResult result = emr.modifyInstanceFleet(request);
         log.info("Sent emr scaling request, got response: " + result);
     }
 
@@ -237,18 +255,51 @@ public class EMRServiceImpl implements EMRService {
         return cluster;
     }
 
-    private InstanceGroup getInstancekGroup(String clusterId, InstanceGroupType groupType) {
+    private InstanceGroup getInstanceGroup(String clusterId, InstanceGroupType groupType) {
         AmazonElasticMapReduce emr = getEmr();
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
-                Collections.singleton(NoSuchEntityException.class));
-        ListInstanceGroupsResult result = retryTemplate.execute(context -> {
-            ListInstanceGroupsRequest listGrpRequest = new ListInstanceGroupsRequest().withClusterId(clusterId);
-            return emr.listInstanceGroups(listGrpRequest);
-        });
-        return result.getInstanceGroups().stream() //
-                .filter(grp -> //
-                        grp.getRequestedInstanceCount() > 0 && groupType.name().equals(grp.getInstanceGroupType())) //
-                .findFirst().orElse(null);
+                Arrays.asList(NoSuchEntityException.class, InvalidRequestException.class));
+        try {
+            ListInstanceGroupsResult result = retryTemplate.execute(context -> {
+                ListInstanceGroupsRequest listGrpRequest = new ListInstanceGroupsRequest().withClusterId(clusterId);
+                return emr.listInstanceGroups(listGrpRequest);
+            });
+            return result.getInstanceGroups().stream() //
+                    .filter(grp -> //
+                            grp.getRequestedInstanceCount() > 0 && groupType.name().equals(grp.getInstanceGroupType())) //
+                    .findFirst().orElse(null);
+        } catch (InvalidRequestException e) {
+            if (e.getMessage().contains("mutually exclusive")) {
+                // it is an instance fleet cluster
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private InstanceFleet getInstanceFleet(String clusterId, InstanceFleetType fleetType) {
+        AmazonElasticMapReduce emr = getEmr();
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
+                Arrays.asList(NoSuchEntityException.class, InvalidRequestException.class));
+        try {
+            ListInstanceFleetsResult result = retryTemplate.execute(context -> {
+                ListInstanceFleetsRequest listGrpRequest = new ListInstanceFleetsRequest().withClusterId(clusterId);
+                return emr.listInstanceFleets(listGrpRequest);
+            });
+            return result.getInstanceFleets().stream() //
+                    .filter(grp -> //
+                            Math.max(grp.getTargetOnDemandCapacity(), grp.getTargetSpotCapacity()) > 0 //
+                                    && fleetType.name().equals(grp.getInstanceFleetType())) //
+                    .findFirst().orElse(null);
+        } catch (InvalidRequestException e) {
+            if (e.getMessage().contains("mutually exclusive")) {
+                // it is an instance group cluster
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
 }

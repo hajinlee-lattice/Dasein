@@ -1,8 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
-import javax.inject.Inject;
-
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;

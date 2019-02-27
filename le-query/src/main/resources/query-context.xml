@@ -21,7 +21,7 @@
         <property name="acquireIncrement" value="1"/>
         <property name="maxPoolSize" value="8"/>
         <property name="minPoolSize" value="1"/>
-        <property name="checkoutTimeout" value="60000"/>
+        <property name="checkoutTimeout" value="90000"/>
         <property name="maxIdleTime" value="30"/>
     </bean>
 

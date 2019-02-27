@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -25,7 +26,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private static final Logger log = LoggerFactory.getLogger(SetupTestInfrastructureTestNG.class);

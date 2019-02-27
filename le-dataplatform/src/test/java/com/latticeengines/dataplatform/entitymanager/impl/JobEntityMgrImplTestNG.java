@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -29,7 +28,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private ModelingJob modelingJob;
     private ModelDefinition modelDef = new ModelDefinition();
-    Model model = new Model();
+    private Model model = new Model();
 
     @Autowired
     protected JobEntityMgr jobEntityMgr;

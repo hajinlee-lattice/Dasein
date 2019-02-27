@@ -2,12 +2,10 @@ package com.latticeengines.pls.service;
 
 import java.io.InputStream;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface FileUploadService {
 

@@ -1,5 +1,5 @@
 angular.module('lp.notes', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.notes.DeleteNoteModal',
     'mainApp.models.services.ModelService'

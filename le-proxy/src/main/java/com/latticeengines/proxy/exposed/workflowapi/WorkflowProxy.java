@@ -10,10 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
@@ -214,6 +215,16 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         url += buildQueryString("jobId", jobIds);
         url = constructUrl(url);
         return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
+    }
+
+    public Integer getNonTerminalJobCount(@NotNull String customerSpace, List<String> types) {
+        Preconditions.checkNotNull(customerSpace);
+        String url = "/clusters/current/jobs/count?customerSpace=" + customerSpace;
+        if (CollectionUtils.isNotEmpty(types)) {
+            url += "&type=" + String.join(",", types);
+        }
+        url = constructUrl(url);
+        return get("getNonTerminalJobCount", url, Integer.class);
     }
 
     public List<Job> getWorkflowExecutionsByJobPids(List<String> jobIds, String customerSpace) {

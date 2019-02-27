@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,9 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -41,11 +44,19 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("cdlService")
 public class CDLServiceImpl implements CDLService {
 
     private static final Logger log = LoggerFactory.getLogger(CDLServiceImpl.class);
+
+    private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
+    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
+    private static final String PATHNAME = "N/A";
+    private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
+    private static final String DELETE_FAIL_TITLE = "Validation Error";
+    private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
 
     @Inject
     protected SourceFileService sourceFileService;
@@ -58,13 +69,16 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-    private static final String PATHNAME = "N/A";
-    private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
-    private static final String DELETE_FAIL_TITLE = "Validation Error";
-    public static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
+
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    @Value("${pls.pa.max.concurrent.limit}")
+    private int maxActivePA;
 
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
+        checkPALimit(customerSpace, request);
         return cdlProxy.processAnalyze(customerSpace, request);
     }
 
@@ -344,4 +358,51 @@ public class CDLServiceImpl implements CDLService {
         }
     }
 
+    /*
+     * Make sure the system is not busy
+     */
+    private void checkPALimit(String customerSpace, ProcessAnalyzeRequest request) {
+        if (StringUtils.isBlank(customerSpace) || request == null || StringUtils.isBlank(request.getUserId())) {
+            // don't fail anything if something is wrong, since this check is not critical
+            log.warn("Invalid parameter in checkPALimit. CustomerSpace={}, ProcessAnalyzeRequest={}", customerSpace,
+                    request);
+            return;
+        }
+        if (Boolean.TRUE.equals(request.getForceRun())) {
+            log.info("Skipping PA limit check when forceRun flag is set");
+            return;
+        }
+        String userId = request.getUserId();
+        if (!isInternalUser(userId)) {
+            log.debug("User({}) is not internal, skip PA limit check", userId);
+            return;
+        }
+
+        // make sure currently not-terminated PA jobs do not exceed limit
+        Integer nActivePA = workflowProxy.getNonTerminalJobCount(customerSpace, Collections.singletonList(PA_JOB_TYPE));
+        Preconditions.checkNotNull(nActivePA);
+        if (nActivePA >= maxActivePA) {
+            log.info(
+                    "There are {} non-terminal PA at the moment, cannot start another one. Limit = {}, internal user = {}",
+                    nActivePA, maxActivePA, userId);
+            throw new UIActionException(getSystemBusyUIAction(), LedpCode.LEDP_40054);
+        }
+    }
+
+    private UIAction getSystemBusyUIAction() {
+        UIAction action = new UIAction();
+        action.setView(View.Banner);
+        action.setTitle("");
+        action.setMessage(LedpCode.LEDP_40054.getMessage());
+        action.setStatus(Status.Error);
+        return action;
+    }
+
+    private boolean isInternalUser(String email) {
+        if (StringUtils.isBlank(email)) {
+            return false;
+        }
+
+        return email.trim().toUpperCase().endsWith(LATTICE_ENGINES_COM);
+    }
 }

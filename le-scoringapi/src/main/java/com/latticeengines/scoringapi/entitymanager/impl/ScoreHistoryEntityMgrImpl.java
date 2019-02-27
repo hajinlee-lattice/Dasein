@@ -1,23 +1,20 @@
 package com.latticeengines.scoringapi.entitymanager.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.firehose.FirehoseService;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
-import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRecordHistory;
@@ -30,19 +27,17 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(ScoreHistoryEntityMgrImpl.class);
 
-    private static final String FABRIC_SCORE_HISTORY = "FabricScoreHistory";
-
-    @Resource(name = "genericFabricMessageManager")
-    private GenericFabricMessageManager<ScoreRecordHistory> fabricEntityManager;
-
     @Value("${scoringapi.score.history.publish.enabled:false}")
     private boolean shouldPublish;
 
+    @Value("${scoringapi.score.history.delivery.stream.name}")
+    private String deliveryStreamName;
+
+    @Inject
+    private FirehoseService firehoseService;
+
     @PostConstruct
     public void init() {
-        if (shouldPublish) {
-            fabricEntityManager.createOrGetNamedBatchId(FABRIC_SCORE_HISTORY, null, false);
-        }
     }
 
     @Override
@@ -53,25 +48,19 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
         for (Record request : requests)
             requestMap.put(request.getRecordId(), request);
 
+        List<String> histories = new ArrayList<>();
         for (RecordScoreResponse response : responses) {
             ScoreRecordHistory scoreHistory = buildScoreHistory(tenantId, requestMap.get(response.getId()), response);
             log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "
                     + scoreHistory.getRecordId() + " latticeId " + scoreHistory.getLatticeId());
-            publishScoreHistory(scoreHistory);
+            histories.add(JsonUtils.serialize(scoreHistory));
         }
+        firehoseService.sendBatch(deliveryStreamName, histories);
     }
+
 
     private void publishScoreHistory(ScoreRecordHistory scoreHistory) {
-        GenericRecordRequest recordRequest = getGenericRequest();
-        recordRequest.setId(scoreHistory.getId());
-        fabricEntityManager.publishEntity(recordRequest, scoreHistory, ScoreRecordHistory.class);
-    }
-
-    private GenericRecordRequest getGenericRequest() {
-        GenericRecordRequest recordRequest = new GenericRecordRequest();
-        recordRequest.setStores(Arrays.asList(FabricStoreEnum.S3))
-                .setRepositories(Arrays.asList(FABRIC_SCORE_HISTORY)).setBatchId(FABRIC_SCORE_HISTORY);
-        return recordRequest;
+        firehoseService.send(deliveryStreamName, JsonUtils.serialize(scoreHistory));
     }
 
     @Override

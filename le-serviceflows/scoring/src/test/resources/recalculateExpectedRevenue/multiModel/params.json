@@ -1,0 +1,16 @@
+{
+  "recalculateExpectedRevenueParameters": {
+    "no_flink": false,
+    "input_table_name": "InputTable",
+    "expected_revenue_field_name": "ExpectedRevenue",
+    "percentile_field_name": "Score",
+    "predicted_revenue_percentile_field_name": "PredictedRevenuePercentile",
+    "original_score_field_map": {
+      "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz": "ExpectedRevenue"
+    },
+    "model_guid_field": "Model_GUID",
+    "fit_function_parameters_map": {
+      "ms__cbfbabb0-743b-4b7a-bb01-d12b2d029532-ai_btnmz": "{\n    \"ev\": {\n        \"alpha\": -80.38284301837075, \n        \"beta\": 267.3216400859408, \n        \"gamma\": 25.0, \n        \"maxRate\": 757.2290310578741, \n        \"version\": \"v2\"\n    }, \n    \"revenue\": {\n        \"alpha\": -36.11200826967415, \n        \"beta\": 174.34074995895384, \n        \"gamma\": 100, \n        \"maxRate\": 2057.8749609810993, \n        \"version\": \"v2\"\n    }, \n    \"probability\": {\n        \"alpha\": -229.07151039431125, \n        \"beta\": 1056.1946928457717, \n        \"gamma\": 100, \n        \"maxRate\": 0.38461538461538464, \n        \"version\": \"v2\"\n    }\n}"
+    }
+  }
+}

@@ -15,23 +15,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
+import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -72,9 +72,10 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         }
         log.info("Use artifact version=" + request.getArtifactVersion().name());
 
+        String targetPathSuffix = NamingUtils.timestamp(orphanRecordsType.getOrphanType());
         String targetPath = PathBuilder
                 .buildDataFileExportPath(podId, CustomerSpace.parse(customerSpace))
-                .append(NamingUtils.timestamp(orphanRecordsType.getOrphanType())).toString();
+                .append(targetPathSuffix).toString();
         log.info("Use targetPath=" + targetPath);
 
         DataCollectionArtifact artifact = new DataCollectionArtifact();
@@ -96,7 +97,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_TYPE, orphanRecordsType.name());
         inputProperties.put(OrphanRecordsExportWorkflowConfiguration.ARTIFACT_DISPLAY_NAME,
                 orphanRecordsType.getDisplayName());
-        inputProperties.put(ExportProperty.TARGET_FILE_NAME, orphanRecordsType.getOrphanType());
+        inputProperties.put(ExportProperty.TARGET_FILE_NAME, targetPathSuffix);
         log.info("InputProperties=" + JsonUtils.serialize(inputProperties));
 
         String transactionTableName = getTableName(TableRoleInCollection.ConsolidatedRawTransaction,

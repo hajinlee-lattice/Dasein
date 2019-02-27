@@ -1,5 +1,5 @@
 angular.module('mainApp.core.services.SessionService', [
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .service('SessionService', function (BrowserStorageUtility, ResourceUtility) {

@@ -89,7 +89,7 @@ public abstract class SegmentExportProcessor {
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
-    @Value("${playmaker.workflow.segment.pagesize:100}")
+    @Value("${playmaker.workflow.segment.pagesize:200}")
     protected long pageSize;
 
     @Value("${yarn.pls.url}")
@@ -141,7 +141,8 @@ public abstract class SegmentExportProcessor {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
 
             Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
-                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Account) //
+                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Account
+                            && InterfaceName.AccountId.equals(tuple.getMiddle())) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Account.name() + SEPARATOR + tuple.getMiddle());
@@ -178,7 +179,8 @@ public abstract class SegmentExportProcessor {
 
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
             exportType.getDefaultAttributeTuples().stream() //
-                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact) //
+                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact
+                            && InterfaceName.ContactId.equals(tuple.getMiddle())) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());

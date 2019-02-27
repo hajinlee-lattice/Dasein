@@ -35,8 +35,8 @@ public class HdfsFileHttpDownloaderUnitTestNG {
 
     private final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
     private final String[] EXPECTED_DATE_STRINGS = new String[] {
-            "11/06/2018 03:15:15 PM PST",
-            "11/06/2018 08:20:20 PM PST"
+            "11/06/2018 11:15:15 PM UTC",
+            "11/07/2018 04:20:20 AM UTC"
     };
 
     @BeforeClass(groups = "unit")

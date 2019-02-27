@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,8 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,15 +22,16 @@ import com.latticeengines.apps.cdl.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.apps.cdl.util.OAuthAccessTokenCache;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.DanteTalkingPointValue;
-import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.cdl.TalkingPoint;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
+import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -188,7 +188,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         try {
             List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
-                    .sorted((tp1, tp2) -> Integer.compare(tp1.getOffset(), tp2.getOffset()))
+                    .sorted(Comparator.comparingInt(TalkingPoint::getOffset))
                     .map(DanteTalkingPointValue::new).collect(Collectors.toList());
             return new TalkingPointPreview(dtps);
         } catch (Exception e) {

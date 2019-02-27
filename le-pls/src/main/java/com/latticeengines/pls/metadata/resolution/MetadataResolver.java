@@ -237,8 +237,22 @@ public class MetadataResolver {
                 knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
 
                 knownColumn.setMappedToLatticeField(true);
-                knownColumn.setDateFormatString(attribute.getDateFormatString());
-                knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                if (StringUtils.isEmpty(attribute.getDateFormatString())
+                        && StringUtils.isEmpty(attribute.getTimeFormatString())) {
+                    if (UserDefinedType.DATE.equals(knownColumn.getFieldType())) {
+                        List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
+                        MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+                        if (result != null) {
+                            knownColumn
+                                    .setDateFormatString(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
+                            knownColumn
+                                    .setTimeFormatString(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                        }
+                    }
+                } else {
+                    knownColumn.setDateFormatString(attribute.getDateFormatString());
+                    knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                }
                 knownColumn.setTimezone(attribute.getTimezone());
 
                 result.fieldMappings.add(knownColumn);
@@ -256,8 +270,22 @@ public class MetadataResolver {
                         knownColumn.setMappedField(attribute.getName());
                         knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                         knownColumn.setMappedToLatticeField(true);
-                        knownColumn.setDateFormatString(attribute.getDateFormatString());
-                        knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                        if (StringUtils.isEmpty(attribute.getDateFormatString())
+                                && StringUtils.isEmpty(attribute.getTimeFormatString())) {
+                            if (UserDefinedType.DATE.equals(knownColumn.getFieldType())) {
+                                List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
+                                MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+                                if (result != null) {
+                                    knownColumn.setDateFormatString(
+                                            TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
+                                    knownColumn.setTimeFormatString(
+                                            TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                                }
+                            }
+                        } else {
+                            knownColumn.setDateFormatString(attribute.getDateFormatString());
+                            knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                        }
                         knownColumn.setTimezone(attribute.getTimezone());
                         result.fieldMappings.add(knownColumn);
                         break;
@@ -308,6 +336,15 @@ public class MetadataResolver {
                     knownColumn.setUserField(header);
                     knownColumn.setMappedField(attribute.getName());
                     knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+                    if (UserDefinedType.DATE.equals(knownColumn.getFieldType())) {
+                        List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
+                        MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+                        if (result != null) {
+                            knownColumn.setDateFormatString(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
+                            knownColumn.setTimeFormatString(
+                                    TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                        }
+                    }
                     knownColumn.setMappedToLatticeField(true);
                     result.fieldMappings.add(knownColumn);
                     break;

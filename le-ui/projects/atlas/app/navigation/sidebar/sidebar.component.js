@@ -4,7 +4,7 @@ angular
     'lp.navigation.sidebar.model',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.services.FeatureFlagService',
+    'common.services.featureflag',
     'common.datacloud'
 ])
 .controller('SidebarController', function($rootScope, $stateParams, $transitions) {
@@ -217,7 +217,7 @@ angular
                         return store.state.includes('home.connectors') && !store.isTransitingFrom(['home.connectors']);
                     },
                     sref: "home.connectors",
-                    label: !store.showCdlEnabledPage ? ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC") : "Application Settings",
+                    label: !store.showCdlEnabledPage ? ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC") : "Connections",
                     icon: "ico-connectors ico-light-gray"
                 },{
                     if: store.showApiConsole && !store.showCdlEnabledPage,

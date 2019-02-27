@@ -1,5 +1,5 @@
 angular.module('common.datacloud.query.results', [
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.utilities.browserstorage'
 ])
 .controller('QueryResultsCtrl', function(
     $q, $scope, $state, $stateParams, $filter, $rootScope, $timeout, 
@@ -34,7 +34,7 @@ angular.module('common.datacloud.query.results', [
             updateOn: 'default blur',
             debounce: 1500
         },
-        accountsCoverage: AccountsCoverage.ratingModelsCoverageMap,
+        accountsCoverage: AccountsCoverage ? AccountsCoverage.ratingModelsCoverageMap : null,
 
         excludeNonSalesForce: false,
         sortType: 'CompanyName',
@@ -65,19 +65,6 @@ angular.module('common.datacloud.query.results', [
             vm.showErrorApi = !vm.isEmpty(AccountsCoverage.errorMap);
             vm.selectedBuckets = [];
             if (vm.section === 'wizard.targets') {
-                // var bucketsToLaunch = (PlaybookWizardStore.currentPlay && 
-                //                         PlaybookWizardStore.currentPlay.launchHistory && 
-                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch && 
-                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch ? 
-                //                         PlaybookWizardStore.currentPlay.launchHistory.mostRecentLaunch.bucketsToLaunch : []);
-                
-                // Get sum of non-suppressed buckets to calculate percentage for each bucket
-                // **Removed for below code**
-                // var numAccounts = 0;
-                // for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
-                //     numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
-                // }
-                
                 // Now instead we get sum of scored and unscored accounts
                 var unscoredAccountCount = vm.accountsCoverage ? vm.accountsCoverage.unscoredAccountCount : 0;
                 var accountCount = vm.accountsCoverage ? vm.accountsCoverage.accountCount : 0;
@@ -273,144 +260,167 @@ angular.module('common.datacloud.query.results', [
                     });
                 } else {
                     var accountQuery = {
-                        "preexisting_segment_name": data.targetSegment.name,
-                        "lookups": [{
-                                "attribute": {
-                                    "entity": "Account",
-                                    "attribute": "AccountId"
+                            "free_form_text_search": vm.search || '',
+                            "preexisting_segment_name": data.targetSegment.name,
+                            "lookups": [{
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "AccountId"
+                                    }
+                                },{
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "LDC_Name"
+                                    }
+                                },{
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "CompanyName"
+                                    }
+                                }, {
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "Website"
+                                    }
                                 }
-                            },{
-                                "attribute": {
-                                    "entity": "Account",
-                                    "attribute": "LDC_Name"
-                                }
-                            },{
-                                "attribute": {
-                                    "entity": "Account",
-                                    "attribute": "CompanyName"
-                                }
-                            }, {
-                                "attribute": {
-                                    "entity": "Account",
-                                    "attribute": "Website"
-                                }
+                            ],
+                            "page_filter": {
+                                "num_rows": vm.pagesize,
+                                "row_offset": offset
                             }
-                        ],
-                        "page_filter": {
-                            "num_rows": vm.pagesize,
-                            "row_offset": offset
-                        }
-                    };
-                    var _accountQuery = angular.copy(accountQuery);
+                        };
                     
-                    PlaybookWizardStore.getAccountsDataCount(_accountQuery).then(function(count) { 
-                        vm.counts.accounts.value = count;
-                        PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 
-                            PlaybookWizardStore.setTargetData(results.data);
-                            vm.accounts = PlaybookWizardStore.getTargetData();
-                            vm.bypassBuckets = true;
-                        });
+                    PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 
+                        PlaybookWizardStore.setTargetData(results.data);
+                        vm.accounts = PlaybookWizardStore.getTargetData();
+                        vm.bypassBuckets = true;
                     });
-
                 }
 
                 // Get Account Counts for Pagination
                 if (!vm.search) {
-                    PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                        vm.noBuckets = [{
-                            bucket: 'A',
-                            count: 0,
-                        },{
-                            bucket: 'B',
-                            count: 0,
-                        },{
-                            bucket: 'C',
-                            count: 0,
-                        },{
-                            bucket: 'D',
-                            count: 0,
-                        },{
-                            bucket: 'E',
-                            count: 0,
-                        },{
-                            bucket: 'F',
-                            count: 0,
-                        }];
-                        var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : {bucketCoverageCounts: []});
-                        
-                        var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
-                              return vm.selectedBuckets.indexOf(bucket.bucket) >= 0; 
-                            });
+                    vm.noBuckets = [{
+                        bucket: 'A',
+                        count: 0,
+                    },{
+                        bucket: 'B',
+                        count: 0,
+                    },{
+                        bucket: 'C',
+                        count: 0,
+                    },{
+                        bucket: 'D',
+                        count: 0,
+                    },{
+                        bucket: 'E',
+                        count: 0,
+                    },{
+                        bucket: 'F',
+                        count: 0,
+                    }];
+                    if(engineIdObject.length) {
+                        PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
 
-                        var calculateCountsFromFiltered = function(array) {
-                            var accounts = 0,
-                                count;
-                            for (var i = 0; i < array.length; i++) {
-                                accounts += filteredAccountsCoverage[i].count;
-                            }
-                            count = accounts;
-                            return count;
-                        };
+                            var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : {bucketCoverageCounts: []});
+                            
+                            var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
+                                  return vm.selectedBuckets.indexOf(bucket.bucket) >= 0; 
+                                });
 
-                        if (vm.section === 'create.targets' || vm.section === 'dashboard.targets') {
-                            if(!vm.bypassBuckets) {
+                            var calculateCountsFromFiltered = function(array) {
+                                var accounts = 0,
+                                    count;
+                                for (var i = 0; i < array.length; i++) {
+                                    accounts += filteredAccountsCoverage[i].count;
+                                }
+                                count = accounts;
+                                return count;
+                            };
+
+                            if (vm.section === 'create.targets' || vm.section === 'dashboard.targets') {
+                                if(!vm.bypassBuckets) {
+                                    vm.counts = { 
+                                        accounts: { 
+                                            value: calculateCountsFromFiltered(filteredAccountsCoverage) 
+                                        },
+                                        contacts: {
+                                            value: (vm.accountsCoverage && vm.accountsCoverage.contactCount ? vm.accountsCoverage.contactCount : 0)
+                                        }
+                                    };
+                                }
+                            } else {
+                                let accountValue = calculateCountsFromFiltered(filteredAccountsCoverage);
+                                let contactsValue = vm.accountsCoverage ? vm.accountsCoverage.contactCount : 0;
                                 vm.counts = { 
                                     accounts: { 
-                                        value: calculateCountsFromFiltered(filteredAccountsCoverage) 
+                                        value: accountValue
                                     },
                                     contacts: {
-                                        value: (vm.accountsCoverage && vm.accountsCoverage.contactCount ? vm.accountsCoverage.contactCount : 0)
+                                        value: contactsValue
                                     }
                                 };
                             }
-                        } else {
-                            let accountValue = calculateCountsFromFiltered(filteredAccountsCoverage);
-                            let contactsValue = vm.accountsCoverage ? vm.accountsCoverage.contactCount : 0;
-                            vm.counts = { 
-                                accounts: { 
-                                    value: accountValue
-                                },
-                                contacts: {
-                                    value: contactsValue
-                                }
-                            };
-                        }
-                        
-                        if(vm.counts.accounts.value > 10){
-                            vm.showAccountPagination = true;
-                            vm.showContactPagination = false;
-                        }
+                            
+                            if(vm.counts.accounts.value > 10){
+                                vm.showAccountPagination = true;
+                                vm.showContactPagination = false;
+                            }
 
-                        if (vm.section == 'wizard.targets' && vm.selectedBuckets.length == 0) {
-                            vm.showAccountPagination = false;
-                        }
+                            if (vm.section == 'wizard.targets' && vm.selectedBuckets.length == 0) {
+                                vm.showAccountPagination = false;
+                            }
 
-                        //only sets topNCount here if coming in for the first time
-                        // if(vm.topNCount == null){
-                        //     vm.topNCount = vm.recommendationCounts.selected;
-                        //     PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
-                        // }
-                        vm.updateTopNCount();
-                    });
-                } else if (vm.search) { 
-                    var countsQuery = { 
-                            freeFormTextSearch: vm.search || '',
-                            restrictNotNullSalesforceId: vm.excludeNonSalesForce,
-                            entityType: 'Account',
-                            selectedBuckets: vm.selectedBuckets
+                            //only sets topNCount here if coming in for the first time
+                            // if(vm.topNCount == null){
+                            //     vm.topNCount = vm.recommendationCounts.selected;
+                            //     PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0) || vm.launchUnscored);
+                            // }
+                            vm.updateTopNCount();
+                        });
+                    } else { // no rating engine
+                        var countsQuery = {
+                            "preexisting_segment_name": data.targetSegment.name,
                         };
 
-                    PlaybookWizardService.getTargetCount(engineId, countsQuery).then(function(data) {
-                        vm.counts.accounts.value = data;
-                        
-                        vm.showAccountPagination = vm.counts.accounts.value > 10;
-                        vm.showContactPagination = false;
+                        PlaybookWizardStore.getAccountsCount(countsQuery).then(function(data) {
+                            vm.counts = {
+                                accounts: {
+                                    value: data
+                                }
+                            };
+                        });
+                    }
+                } else if (vm.search) { 
+                    if(engineId) {
+                        var countsQuery = { 
+                                freeFormTextSearch: vm.search || '',
+                                restrictNotNullSalesforceId: vm.excludeNonSalesForce,
+                                entityType: 'Account',
+                                selectedBuckets: vm.selectedBuckets
+                            };
 
-                        if (vm.section == 'wizard.targets' && vm.selectedBuckets.length == 0) {
-                            vm.counts.accounts.value = 0;
-                            vm.showAccountPagination = false;
-                        }
-                    });
+                        PlaybookWizardService.getTargetCount(engineId, countsQuery).then(function(data) {
+                            vm.counts.accounts.value = data;
+                            
+                            vm.showAccountPagination = vm.counts.accounts.value > 10;
+                            vm.showContactPagination = false;
+
+                            if (vm.section == 'wizard.targets' && vm.selectedBuckets.length == 0) {
+                                vm.counts.accounts.value = 0;
+                                vm.showAccountPagination = false;
+                            }
+                        });
+                    } else {
+                        var countsQuery = {
+                            "free_form_text_search": vm.search,
+                            "preexisting_segment_name": data.targetSegment.name,
+                        };
+
+                        PlaybookWizardStore.getAccountsCount(countsQuery).then(function(data) {
+                            vm.counts.accounts.value = data;
+                            vm.showAccountPagination = vm.counts.accounts.value > 10;
+                        });
+                    }
                 }
 
                 PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);

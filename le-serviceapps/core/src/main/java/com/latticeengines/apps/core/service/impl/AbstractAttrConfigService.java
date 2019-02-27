@@ -140,7 +140,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 // updated for all tenants
                 long defaultWebsiteKeywords = 200L;
                 try {
-                    defaultWebsiteKeywords = (long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                    defaultWebsiteKeywords = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
                             MultiTenantContext.getShortTenantId(), DataLicense.WEBSITEKEYWORDS.getDataLicense());
                 } catch (Exception e) {
                     log.warn("Error getting the limit for website keyword " + MultiTenantContext.getTenant().getId());
@@ -534,8 +534,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return result;
     }
 
+    @Override
     public void removeAttrConfig(String tenantId) {
         attrConfigEntityMgr.cleanupTenant(tenantId);
+    }
+
+    public void removeAttrConfigForEntity(String tenantId, BusinessEntity entity) {
+        attrConfigEntityMgr.deleteAllForEntity(tenantId, entity);
     }
 
     @SuppressWarnings("unchecked")
@@ -560,10 +565,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     renderedAttrNames.remove(metadata.getAttrName());
                 }
                 continue;
-            }
-
-            if ("HG_ASTEA_0275690354".equals(metadata.getAttrName())) {
-                System.out.println("Stop here");
             }
 
             AttrSpecification attrSpec = AttrSpecification.getAttrSpecification(type, subType, metadata.getEntity());

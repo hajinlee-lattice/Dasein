@@ -4,9 +4,7 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import com.latticeengines.sqoop.util.YarnConfigurationUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +15,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
+import com.latticeengines.sqoop.util.YarnConfigurationUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

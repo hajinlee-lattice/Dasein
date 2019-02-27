@@ -127,6 +127,15 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
+    // By default LAST operator users day period unlike other operators.
+    public static TimeFilter last(int val, String period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.LAST;
+        filter.period = period != null ? period : PeriodStrategy.Template.Day.name();
+        filter.values = Collections.singletonList(val);
+        return filter;
+    }
+
     public ComparisonType getRelation() {
         return relation;
     }

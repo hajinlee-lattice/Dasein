@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,25 +36,25 @@ import com.latticeengines.pls.repository.reader.ScoringRequestConfigReaderReposi
 @Component("scoringRequestConfigEntityMgr")
 public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrRepositoryImpl<ScoringRequestConfig, Long>  implements ScoringRequestConfigEntityManager {
     private static Logger LOG = Logger.getLogger(ScoringRequestConfigEntityManagerImpl.class);
-    
+
     private static final String SCORING_REQUEST_CONFIG_ID_PREFIX = "src";
     private static final String SCORING_REQUEST_CONFIG_ID_FORMAT = "%s__%s";
-    
+
     @Inject
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
-    
+
     @Inject
     private ScoringRequestConfigDao scoringRequestConfigDao;
-    
+
     @Inject
     private ScoringRequestConfigReaderRepository scoringRequestReadRepository;
-    
+
     @Inject
     private MarketoScoringMatchFieldEntityMgr marketoScoringMatchFieldEntityMgr;
-    
+
     @Inject
     private TenantEntityMgr tenantEntityMgr;
-    
+
     @Override
     public BaseJpaRepository<ScoringRequestConfig, Long> getRepository() {
         return scoringRequestReadRepository;
@@ -80,7 +79,7 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
         }
         preprocessCreate(scoringRequestConfig);
         scoringRequestConfig.getMarketoScoringMatchFields()
-                .forEach(matchField -> { 
+                .forEach(matchField -> {
                         matchField.setScoringRequestConfig(scoringRequestConfig);
                         matchField.setTenant(scoringRequestConfig.getTenant());
                     });
@@ -90,10 +89,9 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
     private String generateRequestConfigId() {
         return String.format(SCORING_REQUEST_CONFIG_ID_FORMAT, SCORING_REQUEST_CONFIG_ID_PREFIX, UUID.randomUUID().toString());
     }
-    
+
     private void preprocessCreate(ScoringRequestConfig scoringRequestConfig) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         scoringRequestConfig.setTenant(tenant);
         scoringRequestConfig.setConfigId(generateRequestConfigId());
     }
@@ -115,7 +113,7 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
     public ScoringRequestConfig findByConfigId(Long credentialPid, String configId) {
         return scoringRequestReadRepository.findByMarketoCredentialPidAndConfigId(credentialPid, configId);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(ScoringRequestConfig scoringRequestConfig) {
@@ -125,13 +123,13 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
             LOG.warn(String.format("Could not retrieve ScoringRequestConfig: %s, for Tenant: %s", scoringRequestConfig, MultiTenantContext.getTenant()));
             throw new LedpException(LedpCode.LEDP_18194, new String[] {scoringRequestConfig.getConfigId()});
         }
-        
+
         //Handle FieldMappings
         Map<String, MarketoScoringMatchField> updatedFieldMappings = scoringRequestConfig.getMarketoScoringMatchFields()
                 .stream()
                 .collect(Collectors.toMap(MarketoScoringMatchField::getModelFieldName, matchField -> matchField));
         List<MarketoScoringMatchField> removedMappings = new ArrayList<>();
-        
+
         // Update the existing mappings and remove the fields if they are not available in new collection
         Iterator<MarketoScoringMatchField> matchFieldIter = existingConfig.getMarketoScoringMatchFields().iterator();
         while (matchFieldIter.hasNext()) {
@@ -146,8 +144,8 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
             }
         }
         // Add any new mappings that are newly selected
-        updatedFieldMappings.values().forEach(matchField -> existingConfig.addMarketoScoringMatchField(matchField));
-        
+        updatedFieldMappings.values().forEach(existingConfig::addMarketoScoringMatchField);
+
         marketoScoringMatchFieldEntityMgr.deleteFields(removedMappings);
         super.update(existingConfig);
     }

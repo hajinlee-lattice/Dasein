@@ -318,7 +318,7 @@ public class RatingEngineResource {
         return res;
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
     @Deprecated
@@ -329,7 +329,7 @@ public class RatingEngineResource {
         return ratingEngineProxy.getIterationAttributes(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
     }
 
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
     public List<ColumnMetadata> getIterationMetadata(@PathVariable String ratingEngineId,
@@ -453,10 +453,11 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Return a the number of results for the modelingquerytype corresponding to the given rating engine, rating model")
     public Long getModelingQueryCount(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
+            @RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryCountByRatingId(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType);
+        return ratingEngineProxy.getModelingQueryCountByRating(tenant.getId(), ratingEngineId, ratingModelId,
+                modelingQueryType, ratingEngine);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery")
@@ -474,18 +475,17 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Return a the number of results for the modelingquerytype corresponding to the given rating engine, rating model")
     public Long getModelingQueryCountByRatingId(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
-            @RequestBody RatingEngine ratingEngine) {
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryCountByRating(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType, ratingEngine);
+        return ratingEngineProxy.getModelingQueryCountByRatingId(tenant.getId(), ratingEngineId, ratingModelId,
+                modelingQueryType);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model")
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestBody(required = false) Map<String, List<ColumnMetadata>> attributes) {
+            @RequestBody(required = false) List<ColumnMetadata> attributes) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes,

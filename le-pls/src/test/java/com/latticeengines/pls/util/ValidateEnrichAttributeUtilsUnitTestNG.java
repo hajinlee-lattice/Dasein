@@ -1,7 +1,6 @@
 package com.latticeengines.pls.util;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
@@ -18,19 +17,19 @@ public class ValidateEnrichAttributeUtilsUnitTestNG {
         try {
             ValidateEnrichAttributesUtils.validateEnrichAttributes(str2);
             fail("should have thrown exception");
-        } catch (Exception e) {
+        } catch (Exception expected) {
             // ignore
         }
 //        try {
 //            ValidateEnrichAttributesUtils.validateEnrichAttributes(str3);
 //            fail("should have thrown exception");
-//        } catch (Exception e) {
+//        } catch (Exception expected) {
 //            // ignore
 //        }
         try {
             ValidateEnrichAttributesUtils.validateEnrichAttributes(str4);
             fail("should have thrown exception");
-        } catch (Exception e) {
+        } catch (Exception expected) {
             // ignore
         }
     }

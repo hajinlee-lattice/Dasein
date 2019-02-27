@@ -1,4 +1,4 @@
-angular.module('mainApp.core.utilities.BrowserStorageUtility', [])                                                                                                                                                                        
+angular.module('common.utilities.browserstorage', [])                                                                                                                                                                        
 .service('BrowserStorageUtility', function () {
     
     this.CacheTimeout = 28800000; // 8 hours in Milliseconds

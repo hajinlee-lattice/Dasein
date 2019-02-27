@@ -1,5 +1,9 @@
 package com.latticeengines.pls.end2end;
 
+import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,7 +18,6 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
@@ -55,23 +58,11 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
-import com.latticeengines.pls.service.CDLService;
-import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.service.ModelingFileMetadataService;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
 
 public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
@@ -88,9 +79,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
-    private SourceFile missingAccountFile;
-
-    List<S3ImportTemplateDisplay> templates = null;
+    private List<S3ImportTemplateDisplay> templates = null;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -159,10 +148,10 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
 
         String dateFormatString1 = "DD/MM/YYYY";
         String timeFormatString1 = null;
-        String timezone1 = "UTC-5     America/New York, America/Lima";
+        String timezone1 = "America/New_York";
         String dateFormatString2 = "MM.DD.YY";
         String timeFormatString2 = "00:00:00 24H";
-        String timezone2 = "UTC+8     Asia/Shanghai, Australia/Perth";
+        String timezone2 = "Asia/Shanghai";
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (mapping.getUserField().equals("TestDate1")) {
                 mapping.setFieldType(UserDefinedType.DATE);
@@ -197,13 +186,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
         String avroFileName = accountFile.getName().substring(0,
                 accountFile.getName().lastIndexOf("."));
-        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file -> {
-            if (!file.isDirectory() && file.getPath().toString().contains(avroFileName)
-                    && file.getPath().getName().endsWith("avro")) {
-                return true;
-            }
-            return false;
-        });
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file ->
+                !file.isDirectory() && file.getPath().toString().contains(avroFileName)
+                && file.getPath().getName().endsWith("avro"));
         Assert.assertEquals(avroFiles.size(), 1);
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
@@ -308,6 +293,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         List<Object> listObj = restTemplate.getForObject( //
                 String.format("%s/pls/jobs", getRestAPIHostPort()), List.class);
         List<Job> jobs = JsonUtils.convertList(listObj, Job.class);
+        Assert.assertNotNull(jobs);
         log.info(String.format("jobs are %s", Arrays.toString(jobs.toArray())));
         Assert.assertTrue(jobs.size() >= 1);
     }
@@ -394,13 +380,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
         String avroFileName = baseTransactionFile.getName().substring(0,
                 baseTransactionFile.getName().lastIndexOf("."));
-        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file -> {
-            if (!file.isDirectory() && file.getPath().toString().contains(avroFileName)
-                    && file.getPath().getName().endsWith("avro")) {
-                return true;
-            }
-            return false;
-        });
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file ->
+                !file.isDirectory() && file.getPath().toString().contains(avroFileName)
+                && file.getPath().getName().endsWith("avro"));
         Assert.assertEquals(avroFiles.size(), 1);
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
@@ -443,7 +425,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
 
     @Test(groups = "deployment", dependsOnMethods = "verifyBase")
     public void verifyColumnMissing() {
-        missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
+        SourceFile missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(missingAccountFile);
         startCDLImport(missingAccountFile, ENTITY_ACCOUNT);
         accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX,
@@ -587,7 +569,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
         String taskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, entity,
                 entity + FEED_TYPE_SUFFIX, subType, entityType.getDisplayName());
-        ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId,
+        ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace, taskId,
                 sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
@@ -598,9 +580,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SOURCE,
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
                 entity + FEED_TYPE_SUFFIX);
-        ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace.toString(),
+        ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace,
                 dataFeedTask.getUniqueId(), sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);

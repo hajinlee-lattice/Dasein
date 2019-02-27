@@ -159,7 +159,7 @@ angular.module('lp.import.calendar', [])
                 Modal.warning({
                     name: 'calendar_warning',
                     title: "Business Calendar",
-                    message: 'The <strong>Custom</strong> Calendar will be used to build accurate time based analytics through out the tenant.',
+                    message: 'The <strong>Custom</strong> Calendar will be updated throughout the product, including imported data.',
                     confirmtext: "Yes, Update"
                 }, vm.modalCallback);
             }
@@ -170,7 +170,7 @@ angular.module('lp.import.calendar', [])
         Modal.warning({
             name: 'standard_calendar_warning',
             title: "Standard Calendar",
-            message: 'The <strong>Standard</strong> Calendar will be used to build accurate time based analytics through out the tenant.',
+            message: 'The <strong>Standard</strong> Calendar will be updated throughout the tenant, including imported data.',
             confirmtext: "Yes, Update"
         }, vm.modalCallbackStandardCalendar);
     }
@@ -283,9 +283,17 @@ angular.module('lp.import.calendar', [])
     vm.init = function() {
         var calendarInfo = ImportWizardStore.getCalendarInfo(Calendar),
             start_date = DateRange[0],
-            end_date = DateRange[1];
+            end_date = DateRange[1],
+            bannerMessage = '';
+
+        if(calendarInfo.mode !== 'NONE') {
+            bannerMessage = `This tenant is currently using the <strong> ${calendarInfo.modeDisplayName} Mode</strong>. The year starts on <strong>${start_date}</strong> and ends on <strong>${end_date}</strong>.`;
+        } else {
+            bannerMessage = `This tenant does not have a calendar configured.`;
+        }
+
         Banner.info({
-            message: `This tenant is currently using the <strong> ${calendarInfo.modeDisplayName} Mode</strong>. The year starts on <strong>${start_date}</strong> and ends on <strong>${end_date}</strong>.`
+            message: bannerMessage
         });
 
         parseCalendar(vm.calendar);

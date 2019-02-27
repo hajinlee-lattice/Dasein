@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -15,7 +16,6 @@ import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.Oauth2AccessTokenDao;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("oauth2AccessTokenEntityMgr")
 public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2AccessToken>

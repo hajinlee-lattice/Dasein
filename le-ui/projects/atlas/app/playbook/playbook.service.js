@@ -21,6 +21,20 @@ angular.module('lp.playbook')
     this.audienceId = null;
     this.excludeItems = false;
 
+    this.getCoverageMap = (obj) => {
+        var ret = {
+            errorMap : {},
+            ratingModelsCoverageMap : {
+                accountCount: 0,
+                unscoredAccountCount: obj.accounts,
+                contactCount: 0,
+                unscoredContactCount: obj.contacts,
+                bucketCoverageCounts: []
+            }
+        }
+         return ret;  
+    }
+
     this.init = function() {
 
         this.settings = {};
@@ -773,24 +787,15 @@ angular.module('lp.playbook')
         return this.launchUnscored;
     }
 
-    this.getAccountsDataCount = function(query) {
+    this.getAccountsCount = function(query) {
         if(query && query.page_filter) {
             delete query.page_filter;
         }
-        var deferred = $q.defer(),
-            accountsDataCount = PlaybookWizardStore.accountsDataCount;
+        var deferred = $q.defer();
 
-        if(accountsDataCount) {
-            deferred.resolve(accountsDataCount);
-        } else {
-            PlaybookWizardService.getAccountsData(query).then(function(results){
-                PlaybookWizardStore.setAccountsDataCount(results.data.length);
-                deferred.resolve(results.data.length);
-            });
-        }
-        // PlaybookWizardService.getAccountsCount(query).then(function(results){
-        //     console.log(results);
-        // });
+        PlaybookWizardService.getAccountsCount(query).then(function(result){
+            deferred.resolve(result);
+        });
         return deferred.promise;
     }
 
@@ -951,12 +956,9 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    var canceler = $q.defer();
-
     this.playLaunches = function(params) {
 
-        canceler.resolve("cancelled");
-        canceler = $q.defer();
+        var deferred = $q.defer();
 
         $http({
             method: 'GET',
@@ -965,17 +967,17 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                canceler.resolve(result);
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                canceler.reject(errorMsg);
+                deferred.reject(errorMsg);
             }
         );
-        return canceler.promise;
+        return deferred.promise;
     }
 
     this.launchPlay = function(play, opts) {
@@ -1195,7 +1197,7 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         $http({
             method: 'POST',
-            url: this.host + '/entities/counts',
+            url: this.host + '/accounts/count',
             data: query
         }).then(function(response){
             deferred.resolve(response.data);

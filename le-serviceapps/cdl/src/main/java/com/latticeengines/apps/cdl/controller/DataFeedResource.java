@@ -1,8 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.List;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/datafeeds")
 public class DataFeedResource {
 
-    @Autowired
+    @Inject
     private DataFeedService datafeedService;
 
     @PostMapping(value = "/{datafeedName}/jobtype/{jobType}startexecution", headers = "Accept=application/json")
