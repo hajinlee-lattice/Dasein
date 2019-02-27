@@ -1,10 +1,10 @@
 package com.latticeengines.apps.lp.dao;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-
-import java.util.List;
 
 public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 

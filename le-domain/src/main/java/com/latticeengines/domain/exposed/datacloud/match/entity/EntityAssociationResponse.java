@@ -1,11 +1,11 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.security.Tenant;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Response class for entity association.

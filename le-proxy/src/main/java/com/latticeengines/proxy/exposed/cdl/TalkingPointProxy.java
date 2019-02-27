@@ -1,8 +1,11 @@
 package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.util.List;
+
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -10,7 +13,7 @@ import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
-import com.latticeengines.security.exposed.serviceruntime.exception.PostResponseErrorHandler;;
+import com.latticeengines.security.exposed.serviceruntime.exception.PostResponseErrorHandler;
 
 @Component("talkingPointProxy")
 public class TalkingPointProxy extends MicroserviceRestApiProxy implements ProxyInterface {

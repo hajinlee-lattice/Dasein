@@ -1,9 +1,10 @@
 package com.latticeengines.workflowapi.flows.testflows.framework.sampletests;
 
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 // Example of single step that could be tested with the framework.
 @Component("sampleStepToTest")

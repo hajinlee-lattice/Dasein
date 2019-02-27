@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.cdl;
 
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 @Component("cdlAttrConfigProxy")

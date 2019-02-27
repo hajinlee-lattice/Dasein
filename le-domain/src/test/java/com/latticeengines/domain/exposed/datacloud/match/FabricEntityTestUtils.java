@@ -1,5 +1,11 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+
 import org.apache.avro.Schema;
 import org.apache.avro.file.BZip2Codec;
 import org.apache.avro.file.Codec;
@@ -14,16 +20,10 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.xerial.snappy.Snappy;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-
-public class FabricEntityTestUtils {
+class FabricEntityTestUtils {
     private static final Codec codec = new BZip2Codec();
 
-    public static GenericRecord bytesToAvro(byte[] bytes, Schema schema, boolean compression, CompressAlgo algo) {
+    static GenericRecord bytesToAvro(byte[] bytes, Schema schema, boolean compression, CompressAlgo algo) {
         try {
             byte[] decompressed;
             if (CompressAlgo.SNAPPY.equals(algo)) {
@@ -42,7 +42,7 @@ public class FabricEntityTestUtils {
         }
     }
 
-    public static ByteBuffer avroToBytes(GenericRecord record, boolean compression, CompressAlgo algo) {
+    static ByteBuffer avroToBytes(GenericRecord record, boolean compression, CompressAlgo algo) {
         Schema schema = record.getSchema();
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);

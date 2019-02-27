@@ -1,13 +1,14 @@
 package com.latticeengines.workflowapi.flows.testflows.framework;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 // Configuration file for wrapper workflow that runs the step or workflow under test.
 public class TestFrameworkWrapperWorkflowConfiguration extends WorkflowConfiguration {

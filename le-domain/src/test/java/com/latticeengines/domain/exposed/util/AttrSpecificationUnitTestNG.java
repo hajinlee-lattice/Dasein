@@ -1,8 +1,9 @@
 package com.latticeengines.domain.exposed.util;
 
-import com.latticeengines.domain.exposed.serviceapps.core.AttrSpecification;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.serviceapps.core.AttrSpecification;
 
 public class AttrSpecificationUnitTestNG {
 

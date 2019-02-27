@@ -3,10 +3,12 @@ package com.latticeengines.metadata.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
@@ -14,7 +16,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.ArtifactService;
 import com.latticeengines.metadata.service.ModuleService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ModuleEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 

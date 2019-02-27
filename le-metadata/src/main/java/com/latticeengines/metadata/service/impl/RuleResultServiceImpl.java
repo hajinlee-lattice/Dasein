@@ -2,9 +2,11 @@ package com.latticeengines.metadata.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.modelreview.BaseRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
@@ -12,18 +14,17 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.ColumnRuleResultEntityMgr;
 import com.latticeengines.metadata.entitymgr.RowRuleResultEntityMgr;
 import com.latticeengines.metadata.service.RuleResultService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("ruleResultService")
 public class RuleResultServiceImpl implements RuleResultService {
 
-    @Autowired
+    @Inject
     private ColumnRuleResultEntityMgr columnRuleResultEntityMgr;
 
-    @Autowired
+    @Inject
     private RowRuleResultEntityMgr rowRuleResultEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override

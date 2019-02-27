@@ -1,13 +1,12 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,7 +32,7 @@ public class CleanupAllServiceUnitTestNG {
     private CleanupAllService cleanupAllService;
 
     @BeforeClass(groups = "unit")
-    private void setup() throws IOException {
+    private void setup() {
         MockitoAnnotations.initMocks(this);
     }
 

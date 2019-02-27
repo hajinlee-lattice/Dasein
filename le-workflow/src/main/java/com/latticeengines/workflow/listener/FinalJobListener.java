@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.listener;
 
-import com.latticeengines.workflow.exposed.service.JobCacheService;
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -12,9 +13,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-
-import java.util.Collections;
 
 @Component("finalJobListener")
 public class FinalJobListener extends LEJobListener implements LEJobCallerRegister {

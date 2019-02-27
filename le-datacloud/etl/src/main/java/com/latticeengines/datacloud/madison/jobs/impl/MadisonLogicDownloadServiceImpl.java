@@ -1,11 +1,10 @@
 package com.latticeengines.datacloud.madison.jobs.impl;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -20,10 +19,10 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements co
 
     private PropDataMadisonService propDataMadisonService;
     private boolean propdataJobsEnabled = false;
-    
+
     @SuppressWarnings("unused")
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext context) {
 
         long startTime = System.currentTimeMillis();
         try {
@@ -37,7 +36,7 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements co
 
             long endTime = System.currentTimeMillis();
             log.info("Finished! Eclipsed time=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
-            
+
         } catch (Exception ex) {
             log.error("Failed!", ex);
         }
@@ -50,6 +49,6 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements co
     public void setPropdataJobsEnabled(boolean propdataJobsEnabled) {
         this.propdataJobsEnabled = propdataJobsEnabled;
     }
-    
-    
+
+
 }
