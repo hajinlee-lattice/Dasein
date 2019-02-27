@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ComputeOrphanRecordsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportOrphansToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -24,6 +25,7 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
 
     public static class Builder {
         private OrphanRecordsExportWorkflowConfiguration configuration = new OrphanRecordsExportWorkflowConfiguration();
+        private ImportExportS3StepConfiguration importFromS3 = new ImportExportS3StepConfiguration();
         private ComputeOrphanRecordsStepConfiguration computeOrphans = new ComputeOrphanRecordsStepConfiguration();
         private ExportStepConfiguration avroToCsvExport = new ExportStepConfiguration();
         private ExportOrphansToS3StepConfiguration exportToS3 = new ExportOrphansToS3StepConfiguration();
@@ -31,6 +33,7 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration(WORKFLOW_NAME, customerSpace,
                     configuration.getClass().getSimpleName());
+            importFromS3.setCustomerSpace(customerSpace);
             computeOrphans.setCustomerSpace(customerSpace);
             avroToCsvExport.setCustomerSpace(customerSpace);
             exportToS3.setCustomerSpace(customerSpace);
@@ -134,6 +137,7 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
+            importFromS3.setVersion(version);
             computeOrphans.setDataCollectionVersion(version);
             exportToS3.setVersion(version);
             return this;
@@ -153,6 +157,7 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
             avroToCsvExport.setExportDestination(ExportDestination.FILE);
             avroToCsvExport.setUsingDisplayName(false);
 
+            configuration.add(importFromS3);
             configuration.add(computeOrphans);
             configuration.add(avroToCsvExport);
             configuration.add(exportToS3);
