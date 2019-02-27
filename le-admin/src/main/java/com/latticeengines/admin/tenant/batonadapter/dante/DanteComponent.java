@@ -1,6 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.dante;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -59,7 +59,7 @@ public class DanteComponent extends LatticeComponent {
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
-        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.CG));
+        return new HashSet<>(Collections.singleton(LatticeProduct.LPA));
     }
 
     @Override
