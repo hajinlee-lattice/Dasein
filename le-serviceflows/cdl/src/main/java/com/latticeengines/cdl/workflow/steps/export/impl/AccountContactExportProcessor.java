@@ -1,11 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.export.impl;
 
-import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
-import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
-import com.latticeengines.domain.exposed.query.DataPage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
@@ -17,13 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
+import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
+import com.latticeengines.domain.exposed.query.DataPage;
 
 @Component
 public class AccountContactExportProcessor extends SegmentExportProcessor {
