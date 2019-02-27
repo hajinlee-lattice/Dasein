@@ -19,8 +19,9 @@ export default class SystemsComponent extends Component {
         httpService.get(
             "/pls/lookup-id-mapping",
             new Observer(response => {
-                let connectors = response.data.CRM;
-                connectors = connectors.concat(response.data.MAP);
+                let CRMs = response.data.CRM || [];
+                let MAPs = response.data.MAP || [];
+                let connectors = CRMs.concat(MAPs);
                 SystemsService.cleanupLookupId(connectors);
                 this.setState({ loading: false, connectors: connectors });
                 // console.log("BACK HERE ", response);
