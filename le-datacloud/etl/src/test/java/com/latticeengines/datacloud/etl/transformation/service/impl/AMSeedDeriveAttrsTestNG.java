@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
@@ -18,6 +17,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedDeriveAttrs;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedDeriveAttrsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -30,7 +30,7 @@ public class AMSeedDeriveAttrsTestNG
 
     GeneralSource baseSource1 = new GeneralSource("AccountMasterSeed");
 
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         prepareAmSeedDuns();
         TransformationProgress progress = createNewProgress();
