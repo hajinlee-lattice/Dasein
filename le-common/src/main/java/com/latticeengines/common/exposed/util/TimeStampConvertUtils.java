@@ -53,40 +53,40 @@ public class TimeStampConvertUtils {
 
     // Set up static mappings from user exposed date and time format to Java 8 formats.
     static {
-        userToJavaDateFormatMap.put("MM/DD/YYYY", "M/d/yyyy");
         userToJavaDateFormatMap.put("MM/DD/YY", "M/d/yy");
-        userToJavaDateFormatMap.put("DD/MM/YYYY", "d/M/yyyy");
+        userToJavaDateFormatMap.put("MM/DD/YYYY", "M/d/yyyy");
         userToJavaDateFormatMap.put("DD/MM/YY", "d/M/yy");
+        userToJavaDateFormatMap.put("DD/MM/YYYY", "d/M/yyyy");
         userToJavaDateFormatMap.put("YYYY/MM/DD", "yyyy/M/d");
 
-        userToJavaDateFormatMap.put("MM-DD-YYYY", "M-d-yyyy");
         userToJavaDateFormatMap.put("MM-DD-YY", "M-d-yy");
-        userToJavaDateFormatMap.put("DD-MM-YYYY", "d-M-yyyy");
+        userToJavaDateFormatMap.put("MM-DD-YYYY", "M-d-yyyy");
         userToJavaDateFormatMap.put("DD-MM-YY", "d-M-yy");
+        userToJavaDateFormatMap.put("DD-MM-YYYY", "d-M-yyyy");
         userToJavaDateFormatMap.put("YYYY-MM-DD", "yyyy-M-d");
 
-        userToJavaDateFormatMap.put("MM.DD.YYYY", "M.d.yyyy");
         userToJavaDateFormatMap.put("MM.DD.YY", "M.d.yy");
-        userToJavaDateFormatMap.put("DD.MM.YYYY", "d.M.yyyy");
+        userToJavaDateFormatMap.put("MM.DD.YYYY", "M.d.yyyy");
         userToJavaDateFormatMap.put("DD.MM.YY", "d.M.yy");
+        userToJavaDateFormatMap.put("DD.MM.YYYY", "d.M.yyyy");
         userToJavaDateFormatMap.put("YYYY.MM.DD", "yyyy.M.d");
 
-        userToJavaDateFormatMap.put("MMM/DD/YYYY", "MMM/d/yyyy");
         userToJavaDateFormatMap.put("MMM/DD/YY", "MMM/d/yy");
-        userToJavaDateFormatMap.put("DD/MMM/YYYY", "d/MMM/yyyy");
+        userToJavaDateFormatMap.put("MMM/DD/YYYY", "MMM/d/yyyy");
         userToJavaDateFormatMap.put("DD/MMM/YY", "d/MMM/yy");
+        userToJavaDateFormatMap.put("DD/MMM/YYYY", "d/MMM/yyyy");
         userToJavaDateFormatMap.put("YYYY/MMM/DD", "yyyy/MMM/d");
 
-        userToJavaDateFormatMap.put("MMM-DD-YYYY", "MMM-d-yyyy");
         userToJavaDateFormatMap.put("MMM-DD-YY", "MMM-d-yy");
-        userToJavaDateFormatMap.put("DD-MMM-YYYY", "d-MMM-yyyy");
+        userToJavaDateFormatMap.put("MMM-DD-YYYY", "MMM-d-yyyy");
         userToJavaDateFormatMap.put("DD-MMM-YY", "d-MMM-yy");
+        userToJavaDateFormatMap.put("DD-MMM-YYYY", "d-MMM-yyyy");
         userToJavaDateFormatMap.put("YYYY-MMM-DD", "yyyy-MMM-d");
 
-        userToJavaDateFormatMap.put("MMM.DD.YYYY", "MMM.d.yyyy");
         userToJavaDateFormatMap.put("MMM.DD.YY", "MMM.d.yy");
-        userToJavaDateFormatMap.put("DD.MMM.YYYY", "d.MMM.yyyy");
+        userToJavaDateFormatMap.put("MMM.DD.YYYY", "MMM.d.yyyy");
         userToJavaDateFormatMap.put("DD.MMM.YY", "d.MMM.yy");
+        userToJavaDateFormatMap.put("DD.MMM.YYYY", "d.MMM.yyyy");
         userToJavaDateFormatMap.put("YYYY.MMM.DD", "yyyy.MMM.d");
 
         userToJavaTimeFormatMap.put("00:00:00 12H", "h:m:s a");
