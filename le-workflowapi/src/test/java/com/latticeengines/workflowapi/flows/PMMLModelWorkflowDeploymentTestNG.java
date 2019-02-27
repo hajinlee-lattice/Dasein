@@ -1,5 +1,8 @@
 package com.latticeengines.workflowapi.flows;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -36,9 +39,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 

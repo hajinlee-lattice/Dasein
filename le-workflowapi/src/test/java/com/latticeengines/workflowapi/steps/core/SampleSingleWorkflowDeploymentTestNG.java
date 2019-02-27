@@ -2,14 +2,13 @@ package com.latticeengines.workflowapi.steps.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SampleWorkflowToTestConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePostprocessingStepConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePreprocessingStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SampleWorkflowToTestConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowFrameworkDeploymentTestNGBase;
 
 // Example deployment test class for creating a test for a single workflow.

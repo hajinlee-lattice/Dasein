@@ -1,10 +1,10 @@
 package com.latticeengines.workflow.cache;
 
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobCache;
-
-import java.util.List;
 
 public interface JobCacheWriter {
     /**

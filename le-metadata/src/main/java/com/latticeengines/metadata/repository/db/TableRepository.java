@@ -1,10 +1,10 @@
 package com.latticeengines.metadata.repository.db;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
 public interface TableRepository extends BaseJpaRepository<Attribute, Long> {

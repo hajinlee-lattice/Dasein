@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.etl.publication.service;
 
-import com.latticeengines.aws.dynamo.DynamoService;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;

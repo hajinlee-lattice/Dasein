@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 /**
  * Seed class that is used internally. All entities will be transformed into this class for lookup and

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
@@ -15,13 +16,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.ArtifactEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.ArtifactService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ArtifactEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
-    
+
     @Autowired
     private ArtifactService artifactService;
-    
+
     @Autowired
     private ArtifactEntityMgr artifactEntityMgr;
 
@@ -37,19 +37,19 @@ public class ArtifactEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         Module module = new Module();
         module.setName("M1");
         module.setTenant(t1);
-        
+
         Artifact pmmlFile = new Artifact();
         pmmlFile.setArtifactType(ArtifactType.PMML);
         pmmlFile.setPath("/a/b/c");
         pmmlFile.setName("PMMLFile1");
         module.addArtifact(pmmlFile);
-        
+
         Artifact pivotFile = new Artifact();
         pivotFile.setArtifactType(ArtifactType.PivotMapping);
         pivotFile.setPath("/d/e/f");
         pivotFile.setName("PivotFile.txt");
         module.addArtifact(pivotFile);
-        
+
         artifactService.createArtifact(customerSpace1, "M1", pmmlFile.getName(), pmmlFile);
         artifactService.createArtifact(customerSpace1, "M1", pivotFile.getName(), pivotFile);
 

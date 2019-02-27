@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.dao.ArtifactDao;
 import com.latticeengines.metadata.dao.ModuleDao;
 import com.latticeengines.metadata.entitymgr.ArtifactEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("artifactEntityMgr")
 public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implements ArtifactEntityMgr {

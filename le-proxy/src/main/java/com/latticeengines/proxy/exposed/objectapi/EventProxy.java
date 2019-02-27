@@ -6,11 +6,11 @@ import java.time.Duration;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
