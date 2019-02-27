@@ -1,5 +1,7 @@
 package com.latticeengines.apps.lp.controller;
 
+import static org.mockito.Mockito.when;
+
 import javax.inject.Inject;
 
 import org.mockito.Mock;
@@ -11,8 +13,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.lp.service.impl.ModelDownloaderCallable;
 import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-
-import static org.mockito.Mockito.when;
 
 public class ModelSummaryResourceTestNG extends LPDeploymentTestNGBase {
 

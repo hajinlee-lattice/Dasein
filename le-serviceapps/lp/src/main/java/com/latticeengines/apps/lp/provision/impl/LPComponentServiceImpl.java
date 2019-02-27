@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.provision.impl;
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;

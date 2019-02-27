@@ -1,5 +1,10 @@
 package com.latticeengines.apps.lp.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -20,35 +25,30 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
-    
+
     private static final String TENANT = "PMMLTenant.PMMLTenant.Production";
-    
+
     @Value("${pls.modelingservice.basedir}")
     private String modelingBaseDir;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private ModelMetadataService modelMetadataService;
-    
+
     @Autowired
     private PmmlModelService pmmlModelService;
-    
+
     private ModelSummary summary = null;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         CustomerSpace space = CustomerSpace.parse(TENANT);
         HdfsUtils.rmdir(yarnConfiguration, modelingBaseDir + "/" + TENANT);
         HdfsUtils.rmdir(yarnConfiguration, "/Pods/Default/Contracts/" + space.getContractId());
-        
+
         String tenantLocalPath = ClassLoader.getSystemResource("modelmetadataserviceimpl/" + TENANT).getFile();
         HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, tenantLocalPath, modelingBaseDir);
         String hdfsPathToModelSummary = String.format("%s/%s/models/%s/%s/%s/enhancements/modelsummary.json", //
@@ -64,14 +64,14 @@ public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
         tenant.setId(TENANT);
         tenant.setName(TENANT);
         summary.setTenant(tenant);
-        
+
         String pivotMappingLocalPath = ClassLoader.getSystemResource("modelmetadataserviceimpl/pivotvalues.csv").getFile();
         String pivotMappingHdfsPath = String.format("/Pods/Default/Contracts/%s/Tenants/%s/Spaces/%s/Metadata/module1/PivotMappings" , //
                 space.getContractId(), space.getTenantId(), space.getSpaceId());
         HdfsUtils.mkdir(yarnConfiguration, pivotMappingHdfsPath);
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pivotMappingLocalPath, pivotMappingHdfsPath);
         summary.setPivotArtifactPath(pivotMappingHdfsPath + "/pivotvalues.csv");
-        
+
         ModelSummaryService mockedModelSummaryService = Mockito.mock(ModelSummaryService.class);
         when(mockedModelSummaryService.findByModelId(anyString(), anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(summary);
         ReflectionTestUtils.setField(modelMetadataService, "modelSummaryService", mockedModelSummaryService);
