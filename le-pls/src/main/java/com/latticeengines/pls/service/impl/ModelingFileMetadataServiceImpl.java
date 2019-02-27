@@ -438,10 +438,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));
         Collection<String> reservedBeginings = new ArrayList<>(
                 Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr));
-        if (withCDLHeader) {
-            reservedWords.addAll(ValidateFileHeaderUtils.CDL_RESERVED_FIELDS);
-            reservedBeginings.addAll(ValidateFileHeaderUtils.CDL_RESERVED_PREFIX);
-        }
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords,
                 reservedBeginings);
         return stream;
