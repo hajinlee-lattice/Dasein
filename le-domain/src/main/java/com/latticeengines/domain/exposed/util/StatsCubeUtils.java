@@ -596,14 +596,8 @@ public class StatsCubeUtils {
                 continue;
             }
             AttributeStats statsInCube = attrStatsMap.get(name);
-            if (statsInCube.getBuckets() == null) {
-                // skip attr without Buckets field
-                continue;
-            } else if ( //
-                    (Long.valueOf(0).equals(statsInCube.getNonNullCount()) //
-                    || CollectionUtils.isEmpty(statsInCube.getBuckets().getBucketList()) //
-                    ) && !BucketType.Enum.equals(statsInCube.getBuckets().getType())) {
-                // no buckets and not Enum
+            if (statsInCube.getNonNullCount() == 0) {
+                // hide if count == 0
                 continue;
             }
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
@@ -697,6 +691,18 @@ public class StatsCubeUtils {
 
     private static boolean isBooleanBkt(Bucket bkt) {
         return bkt != null && ("yes".equalsIgnoreCase(bkt.getLabel()) || "no".equalsIgnoreCase(bkt.getLabel()));
+    }
+
+    public static Flux<ColumnMetadata> filterByStats(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {
+        if (MapUtils.isEmpty(statsCube.getStatistics())) {
+            return cmFlux;
+        } else {
+            return cmFlux.filter(cm -> {
+                String attrName = cm.getAttrName();
+                AttributeStats attributeStats = statsCube.getStatistics().get(attrName);
+                return attributeStats.getNonNullCount() > 0;
+            });
+        }
     }
 
     public static Flux<ColumnMetadata> sortByCategory(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {
