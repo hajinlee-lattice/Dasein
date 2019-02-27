@@ -298,7 +298,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     @VisibleForTesting
     Iterator<GenericRecord> instantiateIteratorForBulkScoreRequest(String path) {
-        return AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        String glob = null;
+        if (path.endsWith(".avro")) {
+            glob = path;
+        } else if (path.endsWith("/")) {
+            glob = path + "*.avro";
+        } else {
+            glob = path + "/*.avro";
+        }
+        return AvroUtils.iterator(yarnConfiguration, glob);
     }
 
     @VisibleForTesting
