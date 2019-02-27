@@ -1,12 +1,13 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.List;
 
 public class DataUnitUnitTestNG {
 
