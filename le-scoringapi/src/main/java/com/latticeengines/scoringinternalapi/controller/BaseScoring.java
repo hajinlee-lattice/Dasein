@@ -95,7 +95,7 @@ public abstract class BaseScoring extends CommonBase {
 
     protected List<Model> getActiveModels(HttpServletRequest request, ModelType type, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            log.info("Applying Model Type Filter: " + type );
+            log.info("Applying Model Type Filter: " + type);
             List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
             if (log.isDebugEnabled()) {
                 log.debug(JsonUtils.serialize(models));
@@ -262,7 +262,8 @@ public abstract class BaseScoring extends CommonBase {
     private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
             boolean considerAllStatus, boolean considerDeleted, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum, considerAllStatus, considerDeleted);
+            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum, considerAllStatus,
+                    considerDeleted);
         }
     }
 
@@ -289,18 +290,25 @@ public abstract class BaseScoring extends CommonBase {
 
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
-            if (forceSkipMatching) {
-                // In case forceSkipMatching flag is true, it usually means
-                // caller is passing entire post matched data for each record
-                // which could be huge.
-                // To avoid huge amount of splunk logging, we are changing
-                // logging level to debug for logging input payload
-                if (log.isDebugEnabled()) {
-                    log.debug(JsonUtils.serialize(scoreRequests));
-                }
+            if (isCalledViaInternalResource) {
+                // no need to log the request payload as ScoringProcessor job
+                // running in hadoop container is going to log the payload
+                // anyway
             } else {
-                if (log.isInfoEnabled()) {
-                    log.info(JsonUtils.serialize(scoreRequests));
+                if (forceSkipMatching) {
+                    // In case forceSkipMatching flag is true, it usually means
+                    // caller is passing entire post matched data for each
+                    // record
+                    // which could be huge.
+                    // To avoid huge amount of splunk logging, we are changing
+                    // logging level to debug for logging input payload
+                    if (log.isDebugEnabled()) {
+                        log.debug(JsonUtils.serialize(scoreRequests));
+                    }
+                } else {
+                    if (log.isInfoEnabled()) {
+                        log.info(JsonUtils.serialize(scoreRequests));
+                    }
                 }
             }
             AdditionalScoreConfig additionalScoreConfig = AdditionalScoreConfig.instance() //
