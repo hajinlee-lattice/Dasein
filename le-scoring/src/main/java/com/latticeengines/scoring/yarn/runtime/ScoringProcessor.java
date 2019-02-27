@@ -546,14 +546,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 dataFileWriter.append(record);
                 count++;
             }
-            // TODO ygao will delete this
-            if (recordScoreResponseList.size() != count) {
-                log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
-            }
-
-            log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
-                    recordScoreResponseList.size(), count));
         }
+        // TODO ygao will delete this
+        if (recordScoreResponseList.size() != count) {
+            log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
+        }
+
+        log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
+                recordScoreResponseList.size(), count));
     }
 
     private void validateScore(Integer score) {
