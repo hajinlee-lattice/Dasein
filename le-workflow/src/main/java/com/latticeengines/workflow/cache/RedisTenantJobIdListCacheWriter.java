@@ -1,14 +1,14 @@
 package com.latticeengines.workflow.cache;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.cache.CacheName;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobListCache;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -18,13 +18,15 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobListCache;
 
 @Component("tenantJobIdListCacheWriter")
 public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWriter {

@@ -1,17 +1,5 @@
 package com.latticeengines.workflow.cache;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobCache;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.JobStep;
-import org.testng.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,6 +8,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobCache;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.JobStep;
 
 @ContextConfiguration(locations = {"classpath:test-workflow-context.xml"})
 public class RedisJobCacheWriterTestNG extends AbstractTestNGSpringContextTests {
