@@ -261,15 +261,20 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             versions.forEach(version -> {
                 roles.forEach(role -> {
                     Table table = dataCollectionProxy.getTable(customSpace, role, version);
-                    List<Extract> extracts = table.getExtracts();
-                    if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
-                        log.warn("Can not find extracts of the table=" + table.getName() + " for tenant=" + customSpace);
-                        return;
+                    if (table != null) {
+                        List<Extract> extracts = table.getExtracts();
+                        if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
+                            log.warn("Can not find extracts of the table=" + table.getName() + " for tenant=" + customSpace);
+                            return;
+                        }
+                        String srcDir = pathBuilder.getFullPath(extracts.get(0).getPath());
+                        String tenantId = CustomerSpace.parse(customSpace).getTenantId();
+                        String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
+                        String prefix = tgtDir.substring(tgtDir.indexOf(s3Bucket) + s3Bucket.length() + 1);
+                        s3Service.cleanupPrefix(s3Bucket, prefix);
+                    } else {
+                        log.warn("Cannot find table for table role: " + role.name());
                     }
-                    String srcDir = pathBuilder.getFullPath(extracts.get(0).getPath());
-                    String tenantId = CustomerSpace.parse(customSpace).getTenantId();
-                    String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                    s3Service.cleanupPrefix(s3Bucket, tgtDir);
                 });
             });
         } catch (Exception e) {
