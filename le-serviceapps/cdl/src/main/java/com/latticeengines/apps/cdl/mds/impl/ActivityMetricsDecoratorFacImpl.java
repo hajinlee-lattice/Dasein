@@ -6,15 +6,21 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
@@ -24,6 +30,10 @@ import reactor.core.publisher.ParallelFlux;
 
 @Component("activityMetricsDecorator")
 public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecoratorFac {
+
+    private static final Set<String> systemAttributes = SchemaRepository //
+            .getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
 
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
@@ -63,6 +73,9 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
         cm.setCategory(Category.PRODUCT_SPEND);
         // initial values
         cm.setAttrState(AttrState.Active);
+        if (systemAttributes.contains(cm.getAttrName())) {
+            return cm;
+        }
         cm.enableGroup(Segment);
         cm.disableGroup(Enrichment);
         if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {

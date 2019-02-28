@@ -28,6 +28,10 @@ import reactor.core.publisher.ParallelFlux;
 
 public class AccountAttrsDecorator implements Decorator {
 
+    private static final Set<String> systemAttributes = SchemaRepository //
+            .getSystemAttributes(BusinessEntity.Account).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+
     private static Set<String> exportAttributes = SchemaRepository //
             .getDefaultExportAttributes(BusinessEntity.Account).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
@@ -60,6 +64,11 @@ public class AccountAttrsDecorator implements Decorator {
     private ColumnMetadata filterCustomerAttr(ColumnMetadata cm) {
         cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
         cm.setAttrState(AttrState.Active);
+
+        if (systemAttributes.contains(cm.getAttrName())) {
+            return cm;
+        }
+
         cm.enableGroup(Segment);
         // enable some attributes for Export
         if (exportAttributes.contains(cm.getAttrName())) {
