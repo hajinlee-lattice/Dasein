@@ -544,7 +544,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 }
                 GenericData.Record record = builder.build();
                 dataFileWriter.append(record);
-                dataFileWriter.flush();
                 count++;
             }
         }
@@ -552,7 +551,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         if (recordScoreResponseList.size() != count) {
             log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
         }
-
+        dataFileWriter.flush();
         log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
                 recordScoreResponseList.size(), count));
     }
