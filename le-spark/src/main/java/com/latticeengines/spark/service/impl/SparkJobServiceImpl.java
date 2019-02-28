@@ -78,24 +78,17 @@ public class SparkJobServiceImpl implements SparkJobService {
         }
         cleanupTargetDirs(config.getTargets());
         job.configure(config);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(context -> {
-            if (context.getRetryCount() > 0) {
-                log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
-                        + job.getClass().getSimpleName());
-            }
-            LivyScalaClient client = clientService.createClient(session.getSessionUrl(), extraJars);
-            try (PerformanceTimer timer = new PerformanceTimer()) {
-                log.info("Submitting spark job " + job.name());
-                String serialized = submitJobWithRetry(client, job);
-                SparkJobResult result = JsonUtils.deserialize(serialized, SparkJobResult.class);
-                String timerMsg = "Finished spark job " + job.name();
-                timer.setTimerMessage(timerMsg);
-                return result;
-            } finally {
-                client.stop(false);
-            }
-        });
+        LivyScalaClient client = clientService.createClient(session.getSessionUrl(), extraJars);
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            log.info("Submitting spark job " + job.name());
+            String serialized = submitJobWithRetry(client, job);
+            SparkJobResult result = JsonUtils.deserialize(serialized, SparkJobResult.class);
+            String timerMsg = "Finished spark job " + job.name();
+            timer.setTimerMessage(timerMsg);
+            return result;
+        } finally {
+            client.stop(false);
+        }
     }
 
     private <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //

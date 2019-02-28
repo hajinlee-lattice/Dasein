@@ -10,6 +10,12 @@ pushd le-tomcatbase
 build_docker latticeengines/tomcatbase
 popd
 
+if [[ ${MICROSERVICES} == *"saml"* ]]; then
+    pushd le-tomcatbase &&
+    build_docker2 latticeengines/tomcatbase-j8 &&
+    popd
+fi
+
 pushd le-microservice
 bash build.sh $MICROSERVICES
 popd
