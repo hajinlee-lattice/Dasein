@@ -19,9 +19,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public enum MetadataSegmentExportType {
 
-    ACCOUNT("Accounts", BusinessEntity.Account), //
-    CONTACT("Contacts", BusinessEntity.Contact), //
-    ACCOUNT_AND_CONTACT("Accounts and Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
+    ACCOUNT("Enriched Accounts", BusinessEntity.Account), //
+    CONTACT("Enriched Contacts (No Account Attributes)", BusinessEntity.Contact), //
+    ACCOUNT_AND_CONTACT("Enriched Contacts with Account Attributes", BusinessEntity.Contact, BusinessEntity.Account), //
     ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"), //
     ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
     ORPHAN_TXN("Orphan Transaction");
