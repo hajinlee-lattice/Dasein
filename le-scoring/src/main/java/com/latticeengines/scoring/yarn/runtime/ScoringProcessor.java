@@ -183,7 +183,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             execute(rtsBulkScoringConfig, iterator, dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter,
                     recordCount, fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching);
-
+            dataFileWriter.close();
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
@@ -544,6 +544,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 }
                 GenericData.Record record = builder.build();
                 dataFileWriter.append(record);
+                dataFileWriter.flush();
                 count++;
             }
         }
