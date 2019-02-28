@@ -559,6 +559,7 @@ public class MatchInputValidatorUnitTestNG {
             expectedExceptions = { IllegalArgumentException.class }, //
             expectedExceptionsMessageRegExp = "For fetch-only mode, must provide EntityId match key")
     public void testValidateAccountMatchKeysFetchOnly(MatchKey[] keys) {
+        // Don't provide EntityId for fetch-only mode
         validateAccountMatchKey(keys, true, true);
     }
 
