@@ -1,11 +1,11 @@
 package com.latticeengines.workflow.cache;
 
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobListCache;
-
-import java.util.List;
 
 public interface TenantJobIdListCacheWriter {
     /**

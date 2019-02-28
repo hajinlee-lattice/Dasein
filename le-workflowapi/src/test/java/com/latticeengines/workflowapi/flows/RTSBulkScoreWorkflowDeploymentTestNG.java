@@ -1,7 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import au.com.bytecode.opencsv.CSVReader;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -9,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -50,6 +49,8 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 

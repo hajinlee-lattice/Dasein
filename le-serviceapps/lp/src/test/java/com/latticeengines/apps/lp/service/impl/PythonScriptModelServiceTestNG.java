@@ -1,5 +1,12 @@
 package com.latticeengines.apps.lp.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.Set;
 
@@ -21,13 +28,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
 

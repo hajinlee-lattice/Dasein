@@ -5,9 +5,9 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

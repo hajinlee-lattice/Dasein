@@ -47,7 +47,7 @@ public class EmailSettings {
     public static final String PLS_INTERNAL_ATTRIBUTE_ENRICH_COMPLETION_EMAIL_MSG = "We have completed the enrichment of internal attributes.";
     public static final String PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_EMAIL_SUBJECT = "FAILURE - Enrich Internal Attributes - %s ";
     public static final String PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_EMAIL_MSG = "Failed to enrich internal attributes.";
-    public static final String PLS_ONE_TIME_SFDC_ACCESS_TOKEN_EMAIL_SUBJECT = "Salesforce Access Token";
+    public static final String PLS_ONE_TIME_SFDC_ACCESS_TOKEN_EMAIL_SUBJECT = "Lattice Application Authentication Token";
     public static final String GLOBAL_AUTH_FORGET_CREDS_EMAIL_SUBJECT = "Lattice Password Reset";
     public static final String PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT = "SUCCESS - Segment Export - %s ";
     public static final String PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT = "FAILURE - Segment Export - %s ";

@@ -1,5 +1,35 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_ALGO;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -32,38 +62,10 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_ALGO;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
 
 @SuppressWarnings("deprecation")
 public class StatsCubeUtils {
@@ -594,6 +596,10 @@ public class StatsCubeUtils {
                 continue;
             }
             AttributeStats statsInCube = attrStatsMap.get(name);
+            if (statsInCube.getNonNullCount() == 0) {
+                // hide if count == 0
+                continue;
+            }
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
             String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
             // create map entries if not there
@@ -685,6 +691,18 @@ public class StatsCubeUtils {
 
     private static boolean isBooleanBkt(Bucket bkt) {
         return bkt != null && ("yes".equalsIgnoreCase(bkt.getLabel()) || "no".equalsIgnoreCase(bkt.getLabel()));
+    }
+
+    public static Flux<ColumnMetadata> filterByStats(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {
+        if (MapUtils.isEmpty(statsCube.getStatistics())) {
+            return cmFlux;
+        } else {
+            return cmFlux.filter(cm -> {
+                String attrName = cm.getAttrName();
+                AttributeStats attributeStats = statsCube.getStatistics().get(attrName);
+                return attributeStats.getNonNullCount() > 0;
+            });
+        }
     }
 
     public static Flux<ColumnMetadata> sortByCategory(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {

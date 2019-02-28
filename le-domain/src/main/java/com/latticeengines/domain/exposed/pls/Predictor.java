@@ -1,17 +1,8 @@
 package com.latticeengines.domain.exposed.pls;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.security.HasTenantId;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -26,9 +17,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
 @Table(name = "PREDICTOR")

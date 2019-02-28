@@ -4,10 +4,12 @@ import './connectors-list.scss';
 import LeVPanel from 'common/widgets/container/le-v-panel';
 import LeHPanel from 'common/widgets/container/le-h-panel';
 import { LeToolBar, HORIZONTAL } from 'common/widgets/toolbar/le-toolbar';
+import LeModal from "common/widgets/modal/le-modal";
 import LeButton from "common/widgets/buttons/le-button";
 import { CENTER, LEFT } from 'common/widgets/container/le-alignments';
 import Connector from './connector.component';
 import ConnectorsRoutes from "./connectors-routing";
+import { openConfigWindow, solutionInstanceConfig } from "./configWindow";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
@@ -19,20 +21,30 @@ export class ConnectorList extends Component {
         // console.log('THE PROPS ', props);
         this.clickHandler = this.clickHandler.bind(this);
         this.generateAuthTokenClickHandler = this.generateAuthTokenClickHandler.bind(this);
+        this.modalCallback = this.modalCallback.bind(this);
+        this.getIFrame = this.getIFrame.bind(this);
         this.state = {
             connectorSelected: this.props.ConnectorsService.getConnector(),
             userValidated: false,
-            userInfo: null
+            userInfo: null,
+            userName: null,
+            accessToken: null,
+            authorizationCode: null,
+            solutionInstanceId: null,
+            openModal: false
         };
         this.connectors = ConnectorService.getList(this.props.ConnectorsService.isMarketoEnabled());
 
     }
     componentDidMount() {
+        this.getTrayUserName(response => {
+            console.log("getTrayUserName");
+        });
         this.router = ConnectorsRoutes.getRouter();
         if (name != MARKETO) {
             ConnectorService.setUserValidated(true);
         } else {
-            this.validateUser();
+            this.validateUser(userName);
         }
 
         this.router.stateService.go('profiles', { nameConnector: this.state.connectorSelected });
@@ -45,34 +57,32 @@ export class ConnectorList extends Component {
             ConnectorService.sendMSG(() => {
                 this.props.ConnectorsService.generateAuthToken();
             });
+        } else if (ConnectorService.getConnectorName() == MARKETO) {
+            this.getSolutionConfiguration(this.state.userInfo.id, MARKETO, this.state.userName + '_' + MARKETO + '_' + (new Date()).getTime());
         }
 
     }
 
     clickHandler(name) {
-        // console.log('SELECTED ', name);
         this.setState({ connectorSelected: name });
-        // let nameConnector = name;
         ConnectorService.setConnectorName(name);
         if (name != MARKETO) {
             ConnectorService.setUserValidated(true);
-        } else {
+        } else if (name == MARKETO && this.state.userInfo == null) {
             ConnectorService.setUserValidated(true);
-            this.validateUser();
+            this.validateUser(this.state.userName)
         }
         this.router.stateService.go('profilesconnector', { nameConnector: name });
 
     }
 
-    validateUser() {
-        let userName = 'Lattice-Jaya-POC-4';//User already created
-        // let userName = 'k9adsbgl';// User id for M21BugBash1
+    validateUser(userName) {
         let observer = new Observer(
             response => {
                 // httpService.printObservables();
-                console.log('HEY ', response);
                 if (response.data && response.data.name) {
                     this.setState({ userValidated: true, userInfo: response.data });
+                    this.getUserAccessToken(response.data.id);
                     httpService.unsubscribeObservable(observer);
                 } else {
                     this.setState({ userValidated: false, userInfo: {} });
@@ -87,9 +97,142 @@ export class ConnectorList extends Component {
         httpService.get(('/tray/user?userName=' + userName), observer);
     }
 
-    getConnectros() {
-        console.log('STATE', this.connectors);
+    getTrayUserName() {
+        let observer = new Observer(
+            response => {
+                // httpService.printObservables();
+                console.log("getUserName response: ", response);
+                if (response.data && response.data.DropBox) {
+                    let userName = response.data.DropBox;
+                    this.setState({ userName: userName });
+                    httpService.unsubscribeObservable(observer);
+                } else {
+                    this.setState({ userName: null });
+                }
+            },
+            error => {
+                console.error('ERROR ', error);
+                this.setState({ userName: null });
+            }
+        );
 
+        httpService.get('/pls/dropbox/summary', observer);
+    }
+
+    getSolutionConfiguration(userId, tag, instanceName) {
+        const configWindow = openConfigWindow();
+        let observer = new Observer(
+            response => {
+                if (response.data && response.data.authorizationCode) {
+                    var data = response.data;
+                    this.setState({authorizationCode: data.authorizationCode, solutionInstanceId: data.solutionInstanceId});
+                    solutionInstanceConfig.id = data.solutionInstanceId;
+                    configWindow.location = this.getPopupUrl(data.solutionInstanceId, data.authorizationCode);
+                    // this.setState({openModal: true});
+                    httpService.unsubscribeObservable(observer);
+                } else {
+                    console.log("ERROR");
+                }
+            },
+            error => {
+                console.error('ERROR ', error);
+            }
+        );
+        let userAccessToken = this.state.accessToken;
+        console.log("USER_ACCESS_TOKEN: " + userAccessToken);
+        httpService.get('/tray/solutionconfiguration?tag=' + tag + '&userId=' + userId + '&instanceName=' + instanceName, observer, {UserAccessToken: userAccessToken});
+    }
+
+    getUserAccessToken(userId) {
+        let observer = new Observer(
+            response => {
+                if (response.data) {
+                    this.setState({accessToken: response.data.token});
+                    httpService.unsubscribeObservable(observer);
+                } else {
+                    this.setState({accessToken: null});
+                }
+            },
+            error => {
+                this.setState({accessToken: null});
+            }
+        );
+
+        httpService.post('/tray/authorize?userId=' + userId, {}, observer);
+    }
+
+    modalCallback(action) {
+        switch (action) {
+            case 'close':
+                this.setState({ openModal: false });
+                break;
+            case 'ok':
+                this.setState({ openModal: false, saving: true });
+                break;
+        }
+    }
+
+    registerLookupIdMapping() {
+        let observer = new Observer(
+            response => {
+                // httpService.printObservables();
+                if (response.data && response.data.name) {
+                    console.log("HELLO");
+                    console.log(response);
+                    httpService.unsubscribeObservable(observer);
+                } else {
+                    console.log("response", response);
+                }
+            },
+            error => {
+                console.error('ERROR ', error);
+            }
+        );
+
+        var lookupIdMap = {
+            orgId: (new Date()).getTime(),
+            orgName: "test",
+            externalSystemType: "MAP",
+            externalSystemName: "Marketo",
+            externalAuthentication: {
+                solutionInstanceId: this.state.solutionInstanceId,
+                trayWorkflowEnabled: false
+            }
+        };
+
+        console.log("lookupIdMap register: " + lookupIdMap);
+
+        // httpService.post('/pls/lookup-id-mapping/register', lookupIdMap, observer);
+    }
+
+    getIFrame() {
+        let partnerId = 'LatticeEngines';
+        let url = `https://app.tray.io/external/solutions/${partnerId}/configure/${this.state.solutionInstanceId}?code=${this.state.authorizationCode}`;
+        return (
+            <div>
+                <Iframe source={url} />
+            </div>
+        );
+    }
+
+    getPopupUrl(solutionInstanceId, authorizationCode) {
+        let partnerId = 'LatticeEngines';
+        return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}`;
+    }
+
+    getPopup(solutionInstanceId, authorizationCode) {
+        let partnerId = 'LatticeEngines';
+        var url = `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}`;
+        return (
+            <div>
+                <iframe src={url} width='500px'/>
+            </div>
+        );
+    }
+
+
+
+    getConnectros() {
         let connectors = this.connectors.map((obj, index) => {
             return (
                 <Connector
@@ -104,9 +247,12 @@ export class ConnectorList extends Component {
         return connectors;
     }
 
+
+
     render() {
         return (
             <div className="main-panel">
+                <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Configuration Wizard" template={this.getIFrame} />
                 <LeHPanel hstretch={"true"} halignment={CENTER}>
                     <h2 className="connectors-title">Select one of our application connectors</h2>
                 </LeHPanel>
@@ -121,11 +267,12 @@ export class ConnectorList extends Component {
                     </LeHPanel>
 
                 </LeVPanel>
+
                 <LeToolBar direction={HORIZONTAL}>
                     <div className="right">
                         <LeButton
                             name="credentials"
-                            disabled={!(ConnectorService.isUserValidated()) && this.state.connectorSelected == ''}
+                            disabled={!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo))}
                             config={{
                                 label: "Create",
                                 classNames: "gray-button"

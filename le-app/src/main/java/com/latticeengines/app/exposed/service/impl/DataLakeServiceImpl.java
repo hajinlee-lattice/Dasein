@@ -455,6 +455,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                                     }
                                     return avail;
                                 });
+                        flux = StatsCubeUtils.filterByStats(flux, statsCube);
                         return StatsCubeUtils.sortByCategory(flux, statsCube);
                     }
                 });

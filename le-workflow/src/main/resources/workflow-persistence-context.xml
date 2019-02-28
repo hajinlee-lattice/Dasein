@@ -55,6 +55,10 @@
           p:sessionFactory-ref="sessionFactoryWorkflow">
     </bean>
 
+    <bean id="resourceLessTransactionManager"
+          class="org.springframework.batch.support.transaction.ResourcelessTransactionManager">
+    </bean>
+
     <bean id="jdbcTemplateWorkflow" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSourceWorkflow" />
 
 </beans>

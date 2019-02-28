@@ -1,11 +1,9 @@
 package com.latticeengines.apps.lp.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,6 +25,9 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "model summaries", description = "REST resource for model summaries")
 @RestController
