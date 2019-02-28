@@ -42,6 +42,8 @@ public interface DataCollectionService {
     List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
                                DataCollection.Version version);
 
+    List<String> getAllTableNames();
+
     StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version);
 
     AttributeRepository getAttrRepo(String customerSpace, String collectionName, DataCollection.Version version);

@@ -305,6 +305,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public List<String> getAllTableNames() {
+        return dataCollectionEntityMgr.getAllTableName();
+    }
+
+    @Override
     public Map<TableRoleInCollection, Map<Version, List<Table>>> getTableRoleMap(String customerSpace, String collectionName){
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getDefaultCollection(customerSpace);
