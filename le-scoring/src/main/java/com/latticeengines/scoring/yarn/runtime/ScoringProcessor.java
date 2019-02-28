@@ -183,7 +183,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             execute(rtsBulkScoringConfig, iterator, dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter,
                     recordCount, fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching);
-
+            dataFileWriter.close();
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
@@ -551,7 +551,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         if (recordScoreResponseList.size() != count) {
             log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
         }
-
+        dataFileWriter.flush();
         log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
                 recordScoreResponseList.size(), count));
     }
