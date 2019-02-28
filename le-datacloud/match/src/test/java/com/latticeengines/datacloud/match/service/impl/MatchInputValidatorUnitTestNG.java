@@ -536,6 +536,7 @@ public class MatchInputValidatorUnitTestNG {
             expectedExceptionsMessageRegExp = "For non-fetch-only mode, at least one of following match key should be provided: "
                     + "Duns, Domain, Name and SystemId")
     public void testValidateAccountMatchKeysNonFetchOnly1(MatchKey[] keys) {
+        // Don't set any required match key
         validateAccountMatchKey(keys, true, false);
     }
 
@@ -544,7 +545,14 @@ public class MatchInputValidatorUnitTestNG {
             expectedExceptionsMessageRegExp = "For non-fetch-only mode, at least one of following match key should be provided: "
                     + "Duns, Domain, Name and SystemId")
     public void testValidateAccountMatchKeysNonFetchOnly2(MatchKey[] keys) {
+        // Set required match key, but don't map field
         validateAccountMatchKey(keys, false, false);
+    }
+
+    @Test(groups = "unit", dataProvider = "requiredAccountMatchKey")
+    public void testValidateAccountMatchKeysNonFetchOnly3(MatchKey[] keys) {
+        // Set required match key and map field. Should pass without exception
+        validateAccountMatchKey(keys, true, false);
     }
 
     @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
@@ -572,6 +580,7 @@ public class MatchInputValidatorUnitTestNG {
                 keyMap.put(key, new ArrayList<>());
                 if (mapField) {
                     keyMap.get(key).add(key.name());
+                    entityKeyMap.setSystemIdPriority(keyMap.get(MatchKey.SystemId));
                 }
             }
         }
