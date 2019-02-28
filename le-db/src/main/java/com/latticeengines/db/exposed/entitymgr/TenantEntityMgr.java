@@ -14,5 +14,4 @@ public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
 
     Tenant findByTenantName(String tenantName);
 
-    List<Tenant> findByNameStartingWith(String tenantName);
 }

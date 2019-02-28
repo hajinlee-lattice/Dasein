@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
@@ -46,6 +47,9 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
     @Inject
     private DataUnitProxy dataUnitProxy;
+
+    @Value("${cdl.redshift.cleanup.start}")
+    private boolean cleanupFlag;
 
     private final static String TABLE_PREFIX = "ToBeDeletedOn_";
     private final static long TIMEPRE = 1000*3600*24;
@@ -114,6 +118,10 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     }
 
     public boolean removeUnusedTables() {
+        if (!cleanupFlag) {
+            log.warn("the cleanupFlag is " + cleanupFlag);
+            return true;
+        }
         List<String> allRedshiftTable = redshiftService.getTables("");
         List<String> allTenantId = tenantEntityMgr.findAllTenantId();
         Set<String> allMissTenant = new HashSet<>();

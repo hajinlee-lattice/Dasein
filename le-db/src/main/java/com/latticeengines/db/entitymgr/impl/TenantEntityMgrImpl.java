@@ -64,12 +64,6 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     }
 
     @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Tenant> findByNameStartingWith(String tenantName) {
-        return tenantRepository.findByNameStartingWith(tenantName);
-    }
-
-    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
