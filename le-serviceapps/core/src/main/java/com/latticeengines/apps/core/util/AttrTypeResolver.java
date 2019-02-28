@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -16,8 +18,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AttrTypeResolver {
     private static final Logger log = LoggerFactory.getLogger(AttrTypeResolver.class);
@@ -50,9 +50,6 @@ public class AttrTypeResolver {
             type = AttrType.Curated;
         } else {
             type = AttrType.Custom;
-        }
-        if ("HG_ASTEA_0275690354".equals(metadata.getAttrName())) {
-            log.info("Resolved HG_ASTEA_0275690354 to " + type);
         }
         return type;
     }
@@ -100,9 +97,6 @@ public class AttrTypeResolver {
             default:
                 throw new UnsupportedOperationException(
                         String.format("Unsupported AttrType %s.", type));
-        }
-        if ("HG_ASTEA_0275690354".equals(metadata.getAttrName())) {
-            log.info("Resolved HG_ASTEA_0275690354 to " + subType);
         }
         return subType;
     }

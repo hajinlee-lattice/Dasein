@@ -22,13 +22,17 @@ import reactor.core.publisher.ParallelFlux;
 
 public class ContactAttrsDecorator implements Decorator {
 
-    private static Set<String> exportAttributes = SchemaRepository //
+    private static final Set<String> exportAttributes = SchemaRepository //
             .getDefaultExportAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
 
-    private static Set<String> stdAttrs = SchemaRepository //
+    private static final Set<String> stdAttrs = SchemaRepository //
             .getStandardAttributes(BusinessEntity.Contact).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+
+    private static final Set<String> systemAttributes = SchemaRepository //
+            .getSystemAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     @Override
@@ -50,6 +54,9 @@ public class ContactAttrsDecorator implements Decorator {
         if (BusinessEntity.Contact.equals(cm.getEntity())) {
             cm.setCategory(Category.CONTACT_ATTRIBUTES);
             cm.setAttrState(AttrState.Active);
+            if (systemAttributes.contains(cm.getAttrName())) {
+                return cm;
+            }
             cm.enableGroup(Segment);
             // enable some attributes for Export
             if (exportAttributes.contains(cm.getAttrName())) {
