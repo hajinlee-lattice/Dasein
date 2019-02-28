@@ -6,11 +6,13 @@ import java.util.Collections;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -46,9 +48,18 @@ public abstract class RunSparkJob<S extends SparkJobStepConfiguration, //
         String tenantId = customerSpace.getTenantId();
         String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
         jobConfig.setWorkspace(workspace);
-        LivySession session = livySessionHolder.getOrCreateLivySession(tenantId + "~" + getJobClz().getSimpleName());
         log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
-        SparkJobResult result = sparkJobService.runJob(session, getJobClz(), jobConfig);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        SparkJobResult result = retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
+                        + getJobClz().getSimpleName());
+                livySessionHolder.killSession();
+            }
+            LivySession session = livySessionHolder //
+                    .getOrCreateLivySession(tenantId + "~" + getJobClz().getSimpleName());
+            return sparkJobService.runJob(session, getJobClz(), jobConfig);
+        });
         postJobExecution(result);
         livySessionHolder.killSession();
     }

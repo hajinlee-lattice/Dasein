@@ -77,7 +77,7 @@ public class LivySessionServiceImpl implements LivySessionService {
         Integer sessionId = session.getSessionId();
         if (sessionId != null && sessionExists(session)) {
             WebClient webClient = getWebClient(session);
-            String uri = URI_SESSIONS + "/" + String.valueOf(sessionId);
+            String uri = URI_SESSIONS + "/" + sessionId;
             String resp = webClient.method(HttpMethod.DELETE).uri(uri).retrieve()
                     .bodyToMono(String.class).block();
             log.info("Stopped livy session: " + resp);
@@ -89,7 +89,7 @@ public class LivySessionServiceImpl implements LivySessionService {
         String info = "";
         if (sessionId != null) {
             WebClient webClient = getWebClient(session);
-            String uri = URI_SESSIONS + "/" + String.valueOf(sessionId);
+            String uri = URI_SESSIONS + "/" + sessionId;
             info = webClient.method(HttpMethod.GET).uri(uri) //
                     .retrieve().bodyToMono(String.class).onErrorResume(t -> {
                         Mono<String> resumed = Mono.error(t);

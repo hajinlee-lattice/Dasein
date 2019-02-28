@@ -28,7 +28,7 @@ if [[ -f "/etc/ledp/lattice.pem" ]]; then
 fi
 chmod -R 644 /etc/pki/tls
 
-if [[ -f "/etc/ledp/jmxtrans&&gent.jar" ]]; then
+if [[ -f "/etc/ledp/jmxtrans-agent.jar" ]]; then
     echo "Copying /etc/ledp/jmxtrans-agent.jar to /var/lib/jmxtrans-agent.jar"
     cp -f /etc/ledp/jmxtrans-agent.jar /var/lib/jmxtrans-agent.jar
     echo "Copying /etc/ledp/jmxtrans-tomcat-query.xml to ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"

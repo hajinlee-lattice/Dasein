@@ -53,7 +53,11 @@ function build_docker() {
 	rm -rf ${TGT_WAR}
 
 	cd ${DIR}
-	cp ${DIR}/Dockerfile ${WORKSPACE}
+	if [[ "${WAR}" == "saml" ]]; then
+	    cp ${DIR}/Dockerfile_saml ${WORKSPACE}
+	else
+	    cp ${DIR}/Dockerfile ${WORKSPACE}
+	fi
 
 	pushd ${WORKSPACE}
 	if [[ "${UNAME}" == 'Darwin' ]]; then

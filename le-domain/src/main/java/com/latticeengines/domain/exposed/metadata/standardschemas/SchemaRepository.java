@@ -58,12 +58,9 @@ public class SchemaRepository {
             sysAttrs.add(InterfaceName.CDLCreatedTime);
             sysAttrs.add(InterfaceName.CDLUpdatedTime);
             // special
-            switch (entity) {
-                case Account:
-                    sysAttrs.add(InterfaceName.LatticeAccountId);
-                    sysAttrs.add(InterfaceName.CustomerParentAccountID);
-                    break;
-                default:
+            if (BusinessEntity.Account.equals(entity)) {
+                sysAttrs.add(InterfaceName.LatticeAccountId);
+                sysAttrs.add(InterfaceName.CustomerParentAccountID);
             }
         }
         return sysAttrs;
