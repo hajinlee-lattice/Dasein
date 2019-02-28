@@ -599,7 +599,18 @@ public class InternalResource extends InternalResourceBase {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
         MetadataSegmentExportType exportType = export.getType();
-        String exportTypeStr = exportType.getDisplayName();
+        String exportTypeStr = "";
+        switch (exportType) {
+        case ACCOUNT:
+            exportTypeStr = "Account";
+            break;
+        case CONTACT:
+            exportTypeStr = "Contact";
+            break;
+        case ACCOUNT_AND_CONTACT:
+            exportTypeStr = "Account and Contact";
+            break;
+        }
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
                 if (user.getEmail().equals(export.getCreatedBy())) {
