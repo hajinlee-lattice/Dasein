@@ -129,8 +129,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         @Override
         public String call() throws Exception {
             try {
-                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s.csv", config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),
-                        config.getDestinationSysType(), fileGeneratedTime.getTime()));
+                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s.%s", config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),
+                        config.getDestinationSysType(), fileGeneratedTime.getTime(), getFileFormat()));
 
                 generateFileFromAvro(recAvroHdfsFilePath, localFile);
 
