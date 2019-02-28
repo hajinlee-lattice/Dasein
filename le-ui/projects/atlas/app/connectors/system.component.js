@@ -10,6 +10,7 @@ import LeModal from "common/widgets/modal/le-modal";
 import SystemMappingComponent from './system-mapping.component';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
+import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
 import './systems.component.scss';
 
@@ -118,6 +119,20 @@ export default class SystemComponent extends Component {
         }
     }
 
+    getAccountIdRow() {
+        if (this.props.system.externalSystemType != "MAP") {
+            return (<div className="le-layout-flex-grid">
+                        <div className="le-layout-flex-col lable">
+                            Account Id
+                        </div>
+                        <div className="le-layout-flex-col color-blue content" title={this.state.system.accountId}>
+                            {this.state.system.accountId}
+                        </div>
+                    </div>);
+        }
+        return null;
+    }
+
 
     render() {
         // console.log('Render', this.state.openModal);
@@ -151,14 +166,7 @@ export default class SystemComponent extends Component {
                                 {this.state.system.orgId}
                             </div>
                         </div>
-                        <div className="le-layout-flex-grid">
-                            <div className="le-layout-flex-col lable">
-                                Account Id
-                            </div>
-                            <div className="le-layout-flex-col color-blue content" title={this.state.system.accountId}>
-                                {this.state.system.accountId}
-                            </div>
-                        </div>
+                        {this.getAccountIdRow()}
                         <div className="le-layout-flex-grid">
                             <div className="le-layout-flex-col lable">
                                 Last Updated
@@ -178,7 +186,6 @@ export default class SystemComponent extends Component {
                         </div>
                     </LeTileBody>
                     <LeTileFooter classNames={'system-footer right-controlls'}>
-
                         <LeButton
                             name={`${"edit-mappings-"}${this.state.system.orgName}`}
                             disabled={this.state.saving || !this.state.system.isRegistered}
