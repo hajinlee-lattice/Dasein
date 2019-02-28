@@ -1,10 +1,15 @@
 package com.latticeengines.apps.cdl.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,9 +17,7 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 
 @Api(value = "datafeed_internal", description = "REST resource for metadata data feed internal operations")
 @RestController
@@ -36,8 +39,13 @@ public class DataFeedInternalResource {
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all simple data feeds.")
-    public List<SimpleDataFeed> getAllSimpleDataFeeds() {
-        return dataFeedService.getAllSimpleDataFeeds();
-    }
+    public List<SimpleDataFeed> getAllSimpleDataFeeds(
+            @RequestParam(value = "status", required = false, defaultValue = "")String tenantStatus) {
+        if (StringUtils.isEmpty((tenantStatus))) {
+            return dataFeedService.getAllSimpleDataFeeds();
+        } else {
+            return dataFeedService.getSimpleDataFeedsByTenantStatus(TenantStatus.valueOf(tenantStatus));
+        }
 
+    }
 }

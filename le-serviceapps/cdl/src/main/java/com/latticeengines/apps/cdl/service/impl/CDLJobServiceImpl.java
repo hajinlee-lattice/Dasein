@@ -165,7 +165,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void orchestrateJob() {
-        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds();
+        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE);
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis);
 
@@ -175,31 +175,25 @@ public class CDLJobServiceImpl implements CDLJobService {
         List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
-            if (tenant.getStatus() == TenantStatus.ACTIVE) {
-                if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
-                    runningProcessAnalyzeJobs++;
-                    processAnalyzingDataFeeds.add(dataFeed);
+            if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
+                runningProcessAnalyzeJobs++;
+                processAnalyzingDataFeeds.add(dataFeed);
 
-                    if (!haveAutoScheduledPAJob) {
-                        haveAutoScheduledPAJob = isAutoScheduledPAJob(tenant.getId());
-                    }
-                } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
-                    MultiTenantContext.setTenant(tenant);
-                    CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                    Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
-                    if (invokeTime != null) {
-                        if (dataFeed.getNextInvokeTime() == null || dataFeed.getNextInvokeTime().before(currentTime)) {
-                            dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
-                        }
-                        if (currentTimeMillis > invokeTime.getTime()) {
-                            list.add(new HashMap.SimpleEntry<>(invokeTime,
-                                    new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
-                        }
-                    }
+                if (!haveAutoScheduledPAJob) {
+                    haveAutoScheduledPAJob = isAutoScheduledPAJob(tenant.getId());
                 }
-            } else {
-                if (dataFeed.getNextInvokeTime() != null) {
-                    dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), null);
+            } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
+                MultiTenantContext.setTenant(tenant);
+                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
+                if (invokeTime != null) {
+                    if (dataFeed.getNextInvokeTime() == null || dataFeed.getNextInvokeTime().before(currentTime)) {
+                        dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
+                    }
+                    if (currentTimeMillis > invokeTime.getTime()) {
+                        list.add(new HashMap.SimpleEntry<>(invokeTime,
+                                new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
+                    }
                 }
             }
         }
