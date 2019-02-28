@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 
 public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Long> {
 
@@ -31,6 +32,8 @@ public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Lon
     List<DataFeed> getAllDataFeeds();
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
+
+    List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status);
 
     DataFeed updateStatus(DataFeed dataFeed);
 }
