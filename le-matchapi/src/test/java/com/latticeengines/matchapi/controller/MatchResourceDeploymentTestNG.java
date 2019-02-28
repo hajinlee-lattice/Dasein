@@ -289,7 +289,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "prevAndCurrApprovedVersion", enabled = true)
     public void testBulkMatchWithSchema(String version) throws Exception {
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
@@ -413,9 +413,21 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
     }
 
-    @DataProvider(name = "allDataCloudVersions", parallel = true)
-    public Object[][] allDataCloudVersions() {
-        List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
+    private DataCloudVersion getPrevOfCurrDCVersion(String currentVersion) {
+        String majorVersion = DataCloudVersion.parseMajorVersion(currentVersion);
+        String minorVersion = DataCloudVersion.parseMinorVersion(currentVersion);
+        DataCloudVersion prevDataCloudVersion = new DataCloudVersion();
+        prevDataCloudVersion
+                .setVersion(majorVersion + "." + String.valueOf(Integer.valueOf(minorVersion) - 1));
+        return prevDataCloudVersion;
+    }
+
+    @DataProvider(name = "prevAndCurrApprovedVersion", parallel = true)
+    public Object[][] prevAndCurrApprovedVersion() {
+        DataCloudVersion currDataCloudVersion = dataCloudVersionEntityMgr.currentApprovedVersion();
+        DataCloudVersion prevDataCloudVersion = getPrevOfCurrDCVersion(
+                currDataCloudVersion.getVersion());
+        List<DataCloudVersion> versions = Arrays.asList(currDataCloudVersion, prevDataCloudVersion);
         Map<String, PriorityQueue<String>> latestVersions = new HashMap<>();
         for (DataCloudVersion version : versions) {
             if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
@@ -432,17 +444,17 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             }
             latestVersions.get(latestCompatible).offer(version.getVersion());
         }
-        List<String> allVersions = new ArrayList<>();
+        List<String> prevAndCurrentApprovedVer = new ArrayList<>();
         latestVersions.forEach((k, v) -> {
-            allVersions.add(v.poll());
+            prevAndCurrentApprovedVer.add(v.poll());
             if (!v.isEmpty()) {
-                allVersions.add(v.poll());
+                prevAndCurrentApprovedVer.add(v.poll());
             }
         });
-        Object[][] objs = new Object[allVersions.size() + 1][1];
+        Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
         int i = 1;
-        for (String version : allVersions) {
+        for (String version : prevAndCurrentApprovedVer) {
             objs[i++] = new Object[] { version };
         }
         return objs;
