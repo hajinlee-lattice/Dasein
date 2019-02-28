@@ -69,16 +69,23 @@ angular.module('lp.models.ratings', [
                 }
             });
 
+
+
             vm.currentConfiguration = angular.copy(vm.dashboard.summary.bucketMetadata);
 
-            // $state.toggleRatings is true when the user uses the Iteration dropdown menu on the Ratings screen.
-            // Selecting an iteration from the dropdown sets the active iteration, or vm.activeIteration
-            // and gets the corresponding working buckets (vm.workingBuckets and vm.ratingsSummary are what drives the chart data)
+            // Set active iteration (default value for iteration select menu) 
+            // and working buckets (vm.workingBuckets is what drives the chart data)
             if ($stateParams.toggleRatings){
 
-                console.log("here 2");
-
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
+
+                // if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+
+                //     console.log("here");
+                //     console.log(vm.dashboard.summary.bucketMetadata);
+
+                //     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
+                // }
 
                 var id = vm.activeIteration.modelSummaryId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
@@ -90,47 +97,29 @@ angular.module('lp.models.ratings', [
 
             } else {
 
-                // $stateParams.newConfiguration is true if the user came to the ratings page
-                // using the "New Scoring Configuration" button on the dashboard
-                if ($stateParams.newConfiguration == true) {
+                // If the model has been published previously and is Active
+                if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
 
-                    // If the model has been published previously and is Active
-                    if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-
-                        // Set active iteration and working buckets (determines what is displayed in the chart)
-                        vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
-                        vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
-
-                        var id = vm.activeIteration.modelSummaryId;
-                        ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
-                            // Helps with chart data and display
-                            vm.ratingsSummary = result;
-                        });
-
-                    } else {
-                        // If the model has not been published or is inactive, 
-                        // select the most recent iteration in the select menu
-                        vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
-                    }
-                } else {
-
-                    // else they clicked the "Activate" button on the dashboard's "Creation History" list
-                    vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
+                    // Set active iteration and working buckets (determines what is displayed in the chart)
+                    vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
+                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
 
                     var id = vm.activeIteration.modelSummaryId;
-                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
-                        vm.workingBuckets = result;
-                    });
                     ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                        // Helps with chart data and display
                         vm.ratingsSummary = result;
                     });
+
+                } else {
+
+                    // If the model has not been published or is inactive, 
+                    // select the most recent iteration in the select menu
+                    vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
                 }
             }
 
             vm.ratingModelId = vm.activeIteration.id;
         }
-
-        console.log(vm.activeIteration);
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
@@ -217,9 +206,6 @@ angular.module('lp.models.ratings', [
             'Past Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
 
 
-        console.log(vm.buckets);
-        console.log(vm.ratingsSummary.bucketed_scores);
-
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
             var bucket = vm.buckets[i];
@@ -238,7 +224,6 @@ angular.module('lp.models.ratings', [
             }
 
             vm.rightScore = bucket.right_bound_score - 1;
-            
             vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
             vm.rightConverted = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_converted;
             vm.leftScore = bucket.left_bound_score;
@@ -253,6 +238,7 @@ angular.module('lp.models.ratings', [
                 bucketConverted = 0,
                 score = null;
 
+
             for (var index = vm.leftScore; index > vm.rightScore; index--) {
                 score = vm.ratingsSummary.bucketed_scores[index];
 
@@ -262,10 +248,10 @@ angular.module('lp.models.ratings', [
 
                 // firstVal += (score.num_converted * score.num_leads);
                 // secondVal += (score.num_leads * score.num_leads);
+                
             }
 
             bucket.conversionRate = (bucketConverted / bucketLeads) * 100;
-
             // bucket.conversionRate = (firstVal / secondVal) * 100;
             bucket.bucket_name = vm.bucketNames[i];
             bucket.bucketAvgRevenue = bucketRevenue / bucketLeads;
@@ -449,9 +435,9 @@ angular.module('lp.models.ratings', [
         });
 
         var rating_id = $stateParams.rating_id,
-            modelId = vm.ratingModelId;
+            aiModelId = vm.ratingModelId;
             
-        ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
+        ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
             if (result != null && result.success === true) {
 
                 var id = $stateParams.modelId;
