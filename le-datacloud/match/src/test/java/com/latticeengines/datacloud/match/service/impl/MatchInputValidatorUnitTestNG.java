@@ -558,8 +558,15 @@ public class MatchInputValidatorUnitTestNG {
     @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
             expectedExceptions = { IllegalArgumentException.class }, //
             expectedExceptionsMessageRegExp = "For fetch-only mode, must provide EntityId match key")
-    public void testValidateAccountMatchKeysFetchOnly(MatchKey[] keys) {
+    public void testValidateAccountMatchKeysFetchOnly1(MatchKey[] keys) {
         // Don't provide EntityId for fetch-only mode
+        validateAccountMatchKey(keys, true, true);
+    }
+
+    @Test(groups = "unit", dataProvider = "requiredAccountMatchKeyFetchOnly")
+    public void testValidateAccountMatchKeysFetchOnly2(MatchKey[] keys) {
+        // Fetch-only mode: Set required match key and map field. Should pass
+        // without exception
         validateAccountMatchKey(keys, true, true);
     }
 
@@ -616,6 +623,13 @@ public class MatchInputValidatorUnitTestNG {
                 { new MatchKey[] { MatchKey.Name } }, //
                 { new MatchKey[] { MatchKey.DUNS } }, //
                 { new MatchKey[] { MatchKey.SystemId } }, //
+        };
+    }
+
+    @DataProvider(name = "requiredAccountMatchKeyFetchOnly")
+    public Object[][] dataRequiredAccountMatchKeyFetchOnly() {
+        return new Object[][] { //
+                { new MatchKey[] { MatchKey.EntityId } }, //
         };
     }
 
