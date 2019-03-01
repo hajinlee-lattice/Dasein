@@ -366,9 +366,6 @@ public class MatchInputValidator {
     }
 
     private static boolean isKeyMappedToField(Map<MatchKey, List<String>> keyMap, MatchKey key) {
-        if (!keyMap.containsKey(key)) {
-            return false;
-        }
         // Mapped fields for key have verified to be not blank in
         // resolveKeyMap()
         return CollectionUtils.isNotEmpty(keyMap.get(key));

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
@@ -26,6 +28,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class MatchInputValidatorUnitTestNG {
 
     private final int maxRealTimeInput = 1000;
+
+    // At least one of required match key needs to be provided for Entity match
+    private static final MatchKey[] REQUIRED_ENTITY_KEYS = { //
+            MatchKey.Domain, //
+            MatchKey.Name, //
+            MatchKey.DUNS, //
+            MatchKey.SystemId };
 
     @Test(groups = "unit")
     public void testGeneralValidation() {
@@ -602,28 +611,16 @@ public class MatchInputValidatorUnitTestNG {
 
     @DataProvider(name = "unrequiredAccountMatchKey")
     public Object[][] dataUnrequiredAccountMatchKey() {
-        return new Object[][] { //
-                { new MatchKey[] { MatchKey.ExternalId } }, //
-                { new MatchKey[] { MatchKey.Email } }, //
-                { new MatchKey[] { MatchKey.City } }, //
-                { new MatchKey[] { MatchKey.State } }, //
-                { new MatchKey[] { MatchKey.Country } }, //
-                { new MatchKey[] { MatchKey.Zipcode } }, //
-                { new MatchKey[] { MatchKey.PhoneNumber } }, //
-                { new MatchKey[] { MatchKey.LookupId } }, //
-                { new MatchKey[] { MatchKey.LatticeAccountID } }, //
-                { new MatchKey[] { MatchKey.EntityId } }, //
-        };
+        Set<MatchKey> requiredKeySet = new HashSet<>(Arrays.asList(REQUIRED_ENTITY_KEYS));
+        List<MatchKey> unrequiredKeys = Arrays.stream(MatchKey.values()) //
+                .filter(key -> requiredKeySet.contains(key)) //
+                .collect(Collectors.toList());
+        return getAllMatchKeyCombinations(unrequiredKeys.toArray(new MatchKey[unrequiredKeys.size()]));
     }
 
     @DataProvider(name = "requiredAccountMatchKey")
     public Object[][] dataRequiredAccountMatchKey() {
-        return new Object[][] { //
-                { new MatchKey[] { MatchKey.Domain } }, //
-                { new MatchKey[] { MatchKey.Name } }, //
-                { new MatchKey[] { MatchKey.DUNS } }, //
-                { new MatchKey[] { MatchKey.SystemId } }, //
-        };
+        return getAllMatchKeyCombinations(REQUIRED_ENTITY_KEYS);
     }
 
     @DataProvider(name = "requiredAccountMatchKeyFetchOnly")
@@ -631,6 +628,23 @@ public class MatchInputValidatorUnitTestNG {
         return new Object[][] { //
                 { new MatchKey[] { MatchKey.EntityId } }, //
         };
+    }
+
+    // Return all combinations of match keys as test data provider
+    private Object[][] getAllMatchKeyCombinations(MatchKey... keys) {
+        int total = (int) Math.pow(2d, Double.valueOf(keys.length));
+        Object[][] combinations = new Object[total][];
+        for (int i = 1; i < total; i++) {
+            String code = Integer.toBinaryString(total | i).substring(1);
+            List<MatchKey> combination = new ArrayList<>();
+            for (int j = 0; j < keys.length; j++) {
+                if (code.charAt(j) == '1') {
+                    combination.add(keys[j]);
+                }
+            }
+            combinations[i - 1] = combination.toArray();
+        }
+        return combinations;
     }
 
     static List<List<Object>> generateMockData(int rows) {
