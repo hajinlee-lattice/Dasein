@@ -53,8 +53,8 @@ function build_docker() {
 	rm -rf ${TGT_WAR}
 
 	cd ${DIR}
-	if [[ "${SRC_WAR}" == "saml" ]]; then
-	    cp ${DIR}/Dockerfile_saml ${WORKSPACE}/Dockerfile
+	if [[ "${SRC_WAR}" == "saml" ]] || [[ "${SRC_WAR}" == "pls" ]]; then
+	    cp ${DIR}/Dockerfile_j8 ${WORKSPACE}/Dockerfile
 	else
 	    cp ${DIR}/Dockerfile ${WORKSPACE}/Dockerfile
 	fi
