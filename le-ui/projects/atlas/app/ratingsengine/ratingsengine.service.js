@@ -123,7 +123,7 @@ angular.module('lp.ratingsengine')
                     label: 'Rules', 
                     state: 'segment.attributes.rules', 
                     progressDisabled: true,
-                    nextLabel: 'Next, Summary', 
+                    nextLabel: 'Model', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRules(nextState);
                     } 
@@ -193,7 +193,7 @@ angular.module('lp.ratingsengine')
                     label: 'Training', 
                     state: 'segment.products.prioritization.training', 
                     progressDisabled: true,
-                    nextLabel: 'Next',
+                    nextLabel: 'Model',
                     showNextSpinner: true,
                     afterNextValidation: true,
                     nextFn: function(nextState) {
@@ -247,7 +247,7 @@ angular.module('lp.ratingsengine')
                     label:'Field Mapping',
                     state:'segment.attributes.training.mapping',
                     progressDisabled: true,
-                    nextLabel: 'Next',
+                    nextLabel: 'Model',
                     nextFn: function(nextState) {
                         RatingsEngineStore.saveFieldMapping(nextState);
                     }
