@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
 
-@Component("DataUnitCrossTenantService")
+@Component("dataUnitCrossTenantService")
 public class DataUnitCrossTenantServiceImpl implements com.latticeengines.metadata.service.DataUnitCrossTenantService {
 
     private static final Logger log = LoggerFactory.getLogger(DataUnitCrossTenantServiceImpl.class);

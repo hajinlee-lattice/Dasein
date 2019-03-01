@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
-@Component("DropBoxCrossTenantService")
+@Component("dropBoxCrossTenantService")
 public class DropBoxCrossTenantServiceImpl implements DropBoxCrossTenantService {
 
 

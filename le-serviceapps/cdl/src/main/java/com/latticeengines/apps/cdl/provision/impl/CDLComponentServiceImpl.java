@@ -123,8 +123,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             attrConfigEntityMgr.cleanupTenant(tenantId);
             dataUnitCrossTenantService.cleanupByTenant(customerSpace);
             dropBoxCrossTenantService.delete(customerSpace);
-            Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
-            MultiTenantContext.setTenant(tenant);
         } catch (Exception e) {
             log.error(String.format("Uninstall CDL component for: %s failed. %s", customerSpace, e.toString()));
             return false;
