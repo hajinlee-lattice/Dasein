@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.aws.s3.S3Service;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.metadata.service.DataUnitCrossTenantService;
 import com.latticeengines.metadata.service.DataUnitService;
 
 @Component
@@ -34,6 +36,12 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
 
     @Inject
     private DataUnitService dataUnitService;
+
+    @Inject
+    private DataUnitCrossTenantService dataUnitCrossTenantService;
+
+    @Inject
+    private DropBoxCrossTenantService dropBoxCrossTenantService;
 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
@@ -69,10 +77,8 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     public void discardTenant(String customerSpace) {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         attrConfigEntityMgr.cleanupTenant(tenantId);
-        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-        MultiTenantContext.setTenant(tenant);
-        dataUnitService.cleanupByTenant();
-        dropBoxService.delete();
+        dataUnitCrossTenantService.cleanupByTenant(customerSpace);
+        dropBoxCrossTenantService.delete(customerSpace);
     }
 
     private void provisionDropBox(CustomerSpace customerSpace) {
