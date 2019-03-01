@@ -79,9 +79,36 @@ public class DropBoxEntityMgrImpl //
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DropBox createDropBox(Tenant tenant, String region) {
+        if (writerRepository.existsByTenant(tenant)) {
+            log.warn("Tenant " + CustomerSpace.parse(tenant.getId()).getTenantId()
+                    + " already has a dropbox, return the existing one instead of creating a new one.");
+            return writerRepository.findByTenant(tenant);
+        } else {
+            DropBox dropbox = new DropBox();
+            dropbox.setTenant(tenant);
+            dropbox.setRegion(region);
+            dropbox.setDropBox(findAvailableRandomStr());
+            dao.create(dropbox);
+            return dropbox;
+        }
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DropBox getDropBox() {
         Tenant tenant = MultiTenantContext.getTenant();
+        if (isReaderConnection()) {
+            return getDropBoxFromReader(tenant);
+        } else {
+            return writerRepository.findByTenant(tenant);
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DropBox getDropBox(Tenant tenant) {
         if (isReaderConnection()) {
             return getDropBoxFromReader(tenant);
         } else {

@@ -8,7 +8,11 @@ public interface DropBoxEntityMgr extends BaseEntityMgrRepository<DropBox, Long>
 
     DropBox createDropBox(String region);
 
+    DropBox createDropBox(Tenant tenant, String region);
+
     DropBox getDropBox();
+
+    DropBox getDropBox(Tenant tenant);
 
     Tenant getDropBoxOwner(String dropBox);
 
