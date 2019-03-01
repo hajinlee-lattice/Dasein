@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.text.SimpleDateFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -48,11 +49,10 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     @Inject
     private DataUnitProxy dataUnitProxy;
 
-    @Value("${cdl.redshift.cleanup.start}")
+    @Value("${cdl.redshift.cleanup.start:false}")
     private boolean cleanupFlag;
 
     private final static String TABLE_PREFIX = "ToBeDeletedOn_";
-    private final static long TIMEPRE = 1000*3600*24;
 
     public boolean removeUnusedTableByTenant(String customerSpace) {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
@@ -96,11 +96,11 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                     try {
                         Date fDate = df.parse(df.format(new Date()));
                         Date oDate = df.parse(timestamp);
-                        long days=(fDate.getTime()-oDate.getTime())/TIMEPRE;
+                        long days = ChronoUnit.DAYS.between(oDate.toInstant(), fDate.toInstant());
                         log.info("redshift table " + dataUnit.getName() + " distance is " + days + " days");
                         if (days > 9)
                             del = true;
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         log.error(e.getMessage());
                     }
                     if (del) {
@@ -145,7 +145,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                 try {
                     Date fDate = df.parse(df.format(new Date()));
                     Date oDate = df.parse(timestamp);
-                    long days=(fDate.getTime()-oDate.getTime())/TIMEPRE;
+                    long days = ChronoUnit.DAYS.between(oDate.toInstant(), fDate.toInstant());
                     log.info("redshift table " + tableName + " distance is " + days + " days");
                     if (days > 9)
                         del = true;
@@ -162,11 +162,11 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                     if (dataUnit != null) {
                         log.info("dataunit is " + dataUnit.getName());
                         dataUnitProxy.delete(tenantName, dataUnit);
-                    }else {
+                    } else {
                         redshiftService.dropTable(tableName);
                     }
                 }
-            }else {
+            } else {
                 Pattern p = Pattern.compile("([a-z0-9_]+)_([a-z]+)_(\\d{4}_\\d{2}_\\d{2})_\\d{2}_\\d{2}_\\d{2}_utc$");
                 Matcher matcher = p.matcher(tableName);
                 if (matcher.matches()) {
@@ -177,7 +177,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                     try {
                         Date fDate = df.parse(df.format(new Date()));
                         Date oDate = df.parse(createTime);
-                        long days=(fDate.getTime()-oDate.getTime())/TIMEPRE;
+                        long days = ChronoUnit.DAYS.between(oDate.toInstant(), fDate.toInstant());
                         log.info("time distance is " + days);
                         if (days > 7)//avoid to delete the table belongs to local test tenant
                             del = true;
@@ -192,7 +192,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                             allMissTenant.add(tenantName);
                             log.info("RedshiftTable " + tableName + " need to deleted because tenant " + tenantName +
                                     " was missed");
-                        }else {
+                        } else {
                             log.info("RedshiftTable " + tableName + " need to deleted because we cannot find it in Db");
                             dataUnit = dataUnitProxy.getByNameAndType(tenantName, tableName,
                                     DataUnit.StorageType.Redshift);
@@ -202,7 +202,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                         log.info("new table name is " + new_tableName);
                         if (dataUnit != null) {
                             dataUnitProxy.renameTableName(tenantName, dataUnit, new_tableName);
-                        }else {
+                        } else {
                             redshiftService.renameTable(tableName, new_tableName);
                         }
                     }
