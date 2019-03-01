@@ -48,7 +48,7 @@ public class MatchInputValidator {
             validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
-            validateAccountMatchKeys(input.getKeyMap().keySet());
+            validateLDCAccountMatchKeys(input.getKeyMap().keySet());
         }
 
         validateInputData(input, maxRealTimeInput);
@@ -95,7 +95,7 @@ public class MatchInputValidator {
             validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
-            validateAccountMatchKeys(input.getKeyMap().keySet());
+            validateLDCAccountMatchKeys(input.getKeyMap().keySet());
         }
     }
 
@@ -144,7 +144,7 @@ public class MatchInputValidator {
             EntityKeyMap entityKeyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name());
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
-            validateAccountMatchKeys(keyMap.keySet());
+            validateAccountMatchKeys(keyMap, input.isFetchOnly());
 
             // For the Account Entity Key Map, also validate that the System ID priority matches the
             // order in the key map.
@@ -163,11 +163,6 @@ public class MatchInputValidator {
                                 "System ID MatchKey values and System ID priority list mismatch at index " + i + ".");
                     }
                 }
-            }
-            // For fetch-only mode, must have EntityId as match key
-            if (input.isFetchOnly() && (!keyMap.containsKey(MatchKey.EntityId)
-                    || CollectionUtils.isEmpty(keyMap.get(MatchKey.EntityId)))) {
-                throw new IllegalArgumentException("Fetch-only mode must provide EntityId match key");
             }
         } else {
             // TODO(jwinter): Remove this constraint once we start supporting other entities.
@@ -330,7 +325,7 @@ public class MatchInputValidator {
         }
     }
 
-    private static void validateAccountMatchKeys(Set<MatchKey> keySet) {
+    private static void validateLDCAccountMatchKeys(Set<MatchKey> keySet) {
         if (!keySet.contains(MatchKey.DUNS) && !keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
                 && !keySet.contains(MatchKey.LatticeAccountID)) {
             throw new IllegalArgumentException("Neither domain nor name nor lattice account id nor duns is provided.");
@@ -342,6 +337,38 @@ public class MatchInputValidator {
                 && (!keySet.contains(MatchKey.Country) || !keySet.contains(MatchKey.State))) {
             throw new IllegalArgumentException("Name location based match must has country and state.");
         }
+    }
+
+    /**
+     * Compare to validateLDCAccountMatchKeys(), major difference is for
+     * Name+Location only match: remove check that Country + State must exist.
+     * This check is actually for 1.0 LDC matcher (purely sql based), even 2.0
+     * ldc matcher should not have this check since if country is missing, we
+     * use USA as default and state is not mandatory either
+     * 
+     * @param keyMap
+     * @param fetchOnly
+     */
+    private static void validateAccountMatchKeys(Map<MatchKey, List<String>> keyMap, boolean fetchOnly) {
+        if (!fetchOnly) {
+            if (!isKeyMappedToField(keyMap, MatchKey.DUNS) //
+                    && !isKeyMappedToField(keyMap, MatchKey.Domain) //
+                    && !isKeyMappedToField(keyMap, MatchKey.Name) //
+                    && !isKeyMappedToField(keyMap, MatchKey.SystemId)) {
+                throw new IllegalArgumentException(
+                        "For non-fetch-only mode, at least one of following match key should be provided: Duns, Domain, Name and SystemId");
+            }
+        } else {
+            if (!isKeyMappedToField(keyMap, MatchKey.EntityId)) {
+                throw new IllegalArgumentException("For fetch-only mode, must provide EntityId match key");
+            }
+        }
+    }
+
+    private static boolean isKeyMappedToField(Map<MatchKey, List<String>> keyMap, MatchKey key) {
+        // Mapped fields for key have verified to be not blank in
+        // resolveKeyMap()
+        return CollectionUtils.isNotEmpty(keyMap.get(key));
     }
 
     private static List<String> validateInputAvroAndGetFieldNames(InputBuffer buffer, Configuration yarnConfiguration) {

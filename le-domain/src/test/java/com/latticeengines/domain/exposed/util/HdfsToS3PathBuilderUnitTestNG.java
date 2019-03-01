@@ -142,6 +142,12 @@ public class HdfsToS3PathBuilderUnitTestNG {
                         "/Pods/QA/Contracts/QA_LPI_Auto_Refine/Tenants/QA_LPI_Auto_Refine/Spaces/Production/Data/Tables/File/SourceFile_file_1477293584451_csv/Extracts/2016-10-24-03-20-35",
                         "QA", "LPI_QA_Auto_ReBuild2", "bucket2"),
                 "s3a://bucket2/QA_LPI_Auto_Refine/atlas/Data/Tables/File/SourceFile_file_1477293584451_csv/Extracts/2016-10-24-03-20-35");
+
+        String tgtDir = builder.convertAtlasTableDir(
+                "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2", "pod2",
+                "tenantId2", "bucket2");
+        String prefix = tgtDir.substring(tgtDir.indexOf("bucket2") + "bucket2".length() + 1);
+        Assert.assertEquals(prefix, "tenantId2/atlas/Data/Tables/table2");
     }
 
 
