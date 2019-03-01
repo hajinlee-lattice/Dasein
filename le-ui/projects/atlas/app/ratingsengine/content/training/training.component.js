@@ -125,8 +125,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
             vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
 
-            console.log(vm.ratingModel);
-
             if(vm.engineType == 'cross_sell'){
                 vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
