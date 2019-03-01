@@ -47,7 +47,7 @@ angular.module('lp.ratingsengine')
         this.coverage = {};
         this.savedSegment = "";
         this.productsSelected = {};
-        this.modelingStrategy = '';
+        this.modelingStrategy = null;
         this.predictionType = 'PROPENSITY';
         this.type = null;
         this.configFilters = {};
