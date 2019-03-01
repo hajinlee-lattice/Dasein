@@ -34,7 +34,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         if (CDLJobType.DFEXECUTIONCLEANUP.equals(cdlJobType)) {
             return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
         } else if (CDLJobType.REDSHIFTCLEANUP.equals(cdlJobType)){
-            return redShiftCleanupService.removeUnusedTable();
+            return redShiftCleanupService.removeUnusedTables();
         } else {
             return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
