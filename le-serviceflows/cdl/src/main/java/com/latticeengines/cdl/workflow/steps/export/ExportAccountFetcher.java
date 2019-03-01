@@ -163,8 +163,8 @@ public class ExportAccountFetcher {
                 IntStream.range(0, fields.size()) //
                         .forEach(i -> {
                             tempDataRef.put(fields.get(i), values.get(i));
-                            dataPage.getData().add(tempDataRef);
                         });
+                dataPage.getData().add(tempDataRef);
             }
         }
         return dataPage;
