@@ -1,8 +1,10 @@
 package com.latticeengines.monitor.micrometer;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Primary;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
  * Root config for micrometer registry
@@ -22,7 +25,13 @@ import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 @Configuration
 public class MeterRegistryConfig {
 
-    private Logger log = LoggerFactory.getLogger(MeterRegistryConfig.class);
+    private static final String TAG_TENANT = "Tenant";
+    private static final String DEPLOYMENT_TEST_TENANT_NAME = "DeploymentTestNG";
+    private static final String E2E_TEST_TENANT_NAME = "LETest";
+    private static final List<String> TEST_TENANT_NAMES = Arrays.asList(DEPLOYMENT_TEST_TENANT_NAME,
+            E2E_TEST_TENANT_NAME);
+
+    private static final Logger log = LoggerFactory.getLogger(MeterRegistryConfig.class);
 
     @Value("${monitor.metrics.micrometer.enabled:false}")
     private boolean enableMonitoring;
@@ -51,12 +60,34 @@ public class MeterRegistryConfig {
         }
 
         Arrays.stream(registries).filter(Objects::nonNull).forEach(compositeRegistry::add);
-        return compositeRegistry;
+        return addCommonFilters(compositeRegistry);
     }
 
     @Lazy
     @Bean
     public TimedAspect timedAspect(@Lazy @Qualifier("rootRegistry") MeterRegistry registry) {
         return new TimedAspect(registry);
+    }
+
+    private MeterRegistry addCommonFilters(MeterRegistry registry) {
+        if (registry == null) {
+            return null;
+        }
+
+        // not recording metrics for tests
+        registry.config().meterFilter(excludeTestTenantFilter());
+        return registry;
+    }
+
+    private MeterFilter excludeTestTenantFilter() {
+        return MeterFilter.deny(id -> {
+            String tenant = id.getTag(TAG_TENANT);
+            if (StringUtils.isBlank(tenant)) {
+                return false;
+            }
+
+            // tenant containing specific string is considered a test tenant
+            return TEST_TENANT_NAMES.stream().anyMatch(tenant::contains);
+        });
     }
 }
