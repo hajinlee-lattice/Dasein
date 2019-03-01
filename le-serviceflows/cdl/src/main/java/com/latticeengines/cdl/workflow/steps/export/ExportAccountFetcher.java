@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +57,7 @@ public class ExportAccountFetcher {
     public long getCount(SegmentExportContext segmentExportContext, DataCollection.Version version) {
         log.info(String.format("Requesting count for payload: %s", //
                 segmentExportContext.getAccountFrontEndQuery() == null //
-                        ? "null"
-                        : JsonUtils.serialize(segmentExportContext.getClonedAccountFrontEndQuery())));
+                        ? "null" : JsonUtils.serialize(segmentExportContext.getClonedAccountFrontEndQuery())));
         return entityProxy.getCountFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
                 segmentExportContext.getClonedAccountFrontEndQuery(), version);
@@ -140,7 +138,8 @@ public class ExportAccountFetcher {
         return convertToDataPage(matchOutput);
     }
 
-    private DataPage convertToDataPage(MatchOutput matchOutput) {
+    @VisibleForTesting
+    protected DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = new DataPage();
 
         Map<String, Object> data;
@@ -157,16 +156,15 @@ public class ExportAccountFetcher {
 
             List<Map<String, Object>> dataList = new ArrayList<>();
             dataPage.setData(dataList);
-            final Map<String, Object> tempDataRef = new HashMap<>();
-            List<String> fields = matchOutput.getOutputFields();
+            final List<String> fields = matchOutput.getOutputFields();
             for (OutputRecord r : matchOutput.getResult()) {
                 List<Object> values = r.getOutput();
+                Map<String, Object> tempDataRef = new HashMap<>();
                 IntStream.range(0, fields.size()) //
-                        .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
-                data = tempDataRef;
-                if (MapUtils.isNotEmpty(data)) {
-                    dataPage.getData().add(data);
-                }
+                        .forEach(i -> {
+                            tempDataRef.put(fields.get(i), values.get(i));
+                        });
+                dataPage.getData().add(tempDataRef);
             }
         }
         return dataPage;
