@@ -1,6 +1,7 @@
 package com.latticeengines.db.entitymgr.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -49,6 +50,11 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantId(String tenantId) {
         return tenantRepository.findByTenantId(tenantId);
+    }
+
+    @Override
+    public List<String> findAllTenantId() {
+        return tenantRepository.findAllTenantId();
     }
 
     @Override
