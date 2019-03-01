@@ -299,6 +299,10 @@ angular.module('lp.ratingsengine.dashboard', [
 
                 if (type === 'cross_sell') {
 
+                    angular.forEach(vm.dashboard.iterations, function(iteration){
+                        vm.iterationHasProducts(iteration);
+                    });
+
                     if (Array.isArray(vm.targetProducts)) {
                         vm.targetProductsIsArray = true;
                         vm.tooltipContent = angular.copy(vm.targetProducts);
@@ -456,6 +460,19 @@ angular.module('lp.ratingsengine.dashboard', [
                 }
                 $document.bind('click', click);
             }
+        }
+
+        vm.iterationHasProducts = function(iteration){
+            var engineId = vm.ratingEngine.id,
+                modelId = iteration.id;
+
+            RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+                if (result.AI.advancedModelingConfig.cross_sell.targetProducts != undefined) {
+                    iteration.hasProducts = true;
+                } else {
+                    iteration.hasProducts = false;
+                }
+            });
         }
 
         vm.setRemodelIteration = function (iteration) {
