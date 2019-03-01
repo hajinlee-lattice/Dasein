@@ -454,6 +454,11 @@ angular.module('lp.models.ratings', [
         ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
             if (result != null && result.success === true) {
 
+                var id = $stateParams.modelId;
+                ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
+                    vm.currentConfiguration = currentConfig;
+                });
+
                 RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
                     vm.chartNotUpdated = true;
                     vm.updateContent = true;
