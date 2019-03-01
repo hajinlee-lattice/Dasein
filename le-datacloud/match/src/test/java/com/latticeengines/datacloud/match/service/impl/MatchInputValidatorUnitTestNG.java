@@ -613,7 +613,7 @@ public class MatchInputValidatorUnitTestNG {
     public Object[][] dataUnrequiredAccountMatchKey() {
         Set<MatchKey> requiredKeySet = new HashSet<>(Arrays.asList(REQUIRED_ENTITY_KEYS));
         List<MatchKey> unrequiredKeys = Arrays.stream(MatchKey.values()) //
-                .filter(key -> requiredKeySet.contains(key)) //
+                .filter(key -> !requiredKeySet.contains(key)) //
                 .collect(Collectors.toList());
         return getAllMatchKeyCombinations(unrequiredKeys.toArray(new MatchKey[unrequiredKeys.size()]));
     }
