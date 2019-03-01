@@ -125,7 +125,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         List<String> allRedshiftTable = redshiftService.getTables("");
         List<String> allTenantId = tenantEntityMgr.findAllTenantId();
         Set<String> allMissTenant = new HashSet<>();
-        List<String> existingTenant = new ArrayList<>();
+        Set<String> existingTenant = new HashSet<>();
         Set<String> allMissTable = new HashSet<>();
         for (String tenantId : allTenantId) {
             existingTenant.add(CustomerSpace.parse(tenantId).getTenantId().toLowerCase());
