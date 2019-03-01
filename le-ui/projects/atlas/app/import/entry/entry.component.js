@@ -62,8 +62,10 @@ angular.module('lp.import.entry', [
         // ImportWizardStore.clear();
         ImportWizardStore.setThirdpartyidFields([], []); // we don't clear all the stores but we should clear thirdparty ids
 
-        ImportWizardStore.setPostBody($stateParams.data);
-        ImportWizardStore.setFeedType($stateParams.data.FeedType || null);
+        if ($stateParams.data){
+            ImportWizardStore.setPostBody($stateParams.data);
+            ImportWizardStore.setFeedType($stateParams.data.FeedType || null);
+        }
         
         vm.setFeatureFlagPermissions();
         vm.changingEntity = false;    
