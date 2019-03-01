@@ -77,14 +77,17 @@ public class ActionServiceImpl implements ActionService {
             cancelActionEmailInfo.setTenantName(tenant.getName());
             cancelActionEmailInfo.setActionName(getActionName(action));
             log.info("paramArr is :" + cancelActionEmailInfo.toString());
+            String action_email = action.getActionInitiator();
             try {
-                if (!emailAddress.equals(SYSTEMEMAIL_ADDRESS)) {
+                if (!action_email.equals(SYSTEMEMAIL_ADDRESS)) {
+                    log.info("this import action is common action!");
                     emailService.sendPlsActionCancelSuccessEmail(actionUser, appPublicUrl, cancelActionEmailInfo);
-                    if (!emailAddress.equals(action.getActionInitiator())) {
+                    if (!emailAddress.equals(action_email)) {
                         User user_cancel = userService.findByEmail(action.getActionInitiator());
                         emailService.sendPlsActionCancelSuccessEmail(user_cancel, appPublicUrl, cancelActionEmailInfo);
                     }
                 } else {
+                    log.info("this import action is system action!");
                     UserFilter filter = user -> {
                         if (StringUtils.isEmpty(user.getAccessLevel())) {
                             return false;
