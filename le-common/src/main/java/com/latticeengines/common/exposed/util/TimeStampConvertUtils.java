@@ -5,7 +5,6 @@ import com.joestelmach.natty.Parser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -49,44 +48,44 @@ public class TimeStampConvertUtils {
 
     // represent all legal date time format in system which generated according
     // to date format and time format
-    public static final List<DateTimeFormatter> SUPPORTED_DATE_TIME_FORMATTERS = new ArrayList<>();
+    public static final List<java.time.format.DateTimeFormatter> SUPPORTED_DATE_TIME_FORMATTERS = new ArrayList<>();
 
     // Set up static mappings from user exposed date and time format to Java 8 formats.
     static {
-        userToJavaDateFormatMap.put("MM/DD/YY", "M/d/yy");
         userToJavaDateFormatMap.put("MM/DD/YYYY", "M/d/yyyy");
-        userToJavaDateFormatMap.put("DD/MM/YY", "d/M/yy");
+        userToJavaDateFormatMap.put("MM/DD/YY", "M/d/yy");
         userToJavaDateFormatMap.put("DD/MM/YYYY", "d/M/yyyy");
+        userToJavaDateFormatMap.put("DD/MM/YY", "d/M/yy");
         userToJavaDateFormatMap.put("YYYY/MM/DD", "yyyy/M/d");
 
-        userToJavaDateFormatMap.put("MM-DD-YY", "M-d-yy");
         userToJavaDateFormatMap.put("MM-DD-YYYY", "M-d-yyyy");
-        userToJavaDateFormatMap.put("DD-MM-YY", "d-M-yy");
+        userToJavaDateFormatMap.put("MM-DD-YY", "M-d-yy");
         userToJavaDateFormatMap.put("DD-MM-YYYY", "d-M-yyyy");
+        userToJavaDateFormatMap.put("DD-MM-YY", "d-M-yy");
         userToJavaDateFormatMap.put("YYYY-MM-DD", "yyyy-M-d");
 
-        userToJavaDateFormatMap.put("MM.DD.YY", "M.d.yy");
         userToJavaDateFormatMap.put("MM.DD.YYYY", "M.d.yyyy");
-        userToJavaDateFormatMap.put("DD.MM.YY", "d.M.yy");
+        userToJavaDateFormatMap.put("MM.DD.YY", "M.d.yy");
         userToJavaDateFormatMap.put("DD.MM.YYYY", "d.M.yyyy");
+        userToJavaDateFormatMap.put("DD.MM.YY", "d.M.yy");
         userToJavaDateFormatMap.put("YYYY.MM.DD", "yyyy.M.d");
 
-        userToJavaDateFormatMap.put("MMM/DD/YY", "MMM/d/yy");
         userToJavaDateFormatMap.put("MMM/DD/YYYY", "MMM/d/yyyy");
-        userToJavaDateFormatMap.put("DD/MMM/YY", "d/MMM/yy");
+        userToJavaDateFormatMap.put("MMM/DD/YY", "MMM/d/yy");
         userToJavaDateFormatMap.put("DD/MMM/YYYY", "d/MMM/yyyy");
+        userToJavaDateFormatMap.put("DD/MMM/YY", "d/MMM/yy");
         userToJavaDateFormatMap.put("YYYY/MMM/DD", "yyyy/MMM/d");
 
-        userToJavaDateFormatMap.put("MMM-DD-YY", "MMM-d-yy");
         userToJavaDateFormatMap.put("MMM-DD-YYYY", "MMM-d-yyyy");
-        userToJavaDateFormatMap.put("DD-MMM-YY", "d-MMM-yy");
+        userToJavaDateFormatMap.put("MMM-DD-YY", "MMM-d-yy");
         userToJavaDateFormatMap.put("DD-MMM-YYYY", "d-MMM-yyyy");
+        userToJavaDateFormatMap.put("DD-MMM-YY", "d-MMM-yy");
         userToJavaDateFormatMap.put("YYYY-MMM-DD", "yyyy-MMM-d");
 
-        userToJavaDateFormatMap.put("MMM.DD.YY", "MMM.d.yy");
         userToJavaDateFormatMap.put("MMM.DD.YYYY", "MMM.d.yyyy");
-        userToJavaDateFormatMap.put("DD.MMM.YY", "d.MMM.yy");
+        userToJavaDateFormatMap.put("MMM.DD.YY", "MMM.d.yy");
         userToJavaDateFormatMap.put("DD.MMM.YYYY", "d.MMM.yyyy");
+        userToJavaDateFormatMap.put("DD.MMM.YY", "d.MMM.yy");
         userToJavaDateFormatMap.put("YYYY.MMM.DD", "yyyy.MMM.d");
 
         userToJavaTimeFormatMap.put("00:00:00 12H", "h:m:s a");
@@ -181,12 +180,8 @@ public class TimeStampConvertUtils {
             }
         }
         SUPPORTED_JAVA_DATE_TIME_FORMATS.addAll(userToJavaDateFormatMap.values());
-
-        DateTimeParser[] parsers = new DateTimeParser[SUPPORTED_JAVA_DATE_TIME_FORMATS.size()];
-        int index = 0;
         for (String format : TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS) {
-            parsers[index++] = DateTimeFormat.forPattern(format.trim()).getParser();
-            SUPPORTED_DATE_TIME_FORMATTERS.add(DateTimeFormat.forPattern(format.trim()));
+            SUPPORTED_DATE_TIME_FORMATTERS.add(java.time.format.DateTimeFormatter.ofPattern(format.trim()));
         }
 
     }
@@ -486,14 +481,14 @@ public class TimeStampConvertUtils {
     }
 
     /*
-     * DateTimeFormatter wasn't working with 210 formats added, used
-     * SUPPORTED_DATE_TIME_FORMATTERS which is a list of formatters instead
+     * using java 8, DateTimeFormatter wasn't working with 210 formats added,
+     * used SUPPORTED_DATE_TIME_FORMATTERS which is a list of formatters instead
      */
-    public static DateTime parseDateTime(String value) {
-        DateTime dateTime = null;
-        for (DateTimeFormatter formatter : SUPPORTED_DATE_TIME_FORMATTERS) {
+    public static LocalDate parseDateTime(String value) {
+        LocalDate dateTime = null;
+        for (java.time.format.DateTimeFormatter formatter : SUPPORTED_DATE_TIME_FORMATTERS) {
             try {
-                dateTime = formatter.parseDateTime(value);
+                dateTime = LocalDate.parse(value, formatter);
             } catch (Exception e) {
             }
             if (dateTime != null) {
