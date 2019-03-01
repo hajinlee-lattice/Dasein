@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.metadata.service.DataUnitCrossTenantService;
 import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
@@ -73,6 +75,13 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     @Inject
     private S3Service s3Service;
 
+
+    @Inject
+    private DataUnitCrossTenantService dataUnitCrossTenantService;
+
+    @Inject
+    private DropBoxCrossTenantService dropBoxCrossTenantService;
+
     @Value("${aws.customer.s3.bucket}")
     private String customersBucket;
 
@@ -112,10 +121,10 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
             String tenantId = cs.getTenantId();
             attrConfigEntityMgr.cleanupTenant(tenantId);
+            dataUnitCrossTenantService.cleanupByTenant(customerSpace);
+            dropBoxCrossTenantService.delete(customerSpace);
             Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
             MultiTenantContext.setTenant(tenant);
-            dataUnitService.cleanupByTenant();
-            dropBoxService.delete();
         } catch (Exception e) {
             log.error(String.format("Uninstall CDL component for: %s failed. %s", customerSpace, e.toString()));
             return false;
