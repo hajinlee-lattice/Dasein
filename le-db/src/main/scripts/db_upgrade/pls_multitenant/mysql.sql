@@ -1,5 +1,35 @@
 USE `PLS_MultiTenant`;
 
+CREATE PROCEDURE `Update_SEGEMENT_EXPORT_OBJECT_TYPES`()
+    BEGIN
+		UPDATE PLS_MultiTenant.WORKFLOW_JOB
+		SET `INPUT_CONTEXT` = JSON_REPLACE(
+				`INPUT_CONTEXT`,
+				'$.EXPORT_OBJECT_TYPE',
+				'Enriched Accounts'
+		)
+		WHERE TYPE = 'segmentExportWorkflow'
+		AND JSON_EXTRACT (`INPUT_CONTEXT`, '$.EXPORT_OBJECT_TYPE') = 'Accounts';
+
+		UPDATE PLS_MultiTenant.WORKFLOW_JOB
+		SET `INPUT_CONTEXT` = JSON_REPLACE(
+				`INPUT_CONTEXT`,
+				'$.EXPORT_OBJECT_TYPE',
+				'Enriched Contacts (No Account Attributes)'
+		)
+		WHERE TYPE = 'segmentExportWorkflow'
+		AND JSON_EXTRACT (`INPUT_CONTEXT`, '$.EXPORT_OBJECT_TYPE') = 'Contacts';
+
+		UPDATE PLS_MultiTenant.WORKFLOW_JOB
+		SET `INPUT_CONTEXT` = JSON_REPLACE(
+				`INPUT_CONTEXT`,
+				'$.EXPORT_OBJECT_TYPE',
+				'Enriched Contacts with Account Attributes'
+		)
+		WHERE TYPE = 'segmentExportWorkflow'
+		AND JSON_EXTRACT (`INPUT_CONTEXT`, '$.EXPORT_OBJECT_TYPE') = 'Accounts and Contacts';
+    END;
+
 CREATE PROCEDURE `Update_CDL_BUSINESS_CALENDAR`()
   BEGIN
   END;
@@ -31,17 +61,19 @@ CREATE PROCEDURE `CreateDropBoxTable`()
 //
 DELIMITER;
 
-CREATE PROCEDURE `CreateDataIntegrationMonitoringTable`() 
+CREATE PROCEDURE `CreateDataIntegrationMonitoringTable`()
   BEGIN
   END;
 //
 DELIMITER;
 
-CREATE PROCEDURE `CreateDataIntegrationMessageTable`() 
+CREATE PROCEDURE `CreateDataIntegrationMessageTable`()
   BEGIN
   END;
 //
 DELIMITER;
+
+CALL `Update_SEGEMENT_EXPORT_OBJECT_TYPES`();
 
 CALL `Update_CDL_BUSINESS_CALENDAR`();
 CALL `CreateDataIntegrationMonitoringTable`();
