@@ -325,6 +325,8 @@ public class MatchInputValidator {
         }
     }
 
+    // TODO: Split key validation for 1.0 matcher and 2.0 matcher (Will provide
+    // detailed comments after spliting is done)
     private static void validateLDCAccountMatchKeys(Set<MatchKey> keySet) {
         if (!keySet.contains(MatchKey.DUNS) && !keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
                 && !keySet.contains(MatchKey.LatticeAccountID)) {
@@ -340,12 +342,25 @@ public class MatchInputValidator {
     }
 
     /**
-     * Compare to validateLDCAccountMatchKeys(), major difference is for
-     * Name+Location only match: remove check that Country + State must exist.
-     * This check is actually for 1.0 LDC matcher (purely sql based), even 2.0
-     * ldc matcher should not have this check since if country is missing, we
-     * use USA as default and state is not mandatory either
-     * 
+     * Account entity match support 4 kinds of lookup: Duns, Domain, Name,
+     * SystemId. So at least one of them is required to provide. For LDC match
+     * embedded inside Account match, required key is Duns, Domain and Name.
+     * It's covered.
+     *
+     * Compare to validateLDCAccountMatchKeys():
+     *
+     * Difference 1 in Name+Location only match: Remove check that Country +
+     * State must exist. This check is actually for 1.0 LDC matcher (purely sql
+     * based), even 2.0 ldc matcher should not have this check since if country
+     * is missing, we use USA as default and state is not mandatory either
+     *
+     * Difference 2: Don't allow setting MatchKey without mapping any fields. In
+     * validateLDCAccountMatchKeys(), if setting match key without mapping
+     * field, matcher interprets it as not using this match key. Feel this
+     * tolerance makes match key config confusing. If don't use, then don't set.
+     * Don't make change to validateLDCAccountMatchKeys() because it could break
+     * some existing external services
+     *
      * @param keyMap
      * @param fetchOnly
      */
