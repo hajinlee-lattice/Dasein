@@ -18,7 +18,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATT
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_SALES_VOL_US;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_STATE;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_ZIPCODE;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTIC_ID;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ID;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ORBSEC_ATTR_PRIDOM;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ORBSEC_ATTR_SECDOM;
 
@@ -167,7 +167,7 @@ public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGB
 
     private void prepareAMSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of(LATTIC_ID, Long.class));
+        columns.add(Pair.of(LATTICE_ID, Long.class));
         columns.add(Pair.of(AMS_ATTR_DOMAIN, String.class));
         columns.add(Pair.of(AMS_ATTR_STATE, String.class));
         columns.add(Pair.of(AMS_ATTR_ZIP, String.class));
@@ -467,7 +467,7 @@ public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGB
             String key = String.valueOf(record.get(KEY));
             Assert.assertTrue(expected.containsKey(key));
             seenKeys.add(key);
-            isObjEquals(record.get(LATTIC_ID), expected.get(key)[1]);
+            isObjEquals(record.get(LATTICE_ID), expected.get(key)[1]);
             isObjEquals(record.get(ATTR_LDC_DUNS), expected.get(key)[2]);
             isObjEquals(record.get(ATTR_DU_DUNS), expected.get(key)[3]);
             isObjEquals(record.get(ATTR_GU_DUNS), expected.get(key)[4]);
@@ -550,7 +550,7 @@ public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGB
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Object[] expectedOptLog = expectedOptLogs.get(record.get(LATTIC_ID));
+            Object[] expectedOptLog = expectedOptLogs.get(record.get(LATTICE_ID));
             Assert.assertNotNull(expectedOptLog);
             if (record.get(OperationLogUtils.DEFAULT_FIELD_NAME) == null) {
                 Assert.assertNull(expectedOptLog[1]);

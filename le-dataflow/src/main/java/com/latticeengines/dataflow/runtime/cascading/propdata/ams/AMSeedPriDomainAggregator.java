@@ -97,7 +97,7 @@ public class AMSeedPriDomainAggregator extends BaseAggregator<AMSeedPriDomainAgg
     }
 
     private Context update(Context context, TupleEntry arguments, String priDomReason) {
-        context.id = (Long) arguments.getObject(DataCloudConstants.LATTIC_ID);
+        context.id = (Long) arguments.getObject(DataCloudConstants.LATTICE_ID);
         context.isPriDom = arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN);
         context.isPriAct = arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_ACCOUNT);
         context.priDomReason = priDomReason;

@@ -88,12 +88,12 @@ public class AMSeedPriActFix extends ConfigurableFlowBase<TransformerConfig> {
                 .rename(new FieldList(OperationLogUtils.DEFAULT_FIELD_NAME), new FieldList(PRILOC_ZIP_LOG_FIELD)) //
                 .renamePipe("ZipPriLoc");
 
-        ams = ams.join(new FieldList(DataCloudConstants.LATTIC_ID), priLoc, new FieldList(LATTICEID_PRILOC), JoinType.LEFT)
-                .join(new FieldList(DataCloudConstants.LATTIC_ID), ctryPriLoc, new FieldList(LATTICEID_PRILOC_CTRY),
+        ams = ams.join(new FieldList(DataCloudConstants.LATTICE_ID), priLoc, new FieldList(LATTICEID_PRILOC), JoinType.LEFT)
+                .join(new FieldList(DataCloudConstants.LATTICE_ID), ctryPriLoc, new FieldList(LATTICEID_PRILOC_CTRY),
                         JoinType.LEFT)
-                .join(new FieldList(DataCloudConstants.LATTIC_ID), stPriLoc, new FieldList(LATTICEID_PRILOC_ST),
+                .join(new FieldList(DataCloudConstants.LATTICE_ID), stPriLoc, new FieldList(LATTICEID_PRILOC_ST),
                         JoinType.LEFT)
-                .join(new FieldList(DataCloudConstants.LATTIC_ID), zipPriLoc, new FieldList(LATTICEID_PRILOC_ZIP),
+                .join(new FieldList(DataCloudConstants.LATTICE_ID), zipPriLoc, new FieldList(LATTICEID_PRILOC_ZIP),
                         JoinType.LEFT);
         ams = ams.discard(new FieldList(DataCloudConstants.ATTR_IS_PRIMARY_LOCATION))
                 .apply(String.format("(%s == null || %s != null) ? \"Y\" : \"N\"", DataCloudConstants.AMS_ATTR_DOMAIN,
@@ -126,7 +126,7 @@ public class AMSeedPriActFix extends ConfigurableFlowBase<TransformerConfig> {
                 .rename(new FieldList(OperationLogUtils.DEFAULT_FIELD_NAME), new FieldList(PRIDOM_LOG_FIELD)) //
                 .renamePipe("PriDom");
 
-        ams = ams.join(new FieldList(DataCloudConstants.LATTIC_ID), priDom, new FieldList(LATTICEID_PRIDOM),
+        ams = ams.join(new FieldList(DataCloudConstants.LATTICE_ID), priDom, new FieldList(LATTICEID_PRIDOM),
                 JoinType.LEFT);
 
         ams = ams

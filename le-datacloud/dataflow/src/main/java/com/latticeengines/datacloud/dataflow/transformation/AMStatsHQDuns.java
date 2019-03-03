@@ -41,7 +41,7 @@ public class AMStatsHQDuns extends ConfigurableFlowBase<TransformerConfig> {
             am = addSource(parameters.getBaseTables().get(0));
             amBkt = am;
         }
-        String amId = am.getFieldNames().contains(latticeAccountId)? latticeAccountId : DataCloudConstants.LATTIC_ID;
+        String amId = am.getFieldNames().contains(latticeAccountId)? latticeAccountId : DataCloudConstants.LATTICE_ID;
         am = am.retain(new FieldList(amId, //
                 DOMAIN, //
                 STATUS_CODE, //
@@ -49,7 +49,7 @@ public class AMStatsHQDuns extends ConfigurableFlowBase<TransformerConfig> {
                 DUNS, //
                 DDUNS, //
                 GDUNS //
-        )).rename(new FieldList(DataCloudConstants.LATTIC_ID), //
+        )).rename(new FieldList(DataCloudConstants.LATTICE_ID), //
                 new FieldList(InterfaceName.LatticeAccountId.name()));
         Node nodeWithProperCodes = am
                 .filter(DOMAIN + " != null && " + STATUS_CODE + " != null && " + SUBSIDIARY_INDICATOR + " != null && "
