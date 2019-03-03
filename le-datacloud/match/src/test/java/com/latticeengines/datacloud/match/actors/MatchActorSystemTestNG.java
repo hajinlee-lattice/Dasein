@@ -57,8 +57,8 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     @Value("${datacloud.match.default.decision.graph}")
     private String ldcMatchDG;
-    // TODO: Will change to default decision graph per entity in property file
-    private String accountMatchDG = "PetitFour";
+    @Value("${datacloud.match.default.decision.graph.account}")
+    private String accountMatchDG;
 
     private static final String DUNS = "079942718";
     private static final String DOMAIN = "abc.xyz";
