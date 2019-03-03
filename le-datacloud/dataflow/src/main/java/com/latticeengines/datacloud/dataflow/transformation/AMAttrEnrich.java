@@ -37,7 +37,7 @@ public class AMAttrEnrich extends ConfigurableFlowBase<AMAttrEnrichConfig> {
         // Check field conflicts
         Set<String> customerAttrs = new HashSet<>(input.getFieldNames());
         for (String amAttr : am.getFieldNames()) {
-            if (customerAttrs.contains(amAttr) && !amAttr.equals(DataCloudConstants.LATTIC_ID)
+            if (customerAttrs.contains(amAttr) && !amAttr.equals(DataCloudConstants.LATTICE_ID)
                     && !amAttr.equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
                 throw new RuntimeException("Conflict field name between customer table and account master: " + amAttr);
             }

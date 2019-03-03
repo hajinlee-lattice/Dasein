@@ -9,7 +9,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATT
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_LDC_DUNS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_STATE;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_ZIPCODE;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTIC_ID;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ID;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ORBSEC_ATTR_PRIDOM;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ORBSEC_ATTR_SECDOM;
 
@@ -34,7 +34,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<TransformerConfig> {
     public static final String TRANSFORMER_NAME = "AMLookupRebuild";
 
     public static final String KEY = "Key";
-    private static final String[] AMLOOKUP_FINAL_FIELDS = { LATTIC_ID, KEY, ATTR_LDC_DUNS, ATTR_DU_DUNS, ATTR_GU_DUNS };
+    private static final String[] AMLOOKUP_FINAL_FIELDS = { LATTICE_ID, KEY, ATTR_LDC_DUNS, ATTR_DU_DUNS, ATTR_GU_DUNS };
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
