@@ -28,6 +28,7 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -237,6 +239,22 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     value = true;
                 } else if (field.toLowerCase().contains("ismatched")) {
                     value = StringUtils.isNotEmpty(internalRecord.getLatticeAccountId());
+                } else if (ColumnSelection.Predefined.LeadToAcct
+                        .equals(matchContext.getInput().getPredefinedSelection())
+                        && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
+                    // For Lead-to-Account match, if cannot find matched
+                    // AccountId or customer's AccountId doesn't match with
+                    // AccountId from matcher, return anonymous AccountId to
+                    // help ProfileContact step which requires existence of
+                    // AccountId. Anonymous AccountId is some predefined string
+                    // which should have very low chance to be conflict with
+                    // real AccountId. And these contacts become orphan.
+                    value = results.get(field);
+                    String customerAccountId = internalRecord.getParsedSystemIds() == null ? null
+                            : internalRecord.getParsedSystemIds().get(InterfaceName.AccountId.name());
+                    if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
+                        value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
+                    }
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);

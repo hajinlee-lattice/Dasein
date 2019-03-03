@@ -99,6 +99,8 @@ public enum InterfaceName {
                  // contact data
     SalesforceAccountID, // salesforce account ID
     SalesforceContactID, // salesforce contact ID
+    // AccountId from Customer when Entity match is enabled
+    CustomerAccountId, //
 
     CDLCreatedTime, // creation timestamp of CDL entities
     CDLUpdatedTime, // update timestamp of CDL entities

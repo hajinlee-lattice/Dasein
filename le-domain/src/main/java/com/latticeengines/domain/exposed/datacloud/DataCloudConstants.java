@@ -29,6 +29,8 @@ public final class DataCloudConstants {
     public static final String ENTITY_PREFIX_SEED_ATTRIBUTES = "ATTRS_";
     public static final String ENTITY_DELIMITER = "_";
     public static final String ENTITY_ANONYMOUS_ID = "__ANONYMOUS__";
+    // Anonymous AccountId
+    public static final String ENTITY_ANONYMOUS_AID = "__ANONYMOUS_AID__";
     // entity match attribute names
     public static final String ENTITY_ATTR_PID = "PID"; // primary id
     public static final String ENTITY_ATTR_SID = "SID"; // secondary id

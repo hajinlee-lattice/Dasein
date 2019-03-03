@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component("matchStandardizationService")
 public class MatchStandardizationServiceImpl implements MatchStandardizationService {
@@ -210,13 +211,14 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
 
     @Override
     public void parseRecordForSystemIds(List<Object> inputRecord, Map<MatchKey, List<String>> keyMap,
-                                        Map<MatchKey, List<Integer>> keyPositionMap, MatchKeyTuple matchKeyTuple) {
+            Map<MatchKey, List<Integer>> keyPositionMap, MatchKeyTuple matchKeyTuple, EntityMatchKeyRecord record) {
         List<Pair<String, String>> systemIds = new ArrayList<>();
         if (keyMap.containsKey(MatchKey.SystemId) && keyPositionMap.containsKey(MatchKey.SystemId)) {
             List<String> systemIdNames = keyMap.get(MatchKey.SystemId);
             List<Integer> systemIdPositions = keyPositionMap.get(MatchKey.SystemId);
 
             for (int i = 0; i < systemIdNames.size(); i++) {
+                String cleanSystemIdName = getStandardizedSystemIdName(systemIdNames.get(i));
                 String cleanSystemId = null;
                 Integer systemIdPos = systemIdPositions.get(i);
                 if (inputRecord.get(systemIdPos) != null) {
@@ -230,11 +232,37 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     }
                     // TODO(jwinter): Complete work to clean up System IDs.
                     cleanSystemId = StringStandardizationUtils.getStandardizedSystemId(systemId);
+                    record.addOrigSystemId(cleanSystemIdName, systemId);
+                    record.addParsedSystemId(cleanSystemIdName, cleanSystemId);
                 }
-                systemIds.add(Pair.of(systemIdNames.get(i), cleanSystemId));
+                systemIds.add(Pair.of(cleanSystemIdName, cleanSystemId));
             }
         }
         matchKeyTuple.setSystemIds(systemIds);
+    }
+
+    /**
+     * AccountId from customer is named as CustomerAccountId in file import (In
+     * future, might extend this naming convention to other match key fields too
+     * to avoid naming conflicts). But SystemId field names managed in
+     * seed/lookup should use standard name, eg. AccountId. So need to do
+     * standardization for SystemId field names too.
+     *
+     * TODO: Intend to put getStandardizedSystemIdName in
+     * StringStandardizationUtils, but the class is in le-common. InterfaceName
+     * enum is defined in le-domain project which depends on le-common. So the
+     * project dependency has conflict. Plan to move StringStandardizationUtils
+     * and related utils classes to le-domain project. Could impact a lot of
+     * classes. Do it later.
+     *
+     * @param systemIdName
+     * @return
+     */
+    private String getStandardizedSystemIdName(String systemIdName) {
+        if (InterfaceName.CustomerAccountId.name().equalsIgnoreCase(systemIdName.trim())) {
+            return InterfaceName.AccountId.name();
+        }
+        return systemIdName;
     }
 
     // TODO(jwinter): The two methods below are not used right now but I'm not deleting them in case they are needed

@@ -248,7 +248,7 @@ public class MatchInputValidatorUnitTestNG {
             failed = true;
             Assert.assertTrue(
                     e.getMessage().contains(
-                            "Only Predefined selection [ID, Seed] are supported for entity match at this time."),
+                            "Only Predefined selection [ID, Seed, LeadToAcct] are supported for entity match at this time."),
                     "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
             Assert.fail("Failed on wrong exception: " + e.getMessage());
