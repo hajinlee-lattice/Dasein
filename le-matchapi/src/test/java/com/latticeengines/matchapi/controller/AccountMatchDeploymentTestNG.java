@@ -162,11 +162,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             // non-standard domain + country
             { "C3_03", "www.google.com", null, null, "united states", null, null, null, null }, //
 
-            // case 4: system id (currently don't have system id
-            // standardization)
-            { "C4_01", null, null, null, null, null, null, "acc_id", null }, //
-            { "C4_02", null, null, null, null, null, null, null, "sfdc_id" }, //
-            { "C4_03", null, null, null, null, null, null, "acc_id", "sfdc_id" }, //
+            // case 4: system id
+            { "C4_01", null, null, null, null, null, null, " acc_id", null }, //
+            { "C4_02", null, null, null, null, null, null, null, "sfdc_id " }, //
+            { "C4_03", null, null, null, null, null, null, " acc_id ", "\t sfdc_id \t" }, //
 
             // case 5: any combinations
             // duns + name + country
