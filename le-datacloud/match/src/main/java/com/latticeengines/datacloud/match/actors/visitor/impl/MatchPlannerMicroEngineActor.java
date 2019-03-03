@@ -146,7 +146,8 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
 
         Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
                 .get(matchTraveler.getEntity()).getKeyMap();
-        matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple);
+        matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
+                entityMatchKeyRecord);
 
         // Send domain data to DomainCollectionService since this was not done outside the Actor system.
         String domain = matchKeyTuple.getDomain();

@@ -21,7 +21,7 @@ public interface MatchStandardizationService {
                                     EntityMatchKeyRecord record);
 
     void parseRecordForSystemIds(List<Object> inputRecord, Map<MatchKey, List<String>> keyMap,
-                                 Map<MatchKey, List<Integer>> keyPositionMap, MatchKeyTuple matchKeyTuple);
+            Map<MatchKey, List<Integer>> keyPositionMap, MatchKeyTuple matchKeyTuple, EntityMatchKeyRecord record);
 
     // TODO(jwinter): The two methods below are not used right now but I'm not deleting them in case they are needed
     //     later.

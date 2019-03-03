@@ -180,11 +180,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             ColumnMetadata ldcIdCM = new ColumnMetadata();
             ldcIdCM.setAttrName(InterfaceName.LatticeAccountId.name());
             ldcIdCM.setJavaClass(String.class.getSimpleName());
+            return Arrays.asList(ldcIdCM);
+        case LeadToAcct:
             ColumnMetadata accIdCM = new ColumnMetadata();
             accIdCM.setAttrName(InterfaceName.AccountId.name());
             accIdCM.setJavaClass(String.class.getSimpleName());
-            // TODO: Don't return AccountId for now. Need to consider in M27
-            return Arrays.asList(ldcIdCM);
+            return Arrays.asList(accIdCM);
         default:
             throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
 

@@ -22,11 +22,14 @@ public class InternalOutputRecord extends OutputRecord {
     private NameLocation parsedNameLocation;
     private String parsedEmail;
     private Tenant parsedTenant;
+    private Map<String, String> parsedSystemIds;
+
     private String origDomain;
     private NameLocation origNameLocation;
     private String origDuns;
     private String origEmail;
     private Tenant origTenant;
+    private Map<String, String> origSystemIds;
 
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
@@ -286,6 +289,22 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setEntityKeyPositionMap(Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
         this.entityKeyPositionMaps = entityKeyPositionMaps;
+    }
+
+    public Map<String, String> getParsedSystemIds() {
+        return parsedSystemIds;
+    }
+
+    public void setParsedSystemIds(Map<String, String> parsedSystemIds) {
+        this.parsedSystemIds = parsedSystemIds;
+    }
+
+    public Map<String, String> getOrigSystemIds() {
+        return origSystemIds;
+    }
+
+    public void setOrigSystemIds(Map<String, String> origSystemIds) {
+        this.origSystemIds = origSystemIds;
     }
 
 }
