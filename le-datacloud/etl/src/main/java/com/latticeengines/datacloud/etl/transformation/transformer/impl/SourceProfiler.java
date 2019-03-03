@@ -765,7 +765,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isIdAttr(Field field, ProfileParameters paras) {
-            if (field.name().equals(DataCloudConstants.LATTIC_ID)
+            if (field.name().equals(DataCloudConstants.LATTICE_ID)
                     || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
                 if (paras.getIdAttr() != null) {
                     throw new RuntimeException("Only allow one ID field (LatticeAccountId or LatticeID)");

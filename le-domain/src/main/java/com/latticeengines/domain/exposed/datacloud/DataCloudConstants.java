@@ -19,7 +19,7 @@ public final class DataCloudConstants {
     public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
     public static final String PATCH_BOOK_ATTR_PREFIX = "PATCH_";
 
-    public static final String LATTIC_ID = "LatticeID";
+    public static final String LATTICE_ID = "LatticeID";
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
 
     // entity match constants

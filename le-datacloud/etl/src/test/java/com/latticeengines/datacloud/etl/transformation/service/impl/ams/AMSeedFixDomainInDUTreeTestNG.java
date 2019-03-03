@@ -72,7 +72,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends PipelineTransformationTestNGB
 
     private void prepareAMSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of(DataCloudConstants.LATTIC_ID, Long.class));
+        columns.add(Pair.of(DataCloudConstants.LATTICE_ID, Long.class));
         columns.add(Pair.of(DataCloudConstants.AMS_ATTR_DOMAIN, String.class));
         columns.add(Pair.of(DataCloudConstants.AMS_ATTR_DUNS, String.class));
         columns.add(Pair.of(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, String.class));

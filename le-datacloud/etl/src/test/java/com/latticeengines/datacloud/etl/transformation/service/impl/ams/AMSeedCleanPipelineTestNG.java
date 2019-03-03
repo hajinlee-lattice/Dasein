@@ -318,7 +318,7 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Long latticeId = (Long) record.get(DataCloudConstants.LATTIC_ID);
+            Long latticeId = (Long) record.get(DataCloudConstants.LATTICE_ID);
             distinctIds.add(latticeId);
             Map<String, Object> data = latticeIdToData.get(latticeId);
 

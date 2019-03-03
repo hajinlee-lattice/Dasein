@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.dataflow.amstats;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ACCOUNT_ID;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTIC_ID;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ID;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DDUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DOMAIN;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DUNS;
@@ -41,7 +41,7 @@ public class AMStatsHQDunsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     private TransformationFlowParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
-                Pair.of(LATTIC_ID, Integer.class), //
+                Pair.of(LATTICE_ID, Integer.class), //
                 Pair.of(STATUS_CODE, String.class), //
                 Pair.of(SUBSIDIARY_INDICATOR, String.class), //
                 Pair.of(DUNS, String.class), //
