@@ -79,7 +79,7 @@ public class StringStandardizationUtils {
             return null;
         }
 
-        return systemId;
+        return systemId.trim();
     }
 
     public static String getStandardizedOutputLatticeID(String latticeId) {
