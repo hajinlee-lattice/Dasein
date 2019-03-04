@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
 import static com.latticeengines.datacloud.match.util.EntityMatchUtils.shouldSetTTL;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,7 +63,6 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private static final String LOOKUP_BACKGROUND_THREAD_NAME = "entity-match-internal";
     private static final int ENTITY_ID_LENGTH = 16;
     private static final int MAX_ID_ALLOCATION_ATTEMPTS = 50;
-    private static final long TERMINATION_TIMEOUT_IN_MILLIS = 30000;
     // make the probability even for all characters since we want to have case insensitive ID
     private static final char[] ENTITY_ID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
@@ -292,12 +293,19 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     /*
      * shutdown all workers and block until all background threads finishes
      */
+    @PreDestroy
     @VisibleForTesting
-    synchronized void shutdownAndAwaitTermination() throws Exception {
-        shouldTerminate = true;
-        if (lookupExecutorService != null) {
-            lookupExecutorService.shutdown();
-            lookupExecutorService.awaitTermination(TERMINATION_TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
+    synchronized void predestroy() {
+        try {
+            log.info("Shutting down staging lookup entry publishers");
+            shouldTerminate = true;
+            if (lookupExecutorService != null) {
+                lookupExecutorService.shutdownNow();
+                lookupExecutorService.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            log.info("Completed shutting down of staging lookup entry publishers");
+        } catch (Exception e) {
+            log.error("Fail to finish all pre-destroy actions", e);
         }
     }
 
@@ -793,7 +801,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     }
                 } catch (InterruptedException e) {
                     if (!shouldTerminate) {
-                        log.error("Staging lookup entry publisher (in background) is interrupted", e);
+                        log.warn("Staging lookup entry publisher (in background) is interrupted");
                     }
                 } catch (Exception e) {
                     log.error("Encounter an error (in background) in staging lookup entry publisher", e);

@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +57,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 
 import akka.actor.ActorRef;
+import scala.concurrent.duration.Duration;
 
 @Component("matchActorSystem")
 public class MatchActorSystem extends ActorSystemTemplate {
@@ -115,15 +118,21 @@ public class MatchActorSystem extends ActorSystemTemplate {
     }
 
     @PreDestroy
-    private void preDestroy() {
+    private void predestroy() {
         log.info("Shutting down match actor system");
-        if (system != null) {
-            system.shutdown();
+        try {
+            if (dataSourceServiceExecutor != null) {
+                dataSourceServiceExecutor.shutdownNow();
+                dataSourceServiceExecutor.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            if (system != null) {
+                system.shutdown();
+                system.awaitTermination(Duration.create(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            }
+            log.info("Completed shutdown of match actor system");
+        } catch (Exception e) {
+            log.error("Fail to finish all pre-destroy actions", e);
         }
-        if (dataSourceServiceExecutor != null) {
-            dataSourceServiceExecutor.shutdown();
-        }
-        log.info("Completed shutdown of match actor system");
     }
 
     @Override
