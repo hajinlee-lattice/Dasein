@@ -47,9 +47,9 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     // to avoid naming conflicts). But SystemId field names managed in
     // seed/lookup should use standard name, eg. AccountId. So need to do
     // standardization for SystemId field names too.
-    private final static Map<String, String> STANDARD_ATTR_NAMES = new HashMap<>();
+    private final static Map<String, String> STANDARD_ATTR_DICT = new HashMap<>();
     static {
-        STANDARD_ATTR_NAMES.put(InterfaceName.CustomerAccountId.name().toLowerCase(), InterfaceName.AccountId.name());
+        STANDARD_ATTR_DICT.put(InterfaceName.CustomerAccountId.name().toLowerCase(), InterfaceName.AccountId.name());
     }
 
 
@@ -264,8 +264,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     private String getStandardizedAttrName(@NotNull String attrName) {
         Preconditions.checkNotNull(attrName);
         attrName = attrName.trim();
-        if (STANDARD_ATTR_NAMES.containsKey(attrName.toLowerCase())) {
-            return STANDARD_ATTR_NAMES.get(attrName.toLowerCase());
+        if (STANDARD_ATTR_DICT.containsKey(attrName.toLowerCase())) {
+            return STANDARD_ATTR_DICT.get(attrName.toLowerCase());
         }
         return attrName;
     }
