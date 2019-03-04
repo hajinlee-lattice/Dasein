@@ -83,7 +83,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId) {
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId,
+            boolean enableEntityMatch) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
@@ -91,7 +92,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), withoutId);
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), withoutId, enableEntityMatch);
         return resolver.getFieldMappingsDocumentBestEffort(table);
     }
 
@@ -109,8 +110,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             sourceFileService.update(sourceFile);
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
-        Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
+        Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
         FieldMappingDocument fieldMappingFromSchemaRepo = resolver.getFieldMappingsDocumentBestEffort(table);
         generateExtraFieldMappingInfo(fieldMappingFromSchemaRepo, true);
         FieldMappingDocument resultDocument;
@@ -120,7 +122,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             Table templateTable = dataFeedTask.getImportTemplate();
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
-                    templateTable, SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId));
+                    templateTable, SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true,
+                            withoutId, enableEntityMatch));
         }
         return resultDocument;
     }
@@ -196,8 +199,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return resolver.getFieldMappingsDocumentBestEffort(table);
     }
 
-    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation, boolean withoutId) {
-        Table table = SchemaRepository.instance().getSchema(schemaInterpretation, withoutId);
+    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation, boolean withoutId,
+                                         boolean enableEntityMatch) {
+        Table table = SchemaRepository.instance().getSchema(schemaInterpretation, withoutId, enableEntityMatch);
         SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
             Attribute domainAttribute = table.getAttribute(interfaceName);
             if (domainAttribute != null) {
@@ -212,7 +216,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false);
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false, false);
         resolveMetadata(sourceFile, fieldMappingDocument, table, false);
     }
 
@@ -226,7 +230,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
             boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
+            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
         } else {
             table = dataFeedTask.getImportTemplate();
@@ -347,7 +352,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true, withoutId)
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true, withoutId, enableEntityMatch)
                 : templateTable;
         Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
                 .collect(Collectors.toSet());
@@ -483,7 +489,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
             boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-            Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
+            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
             return table.getAttributes().stream().map(this::getLatticeFieldFromTableAttribute).collect(Collectors.toList());
         } else {
             List<LatticeSchemaField> templateSchemaFields = new ArrayList<>();

@@ -118,7 +118,7 @@ public class ModelingFileUploadResource {
                 LatticeProduct.CG);
         if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             return ResponseDocument.successResponse(modelingFileMetadataService
-                    .getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters, false));
+                    .getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters, false, false));
         } else {
             return ResponseDocument.successResponse(modelingFileMetadataService
                     .getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType));
