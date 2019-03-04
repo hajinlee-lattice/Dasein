@@ -37,6 +37,7 @@
     "raw-loader": "^0.5.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-transition-group": "^1.2.1",
     "react2angular": "^4.0.4",
     "redux": "4.0.1",
     "redux-thunk": "2.3.0",
