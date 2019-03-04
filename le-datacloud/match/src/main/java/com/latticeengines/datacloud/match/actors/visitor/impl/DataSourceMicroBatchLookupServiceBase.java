@@ -26,11 +26,6 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest
  */
 public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLookupServiceBase {
 
-    /**
-     * Shutdown executor and take other destroy actions
-     */
-    // protected abstract void predestroy();
-
     /*
      * TODO use blocking queue in batch mode (don't care about single record latency that much)
      * TODO implement graceful termination
