@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.provision.impl;
 
 
 import java.util.List;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -137,7 +135,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Override
     public boolean reset(String customerSpace) {
-        log.info("Start reset CDL component for: " + customerSpace);
+        log.info(String.format("Start reset CDL component for: %s.", customerSpace));
         try {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
             Tenant tenant = tenantEntityMgr.findByTenantId(cs.toString());
@@ -158,10 +156,8 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
                 s3Service.cleanupPrefix(customersBucket, cs.getContractId());
 
                 log.info("Clean up DataCollection(DataFeed_xxx)");
-                DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();
-                if (dataCollection != null) {
-                    dataCollectionEntityMgr.delete(dataCollection);
-                }
+                dataCollectionEntityMgr.deleteAll();
+
 
                 log.info("Clean up MetadataSegment(RatingEngine,Play)");
                 List<MetadataSegment> segments = segmentService.getSegments();
@@ -194,6 +190,8 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             log.error(String.format("Reset CDL component for: %s failed. %s", customerSpace, e.toString()));
             return false;
         }
+
+        log.info(String.format("Reset CDL component for: %s succeed.", customerSpace));
         return true;
     }
 }
