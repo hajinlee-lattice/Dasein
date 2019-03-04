@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -280,10 +281,15 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         Long lastUpdatedTime = Long.parseLong(result.get(PlaymakerRecommendationEntityMgr.END_KEY).toString());
         Assert.assertNotNull(lastUpdatedTime);
 
+        int accExtSize = CollectionUtils.size(accExt);
         if (totalAccExtCount >= offset + max) {
-            Assert.assertEquals(accExt.size(), max);
+            // should be a full page
+            Assert.assertEquals(accExtSize, max, String.format("accExtSize=%d, max=%d", accExtSize, max));
         } else {
-            Assert.assertEquals(accExt.size(), offset + max - totalAccExtCount);
+            // should be a partial page
+            Assert.assertEquals(accExtSize, totalAccExtCount - offset, //
+                    String.format("accExtSize=%d, offset=%d, max=%d, totalAccExtCount=%d", //
+                            accExtSize, offset, max, totalAccExtCount));
         }
 
         List<String> impFields = Arrays.asList("ID", "SfdcAccountID", "LEAccountExternalID", "LastModificationDate",
