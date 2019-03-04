@@ -63,6 +63,7 @@ echo "Configuring HDP ..."
 cp $WSHOME/le-dev/hadoop/hadoop-env.sh $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/mapred-site.xml $HADOOP_CONF_DIR
+cp $WSHOME/le-dev/hadoop/yarn-env.sh $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/yarn-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/kms-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/${CORE_SITE_XML} $HADOOP_CONF_DIR/core-site.xml

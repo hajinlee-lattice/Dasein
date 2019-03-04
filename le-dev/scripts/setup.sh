@@ -10,11 +10,6 @@ function processErrors
   fi
 }
 
-
-if [[ ! -z "${J8_HOME}" ]]; then
-    export JAVA_HOME=${J8_HOME}
-fi
-
 PYTHON=${PYTHON:=python}
 
 # Test for required env variables
