@@ -118,10 +118,37 @@ public class MetadataResolverUnitTestNG {
 
         // case 14: missing date time value, skip those and expect true.
         Assert.assertTrue(
-                metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "", "12/05/2018", null, "", "1/1/1",
+                metadataResolver.isDateTypeColumn(
+                        Arrays.asList("11/4/2016", "", "12/05/2018", null, "", "01/01/01",
                         "13/11/2017"),
                         formatForDateAndTime));
         Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), null);
+
+        // case 15: verify two digit year can be recognized
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("11/4/16", "", "12/05/18", null, "", "1/1/01", "13/11/17"), formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), null);
+
+        // case 16: verify four digit year can be recognized
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("11/4/2016", "12/05/1218", null, "1/1/1001", "13/11/2017"),
+                formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), null);
+
+        // case 17: same times for year with 2 digit and year with 4 digit, 4
+        // digit wins
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("11/4/2016", "15/05/1218", null, "1/1/01", "13/11/17"), formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MM/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getRight(), null);
+
+        // case 18: verify 3 characters month
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("11/Apr/2016", "15/Mar/1218", null, "1/Jan/01", "13/Feb/17"), formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MMM/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
     }
 }

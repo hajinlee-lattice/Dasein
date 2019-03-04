@@ -2,6 +2,9 @@ package com.latticeengines.pls.metadata.resolution;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,9 +25,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -571,7 +571,7 @@ public class MetadataResolver {
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
-                DateTime dateTime = null;
+                TemporalAccessor dateTime = null;
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime == null) {
                     return false;
@@ -594,11 +594,11 @@ public class MetadataResolver {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 for (String format : supportedDateTimeFormat) {
-                    DateTimeFormatter dtf = DateTimeFormat.forPattern(format);
-                    DateTime date = null;
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
+                    TemporalAccessor date = null;
                     try {
-                        date = dtf.parseDateTime(columnField.trim());
-                    } catch (Exception e) {
+                        date = dtf.parse(columnField.trim());
+                    } catch (DateTimeParseException e) {
                         log.debug("Found columnField unparsable as date/time: " + columnField);
                     }
                     if (date != null) {
