@@ -231,18 +231,20 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 // -Xrunjdwp:transport=dt_socket,address=4023,server=y,suspend=y",
                 "ls -alhR . > <LOG_DIR>/directory.info", //
                 "&&", //
+                "cat launch_container.sh > <LOG_DIR>/launch_container.sh", //
+                "&&", //
+                "if [[ -z \\\"${LE_GC_OPTS}\\\" ]]; then LE_GC_OPTS=\\\"${LE_DEFAULT_GC_OPTS}\\\"; fi",//
+                "&&",
                 "$JAVA_HOME/bin/java", //
-                "-Dlog4j.debug", //
-                "-Dlog4j.configuration=file:log4j.properties", //
-                "-Dlog4j2.debug", //
-                "-Dlog4j.configurationFile=log4j2-yarn.xml", //
-                "-DLOG4J_DEBUG_DIR=<LOG_DIR>", //
+                getLogOpt(), //
                 CipherUtils.getSecretPropertyStr(), // secrets
                 getJacocoOpt(containerProperties), //
                 getTrustStoreOpts(containerProperties), //
                 getXmxSetting(appMasterProperties, true), //
-                "-XX:+UseNUMA", //
-                "-XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
+                // we define LE_GC_OPTS in hadoop-env or yarn-env
+                // because we do not want the application to depend on the java version on hadoop nodes
+                // after we completely migrate to java 11, we can simplify this
+                "${LE_GC_OPTS}<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
@@ -253,6 +255,16 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
             log.debug("Commands send to YARN: " + commands);
         }
         return commands;
+    }
+
+    private String getLogOpt() {
+        return StringUtils.join(Arrays.asList( //
+                "-Dlog4j.debug", //
+                "-Dlog4j.configuration=file:log4j.properties", //
+                "-Dlog4j2.debug", //
+                "-Dlog4j.configurationFile=log4j2-yarn.xml", //
+                "-DLOG4J_DEBUG_DIR=<LOG_DIR>" //
+        ), " ");
     }
 
     private String getJacocoOpt(Properties properties) {
@@ -303,6 +315,9 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties) {
+        environment.putIfAbsent("LE_DEFAULT_GC_OPTS", //
+                "-XX:+UseNUMA -XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc "
+                        + "-XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:");
         return environment;
     }
 
