@@ -238,7 +238,11 @@ angular.module('lp.import.calendar', [])
                 vm.saving = true;
                 ImportWizardStore.saveCalendar(vm.calendar).then(function(result) {
                     Modal.modalRemoveFromDOM(modal, {name: 'calendar_warning'});
-                    $state.go('home');
+                    if(gotoLastFrom()) {
+                        $state.go(vm.lastFrom.name);
+                    } else {
+                        $state.go('home');
+                    }
                 });
             }
         }
@@ -262,7 +266,11 @@ angular.module('lp.import.calendar', [])
                     // this just deletes the calendar, then standard calendar is used by default
                     ImportWizardService.deleteCalendar().then(function(result) {
                         vm.saving = false;
-                        $state.go('home');
+                        if(gotoLastFrom()) {
+                            $state.go(vm.lastFrom.name);
+                        } else {
+                            $state.go('home');
+                        }
                     });
                 } else {
                     //this sets a blank calendar in standard mode (new way to set it rather then delete)
@@ -273,12 +281,22 @@ angular.module('lp.import.calendar', [])
                         longerMonth: '1'
                     }).then(function(result) {
                         vm.saving = false;
-                        $state.go('home');
+                        if(gotoLastFrom()) {
+                        //if(vm.lastFrom.name && vm.lastFrom.name.includes('home.import')) {
+                            $state.go(vm.lastFrom.name);
+                        } else {
+                            $state.go('home');
+                        }
                     });
                 }
             }
         }
     }
+
+    function gotoLastFrom() {
+        return (vm.lastFrom.name && vm.lastFrom.name.includes('home.import'));
+    }
+    console.log(vm.lastFrom.name);
 
     vm.init = function() {
         var calendarInfo = ImportWizardStore.getCalendarInfo(Calendar),
