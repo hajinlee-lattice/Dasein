@@ -37,26 +37,36 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
     protected void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext, File localFile)
             throws IOException {
         long segmentContactsCount = contactFetcher.getCount(segmentExportContext, version);
-        log.info("contactCount = %d", segmentContactsCount);
+        log.info(String.format("contactCount = %d", segmentContactsCount));
 
         if (segmentContactsCount > 0) {
             // process contacts that exists in segment
-            long processedSegmentContactsCount = 0;
+            long total = 0;
+            long offset = 0;
             // find total number of pages needed
             int pages = (int) Math.ceil((segmentContactsCount * 1.0D) / pageSize);
-            log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
+            log.info("Number of minimum required loops: " + pages + ", with pageSize: " + pageSize);
 
             try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
                     new GenericDatumWriter<GenericRecord>(schema))) {
                 dataFileWriter.create(schema, localFile);
 
-                // loop over to required number of pages
-                for (int pageNo = 0; pageNo < pages; pageNo++) {
+                int pageNo = 0;
+                while (true) {
                     // fetch and process a single page
-                    processedSegmentContactsCount = fetchAndProcessContactsPage(segmentExportContext,
-                            segmentContactsCount, processedSegmentContactsCount, pageNo, dataFileWriter, schema,
-                            version);
+                    total = fetchAndProcessContactsPage(segmentExportContext, segmentContactsCount, offset, pageNo,
+                            dataFileWriter, schema, version);
+                    if (total == offset) {
+                        break;
+                    } else {
+                        offset = total;
+                    }
+                    pageNo++;
                 }
+                if (total < segmentContactsCount) {
+                    log.warn("Export contact number less than expected.");
+                }
+                log.info(String.format("segmentContactsCount = %d", total));
             }
         }
     }

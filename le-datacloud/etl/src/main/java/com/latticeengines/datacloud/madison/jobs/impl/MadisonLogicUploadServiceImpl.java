@@ -3,11 +3,10 @@ package com.latticeengines.datacloud.madison.jobs.impl;
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +25,7 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
     private boolean propdataJobsEnabled = false;
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext context) {
 
         long startTime = System.currentTimeMillis();
 

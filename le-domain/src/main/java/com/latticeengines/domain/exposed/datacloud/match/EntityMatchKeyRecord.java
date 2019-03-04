@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -14,12 +16,14 @@ public class EntityMatchKeyRecord {
     private NameLocation parsedNameLocation;
     private String parsedEmail;
     private Tenant parsedTenant;
+    private Map<String, String> parsedSystemIds;
 
     private String origDomain;
     private NameLocation origNameLocation;
     private String origDuns;
     private String origEmail;
     private Tenant origTenant;
+    private Map<String, String> origSystemIds;
 
     // TODO(jwinter): Fix handling of error messages which should be passed using the actor system.
     private Boolean failed = false;
@@ -121,6 +125,22 @@ public class EntityMatchKeyRecord {
         this.origTenant = origTenant;
     }
 
+    public Map<String, String> getParsedSystemIds() {
+        return parsedSystemIds;
+    }
+
+    public void setParsedSystemIds(Map<String, String> parsedSystemIds) {
+        this.parsedSystemIds = parsedSystemIds;
+    }
+
+    public Map<String, String> getOrigSystemIds() {
+        return origSystemIds;
+    }
+
+    public void setOrigSystemIds(Map<String, String> origSystemIds) {
+        this.origSystemIds = origSystemIds;
+    }
+
     public Boolean isFailed() {
         return failed;
     }
@@ -142,5 +162,19 @@ public class EntityMatchKeyRecord {
             this.errorMessages = new ArrayList<>();
         }
         this.errorMessages.add(errorMessage);
+    }
+
+    public void addOrigSystemId(String idField, String idVal) {
+        if (this.origSystemIds == null) {
+            this.origSystemIds = new HashMap<>();
+        }
+        this.origSystemIds.put(idField, idVal);
+    }
+
+    public void addParsedSystemId(String idField, String idVal) {
+        if (this.parsedSystemIds == null) {
+            this.parsedSystemIds = new HashMap<>();
+        }
+        this.parsedSystemIds.put(idField, idVal);
     }
 }

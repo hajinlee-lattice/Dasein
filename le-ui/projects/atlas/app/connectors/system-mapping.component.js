@@ -2,6 +2,7 @@ import React, { Component, react2angular } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import './system-mapping.component.scss';
+import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
 export default class SystemMappingComponent extends Component {
 
@@ -10,6 +11,7 @@ export default class SystemMappingComponent extends Component {
         // console.log('THE MAPPING', this.props);
         this.state = { systemsAvailable: [], system: props.system };
         this.accountIdClickHandler = this.accountIdClickHandler.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentWillUnmount(){
@@ -73,6 +75,51 @@ export default class SystemMappingComponent extends Component {
         }
     }
 
+    handleChange(event) {
+        let systemCopy = Object.assign({}, this.state.system);
+        systemCopy.orgName = event.target.value;
+        this.setState({system: systemCopy});
+    }
+
+    getOrgName() {
+        if (this.props.system.externalAuthentication) {
+            return (<div className="le-flex-row">
+                        <div className="le-flex-column">
+                            System Org Name:
+                                </div>
+                        <div className="le-flex-column color-blue">
+                            <input type="text" value={this.state.system.orgName} onChange={this.handleChange}/>
+                        </div>
+                    </div>);
+        } else {
+            return (<div className="le-flex-row">
+                        <div className="le-flex-column">
+                            System Org Name:
+                                </div>
+                        <div className="le-flex-column color-blue">
+                            {this.props.system.orgName}
+                        </div>
+                    </div>);  
+        }
+    }
+
+    getAccountIDDropdown() {
+        if (this.props.system.externalSystemType != "MAP") {
+            return (
+                    <div className="le-flex-row">
+                        <div className="le-flex-column">
+                            Account ID:
+                                </div>
+                        <div className="le-flex-column">
+                            {this.getAccountIDSelection()}
+                        </div>
+                    </div>
+            );
+        } else {
+            return null;
+        }
+    }
+
     render() {
         console.log('RENDER MAPPING');
         return (
@@ -86,22 +133,17 @@ export default class SystemMappingComponent extends Component {
                         {this.props.system.orgId}
                     </div>
                 </div>
+
                 <div className="le-flex-row">
-                    <div className="le-flex-column">
-                        System Org Name:
-                            </div>
-                    <div className="le-flex-column color-blue">
-                        {this.props.system.orgName}
-                    </div>
+                        <div className="le-flex-column">
+                            System Org Name:
+                                </div>
+                        <div className="le-flex-column color-blue">
+                            {this.props.system.orgName}
+                        </div>
                 </div>
-                <div className="le-flex-row">
-                    <div className="le-flex-column">
-                        Account ID:
-                            </div>
-                    <div className="le-flex-column">
-                        {this.getAccountIDSelection()}
-                    </div>
-                </div>
+
+                {this.getAccountIDDropdown()}
             </div>
 
         );

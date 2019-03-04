@@ -18,18 +18,20 @@ class SystemsService {
         return SystemsService.instance;
     }
     cleanupLookupId(systemsList){
-        systemsList.forEach(system => {
-            if(system.externalSystemName == null){
-                switch(system.externalSystemType){
-                    case CRM.externalSystemType:
-                        system.externalSystemName = CRM.externalSystemName;
-                    break;
-                    case MAP.externalSystemType:
-                        system.externalSystemName = MAP.externalSystemName;
-                    break;
+        if (systemsList) {
+            systemsList.forEach(system => {
+                if(system.externalSystemName == null){
+                    switch(system.externalSystemType){
+                        case CRM.externalSystemType:
+                            system.externalSystemName = CRM.externalSystemName;
+                        break;
+                        case MAP.externalSystemType:
+                            system.externalSystemName = MAP.externalSystemName;
+                        break;
+                    }
                 }
-            }
-        });
+            });
+        }
 
     }
     

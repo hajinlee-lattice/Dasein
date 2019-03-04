@@ -38,6 +38,8 @@ public interface S3Service {
 
     void copyObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey);
 
+    void copyLargeObjects(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey);
+
     void moveObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey);
 
     boolean isNonEmptyDirectory(String bucket, String prefix);

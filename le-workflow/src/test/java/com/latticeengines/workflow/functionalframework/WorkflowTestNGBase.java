@@ -2,8 +2,6 @@ package com.latticeengines.workflow.functionalframework;
 
 import javax.sql.DataSource;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +9,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.workflow.core.DataPlatformInfrastructure;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;

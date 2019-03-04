@@ -19,11 +19,11 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 public class MigrateReportAndOutput extends WorkflowTestNGBase {

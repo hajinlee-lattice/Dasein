@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.entitymgr.impl;
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.testng.Assert;
@@ -16,7 +17,7 @@ public class ModelSummaryDownloadFlagEntityMgrImplTestNG extends LPFunctionalTes
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
+    public void setup() {
         setupTestEnvironment();
     }
 

@@ -25,4 +25,8 @@ ${HADOOP_HOME}/sbin/yarn-daemon.sh start timelineserver
 ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh start historyserver
 
 ${SPARK_HOME}/sbin/start-history-server.sh
-${LIVY_HOME}/bin/livy-server start
+if [[ -n "${J8_HOME}" ]]; then
+    JAVA_HOME=${J8_HOME} ${LIVY_HOME}/bin/livy-server start
+else
+    ${LIVY_HOME}/bin/livy-server start
+fi

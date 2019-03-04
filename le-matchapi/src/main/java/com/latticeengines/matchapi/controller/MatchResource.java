@@ -180,8 +180,11 @@ public class MatchResource {
     public EntityPublishStatistics publishEntity(@RequestBody EntityPublishRequest request) {
         try {
             validateEntityPublishRequest(request);
+            if (request.isBumpupVersion()) {
+                entityMatchVersionService.bumpVersion(request.getDestEnv(), request.getDestTenant());
+            }
             EntityPublishStatistics statistics = entityInternalMatchService.publishEntity(request.getEntity(),
-                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), null);
+                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), request.getDestTTLEnabled());
             statistics.setRequest(request);
             return statistics;
         } catch (Exception e) {

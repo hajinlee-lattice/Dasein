@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.HttpMethod;
@@ -30,13 +31,19 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketPolicy;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.CopyPartRequest;
+import com.amazonaws.services.s3.model.CopyPartResult;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -56,10 +63,15 @@ public class S3ServiceImpl implements S3Service {
     private static final Logger log = LoggerFactory.getLogger(S3ServiceImpl.class);
     private static final CannedAccessControlList ACL = CannedAccessControlList.BucketOwnerFullControl;
 
+    private static final long SIZE_LIMIT = 5L * 1024L * 1024L * 1024L;
+
     private static ExecutorService workers;
 
     @Inject
     private AmazonS3 s3Client;
+
+    @Value("${aws.s3.copy.part.size:524288000}")
+    private long partSize;
 
     @Override
     public boolean objectExist(String bucket, String object) {
@@ -71,7 +83,58 @@ public class S3ServiceImpl implements S3Service {
             String destinationKey) {
         sourceKey = sanitizePathToKey(sourceKey);
         destinationKey = sanitizePathToKey(destinationKey);
-        s3Client.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        ObjectMetadata metadataResult = s3Client.getObjectMetadata(sourceBucketName, sourceKey);
+        if (metadataResult.getContentLength() >= SIZE_LIMIT) {
+            copyLargeObjects(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        } else {
+            s3Client.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        }
+    }
+
+    @Override
+    public void copyLargeObjects(String sourceBucketName, String sourceKey, String destinationBucketName,
+                                  String destinationKey) {
+        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(destinationBucketName, destinationKey);
+        InitiateMultipartUploadResult initResult = s3Client.initiateMultipartUpload(initRequest);
+        ObjectMetadata metadataResult = s3Client.getObjectMetadata(sourceBucketName, sourceKey);
+        long objectSize = metadataResult.getContentLength();
+
+        long bytePosition = 0;
+        int partNum = 1;
+        List<CopyPartResult> copyResponses = new ArrayList<>();
+        while (bytePosition < objectSize) {
+
+            long lastByte = Math.min(bytePosition + partSize - 1, objectSize - 1);
+
+            CopyPartRequest copyRequest = new CopyPartRequest()
+                    .withSourceBucketName(sourceBucketName)
+                    .withSourceKey(sourceKey)
+                    .withDestinationBucketName(destinationBucketName)
+                    .withDestinationKey(destinationKey)
+                    .withUploadId(initResult.getUploadId())
+                    .withFirstByte(bytePosition)
+                    .withLastByte(lastByte)
+                    .withPartNumber(partNum++);
+            copyResponses.add(s3Client.copyPart(copyRequest));
+            bytePosition += partSize;
+        }
+
+        // Complete the upload request to concatenate all uploaded parts and make the copied object available.
+        CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(
+                destinationBucketName,
+                destinationKey,
+                initResult.getUploadId(),
+                getETags(copyResponses));
+        s3Client.completeMultipartUpload(completeRequest);
+    }
+
+    // This is a helper function to construct a list of ETags.
+    private static List<PartETag> getETags(List<CopyPartResult> responses) {
+        List<PartETag> etags = new ArrayList<>();
+        for (CopyPartResult response : responses) {
+            etags.add(new PartETag(response.getPartNumber(), response.getETag()));
+        }
+        return etags;
     }
 
     @Override

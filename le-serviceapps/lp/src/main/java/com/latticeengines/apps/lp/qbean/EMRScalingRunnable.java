@@ -36,6 +36,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
 
     private static final int MAX_TASK_CORE_RATIO = 3;
+    private static final int MAX_SCALE_IN_SIZE = 4;
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
     private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT = TimeUnit.MINUTES.toMillis(50);
@@ -109,14 +110,14 @@ public class EMRScalingRunnable implements Runnable {
             return;
         }
 
-        taskFleet = emrService.getTaskFleet(clusterId);
-        if (taskFleet != null) {
-            taskVCores = getInstanceVCores(taskFleet);
-            taskMb = getInstanceMemory(taskFleet);
-        } else {
-            taskGrp = emrService.getTaskGroup(clusterId);
+        taskGrp = emrService.getTaskGroup(clusterId);
+        if (taskGrp != null) {
             taskVCores = getInstanceVCores(taskGrp);
             taskMb = getInstanceMemory(taskGrp);
+        } else {
+            taskFleet = emrService.getTaskFleet(clusterId);
+            taskVCores = getInstanceVCores(taskFleet);
+            taskMb = getInstanceMemory(taskFleet);
         }
         log.debug(String.format("taskMb=%d, taskVCores=%d", taskMb, taskVCores));
 
@@ -200,8 +201,8 @@ public class EMRScalingRunnable implements Runnable {
             } else if (hasActiveTezApps()) {
                 log.info("Has active TEZ applications, won't attempt to scale in.");
             } else if (getScaleInAttempt().get() >= 5) {
+                target = Math.max(requested - MAX_SCALE_IN_SIZE, target);
                 log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
-                // be conservative about terminating machines
                 scale(target);
                 resetScaleInCounter();
             }
@@ -357,16 +358,17 @@ public class EMRScalingRunnable implements Runnable {
 
     private int getCoreCount() {
         if (coreFleet == null && coreGrp == null) {
-            coreFleet = emrService.getCoreFleet(clusterId);
-            if (coreFleet != null) {
-                coreMb = getInstanceMemory(coreFleet);
-                coreVCores = getInstanceVCores(coreFleet);
-                log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
-            } else {
-                coreGrp = emrService.getCoreGroup(clusterId);
+            coreGrp = emrService.getCoreGroup(clusterId);
+            if (coreGrp != null) {
                 coreMb = getInstanceMemory(coreGrp);
                 coreVCores = getInstanceVCores(coreGrp);
                 log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
+            } else {
+                coreFleet = emrService.getCoreFleet(clusterId);
+                coreMb = getInstanceMemory(coreFleet);
+                coreVCores = getInstanceVCores(coreFleet);
+                log.debug(String.format("coreMb=%d, coreVCores=%d", coreMb, coreVCores));
+
             }
         }
         if (coreFleet != null) {

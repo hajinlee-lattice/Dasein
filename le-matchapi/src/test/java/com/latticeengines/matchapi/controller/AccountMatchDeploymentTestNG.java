@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -24,6 +26,7 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
@@ -31,16 +34,23 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 /**
- * Mostly focus on bulk match end-to-end code path
- * Account match correctness verification is in AccountMatchCorrectnessDeploymentTestNG
+ * Mostly focus on entity bulk match end-to-end code path. Covers some but
+ * limited correctness verification
+ * 
+ * Account match correctness verification is in EntityMatchCorrectnessTestNG &
+ * AccountMatchCorrectnessDeploymentTestNG
  */
 public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AccountMatchDeploymentTestNG.class);
@@ -53,6 +63,9 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     @Inject
     private TenantService tenantService;
+
+    @Inject
+    private MatchProxy matchProxy;
 
     private static final String TENANT_ID = AccountMatchDeploymentTestNG.class.getSimpleName()
             + UUID.randomUUID().toString();
@@ -77,24 +90,60 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             InterfaceName.EntityId.name(), //
     };
 
+    private static final String[] FIELDS_LEAD_TO_ACCT = { //
+            TEST_ID, //
+            MatchKey.Domain.name(), //
+            MatchKey.DUNS.name(), //
+            MatchKey.Name.name(), //
+            MatchKey.Country.name(), //
+            MatchKey.State.name(), //
+            MatchKey.City.name(), //
+            InterfaceName.CustomerAccountId.name(), //
+    };
+
+    private static final String[] FIELDS_LEAD_TO_ACCT_NOAID = { //
+            TEST_ID, //
+            MatchKey.DUNS.name(), //
+            MatchKey.Domain.name(), //
+            MatchKey.Name.name(), //
+    };
+
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
 
     private static final List<Class<?>> SCHEMA_FETCHONLY = new ArrayList<>(
             Collections.nCopies(FIELDS_FETCHONLY.length, String.class));
 
+    private static final List<Class<?>> SCHEMA_LEAD_TO_ACCT = new ArrayList<>(
+            Collections.nCopies(FIELDS_LEAD_TO_ACCT.length, String.class));
+
+    private static final List<Class<?>> SCHEMA_LEAD_TO_ACCT_NOAID = new ArrayList<>(
+            Collections.nCopies(FIELDS_LEAD_TO_ACCT_NOAID.length, String.class));
+
+    /***************************************************************
+     * TestId is designed with format C<CaseGroupId>_<CaseId>
+     * eg. C0_01 means CaseId = 01 under group CaseGroupId = 0
+     * Result verification has dependency on CaseGroupId in TestId
+     ***************************************************************/
+
+    /*********************************************************************
+     * DATA_ALL_KEYS setup an Account universe while other data sets are
+     * designed to match to this universe
+     *********************************************************************/
+    // TODO: Change to duns = 079942718 when parent duns feature is
+    // enabled.
+    // Schema:Domain, DUNS, Name, Country, State, City, AccountId, SfdcId
+    private static final Object[][] DATA_ALL_KEYS = {
+            { "C0_01", "google.com", "060902413", "google", "usa", "ca", "mountain view", "acc_id", "sfdc_id" }, //
+            { "C0_02", "amazon.com", "884745530", "amazon", "usa", "washington", "seattle", "acc_id_02", "sfdc_id_02" }, //
+    };
+
     /************************************************************************
-     * Both DATA_ALL_KEYS & DATA_PARTIAL_KEYS should match to same EntityId
+     * DATA_PARTIAL_KEYS is designed to all match to C0_01 in DATA_ALL_KEYS
      ************************************************************************/
     // TODO: Change to duns = 079942718 when parent duns feature is
     // enabled
-    // Domain, DUNS, Name, Country, State, City, AccountId, SfdcId
-    private static final Object[][] DATA_ALL_KEYS = {
-            { "C0_01", "google.com", "060902413", "google", "usa", "ca", "mountain view", "acc_id", "sfdc_id" }, //
-    };
-
-    // TODO: Change to duns = 079942718 when parent duns feature is
-    // enabled
-    // TestId, Domain, DUNS, Name, Country, State, City, SfdcId, MktoId
+    // Schema: TestId, Domain, DUNS, Name, Country, State, City, AccountId,
+    // SfdcId
     private static final Object[][] DATA_PARTIAL_KEYS = {
             // case 1: duns only
             { "C1_01", null, "060902413", null, null, null, null, null, null }, //
@@ -113,11 +162,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             // non-standard domain + country
             { "C3_03", "www.google.com", null, null, "united states", null, null, null, null }, //
 
-            // case 4: system id (currently don't have system id
-            // standardization)
-            { "C4_01", null, null, null, null, null, null, "acc_id", null }, //
-            { "C4_02", null, null, null, null, null, null, null, "sfdc_id" }, //
-            { "C4_03", null, null, null, null, null, null, "acc_id", "sfdc_id" }, //
+            // case 4: system id
+            { "C4_01", null, null, null, null, null, null, " acc_id", null }, //
+            { "C4_02", null, null, null, null, null, null, null, "sfdc_id " }, //
+            { "C4_03", null, null, null, null, null, null, " acc_id ", "\t sfdc_id \t" }, //
 
             // case 5: any combinations
             // duns + name + country
@@ -158,6 +206,111 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "C5_25", "google.com", "060902413", "google", "usa", null, null, "acc_id", "sfdc_id" }, //
     };
 
+
+    /*************************************************************************
+     * Designed to test match based on Account universe setup by DATA_ALL_KEYS
+     * (published to serving store)
+     *************************************************************************/
+    // Schema: TestId, Domain, DUNS, Name, Country, State, City,
+    // CustomerAccountId
+    private static final Object[][] DATA_LEAD_TO_ACCT = {
+            // case 6: CustomerAccountId = AccountId in case C0_01 -- All
+            // expected to return AccountId acc_id in case C0_01
+
+            // keys besides AID all empty
+            { "C6_01", null, null, null, null, null, null, "acc_id" }, //
+
+            // all keys match to case C0_01
+            { "C6_02", "google.com", null, null, null, null, null, "acc_id" }, //
+            { "C6_03", null, "060902413", null, null, null, null, "acc_id" }, //
+            { "C6_04", null, null, "google", "usa", null, null, "acc_id" }, //
+
+            // AID match to case C0_01, other match keys match to case C0_02 or
+            // don't match to any (AID is highest priority key which
+            // decides match result) -- All expected to return AccountId acc_id
+            // in case C0_01
+            { "C6_05", "amazon.com", null, null, null, null, null, "acc_id" }, //
+            { "C6_06", null, "884745530", null, null, null, null, "acc_id" }, //
+            { "C6_07", null, null, "amazon", "usa", "washington", "seattle", "acc_id" }, //
+            { "C6_08", null, "uber.com", null, null, null, null, "acc_id" }, //
+            { "C6_09", null, null, "123456789", null, null, null, "acc_id" }, //
+            { "C6_10", null, null, null, "facebook", "usa", null, "acc_id" }, //
+
+
+            // case 7: CustomerAccountId is empty with other match keys match
+            // with case C0_01 -- All expected to return AccountId acc_id in
+            // case C0_01
+            { "C7_01", "google.com", null, null, null, null, null, null }, //
+            { "C7_02", null, "060902413", null, null, null, null, "" }, //
+            { "C7_03", null, null, "google", "usa", null, null, "   " }, //
+
+
+            // case 8: CustomerAccountId != AccountId in case C0_01, but other
+            // keys matched -- Expected to return anonymous AccountId, since
+            // CustomerAccountId doesn't exist in Account universe
+            { "C8_01", "google.com", null, null, null, null, null, "acc_id_nonexist" }, //
+            { "C8_02", null, "060902413", null, null, null, null, "acc_id_nonexist" }, //
+            { "C8_03", null, null, "google", "usa", null, null, "acc_id_nonexist" }, //
+
+
+            // case 9: CustomerAccountId != AccountId in case C0_01 with other
+            // match keys don't match either -- Expected to return anonymous
+            // AccountId, since CustomerAccountId doesn't exist in Account
+            // universe
+            { "C9_01", null, "uber.com", null, null, null, null, "acc_id_nonexist" }, //
+            { "C9_02", null, "uber.com", null, null, null, null, null }, //
+            { "C9_03", null, null, "123456789", null, null, null, "acc_id_nonexist" }, //
+            { "C9_04", null, null, "123456789", null, null, null, "" }, //
+            { "C9_05", null, null, null, "facebook", "usa", null, "acc_id_nonexist" }, //
+            { "C9_06", null, null, null, "facebook", "usa", null, "   " }, //
+    };
+
+    /****************************************************************************
+     * Designed to test match based on Account universe setup by DATA_ALL_KEYS
+     * (published to serving store) without AID in schema and with other match
+     * keys simplified
+     ****************************************************************************/
+    // Schema: TestId, DUNS, Domain, Name
+    // Priority in current default decision graph of Account: DUNS -> Domain ->
+    // Name
+    private static final Object[][] DATA_LEAD_TO_ACCT_NOAID = {
+            // case 10: keys match to case C0_01 -- All expected to return
+            // AccountId acc_id in case C0_01
+
+            // all keys match to case C0_01
+            { "C10_01", "060902413", null, null }, //
+            { "C10_02", null, "google.com", null }, //
+            { "C10_03", null, null, "google" }, //
+
+            // higher priority keys match to case C0_01, while lower priority
+            // keys match to case C0_02
+            { "C10_04", "060902413", "amazon.com", null }, //
+            { "C10_05", "060902413", null, "amazon" }, //
+            { "C10_06", "060902413", "amazon.com", "amazon" }, //
+            { "C10_07", null, "google.com", "amazon" }, //
+
+            // higher priority keys match to case C0_01, while lower priority
+            // keys match to nothing
+            { "C10_08", "060902413", null, null }, //
+            { "C10_09", "060902413", "domain_nonexist.com", null }, //
+            { "C10_10", "060902413", null, "company_nonexist" }, //
+            { "C10_11", "060902413", "domain_nonexist.com", "company_nonexist" }, //
+            { "C10_12", null, "google.com", "company_nonexist" }, //
+
+
+            // case 11: keys not match to any existing account -- All expected
+            // to return anonymous AccountId
+            { "C11_01", null, null, null }, //
+            { "C11_02", "000000000", null, null }, //
+            { "C11_03", null, "domain_nonexist.com", null }, //
+            { "C11_04", null, null, "company_nonexist" }, //
+            { "C11_05", "000000000", "domain_nonexist.com", null }, //
+            { "C11_06", "000000000", null, "company_nonexist" }, //
+            { "C11_07", null, "domain_nonexist.com", "company_nonexist" }, //
+            { "C11_08", "000000000", "domain_nonexist.com", "company_nonexist" }, //
+    };
+
+
     // prepare in the run time because it needs EntityId got from non-fetch-only
     // mode test
     private Object[][] dataFetchOnly;
@@ -165,8 +318,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final String CASE_ALL_KEYS = "ALL_KEYS";
     private static final String CASE_PARTIAL_KEYS = "PARTIAL_KEYS";
+    private static final String CASE_LEAD_TO_ACCT = "LEAD_TO_ACCT";
+    private static final String CASE_LEAD_TO_ACCT_NOAID = "LEAD_TO_ACCT_NOAID";
 
-    private String resultEntityId = null;
+    private String googleEntityId = null;
 
     @BeforeClass(groups = "deployment")
     public void init() {
@@ -188,7 +343,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Test(groups = "deployment", priority = 1)
     public void testAllKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_ALL_KEYS);
-        runAndVerify(input);
+        runAndVerify(input, CASE_ALL_KEYS);
+        publishBaseSet();
     }
 
     // Records with partial match key (extracted from match key of #1)
@@ -196,22 +352,54 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Test(groups = "deployment", priority = 2)
     public void testPartialKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_PARTIAL_KEYS);
-        runAndVerify(input);
+        runAndVerify(input, CASE_PARTIAL_KEYS);
     }
 
     // Use EntityId got from #1 to test fetch-only mode
     @Test(groups = "deployment", priority = 3)
     public void testFetchOnly() {
         MatchInput input = prepareBulkMatchInputFetchOnly();
-        runAndVerify(input);
+        runAndVerify(input, null);
     }
 
-    private void runAndVerify(MatchInput input) {
+    // Provide all the match keys to test Lead-to-Account match ---
+    // Non-AllocateId mode for Account match and return AccountId
+    @Test(groups = "deployment", priority = 4)
+    public void testLeadToAcct() {
+        MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT, true);
+        runAndVerify(input, CASE_LEAD_TO_ACCT);
+    }
+
+    // Provide patial match keys without AccountId to test Lead-to-Account match
+    // --- Non-AllocateId mode for Account match and return AccountId
+    @Test(groups = "deployment", priority = 5)
+    public void testLeadToAcctNoAID() {
+        MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT_NOAID, false);
+        runAndVerify(input, CASE_LEAD_TO_ACCT_NOAID);
+    }
+
+    private void publishBaseSet() {
+        // No need to bump up version because test generates new test every time
+        EntityPublishRequest request = new EntityPublishRequest();
+        request.setEntity(BusinessEntity.Account.name());
+        request.setSrcTenant(tenant);
+        request.setDestTenant(tenant);
+        request.setDestEnv(EntityMatchEnvironment.SERVING);
+        request.setDestTTLEnabled(true);
+        EntityPublishStatistics stats = matchProxy.publishEntity(request);
+        Assert.assertEquals(stats.getSeedCount(), DATA_ALL_KEYS.length);
+    }
+
+    private void runAndVerify(MatchInput input, String scenario) {
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, this.getClass().getSimpleName());
-        if (input.isFetchOnly()) {
-            validateBulkMatchResultFetchOnly(finalStatus.getResultLocation());
+        if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
+            validateAllocateAcctResult(finalStatus.getResultLocation());
+        } else if (CASE_LEAD_TO_ACCT.equals(scenario) || CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
+            validateLeadToAcctResult(finalStatus.getResultLocation(), scenario);
+        } else if (input.isFetchOnly()) {
+            validateAcctMatchFetchOnlyResult(finalStatus.getResultLocation());
         } else {
-            validateBulkMatchResult(finalStatus.getResultLocation());
+            throw new IllegalArgumentException("Don't know how to validate match result");
         }
     }
 
@@ -225,7 +413,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setTargetEntity(BusinessEntity.Account.name());
         input.setAllocateId(true);
-        input.setEntityKeyMaps(prepareKeyMaps());
+        input.setEntityKeyMaps(prepareKeyMaps(FIELDS, new String[] { InterfaceName.AccountId.name(), SFDC_ID }));
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
@@ -249,13 +437,46 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return input;
     }
 
-    private Map<String, MatchInput.EntityKeyMap> prepareKeyMaps() {
+    private MatchInput prepareBulkMatchInputLeadToAcct(String scenario, boolean mapSystemId) {
+        String[] fields = null;
+        if (CASE_LEAD_TO_ACCT.equals(scenario)) {
+            fields = FIELDS_LEAD_TO_ACCT;
+        } else if (CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
+            fields = FIELDS_LEAD_TO_ACCT_NOAID;
+        } else {
+            throw new IllegalArgumentException("Unrecognized test scenario: " + scenario);
+        }
+
+        MatchInput input = new MatchInput();
+        input.setTenant(tenant);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        input.setPredefinedSelection(Predefined.LeadToAcct);
+        input.setFields(Arrays.asList(fields));
+        input.setSkipKeyResolution(true);
+        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
+        input.setTargetEntity(BusinessEntity.Account.name());
+        input.setAllocateId(false);
+        if (mapSystemId) {
+            input.setEntityKeyMaps(
+                    prepareKeyMaps(fields, new String[] { InterfaceName.CustomerAccountId.name() }));
+        } else {
+            input.setEntityKeyMaps(prepareKeyMaps(fields, new String[] {}));
+        }
+        input.setInputBuffer(prepareBulkData(scenario));
+        input.setUseDnBCache(true);
+        input.setUseRemoteDnB(true);
+        return input;
+    }
+
+    private Map<String, MatchInput.EntityKeyMap> prepareKeyMaps(String[] fields, String[] systemIdFields) {
         Map<String, MatchInput.EntityKeyMap> keyMaps = new HashMap<>();
         MatchInput.EntityKeyMap keyMap = new MatchInput.EntityKeyMap();
-        Map<MatchKey, List<String>> map = MatchKeyUtils.resolveKeyMap(Arrays.asList(FIELDS));
-        map.put(MatchKey.SystemId, Arrays.asList(InterfaceName.AccountId.name(), SFDC_ID));
+        Map<MatchKey, List<String>> map = MatchKeyUtils.resolveKeyMap(Arrays.asList(fields));
+        if (systemIdFields.length > 0) {
+            map.put(MatchKey.SystemId, Arrays.asList(systemIdFields));
+        }
         keyMap.setKeyMap(map);
-        keyMap.setSystemIdPriority(Arrays.asList(InterfaceName.AccountId.name(), SFDC_ID));
+        keyMap.setSystemIdPriority(map.get(MatchKey.SystemId));
         keyMaps.put(BusinessEntity.Account.name(), keyMap);
 
         return keyMaps;
@@ -283,6 +504,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         case CASE_PARTIAL_KEYS:
             uploadAvroData(DATA_PARTIAL_KEYS, Arrays.asList(FIELDS), SCHEMA, avroDir, CASE_PARTIAL_KEYS + ".avro");
             break;
+        case CASE_LEAD_TO_ACCT:
+            uploadAvroData(DATA_LEAD_TO_ACCT, Arrays.asList(FIELDS_LEAD_TO_ACCT), SCHEMA_LEAD_TO_ACCT, avroDir,
+                    CASE_LEAD_TO_ACCT + ".avro");
+            break;
+        case CASE_LEAD_TO_ACCT_NOAID:
+            uploadAvroData(DATA_LEAD_TO_ACCT_NOAID, Arrays.asList(FIELDS_LEAD_TO_ACCT_NOAID), SCHEMA_LEAD_TO_ACCT_NOAID,
+                    avroDir, CASE_LEAD_TO_ACCT_NOAID + ".avro");
+            break;
         default:
             throw new UnsupportedOperationException("Unknown test scenario " + scenario);
         }
@@ -295,7 +524,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);
         dataFetchOnly = new Object[][] {
-                { resultEntityId }, //
+                { googleEntityId }, //
                 { "FakedEntityId" }, //
                 { null }, //
         };
@@ -303,21 +532,25 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return inputBuffer;
     }
 
-    // Designed test case that all of them should match to same EntityId
-    private void validateBulkMatchResult(String path) {
+    // Designed test case that all of them should match to googleEntityId
+    private void validateAllocateAcctResult(String path) {
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            if (resultEntityId == null) {
-                resultEntityId = record.get(InterfaceName.EntityId.name()).toString();
+            // case group 0 is to build universe
+            if ("0".equals(extractCaseGroup(record.get(TEST_ID).toString()))) {
+                Assert.assertNotNull(record.get(InterfaceName.EntityId.name()).toString());
+                if ("C0_01".equals(record.get(TEST_ID).toString())) {
+                    googleEntityId = record.get(InterfaceName.EntityId.name()).toString();
+                }
             } else {
-                Assert.assertEquals(record.get(InterfaceName.EntityId.name()).toString(), resultEntityId);
+                Assert.assertEquals(record.get(InterfaceName.EntityId.name()).toString(), googleEntityId);
             }
         }
     }
 
-    private void validateBulkMatchResultFetchOnly(String path) {
+    private void validateAcctMatchFetchOnlyResult(String path) {
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
         int count = 0;
         while (records.hasNext()) {
@@ -326,12 +559,55 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             log.info(record.toString());
             String entityId = record.get(InterfaceName.EntityId.name()) == null ? null
                     : record.get(InterfaceName.EntityId.name()).toString();
-            if (resultEntityId.equals(entityId)) {
+            if (googleEntityId.equals(entityId)) {
                 Assert.assertNotNull(record.get(InterfaceName.LatticeAccountId.name()));
             } else {
                 Assert.assertNull(record.get(InterfaceName.LatticeAccountId.name()));
             }
         }
         Assert.assertEquals(count, dataFetchOnly.length);
+    }
+
+    private void validateLeadToAcctResult(String path, String scenario) {
+        Set<String> casesMatchedAID = null;
+        Set<String> casesAnonymousAID = null;
+        if (CASE_LEAD_TO_ACCT.equals(scenario)) {
+            casesMatchedAID = new HashSet<>(Arrays.asList("6", "7"));
+            casesAnonymousAID = new HashSet<>(Arrays.asList("8", "9"));
+        } else if (CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
+            casesMatchedAID = new HashSet<>(Arrays.asList("10"));
+            casesAnonymousAID = new HashSet<>(Arrays.asList("11"));
+        } else {
+            throw new IllegalArgumentException("Unrecognized test scenario: " + scenario);
+        }
+
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        int count = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            count++;
+            log.info(record.toString());
+            Assert.assertNotNull(record.get(InterfaceName.AccountId.name()));
+            String groupId = extractCaseGroup(record.get(TEST_ID).toString());
+            String acctId = record.get(InterfaceName.AccountId.name()).toString();
+            if (casesMatchedAID.contains(groupId)) {
+                Assert.assertEquals(acctId, "acc_id");
+            } else if (casesAnonymousAID.contains(groupId)) {
+                Assert.assertEquals(acctId, DataCloudConstants.ENTITY_ANONYMOUS_AID);
+            } else {
+                throw new IllegalArgumentException("Unrecgoized test case group " + groupId);
+            }
+        }
+        if (CASE_LEAD_TO_ACCT.equals(scenario)) {
+            Assert.assertEquals(count, DATA_LEAD_TO_ACCT.length);
+        }
+        if (CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
+            Assert.assertEquals(count, DATA_LEAD_TO_ACCT_NOAID.length);
+
+        }
+    }
+
+    private String extractCaseGroup(String caseId) {
+        return caseId.substring(1, caseId.indexOf("_"));
     }
 }

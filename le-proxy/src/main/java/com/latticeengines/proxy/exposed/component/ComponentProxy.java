@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.component;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -8,8 +10,6 @@ import com.latticeengines.domain.exposed.component.ComponentStatus;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
-
-import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 @Component("componentProxy")
 public class ComponentProxy extends MicroserviceRestApiProxy implements ProxyInterface {

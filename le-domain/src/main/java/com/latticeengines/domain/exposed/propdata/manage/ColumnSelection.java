@@ -137,7 +137,15 @@ public class ColumnSelection {
         CompanyProfile("CompanyProfile"), //
 
         // Entity Match
-        Seed("Seed"), // LatticeAccountId, AccountId from entity seed table
+
+        // Return attrs from entity seed table. Currently only returns
+        // LatticeAccountId. Could add more if necessary, but need to deal with
+        // issue that attr name conflicts with match input
+        Seed("Seed"), //
+        // Only for M27 branched feature of Lead-to-Account match to return
+        // AccountId from Account seed table for Contact. Might be removed in
+        // future.
+        LeadToAcct("LeadToAcct"), //
         ;
 
         public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
@@ -150,7 +158,7 @@ public class ColumnSelection {
                 Enrichment, Segment, TalkingPoint, CompanyProfile, Seed);
 
         // For entity match
-        public static final EnumSet<Predefined> entitySupportedSelections = EnumSet.of(ID, Seed);
+        public static final EnumSet<Predefined> entitySupportedSelections = EnumSet.of(ID, Seed, LeadToAcct);
 
         private static Map<String, Predefined> nameMap;
 

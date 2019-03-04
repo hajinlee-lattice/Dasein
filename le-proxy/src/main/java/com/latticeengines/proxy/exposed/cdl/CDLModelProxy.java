@@ -1,8 +1,8 @@
 package com.latticeengines.proxy.exposed.cdl;
 
-import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;

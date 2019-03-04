@@ -22,8 +22,14 @@ public class EntityPublishRequest {
     @JsonProperty("DestEnv")
     private EntityMatchEnvironment destEnv;
 
+    // If not set, will use default TTL setting of DestEnv
     @JsonProperty("DestTTLEnabled")
     private Boolean destTTLEnabled;
+
+    // Entity publish API is for testing purpose. For most of cases, we
+    // might want dest env to start with empty universe
+    @JsonProperty("BumpupVersion")
+    private boolean bumpupVersion = true;
 
     public String getEntity() {
         return entity;
@@ -64,4 +70,13 @@ public class EntityPublishRequest {
     public void setDestTTLEnabled(Boolean destTTLEnabled) {
         this.destTTLEnabled = destTTLEnabled;
     }
+
+    public boolean isBumpupVersion() {
+        return bumpupVersion;
+    }
+
+    public void setBumpupVersion(boolean bumpupVersion) {
+        this.bumpupVersion = bumpupVersion;
+    }
+
 }

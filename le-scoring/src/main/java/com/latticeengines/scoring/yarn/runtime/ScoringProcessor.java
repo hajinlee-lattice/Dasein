@@ -183,7 +183,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             execute(rtsBulkScoringConfig, iterator, dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter,
                     recordCount, fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching);
-
+            dataFileWriter.close();
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
@@ -298,7 +298,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     @VisibleForTesting
     Iterator<GenericRecord> instantiateIteratorForBulkScoreRequest(String path) {
-        return AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        String glob = null;
+        if (path.endsWith(".avro")) {
+            glob = path;
+        } else if (path.endsWith("/")) {
+            glob = path + "*.avro";
+        } else {
+            glob = path + "/*.avro";
+        }
+        return AvroUtils.iterator(yarnConfiguration, glob);
     }
 
     @VisibleForTesting
@@ -538,14 +546,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 dataFileWriter.append(record);
                 count++;
             }
-            // TODO ygao will delete this
-            if (recordScoreResponseList.size() != count) {
-                log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
-            }
-
-            log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
-                    recordScoreResponseList.size(), count));
         }
+        // TODO ygao will delete this
+        if (recordScoreResponseList.size() != count) {
+            log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
+        }
+        dataFileWriter.flush();
+        log.info(String.format("recordScoreResponseList size is %d. Append %d records to avro file.",
+                recordScoreResponseList.size(), count));
     }
 
     private void validateScore(Integer score) {

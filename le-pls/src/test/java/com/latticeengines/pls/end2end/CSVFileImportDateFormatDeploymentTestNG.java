@@ -77,6 +77,8 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         String dateFormatString2 = "MM.DD.YY";
         String timeFormatString2 = "00:00:00 24H";
         String timezone2 = "Asia/Shanghai";
+        String storedDateFormatString1 = "MM/DD/YYYY";
+        String storedTimeFormatString2 = "00:00:00 12H";
 
         Assert.assertNotNull(baseAccountFile);
 
@@ -92,15 +94,22 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 .getFieldMappingDocumentBestEffort(accountDateSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("TestDate1")) {
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
+                Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString1);
+                // change the auto detection result for date pattern
                 fieldMapping.setFieldType(UserDefinedType.DATE);
                 fieldMapping.setMappedToLatticeField(false);
-                fieldMapping.setDateFormatString(dateFormatString1);
+                fieldMapping.setDateFormatString(storedDateFormatString1);
                 fieldMapping.setTimezone(timezone1);
             } else if (fieldMapping.getUserField().equals("TestDate2")) {
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
+                Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString2);
+                Assert.assertEquals(fieldMapping.getTimeFormatString(), timeFormatString2);
+                // change the auto detection result for time pattern
                 fieldMapping.setFieldType(UserDefinedType.DATE);
                 fieldMapping.setMappedToLatticeField(false);
                 fieldMapping.setDateFormatString(dateFormatString2);
-                fieldMapping.setTimeFormatString(timeFormatString2);
+                fieldMapping.setTimeFormatString(storedTimeFormatString2);
                 fieldMapping.setTimezone(timezone2);
             }
         }
@@ -116,11 +125,11 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 .getFieldMappingDocumentBestEffort(accountDateSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("TestDate1")) {
-                Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString1);
+                Assert.assertEquals(fieldMapping.getDateFormatString(), storedDateFormatString1);
                 Assert.assertEquals(fieldMapping.getTimezone(), timezone1);
             } else if (fieldMapping.getUserField().equals("TestDate2")) {
                 Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString2);
-                Assert.assertEquals(fieldMapping.getTimeFormatString(), timeFormatString2);
+                Assert.assertEquals(fieldMapping.getTimeFormatString(), storedTimeFormatString2);
                 Assert.assertEquals(fieldMapping.getTimezone(), timezone2);
             }
         }

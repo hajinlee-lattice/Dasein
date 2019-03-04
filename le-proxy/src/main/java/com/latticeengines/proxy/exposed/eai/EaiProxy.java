@@ -1,10 +1,11 @@
 package com.latticeengines.proxy.exposed.eai;
 
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.network.exposed.eai.EaiInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
-import org.springframework.stereotype.Component;
 
 @Component("eaiProxy")
 public class EaiProxy extends MicroserviceRestApiProxy implements EaiInterface {

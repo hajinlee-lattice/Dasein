@@ -25,6 +25,11 @@
 export JAVA_HOME=/opt/java/default
 export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native:$JAVA_LIBRARY_PATH
 
+if [[ -n $(${JAVA_HOME}/bin/java -version 2>&1 |  grep "11.0") ]]; then
+  # Java 11
+  export JAVA_TOOL_OPTIONS="-XX:+UnlockExperimentalVMOptions -XX:+UseZGC"
+fi
+
 # The jsvc implementation to use. Jsvc is required to run secure datanodes
 # that bind to privileged ports to provide authentication of data transfer
 # protocol.  Jsvc is not required if SASL is configured for authentication of
@@ -95,7 +100,7 @@ export HADOOP_SECURE_DN_LOG_DIR=${HADOOP_LOG_DIR}/${HADOOP_HDFS_USER}
 ###
 
 # The directory where pid files are stored. /tmp by default.
-# NOTE: this should be set to a directory that can only be written to by 
+# NOTE: this should be set to a directory that can only be written to by
 #       the user that will run the hadoop daemons.  Otherwise there is the
 #       potential for a symlink attack.
 export HADOOP_PID_DIR=${HADOOP_PID_DIR}

@@ -111,7 +111,7 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
             parameters.setDecodeFields(configuration.getDecodeFields());
             if (ArrayUtils.isEmpty(configuration.getRetainFields())) {
                 String[] retainFields = { //
-                        DataCloudConstants.LATTIC_ID, //
+                        DataCloudConstants.LATTICE_ID, //
                         DataCloudConstants.ATTR_LDC_DOMAIN, //
                         DataCloudConstants.ATTR_LDC_DUNS, //
                 };

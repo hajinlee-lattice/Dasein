@@ -25,6 +25,7 @@ import com.latticeengines.apps.cdl.dao.DataCollectionTableDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
+import com.latticeengines.apps.cdl.repository.reader.DataCollectionTableReaderRepository;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -56,6 +57,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Inject
     private DataFeedEntityMgr dataFeedEntityMgr;
+
+    @Inject
+    private DataCollectionTableReaderRepository dataCollectionTableReaderRepository;
 
     @Override
     public DataCollectionDao getDao() {
@@ -107,6 +111,17 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     public List<String> findTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
+        if (tableNames == null) {
+            return Collections.emptyList();
+        } else {
+            return tableNames;
+        }
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public List<String> getAllTableName() {
+        List<String> tableNames = dataCollectionTableReaderRepository.findAllTableName();
         if (tableNames == null) {
             return Collections.emptyList();
         } else {

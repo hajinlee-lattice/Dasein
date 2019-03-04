@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -412,6 +413,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         return datafeedEntityMgr.getAllSimpleDataFeeds();
+    }
+
+    @Override
+    public List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status) {
+        return datafeedEntityMgr.getSimpleDataFeedsByTenantStatus(status);
     }
 
     @Override

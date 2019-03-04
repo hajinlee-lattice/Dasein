@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Active;
-import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Inactive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +56,12 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     private Set<String> contactSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
     private Set<String> contactExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact) //
+            .stream().map(InterfaceName::name).collect(Collectors.toSet());
+
+    private Set<String> psSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory) //
+            .stream().map(InterfaceName::name).collect(Collectors.toSet());
+
+    private Set<String> caSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.CuratedAccount) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Scheduler scheduler = Schedulers.newParallel("verification");
@@ -202,7 +207,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private String getProductSpentPartition(String attrName) {
         String partiion;
-        if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
+        if (psSystemAttrs.contains(attrName)) {
+            partiion = Partition.SYSTEM;
+        } else if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
             partiion = Partition.HAS_PURCHASED;
         } else {
             partiion = Partition.OTHERS;
@@ -215,13 +222,17 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
-            verifyFlags(config, cat, null, //
-                    Active, false, //
-                    false, true, //
-                    false, true, //
-                    true, true, //
-                    false, true, //
-                    false, false);
+            if (caSystemAttrs.contains(attrName)) {
+                verifySystemAttr(config, cat);
+            } else {
+                verifyFlags(config, cat, null, //
+                        Active, false, //
+                        false, true, //
+                        false, true, //
+                        true, true, //
+                        false, true, //
+                        false, false);
+            }
             return true;
         });
     }
@@ -419,7 +430,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void checkAndVerifyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
         List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
-//        System.out.println(attrConfigs);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
                 .map(verifier).sequential().count().block();
@@ -427,8 +437,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void verifySystemAttr(AttrConfig attrConfig, Category category) {
+        log.info("Verifying system attr " + attrConfig.getAttrName() + " in " + category);
         verifyFlags(attrConfig, category, Partition.SYSTEM, //
-                Inactive, false, //
+                Active, false, //
                 false, false, //
                 false, false, //
                 false, false, //

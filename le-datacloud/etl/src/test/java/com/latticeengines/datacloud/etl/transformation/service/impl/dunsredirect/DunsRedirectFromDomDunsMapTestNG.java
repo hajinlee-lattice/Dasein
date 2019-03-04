@@ -79,7 +79,7 @@ public class DunsRedirectFromDomDunsMapTestNG extends PipelineTransformationTest
 
     private void prepareData() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of(DataCloudConstants.LATTIC_ID, Long.class));
+        schema.add(Pair.of(DataCloudConstants.LATTICE_ID, Long.class));
         schema.add(Pair.of(DataCloudConstants.ATTR_LDC_DOMAIN, String.class));
         schema.add(Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class));
         schema.add(Pair.of(DataCloudConstants.ATTR_COUNTRY, String.class));

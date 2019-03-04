@@ -26,7 +26,7 @@
     "style-loader": "^0.21.0"
   },
   "scripts": {
-    "dev-uicomponents": "start-storybook -p 9001 -c .storybook",
+    "dev-uicomponents": "start-storybook -s ./public -p 9001 -c .storybook",
     "build-uicomponents": "build-storybook"
   },
   "author": "",

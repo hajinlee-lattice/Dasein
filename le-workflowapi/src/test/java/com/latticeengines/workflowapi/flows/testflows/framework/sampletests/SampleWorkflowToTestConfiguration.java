@@ -1,9 +1,10 @@
 package com.latticeengines.workflowapi.flows.testflows.framework.sampletests;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class SampleWorkflowToTestConfiguration extends WorkflowConfiguration {
 

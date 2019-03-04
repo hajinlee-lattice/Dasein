@@ -26,7 +26,7 @@ public class MatchKeyUtils {
      */
     public static final Map<MatchKey, String> AM_FIELD_MAP = ImmutableMap
             .<MatchKey, String> builder() //
-            .put(MatchKey.LatticeAccountID, DataCloudConstants.LATTIC_ID) //
+            .put(MatchKey.LatticeAccountID, DataCloudConstants.LATTICE_ID) //
             .put(MatchKey.DUNS, DataCloudConstants.ATTR_LDC_DUNS) //
             .put(MatchKey.Domain, DataCloudConstants.ATTR_LDC_DOMAIN) //
             .put(MatchKey.Name, DataCloudConstants.ATTR_LDC_NAME) //
@@ -40,7 +40,7 @@ public class MatchKeyUtils {
      */
     public static final Map<MatchKey, String> AMS_FIELD_MAP = ImmutableMap
             .<MatchKey, String> builder() //
-            .put(MatchKey.LatticeAccountID, DataCloudConstants.LATTIC_ID) //
+            .put(MatchKey.LatticeAccountID, DataCloudConstants.LATTICE_ID) //
             .put(MatchKey.DUNS, DataCloudConstants.AMS_ATTR_DUNS) //
             .put(MatchKey.Domain, DataCloudConstants.AMS_ATTR_DOMAIN) //
             .put(MatchKey.Name, DataCloudConstants.AMS_ATTR_NAME) //

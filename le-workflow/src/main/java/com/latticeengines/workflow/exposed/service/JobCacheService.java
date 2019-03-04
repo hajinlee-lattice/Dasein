@@ -1,12 +1,12 @@
 package com.latticeengines.workflow.exposed.service;
 
+import java.util.List;
+import java.util.concurrent.Future;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-
-import java.util.List;
-import java.util.concurrent.Future;
 
 public interface JobCacheService {
     /**

@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
@@ -24,6 +28,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class MatchInputValidatorUnitTestNG {
 
     private final int maxRealTimeInput = 1000;
+
+    // At least one of required match key needs to be provided for Entity match
+    private static final MatchKey[] REQUIRED_ENTITY_KEYS = { //
+            MatchKey.Domain, //
+            MatchKey.Name, //
+            MatchKey.DUNS, //
+            MatchKey.SystemId };
 
     @Test(groups = "unit")
     public void testGeneralValidation() {
@@ -167,6 +178,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertFalse(failed, "Should pass on DUNS only validation.");
     }
 
+
     // Test real time validation of Entity Matching.
     @Test(groups = "unit")
     public void testValidateRealTimeInputEntityMatch() {
@@ -236,7 +248,7 @@ public class MatchInputValidatorUnitTestNG {
             failed = true;
             Assert.assertTrue(
                     e.getMessage().contains(
-                            "Only Predefined selection [ID, Seed] are supported for entity match at this time."),
+                            "Only Predefined selection [ID, Seed, LeadToAcct] are supported for entity match at this time."),
                     "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
             Assert.fail("Failed on wrong exception: " + e.getMessage());
@@ -527,6 +539,113 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertFalse(failed, "Entity Match Column Selection Validation should have passed.");
     }
 
+
+    @Test(groups = "unit", dataProvider = "unrequiredAccountMatchKey", //
+            expectedExceptions = { IllegalArgumentException.class }, //
+            expectedExceptionsMessageRegExp = "For non-fetch-only mode, at least one of following match key should be provided: "
+                    + "Duns, Domain, Name and SystemId")
+    public void testValidateAccountMatchKeysNonFetchOnly1(MatchKey[] keys) {
+        // Don't set any required match key
+        validateAccountMatchKey(keys, true, false);
+    }
+
+    @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
+            expectedExceptions = { IllegalArgumentException.class }, //
+            expectedExceptionsMessageRegExp = "For non-fetch-only mode, at least one of following match key should be provided: "
+                    + "Duns, Domain, Name and SystemId")
+    public void testValidateAccountMatchKeysNonFetchOnly2(MatchKey[] keys) {
+        // Set required match key, but don't map field
+        validateAccountMatchKey(keys, false, false);
+    }
+
+    @Test(groups = "unit", dataProvider = "requiredAccountMatchKey")
+    public void testValidateAccountMatchKeysNonFetchOnly3(MatchKey[] keys) {
+        // Set required match key and map field. Should pass without exception
+        validateAccountMatchKey(keys, true, false);
+    }
+
+    @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
+            expectedExceptions = { IllegalArgumentException.class }, //
+            expectedExceptionsMessageRegExp = "For fetch-only mode, must provide EntityId match key")
+    public void testValidateAccountMatchKeysFetchOnly1(MatchKey[] keys) {
+        // Don't provide EntityId for fetch-only mode
+        validateAccountMatchKey(keys, true, true);
+    }
+
+    @Test(groups = "unit", dataProvider = "requiredAccountMatchKeyFetchOnly")
+    public void testValidateAccountMatchKeysFetchOnly2(MatchKey[] keys) {
+        // Fetch-only mode: Set required match key and map field. Should pass
+        // without exception
+        validateAccountMatchKey(keys, true, true);
+    }
+
+    private void validateAccountMatchKey(MatchKey[] keys, boolean mapField, boolean fetchOnly) {
+        MatchInput input = new MatchInput();
+        input.setTenant(new Tenant("PD_Test"));
+        input.setSkipKeyResolution(true);
+        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
+        input.setPredefinedSelection(Predefined.Seed);
+
+        input.setFetchOnly(fetchOnly);
+        input.setEntityKeyMaps(new HashMap<>());
+        input.getEntityKeyMaps().put(BusinessEntity.Account.name(), new EntityKeyMap());
+        EntityKeyMap entityKeyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name());
+        entityKeyMap.setKeyMap(new HashMap<>());
+        Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
+        if (keys != null) {
+            for (MatchKey key : keys) {
+                keyMap.put(key, new ArrayList<>());
+                if (mapField) {
+                    keyMap.get(key).add(key.name());
+                    entityKeyMap.setSystemIdPriority(keyMap.get(MatchKey.SystemId));
+                }
+            }
+        }
+
+        // This test doesn't care what fields and data are set
+        input.setFields(Arrays.stream(MatchKey.values()).map(key -> key.name()).collect(Collectors.toList()));
+        input.setData(generateMockData(100, true));
+
+        MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+    }
+
+    @DataProvider(name = "unrequiredAccountMatchKey")
+    public Object[][] dataUnrequiredAccountMatchKey() {
+        Set<MatchKey> requiredKeySet = new HashSet<>(Arrays.asList(REQUIRED_ENTITY_KEYS));
+        List<MatchKey> unrequiredKeys = Arrays.stream(MatchKey.values()) //
+                .filter(key -> !requiredKeySet.contains(key)) //
+                .collect(Collectors.toList());
+        return getAllMatchKeyCombinations(unrequiredKeys.toArray(new MatchKey[unrequiredKeys.size()]));
+    }
+
+    @DataProvider(name = "requiredAccountMatchKey")
+    public Object[][] dataRequiredAccountMatchKey() {
+        return getAllMatchKeyCombinations(REQUIRED_ENTITY_KEYS);
+    }
+
+    @DataProvider(name = "requiredAccountMatchKeyFetchOnly")
+    public Object[][] dataRequiredAccountMatchKeyFetchOnly() {
+        return new Object[][] { //
+                { new MatchKey[] { MatchKey.EntityId } }, //
+        };
+    }
+
+    // Return all combinations of match keys as test data provider
+    private Object[][] getAllMatchKeyCombinations(MatchKey... keys) {
+        int total = (int) Math.pow(2d, Double.valueOf(keys.length));
+        Object[][] combinations = new Object[total][];
+        for (int i = 1; i < total; i++) {
+            String code = Integer.toBinaryString(total | i).substring(1);
+            List<MatchKey> combination = new ArrayList<>();
+            for (int j = 0; j < keys.length; j++) {
+                if (code.charAt(j) == '1') {
+                    combination.add(keys[j]);
+                }
+            }
+            combinations[i - 1] = combination.toArray();
+        }
+        return combinations;
+    }
 
     static List<List<Object>> generateMockData(int rows) {
         return generateMockData(rows, false);

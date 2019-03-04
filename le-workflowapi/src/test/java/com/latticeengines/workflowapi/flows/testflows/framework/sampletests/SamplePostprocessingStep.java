@@ -1,9 +1,10 @@
 package com.latticeengines.workflowapi.flows.testflows.framework.sampletests;
 
-import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePostprocessingStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePostprocessingStep;
 
 // Sample step showing how to extend the TestBasePostprocessingStep with test-specific tear down
 // infrastructure.

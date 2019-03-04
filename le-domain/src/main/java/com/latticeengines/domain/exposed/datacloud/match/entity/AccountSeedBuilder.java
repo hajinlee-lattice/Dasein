@@ -1,12 +1,13 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
-import com.google.common.base.Preconditions;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Builder for {@link AccountSeed}

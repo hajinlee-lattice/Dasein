@@ -181,7 +181,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
     }
 
     private Context update(Context context, TupleEntry arguments, String priLocReason) {
-        context.id = (Long) arguments.getObject(DataCloudConstants.LATTIC_ID);
+        context.id = (Long) arguments.getObject(DataCloudConstants.LATTICE_ID);
         context.duns = arguments.getString(DataCloudConstants.AMS_ATTR_DUNS);
         context.duDuns = arguments.getString(DataCloudConstants.ATTR_DU_DUNS);
         context.guDuns = arguments.getString(DataCloudConstants.ATTR_GU_DUNS);

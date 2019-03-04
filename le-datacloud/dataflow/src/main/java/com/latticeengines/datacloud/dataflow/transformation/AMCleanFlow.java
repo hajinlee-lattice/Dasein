@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ACCOUNT_ID;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTIC_ID;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ID;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,9 +87,9 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
                     dropAttributes.add(attribute);
                     break;
                 case LATTICEID:
-                    LatticeIdFunction idFunc = new LatticeIdFunction(new Fields(attribute), LATTIC_ID);
+                    LatticeIdFunction idFunc = new LatticeIdFunction(new Fields(attribute), LATTICE_ID);
                     accountMaster = accountMaster //
-                            .apply(idFunc, new FieldList(LATTIC_ID), new FieldMetadata(attribute, String.class));
+                            .apply(idFunc, new FieldList(LATTICE_ID), new FieldMetadata(attribute, String.class));
                     expectedAMFields.add(attribute);
                     break;
                 case STRING:
@@ -113,7 +113,7 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
             if(attrsAndExpectedType.containsKey(field)) {
                 fms.add(new FieldMetadata(field, typeMetadata.get(attrsAndExpectedType.get(field))));
             } else {
-                if (field.equals(LATTIC_ID))
+                if (field.equals(LATTICE_ID))
                     fms.add(new FieldMetadata(field, Long.class));
                 else
                     fms.add(new FieldMetadata(field, field.getClass()));
