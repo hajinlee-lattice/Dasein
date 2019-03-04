@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -30,6 +31,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     private static final int NUM_10K = 10_000;
     private static final int NUM_1K = 1_000;
     private static final Logger log = LoggerFactory.getLogger(BulkMatchProcessorAsyncExecutorImpl.class);
+
+    @Value("${datacloud.dnb.check.quota}")
+    private boolean checkDnBQuota;
 
     @Autowired
     private RateLimitingService rateLimitingService;
@@ -293,7 +297,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     }
 
     private void checkIfProceed(ProcessorContext processorContext) {
-        if (!processorContext.getDivider().hasNextGroup() || !processorContext.isUseRemoteDnB()) {
+        if (!processorContext.getDivider().hasNextGroup() || !processorContext.isUseRemoteDnB() || !checkDnBQuota) {
             return;
         }
         long timeout = (long) (processorContext.getTimeOut() * 0.75);
