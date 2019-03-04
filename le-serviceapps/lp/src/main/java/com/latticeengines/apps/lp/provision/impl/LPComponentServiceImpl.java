@@ -79,7 +79,7 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
 
     @Override
     public boolean reset(String customerSpace) {
-        log.info("Start reset LP component for: " + customerSpace);
+        log.info(String.format("Start reset LP component for: %s", customerSpace));
         try {
             String podId = CamilleEnvironment.getPodId();
             String customerBase = "/user/s-analytics/customers";
@@ -117,9 +117,11 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
             }
 
         } catch (Exception e) {
-            log.error(String.format("Reset component LP for: %s failed. %s", customerSpace, e.toString()));
+            log.error(String.format("Reset LP component for: %s failed. %s", customerSpace, e.toString()));
             return false;
         }
+
+        log.info(String.format("Reset LP component for: %s succeed.", customerSpace));
         return true;
     }
 }
