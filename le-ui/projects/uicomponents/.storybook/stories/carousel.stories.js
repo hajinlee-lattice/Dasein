@@ -31,13 +31,13 @@ const elements = [
     { id: 5, name: 'Test5' },
     { id: 6, name: 'Test6' },
     { id: 7, name: 'Test7' },
-    { id: 7, name: 'Test8' },
-    { id: 7, name: 'Test9' },
-    { id: 7, name: 'Test10' },
-    { id: 7, name: 'Test11' },
-    { id: 7, name: 'Test12' },
-    { id: 7, name: 'Test113' },
-    { id: 7, name: 'Test14' }
+    { id: 8, name: 'Test8' },
+    { id: 9, name: 'Test9' },
+    { id: 10, name: 'Test10' },
+    { id: 11, name: 'Test11' },
+    { id: 12, name: 'Test12' },
+    { id: 13, name: 'Test13' },
+    { id: 14, name: 'Test14' }
 ];
 
 const utility = {
