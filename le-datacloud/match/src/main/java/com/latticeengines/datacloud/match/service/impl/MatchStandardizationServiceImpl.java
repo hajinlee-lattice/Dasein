@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -27,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
-import avro.shaded.com.google.common.base.Preconditions;
 
 @Component("matchStandardizationService")
 public class MatchStandardizationServiceImpl implements MatchStandardizationService {
@@ -47,9 +47,9 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     // to avoid naming conflicts). But SystemId field names managed in
     // seed/lookup should use standard name, eg. AccountId. So need to do
     // standardization for SystemId field names too.
-    private static Map<String, String> standardAttrDict = new HashMap<>();
+    private final static Map<String, String> STANDARD_ATTR_NAMES = new HashMap<>();
     static {
-        standardAttrDict.put(InterfaceName.CustomerAccountId.name().toLowerCase(), InterfaceName.AccountId.name());
+        STANDARD_ATTR_NAMES.put(InterfaceName.CustomerAccountId.name().toLowerCase(), InterfaceName.AccountId.name());
     }
 
 
@@ -264,8 +264,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     private String getStandardizedAttrName(@NotNull String attrName) {
         Preconditions.checkNotNull(attrName);
         attrName = attrName.trim();
-        if (standardAttrDict.containsKey(attrName.toLowerCase())) {
-            return standardAttrDict.get(attrName.toLowerCase());
+        if (STANDARD_ATTR_NAMES.containsKey(attrName.toLowerCase())) {
+            return STANDARD_ATTR_NAMES.get(attrName.toLowerCase());
         }
         return attrName;
     }
