@@ -32,8 +32,8 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     private static final int NUM_1K = 1_000;
     private static final Logger log = LoggerFactory.getLogger(BulkMatchProcessorAsyncExecutorImpl.class);
 
-    @Value("${datacloud.dnb.check.quota}")
-    private boolean checkDnBQuota;
+    @Value("${datacloud.dnb.quota.check.disabled}")
+    private boolean disableDnBCheck;
 
     @Autowired
     private RateLimitingService rateLimitingService;
@@ -297,7 +297,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     }
 
     private void checkIfProceed(ProcessorContext processorContext) {
-        if (!processorContext.getDivider().hasNextGroup() || !processorContext.isUseRemoteDnB() || !checkDnBQuota) {
+        if (!processorContext.getDivider().hasNextGroup() || !processorContext.isUseRemoteDnB() || disableDnBCheck) {
             return;
         }
         long timeout = (long) (processorContext.getTimeOut() * 0.75);
