@@ -37,7 +37,6 @@ public class HadoopConfigurationUtils {
                 }
                 if  (val.contains(TOKEN)) {
                     val2 = val2.replace(TOKEN, masterIp);
-                    log.info(String.format("Set %s=%s", key, val2));
                 }
                 if (!val.equals(val2)) {
                     properties.setProperty(key, val2);
