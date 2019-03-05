@@ -16,6 +16,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -64,6 +66,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private static final String fileName = "SourceFile_csv.avro";
     private static final String podId = "MatchResourceDeploymentTestNG";
     private static List<String> domains = new ArrayList<>();
+    private static final Logger log = LoggerFactory.getLogger(MatchResourceDeploymentTestNG.class);
 
     static {
         domains.add("fb.com");
@@ -293,6 +296,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
     public void testBulkMatchWithSchema(String version) throws Exception {
+        log.info("DataCloud Version : " + version);
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDirInThisRun);
@@ -429,10 +433,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (String majVer : distinctMajorVer) {
             String currApprVerForMajVer = dataCloudVersionService
                     .latestApprovedForMajorVersion(majVer).getVersion();
+            // returning current and previous datacloud version
             prevAndCurrentApprovedVer
-                    .add(currApprVerForMajVer);
-            prevAndCurrentApprovedVer
-                    .add(dataCloudVersionService.priorVersions(currApprVerForMajVer, 1).get(0));
+                    .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 2));
         }
         Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
