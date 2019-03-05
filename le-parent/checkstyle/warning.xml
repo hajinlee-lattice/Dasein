@@ -18,8 +18,14 @@
         <property name="lineSeparator" value="lf"/>
     </module>
 
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="SuppressWarningsHolder" />
+        <module name="OuterTypeFilename"/>
+        <module name="OneTopLevelClass"/>
 
         <module name="SuppressWarnings">
             <property name="format"
@@ -53,7 +59,13 @@
             <property name="exceptionVariableName" value="expected|ignore"/>
         </module>
 
+        <!-- Annotations -->
+        <module name="PackageAnnotation"/>
+
         <!-- Imports -->
+        <module name="AvoidStarImport"/>
+        <module name="UnusedImports"/>
+        <module name="RedundantImport"/>
         <module name="ImportOrder">
             <property name="groups" value="java,javax,org,com"/>
             <property name="ordered" value="true"/>
