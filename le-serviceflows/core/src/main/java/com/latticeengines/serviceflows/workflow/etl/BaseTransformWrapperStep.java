@@ -62,7 +62,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     protected String pipelineVersion;
 
     protected int scalingMultiplier = 1;
-    protected int extraScalingMultiplier = 2;
+    protected int doubleMultiplier = 2;
 
     @Override
     public TransformationWorkflowConfiguration executePreProcessing() {
@@ -143,12 +143,12 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
         engineConf.setEngine("TEZ");
         Map<String, String> jobProperties = new HashMap<>();
-        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * extraScalingMultiplier));
-        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * extraScalingMultiplier));
-        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * extraScalingMultiplier));
-        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * extraScalingMultiplier));
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * doubleMultiplier));
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * doubleMultiplier));
+        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * doubleMultiplier));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
-        engineConf.setPartitions(cascadingPartitions * extraScalingMultiplier);
+        engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         return engineConf;
     }
 
