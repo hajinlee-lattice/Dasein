@@ -38,6 +38,10 @@ public class FieldMapping {
     @JsonProperty
     private String timezone;
 
+    // Judge the field was mapped to date or time format before
+    @JsonProperty
+    private boolean mappedToDateBefore;
+
     public String getUserField() {
         return this.userField;
     }
@@ -92,6 +96,14 @@ public class FieldMapping {
 
     public void setTimeFormatString(String timeFormatString) {
         this.timeFormatString = timeFormatString;
+    }
+
+    public boolean isMappedToDateBefore() {
+        return mappedToDateBefore;
+    }
+
+    public void setMappedToDateBefore(boolean mappedToDateBefore) {
+        this.mappedToDateBefore = mappedToDateBefore;
     }
 
     public String getTimezone() { return timezone; }

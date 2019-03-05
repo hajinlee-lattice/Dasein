@@ -26,7 +26,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
 
     //@Test(groups = "end2end")
-    @Test(groups = "end2end", enabled = false)
+    @Test(groups = "end2end", enabled = true)
     @Override
     public void runTest() throws Exception {
         super.runTest();

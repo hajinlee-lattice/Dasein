@@ -1,10 +1,16 @@
 package com.latticeengines.dellebi.flowdef;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
+import com.latticeengines.dellebi.service.DellEbiFlowService;
+import com.latticeengines.dellebi.util.PipeFactory;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
@@ -13,24 +19,19 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 
-import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
-import com.latticeengines.dellebi.service.DellEbiFlowService;
-import com.latticeengines.dellebi.util.PipeFactory;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-
 @Component
 public class FlowDefinition {
+
+    private static final Logger log = LoggerFactory.getLogger(FlowDefinition.class);
 
     @Value("${dellebi.cascadinginputdelimiter}")
     private String cascadingInputDelimiter;
 
-    @Autowired
+    @Inject
     private DellEbiFlowService dellEbiFlowService;
 
-    @Autowired
+    @Inject
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
-
-    private static final Logger log = LoggerFactory.getLogger(FlowDefinition.class);
 
     @SuppressWarnings("rawtypes")
     public FlowDef populateFlowDefByType(String type) {

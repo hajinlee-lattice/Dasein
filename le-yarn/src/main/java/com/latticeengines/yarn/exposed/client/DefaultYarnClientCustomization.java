@@ -229,60 +229,27 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         List<String> commands = Arrays.asList( //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE
                 // -Xrunjdwp:transport=dt_socket,address=4023,server=y,suspend=y",
-                "ls -alhR . > <LOG_DIR>/directory.info", //
+                "ls -alhR . > ${LOG_DIR}/directory.info", //
                 "&&", //
-                "cat launch_container.sh > <LOG_DIR>/launch_container.sh", //
+                "cat launch_container.sh > ${LOG_DIR}/launch_container.sh", //
                 "&&", //
-                "if [[ -z \\\"${LE_GC_OPTS}\\\" ]]; then LE_GC_OPTS=\\\"${LE_DEFAULT_GC_OPTS}\\\"; fi",//
-                "&&",
                 "$JAVA_HOME/bin/java", //
-                getLogOpt(), //
-                CipherUtils.getSecretPropertyStr(), // secrets
-                getJacocoOpt(containerProperties), //
-                getTrustStoreOpts(containerProperties), //
                 getXmxSetting(appMasterProperties, true), //
-                // we define LE_GC_OPTS in hadoop-env or yarn-env
-                // because we do not want the application to depend on the java version on hadoop nodes
-                // after we completely migrate to java 11, we can simplify this
-                "${LE_GC_OPTS}<LOG_DIR>/gc.log", //
+                "${LE_LOG_OPTS}", //
+                "${LE_CIPHER_OPTS}", //
+                "${LE_JACOCO_OPT}",
+                "${LE_TRUSTSTORE_OPT}", //
+                "${LE_GC_OPTS}", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
                 parameter, //
-                "1><LOG_DIR>/Appmaster.stdout", //
-                "2><LOG_DIR>/Appmaster.stderr");
+                "1>${LOG_DIR}/Appmaster.stdout", //
+                "2>${LOG_DIR}/Appmaster.stderr");
         if (log.isDebugEnabled()) {
             log.debug("Commands send to YARN: " + commands);
         }
         return commands;
-    }
-
-    private String getLogOpt() {
-        return StringUtils.join(Arrays.asList( //
-                "-Dlog4j.debug", //
-                "-Dlog4j.configuration=file:log4j.properties", //
-                "-Dlog4j2.debug", //
-                "-Dlog4j.configurationFile=log4j2-yarn.xml", //
-                "-DLOG4J_DEBUG_DIR=<LOG_DIR>" //
-        ), " ");
-    }
-
-    private String getJacocoOpt(Properties properties) {
-        if (properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()) != null
-                && properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()) != null) {
-            return String.format(" -javaagent:%s=destfile=%s,append=true,includes=com.*",
-                    properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()),
-                    properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()));
-        }
-        return "";
-    }
-
-    private String getTrustStoreOpts(Properties properties) {
-        String trustStore = properties.getProperty(ContainerProperty.TRUST_STORE.name());
-        if (StringUtils.isNotBlank(trustStore) && !trustStore.contains("#") && new File(trustStore).exists()) {
-            return String.format(" -Djavax.net.ssl.trustStore=%s", trustStore);
-        }
-        return "";
     }
 
     @Override
@@ -315,10 +282,54 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties) {
-        environment.putIfAbsent("LE_DEFAULT_GC_OPTS", //
-                "-XX:+UseNUMA -XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc "
-                        + "-XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:");
+        environment.putIfAbsent("LOG_DIR", "<LOG_DIR>");
+        environment.putIfAbsent("LE_LOG_OPTS", getLogOpts());
+        environment.putIfAbsent("LE_CIPHER_OPTS", CipherUtils.getSecretPropertyStr()); // secret
+        environment.putIfAbsent("LE_JACOCO_OPT", getJacocoOpt(containerProperties));
+        environment.putIfAbsent("LE_TRUSTSTORE_OPT", getTrustStoreOpt(containerProperties));
+        environment.putIfAbsent("LE_GC_OPTS", getGcOpts());
         return environment;
+    }
+
+    private static String getGcOpts() {
+        return StringUtils.join(Arrays.asList( //
+                "-XX:+UseNUMA", //
+                "-XX:+UseG1GC", //
+                "-XX:+UseStringDeduplication", //
+                "-XX:+PrintGCDateStamps",
+                "-XX:+PrintGCTimeStamps", //
+                "-XX:+PrintAdaptiveSizePolicy", //
+                "-verbosegc", //
+                "-Xloggc:${LOG_DIR}/gc.log" //
+        ), " ");
+    }
+
+    private static String getLogOpts() {
+        return StringUtils.join(Arrays.asList( //
+                "-Dlog4j.debug", //
+                "-Dlog4j.configuration=file:log4j.properties", //
+                "-Dlog4j2.debug", //
+                "-Dlog4j.configurationFile=log4j2-yarn.xml", //
+                "-DLOG4J_DEBUG_DIR=${LOG_DIR}" //
+        ), " ");
+    }
+
+    private static String getJacocoOpt(Properties properties) {
+        if (properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()) != null
+                && properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()) != null) {
+            return String.format("-javaagent:%s=destfile=%s,append=true,includes=com.latticeengines.*",
+                    properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()),
+                    properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()));
+        }
+        return "";
+    }
+
+    private static String getTrustStoreOpt(Properties properties) {
+        String trustStore = properties.getProperty(ContainerProperty.TRUST_STORE.name());
+        if (StringUtils.isNotBlank(trustStore) && !trustStore.contains("#")) {
+            return String.format("-Djavax.net.ssl.trustStore=%s", trustStore);
+        }
+        return "";
     }
 
     public String getHdfsJobBaseDir() {

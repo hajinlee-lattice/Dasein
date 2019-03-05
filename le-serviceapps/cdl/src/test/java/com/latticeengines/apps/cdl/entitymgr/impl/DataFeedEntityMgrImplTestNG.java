@@ -1,7 +1,12 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
+
 import java.util.Date;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.joda.time.DateTime;
@@ -29,10 +34,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.security.exposed.service.TenantService;
-
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
 
 public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 

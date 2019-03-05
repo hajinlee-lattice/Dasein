@@ -3,21 +3,23 @@ package com.latticeengines.dellebi.util;
 import java.net.URI;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-
-import cascading.flow.FlowDef;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
+import cascading.flow.FlowDef;
+
 public class HadoopFileSystemOperations {
+
     @Value("${dellebi.datahadooprootpath}")
     private String dataHadoopRootPath;
 
@@ -29,7 +31,7 @@ public class HadoopFileSystemOperations {
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private static final Logger log = LoggerFactory.getLogger(HadoopFileSystemOperations.class);

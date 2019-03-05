@@ -4,26 +4,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.datacloud.workflow.match.steps.BulkMatchContextKey;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.datacloud.workflow.match.steps.BulkMatchContextKey;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -32,13 +33,13 @@ public class UpdateFailedMatchListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateFailedMatchListener.class);
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Override

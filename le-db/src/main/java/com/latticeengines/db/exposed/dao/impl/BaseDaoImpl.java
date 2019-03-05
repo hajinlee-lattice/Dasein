@@ -1,10 +1,12 @@
 package com.latticeengines.db.exposed.dao.impl;
 
+import javax.inject.Inject;
+
+import org.hibernate.SessionFactory;
+import org.springframework.stereotype.Repository;
+
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 /**
  * Provides persistence with the single converged platform default multi-tenant
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public abstract class BaseDaoImpl<T extends HasPid> extends AbstractBaseDaoImpl<T> implements BaseDao<T> {
 
-    @Autowired
+    @Inject
     protected SessionFactory sessionFactory;
 
     @Override

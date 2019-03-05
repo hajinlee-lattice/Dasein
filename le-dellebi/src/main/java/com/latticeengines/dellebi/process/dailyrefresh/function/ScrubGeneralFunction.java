@@ -3,8 +3,8 @@ package com.latticeengines.dellebi.process.dailyrefresh.function;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.apache.hadoop.mapred.FileSplit;
 
+import org.apache.hadoop.mapred.FileSplit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

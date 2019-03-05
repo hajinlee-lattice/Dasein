@@ -6,8 +6,8 @@ import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_R
 
 import java.io.InputStream;
 
-import com.latticeengines.query.factory.RedshiftQueryProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -26,6 +26,7 @@ import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.querydsl.sql.SQLQuery;
 
@@ -33,19 +34,19 @@ import com.querydsl.sql.SQLQuery;
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
 public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     protected QueryEvaluator queryEvaluator;
 
-    @Autowired
+    @Inject
     protected QueryEvaluatorService queryEvaluatorService;
 
-    @Autowired
+    @Inject
     private TestArtifactService testArtifactService;
 
-    @Autowired
+    @Inject
     protected QueryProcessor queryProcessor;
 
-    @Autowired
+    @Inject
     protected QueryFactory queryFactory;
 
 

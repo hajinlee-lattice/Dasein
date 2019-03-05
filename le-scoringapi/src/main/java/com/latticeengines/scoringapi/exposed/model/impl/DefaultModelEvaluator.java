@@ -11,8 +11,6 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
@@ -22,6 +20,8 @@ import org.jpmml.evaluator.PMMLManager;
 import org.jpmml.evaluator.ProbabilityDistribution;
 import org.jpmml.model.ImportFilter;
 import org.jpmml.model.JAXBUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -40,7 +40,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
     protected final PMMLManager manager;
 
-    protected static final double DEFAULT_DOUBLE_VALUE = 0.0d;
+    private static final double DEFAULT_DOUBLE_VALUE = 0.0d;
 
     public DefaultModelEvaluator(InputStream is) {
         PMML unmarshalled;

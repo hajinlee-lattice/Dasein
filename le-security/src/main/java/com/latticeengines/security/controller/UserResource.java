@@ -1,10 +1,8 @@
 package com.latticeengines.security.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.Collections;
 import java.util.List;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +37,9 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "user", description = "REST resource for user management")
 @RestController

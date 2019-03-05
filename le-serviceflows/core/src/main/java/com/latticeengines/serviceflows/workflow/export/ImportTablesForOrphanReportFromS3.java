@@ -9,11 +9,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
-import com.latticeengines.common.exposed.util.JsonUtils;
 
 @Component("importTablesForOrphanReportFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

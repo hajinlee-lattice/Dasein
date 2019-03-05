@@ -3,11 +3,11 @@ package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.IngestionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.IngestionWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class IngestionWorkflowSubmitter {

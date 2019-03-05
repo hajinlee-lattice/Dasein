@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -39,7 +38,6 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -49,19 +47,15 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
@@ -73,20 +67,15 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     @Inject
     private ActionProxy actionProxy;
 
-    @Inject
-    private DropBoxProxy dropBoxProxy;
-
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
-    private List<S3ImportTemplateDisplay> templates = null;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        templates = cdlService.getS3ImportTemplate(customerSpace);
     }
 
     @Test(groups = "deployment")
@@ -487,7 +476,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         assertTrue(attributes.size() >= headers.size());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyColumnMissing")
+    @Test(groups = "deployment", dependsOnMethods = "verifyColumnMissing", enabled = false)
     public void testParallelImport() {
         SourceFile sourceFile1 = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(sourceFile1);
@@ -539,80 +528,5 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         }
         Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
     }
-
-    @Test(groups = "deployment", dependsOnMethods = "verifyTransaction")
-    public void importS3Base() {
-        prepareS3BaseData(ENTITY_ACCOUNT, EntityType.Accounts);
-        prepareS3BaseData(ENTITY_CONTACT, EntityType.Contacts);
-        prepareS3BaseData(ENTITY_TRANSACTION, EntityType.ProductPurchases);
-    }
-
-    private void prepareS3BaseData(String entity, EntityType entityType) {
-        switch (entity) {
-        case ENTITY_ACCOUNT:
-            testS3ImportWithTemplateData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT, entityType);
-            testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
-            break;
-        case ENTITY_CONTACT:
-            testS3ImportWithTemplateData(CONTACT_SOURCE_FILE, ENTITY_CONTACT, entityType);
-            testS3ImportOnlyData(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
-            break;
-        case ENTITY_TRANSACTION:
-            testS3ImportWithTemplateData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION, entityType);
-            testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
-            break;
-        }
-    }
-
-    private void testS3ImportWithTemplateData(String csvFileName, String entity, EntityType entityType) {
-        SourceFile sourceFile = uploadSourceFile(csvFileName, entity);
-        String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
-        String taskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, entity,
-                entity + FEED_TYPE_SUFFIX, subType, entityType.getDisplayName());
-        ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace, taskId,
-                sourceFile.getName());
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-
-    }
-
-    private void testS3ImportOnlyData(String csvFileName, String entity) {
-        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(entity), entity, csvFileName,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                entity + FEED_TYPE_SUFFIX);
-        ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace,
-                dataFeedTask.getUniqueId(), sourceFile.getName());
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "importS3Base")
-    public void testGetS3ImportDisplay() {
-        // verify that the tenant has 5 template display by default
-        Assert.assertNotNull(templates);
-        Assert.assertEquals(templates.size(), 5);
-        // S3ImportTemplateDisplay display = templates.get(0);
-        // Assert.assertEquals(display.getPath(), "N/A");
-        for (S3ImportTemplateDisplay display : templates) {
-            Assert.assertEquals(display.getPath(), "N/A");
-            Assert.assertEquals(display.getExist(), Boolean.FALSE);
-        }
-        templates = cdlService.getS3ImportTemplate(customerSpace);
-        Assert.assertNotNull(templates);
-        List<String> feedTypes = Arrays.asList(ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_CONTACT + FEED_TYPE_SUFFIX,
-                ENTITY_TRANSACTION + FEED_TYPE_SUFFIX);
-        List<S3ImportTemplateDisplay> renderedTemplats = templates.stream()
-                .filter(template -> feedTypes.contains(template.getFeedType())).collect(Collectors.toList());
-        for (S3ImportTemplateDisplay display : renderedTemplats) {
-            DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
-            Assert.assertNotNull(dropBoxSummary);
-            Assert.assertEquals(display.getPath(), S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
-                    dropBoxSummary.getDropBox(), display.getFeedType()));
-            Assert.assertEquals(display.getExist(), Boolean.TRUE);
-        }
-    }
-
 
 }

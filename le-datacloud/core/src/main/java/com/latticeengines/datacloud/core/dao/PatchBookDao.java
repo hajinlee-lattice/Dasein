@@ -1,10 +1,10 @@
 package com.latticeengines.datacloud.core.dao;
 
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-
-import java.util.List;
 
 public interface PatchBookDao extends BaseDao<PatchBook> {
     /**

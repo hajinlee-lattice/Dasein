@@ -6,34 +6,35 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.quartz.JobHistory;
-import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
+import javax.inject.Inject;
+
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.quartz.JobConfig;
+import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.JobInfo;
+import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
 import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-quartz-context.xml" })
 public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
 
-    public static final String JOB_NAME = "testPredefinedJob";
-    public static final String JOB_GROUP = "PredefinedJobs";
+    private static final String JOB_NAME = "testPredefinedJob";
+    private static final String JOB_GROUP = "PredefinedJobs";
 
-    @Autowired
+    @Inject
     private Scheduler scheduler;
 
-    @Autowired
+    @Inject
     private SchedulerEntityMgr schedulerEntityMgr;
 
-    @Autowired
+    @Inject
     private ApplicationContext appContext;
 
     @SuppressWarnings("unchecked")

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +26,8 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Components.ComponentsMap;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -42,19 +42,19 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/internal")
 public class InternalResource {
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private ServiceService serviceService;
 
-    @Autowired
+    @Inject
     private DynamicOptionsService dynamicOptionsService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -6,9 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.Deflater;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.eai.service.impl.CamelValueConverter;
-import com.latticeengines.eai.service.ValueConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.CodecFactory;
@@ -19,9 +16,12 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.camel.spring.SpringCamelContext;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.eai.service.ValueConverter;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
+import com.latticeengines.eai.service.impl.CamelValueConverter;
 
 public class DataContainer {
 

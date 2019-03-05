@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.provision.impl;
 
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -72,7 +74,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private S3Service s3Service;
-
 
     @Inject
     private DataUnitCrossTenantService dataUnitCrossTenantService;
@@ -156,8 +157,10 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
                 s3Service.cleanupPrefix(customersBucket, cs.getContractId());
 
                 log.info("Clean up DataCollection(DataFeed_xxx)");
-                dataCollectionEntityMgr.deleteAll();
-
+                DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();
+                if (dataCollection != null) {
+                    dataCollectionEntityMgr.delete(dataCollection);
+                }
 
                 log.info("Clean up MetadataSegment(RatingEngine,Play)");
                 List<MetadataSegment> segments = segmentService.getSegments();

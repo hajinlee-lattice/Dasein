@@ -2,12 +2,13 @@ package com.latticeengines.monitor.alerts.service.impl;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class AlertServiceImpl implements AlertService {
     // @Autowired
     // private PagerDutyService pagerDutyEmailService;
 
-    @Autowired
+    @Inject
     private PagerDutyService pagerDutyService;
 
     @Override

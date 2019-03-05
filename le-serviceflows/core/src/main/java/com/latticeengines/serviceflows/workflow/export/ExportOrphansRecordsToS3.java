@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportOrphansToS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 

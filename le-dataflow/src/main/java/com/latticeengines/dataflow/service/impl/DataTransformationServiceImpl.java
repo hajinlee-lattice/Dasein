@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.latticeengines.yarn.exposed.service.EMREnvService;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -22,25 +22,24 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-
-import javax.inject.Inject;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
 
     private static final String APPCTX = "APPCTX";
 
-    @Autowired
+    @Inject
     private ApplicationContext appContext;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
-
-    @Value("${dataplatform.hdfs.stack:}")
-    private String stackName;
 
     @Inject
     private EMREnvService emrEnvService;
+
+    @Value("${dataplatform.hdfs.stack}")
+    private String stackName;
 
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {

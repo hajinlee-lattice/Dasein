@@ -1,14 +1,14 @@
 package com.latticeengines.playmaker.aspect;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -21,7 +21,7 @@ public class RecommendationRetryAspect {
 
     public static Logger log = LoggerFactory.getLogger(RecommendationRetryAspect.class);
 
-    @Autowired
+    @Inject
     private JdbcTemplateFactoryImpl templateFactory;
 
     @Around("execution(public * com.latticeengines.playmaker.entitymgr.impl.PlaymakerRecommendationEntityMgrImpl.*(..)) && args(tenantName, ..)")

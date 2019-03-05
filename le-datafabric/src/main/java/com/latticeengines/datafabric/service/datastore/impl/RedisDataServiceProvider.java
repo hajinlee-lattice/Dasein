@@ -9,15 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
+import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.util.Pool;
-
-import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
-import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 
 @Component("redisDataService")
 public class RedisDataServiceProvider implements FabricDataServiceProvider {

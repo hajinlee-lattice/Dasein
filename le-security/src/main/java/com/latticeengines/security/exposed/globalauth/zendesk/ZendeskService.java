@@ -1,8 +1,8 @@
 package com.latticeengines.security.exposed.globalauth.zendesk;
 
-import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
 
 /**
  * Zendesk client

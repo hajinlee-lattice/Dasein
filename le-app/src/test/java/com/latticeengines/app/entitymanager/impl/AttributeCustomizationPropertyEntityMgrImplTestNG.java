@@ -3,13 +3,15 @@ package com.latticeengines.app.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationPropertyEntityMgr;
 import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeCustomizationProperty;
@@ -17,7 +19,6 @@ import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNGBase {
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
@@ -26,10 +27,10 @@ public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNG
     private static final String ATTRIBUTE_NAME_2 = "TestAttribute_2";
     private static final String ATTRIBUTE_NAME_3 = "TestAttribute_3";
 
-    @Autowired
+    @Inject
     private AttributeCustomizationPropertyEntityMgr attributeCustomizationPropertyEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private String propertyName = "hidden";

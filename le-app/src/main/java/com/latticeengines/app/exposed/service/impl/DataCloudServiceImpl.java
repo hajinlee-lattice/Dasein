@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.app.exposed.service.DataCloudService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReportType;
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectLookupReproduceDetail;
@@ -18,7 +19,6 @@ import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttr
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
 import com.latticeengines.proxy.exposed.matchapi.MatchCustomerReportProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Service("dataCloudService")
 public class DataCloudServiceImpl implements DataCloudService {

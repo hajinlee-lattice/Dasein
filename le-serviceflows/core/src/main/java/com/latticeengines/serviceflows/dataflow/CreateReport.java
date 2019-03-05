@@ -13,16 +13,16 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.FilterReportColumn;
 import com.latticeengines.domain.exposed.dataflow.GroupByDomainReportColumn;
 import com.latticeengines.domain.exposed.dataflow.ReportColumn;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
 @Component("createReport")
 public class CreateReport extends TypesafeDataFlowBuilder<CreateReportParameters> {
     private static final String DOMAIN = "__Domain";
-    public static final String TEMPORARY_FIELD_NAME = "__Temporary";
+    private static final String TEMPORARY_FIELD_NAME = "__Temporary";
 
     @Override
     public Node construct(CreateReportParameters parameters) {

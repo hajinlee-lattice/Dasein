@@ -1,8 +1,14 @@
 package com.latticeengines.scoringapi.controller;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
@@ -34,37 +40,32 @@ import com.latticeengines.testframework.exposed.proxy.pls.PlsMarketoCredentialPr
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
-    
-    Logger LOG = Logger.getLogger(getClass());
-    
+
+    private static Logger LOG = Logger.getLogger(ScoreExternalResourceDeploymentTestNG.class);
+
     private static final String MARKETO_CRED_NAME = "TestProfileFromScoringAPI";
-    
+
     private static final MarketoScoringMatchField MARKETO_SCORE_MATCH_FIELD_1 = new MarketoScoringMatchField();
     private static final MarketoScoringMatchField MARKETO_SCORE_MATCH_FIELD_2 = new MarketoScoringMatchField();
     private static final MarketoScoringMatchField MARKETO_SCORE_MATCH_FIELD_3 = new MarketoScoringMatchField();
-    
-    protected static final int EXPECTED_SCORE_99 = 99;
-    
+
+    private static final int EXPECTED_SCORE_99 = 99;
+
     @Inject
     private PlsMarketoCredentialProxy marketoCredProxy;
-    
+
     private RestTemplate restTemplate;
     private MarketoCredential marketoCredential;
     private ScoringRequestConfigSummary scoringRequestConfigSummary;
-    
+
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
         super.beforeClass();
         deploymentTestBed.attachProtectedProxy(marketoCredProxy);
         restTemplate = HttpClientUtils.newRestTemplate();
     }
-    
+
     @Test(groups="deployment")
     public void testCreateMarketoCredential() {
         // Setup Marketo Profile and Webhook request
@@ -76,7 +77,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNotNull(marketoCreds.get(0), "Marketo Credential is null");
         marketoCredential = marketoCreds.get(0);
     }
-    
+
     @Test(groups="deployment")
     public void testVerifyModelSummary() {
         List<ModelSummary> modelSummaries = modelSummaryProxy.findPaginatedModels(customerSpace.toString(),
@@ -86,29 +87,29 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNotNull(modelSummaries.get(0).getId());
         assertEquals(modelSummaries.get(0).getId(), MODEL_ID);
     }
-    
+
     @Test(groups="deployment", dependsOnMethods = {"testCreateMarketoCredential", "testVerifyModelSummary"})
     public void testCreateScoringRequestConfig() {
         List<ScoringRequestConfigSummary> reqConfigSummaryLst = marketoCredProxy.getScoringRequestConfigs(marketoCredential.getPid());
         assertNotNull(reqConfigSummaryLst);
         assertTrue(reqConfigSummaryLst.size() == 0);
-        
+
         ScoringRequestConfig scoringReqConf = new ScoringRequestConfig();
         scoringReqConf.setMarketoCredential(marketoCredential);
         scoringReqConf.setModelUuid(MODEL_ID);
-        
+
         MARKETO_SCORE_MATCH_FIELD_1.setModelFieldName(FieldInterpretation.Website.toString());
         MARKETO_SCORE_MATCH_FIELD_1.setMarketoFieldName("lead.website");
-        
+
         MARKETO_SCORE_MATCH_FIELD_2.setModelFieldName(FieldInterpretation.Email.toString());
         MARKETO_SCORE_MATCH_FIELD_2.setMarketoFieldName("lead.email");
-        
+
         MARKETO_SCORE_MATCH_FIELD_3.setModelFieldName(FieldInterpretation.CompanyName.toString());
         MARKETO_SCORE_MATCH_FIELD_3.setMarketoFieldName("lead.company");
-        
+
         List<MarketoScoringMatchField> scoringMappings = Arrays.asList(MARKETO_SCORE_MATCH_FIELD_1, MARKETO_SCORE_MATCH_FIELD_2, MARKETO_SCORE_MATCH_FIELD_3);
         scoringReqConf.setMarketoScoringMatchFields(scoringMappings);
-        
+
         ScoringRequestConfig createdReq = marketoCredProxy.createScoringRequestConfig(marketoCredential.getPid(), scoringReqConf);
         assertNotNull(createdReq);
         assertNotNull(createdReq.getConfigId());
@@ -118,7 +119,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertTrue(reqConfigSummaryLst.size() == 1);
         scoringRequestConfigSummary = reqConfigSummaryLst.get(0);
     }
-    
+
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})
     public void testScoreRecord_assertSuccess() throws IOException {
         String url = apiHostPort + "/score/external/record/" + scoringRequestConfigSummary.getConfigId();
@@ -128,7 +129,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         HttpHeaders headers = new HttpHeaders();
         headers.set(Constants.LATTICE_SECRET_KEY_HEADERNAME, marketoCredential.getLatticeSecretKey());
         HttpEntity<ScoreRequest> entityReq = new HttpEntity<ScoreRequest>(scoreRequest, headers);
-        
+
         ResponseEntity<ScoreResponse> response = null;
         Exception exception = null;
         ExceptionHandlerErrors exceptionDetails = null;
@@ -145,7 +146,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         Assert.assertNotNull(scoreResponse.getBucket());
         Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
-    
+
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})
     public void testScoreRecord_assertFailWithMissingSecretKey() throws IOException {
         String url = apiHostPort + "/score/external/record/" + scoringRequestConfigSummary.getConfigId();
@@ -166,7 +167,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNotNull(exceptionDetails);
         assertTrue(exceptionDetails.getDescription().contains(LedpCode.LEDP_18199.getMessage()));
     }
-    
+
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})
     public void testScoreRecord_assertFailWithInvalidSecretKey() throws IOException {
         String url = apiHostPort + "/score/external/record/" + scoringRequestConfigSummary.getConfigId();
@@ -176,7 +177,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         HttpHeaders headers = new HttpHeaders();
         headers.set(Constants.LATTICE_SECRET_KEY_HEADERNAME, "Invalid Key");
         HttpEntity<ScoreRequest> entityReq = new HttpEntity<ScoreRequest>(scoreRequest, headers);
-        
+
         Exception exception = null;
         ExceptionHandlerErrors exceptionDetails = null;
         try {
@@ -189,7 +190,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNotNull(exceptionDetails);
         assertTrue(exceptionDetails.getDescription().contains(LedpCode.LEDP_18200.getMessage()));
     }
-    
+
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})
     public void testScoreRecord_assertFailWithMissingRecord() throws IOException {
         String url = apiHostPort + "/score/external/record/" + scoringRequestConfigSummary.getConfigId();
@@ -199,7 +200,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         HttpHeaders headers = new HttpHeaders();
         headers.set(Constants.LATTICE_SECRET_KEY_HEADERNAME, marketoCredential.getLatticeSecretKey());
         HttpEntity<ScoreRequest> entityReq = new HttpEntity<ScoreRequest>(scoreRequest, headers);
-        
+
         Exception exception = null;
         ExceptionHandlerErrors exceptionDetails = null;
         try {
@@ -212,7 +213,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNotNull(exceptionDetails);
         assertTrue(exceptionDetails.getDescription().contains(LedpCode.LEDP_18201.getMessage()));
     }
-    
+
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})
     public void testScoreRecord_assertFailWithInvalidRequestId() throws IOException {
         final String invalidConfigId = "InvalidRequestID";
@@ -223,7 +224,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         HttpHeaders headers = new HttpHeaders();
         headers.set(Constants.LATTICE_SECRET_KEY_HEADERNAME, marketoCredential.getLatticeSecretKey());
         HttpEntity<ScoreRequest> entityReq = new HttpEntity<ScoreRequest>(scoreRequest, headers);
-        
+
         Exception exception = null;
         ExceptionHandlerErrors exceptionDetails = null;
         try {
@@ -237,10 +238,10 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         LOG.error(JsonUtils.serialize(exceptionDetails));
         assertTrue(exceptionDetails.getDescription().contains(LedpException.buildMessage(LedpCode.LEDP_18194, new String[] {invalidConfigId})));
     }
-    
+
     /**
      * As ScoringRequestConfig find operations performed on reader connection, we need to add some delay before making find call.
-     * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay 
+     * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay
      */
     private void addDelay() {
         try {

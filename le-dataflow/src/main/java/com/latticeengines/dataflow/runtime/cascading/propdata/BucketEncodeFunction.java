@@ -6,20 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
-import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;

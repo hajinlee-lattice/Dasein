@@ -4,20 +4,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.junit.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.service.DataCloudService;
 import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReportType;
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttributeReproduceDetail;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 
 public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
@@ -30,12 +31,12 @@ public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
     private static String attribute = "LDC_PrimaryIndustry";
     private static String matchedValue = "Bad Industry";
 
-    IncorrectLookupReportRequest lookupRequest = new IncorrectLookupReportRequest();
-    IncorrectMatchedAttrReportRequest matchedRequest = new IncorrectMatchedAttrReportRequest();
+    private IncorrectLookupReportRequest lookupRequest = new IncorrectLookupReportRequest();
+    private IncorrectMatchedAttrReportRequest matchedRequest = new IncorrectMatchedAttrReportRequest();
     private CustomerReport lookupCustomerReport;
     private CustomerReport matchedCustomerReport;
 
-    @Autowired
+    @Inject
     private DataCloudService dataCloudService;
 
     @BeforeClass(groups = "deployment")

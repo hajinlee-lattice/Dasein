@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.Arrays;
 
-import cascading.tuple.Fields;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -13,11 +12,12 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ContactNameConcatenateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
+import cascading.tuple.Fields;
+
 @Component(ContactNameConcatenate.DATAFLOW_BEAN_NAME)
 public class ContactNameConcatenate extends ConfigurableFlowBase<ContactNameConcatenateConfig> {
     public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_CONTACT_NAME_CONCATENATER;
     public static final String DATAFLOW_BEAN_NAME = "ContactNameConcatenateFlow";
-    private ContactNameConcatenateConfig config;
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
@@ -36,7 +36,7 @@ public class ContactNameConcatenate extends ConfigurableFlowBase<ContactNameConc
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        config = getTransformerConfig(parameters);
+        ContactNameConcatenateConfig config = getTransformerConfig(parameters);
 
         Node node = addSource(parameters.getBaseTables().get(0));
         if (!node.getFieldNames().contains(config.getResultField())) {

@@ -1,8 +1,9 @@
 package com.latticeengines.eai.service.impl;
 
-import com.latticeengines.eai.service.ValueConverter;
 import org.apache.camel.TypeConverter;
 import org.apache.camel.spi.TypeConverterRegistry;
+
+import com.latticeengines.eai.service.ValueConverter;
 
 public class CamelValueConverter implements ValueConverter {
 

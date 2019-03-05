@@ -1,6 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Test;
 
 public class VersionComparisonUtilsTestNG {

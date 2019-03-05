@@ -7,13 +7,13 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubGeneralFunction;
+
 import cascading.operation.AssertionLevel;
 import cascading.operation.assertion.AssertSizeEquals;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubGeneralFunction;
 
 public class PipeFactory {
 
@@ -23,12 +23,9 @@ public class PipeFactory {
 
         Pipe docPipe = null;
 
-        switch (pipeName) {
-
-        case "generic_item_Pipe":
+        if ("generic_item_Pipe".equals(pipeName)) {
             docPipe = createGenericItemPipe(fields, exportedFields);
-            break;
-        default:
+        } else {
             log.error(pipeName + " is not registed!");
         }
 

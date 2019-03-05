@@ -8,13 +8,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
@@ -33,23 +34,23 @@ import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor
 
 public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(ScoringWithDuplicateLeadsTestNG.class);
     private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
-    private static final Logger log = LoggerFactory.getLogger(ScoringWithDuplicateLeadsTestNG.class);
-    @Autowired
+    @Inject
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private static final String customer = ScoringWithDuplicateLeadsTestNG.class.getSimpleName();
 
     private static String tenant;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     @Value("${scoring.test.table}")
