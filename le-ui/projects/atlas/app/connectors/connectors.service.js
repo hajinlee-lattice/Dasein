@@ -64,7 +64,7 @@ class ConnectorService {
 
     getConnectorCreationBody() {
         let system = this.getConnectorCreationTitle();
-        let h5 = `${'<h5>'}${system} ${'org Authentiocation</h5>'}`;
+        let h5 = `${'<h5>'}${system} ${'org Authentication</h5>'}`;
         let p = '<p>Generate a One-time Authentication token below to connect the BIS application with Lattice platform</p>';
         return `${h5}${p}`;
     }
