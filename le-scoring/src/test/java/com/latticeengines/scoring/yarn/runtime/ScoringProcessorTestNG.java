@@ -34,6 +34,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -95,6 +96,22 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     public void AfterMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dir);
         FileUtils.deleteQuietly(new File(ScoringDaemonService.IMPORT_ERROR_FILE_NAME));
+    }
+
+    @Test(groups = "functional")
+    public void testAvroUtils() throws IOException {
+        // upload anther avro file
+        String anotherFilePath = dir + "/allTest_with_lattice_accountId_1.avro";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), anotherFilePath);
+
+        int count = 0;
+        try (AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, dir + "/*.avro")) {
+            while (iterator.hasNext()) {
+                count++;
+                iterator.next();
+            }
+        }
+        Assert.assertEquals(count, 852);
     }
 
     @Test(groups = "functional")
