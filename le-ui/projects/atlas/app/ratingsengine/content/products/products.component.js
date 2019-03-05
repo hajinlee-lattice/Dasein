@@ -18,16 +18,30 @@ angular.module('lp.ratingsengine.wizard.products', [
             purchasedBeforePeriod: getPurchasedBeforePeriod(),
             periodType: PeriodType.ApsRollingPeriod + '(s)',
             ratingEngine: RatingEngine,
-            productCoverage: {}
+            productCoverage: {},
+            productCoverageCounts: {},
+            errorProductsMap: new Set()
         });
 
-        $scope.$watch('vm.search', function(newValue, oldValue) {
-            if(vm.search || oldValue) {
+        // $scope.$watch('vm.search', function(newValue, oldValue) {
+        //     if(vm.search || oldValue) {
+        //         vm.currentPage = 1;
+        //         var products = vm.filteredProductsList.slice(0, 10);
+        //         console.log(JSON.stringify(products));
+        //         vm.getProductCoverage(vm.ratingEngine, products);
+        //     }
+        // });
+
+        var timeout = $timeout(function(){});
+
+        vm.handleSearch = function() {
+            $timeout.cancel(timeout); //cancel the last timeout
+            timeout = $timeout(function(){
                 vm.currentPage = 1;
                 var products = vm.filteredProductsList.slice(0, 10);
                 vm.getProductCoverage(vm.ratingEngine, products);
-            }
-        });
+            }, 1000);
+        };
 
         $scope.$watch('vm.currentPage', function(newValue, oldValue) {
             var products = vm.getProductsToQuery();
@@ -131,7 +145,6 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.clearProductCoverageAndValidate = function() {
-        vm.productCoverage = {};
         vm.validateNextStep();
         vm.resellFormOnChange();
         vm.getProductCoverage(vm.ratingEngine, vm.getProductsToQuery());
@@ -172,14 +185,31 @@ angular.module('lp.ratingsengine.wizard.products', [
         }
     }
 
-    vm.getProductCoverage = function(ratingEngine, filteredProducts) {
-        RatingsEngineStore.getProductCoverage(ratingEngine, filteredProducts, vm.purchasedBeforePeriod).then(function (result) {
-            for (var productId in result.ratingModelsCoverageMap) {
-                if (!vm.productCoverage.hasOwnProperty(productId)) {
-                    vm.productCoverage[productId] = result.ratingModelsCoverageMap[productId].unscoredAccountCount;
+    vm.getPurchasePeriodToQuery = function() {
+        return vm.purchasedBeforePeriod == null ? 0 : vm.purchasedBeforePeriod;
+    }
+
+    vm.getProductCoverage = function(ratingEngine, filteredList) {
+        var purchasedBeforePeriod = vm.purchasedBeforePeriod == null ? 0 : vm.purchasedBeforePeriod;
+        if (!vm.productCoverageCounts.hasOwnProperty(purchasedBeforePeriod)) {
+            vm.productCoverageCounts[purchasedBeforePeriod] = {};
+        };
+        var filteredProducts = filteredList.filter(function(value, index) {
+            return vm.productCoverageCounts[purchasedBeforePeriod] && !vm.productCoverageCounts[purchasedBeforePeriod].hasOwnProperty(value.ProductId);
+        });
+        vm.errorProductsMap = new Set();
+        if (filteredProducts.length > 0) {
+            RatingsEngineStore.getProductCoverage(ratingEngine, filteredProducts, vm.purchasedBeforePeriod).then(function (result) {
+                for (var productId in result.ratingModelsCoverageMap) {
+                    if (!vm.productCoverageCounts[purchasedBeforePeriod].hasOwnProperty(productId)) {
+                        vm.productCoverageCounts[purchasedBeforePeriod][productId] = result.ratingModelsCoverageMap[productId].unscoredAccountCount;
+                    }
                 }
-            }
-        })
+                for (var productId in result.errorMap) {
+                    vm.errorProductsMap.add(productId)
+                }
+            })
+        }
     }
 
     vm.init();

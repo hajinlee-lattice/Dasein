@@ -23,7 +23,7 @@
 
             <div class="filters">
                 <div class="ng-search">
-                    <input type="text" class="form-control" placeholder="Search {{vm.products.length}} Products" ng-model="vm.search" />
+                    <input type="text" class="form-control" placeholder="Search {{vm.products.length}} Products" ng-model="vm.search" ng-change="vm.handleSearch()"/>
                     <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
                         <span class="fa fa-search" ng-show="!vm.search.length"></span>
                         <span class="fa fa-times" ng-show="vm.search.length"></span>
@@ -49,8 +49,8 @@
                 <tbody>
                     <tr 
                         ng-repeat="product in (vm.filteredProductsList = (vm.products 
-                                | filter: {'ProductName': vm.search}))
-                                | orderBy: vm.sortBy
+                                | filter: {'ProductName': vm.search}
+                                | orderBy: vm.sortBy))
                                 | startFrom: (vm.currentPage - 1) * vm.pageSize 
                                 | limitTo: vm.pageSize"
                         class="item product"
@@ -67,9 +67,14 @@
                         <td>
                             <label for="{{product.ProductId}}">{{product.ProductName}}</label>
                         </td>
-                        <td>
+<!--                         <td>
                             <label for="{{product.ProductId}}" ng-if="vm.productCoverage.hasOwnProperty(product.ProductId)">{{vm.productCoverage[product.ProductId].toLocaleString()}}</label>
                             <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverage.hasOwnProperty(product.ProductId)"></span>
+                        </td> -->
+                        <td>
+                            <label for="{{product.ProductId}}" ng-if="vm.productCoverageCounts[vm.getPurchasePeriodToQuery()].hasOwnProperty(product.ProductId)">{{vm.productCoverageCounts[vm.getPurchasePeriodToQuery()][product.ProductId].toLocaleString()}}</label>
+                            <span ng-show="vm.errorProductsMap.has(product.ProductId)"> N/A </span>
+                            <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverageCounts[vm.getPurchasePeriodToQuery()].hasOwnProperty(product.ProductId) && !vm.errorProductsMap.has(product.ProductId)"></span>
                         </td>
                         <!--<td>
                             <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
