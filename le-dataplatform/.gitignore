@@ -1,2 +1,11 @@
 /ddl_*.sql
 /metadata.json
+
+/dataplatform
+/datascience
+/name1
+/name2
+/data
+/latticeengines.properties
+/log4j.properties
+/log4j2-yarn.xml
