@@ -290,7 +290,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         step.setTargetTable(targetTable);
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
-        step.setConfiguration(appendEngineConf(conf, heavyEngineConfig()));
+        step.setConfiguration(appendEngineConf(conf, extraHeavyEngineConfig()));
         return step;
     }
 
