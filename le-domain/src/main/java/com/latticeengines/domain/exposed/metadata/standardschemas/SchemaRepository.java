@@ -1486,7 +1486,7 @@ public class SchemaRepository {
                 attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
             }
         } else if (schema == SchemaInterpretation.ContactEntityMatch) {
-            attrs.addAll(Arrays.asList(website, accountCompanyName, duns, city, state, country,
+            attrs.addAll(Arrays.asList(email, website, accountCompanyName, duns, city, state, country,
                     postalCode, phoneNumber));
             attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
         }
