@@ -4,16 +4,17 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.YarnClient;
 
@@ -70,27 +71,25 @@ public class ExportAndReportService {
     @Value("${dellebi.datatarget.password.encrypted}")
     private String targetJdbcPassword;
 
-    private List<String> targetColumns;
-
-    @Autowired
+    @Inject
     private MailSender mailSender;
 
-    @Autowired
+    @Inject
     private DellEbiFlowService dellEbiFlowService;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     public boolean export(DataFlowContext context) {
@@ -123,7 +122,7 @@ public class ExportAndReportService {
         String errorMsg = null;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
 
-        targetColumns = Arrays.asList(dellEbiFlowService.getTargetColumns(context));
+        List<String> targetColumns = Arrays.asList(dellEbiFlowService.getTargetColumns(context));
         String optionalEnclosurePara = "--fields-terminated-by";
         String optionalEnclosureValue = "\t";
 

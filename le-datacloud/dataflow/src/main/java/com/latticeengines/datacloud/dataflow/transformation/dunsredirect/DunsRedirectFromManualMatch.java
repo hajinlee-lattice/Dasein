@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.dataflow.transformation.dunsredirect;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.ValidationUtils;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -11,8 +15,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectFromManualMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Generate DunsRedirectBook rows from bulk match enriched ManualSeedStandard data
@@ -23,7 +25,7 @@ public class DunsRedirectFromManualMatch
     public static final String DATAFLOW_BEAN_NAME = "DunsRedirectFromManualMatch";
     public static final String TRANSFORMER_NAME = "DunsRedirectFromManualMatchTransformer";
 
-    @Autowired
+    @Inject
     private BeanValidationService beanValidationService;
 
     @Override

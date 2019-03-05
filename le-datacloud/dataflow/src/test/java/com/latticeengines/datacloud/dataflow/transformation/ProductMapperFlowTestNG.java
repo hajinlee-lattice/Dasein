@@ -1,10 +1,10 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.List;
-import java.util.Arrays;
-import java.util.UUID;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,8 +18,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 
 public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {

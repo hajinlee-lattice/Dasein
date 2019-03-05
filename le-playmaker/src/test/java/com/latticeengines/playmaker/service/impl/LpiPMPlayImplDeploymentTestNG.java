@@ -1,9 +1,7 @@
 package com.latticeengines.playmaker.service.impl;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -38,32 +36,17 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
-    private Play firstPlayWithLaunch;
-    private Play secondPlayWithLaunch;
-    private Tenant tenant;
-    private PlayLaunch firstPlayLaunch;
-    private PlayLaunch secondPlayLaunch;
-
     @Inject
     private PlayProxy playProxy;
 
-    List<String> accountFields = Arrays.asList( //
-            "LatticeAccountId", //
-            "CDLUpdatedTime", //
-            "AccountId", //
-            "Website", //
-            "LDC_Name", //
-            "ID", //
-            "LEAccountExternalID", //
-            "LastModificationDate", //
-            "SalesforceAccountID", //
-            "SfdcAccountID", //
-            "RowNum");
+    private Play firstPlayWithLaunch;
+    private Play secondPlayWithLaunch;
+    private Tenant tenant;
 
-    PlayLaunchConfig playLaunchConfig = null;
-    
+    private PlayLaunchConfig playLaunchConfig = null;
+
     @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
+    public void setup() {
         playLaunchConfig = new PlayLaunchConfig.Builder().build();
         testPlayCreationHelper.setupTenantAndData();
     }
@@ -76,7 +59,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountWithoutPlayCreation" })
     public void testGetPlayCountAfterCreatingPlayWithoutLaunch() throws Exception {
-        PlayLaunchConfig plConfig = new PlayLaunchConfig.Builder().build(); 
+        PlayLaunchConfig plConfig = new PlayLaunchConfig.Builder().build();
         testPlayCreationHelper.setupPlayTestEnv();
         testPlayCreationHelper.createPlay(plConfig);
 
@@ -85,11 +68,11 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingPlayWithoutLaunch" })
-    public void testGetPlayCountAfterCreatingPlayWithLaunch() throws Exception {
+    public void testGetPlayCountAfterCreatingPlayWithLaunch() {
         tenant = testPlayCreationHelper.getTenant();
         testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
         firstPlayWithLaunch = testPlayCreationHelper.getPlay();
-        firstPlayLaunch = testPlayCreationHelper.getPlayLaunch();
+        PlayLaunch firstPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         playProxy.updatePlayLaunch(tenant.getId(), firstPlayWithLaunch.getName(), firstPlayLaunch.getLaunchId(),
                 LaunchState.Launching);
         playProxy.updatePlayLaunch(tenant.getId(), firstPlayWithLaunch.getName(), firstPlayLaunch.getLaunchId(),
@@ -110,7 +93,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         Assert.assertEquals(playCount, 1);
 
         testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
-        secondPlayLaunch = testPlayCreationHelper.getPlayLaunch();
+        PlayLaunch secondPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         playProxy.updatePlayLaunch(tenant.getId(), secondPlay.getName(), secondPlayLaunch.getLaunchId(),
                 LaunchState.Launching);
         playProxy.updatePlayLaunch(tenant.getId(), secondPlay.getName(), secondPlayLaunch.getLaunchId(),
@@ -146,7 +129,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountForFutureTimestamp" })
-    public void testDeletePlay() throws Exception {
+    public void testDeletePlay() {
         playProxy.deletePlay(tenant.getId(), secondPlayWithLaunch.getName(), false);
         int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 1);

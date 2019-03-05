@@ -1,11 +1,10 @@
 package com.latticeengines.security.exposed.jwt;
 
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -17,11 +16,11 @@ import com.latticeengines.security.exposed.jwt.handler.JwtHandler;
 @Component("jwtManager")
 public class JwtManager {
 
-    public static final String SOURCE_REF_KEY = "source_ref";
+    static final String SOURCE_REF_KEY = "source_ref";
 
     private static final Map<String, JwtHandler> jwtTokenHandlers = new HashMap<>();
 
-    public JwtHandler getJwtTokenHandler(String sourceRef) {
+    private JwtHandler getJwtTokenHandler(String sourceRef) {
         return jwtTokenHandlers.get(sourceRef);
     }
 

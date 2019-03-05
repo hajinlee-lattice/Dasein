@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ import com.latticeengines.yarn.exposed.client.ContainerProperty;
 public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     private static final Logger log = LoggerFactory.getLogger(ResubmitPreemptedJobsWithThrottling.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${dataplatform.yarn.job.basedir}")

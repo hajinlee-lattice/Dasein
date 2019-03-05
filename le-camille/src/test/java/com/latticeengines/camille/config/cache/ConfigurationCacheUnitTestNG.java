@@ -1,8 +1,5 @@
 package com.latticeengines.camille.config.cache;
 
-import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -15,14 +12,11 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
+import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
 public class ConfigurationCacheUnitTestNG {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {

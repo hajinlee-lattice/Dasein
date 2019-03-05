@@ -2,18 +2,17 @@ package com.latticeengines.dataflow.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,7 +32,7 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DataFlowFunctionalTestNGBase.class);
 
-    public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
+    protected void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         for (AbstractMap.SimpleEntry<String, String> e : copyEntries) {
@@ -48,9 +47,8 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     }
 
-    protected Path getDestinationPath(String destPath, Resource res) throws IOException {
-        Path dest = new Path(destPath, res.getFilename());
-        return dest;
+    private Path getDestinationPath(String destPath, Resource res) {
+        return new Path(destPath, res.getFilename());
     }
 
     protected void verifyNumRows(Configuration config, String targetDir, int expectedNumRows) throws Exception {

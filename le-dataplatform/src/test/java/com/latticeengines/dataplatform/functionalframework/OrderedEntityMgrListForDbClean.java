@@ -3,8 +3,8 @@ package com.latticeengines.dataplatform.functionalframework;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,47 +18,47 @@ import com.latticeengines.dataplatform.entitymanager.modeling.AlgorithmEntityMgr
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 
 @Configuration
 public class OrderedEntityMgrListForDbClean {
 
-    @Autowired
+    @Inject
     protected AlgorithmEntityMgr algorithmEntityMgr;
 
-    @Autowired
+    @Inject
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    @Autowired
+    @Inject
     protected JobEntityMgr jobEntityMgr;
 
-    @Autowired
+    @Inject
     protected ModelEntityMgr modelEntityMgr;
 
-    @Autowired
+    @Inject
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandLogEntityMgr modelCommandLogEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandParameterEntityMgr modelCommandParameterEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
     private List<BaseEntityMgr<? extends HasPid>> entityMgrs;
 
     @PostConstruct
-    public void init() {
+    public void postConstruct() {
         entityMgrs = ImmutableList.of(algorithmEntityMgr, throttleConfigurationEntityMgr, jobEntityMgr, modelEntityMgr,
                 modelDefinitionEntityMgr, modelCommandLogEntityMgr, modelCommandStateEntityMgr,
                 modelCommandParameterEntityMgr, modelCommandResultEntityMgr, modelCommandEntityMgr);

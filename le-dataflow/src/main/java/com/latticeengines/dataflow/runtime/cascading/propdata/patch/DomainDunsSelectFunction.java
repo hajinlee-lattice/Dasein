@@ -1,21 +1,23 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.patch;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.Arrays;
-import java.util.Map;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Copy the first non-blank Domain + DUNS pair (only one field need to be non-blank to get selected) to given output

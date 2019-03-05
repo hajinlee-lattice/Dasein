@@ -1,9 +1,9 @@
 package com.latticeengines.security.provider.activedirectory;
 
-import java.util.Calendar;
-
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
+import java.util.Calendar;
 
 import org.testng.annotations.Test;
 

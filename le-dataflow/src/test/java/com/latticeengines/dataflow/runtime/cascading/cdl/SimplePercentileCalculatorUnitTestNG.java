@@ -1,5 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
@@ -8,9 +11,6 @@ import java.util.stream.DoubleStream;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class SimplePercentileCalculatorUnitTestNG {
 

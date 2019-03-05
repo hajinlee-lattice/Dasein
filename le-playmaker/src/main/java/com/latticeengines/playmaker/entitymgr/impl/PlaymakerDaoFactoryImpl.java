@@ -5,17 +5,19 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerSyncLookupSource;
@@ -28,25 +30,22 @@ import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV710;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV740;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV750;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("daoFactory")
 public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
 
     private static final Logger log = LoggerFactory.getLogger(PlaymakerDaoFactoryImpl.class);
 
-    @Autowired
+    @Inject
     private JdbcTemplateFactoryImpl templateFactory;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
-    @Qualifier(value = "lpiPMRecommendationDaoAdapter")
+    @Resource(name = "lpiPMRecommendationDaoAdapter")
     private PlaymakerRecommendationDao lpiPlaymakerRecommendationDao;
 
     private Map<String, Class<? extends PlaymakerRecommendationDao>> versionDaoMap;

@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.util.Properties;
 
-import com.latticeengines.hadoop.exposed.service.ManifestService;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -17,6 +16,7 @@ import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.yarn.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;

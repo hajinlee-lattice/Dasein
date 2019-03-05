@@ -5,8 +5,6 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -16,9 +14,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public class HdfsUriGenerator {
 
     public static final String EXTRACT_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
-
-    @SuppressWarnings("unused")
-    private Logger log = LoggerFactory.getLogger(HdfsUriGenerator.class);
 
     @SuppressWarnings("unchecked")
     public String getHdfsUriForCamel(Exchange exchange, Table table, String fileName) {

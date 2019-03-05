@@ -1,10 +1,16 @@
 package com.latticeengines.security.exposed.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,25 +26,20 @@ import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     GlobalTenantManagementService globalTenantManagementService;
 
-    @Autowired
+    @Inject
     UserService userService;
 
     private Tenant tenant;
     private Tenant anotherTenant;
     private final UserRegistration uReg = createUserRegistration();
     private final LoginValidationResponse samlUser = createExternalUserFromSamlResponse();
-    
-    
+
+
     @BeforeClass(groups = "functional")
     public void setup() {
         tenant = new Tenant();
@@ -95,7 +96,7 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
         level = userService.getAccessLevel(anotherTenant.getId(), uReg.getCredentials().getUsername());
         assertEquals(level, AccessLevel.INTERNAL_ADMIN);
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = {"testAddUserAccessLevel"})
     public void testFindUser() {
         User user = userService.findByUsername(uReg.getCredentials().getUsername());
@@ -156,7 +157,7 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
         samlUser.setUserId("samltest" + UUID.randomUUID().toString() + "@test.com");
         samlUser.setFirstName("Test SamlUser");
         samlUser.setLastName("SamlTester");
-        
+
         return samlUser;
     }
 

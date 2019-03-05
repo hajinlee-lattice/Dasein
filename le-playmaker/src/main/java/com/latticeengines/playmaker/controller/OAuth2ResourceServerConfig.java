@@ -1,9 +1,9 @@
 package com.latticeengines.playmaker.controller;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,8 +15,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
+import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
 import com.latticeengines.playmaker.exception.ExceptionEncodingTranslator;
 
 @Configuration
@@ -29,7 +29,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     @Resource(name = "dataSourceOauth2")
     private DataSource dataSource;
 
-    @Autowired
+    @Inject
     private LatticeOauth2AuthenticationManager latticeAuthenticationManager;
 
     @Bean

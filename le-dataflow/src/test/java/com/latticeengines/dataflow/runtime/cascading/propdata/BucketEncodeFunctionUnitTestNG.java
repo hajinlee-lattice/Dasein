@@ -1,8 +1,9 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 
 public class BucketEncodeFunctionUnitTestNG {
 
