@@ -148,13 +148,13 @@ angular.module('lp.jobs.row.subjobs', [])
                     // console.log(subjob.jobStatus, ' == ',getPayloadValue(subjob, 'total_rows'), ' -- ',getPayloadValue(subjob, 'imported_rows'));
                     return 'Success';
                 }
-                if (getPayloadValue(subjob, 'imported_rows') < getPayloadValue(subjob, 'total_rows') && subjob.jobStatus === 'Completed') {
+                if (getPayloadValue(subjob, 'imported_rows') < getPayloadValue(subjob, 'total_rows') && subjob.jobStatus === 'Completed' && (getPayloadValue(subjob, 'total_failed_rows') != getPayloadValue(subjob, 'total_rows'))) {
                     return 'Partial Success';
                 }
                 if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
                     return 'In Progress';
                 }
-                if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows')) {
+                if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows') || (getPayloadValue(subjob, 'total_failed_rows') == getPayloadValue(subjob, 'total_rows'))) {
                     return 'Failed';
                 }
                 return subjob.jobStatus;

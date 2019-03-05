@@ -1170,6 +1170,9 @@ angular
                     })
 
                     return deferred.promise;
+                },
+                BackState: function(StateHistory) {
+                    return StateHistory.lastFrom() ? StateHistory.lastFrom().name : null;
                 }
             },
             views: {
