@@ -6,13 +6,17 @@ class LeCarousel extends Component {
 
   constructor(props) {
     super(props);
-    this.config = { breakTo: 400 }
+    
     this.state = { viewPortIndex: 0, initial: this.props.numPerViewport ? this.props.numPerViewport : 3, numPerViewport: this.props.numPerViewport ? this.props.numPerViewport : 3, prevDisabled: true, nextDisabled: false };
     this.getPrevViewPort = this.getPrevViewPort.bind(this);
     this.getNextViewPort = this.getNextViewPort.bind(this);
     this.resized = this.resized.bind(this);
+    this.maxNumber = this.props.children.length;
+    console.log(this.maxNumber);
+    this.start = 0;
+    this.end = 0;
   }
-  
+
 
   resized() {
     let div = $(this.elementRef);
@@ -20,26 +24,26 @@ class LeCarousel extends Component {
     let viewport = $(children).children()[0];
     let elements = $(viewport).children();
     let singleElement = 0;
-    let minElement = $(elements[0]).css('min-width') ? $(elements[0]).css('min-width').replace(/[^-\d\.]/g, ''): 100;
-    let maxElement = $(elements[0]).css('max-width') ? $(elements[0]).css('max-width').replace(/[^-\d\.]/g, ''): 100;
+    let minElement = $(elements[0]).css('min-width') ? $(elements[0]).css('min-width').replace(/[^-\d\.]/g, '') : 100;
+    let maxElement = $(elements[0]).css('max-width') ? $(elements[0]).css('max-width').replace(/[^-\d\.]/g, '') : 100;
     let allMin = true;
     let allMax = true;
     for (let i = 0; i < elements.length; i++) {
       let el = elements[i];
       singleElement = $(el).width();
-      console.log(singleElement, minElement, maxElement);
-      if(singleElement > Number(minElement)){
+      // console.log(singleElement, minElement, maxElement);
+      if (singleElement > Number(minElement)) {
         allMin = false;
       }
-      if(singleElement  < Number(maxElement)){
+      if (singleElement < Number(maxElement)) {
         allMax = false;
       }
     }
-    if(allMin == true && this.state.numPerViewport > 1){
+    if (allMin == true && this.state.numPerViewport > 1) {
       this.setState({ numPerViewport: this.state.numPerViewport - 1 });
       return;
     }
-    if(allMax == true){
+    if (allMax == true) {
       this.setState({ numPerViewport: this.state.numPerViewport + 1 });
       return;
     }
@@ -72,34 +76,24 @@ class LeCarousel extends Component {
   getElementsViewPort() {
     let childrenViewPort = [];
     if (this.props.children) {
-      let start = Number(this.state.numPerViewport * this.state.viewPortIndex);
+      this.start = Number(this.state.numPerViewport * this.state.viewPortIndex);
       // console.log(start);
-      let end = Number(start + this.state.numPerViewport);
+      this.end = Number(this.start + this.state.numPerViewport);
       // console.log(start, ' == ', end);
-      for (var i = start; i < end; i++) {
+      for (var i = this.start; i < this.end; i++) {
         childrenViewPort.push(<LeCarouselElement elementsStyle={this.props.elementsStyle}>{this.props.children[i]}</LeCarouselElement>);
       }
     }
-    console.log(childrenViewPort.length);
+    // console.log(childrenViewPort.length, this.end);
     return childrenViewPort;
   }
 
-  getChildrenWrapped() {
-    let children = [];
-    if (this.props.children) {
-      this.props.children.forEach(child => {
-        children.push(<LeCarouselElement elementsStyle={this.props.elementsStyle}>{child}</LeCarouselElement>);
-      });
-    }
-    return children;
-  }
-
   render() {
-    // console.log('Render');
     return (
       <div className="le-carousel-container" ref={this.refCallback} >
         <div className="le-carousel-left-control">
           <LeButton
+            disabled={this.state.viewPortIndex == 0}
             name="borderless"
             callback={this.getPrevViewPort}
             config={{
@@ -115,6 +109,7 @@ class LeCarousel extends Component {
         </div>
         <div className="le-carousel-right-control">
           <LeButton
+          disabled={(this.end * this.state.viewPortIndex >= this.maxNumber) || (this.end >= this.maxNumber)}
             name="borderless"
             callback={this.getNextViewPort}
             config={{
