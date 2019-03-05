@@ -137,13 +137,13 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
     protected void uploadArtifactsToHdfs() throws IOException {
         String dpHdfsPath = String.format("%s/dataplatform", manifestService.getLedpPath());
-        FileUtils.deleteDirectory(new File("dataplatform"));
+        FileUtils.deleteQuietly(new File("dataplatform"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, dpHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "dataplatform", dpHdfsPath);
 
         String dsHdfsPath = manifestService.getLedsPath();
-        FileUtils.deleteDirectory(new File("datascience"));
-        HdfsUtils.copyHdfsToLocal(yarnConfiguration, dsHdfsPath, ".");
+        FileUtils.deleteQuietly(new File("datascience"));
+        HdfsUtils.copyHdfsToLocal(yarnConfiguration, dsHdfsPath, "datascience");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "datascience", dsHdfsPath);
 
         String log4jPath = String.format("%s/conf/log4j.properties", manifestService.getLedpPath());
