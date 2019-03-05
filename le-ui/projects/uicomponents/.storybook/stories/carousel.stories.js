@@ -129,7 +129,7 @@ stories.add("Carousel - Tile", () => (
 
 stories.add("Carousel - Card", () => (
     <div style={style}>
-        <LeCarousel numPerViewport={6} elementsStyle={{ border: '0px solid blue', minWidth: '100px', maxWidth: '200px'}}>
+        <LeCarousel elementsStyle={{ border: '0px solid blue', minWidth: '100px', maxWidth: '200px'}}>
             {utility.getCardContent()}
         </LeCarousel>
     </div>
