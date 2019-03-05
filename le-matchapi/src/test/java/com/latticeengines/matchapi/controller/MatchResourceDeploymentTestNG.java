@@ -416,7 +416,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     }
 
     @DataProvider(name = "recentApprovedVersions", parallel = true)
-    public Object[][] prevAndCurrApprovedVersion() {
+    public Object[][] recentApprovedVersions() {
         Set<String> distinctMajorVer = new HashSet<>();
         List<String> prevAndCurrentApprovedVer = new ArrayList<>();
         List<DataCloudVersion> allApprovedVersions = dataCloudVersionEntityMgr.allApprovedVerions();
