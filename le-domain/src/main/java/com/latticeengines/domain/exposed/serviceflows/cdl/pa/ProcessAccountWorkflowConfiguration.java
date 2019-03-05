@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,6 +20,11 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private CommitEntityMatchWorkflowConfiguration.Builder commitMatch = new CommitEntityMatchWorkflowConfiguration.Builder();
         private UpdateAccountWorkflowConfiguration.Builder updateAccountWorkflowBuilder = new UpdateAccountWorkflowConfiguration.Builder();
         private RebuildAccountWorkflowConfiguration.Builder rebuildAccountWorkflowBuilder = new RebuildAccountWorkflowConfiguration.Builder();
+
+        {
+            // only publish account here for M27 lead to account match
+            commitMatch.checkImportEntitySet(Collections.singleton(BusinessEntity.Account.name()));
+        }
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -47,6 +53,7 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processAccountStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             rebuildAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            commitMatch.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
@@ -56,6 +63,7 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     processAccountStepConfiguration.setRebuild(true);
                     updateAccountWorkflowBuilder.rebuildEntities(entities);
                     rebuildAccountWorkflowBuilder.rebuildEntities(entities);
+                    commitMatch.entitySet(Collections.singleton(BusinessEntity.Account.name()));
                 }
             }
             return this;

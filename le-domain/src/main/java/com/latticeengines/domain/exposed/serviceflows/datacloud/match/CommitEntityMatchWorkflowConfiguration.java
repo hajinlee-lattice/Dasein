@@ -31,7 +31,14 @@ public class CommitEntityMatchWorkflowConfiguration extends BaseDataCloudWorkflo
             return this;
         }
 
-        public CommitEntityMatchWorkflowConfiguration.Builder entityMatchEnabled (boolean entityMatchEnabled) {
+        public CommitEntityMatchWorkflowConfiguration.Builder checkImportEntitySet(Set<String> entitySet) {
+            // need to set the flag to false for entity set to have effect
+            commitEntity.setCheckAllEntityImport(false);
+            commitEntity.setEntityImportSetToCheck(entitySet);
+            return this;
+        }
+
+        public CommitEntityMatchWorkflowConfiguration.Builder entityMatchEnabled(boolean entityMatchEnabled) {
             commitEntity.setSkipStep(!entityMatchEnabled);
             return this;
         }
