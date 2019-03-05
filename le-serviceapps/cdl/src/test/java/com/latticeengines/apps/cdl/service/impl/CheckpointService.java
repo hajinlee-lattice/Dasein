@@ -502,58 +502,61 @@ public class CheckpointService {
                 currentDataCloudBuildNumber, mainTestTenant.getId(), initialVersion));
     }
 
-    public void saveCheckPoint(String checkpoint) throws IOException {
-        String rootDir = "checkpoints/" + checkpoint;
+    public void saveCheckPoint(String checkpointName, String checkpointVersion) throws IOException {
+        String rootDir = "checkpoints/" + checkpointName;
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
 
-        downloadHdfsData(checkpoint);
+        downloadHdfsData(checkpointName);
 
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
+            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                saveTableIfExists(role, version, checkpoint);
+                saveTableIfExists(role, version, checkpointName);
                 if (active.equals(version)) {
                     saveRedshiftTableIfExists(role, version);
-                    saveDynamoTableIfExists(checkpoint, role, version);
+                    saveDynamoTableIfExists(checkpointName, role, version);
                 }
             }
-            saveStatsIfExists(version, checkpoint);
-            saveDataCollectionStatus(version, checkpoint);
+            saveStatsIfExists(version, checkpointName);
+            saveDataCollectionStatus(version, checkpointName);
         }
 
-        printSaveRedshiftStatements(checkpoint);
-        saveCheckpointVersion(checkpoint);
+        printSaveRedshiftStatements(checkpointName, checkpointVersion);
+        saveCheckpointVersion(checkpointName);
+        printPublicEntityRequest(checkpointName, checkpointVersion);
     }
 
-    public void saveCheckPoint(String checkpoint, String customerSpace) throws IOException {
-        String rootDir = "checkpoints/" + checkpoint;
+    public void saveCheckPoint(String checkpointName, String checkpointVersion, String customerSpace) throws
+            IOException {
+        String rootDir = "checkpoints/" + checkpointName;
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
 
-        downloadHdfsData(checkpoint);
+        downloadHdfsData(checkpointName);
 
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
+            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                saveTableIfExists(role, version, checkpoint);
+                saveTableIfExists(role, version, checkpointName);
                 if (active.equals(version)) {
                     saveRedshiftTableIfExists(role, version);
-                    saveDynamoTableIfExists(checkpoint, role, version);
+                    saveDynamoTableIfExists(checkpointName, role, version);
                 }
             }
-            saveStatsIfExists(version, checkpoint);
-            saveDataCollectionStatus(version, checkpoint);
+            saveStatsIfExists(version, checkpointName);
+            saveDataCollectionStatus(version, checkpointName);
         }
 
-        printSaveRedshiftStatements(checkpoint);
+        printSaveRedshiftStatements(checkpointName, checkpointVersion);
+        saveCheckpointVersion(checkpointName);
         // Save Workflow Execution Context.
-        saveWorkflowExecutionContext(checkpoint, customerSpace);
-        saveCheckpointVersion(checkpoint);
+        saveWorkflowExecutionContext(checkpointName, customerSpace);
+        printPublicEntityRequest(checkpointName, checkpointVersion);
     }
 
     private void saveCheckpointVersion(String checkpoint) throws IOException {
@@ -645,15 +648,15 @@ public class CheckpointService {
         log.info("Save DataCollection Status at version " + version + " to " + jsonFile);
     }
 
-    private void printSaveRedshiftStatements(String checkpoint) {
+    private void printSaveRedshiftStatements(String checkpointName, String checkpointVersion) {
         if (MapUtils.isNotEmpty(savedRedshiftTables)) {
-            String nextVersion = "99";
-            StringBuilder msg = new StringBuilder("If you are going to save the checkpoint to version " + nextVersion);
+            StringBuilder msg = new StringBuilder("If you are going to save the checkpoint to version "
+                    + checkpointVersion);
             msg.append(", you can run following statements in redshift:\n\n");
             List<String> dropTables = new ArrayList<>();
             List<String> renameTables = new ArrayList<>();
             savedRedshiftTables.forEach((role, table) -> {
-                String tgtTable = checkpointRedshiftTableName(checkpoint, role, nextVersion);
+                String tgtTable = checkpointRedshiftTableName(checkpointName, role, checkpointVersion);
                 dropTables.add("drop table if exists " + tgtTable + ";");
                 renameTables.add(String.format("alter table %s rename to %s;", table, tgtTable));
             });
@@ -665,6 +668,12 @@ public class CheckpointService {
             }
             log.info(msg.toString());
         }
+    }
+
+    private void printPublicEntityRequest(String checkpointName, String checkpointVersion) {
+        StringBuilder msg = new StringBuilder("To publish Entity Match Seed table version " + checkpointVersion +
+                " you must run the following HTTP Request:\n");
+        //msg.append()
     }
 
     private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role,
