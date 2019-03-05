@@ -1,13 +1,13 @@
 package com.latticeengines.datacloud.core.exposed.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Utility class for testing {@link PatchBook} related stuff

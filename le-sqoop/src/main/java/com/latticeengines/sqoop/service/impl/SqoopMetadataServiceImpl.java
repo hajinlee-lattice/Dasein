@@ -1,15 +1,16 @@
 package com.latticeengines.sqoop.service.impl;
 
 import java.io.IOException;
+
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -27,13 +28,11 @@ public class SqoopMetadataServiceImpl implements SqoopMetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(SqoopMetadataServiceImpl.class);
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
-
-    private AvroSchemaGenerator avroSchemaGenerator;
 
     @Override
     public DataSchema createDataSchema(DbCreds creds, String tableName) {
@@ -51,14 +50,14 @@ public class SqoopMetadataServiceImpl implements SqoopMetadataService {
 
         try {
             ConnManager connManager = getConnectionManager(options);
-            avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
+            AvroSchemaGenerator avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
             return avroSchemaGenerator.generate();
         } catch (IOException e) {
             log.error(ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
-    
+
     public ConnManager getConnectionManager(SqoopOptions options) throws IOException {
         JobData data = new JobData(options, null);
         ConnManager connManager = new ConnFactory(yarnConfiguration).getManager(data);

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,12 +27,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.service.RecommendationCleanupService;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { // "classpath:test-pls-context.xml",
+@ContextConfiguration(locations = {
         "classpath:test-testframework-cleanup-context.xml", "classpath:playmakercore-context.xml",
         "classpath:test-playmaker-context.xml" })
 public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {

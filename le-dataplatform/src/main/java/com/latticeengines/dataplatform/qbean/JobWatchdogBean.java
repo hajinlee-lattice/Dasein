@@ -2,34 +2,35 @@ package com.latticeengines.dataplatform.qbean;
 
 import java.util.concurrent.Callable;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogCallable;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.service.YarnService;
 
 @Component("jobWatchdog")
 public class JobWatchdogBean implements QuartzJobBean {
 
-    @Autowired
+    @Inject
     private ModelingJobService modelingJobService;
 
-    @Autowired
+    @Inject
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelEntityMgr modelEntityMgr;
 
-    @Autowired
+    @Inject
     private YarnService yarnService;
 
-    @Autowired
+    @Inject
     private JobEntityMgr jobEntityMgr;
 
     @Value("${dataplatform.retry.wait.time}")

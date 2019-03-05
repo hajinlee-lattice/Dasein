@@ -7,12 +7,12 @@ import java.util.Random;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -21,12 +21,12 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
-    
+
     private static final Logger log = LoggerFactory.getLogger(EventDataSamplingMapper.class);
 
     private SamplingConfiguration sampleConfig = null;
     private Random random = null;
-    
+
     @Override
     public void setup(Context context) {
         Configuration config = context.getConfiguration();
@@ -51,11 +51,11 @@ public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritabl
             InterruptedException {
         List<SamplingElement> samplingElements = sampleConfig.getSamplingElements();
         int trainingPct = sampleConfig.getTrainingPercentage();
-        
+
         for (SamplingElement samplingElement : samplingElements) {
             int sampleRate = samplingElement.getPercentage();
             int sample = random.nextInt(100);
-            
+
             if (sample < sampleRate) {
                 // now sample for training-test
                 int trainingOrTest = random.nextInt(100);
@@ -67,9 +67,9 @@ public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritabl
                 }
                 context.write(new Text(name), new AvroValue<Record>(key.datum()));
             }
-            
+
         }
-        
+
     }
 
 }

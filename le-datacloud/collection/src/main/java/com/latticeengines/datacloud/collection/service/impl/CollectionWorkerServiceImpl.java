@@ -7,20 +7,16 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
+import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
-import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
-import com.latticeengines.datacloud.collection.service.VendorConfigService;
-import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 @Component
 public class CollectionWorkerServiceImpl implements CollectionWorkerService {
 
     @Inject
     CollectionWorkerMgr collectionWorkerMgr;
-
-    @Inject
-    VendorConfigService vendorConfigService;
 
     @Override
     public CollectionWorkerMgr getEntityMgr() {

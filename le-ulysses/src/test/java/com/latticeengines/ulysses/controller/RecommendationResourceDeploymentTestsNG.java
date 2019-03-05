@@ -2,7 +2,8 @@ package com.latticeengines.ulysses.controller;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -10,24 +11,24 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class RecommendationResourceDeploymentTestsNG extends UlyssesDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private RecommendationEntityMgr recommendationEntityMgr;
 
-    @Autowired
+    @Inject
     private RecommendationDao recommendationDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     private String getRecommendationResourceUrl() {

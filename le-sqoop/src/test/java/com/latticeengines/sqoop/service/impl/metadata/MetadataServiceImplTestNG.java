@@ -7,9 +7,10 @@ import java.net.URL;
 import java.sql.Types;
 import java.util.AbstractMap;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.derby.drda.NetworkServerControl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,22 +19,20 @@ import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
-import com.latticeengines.sqoop.functionalframework.SqoopFunctionalTestNGBase;
 import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
+import com.latticeengines.sqoop.functionalframework.SqoopFunctionalTestNGBase;
 
 public class MetadataServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
-    @Autowired
+    @Inject
     private SqoopMetadataService sqoopMetadataService;
-
-    private NetworkServerControl serverControl;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        serverControl = new NetworkServerControl();
+        NetworkServerControl serverControl = new NetworkServerControl();
         serverControl.start(null);
     }
 

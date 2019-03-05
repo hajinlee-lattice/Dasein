@@ -1,14 +1,15 @@
 package com.latticeengines.datacloud.core.dao.impl;
 
+import java.util.List;
+
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.dao.PatchBookDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
-
-import java.util.List;
 
 public class PatchBookDaoImpl
         extends BaseDaoWithAssignedSessionFactoryImpl<PatchBook> implements PatchBookDao {

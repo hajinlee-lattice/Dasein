@@ -1,11 +1,11 @@
 package com.latticeengines.camille.exposed;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import org.apache.curator.framework.CuratorFramework;
@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -112,7 +112,7 @@ public class Camille {
 
     /**
      * Gets direct children only (not a full hierarchy).
-     * 
+     *
      * @throws Exception
      */
     public List<AbstractMap.SimpleEntry<Document, Path>> getChildren(Path path) throws Exception {
@@ -159,7 +159,7 @@ public class Camille {
     }
     /**
      * Gets direct children only (not a full hierarchy).
-     * 
+     *
      * @throws Exception
      */
     public List<AbstractMap.SimpleEntry<Document, Path>> getChildrenInCache(Path path, TreeCache cache) throws Exception {

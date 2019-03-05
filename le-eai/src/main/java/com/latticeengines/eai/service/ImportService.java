@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.ProducerTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
@@ -17,9 +15,6 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class ImportService {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ImportService.class);
 
     private static Map<SourceType, ImportService> services = new HashMap<>();
 
@@ -36,10 +31,10 @@ public abstract class ImportService {
     /**
      * Import metadata from the specific connector. The original list of table
      * metadata will be decorated with the following:
-     * 
+     *
      * 1. Attribute length, precision, scale, physical type, logical type 2.
      * Avro schema associated with the Table
-     * 
+     *
      * @param tables
      *            list of tables that only has table name and attribute names
      * @return

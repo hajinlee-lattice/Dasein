@@ -1,10 +1,10 @@
 package com.latticeengines.datacloud.core.entitymgr;
 
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-
-import java.util.List;
 
 public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
 

@@ -3,6 +3,7 @@ package com.latticeengines.admin.service.impl;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.AfterClass;
@@ -26,17 +27,17 @@ public class ProspectingUserServiceTestNG extends AdminFunctionalTestNGBase {
     private UserService userService;
 
     @BeforeClass(groups = { "functional" })
-    public void setup() throws Exception {
+    public void setup() {
     }
 
     @AfterClass(groups = { "functional" })
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 
     @Test(groups = "functional")
     public void createUser() {
         Date now = new Date();
-        Long longTime = new Long(now.getTime() / 1000);
+        Long longTime = now.getTime() / 1000L;
         String current_time_s = longTime.toString();
         UserRegistration userReg = new UserRegistration();
         Credentials cred = new Credentials();

@@ -10,16 +10,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.Closure;
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
@@ -55,22 +54,23 @@ public class AttributeServiceImpl implements AttributeService {
             "Description", "Data Type", "Status", "Premium");
 
     private static final String KEY_SUFFIX = "Data_Pivoted_Source";
-    @Autowired
+
+    @Inject
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private CommonTenantConfigServiceImpl appTenantConfigService;
 
-    @Autowired
+    @Inject
     private AttributeCustomizationService attributeCustomizationService;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @PostConstruct

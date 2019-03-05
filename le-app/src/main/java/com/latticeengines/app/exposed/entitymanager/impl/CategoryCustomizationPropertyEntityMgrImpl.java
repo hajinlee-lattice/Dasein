@@ -2,7 +2,8 @@ package com.latticeengines.app.exposed.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -11,22 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.app.exposed.dao.CategoryCustomizationPropertyDao;
 import com.latticeengines.app.exposed.entitymanager.CategoryCustomizationPropertyEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("categoryCustomizationPropertyEntityMgr")
 public class CategoryCustomizationPropertyEntityMgrImpl extends BaseEntityMgrImpl<CategoryCustomizationProperty>
         implements CategoryCustomizationPropertyEntityMgr {
 
-    @Autowired
+    @Inject
     private CategoryCustomizationPropertyDao categoryCustomizationPropertyDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override

@@ -6,9 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,8 +38,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     private static final Logger log = LoggerFactory.getLogger(ModelStepOutputResultsProcessorImpl.class);
 
-    public static final int SAMPLE_SIZE = 100;
-    public static final String RANDOM_FOREST = "RandomForest";
+    private static final int SAMPLE_SIZE = 100;
+    static final String RANDOM_FOREST = "RandomForest";
     private static final String JSON_SUFFIX = ".json";
     private static final String CSV_SUFFIX = ".csv";
     private static final String CREATE_OUTPUT_TABLE_SQL = "(Id int NOT NULL,\n" + "    CommandId int NOT NULL,\n"

@@ -4,11 +4,6 @@ import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.compu
 import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.getAvailableTimeZoneIDs;
 import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.getAvailableZoneIds;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -17,6 +12,11 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TimeZone;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 @SuppressWarnings("checkstyle:FileTabCharacter")
 public class TimeStampConvertUtilsUnitTestNG {
@@ -79,7 +79,7 @@ public class TimeStampConvertUtilsUnitTestNG {
     }
 
     @Test(groups = { "unit", "functional" })
-    public void testConvertToLongWithDateTimeFormatWithENLocale() throws Exception {
+    public void testConvertToLongWithDateTimeFormatWithENLocale() {
         long actualTime = TimeStampConvertUtils.convertToLong("01-Feb-2018",
                 "DD-MMM-YYYY", "", "");
         Assert.assertEquals(actualTime, 1517443200000L);
@@ -102,7 +102,7 @@ public class TimeStampConvertUtilsUnitTestNG {
 
     // Test successful cases of date to timestamp conversion with various date/time formats.
     @Test(groups = { "unit", "functional" })
-    public void testConvertToLongWithDateTimeFormatAndTimezone() throws Exception {
+    public void testConvertToLongWithDateTimeFormatAndTimezone() {
 
         // Test Case 1: Simple date with format MM/DD/YYYY, default timezone (UTC).
         long actualTime = TimeStampConvertUtils.convertToLong("02/01/2018",
@@ -190,7 +190,7 @@ public class TimeStampConvertUtilsUnitTestNG {
 
     // Test error cases for date to timestamp conversion with date/time formats.
     @Test(groups = { "unit", "functional" })
-    public void testConvertToLongWithFormatStringErrorCases() throws Exception {
+    public void testConvertToLongWithFormatStringErrorCases() {
         boolean exceptionFound;
 
         // PLS-12095: Date Attribute : Column without date could still upload successfully.

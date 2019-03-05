@@ -1,12 +1,9 @@
 package com.latticeengines.security.exposed.globalauth.zendesk.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.zendesk.ZendeskRole;
-import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
-import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -25,9 +22,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.zendesk.ZendeskRole;
+import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
+import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 
 public class ZendeskServiceImplUnitTestNG {
     private static Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTION_MAP = Collections.singletonMap(
