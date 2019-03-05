@@ -3,12 +3,10 @@ package com.latticeengines.matchapi.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -33,6 +31,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -85,6 +84,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Autowired
     private MatchCommandService matchCommandService;
+
+    @Autowired
+    private DataCloudVersionService dataCloudVersionService;
 
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
@@ -289,7 +291,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
     public void testBulkMatchWithSchema(String version) throws Exception {
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
@@ -413,36 +415,29 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
     }
 
-    @DataProvider(name = "allDataCloudVersions", parallel = true)
-    public Object[][] allDataCloudVersions() {
-        List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
-        Map<String, PriorityQueue<String>> latestVersions = new HashMap<>();
-        for (DataCloudVersion version : versions) {
+    @DataProvider(name = "recentApprovedVersions", parallel = true)
+    public Object[][] recentApprovedVersions() {
+        Set<String> distinctMajorVer = new HashSet<>();
+        List<String> prevAndCurrentApprovedVer = new ArrayList<>();
+        List<DataCloudVersion> allApprovedVersions = dataCloudVersionEntityMgr.allApprovedVerions();
+        for (DataCloudVersion version : allApprovedVersions) {
             if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
                 continue;
             }
-            String vString = version.getVersion();
-            if (vString.compareTo("90") > 0) {
-                continue;
-            }
-            String latestCompatible = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(version.getMajorVersion())
-                    .getVersion();
-            if (!latestVersions.containsKey(latestCompatible)) {
-                latestVersions.put(latestCompatible, new PriorityQueue<>(Collections.reverseOrder()));
-            }
-            latestVersions.get(latestCompatible).offer(version.getVersion());
+            distinctMajorVer.add(version.getMajorVersion());
         }
-        List<String> allVersions = new ArrayList<>();
-        latestVersions.forEach((k, v) -> {
-            allVersions.add(v.poll());
-            if (!v.isEmpty()) {
-                allVersions.add(v.poll());
-            }
-        });
-        Object[][] objs = new Object[allVersions.size() + 1][1];
+        for (String majVer : distinctMajorVer) {
+            String currApprVerForMajVer = dataCloudVersionService
+                    .latestApprovedForMajorVersion(majVer).getVersion();
+            prevAndCurrentApprovedVer
+                    .add(currApprVerForMajVer);
+            prevAndCurrentApprovedVer
+                    .add(dataCloudVersionService.priorVersions(currApprVerForMajVer, 1).get(0));
+        }
+        Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
         int i = 1;
-        for (String version : allVersions) {
+        for (String version : prevAndCurrentApprovedVer) {
             objs[i++] = new Object[] { version };
         }
         return objs;
