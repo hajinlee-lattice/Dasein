@@ -5,17 +5,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
@@ -41,22 +41,22 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     private static Logger log = LoggerFactory.getLogger(MatchCommandServiceImpl.class);
     private static final Integer MAX_RETRIES = 2;
 
-    @Autowired
+    @Inject
     private MatchCommandEntityMgr matchCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private MatchBlockEntityMgr matchBlockEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     private DnbMatchCommandEntityMgr dnbMatchCommandEntityMgr;
 
     @Override
@@ -202,7 +202,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                     throw new IOException("Cannot find application report for ApplicationId " + applicationId);
                 }
                 return report.getFinalApplicationStatus();
-            } catch (IOException | YarnException e) {
+            } catch (IOException e) {
                 log.error("Failed to get application status for " + appIdStr + " retries=" + retries, e);
                 try {
                     Thread.sleep(sleepTime);
