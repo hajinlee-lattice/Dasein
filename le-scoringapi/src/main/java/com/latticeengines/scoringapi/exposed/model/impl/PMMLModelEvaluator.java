@@ -5,14 +5,14 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -23,7 +23,7 @@ import com.latticeengines.scoringapi.exposed.model.impl.pmmlresult.PMMLResultHan
 import com.latticeengines.scoringapi.exposed.model.impl.pmmlresult.PMMLResultHandlerBase;
 
 public class PMMLModelEvaluator extends DefaultModelEvaluator {
-    
+
     private static final Logger log = LoggerFactory.getLogger(PMMLModelEvaluator.class);
 
     public PMMLModelEvaluator(InputStream is) {
@@ -41,7 +41,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
         Object o = results.get(new FieldName(target));
         PMMLResultHandler handler = PMMLResultHandlerBase.getHandler(o.getClass());
-        
+
         if (handler == null) {
             log.error(String.format("No handler for %s class type.", o.getClass().toString()));
             result.put(ScoreType.PERCENTILE, -1);
@@ -64,11 +64,11 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
             throw new RuntimeException(e);
         }
     }
-    
+
     private Object getDefaultValue(DataType dataType) {
         return DataTypeDefault.getByDataType(dataType).getDefaultValue();
     }
-    
+
     @Override
     public Map<ScoreType, Object> evaluate(Map<String, Object> record, //
             ScoreDerivation derivation) {
@@ -80,10 +80,10 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
         for (FieldName name : evaluator.getActiveFields()) {
             Object value = record.get(name.getValue());
-            
+
             if (value == null) {
                 DataField dataField = evaluator.getDataField(name);
-                
+
                 if (dataField != null) {
                     value = getDefaultValue(dataField.getDataType());
                 }
@@ -108,9 +108,9 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
         return result;
     }
-    
+
     private enum DataTypeDefault {
-        
+
         STRING(DataType.STRING, ""), //
         INTEGER(DataType.INTEGER, 0), //
         FLOAT(DataType.FLOAT, 0.0), //
@@ -131,15 +131,15 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
         private final DataType dataType;
         private final Object defaultValue;
-        
+
         private static Map<DataType, DataTypeDefault> map = new HashMap<>();
-            
+
         static {
             for (DataTypeDefault d : DataTypeDefault.values()) {
                 map.put(d.getDataType(), d);
             }
         }
-        
+
         DataTypeDefault(DataType dataType, Object defaultValue) {
             this.dataType = dataType;
             this.defaultValue = defaultValue;
@@ -152,7 +152,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
         public DataType getDataType() {
             return dataType;
         }
-        
+
         public static DataTypeDefault getByDataType(DataType dataType) {
             return map.get(dataType);
         }

@@ -8,23 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
-import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
-import com.latticeengines.domain.exposed.datacloud.match.patch.LookupPatchRequest;
-import com.latticeengines.domain.exposed.datacloud.match.patch.LookupPatchResponse;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchRequest;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchResponse;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchStatus;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchValidationResponse;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,14 +19,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
+import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.datacloud.match.exposed.service.PatchService;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.LookupUpdateRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LookupUpdateResponse;
+import com.latticeengines.domain.exposed.datacloud.match.patch.LookupPatchRequest;
+import com.latticeengines.domain.exposed.datacloud.match.patch.LookupPatchResponse;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchRequest;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchResponse;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchStatus;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchValidationResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import javax.inject.Inject;
 
 @Api(value = "patch", description = "REST resource for account master lookup patch")
 @RestController

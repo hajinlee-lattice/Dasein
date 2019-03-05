@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.dataflow;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
@@ -26,8 +28,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScor
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
-
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(locations = {"classpath:serviceflows-scoring-dataflow-context.xml"})
 public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {

@@ -5,8 +5,6 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.ZooDefs;
 import org.testng.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleConfiguration;
@@ -18,10 +16,6 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.netflix.curator.test.TestingServer;
 
 public class CamilleEnvironmentUnitTestNG {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
 
     @Test(groups = "unit")
     public synchronized void testBootstrapWithOnePod() throws Exception {

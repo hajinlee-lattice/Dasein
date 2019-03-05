@@ -2,10 +2,11 @@ package com.latticeengines.eai.service.impl;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
@@ -16,7 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Aspect
 public class ResourceAspect {
 
-    @Autowired
+    @Inject
     private BeanValidationService beanValidationService;
 
     @Before("execution(* com.latticeengines.eai.controller.EaiResource.*(..))")

@@ -1,9 +1,7 @@
 package com.latticeengines.component.exposed.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,12 +13,15 @@ import com.latticeengines.component.exposed.service.ComponentService;
 import com.latticeengines.domain.exposed.component.ComponentStatus;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "component", description = "Rest resource for install/uninstall le component")
 @RestController
 @RequestMapping("/component/customerSpace/{customerSpace}")
 public class ComponentResource {
 
-    @Autowired
+    @Inject
     private ComponentService componentService;
 
     @RequestMapping(value = "/install", method = RequestMethod.POST, headers = "Accept=application/json")

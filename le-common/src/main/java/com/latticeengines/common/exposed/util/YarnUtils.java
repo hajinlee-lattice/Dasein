@@ -3,14 +3,14 @@ package com.latticeengines.common.exposed.util;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.yarn.client.YarnClient;
 
 import com.google.common.base.Strings;
@@ -35,8 +35,7 @@ public class YarnUtils {
         return (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler"));
     }
 
-    public static ApplicationReport getApplicationReport(YarnClient yarnClient, ApplicationId applicationId)
-            throws YarnException, IOException {
+    public static ApplicationReport getApplicationReport(YarnClient yarnClient, ApplicationId applicationId) {
         ApplicationReport report = yarnClient.getApplicationReport(applicationId);
         return report;
     }

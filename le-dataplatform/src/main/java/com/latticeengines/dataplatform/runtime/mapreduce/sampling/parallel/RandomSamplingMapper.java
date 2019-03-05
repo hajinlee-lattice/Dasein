@@ -7,12 +7,12 @@ import java.util.Random;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob;
@@ -20,16 +20,16 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public abstract class RandomSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
-    
-    private static final Logger log = LoggerFactory.getLogger(RandomSamplingMapper.class);
-    protected List<SamplingElement> trainingElements;
-    protected SamplingElement testingElement;
-    protected int samplingRate;
-    protected int trainingPercentage;
-    protected int trainingSetCount;
 
-    protected Text outKey;
-    protected AvroValue<Record> outValue;
+    private static final Logger log = LoggerFactory.getLogger(RandomSamplingMapper.class);
+    List<SamplingElement> trainingElements;
+    private SamplingElement testingElement;
+    private int samplingRate;
+    int trainingPercentage;
+    int trainingSetCount;
+
+    Text outKey;
+    private AvroValue<Record> outValue;
     protected Random random;
 
     @Override
@@ -44,7 +44,7 @@ public abstract class RandomSamplingMapper extends Mapper<AvroKey<Record>, NullW
         outKey = new Text();
         outValue = new AvroValue<Record>();
         random = new Random();
-        
+
         if (sampleConfig.getRandomSeed() != -1) {
             Long seed = sampleConfig.getRandomSeed();
             log.info("Random seed = " + seed);

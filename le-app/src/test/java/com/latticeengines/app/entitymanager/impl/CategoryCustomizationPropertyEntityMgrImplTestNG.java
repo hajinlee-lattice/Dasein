@@ -4,13 +4,15 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.entitymanager.CategoryCustomizationPropertyEntityMgr;
 import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
@@ -18,17 +20,16 @@ import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class CategoryCustomizationPropertyEntityMgrImplTestNG extends AppTestNGBase {
 
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
             .parse(CategoryCustomizationPropertyEntityMgrImplTestNG.class.getSimpleName());
 
-    @Autowired
+    @Inject
     private CategoryCustomizationPropertyEntityMgr categoryCustomizationPropertyEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private String propertyName = "hidden";

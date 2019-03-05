@@ -1,11 +1,12 @@
 package com.latticeengines.eai.service.impl.s3;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +26,10 @@ public class S3ExportServiceImpl extends ExportService {
 
     private static final Logger log = LoggerFactory.getLogger(S3ExportServiceImpl.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private EaiYarnService eaiYarnService;
 
     @Value("${aws.s3.bucket}")

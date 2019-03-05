@@ -2,10 +2,11 @@ package com.latticeengines.api.controller;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,9 @@ import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.wordnik.swagger.annotations.Api;
@@ -32,7 +33,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class ModelResource {
     private static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 
-    @Autowired
+    @Inject
     private ModelingService modelingService;
 
     public ModelResource() {

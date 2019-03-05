@@ -6,13 +6,14 @@ import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
@@ -28,7 +29,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class BaseFileFlowService implements FileFlowService {
 
-    static final Logger log = LoggerFactory.getLogger(BaseFileFlowService.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseFileFlowService.class);
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
@@ -36,13 +37,13 @@ public abstract class BaseFileFlowService implements FileFlowService {
     @Value("${dellebi.datahadooperrorworkingpath}")
     private String dataHadoopErrorWorkingPath;
 
-    @Autowired
+    @Inject
     protected DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
-    @Autowired
+    @Inject
     protected DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
-    
-    @Autowired
+
+    @Inject
     protected Configuration yarnConfiguration;
 
     public BaseFileFlowService() {

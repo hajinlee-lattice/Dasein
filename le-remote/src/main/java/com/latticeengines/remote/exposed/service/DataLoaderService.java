@@ -22,8 +22,8 @@ import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
-import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
+import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
 
 public interface DataLoaderService {
 

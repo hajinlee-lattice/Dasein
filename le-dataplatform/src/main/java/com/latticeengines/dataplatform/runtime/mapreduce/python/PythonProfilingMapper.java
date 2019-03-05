@@ -3,9 +3,9 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.io.Text;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FileAggregator;

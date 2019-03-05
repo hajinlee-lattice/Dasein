@@ -3,11 +3,11 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("modelCommandLogService")
 public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
-    public static final String MODELCOMMAND_ID_LOG_PREFIX = "ModelCommandId";
+    static final String MODELCOMMAND_ID_LOG_PREFIX = "ModelCommandId";
     private static final Logger log = LoggerFactory.getLogger(ModelCommandLogServiceImpl.class);
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -49,7 +49,7 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
         } else {
             sb.append(step.getDescription()).append(" submitted at ").append(dateTimeFormatter.print(new DateTime()));
         }
-        
+
         log(modelCommand, sb.toString());
     }
 

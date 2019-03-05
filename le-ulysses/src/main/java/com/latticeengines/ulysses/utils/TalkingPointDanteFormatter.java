@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.latticeengines.common.exposed.util.JsonUtils;

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData.Record;
@@ -23,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -59,7 +59,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     @Override
     protected AvroRowHandler initialize(
             Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, Schema schema)
-            throws IOException, InterruptedException {
+            throws IOException {
         table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
         boolean exportUsingDisplayName = config.getBoolean("eai.export.displayname", true);
         List<String> headers = new ArrayList<>();

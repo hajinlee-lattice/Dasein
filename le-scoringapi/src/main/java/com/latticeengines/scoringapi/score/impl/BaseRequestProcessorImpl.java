@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
@@ -18,13 +19,13 @@ public class BaseRequestProcessorImpl {
 
     private static final Logger log = LoggerFactory.getLogger(BaseRequestProcessorImpl.class);
 
-    @Autowired
+    @Inject
     protected HttpStopWatch httpStopWatch;
 
-    @Autowired
+    @Inject
     protected List<Matcher> matchers;
 
-    @Autowired
+    @Inject
     protected RequestInfo requestInfo;
 
     protected DateTimeFormatter timestampFormatter = ISODateTimeFormat.dateTime();

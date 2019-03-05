@@ -1,7 +1,5 @@
 package com.latticeengines.dataflowapi.yarn.client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +11,6 @@ import com.latticeengines.yarn.exposed.client.SingleContainerClientCustomization
 
 @Component("dataflowClientCustomization")
 public class DataFlowClientCustomization extends SingleContainerClientCustomization {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(DataFlowClientCustomization.class);
 
     @Autowired
     public DataFlowClientCustomization(Configuration yarnConfiguration, //

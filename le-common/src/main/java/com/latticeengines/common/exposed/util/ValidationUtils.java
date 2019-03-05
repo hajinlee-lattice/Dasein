@@ -1,14 +1,14 @@
 package com.latticeengines.common.exposed.util;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.exception.AnnotationValidationError;
-import com.latticeengines.common.exposed.validator.BeanValidationService;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.exception.AnnotationValidationError;
+import com.latticeengines.common.exposed.validator.BeanValidationService;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public class ValidationUtils {
     private static final String DEFAULT_OBJECT_NAME = "Object";

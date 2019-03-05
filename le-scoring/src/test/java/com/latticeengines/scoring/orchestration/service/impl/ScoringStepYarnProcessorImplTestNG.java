@@ -5,11 +5,12 @@ import static org.testng.Assert.assertEquals;
 import java.net.URL;
 import java.sql.Timestamp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
@@ -35,16 +36,16 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
 
     private static final Logger log = LoggerFactory.getLogger(ScoringStepYarnProcessorImplTestNG.class);
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private static final String customer = "Nutanix";
@@ -52,13 +53,13 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     @Value("${scoring.test.table}")
     private String testInputTable;
 
-    @Autowired
+    @Inject
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     private String outputTable;
@@ -72,7 +73,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     private String tenant;
 
     @BeforeMethod(groups = "sqoop")
-    public void beforeMethod() throws Exception {
+    public void beforeMethod() {
     }
 
     @BeforeClass(groups = "sqoop")

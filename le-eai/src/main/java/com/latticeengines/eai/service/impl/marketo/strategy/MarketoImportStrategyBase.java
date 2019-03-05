@@ -5,15 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.foundationdb.sql.StandardException;
@@ -32,7 +33,7 @@ import com.latticeengines.eai.service.impl.ImportStrategy;
 public abstract class MarketoImportStrategyBase extends ImportStrategy {
     private static final Logger log = LoggerFactory.getLogger(MarketoImportStrategyBase.class);
 
-    @Autowired
+    @Inject
     private AvroTypeConverter marketoToAvroTypeConverter;
 
     public MarketoImportStrategyBase(String name) {

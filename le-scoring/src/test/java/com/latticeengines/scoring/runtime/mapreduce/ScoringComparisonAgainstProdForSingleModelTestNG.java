@@ -10,16 +10,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -49,13 +50,13 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
     private static final Logger log = LoggerFactory.getLogger(ScoringComparisonAgainstProdForSingleModelTestNG.class);
 
-    @Autowired
+    @Inject
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private static final String customer = "Nutanix";
@@ -65,10 +66,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     @Value("${scoring.test.table}")
     private String testInputTable;
 
-    @Autowired
+    @Inject
     private DbCreds scoringCreds;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     private String inputLeadsTable;
@@ -142,7 +143,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
      * Don't directly load data from Prod DB, please import data to a dev db
      * before you use this method resultJdbcUrl should be something like
      * "jdbc:sqlserver://10.41.1.207\\SQL2012STD;databaseName=ScoringDaemon_QA;user=$$USER$$;password=$$PASSWD$$"
-     * 
+     *
      * @throws Exception
      */
 

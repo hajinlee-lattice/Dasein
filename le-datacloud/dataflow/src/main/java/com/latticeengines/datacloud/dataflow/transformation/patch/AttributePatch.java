@@ -1,6 +1,13 @@
 package com.latticeengines.datacloud.dataflow.transformation.patch;
 
-import cascading.tuple.Fields;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -13,13 +20,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import cascading.tuple.Fields;
 
 /**
  * Transformer to patch account master attributes with values specified in PatchBook entries.

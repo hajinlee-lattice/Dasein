@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,6 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.impl.BulkMatchPlanner;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -46,11 +47,11 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private static final String INPUT_AVRO_KEY = "InputAvro";
     private static final String PUBLIC_DOMAIN_KEY = "PublicDomain";
 
-    @Autowired
+    @Inject
     @Qualifier("accountMasterColumnMetadataService")
     private ColumnMetadataService columnMetadataService;
 
-    @Autowired
+    @Inject
     @Qualifier("accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
@@ -72,25 +73,25 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Value("${datacloud.match.cascading.queue.name:Modeling}")
     private String matchQueueName;
 
-    @Autowired
+    @Inject
     private AccountMaster accountMaster;
 
-    @Autowired
+    @Inject
     private AccountMasterLookup accountMasterLookup;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private BulkMatchPlanner bulkMatchPlanner;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @Override

@@ -7,23 +7,24 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import cascading.tuple.Fields;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ProductMapperFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProductMapperConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.util.ProductUtils;
+
+import cascading.tuple.Fields;
 
 @Component(ProductMapperFlow.BEAN_NAME)
 public class ProductMapperFlow extends ConfigurableFlowBase<ProductMapperConfig> {

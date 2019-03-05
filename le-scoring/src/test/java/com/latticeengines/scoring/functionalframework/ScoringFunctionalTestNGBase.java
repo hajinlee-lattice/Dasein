@@ -2,19 +2,18 @@ package com.latticeengines.scoring.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
@@ -26,18 +25,16 @@ public class ScoringFunctionalTestNGBase extends YarnFunctionalTestNGBase {
 
     protected static final Logger log = LoggerFactory.getLogger(ScoringFunctionalTestNGBase.class);
 
-    @Autowired
+    @Inject
     private ScoringOrderedEntityMgrListForDbClean scoringOrderedEntityMgrListForDbClean;
 
-    @Autowired
+    @Inject
     protected DbMetadataService dbMetadataService;
 
     @Value("${dataplatform.customer.basedir}")
     protected String customerBaseDir;
 
-    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-
-    protected boolean doClearDbTables() {
+    private boolean doClearDbTables() {
         return true;
     }
 

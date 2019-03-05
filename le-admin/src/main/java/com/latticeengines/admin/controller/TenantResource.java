@@ -1,11 +1,9 @@
 package com.latticeengines.admin.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,6 +36,9 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.proxy.exposed.component.ComponentProxy;
 import com.latticeengines.security.exposed.Constants;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController

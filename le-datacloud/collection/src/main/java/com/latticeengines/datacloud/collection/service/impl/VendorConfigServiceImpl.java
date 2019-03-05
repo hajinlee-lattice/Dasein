@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 
 @Component
 public class VendorConfigServiceImpl implements VendorConfigService {

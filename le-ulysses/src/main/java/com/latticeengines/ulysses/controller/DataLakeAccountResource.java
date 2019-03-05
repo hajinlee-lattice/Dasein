@@ -1,5 +1,22 @@
 package com.latticeengines.ulysses.controller;
 
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.RequestEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -13,23 +30,9 @@ import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.ulysses.utils.AccountDanteFormatter;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.RequestEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Inject;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.List;
 
 @Api(value = "CDLAccounts", description = "Common REST resource to lookup CDL accounts")
 @RestController

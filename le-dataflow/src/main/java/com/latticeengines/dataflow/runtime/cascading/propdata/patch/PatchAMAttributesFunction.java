@@ -1,23 +1,25 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.patch;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.util.TypeConversionUtil;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.util.TypeConversionUtil;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Patch all AM attributes of multiple patchItems. PatchItems are JSON object strings identified by input field names.

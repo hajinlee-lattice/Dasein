@@ -18,11 +18,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.PartitionUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
+import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.RawCollectionRequestMgr;
-import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
-import com.latticeengines.datacloud.collection.service.VendorConfigService;
-import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 
 @Component
 public class RawCollectionRequestServiceImpl implements RawCollectionRequestService {
@@ -31,9 +30,6 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     @Inject
     private RawCollectionRequestMgr rawCollectionRequestMgr;
-
-    @Inject
-    private VendorConfigService vendorConfigService;
 
     private ExecutorService uploadWorkers;
 

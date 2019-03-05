@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
 import org.testng.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,12 +23,9 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public class BatonToolUnitTestNG {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
 
     private BatonService service;
-    
+
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
@@ -65,8 +60,8 @@ public class BatonToolUnitTestNG {
         service.loadDirectory(tempDir.toString(), "testDir");
         String podId = CamilleEnvironment.getPodId();
 
-        Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/testDir/0/0.txt", podId))).getData().equals("zero"));
-        Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/testDir/0/1/1.txt", podId))).getData().equals("one"));
+        Assert.assertEquals(c.get(new Path(String.format("/Pods/%s/testDir/0/0.txt", podId))).getData(), "zero");
+        Assert.assertEquals(c.get(new Path(String.format("/Pods/%s/testDir/0/1/1.txt", podId))).getData(), "one");
     }
 
     @Test(groups = "unit")
@@ -83,8 +78,8 @@ public class BatonToolUnitTestNG {
         service.loadDirectory(tempDir.toString(), "");
         String podId = CamilleEnvironment.getPodId();
 
-        Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/0/0.txt", podId))).getData().equals("zero"));
-        Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/0/1/1.txt", podId))).getData().equals("one"));
+        Assert.assertEquals(c.get(new Path(String.format("/Pods/%s/0/0.txt", podId))).getData(), "zero");
+        Assert.assertEquals(c.get(new Path(String.format("/Pods/%s/0/1/1.txt", podId))).getData(), "one");
     }
 
     @Test(groups = "unit")
@@ -108,7 +103,7 @@ public class BatonToolUnitTestNG {
         sourceDir.makePathsLocal();
         storedDir.makePathsLocal();
 
-        Assert.assertTrue(storedDir.equals(sourceDir));
+        Assert.assertEquals(sourceDir, storedDir);
     }
 
     private static void createDirectory(String path) {
