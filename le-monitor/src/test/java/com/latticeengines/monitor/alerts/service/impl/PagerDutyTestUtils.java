@@ -1,15 +1,16 @@
 package com.latticeengines.monitor.alerts.service.impl;
 
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class PagerDutyTestUtils {
+class PagerDutyTestUtils {
 
-    public static void confirmPagerDutyIncident(String result) {
+    static void confirmPagerDutyIncident(String result) {
         try {
             JsonNode resultObj = new ObjectMapper().readTree(result);
-            assertTrue(resultObj.get("status").asText().equals("success"));
+            assertEquals(resultObj.get("status").asText(), "success");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

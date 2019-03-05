@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.provision.impl;
 
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -73,7 +74,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private S3Service s3Service;
-
 
     @Inject
     private DataUnitCrossTenantService dataUnitCrossTenantService;

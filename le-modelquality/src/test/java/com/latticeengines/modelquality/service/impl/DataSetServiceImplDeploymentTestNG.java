@@ -1,6 +1,10 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -13,23 +17,20 @@ import com.latticeengines.modelquality.functionalframework.ModelQualityTestNGBas
 import com.latticeengines.modelquality.service.DataSetService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
 public class DataSetServiceImplDeploymentTestNG extends ModelQualityTestNGBase {
 
-    @Autowired
+    @Inject
     private DataSetService dataSetService;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
+    public void setup() {
     }
 
     @AfterClass(groups = "deployment")
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 
     @Test(groups = "deployment", enabled = true)

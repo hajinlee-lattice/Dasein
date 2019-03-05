@@ -1,12 +1,10 @@
 package com.latticeengines.apps.cdl.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,12 +17,15 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "datafeed_internal", description = "REST resource for metadata data feed internal operations")
 @RestController
 @RequestMapping("/datafeed/internal")
 public class DataFeedInternalResource {
 
-    @Autowired
+    @Inject
     private DataFeedService dataFeedService;
 
     @RequestMapping(value = "/list", method = RequestMethod.GET, headers = "Accept=application/json")

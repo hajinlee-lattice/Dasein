@@ -10,10 +10,9 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -25,7 +24,8 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -64,16 +64,16 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
     private static final String PREDEFINED_JOB_GROUP = "PredefinedJobs";
     private static final String BACKGROUND_JOB_GROUP = "BackgroundJobs";
 
-    @Autowired
+    @Inject
     private Scheduler scheduler;
 
-    @Autowired
+    @Inject
     private JobHistoryEntityMgr jobHistoryEntityMgr;
 
-    @Autowired
+    @Inject
     private JobSourceEntityMgr jobSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private ApplicationContext appContext;
 
     @Value("${quartz.predefined.jobs.enabled}")
@@ -85,9 +85,10 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
     @Value("${quartz.scheduler.jobs.history.cleanup.trigger:0 0 5 * * ?}")
     private String jobHistoryCleanupJobCronTrigger;
 
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
-    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
-            .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
+    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = //
+            new MagicAuthenticationHeaderHttpRequestInterceptor();
+    private List<ClientHttpRequestInterceptor> addMagicAuthHeaders = //
+            Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @Override

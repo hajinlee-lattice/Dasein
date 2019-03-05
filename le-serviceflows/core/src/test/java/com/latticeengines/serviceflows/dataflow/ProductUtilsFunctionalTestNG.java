@@ -15,10 +15,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 
 public class ProductUtilsFunctionalTestNG {
     private static final Logger log = LoggerFactory.getLogger(ProductUtilsFunctionalTestNG.class);

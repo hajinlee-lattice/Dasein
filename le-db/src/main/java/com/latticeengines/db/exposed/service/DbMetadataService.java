@@ -1,9 +1,10 @@
 package com.latticeengines.db.exposed.service;
 
-import com.latticeengines.domain.exposed.modeling.DbCreds;
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.List;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public interface DbMetadataService {
 

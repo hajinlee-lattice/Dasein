@@ -2,14 +2,15 @@ package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -30,7 +31,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
     private DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecond();
 
-    @Autowired
+    @Inject
     private ScoringCommandLogEntityMgr scoringCommandLogEntityMgr;
 
     @Override

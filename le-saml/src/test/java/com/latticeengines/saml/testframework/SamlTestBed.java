@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
@@ -19,7 +21,6 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -28,23 +29,23 @@ import org.springframework.security.saml.key.KeyManager;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.proxy.exposed.saml.SPSamlProxy;
 import com.latticeengines.saml.util.SAMLUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 
 public abstract class SamlTestBed {
-    public static final String RESOURCE_BASE = "/com/latticeengines/saml/";
+    private static final String RESOURCE_BASE = "/com/latticeengines/saml/";
 
-    @Autowired
+    @Inject
     private ParserPool parserPool;
 
-    @Autowired
+    @Inject
     private KeyManager keyManager;
 
-    @Autowired
+    @Inject
     private SPSamlProxy spSamlProxy;
 
     @Value("${common.saml.url:http://localhost:8087}")

@@ -1,6 +1,7 @@
 package com.latticeengines.yarn.exposed.service;
 
 import java.util.Properties;
+
 import org.springframework.yarn.client.CommandYarnClient;
 
 public interface YarnClientCustomizationService {

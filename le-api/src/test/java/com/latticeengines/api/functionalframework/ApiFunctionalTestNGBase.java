@@ -23,9 +23,8 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.api.exposed.exception.ModelingServiceRestException;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
-
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-api-context.xml" })

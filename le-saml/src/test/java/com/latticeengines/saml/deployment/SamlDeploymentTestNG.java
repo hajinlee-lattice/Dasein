@@ -1,27 +1,25 @@
 package com.latticeengines.saml.deployment;
 
-import java.io.UnsupportedEncodingException;
-
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 
 public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
 
     @Test(groups = "deployment")
-    public void testIdPInitiatedAuth() throws UnsupportedEncodingException {
+    public void testIdPInitiatedAuth() {
         Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
         assertRedirectedToSuccessPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
-    public void testIdPInitiatedAuth_ResponseNotSigned() throws UnsupportedEncodingException {
+    public void testIdPInitiatedAuth_ResponseNotSigned() {
         Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
         assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response, false));
     }

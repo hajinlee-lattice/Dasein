@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayGroupEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayGroupService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -41,9 +40,6 @@ public class PlayGroupResource {
 
     @Inject
     private PlayGroupService playGroupService;
-
-    @Inject
-    private PlayEntityMgr playEntityMgr;
 
     @Inject
     private PlayGroupEntityMgr playGroupEntityMgr;

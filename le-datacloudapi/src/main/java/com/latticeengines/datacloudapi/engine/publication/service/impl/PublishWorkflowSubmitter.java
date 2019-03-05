@@ -3,10 +3,10 @@ package com.latticeengines.datacloudapi.engine.publication.service.impl;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class PublishWorkflowSubmitter {

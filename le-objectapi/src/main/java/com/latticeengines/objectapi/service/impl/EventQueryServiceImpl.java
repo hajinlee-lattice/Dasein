@@ -1,5 +1,9 @@
 package com.latticeengines.objectapi.service.impl;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -17,17 +21,10 @@ import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(EventQueryServiceImpl.class);
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
     private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
 

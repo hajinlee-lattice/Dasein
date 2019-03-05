@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 
@@ -21,7 +21,7 @@ class BlockDivider {
     private Configuration yarnConfiguration;
     private Iterator<GenericRecord> iterator;
     private Integer count = 0;
-    public Integer groupSize;
+    private Integer groupSize;
 
     BlockDivider(String avroPath, Configuration yarnConfiguration, Integer groupSize) {
         this.avroPath = avroPath;

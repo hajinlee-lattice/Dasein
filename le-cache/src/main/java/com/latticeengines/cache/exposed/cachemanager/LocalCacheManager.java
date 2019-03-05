@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 
-import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import com.latticeengines.cache.LocalCache;
+import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 

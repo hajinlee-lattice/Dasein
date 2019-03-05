@@ -3,9 +3,9 @@ package com.latticeengines.datacloudapi.api.controller;
 import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.datacloud.etl.publication.service.impl.DynamoPublishService;
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -17,6 +17,7 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
+import com.latticeengines.datacloud.etl.publication.service.impl.DynamoPublishService;
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -49,22 +50,22 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
 
     private static final String DYNAMO_RECORD_TYPE = "LatticeAccount";
 
-    @Autowired
+    @Inject
     private PublicationEntityMgr publicationEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private PublicationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     private PublicationProxy publicationProxy;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private DynamoService dynamoService;
 
     @Value("${common.le.stack}")

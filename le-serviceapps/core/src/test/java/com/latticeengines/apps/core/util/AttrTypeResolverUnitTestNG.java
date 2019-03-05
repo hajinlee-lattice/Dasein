@@ -1,14 +1,14 @@
 package com.latticeengines.apps.core.util;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import static org.junit.Assert.assertNotEquals;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;

@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.cdl;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.util.Date;
 import java.util.List;
 
@@ -17,8 +19,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
-
-import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 @Component("dataFeedProxy")
 public class DataFeedProxy extends MicroserviceRestApiProxy {
