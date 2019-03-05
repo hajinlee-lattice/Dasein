@@ -247,11 +247,13 @@ public class MetadataResolver {
                                     .setDateFormatString(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
                             knownColumn
                                     .setTimeFormatString(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                            knownColumn.setMappedToDateBefore(false);
                         }
                     }
                 } else {
                     knownColumn.setDateFormatString(attribute.getDateFormatString());
                     knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                    knownColumn.setMappedToDateBefore(true);
                 }
                 knownColumn.setTimezone(attribute.getTimezone());
 
@@ -280,11 +282,13 @@ public class MetadataResolver {
                                             TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
                                     knownColumn.setTimeFormatString(
                                             TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                                    knownColumn.setMappedToDateBefore(false);
                                 }
                             }
                         } else {
                             knownColumn.setDateFormatString(attribute.getDateFormatString());
                             knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                            knownColumn.setMappedToDateBefore(true);
                         }
                         knownColumn.setTimezone(attribute.getTimezone());
                         result.fieldMappings.add(knownColumn);
@@ -343,6 +347,7 @@ public class MetadataResolver {
                             knownColumn.setDateFormatString(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
                             knownColumn.setTimeFormatString(
                                     TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                            knownColumn.setMappedToDateBefore(false);
                         }
                     }
                     knownColumn.setMappedToLatticeField(true);
@@ -559,6 +564,7 @@ public class MetadataResolver {
             fundamentalType = UserDefinedType.DATE;
             fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
             fieldMapping.setTimeFormatString(formatForDateAndTime.getRight());
+            fieldMapping.setMappedToDateBefore(false);
         } else {
             fundamentalType = UserDefinedType.TEXT;
         }
