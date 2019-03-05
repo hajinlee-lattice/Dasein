@@ -6,16 +6,18 @@ class LeCarousel extends Component {
 
   constructor(props) {
     super(props);
-    
-    this.state = { viewPortIndex: 0, initial: this.props.numPerViewport ? this.props.numPerViewport : 3, numPerViewport: this.props.numPerViewport ? this.props.numPerViewport : 3, prevDisabled: true, nextDisabled: false };
+    this.state = {loaded: false};
+    // this.state = { viewPortIndex: 0, initial: this.props.numPerViewport ? this.props.numPerViewport : 3, numPerViewport: this.props.numPerViewport ? this.props.numPerViewport : 3, prevDisabled: true, nextDisabled: false };
     this.getPrevViewPort = this.getPrevViewPort.bind(this);
     this.getNextViewPort = this.getNextViewPort.bind(this);
     this.resized = this.resized.bind(this);
     this.maxNumber = this.props.children.length;
-    console.log(this.maxNumber);
+    // console.log(this.maxNumber);
     this.start = 0;
     this.end = 0;
+    this.reachedEnd = false;
   }
+
 
 
   resized() {
@@ -53,10 +55,28 @@ class LeCarousel extends Component {
     if (element) {
       this.elementRef = element;
     }
+    // console.log($(element).width());
   };
 
   componentDidMount() {
+    // console.log('MOUNTED');
     window.addEventListener("resize", this.resized);
+    // console.log('MOUNTED');
+    let div = $(this.elementRef);
+    let children = div.children()[1];
+    let viewport = $(children).children()[0];
+    
+    let max = $(viewport).width();
+    let maxConfig = this.props.elementsStyle.maxWidth ? this.props.elementsStyle.maxWidth.replace(/[^-\d\.]/g, '') : 100;
+    let maxElement = maxConfig;
+    
+    let num = parseInt(max / maxElement);
+    let val = num * maxConfig;
+    if(val < max){
+      num = num + 1;
+    }
+    this.setState({ loaded:true, viewPortIndex: 0, numPerViewport: num, prevDisabled: true, nextDisabled: false });
+    // console.log(max, maxElement, num);
   }
 
   componentWillUnmount() {
@@ -75,16 +95,18 @@ class LeCarousel extends Component {
 
   getElementsViewPort() {
     let childrenViewPort = [];
-    if (this.props.children) {
+    if (this.props.children && this.state.loaded) {
       this.start = Number(this.state.numPerViewport * this.state.viewPortIndex);
-      // console.log(start);
       this.end = Number(this.start + this.state.numPerViewport);
-      // console.log(start, ' == ', end);
       for (var i = this.start; i < this.end; i++) {
-        childrenViewPort.push(<LeCarouselElement elementsStyle={this.props.elementsStyle}>{this.props.children[i]}</LeCarouselElement>);
+        childrenViewPort.push(<LeCarouselElement key={i} elementsStyle={this.props.elementsStyle}>{this.props.children[i]}</LeCarouselElement>);
       }
     }
-    // console.log(childrenViewPort.length, this.end);
+    if((this.state.numPerViewport * this.state.viewPortIndex) >= this.maxNumber ){
+      this.reachedEnd = true;
+    }else{
+      this.reachedEnd = false;
+    }
     return childrenViewPort;
   }
 
@@ -109,7 +131,7 @@ class LeCarousel extends Component {
         </div>
         <div className="le-carousel-right-control">
           <LeButton
-          disabled={(this.end * this.state.viewPortIndex >= this.maxNumber) || (this.end >= this.maxNumber)}
+            disabled={this.reachedEnd}
             name="borderless"
             callback={this.getNextViewPort}
             config={{
