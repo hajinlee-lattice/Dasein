@@ -47,6 +47,9 @@ public class CommitEntityMatchUnitTestNG {
                  * check all entities for import & skip published entities
                  */
                 { //
+                        /*
+                         * Account is already published, so only publish Contact & Product
+                         */
                         newConfig(true, true), //
                         new BusinessEntity[] { Account, Contact, Product }, //
                         new BusinessEntity[] { Account }, //
@@ -54,8 +57,9 @@ public class CommitEntityMatchUnitTestNG {
                 }, //
                 { //
                         /*
-                         * some entities that does not has import but is already published (rebuilt
-                         * entity)
+                         * some entities that does not have import but is already published
+                         * (CuratedAccount). this can happen due to previous CommitEntityMatch with
+                         * force rebuild entity
                          */
                         newConfig(true, true), //
                         new BusinessEntity[] { Account, Contact, Product }, //
@@ -64,8 +68,8 @@ public class CommitEntityMatchUnitTestNG {
                 }, //
                 { //
                         /*
-                         * some entities that does not has import but is already published (rebuilt
-                         * entity) all entities that have import already published
+                         * some entities that does not have import but is already published (rebuilt
+                         * entity), also all entities that have import already published
                          */
                         newConfig(true, true), //
                         new BusinessEntity[] { Account, Contact, Product }, //
