@@ -233,8 +233,6 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "&&", //
                 "cat launch_container.sh > <LOG_DIR>/launch_container.sh", //
                 "&&", //
-                "if [[ -z \\\"${LE_GC_OPTS}\\\" ]]; then LE_GC_OPTS=\\\"${LE_DEFAULT_GC_OPTS}\\\"; fi",//
-                "&&",
                 "$JAVA_HOME/bin/java", //
                 getLogOpt(), //
                 CipherUtils.getSecretPropertyStr(), // secrets
@@ -244,7 +242,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 // we define LE_GC_OPTS in hadoop-env or yarn-env
                 // because we do not want the application to depend on the java version on hadoop nodes
                 // after we completely migrate to java 11, we can simplify this
-                "${LE_GC_OPTS}<LOG_DIR>/gc.log", //
+                "-XX:+UseNUMA -XX:+UseG1GC -XX:+UseStringDeduplication -verbosegc -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintAdaptiveSizePolicy -Xloggc:<LOG_DIR>/gc.log", //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
