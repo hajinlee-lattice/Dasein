@@ -59,9 +59,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             throw new RuntimeException(
                     "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
         }
+        Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
         Set<String> publishedEntities = getPublishedEntities();
         Set<String> commitEntities = getEntitySet(publishedEntities);
-        commitEntities.forEach(entity -> publishEntity(tenant, entity));
+        commitEntities.forEach(entity -> publishEntity(standardizedTenant, entity));
         setPublishedEntities(commitEntities, publishedEntities);
     }
 
