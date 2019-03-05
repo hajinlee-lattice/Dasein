@@ -122,9 +122,9 @@ angular.module('lp.models.ratings', [
         }
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
-            vm.modelType = "Leads";
+            vm.modelType = "All Leads";
         } else {
-            vm.modelType = "Accounts";
+            vm.modelType = "Scorable Accounts";
         };
 
         vm.Math = window.Math;
