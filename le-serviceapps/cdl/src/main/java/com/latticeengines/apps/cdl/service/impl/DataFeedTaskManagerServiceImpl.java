@@ -160,7 +160,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Table newMeta = metadataPair.getLeft();
         List<AttrConfig> attrConfigs = metadataPair.getRight();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId, enableEntityMatch);
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
@@ -175,7 +176,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
-                if (!finalSchemaCheck(finalTemplate, entity, withoutId)) {
+                if (!finalSchemaCheck(finalTemplate, entity, withoutId, enableEntityMatch)) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
@@ -192,7 +193,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable, null);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
-            if (!finalSchemaCheck(newMeta, entity, withoutId)) {
+            if (!finalSchemaCheck(newMeta, entity, withoutId, enableEntityMatch)) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
             }
             dataFeedTask = new DataFeedTask();
@@ -642,7 +643,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @VisibleForTesting
-    boolean finalSchemaCheck(Table finalTemplate, String entity, boolean withoutId) {
+    boolean finalSchemaCheck(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch) {
         if (finalTemplate == null) {
             log.error("Template cannot be null!");
             return false;
@@ -652,7 +653,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         Map<String, Attribute> standardAttrs = new HashMap<>();
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
+                , enableEntityMatch);
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));

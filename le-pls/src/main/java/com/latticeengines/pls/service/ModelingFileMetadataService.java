@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 public interface ModelingFileMetadataService {
 
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId);
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId, boolean enableEntityMatch);
 
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
             String entity, String source, String feedType);

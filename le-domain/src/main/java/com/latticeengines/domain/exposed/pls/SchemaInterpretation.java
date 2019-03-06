@@ -16,7 +16,8 @@ public enum SchemaInterpretation {
     AccountMaster, //
     TransactionRaw, //
     TransactionDailyAggregation, //
-    TransactionPeriodAggregation, DeleteAccountTemplate, DeleteContactTemplate, DeleteTransactionTemplate;
+    TransactionPeriodAggregation, DeleteAccountTemplate, DeleteContactTemplate, DeleteTransactionTemplate,
+    ContactEntityMatch;
 
     public static SchemaInterpretation getByName(String interpretationName) {
         for (SchemaInterpretation interpretation : values()) {
