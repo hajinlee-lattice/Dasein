@@ -64,8 +64,9 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
             boolean isEV = ScoreResultField.ExpectedRevenue.displayName.equals(originalScoreFieldMap.get(modelGuid));
             log.info(String.format("isEV = %s, modelGuid = %s", isEV, modelGuid));
 
-            Node output = isEV ? calculatePercentileAndFittedExpectedRevenue(percentileFieldName, predictedRevenuePercentileFieldName,
-                    expectedRevenueFieldName, evFitFunctionParameterStr, node) : node;
+            Node output = isEV ? calculatePercentileAndFittedExpectedRevenue(percentileFieldName,
+                    predictedRevenuePercentileFieldName, expectedRevenueFieldName, evFitFunctionParameterStr, node)
+                    : node;
             if (merged == null) {
                 merged = output;
             } else {
@@ -75,16 +76,17 @@ public class RecalculateExpectedRevenue extends TypesafeDataFlowBuilder<Recalcul
         return merged;
     }
 
-    private Node calculatePercentileAndFittedExpectedRevenue(String percentileFieldName, String predictedRevenuePercentileFieldName,
-            String expectedRevenueFieldName, String evFitFunctionParameterStr, Node node) {
+    private Node calculatePercentileAndFittedExpectedRevenue(String percentileFieldName,
+            String predictedRevenuePercentileFieldName, String expectedRevenueFieldName,
+            String evFitFunctionParameterStr, Node node) {
 
         List<String> returnedFields = new ArrayList<>(node.getFieldNames());
         List<FieldMetadata> returnedMetadata = new ArrayList<>(node.getSchema());
 
         return node.apply(
                 new CalculateExpectedRevenueFunction(new Fields(returnedFields.toArray(new String[0])),
-                        percentileFieldName, predictedRevenuePercentileFieldName, expectedRevenueFieldName,
-                        evFitFunctionParameterStr),
+                        percentileFieldName, ScoreResultField.Probability.displayName,
+                        predictedRevenuePercentileFieldName, expectedRevenueFieldName, evFitFunctionParameterStr),
                 null, returnedMetadata, new FieldList(returnedFields), Fields.REPLACE);
     }
 }

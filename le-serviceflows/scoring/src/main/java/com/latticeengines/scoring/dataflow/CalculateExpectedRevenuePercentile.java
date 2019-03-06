@@ -191,6 +191,8 @@ public class CalculateExpectedRevenuePercentile
 
         public final String standardScoreField = ScoreResultField.Percentile.displayName;
         public final String expectedRevenueField = ScoreResultField.ExpectedRevenue.displayName;
+        public final String probabilityField = ScoreResultField.Probability.displayName;
+        public final String predictedRevenueField = ScoreResultField.PredictedRevenue.displayName;
 
         public CustomerSpace customerSpace;
         public int minPct = 5;

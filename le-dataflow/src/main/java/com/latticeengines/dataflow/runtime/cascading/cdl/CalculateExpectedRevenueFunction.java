@@ -24,17 +24,19 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
     private String percentileFieldName;
     private String predictedRevenuePercentileFieldName;
     private int expectedRevenueFieldPos;
+    private int probabilityFieldPos;
     private FittedConversionRateCalculator probabilityFitter;
     private FittedConversionRateCalculator predictedRevenueFitter;
 
     public CalculateExpectedRevenueFunction(Fields fieldDeclaration, String percentileFieldName,
-            String predictedRevenuePercentileFieldName, String expectedRevenueFieldName,
+            String probabilityFieldName, String predictedRevenuePercentileFieldName, String expectedRevenueFieldName,
             String evFitFunctionParamsStr) {
         super(fieldDeclaration);
 
         this.percentileFieldName = percentileFieldName;
         this.predictedRevenuePercentileFieldName = predictedRevenuePercentileFieldName;
         this.expectedRevenueFieldPos = fieldDeclaration.getPos(expectedRevenueFieldName);
+        this.probabilityFieldPos = fieldDeclaration.getPos(probabilityFieldName);
 
         EVFitFunctionParameters evFitFunctionParameters = parseEVFitFunctionParams(evFitFunctionParamsStr);
         FitFunctionParameters probFitParams = evFitFunctionParameters.getProbabilityParameters();
@@ -59,9 +61,7 @@ public class CalculateExpectedRevenueFunction extends BaseOperation implements F
         double expectedRevenueWithoutFitFunction = probFit * revenueFit;
         Tuple result = arguments.getTupleCopy();
         result.set(expectedRevenueFieldPos, expectedRevenueWithoutFitFunction);
-        log.info(String.format("percentile = %s, predictedRevenuePercentile = %s,  expectedRevenueWithoutFitFunction = %s", percentile,
-                predictedRevenuePercentile, expectedRevenueWithoutFitFunction));
-
+        result.set(probabilityFieldPos, probFit);
         functionCall.getOutputCollector().add(result);
     }
 

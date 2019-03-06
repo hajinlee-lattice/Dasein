@@ -38,7 +38,8 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
         List<GenericRecord> outputRecords = readOutput();
 
         assertEquals(outputRecords.size(), inputRecords.size());
-        String[] modelGuids = { "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", //
+        String[] modelGuids = { //
+                "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", //
                 "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", //
                 "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql", //
                 evModelGuid, };

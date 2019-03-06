@@ -25,17 +25,24 @@ public class CalculateFittedExpectedRevenueFunction extends BaseOperation implem
 
     private static final long serialVersionUID = 8540065221465151489L;
 
-    private static final int EV_REVENUE_PRECISION = 2;
+    public static final int EV_REVENUE_PRECISION = 2;
+    public static final int PREDICTED_REVENUE_PRECISION = 6;
     private String expectedRevenuePercentileFieldName;
+    private String probabilityFieldName;
     private int expectedRevenueFieldPos;
+    private int predictedRevenueFieldPos;
     private FittedConversionRateCalculator expectedRevenueFitter;
 
     public CalculateFittedExpectedRevenueFunction(Fields fieldDeclaration, String expectedRevenueFieldName,
-            String expectedRevenuePercentileFieldName, String evFitFunctionParamsStr) {
+            String expectedRevenuePercentileFieldName, String probabilityFieldName, String predictedRevenueFieldName,
+            String evFitFunctionParamsStr) {
         super(fieldDeclaration);
 
         this.expectedRevenuePercentileFieldName = expectedRevenuePercentileFieldName;
+        this.probabilityFieldName = probabilityFieldName;
+
         this.expectedRevenueFieldPos = fieldDeclaration.getPos(expectedRevenueFieldName);
+        this.predictedRevenueFieldPos = fieldDeclaration.getPos(predictedRevenueFieldName);
 
         EVFitFunctionParameters evFitFunctionParameters = parseEVFitFunctionParams(evFitFunctionParamsStr);
         expectedRevenueFitter = getFitter(evFitFunctionParameters.getEVParameters());
@@ -50,11 +57,21 @@ public class CalculateFittedExpectedRevenueFunction extends BaseOperation implem
 
         TupleEntry arguments = functionCall.getArguments();
         Integer percentile = arguments.getInteger(expectedRevenuePercentileFieldName);
+        double probability = arguments.getDouble(probabilityFieldName);
+        Tuple result = arguments.getTupleCopy();
         double fittedExpectedRevenue = expectedRevenueFitter.calculate(percentile);
+        double adjustedPredictedRevenue = fittedExpectedRevenue / probability;
+        try {
+            adjustedPredictedRevenue = BigDecimal.valueOf(adjustedPredictedRevenue)
+                    .setScale(PREDICTED_REVENUE_PRECISION, RoundingMode.HALF_UP).doubleValue();
+        } catch (Exception ex) {
+            throw new RuntimeException(
+                    String.format("Error: adjustedPredictedRevenue = %s, fittedExpectedRevenue = %s, probability = %s",
+                            adjustedPredictedRevenue, fittedExpectedRevenue, probability, ex));
+        }
+        result.set(predictedRevenueFieldPos, adjustedPredictedRevenue);
         fittedExpectedRevenue = BigDecimal.valueOf(fittedExpectedRevenue)
                 .setScale(EV_REVENUE_PRECISION, RoundingMode.HALF_UP).doubleValue();
-
-        Tuple result = arguments.getTupleCopy();
         result.set(expectedRevenueFieldPos, fittedExpectedRevenue);
 
         functionCall.getOutputCollector().add(result);
