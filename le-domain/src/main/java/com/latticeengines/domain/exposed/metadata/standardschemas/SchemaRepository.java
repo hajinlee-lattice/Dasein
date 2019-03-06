@@ -102,14 +102,14 @@ public class SchemaRepository {
         return MetadataSegmentExportType.getDefaultExportAttributes(entity);
     }
 
-    public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId) {
+    public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {
         Table table = null;
         switch (entity) {
             case Account:
                 table = getAccountSchema(cdlSchema, withoutId);
                 break;
             case Contact:
-                table = getContactSchema(cdlSchema);
+                table = getContactSchema(cdlSchema, enableEntityMatch);
                 break;
             case Product:
                 table = getProductSchema();
@@ -124,23 +124,29 @@ public class SchemaRepository {
             default:
                 throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
-        table.addAttributes(matchingAttributes(entity));
+        if (!enableEntityMatch) {
+            table.addAttributes(matchingAttributes(entity));
+        }
         return table;
     }
 
     public Table getSchema(BusinessEntity entity) {
-        return getSchema(entity, false, false);
+        return getSchema(entity, true, false, false);
     }
 
     public Table getSchema(SchemaInterpretation schema) {
-        return getSchema(schema, false, false);
+        return getSchema(schema, false, false, false);
     }
 
     public Table getSchema(SchemaInterpretation schema, boolean withoutId) {
-        return getSchema(schema, false, withoutId);
+        return getSchema(schema, false, withoutId, false);
     }
 
-    public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps, boolean withoutId) {
+    public Table getSchema(SchemaInterpretation schema, boolean withoutId, boolean enableEntityMatch) {
+        return getSchema(schema, false, withoutId, enableEntityMatch);
+    }
+
+    public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps, boolean withoutId, boolean enableEntityMatch) {
         Table table = null;
         switch (schema) {
             case SalesforceAccount:
@@ -153,7 +159,7 @@ public class SchemaRepository {
                 table = getAccountSchema(false, withoutId);
                 break;
             case Contact:
-                table = getContactSchema(false);
+                table = getContactSchema(false, enableEntityMatch);
                 break;
             case Product:
                 table = getProductSchema();
@@ -190,7 +196,9 @@ public class SchemaRepository {
             default:
                 throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
-        table.addAttributes(getMatchingAttributes(schema));
+        if (!enableEntityMatch) {
+            table.addAttributes(getMatchingAttributes(schema));
+        }
         return table;
     }
 
@@ -629,7 +637,7 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getContactSchema(boolean cdlSchema) {
+    private Table getContactSchema(boolean cdlSchema, boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.Contact);
         table.setPrimaryKey(createPrimaryKey(InterfaceName.ContactId.name()));
 
@@ -668,17 +676,19 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        table.addAttribute(attr(InterfaceName.AccountId.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID",
-                        "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
-                .type(Schema.Type.STRING) //
-                .notNull() //
-                .required() //
-                .interfaceName(InterfaceName.AccountId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
+        if (!enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                    .allowedDisplayNames(Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID",
+                            "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                    .type(Schema.Type.STRING) //
+                    .notNull() //
+                    .required() //
+                    .interfaceName(InterfaceName.AccountId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.Title.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TITLE")) //
                 .type(Schema.Type.STRING) //
@@ -767,6 +777,9 @@ public class SchemaRepository {
                     .logicalType(LogicalDataType.Timestamp) //
                     .fundamentalType(FundamentalType.DATE.name()) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+        }
+        if (enableEntityMatch) {
+            table.addAttributes(getContactAttributesForEntityMatch());
         }
         return table;
     }
@@ -1331,6 +1344,23 @@ public class SchemaRepository {
         return builder;
     }
 
+    private List<Attribute> getContactAttributesForEntityMatch() {
+        List<Attribute> attrs = new ArrayList<>();
+        Attribute customAccountId = attr(InterfaceName.CustomerAccountId.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID",
+                        "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .interfaceName(InterfaceName.CustomerAccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+        attrs.add(customAccountId);
+        attrs.addAll(getMatchingAttributes(SchemaInterpretation.ContactEntityMatch));
+        return attrs;
+    }
+
     public List<Attribute> getMatchingAttributes(SchemaInterpretation schema) {
         Attribute website = attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet("WEBSITE")) //
@@ -1455,6 +1485,11 @@ public class SchemaRepository {
             } else {
                 attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
             }
+        } else if (schema == SchemaInterpretation.ContactEntityMatch) {
+            email.setDefaultValueStr("");
+            attrs.addAll(Arrays.asList(email, website, accountCompanyName, duns, city, state, country,
+                    postalCode, phoneNumber));
+            attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
         }
         return attrs;
     }

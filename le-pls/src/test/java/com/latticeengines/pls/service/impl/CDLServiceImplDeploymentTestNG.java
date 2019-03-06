@@ -97,7 +97,8 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 new FileInputStream(dataFile));
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false);
+                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false,
+                        false);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
