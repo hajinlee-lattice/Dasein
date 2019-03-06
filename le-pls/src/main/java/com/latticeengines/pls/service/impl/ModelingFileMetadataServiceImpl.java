@@ -498,6 +498,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             for (Attribute accountAttribute : attributes) {
                 templateSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
             }
+            templateSchemaFields.forEach(t -> t.setFromExistingTemplate(true));
             return templateSchemaFields;
         }
     }
