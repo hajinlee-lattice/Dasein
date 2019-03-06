@@ -91,6 +91,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     //==================================================
     $scope.onSaveClick = function(){
         $scope.spaceConfig.Products = $scope.selectedProductNames;
+        // transform format to long type
+        if ($scope.tenantInfo.properties.expiredTime) {
+        	$scope.tenantInfo.properties.expiredTime = Date.parse($scope.tenantInfo.properties.expiredTime);
+        	alert($scope.tenantInfo.properties.expiredTime);
+        }
         var infos = {
             CustomerSpaceInfo: $scope.spaceInfo,
             TenantInfo: $scope.tenantInfo
@@ -654,6 +659,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.saveTenantInfo = function() {
         $scope.isEditingTenantInfo = false;
         $scope.isSavingTenantInfo = true;
+        if ($scope.tenantInfo.properties.expiredTime) {
+        	$scope.tenantInfo.properties.expiredTime = Date.parse($scope.tenantInfo.properties.expiredTime);
+        }
         TenantService.UpdateTenantInfo($scope.contractId, $scope.tenantId, $scope.tenantInfo).then(function(result) {
             $scope.isSavingTenantInfo = false;
             if (result === false) {

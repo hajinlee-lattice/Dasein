@@ -144,6 +144,9 @@ public class PLSComponentManager {
             if (StringUtils.isNotBlank(info.properties.tenantType)) {
                 tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
             }
+            if (info.properties.expiredTime != null) {
+                tenant.setExpiredTime(info.properties.expiredTime);
+            }
             tenant.setContract(info.properties.contract);
             LOGGER.info("registered tenant's status is " + String.valueOf(tenant.getStatus()) + ", tenant type is "
                     + String.valueOf(tenant.getTenantType()));
