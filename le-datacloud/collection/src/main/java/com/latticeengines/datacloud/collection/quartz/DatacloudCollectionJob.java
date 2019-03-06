@@ -24,6 +24,8 @@ public class DatacloudCollectionJob implements QuartzJobBean {
 
                 collectionDBService.collect();
 
+                collectionDBService.consolidate();
+
                 return true;
 
             }

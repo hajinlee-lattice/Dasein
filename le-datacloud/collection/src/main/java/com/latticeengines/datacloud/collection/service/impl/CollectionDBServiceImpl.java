@@ -46,17 +46,25 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.ecs.ECSService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.collection.service.CollectionDBService;
 import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateCollectionConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
+import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 
 @Service("collectionDBService")
 public class CollectionDBServiceImpl implements CollectionDBService {
@@ -81,7 +89,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private ECSService ecsService;
 
     @Inject
+    private VendorConfigMgr vendorConfigMgr;
+
+    @Inject
     private VendorConfigService vendorConfigService;
+
+    @Inject
+    private TransformationProxy transformationProxy;
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
@@ -130,6 +144,12 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     @Value("${datacloud.collection.orbintelligencev2.timestamp}")
     private String orbIntelligenceV2TimestampColumn;
+
+    @Value("${datacloud.collection.consolidation.exec.period}")
+    private int consolidationExecPeriod;
+
+    @Value("${datacloud.collection.consolidation.exec.weekday}")
+    private int consolidationExecWeekDay;
 
     private long prevCollectMillis = 0;
     private int prevCollectTasks;
@@ -737,7 +757,15 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         long maxTs = tsPair.getValue();
 
         int periodInMS = ingestionPartionPeriod * 1000;
-        if (minTs % periodInMS != 0) {
+        int dayInMS = 86400 * 1000;
+        int weekInMS = dayInMS * 7;
+        if (periodInMS == weekInMS) {
+
+            minTs -= minTs % dayInMS;//adjust to day boundary
+            long weekDay = (minTs % weekInMS / dayInMS + 4) % 7;//week day
+            minTs -= weekDay * dayInMS;
+
+        } else {
 
             minTs -= minTs % periodInMS;
 
@@ -991,6 +1019,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             List<CollectionWorker> consumedWorkers = collectionWorkerService.getWorkerByStatus(statusList);
             if (CollectionUtils.isEmpty(consumedWorkers)) {
 
+                log.info("no consumed worker to handle, quit...");
                 return;
 
             }
@@ -1020,6 +1049,114 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         return CollectionUtils.size(consumedWorkers);
 
+    }
+
+    //0 -> Sun, 1 -> Mon, ...
+    private static int getWeekDay(long millis) {
+
+        int dayInMS = 86400 * 1000;
+        int weekInMS = dayInMS * 7;
+        millis -= millis % dayInMS;
+        return ((int)(millis % weekInMS) / dayInMS + 4) % 7;
+
+    }
+
+    public void consolidate() {
+
+        if (consolidationExecPeriod == 86400 * 7) {
+
+            int weekDay = getWeekDay(System.currentTimeMillis());
+            if (weekDay != consolidationExecWeekDay) {
+
+                return;
+
+            }
+
+        }
+
+        //current workers ingested
+        List<String> statusList = Collections.singletonList(CollectionWorker.STATUS_INGESTED);
+        List<CollectionWorker> consumedWorkers = collectionWorkerService.getWorkerByStatus(statusList);
+
+        if (CollectionUtils.size(consumedWorkers) == 0) {
+
+            log.info("no ingested worker output to consolidate, quit...");
+            return;
+
+        }
+
+
+        //current time stamp
+        long now = System.currentTimeMillis();
+
+        try {
+
+            for (VendorConfig vendorConfig: vendorConfigMgr.findAll()) {
+
+                String vendor = vendorConfig.getVendor();
+
+                //only handling effective vendors
+                if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
+
+                    continue;
+
+                }
+
+                //check consolidation period
+                Timestamp ts = vendorConfig.getLastConsolidated();
+                boolean triggerConsolidation =
+                        ts == null || (now - ts.getTime()) / 1000 >= consolidationExecPeriod;
+                if (!triggerConsolidation) {
+
+                    continue;
+
+                }
+
+                //log prelude
+                log.info("issue consolidation request to datacloudapi for " + vendor);
+                if (vendorConfig.getLastConsolidated() != null){
+
+                    log.info("last time consolidating " + vendor + " is: " + ts);
+
+                }
+                else {
+
+                    log.info(vendor + " has never been consolidated before");
+
+                }
+
+                //issue req
+                ConsolidateCollectionConfig collectionConfig = new ConsolidateCollectionConfig();
+                collectionConfig.setShouldInheritSchemaProp(false);
+                collectionConfig.setTransformer("TransformerBase");
+                collectionConfig.setVendor(vendor);
+                collectionConfig.setRawIngestion(vendor + "_RAW");
+
+                TransformationStepConfig stepConfig = new TransformationStepConfig();
+                stepConfig.setTransformer("consolidateCollectionTransformer");
+                stepConfig.setTargetSource("Consolidated" + vendor);
+                stepConfig.setStepType("Simple");
+                stepConfig.setNoInput(true);
+                stepConfig.setConfiguration(JsonUtils.serialize(collectionConfig));
+
+                PipelineTransformationRequest req = new PipelineTransformationRequest();
+                req.setSubmitter("DataCloudService");
+                req.setName("consolidateCollection");
+                req.setSteps(Arrays.asList(stepConfig));
+
+                TransformationProgress progress =  transformationProxy.transform(req, HdfsPodContext.getDefaultHdfsPodId());
+
+                vendorConfig.setLastConsolidated(new Timestamp(System.currentTimeMillis()));
+                vendorConfigMgr.update(vendorConfig);
+
+                //log postlude
+                log.info("consolidate req issued: \n" + progress);
+            }
+
+        } catch (Exception e) {
+            log.error("exception occurred: " + e.getMessage());
+            log.error("exception call stack: \n" + e.getStackTrace());
+        }
     }
 
     @Override
