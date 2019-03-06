@@ -1,7 +1,16 @@
+import { MessagingFactory } from 'common/app/utilities/messaging-service';
+import { NGPAJobsService } from '../pa-jobs.service';
+import Observer from "common/app/http/observer";
+import Message, {
+    MODAL,
+    WARNING,
+    CLOSE_MODAL
+} from 'common/app/utilities/message';
 angular.module('lp.jobs.row.subjobs', [])
-
+    .factory('LeMessaging', MessagingFactory)
+    .factory('NGPAJobsService', NGPAJobsService)
     .directive('importJobRowSubJobs', [function () {
-        var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', function ($scope, JobsStore, JobsService, BrowserStorageUtility) {
+        var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', 'LeMessaging', 'NGPAJobsService', function ($scope, JobsStore, JobsService, BrowserStorageUtility, LeMessaging, NGPAJobsService) {
             $scope.typesGroupd = {};
             $scope.watcher = null;
             function init() {
@@ -12,30 +21,30 @@ angular.module('lp.jobs.row.subjobs', [])
                 $scope.typesGroupd = {};
                 $scope.groupdByUser($scope.subjobs);
                 $scope.groupInsideUsers();
-                $scope.watcher = $scope.$watchCollection('subjobs', function(newSubJobs) {
+                $scope.watcher = $scope.$watchCollection('subjobs', function (newSubJobs) {
                     $scope.sobjobsGrouped = [];
                     $scope.usersGroupped = {};
                     $scope.groupdByUser(newSubJobs);
                     $scope.groupInsideUsers();
                 });
             }
-            
+
             this.$onDestroy = function () {
-                if($scope.watcher != null){
+                if ($scope.watcher != null) {
                     $scope.watcher();
                 }
             };
-            
-            function addToGroup(subjob){
-                if(!$scope.typesGroupd[subjob.jobType]){
+
+            function addToGroup(subjob) {
+                if (!$scope.typesGroupd[subjob.jobType]) {
                     $scope.typesGroupd[subjob.jobType] = [];
                     $scope.typesGroupd[subjob.jobType].push(subjob);
                     subjob.actionsCount = 1;
-                }else{
+                } else {
                     let actionsCount = $scope.typesGroupd[subjob.jobType][0].actionsCount + 1;
-                    if(subjob.startTimestamp > $scope.typesGroupd[subjob.jobType][0].startTimestamp){
+                    if (subjob.startTimestamp > $scope.typesGroupd[subjob.jobType][0].startTimestamp) {
                         $scope.typesGroupd[subjob.jobType].unshift(subjob);
-                    }else{
+                    } else {
                         $scope.typesGroupd[subjob.jobType].push(subjob);
                     }
                     $scope.typesGroupd[subjob.jobType][0].actionsCount = actionsCount;
@@ -43,32 +52,32 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
 
-            $scope.groupdByUser = function(subjobs){
+            $scope.groupdByUser = function (subjobs) {
                 subjobs.forEach(subjob => {
-                    if(!$scope.usersGroupped[subjob.user]){
+                    if (!$scope.usersGroupped[subjob.user]) {
                         $scope.usersGroupped[subjob.user] = [];
                         $scope.usersGroupped[subjob.user].push(subjob);
-                    }else{
+                    } else {
                         $scope.usersGroupped[subjob.user].push(subjob);
                     }
                 });
             };
 
-            $scope.groupInsideUsers = function(){
+            $scope.groupInsideUsers = function () {
                 const keys = Object.keys($scope.usersGroupped);
-                for(const key of keys){
+                for (const key of keys) {
                     let jobs = $scope.usersGroupped[key];
                     $scope.groupByTypes(jobs);
                 }
             }
 
-            $scope.groupByTypes = function(subjobs){
+            $scope.groupByTypes = function (subjobs) {
                 $scope.typesGroupd = {};
-                if(subjobs && subjobs != null){
+                if (subjobs && subjobs != null) {
                     subjobs.forEach(subjob => {
-                        if(JobsStore.nonWorkflowJobTypes.indexOf(subjob.jobType) >=0){
+                        if (JobsStore.nonWorkflowJobTypes.indexOf(subjob.jobType) >= 0) {
                             addToGroup(subjob);
-                        }else{
+                        } else {
                             $scope.sobjobsGrouped.push(subjob);
                         }
                     });
@@ -94,7 +103,7 @@ angular.module('lp.jobs.row.subjobs', [])
                         };
                     default:
                         {
-                            return `${subjob.actionsCount > 1 ? subjob.actionsCount: ''} ${subjob.name}`;
+                            return `${subjob.actionsCount > 1 ? subjob.actionsCount : ''} ${subjob.name}`;
                         }
                 }
             }
@@ -123,14 +132,14 @@ angular.module('lp.jobs.row.subjobs', [])
                 return path + fileName + '&filePath=' + filePath + '&Authorization=' + auth;
             };
 
-            $scope.canBeDownload = function(subjob) {
+            $scope.canBeDownload = function (subjob) {
                 var fileName = subjob.inputs != undefined ? subjob.inputs['SOURCE_FILE_NAME'] : '';
-                if(fileName != ''){
+                if (fileName != '') {
                     var extPosition = fileName.lastIndexOf('.');
                     var extention = fileName.substring(extPosition, fileName.length).toLowerCase();
-                    if(extention !== '.csv'){
+                    if (extention !== '.csv') {
                         return false;
-                    }else{
+                    } else {
                         return true;
                     }
                 }
@@ -138,8 +147,11 @@ angular.module('lp.jobs.row.subjobs', [])
             };
 
             $scope.getValidation = function (subjob) {
+                if(subjob.jobStatus === 'Cancelled'){
+                    return subjob.jobStatus;
+                }
                 if (subjob.jobStatus === 'Failed') {
-                    return 'Failed';
+                    return subjob.jobStatus;
                 }
                 if (subjob.jobStatus === 'Running') {
                     return 'In Progress';
@@ -192,7 +204,7 @@ angular.module('lp.jobs.row.subjobs', [])
                 return subjob.user;
             }
 
-            $scope.hasImpactedEntity = function(subjob) {
+            $scope.hasImpactedEntity = function (subjob) {
                 return subjob && subjob.outputs && JSON.parse(subjob.outputs.IMPACTED_BUSINESS_ENTITIES)[0] != undefined;
             }
 
@@ -203,8 +215,63 @@ angular.module('lp.jobs.row.subjobs', [])
                 return path + filePath + '&Authorization=' + auth;
             }
 
-            $scope.hasErrors = function(subjob) {
+            $scope.hasErrors = function (subjob) {
                 return subjob.jobType == 'cdlDataFeedImportWorkflow' && subjob.outputs && subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES;
+            }
+            $scope.showCancel = function (subjob) {
+                let status = this.getjobstatus();
+                console.log(status);
+                if(subjob.jobType !='cdlDataFeedImportWorkflow'){
+                    return false;
+                }
+                switch (status) {
+                    case 'Ready':
+                        return true;
+                    default:
+                        return false;
+                }
+                // return true;
+            }
+            $scope.confirmCancelAction = function (subjob) {
+                console.log(subjob);
+                let name = $scope.getActionName(subjob);
+                let p = '<span>Are you sure you want to cancel the action</span><br>';
+                let n = `${'<p><strong>'}${name}${'</strong>?</p>'}`;
+                let msg = new Message(
+                    'Test',
+                    MODAL,
+                    WARNING,
+                    'Confirm',
+                    `${p}${n}`
+                );
+                msg.setConfirmText('Yes, Cancel');
+                msg.setDiscardText('No');
+                msg.setIcon('fa fa-exclamation-circle');
+                msg.setCallbackFn((args) => {
+                    console.log(args);
+                    let closeMsg = new Message([], CLOSE_MODAL);
+                    closeMsg.setName(args.name);
+                    // closeMsg.setCallbackFn();
+                    LeMessaging.sendMessage(closeMsg);
+                    if (args.action == "ok" && subjob.inputs.ACTION_ID) {
+                        // console.log('Feature not connected to apis?', subjob);
+                        let obs = new Observer(
+                            response => {
+                                console.log(response);
+                                if(response.status == 200){
+                                    subjob.jobStatus = 'Cancelled';
+                                }
+                                NGPAJobsService.unregister(obs);
+                            },
+                            error => {
+                                console.error('ERROR');
+                                NGPAJobsService.unregister(obs);
+                            }
+                        );
+                        NGPAJobsService.cancelAction(subjob.inputs.ACTION_ID, obs)
+                    }
+                });
+                LeMessaging.sendMessage(msg);
             }
 
             init();
@@ -215,7 +282,8 @@ angular.module('lp.jobs.row.subjobs', [])
             replace: true,
             scope: {
                 subjobs: '=',
-                applicationId: '='
+                applicationId: '=',
+                getjobstatus: '&'
             },
             controller: controller,
             templateUrl: "app/jobs/processing/subjobs/import-job-row-subjobs.component.html",

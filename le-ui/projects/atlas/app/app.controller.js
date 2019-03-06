@@ -78,7 +78,7 @@ export default function (
                             title: message.getMessage(),
                             message: message.getFullMessage()
                         });
-                        $scope.$apply(() => { });
+                        // $scope.$apply(() => { });
                         break;
                     case CLOSE_MODAL:
                         let modal = Modal.get(message.getName());
@@ -90,11 +90,12 @@ export default function (
                         // console.log(message.getMessage());
                         Modal[message.getType()]({
                             title: message.getMessage(),
-                            icon: message.getIcon(),
+                            icon: message.getIcon() ? message.getIcon() : '',
                             message: message.getFullMessage(),
-                            confirmtext: message.getConfirmText() ? message.getConfirmText() : ''
+                            confirmtext: message.getConfirmText() ? message.getConfirmText() : '',
+                            dischargetext: message.getDiscardText() ? message.getDiscardText() : ''
                         }, message.getCallbackFn());
-                        $scope.$apply(() => { });
+                        // $scope.$apply(() => { });
                         break;
 
                     case NOTIFICATION:
@@ -103,11 +104,14 @@ export default function (
                             title: message.getMessage(),
                             message: message.getFullMessage()
                         });
-                        $scope.$apply(() => { });
+                        // $scope.$apply(() => { });
                         break;
 
-                        break;
                 }
+                setTimeout(() => {
+                    $scope.$apply(() => { });
+                }, 0);
+                
             }
         }
     });
