@@ -183,7 +183,8 @@ public abstract class SegmentExportProcessor {
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
             exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact
-                            && InterfaceName.ContactId.equals(tuple.getMiddle())) //
+                            && (InterfaceName.ContactId.equals(tuple.getMiddle())
+                                    || InterfaceName.AccountId.equals(tuple.getMiddle()))) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());
