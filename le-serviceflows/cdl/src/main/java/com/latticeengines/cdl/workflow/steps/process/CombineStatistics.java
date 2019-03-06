@@ -3,14 +3,12 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,6 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -158,15 +157,16 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             paths.add(extract.getPath());
         }
         log.info("Checking for result file: " + StringUtils.join(paths, ", "));
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, paths);
-        StatsCube statsCube = StatsCubeUtils.parseAvro(records);
-        if (BusinessEntity.PurchaseHistory.equals(entity)) {
-            processPHCube(statsCube);
+        try (AvroFilesIterator records = AvroUtils.avroFileIterator(yarnConfiguration, paths)) {
+            StatsCube statsCube = StatsCubeUtils.parseAvro(records);
+            if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                processPHCube(statsCube);
+            }
+            if (BusinessEntity.Rating.equals(entity)) {
+                processRatingCube(statsCube);
+            }
+            return statsCube;
         }
-        if (BusinessEntity.Rating.equals(entity)) {
-            processRatingCube(statsCube);
-        }
-        return statsCube;
     }
 
     private void processPHCube(StatsCube statsCube) {
@@ -187,7 +187,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             statsCube.getStatistics().forEach((attrName, attrStats) -> {
                 if (isRatingAttr(attrName)) {
                     StatsCubeUtils.sortRatingBuckets(attrStats);
-                    log.info("Sorted rating buckets for " + attrName + " : " + JsonUtils.serialize(attrStats) );
+                    log.info("Sorted rating buckets for " + attrName + " : " + JsonUtils.serialize(attrStats));
                 }
                 if (liftMap.containsKey(attrName)) {
                     Map<String, Double> lifts = JsonUtils.convertMap(liftMap.get(attrName), String.class, Double.class);
