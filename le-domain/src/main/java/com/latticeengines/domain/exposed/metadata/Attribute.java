@@ -658,6 +658,11 @@ public class Attribute
         properties.put("Tags", tags);
     }
 
+    public boolean hasTag(Tag tag) {
+        List<String> tags = getTags();
+        return CollectionUtils.isNotEmpty(tags) && tags.contains(tag.toString());
+    }
+
     public String getPhysicalName() {
         return (String) properties.get("PhysicalName");
     }

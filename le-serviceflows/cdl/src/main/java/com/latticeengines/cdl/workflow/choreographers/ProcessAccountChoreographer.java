@@ -116,7 +116,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         Set<BusinessEntity> entities = step.getSetObjectFromContext(BaseWorkflowStep.PA_SKIP_ENTITIES,
                 BusinessEntity.class);
         boolean skip = CollectionUtils.isNotEmpty(entities) && entities.contains(mainEntity());
-        if (skip == true) {
+        if (skip) {
             AbstractWorkflow<?> workflow = rebuildWorkflow();
             String namespace = getStepNamespace(seq);
             return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
