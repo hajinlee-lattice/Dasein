@@ -221,7 +221,7 @@ angular.module('lp.jobs.row.subjobs', [])
             $scope.showCancel = function (subjob) {
                 let status = this.getjobstatus();
                 console.log(status);
-                if(subjob.jobType !='cdlDataFeedImportWorkflow'){
+                if(subjob.jobType !='cdlDataFeedImportWorkflow' || (status === 'Running' || status === 'Pending') || (subjob.jobStatus === 'Running' || subjob.jobStatus === 'Pending')){
                     return false;
                 }
                 switch (status) {
