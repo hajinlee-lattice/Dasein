@@ -22,3 +22,4 @@ export LOG_LEVEL=verbose
 export STACK_ENV=${LE_STACK}
 export LEUI_BUNDLER=wp
 export LEADMIN_BUNDLER=grunt
+export TRAY_API_URL=https://tray.io/graphql
