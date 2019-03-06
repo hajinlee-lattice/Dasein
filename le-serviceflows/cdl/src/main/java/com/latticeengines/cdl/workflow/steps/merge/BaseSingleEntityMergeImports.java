@@ -66,7 +66,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 throw new IllegalStateException("Did not generate new table for " + batchStore);
             }
             isDataQuotaLimit(table);
-            table = enrichTableSchema(table);
+            enrichTableSchema(table);
             dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
         }
     }
@@ -173,8 +173,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
     }
 
-    protected Table enrichTableSchema(Table table) {
-        return table;
+    protected void enrichTableSchema(Table table) {
     }
 
 }

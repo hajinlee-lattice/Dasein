@@ -106,6 +106,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
+        enrichMasterTableSchema(masterTable);
         createAccountFeatures();
         registerDynamoExport();
     }
@@ -464,7 +465,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         log.info("BucketedAccount table has " + table.getAttributes().size() + " attributes in total.");
     }
 
-    void setupLatticeAccountIdAttr(ColumnMetadata latticeIdCm, Attribute attr) {
+    private void setupLatticeAccountIdAttr(ColumnMetadata latticeIdCm, Attribute attr) {
         attr.setInterfaceName(InterfaceName.LatticeAccountId);
         attr.setDisplayName(latticeIdCm.getDisplayName());
         attr.setDescription(latticeIdCm.getDescription());
@@ -473,7 +474,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         attr.setGroupsViaList(latticeIdCm.getEnabledGroups());
     }
 
-    void setupAmColMapAttr(Map<String, ColumnMetadata> amColMap, Attribute attr) {
+    private void setupAmColMapAttr(Map<String, ColumnMetadata> amColMap, Attribute attr) {
         ColumnMetadata cm = amColMap.get(attr.getName());
         attr.setDisplayName(removeNonAscII(cm.getDisplayName()));
         attr.setDescription(removeNonAscII(cm.getDescription()));
@@ -511,6 +512,38 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         }
     }
 
+    private void enrichMasterTableSchema(Table table) {
+        final List<Attribute> attrs = new ArrayList<>();
+        final String evaluationDateStr = findEvaluationDate();
+        final String ldrFieldValue = //
+                StringUtils.isNotBlank(evaluationDateStr) ? ("Last Data Refresh: " + evaluationDateStr) : null;
+        final AtomicLong updatedAttrs = new AtomicLong(0);
+        table.getAttributes().forEach(attr0 -> {
+            boolean updated = false;
+            if (!attr0.hasTag(Tag.INTERNAL)) {
+                attr0.setTags(Tag.INTERNAL);
+                updated = true;
+            }
+            if (StringUtils.isNotBlank(ldrFieldValue) && LogicalDataType.Date.equals(attr0.getLogicalDataType())) {
+                if (attr0.getLastDataRefresh() == null || !attr0.getLastDataRefresh().equals(ldrFieldValue)) {
+                    log.info("Setting last data refresh for profile date attribute: " + attr0.getName() + " to "
+                            + evaluationDateStr);
+                    attr0.setLastDataRefresh(ldrFieldValue);
+                    updated = true;
+                }
+            }
+            if (updated) {
+                updatedAttrs.incrementAndGet();
+            }
+            attrs.add(attr0);
+        });
+        if (updatedAttrs.get() > 0) {
+            log.info("Found " + updatedAttrs.get() + " attrs to update, refresh master table schema.");
+            table.setAttributes(attrs);
+            metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+        }
+    }
+
     private void setAccountFeatureTableSchema(Table table) {
         String dataCloudVersion = configuration.getDataCloudVersion();
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model,
@@ -519,14 +552,13 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         amCols.forEach(cm -> amColMap.put(cm.getAttrName(), cm));
         List<Attribute> attrs = new ArrayList<>();
         table.getAttributes().forEach(attr0 -> {
-            Attribute attr = attr0;
             if (amColMap.containsKey(attr0.getName())) {
                 ColumnMetadata cm = amColMap.get(attr0.getName());
                 if (Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())) {
-                    attr.setTags(Tag.INTERNAL);
+                    attr0.setTags(Tag.INTERNAL);
                 }
             }
-            attrs.add(attr);
+            attrs.add(attr0);
         });
         table.setAttributes(attrs);
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
