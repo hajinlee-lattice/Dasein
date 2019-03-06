@@ -218,10 +218,19 @@ angular.module('lp.jobs.row.subjobs', [])
             $scope.hasErrors = function (subjob) {
                 return subjob.jobType == 'cdlDataFeedImportWorkflow' && subjob.outputs && subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES;
             }
+
+            $scope.showWarning = function(subjob){
+                if(subjob.errorMsg != null){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+
             $scope.showCancel = function (subjob) {
                 let status = this.getjobstatus();
-                console.log(status);
-                if(subjob.jobType !='cdlDataFeedImportWorkflow' || (status === 'Running' || status === 'Pending') || (subjob.jobStatus === 'Running' || subjob.jobStatus === 'Pending')){
+                // console.log(status);
+                if(subjob.jobType !='cdlDataFeedImportWorkflow' || (subjob.jobStatus === 'Running' || subjob.jobStatus === 'Pending')){
                     return false;
                 }
                 switch (status) {
@@ -230,7 +239,9 @@ angular.module('lp.jobs.row.subjobs', [])
                     default:
                         return false;
                 }
-                // return true;
+            }
+            $scope.getErrorMessage = function(subjob){
+                return subjob.errorMsg != null ? subjob.errorMsg : 'Unknown';
             }
             $scope.confirmCancelAction = function (subjob) {
                 console.log(subjob);

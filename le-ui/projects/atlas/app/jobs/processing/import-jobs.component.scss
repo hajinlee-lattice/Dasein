@@ -195,8 +195,34 @@ section.import-jobs {
     border-top: 13px solid #4A4A4A;
     transform: translate(-10%, -160%);
   }
-  .test-info {
-    position: absolute;
-    margin-top: 1em;
-    margin-left: 0.5em;
+
+//   .tooltip-container:hover{
+//       position: absolute;
+//       width: 100%;
+      
+//   }
+  .tooltip-cell{
+      display: inline-flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      .text-container{
+          flex: 1;
+      }
+    //   flex-wrap: wrap;
+      .text-icon-tooltip-container{
+        width: 50%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // border: 1px solid;
+        .tooltip-container-text:hover{
+            position: absolute;
+            // margin-bottom: 10px;
+        }
+      }
+      
   }
+  
