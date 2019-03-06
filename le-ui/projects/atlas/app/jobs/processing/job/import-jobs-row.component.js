@@ -315,9 +315,15 @@ angular.module('lp.jobs.import.row', [
 
         $scope.getActionsCount = function () {
             if ($scope.job.subJobs) {
+                let count = 0;
+                $scope.job.subJobs.forEach(element => {
+                    if(element.jobStatus != 'Cancelled'){
+                        count++;
+                    }
+                });
                 // var idsString = $scope.job.inputs.ACTION_IDS;
                 // var ids = JSON.parse(idsString);
-                return $scope.job.subJobs.length;//ids.length;
+                return count;//ids.length;
             } else {
                 return '-';
             }

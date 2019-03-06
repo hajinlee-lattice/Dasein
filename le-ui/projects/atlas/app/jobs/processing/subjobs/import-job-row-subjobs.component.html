@@ -11,7 +11,7 @@
             <div class="le-cell le-col-start-11 le-col-span-1"></div>
         </div>
 
-        <div class="le-row" ng-repeat="subjob in sobjobsGrouped | orderBy:'-startTimestamp'">
+        <div class="le-row" ng-repeat="subjob in sobjobsGrouped | orderBy:'-startTimestamp' | filter : {'jobStatus': '!Cancelled'}">
             <div class="le-cell le-col-start-1 le-col-span-2">
                 {{subjob.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
             </div>
@@ -48,7 +48,7 @@
                     {{getUser(subjob)}}
                 </span>
             </div>
-            <div class="le-cell le-col-start-11 le-col-span-1 cancel-action" ng-if="showCancel()">
+            <div class="le-cell le-col-start-11 le-col-span-1 cancel-action" ng-if="showCancel(subjob)">
                 <span class="word-break">
                     <li class="import show-tooltip title-tooltip top">
                         <div>
