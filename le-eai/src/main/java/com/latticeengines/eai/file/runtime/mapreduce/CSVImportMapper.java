@@ -190,7 +190,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             }
                         }
                         lineNum++;
-                    } catch (IOException ex) {
+                    } catch (IllegalStateException ex) {
                         LOG.warn(ex.getMessage(), ex);
                         rowError = true;
                         errorMap.put(String.valueOf(lineNum), String.format(
