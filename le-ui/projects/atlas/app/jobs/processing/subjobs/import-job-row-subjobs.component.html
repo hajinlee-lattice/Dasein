@@ -30,7 +30,17 @@
             </div>
             <div class="le-cell le-col-start-5 le-col-span-1"
                 ng-class="{'partial': getValidation(subjob) == 'Partial Success', 'failed': getValidation(subjob) == 'Failed'}">
-                {{getValidation(subjob)}}
+                <div class="tooltip-cell">
+                    <div class="text-ellipsis text-container"><span>{{getValidation(subjob)}}</span></div>
+                    <div ng-if="showWarning(subjob)" class="text-icon-tooltip-container">
+                        <span class="tooltip-container-text">
+                            <li class="show-tooltip title-tooltip top">
+                                <div class="tooltip_"><span>{{getErrorMessage(subjob)}}</span></div>
+                                <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true"></i>
+                            </li>
+                        </span>
+                    </div>
+                </div>
             </div>
             <div class="le-cell le-col-start-6 le-col-span-1">
                 {{getRecordFound(subjob)}}
@@ -50,15 +60,19 @@
                 </span>
             </div>
             <div class="le-cell le-col-start-11 le-col-span-1 cancel-action" ng-if="showCancel(subjob)">
-
-                <span class="word-break">
-                    <li class="">
-                        <button class="button borderless-button" ng-click="confirmCancelAction(subjob)">
-                            <i class="fa fa-times">
-                            </i>
-                        </button>
-                    </li>
-                </span>
+                <div class="tooltip-cell">
+                    <div class="text-icon-tooltip-container">
+                        <span class="tooltip-container-text">
+                            <li class="show-tooltip title-tooltip top delay">
+                                <div class="tooltip_"><span>Cancel</span></div>
+                                <button class="button borderless-button" ng-click="confirmCancelAction(subjob)">
+                                    <i class="fa fa-times">
+                                    </i>
+                                </button>
+                            </li>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
