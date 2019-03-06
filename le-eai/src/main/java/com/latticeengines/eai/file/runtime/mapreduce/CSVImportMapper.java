@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -167,32 +168,28 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     new BufferedReader(new InputStreamReader(new FileInputStream(csvFileName), StandardCharsets.UTF_8)),
                     format)) {
                 Iterator<CSVRecord> iter = parser.iterator();
-                boolean hasNext = true;
-                // two while make sure parser reaches EOF
-                while (hasNext) {
+                while (true) {
                     // capture IO exception produced during dealing with line
                     try {
-                        while (hasNext = iter.hasNext()) {
-                            if (failMapper) {
-                                throw new CriticalImportException(
-                                        "There's critical exception in import, will fail the job!");
-                            }
-                            LOG.debug("Start to processing line: " + lineNum);
-                            beforeEachRecord();
-                            GenericRecord avroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
-                            if (errorMap.size() == 0 && duplicateMap.size() == 0) {
-                                dataFileWriter.append(avroRecord);
-                                context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
-                            } else {
-                                if (errorMap.size() > 0) {
-                                    handleError(context, lineNum);
-                                }
-                                if (duplicateMap.size() > 0) {
-                                    handleDuplicate(context, lineNum);
-                                }
-                            }
-                            lineNum++;
+                        if (failMapper) {
+                            throw new CriticalImportException(
+                                    "There's critical exception in import, will fail the job!");
                         }
+                        LOG.debug("Start to processing line: " + lineNum);
+                        beforeEachRecord();
+                        GenericRecord avroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
+                        if (errorMap.size() == 0 && duplicateMap.size() == 0) {
+                            dataFileWriter.append(avroRecord);
+                            context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
+                        } else {
+                            if (errorMap.size() > 0) {
+                                handleError(context, lineNum);
+                            }
+                            if (duplicateMap.size() > 0) {
+                                handleDuplicate(context, lineNum);
+                            }
+                        }
+                        lineNum++;
                     } catch (IOException ex) {
                         LOG.warn(ex.getMessage(), ex);
                         rowError = true;
@@ -200,6 +197,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 "%s, try to remove single quote \' or double quote \"  in the row and try again",
                                 ex.getMessage()).toString());
                         handleError(context, lineNum);
+                    } catch (NoSuchElementException e) {
+                        break;
                     }
                 }
             } catch (CriticalImportException critical) {
