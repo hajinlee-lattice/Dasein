@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -85,7 +86,7 @@ public class AvroUtils {
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
         SeekableInput input;
         FileReader<GenericRecord> reader;
-        
+
         try {
             input = new FsInput(path, config);
             GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
@@ -99,8 +100,7 @@ public class AvroUtils {
     public static DataFileStream<GenericRecord> getAvroFileStream(Configuration config, Path path) {
         DataFileStream<GenericRecord> streamReader;
         try {
-            FSDataInputStream input = new FSDataInputStream(
-                    HdfsUtils.getInputStream(config, path.toString()));
+            FSDataInputStream input = new FSDataInputStream(HdfsUtils.getInputStream(config, path.toString()));
             GenericDatumReader<GenericRecord> reader = new GenericDatumReader<>();
             streamReader = new DataFileStream<>(input, reader);
         } catch (IOException e) {
@@ -126,8 +126,7 @@ public class AvroUtils {
                 newFields.add(field);
                 fieldMap.remove(fieldName);
             } else {
-                errorMsgs.add(
-                        "Found field " + fieldName + " in ordered schema, but not shuffled one.");
+                errorMsgs.add("Found field " + fieldName + " in ordered schema, but not shuffled one.");
             }
         }
 
@@ -137,8 +136,7 @@ public class AvroUtils {
 
         if (!errorMsgs.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Shuffled and ordered schemas do not match, cannot align.\n"
-                            + StringUtils.join(errorMsgs, "\n"));
+                    "Shuffled and ordered schemas do not match, cannot align.\n" + StringUtils.join(errorMsgs, "\n"));
         }
 
         shuffledJson.set("fields", newFields);
@@ -178,8 +176,7 @@ public class AvroUtils {
     }
 
     public static Schema getSchema(File file) {
-        try (FileReader<GenericRecord> reader = new DataFileReader<>(file,
-                new GenericDatumReader<>())) {
+        try (FileReader<GenericRecord> reader = new DataFileReader<>(file, new GenericDatumReader<>())) {
             return reader.getSchema();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -212,8 +209,7 @@ public class AvroUtils {
         }
     }
 
-    public static List<GenericRecord> getDataFromGlob(Configuration configuration,
-            List<String> paths) {
+    public static List<GenericRecord> getDataFromGlob(Configuration configuration, List<String> paths) {
         try {
             List<GenericRecord> records = new ArrayList<>();
             for (String path : paths) {
@@ -264,12 +260,10 @@ public class AvroUtils {
                 return countOneFile(configuration, matches.get(0));
             }
 
-            ExecutorService executorService = Executors
-                    .newFixedThreadPool(Math.min(8, matches.size()));
+            ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
             Map<String, Future<Long>> futures = new HashMap<>();
             for (final String match : matches) {
-                Future<Long> future = executorService
-                        .submit(() -> countOneFile(configuration, match));
+                Future<Long> future = executorService.submit(() -> countOneFile(configuration, match));
                 futures.put(match, future);
             }
 
@@ -295,8 +289,7 @@ public class AvroUtils {
         // log.info("Counting number of records in " + path);
         Long count = 0L;
 
-        try (DataFileStream<GenericRecord> stream = getAvroFileStream(configuration,
-                new Path(path));) {
+        try (DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path));) {
             try {
                 while (stream.nextBlock() != null) {
                     count += stream.getBlockCount();
@@ -405,25 +398,23 @@ public class AvroUtils {
         return fieldAssembler.endRecord();
     }
 
-    public static Schema constructSchemaWithProperties(String tableName,
-            Map<String, Class<?>> classMap, Map<String, Map<String, String>> propertyMap) {
+    public static Schema constructSchemaWithProperties(String tableName, Map<String, Class<?>> classMap,
+            Map<String, Map<String, String>> propertyMap) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);
         FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         FieldBuilder<Schema> fieldBuilder;
         for (Map.Entry<String, Class<?>> classEntry : classMap.entrySet()) {
             fieldBuilder = fieldAssembler.name(classEntry.getKey());
             Type type = getAvroType(classEntry.getValue());
-            fieldBuilder = constructFieldWithProperties(propertyMap, fieldBuilder,
-                    classEntry.getKey());
+            fieldBuilder = constructFieldWithProperties(propertyMap, fieldBuilder, classEntry.getKey());
             fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
         }
         Schema schema = fieldAssembler.endRecord();
         return schema;
     }
 
-    private static FieldBuilder<Schema> constructFieldWithProperties(
-            Map<String, Map<String, String>> propertyMap, FieldBuilder<Schema> fieldBuilder,
-            String fieldName) {
+    private static FieldBuilder<Schema> constructFieldWithProperties(Map<String, Map<String, String>> propertyMap,
+            FieldBuilder<Schema> fieldBuilder, String fieldName) {
         if (propertyMap != null) {
             Map<String, String> properties = propertyMap.get(fieldName);
             if (properties != null) {
@@ -437,29 +428,23 @@ public class AvroUtils {
         return fieldBuilder;
     }
 
-    public static FieldAssembler<Schema> constructFieldWithType(
-            FieldAssembler<Schema> fieldAssembler, FieldBuilder<Schema> fieldBuilder, Type type) {
+    public static FieldAssembler<Schema> constructFieldWithType(FieldAssembler<Schema> fieldAssembler,
+            FieldBuilder<Schema> fieldBuilder, Type type) {
         switch (type) {
-            case DOUBLE:
-                return fieldBuilder.type().unionOf().doubleType().and().nullType().endUnion()
-                        .noDefault();
-            case FLOAT:
-                return fieldBuilder.type().unionOf().floatType().and().nullType().endUnion()
-                        .noDefault();
-            case INT:
-                return fieldBuilder.type().unionOf().intType().and().nullType().endUnion()
-                        .noDefault();
-            case LONG:
-                return fieldBuilder.type().unionOf().longType().and().nullType().endUnion()
-                        .noDefault();
-            case STRING:
-                return fieldBuilder.type().unionOf().stringType().and().nullType().endUnion()
-                        .noDefault();
-            case BOOLEAN:
-                return fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion()
-                        .noDefault();
-            default:
-                return fieldAssembler;
+        case DOUBLE:
+            return fieldBuilder.type().unionOf().doubleType().and().nullType().endUnion().noDefault();
+        case FLOAT:
+            return fieldBuilder.type().unionOf().floatType().and().nullType().endUnion().noDefault();
+        case INT:
+            return fieldBuilder.type().unionOf().intType().and().nullType().endUnion().noDefault();
+        case LONG:
+            return fieldBuilder.type().unionOf().longType().and().nullType().endUnion().noDefault();
+        case STRING:
+            return fieldBuilder.type().unionOf().stringType().and().nullType().endUnion().noDefault();
+        case BOOLEAN:
+            return fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
+        default:
+            return fieldAssembler;
         }
     }
 
@@ -479,8 +464,8 @@ public class AvroUtils {
         }
     }
 
-    private static void setValues(GenericRecord r, Schema s, Schema combined,
-            ModifiableRecordBuilder recordBldr, Map<String, String> nameMap, String nameSuffix) {
+    private static void setValues(GenericRecord r, Schema s, Schema combined, ModifiableRecordBuilder recordBldr,
+            Map<String, String> nameMap, String nameSuffix) {
         for (Field field : s.getFields()) {
             String key = s.getName() + nameSuffix + "." + field.name();
             Object value = r.get(field.name());
@@ -490,8 +475,7 @@ public class AvroUtils {
     }
 
     @SuppressWarnings({ "unchecked", "deprecation" })
-    public static GenericRecord combineAvroRecords(GenericRecord r1, GenericRecord r2,
-            Object[] schema) {
+    public static GenericRecord combineAvroRecords(GenericRecord r1, GenericRecord r2, Object[] schema) {
         Schema s2 = r2.getSchema();
         Schema combinedSchema = Schema.parse((String) schema[0]);
         ModifiableRecordBuilder recordBldr = new ModifiableRecordBuilder(combinedSchema, r1, r2);
@@ -521,20 +505,20 @@ public class AvroUtils {
             return null;
         }
         switch (avroType) {
-            case DOUBLE:
-                return Double.class;
-            case FLOAT:
-                return Float.class;
-            case INT:
-                return Integer.class;
-            case LONG:
-                return Long.class;
-            case STRING:
-                return String.class;
-            case BOOLEAN:
-                return Boolean.class;
-            default:
-                throw new RuntimeException("Unknown java type for avro type " + avroType);
+        case DOUBLE:
+            return Double.class;
+        case FLOAT:
+            return Float.class;
+        case INT:
+            return Integer.class;
+        case LONG:
+            return Long.class;
+        case STRING:
+            return String.class;
+        case BOOLEAN:
+            return Boolean.class;
+        default:
+            throw new RuntimeException("Unknown java type for avro type " + avroType);
         }
     }
 
@@ -550,29 +534,28 @@ public class AvroUtils {
             return null;
         }
         switch (avroType) {
-            case DOUBLE:
-                return "DOUBLE";
-            case FLOAT:
-                return "FLOAT";
-            case INT:
-                return "INT";
-            case LONG:
-                return "BIGINT";
-            case STRING:
-                return "STRING";
-            case BOOLEAN:
-                return "BOOLEAN";
-            case BYTES:
-                return "BINARY";
+        case DOUBLE:
+            return "DOUBLE";
+        case FLOAT:
+            return "FLOAT";
+        case INT:
+            return "INT";
+        case LONG:
+            return "BIGINT";
+        case STRING:
+            return "STRING";
+        case BOOLEAN:
+            return "BOOLEAN";
+        case BYTES:
+            return "BINARY";
 
-            default:
-                throw new RuntimeException("Unknown hive type for avro type " + avroType);
+        default:
+            throw new RuntimeException("Unknown hive type for avro type " + avroType);
         }
 
     }
 
-    public static Type convertSqlTypeToAvro(String type)
-            throws IllegalArgumentException, IllegalAccessException {
+    public static Type convertSqlTypeToAvro(String type) throws IllegalArgumentException, IllegalAccessException {
         // the argument 'type' looks like NVARCHAR(MAX), or NVARCHAR(255), etc.
         String typeStr = StringUtils.substringBefore(type.toLowerCase(), "(");
 
@@ -587,40 +570,40 @@ public class AvroUtils {
         if (sqlTypeMap.containsKey(typeStr)) {
             int sqlTypeInt = sqlTypeMap.get(typeStr);
             switch (sqlTypeInt) {
-                case Types.TINYINT:
-                case Types.SMALLINT:
-                case Types.INTEGER:
-                    return Type.INT;
-                case Types.BIGINT:
-                    return Type.LONG;
-                case Types.BIT:
-                case Types.BOOLEAN:
-                    return Type.BOOLEAN;
-                case Types.REAL:
-                    return Type.FLOAT;
-                case Types.FLOAT:
-                case Types.DOUBLE:
-                case Types.NUMERIC:
-                case Types.DECIMAL:
-                    return Type.DOUBLE;
-                case Types.CHAR:
-                case Types.VARCHAR:
-                case Types.LONGVARCHAR:
-                case Types.LONGNVARCHAR:
-                case Types.NVARCHAR:
-                case Types.NCHAR:
-                    return Type.STRING;
-                case Types.DATE:
-                case Types.TIME:
-                case Types.TIMESTAMP:
-                    return Type.LONG;
-                case Types.BLOB:
-                case Types.BINARY:
-                case Types.VARBINARY:
-                case Types.LONGVARBINARY:
-                    return Type.BYTES;
-                default:
-                    throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
+            case Types.TINYINT:
+            case Types.SMALLINT:
+            case Types.INTEGER:
+                return Type.INT;
+            case Types.BIGINT:
+                return Type.LONG;
+            case Types.BIT:
+            case Types.BOOLEAN:
+                return Type.BOOLEAN;
+            case Types.REAL:
+                return Type.FLOAT;
+            case Types.FLOAT:
+            case Types.DOUBLE:
+            case Types.NUMERIC:
+            case Types.DECIMAL:
+                return Type.DOUBLE;
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.LONGNVARCHAR:
+            case Types.NVARCHAR:
+            case Types.NCHAR:
+                return Type.STRING;
+            case Types.DATE:
+            case Types.TIME:
+            case Types.TIMESTAMP:
+                return Type.LONG;
+            case Types.BLOB:
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                return Type.BYTES;
+            default:
+                throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
             }
         } else {
             // we need to handle SQLSERVER type INT separately as it is not
@@ -641,24 +624,24 @@ public class AvroUtils {
     private static SQLType getSqlType(Type avroType) {
         SQLType type;
         switch (avroType) {
-            case BOOLEAN:
-                type = JDBCType.BOOLEAN;
-                break;
-            case STRING:
-                type = JDBCType.VARCHAR;
-                break;
-            case INT:
-                type = JDBCType.INTEGER;
-                break;
-            case LONG:
-                type = JDBCType.BIGINT;
-                break;
-            case FLOAT:
-            case DOUBLE:
-                type = JDBCType.FLOAT;
-                break;
-            default:
-                throw new RuntimeException(String.format("Unsupported avro type %s", avroType));
+        case BOOLEAN:
+            type = JDBCType.BOOLEAN;
+            break;
+        case STRING:
+            type = JDBCType.VARCHAR;
+            break;
+        case INT:
+            type = JDBCType.INTEGER;
+            break;
+        case LONG:
+            type = JDBCType.BIGINT;
+            break;
+        case FLOAT:
+        case DOUBLE:
+            type = JDBCType.FLOAT;
+            break;
+        default:
+            throw new RuntimeException(String.format("Unsupported avro type %s", avroType));
         }
         return type;
     }
@@ -675,43 +658,41 @@ public class AvroUtils {
             return null;
         }
         switch (javaClassName) {
-            case "Double":
-                return Type.DOUBLE;
-            case "Float":
-                return Type.FLOAT;
-            case "Integer":
-                return Type.INT;
-            case "Long":
-                return Type.LONG;
-            case "String":
-                return Type.STRING;
-            case "Boolean":
-                return Type.BOOLEAN;
-            case "Date":
-                return Type.LONG;
-            case "Timestamp":
-                return Type.LONG;
-            case "List":
-                return Type.ARRAY;
-            case "Map":
-                return Type.RECORD;
-            default:
-                throw new RuntimeException("Unknown avro type for java type " + javaClassName);
+        case "Double":
+            return Type.DOUBLE;
+        case "Float":
+            return Type.FLOAT;
+        case "Integer":
+            return Type.INT;
+        case "Long":
+            return Type.LONG;
+        case "String":
+            return Type.STRING;
+        case "Boolean":
+            return Type.BOOLEAN;
+        case "Date":
+            return Type.LONG;
+        case "Timestamp":
+            return Type.LONG;
+        case "List":
+            return Type.ARRAY;
+        case "Map":
+            return Type.RECORD;
+        default:
+            throw new RuntimeException("Unknown avro type for java type " + javaClassName);
         }
 
     }
 
-    public static String generateHiveCreateTableStatement(String tableName, String pathDir,
-            String schemaHdfsPath) {
+    public static String generateHiveCreateTableStatement(String tableName, String pathDir, String schemaHdfsPath) {
 
         String template = "CREATE EXTERNAL TABLE %s COMMENT \"%s\"" + //
                 " ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'" + //
-                " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'"
-                + //
+                " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'" + //
                 " OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'" + //
                 " LOCATION '%s'" + " TBLPROPERTIES ('avro.schema.url'='%s')";
-        return String.format(template, tableName, "Auto-generated table from metadata service.",
-                pathDir, schemaHdfsPath);
+        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir,
+                schemaHdfsPath);
     }
 
     public static Schema extractTypeInformation(Schema schema) {
@@ -739,13 +720,13 @@ public class AvroUtils {
         return assembler.endRecord();
     }
 
-    public static void appendToHdfsFile(Configuration configuration, String filePath,
-            List<GenericRecord> data) throws IOException {
+    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data)
+            throws IOException {
         appendToHdfsFile(configuration, filePath, data, false);
     }
 
-    public static void appendToHdfsFile(Configuration configuration, String filePath,
-            List<GenericRecord> data, boolean snappy) throws IOException {
+    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data,
+            boolean snappy) throws IOException {
         FileSystem fs = HdfsUtils.getFileSystem(configuration, filePath);
         Path path = new Path(filePath);
 
@@ -754,19 +735,16 @@ public class AvroUtils {
         }
 
         try (OutputStream out = fs.append(path)) {
-            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                    new GenericDatumWriter<GenericRecord>())) {
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
                 if (snappy) {
                     writer.setCodec(CodecFactory.snappyCodec());
                 }
-                try (DataFileWriter<GenericRecord> appender = writer
-                        .appendTo(new FsInput(path, configuration), out)) {
+                try (DataFileWriter<GenericRecord> appender = writer.appendTo(new FsInput(path, configuration), out)) {
                     for (GenericRecord datum : data) {
                         try {
                             appender.append(datum);
                         } catch (Exception e) {
-                            log.warn("Data for the error row: " + datum.toString() + " filePath:"
-                                    + filePath);
+                            log.warn("Data for the error row: " + datum.toString() + " filePath:" + filePath);
                             throw new IOException(e);
                         }
                     }
@@ -786,13 +764,11 @@ public class AvroUtils {
         Path path = new Path(filePath);
 
         if (HdfsUtils.fileExists(configuration, filePath)) {
-            throw new IOException(
-                    "File " + filePath + " already exists. Please consider using append.");
+            throw new IOException("File " + filePath + " already exists. Please consider using append.");
         }
 
         try (OutputStream out = fs.create(path)) {
-            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                    new GenericDatumWriter<GenericRecord>())) {
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
                 if (snappy) {
                     writer.setCodec(CodecFactory.snappyCodec());
                 }
@@ -811,16 +787,14 @@ public class AvroUtils {
         }
     }
 
-    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path)
-            throws IOException {
+    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
         writeToLocalFile(schema, data, path, false);
     }
 
-    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path,
-            boolean snappy) throws IOException {
+    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path, boolean snappy)
+            throws IOException {
         File avroFile = new File(path);
-        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                new GenericDatumWriter<GenericRecord>());) {
+        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
             if (snappy) {
                 writer.setCodec(CodecFactory.snappyCodec());
             }
@@ -835,11 +809,9 @@ public class AvroUtils {
         appendToLocalFile(data, path, false);
     }
 
-    public static void appendToLocalFile(List<GenericRecord> data, String path, boolean snappy)
-            throws IOException {
+    public static void appendToLocalFile(List<GenericRecord> data, String path, boolean snappy) throws IOException {
         File avroFile = new File(path);
-        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                new GenericDatumWriter<GenericRecord>());) {
+        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
             if (snappy) {
                 writer.setCodec(CodecFactory.snappyCodec());
             }
@@ -949,7 +921,7 @@ public class AvroUtils {
     }
 
     public static long countLocalDir(String dir) {
-        Collection<File> files = FileUtils.listFiles(new File(dir), new String[]{ "avro" }, false);
+        Collection<File> files = FileUtils.listFiles(new File(dir), new String[] { "avro" }, false);
         List<Callable<Long>> callables = new ArrayList<>();
         files.forEach(file -> {
             Callable<Long> callable = () -> {
@@ -980,8 +952,8 @@ public class AvroUtils {
 
     private static long countLocalFile(File file) throws IOException {
         long count = 0L;
-        try (DataFileStream<GenericRecord> stream = new DataFileStream<>(new SeekableFileInput(file), new GenericDatumReader<>()))
-        {
+        try (DataFileStream<GenericRecord> stream = new DataFileStream<>(new SeekableFileInput(file),
+                new GenericDatumReader<>())) {
             try {
                 while (stream.nextBlock() != null) {
                     count += stream.getBlockCount();
@@ -993,8 +965,7 @@ public class AvroUtils {
         return count;
     }
 
-    public static List<GenericRecord> readFromInputStream(InputStream inputStream)
-            throws IOException {
+    public static List<GenericRecord> readFromInputStream(InputStream inputStream) throws IOException {
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         try (DataFileStream<GenericRecord> stream = new DataFileStream<>(inputStream, //
                 new GenericDatumReader<GenericRecord>())) {
@@ -1005,8 +976,8 @@ public class AvroUtils {
         return data;
     }
 
-    public static List<GenericRecord> readFromInputStream(InputStream inputStream, int offset,
-            int limit) throws IOException {
+    public static List<GenericRecord> readFromInputStream(InputStream inputStream, int offset, int limit)
+            throws IOException {
         List<GenericRecord> data = new ArrayList<>();
         try (DataFileStream<GenericRecord> stream = new DataFileStream<>(inputStream, //
                 new GenericDatumReader<GenericRecord>())) {
@@ -1044,8 +1015,7 @@ public class AvroUtils {
         return schema;
     }
 
-    public static Schema readSchemaFromResource(ResourceLoader resourceLoader, String resourcePath)
-            throws IOException {
+    public static Schema readSchemaFromResource(ResourceLoader resourceLoader, String resourcePath) throws IOException {
         Schema schema = null;
         Resource schemaResource = resourceLoader.getResource(resourcePath);
         try (InputStream is = schemaResource.getInputStream()) {
@@ -1068,6 +1038,7 @@ public class AvroUtils {
         return records;
     }
 
+    @Deprecated
     public static Iterator<GenericRecord> iterator(Configuration configuration, String path) {
         try {
             return new AvroFilesIterator(configuration, path);
@@ -1076,8 +1047,15 @@ public class AvroUtils {
         }
     }
 
-    public static Iterator<GenericRecord> iterator(Configuration configuration,
-            Collection<String> paths) {
+    public static AvroFilesIterator avroFileIterator(Configuration configuration, String path) {
+        try {
+            return new AvroFilesIterator(configuration, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static AvroFilesIterator avroFileIterator(Configuration configuration, Collection<String> paths) {
         try {
             return new AvroFilesIterator(configuration, paths);
         } catch (IOException e) {
@@ -1085,7 +1063,7 @@ public class AvroUtils {
         }
     }
 
-    public static class AvroFilesIterator implements Iterator<GenericRecord> {
+    public static class AvroFilesIterator implements Iterator<GenericRecord>, Closeable {
 
         private List<String> matchedFiles;
         private Integer fileIdx = 0;
@@ -1095,23 +1073,20 @@ public class AvroUtils {
         AvroFilesIterator(Configuration configuration, String path) throws IOException {
             matchedFiles = HdfsUtils.getFilesByGlob(configuration, path);
             if (matchedFiles == null || matchedFiles.isEmpty()) {
-                throw new IOException("Could not find any avro file that matches the path pattern ["
-                        + path + "]");
+                throw new IOException("Could not find any avro file that matches the path pattern [" + path + "]");
             }
             this.configuration = configuration;
             reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
         }
 
-        AvroFilesIterator(Configuration configuration, Collection<String> paths)
-                throws IOException {
+        AvroFilesIterator(Configuration configuration, Collection<String> paths) throws IOException {
             matchedFiles = new ArrayList<>();
             for (String path : paths) {
                 matchedFiles.addAll(HdfsUtils.getFilesByGlob(configuration, path));
             }
             if (matchedFiles.isEmpty()) {
-                throw new IOException(
-                        "Could not find any avro file that matches one of the path patterns [ "
-                                + StringUtils.join(paths, ", ") + " ]");
+                throw new IOException("Could not find any avro file that matches one of the path patterns [ "
+                        + StringUtils.join(paths, ", ") + " ]");
             }
             this.configuration = configuration;
             reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
@@ -1139,6 +1114,20 @@ public class AvroUtils {
         @Override
         public void remove() {
             throw new UnsupportedOperationException("remove is not applicable to this iterator.");
+        }
+
+        @Override
+        public void close() {
+            if (reader == null) {
+                return;
+            }
+            try {
+                reader.close();
+            } catch (IOException e) {
+                log.error("Failed to close avro file reader.");
+            } finally {
+                reader = null;
+            }
         }
     }
 
@@ -1168,51 +1157,48 @@ public class AvroUtils {
         }
         try {
             switch (avroType) {
-                case DOUBLE:
-                    if (!(value instanceof Double)) {
-                        return Double.valueOf(value.toString());
-                    }
-                    break;
-                case FLOAT:
-                    if (!(value instanceof Float)) {
-                        return Float.valueOf(value.toString());
-                    }
-                    break;
-                case INT:
-                    if (!(value instanceof Integer)) {
-                        return Integer.valueOf(value.toString());
-                    }
-                    break;
-                case LONG:
-                    if (!(value instanceof Long)) {
-                        return Long.valueOf(value.toString());
-                    }
-                    break;
-                case BOOLEAN:
-                    if (!(value instanceof Boolean)) {
-                        return Boolean.valueOf(value.toString());
-                    }
-                    break;
-                default:
-                    break;
+            case DOUBLE:
+                if (!(value instanceof Double)) {
+                    return Double.valueOf(value.toString());
+                }
+                break;
+            case FLOAT:
+                if (!(value instanceof Float)) {
+                    return Float.valueOf(value.toString());
+                }
+                break;
+            case INT:
+                if (!(value instanceof Integer)) {
+                    return Integer.valueOf(value.toString());
+                }
+                break;
+            case LONG:
+                if (!(value instanceof Long)) {
+                    return Long.valueOf(value.toString());
+                }
+                break;
+            case BOOLEAN:
+                if (!(value instanceof Boolean)) {
+                    return Boolean.valueOf(value.toString());
+                }
+                break;
+            default:
+                break;
             }
         } catch (Exception ex) {
-            log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value="
-                    + value);
+            log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value=" + value);
             value = null;
         }
         return value;
     }
 
-    private static Type getFieldType(Field field)
-    {
+    private static Type getFieldType(Field field) {
         Type fieldType = field.schema().getType();
 
         // if the field is of type union, we must loop to get the correct type
         // if not then there is only one definition
-        if(fieldType == Schema.Type.UNION)
-        {
-            for (Schema schema: field.schema().getTypes()) {
+        if (fieldType == Schema.Type.UNION) {
+            for (Schema schema : field.schema().getTypes()) {
 
                 if (!schema.equals(NULL_SCHEMA)) {
 
@@ -1226,17 +1212,16 @@ public class AvroUtils {
         return fieldType;
     }
 
-    private static boolean getFieldAllowsNull(Field field)
-    {
+    @SuppressWarnings("unused")
+    private static boolean getFieldAllowsNull(Field field) {
         Type type = field.schema().getType();
 
         boolean nullAllowed = false;
 
         // the null is allowed we have two fields (maybe more): one for
         // the field type and one defining null
-        if(type == Schema.Type.UNION)
-        {
-            for (Schema schema: field.schema().getTypes()) {
+        if (type == Schema.Type.UNION) {
+            for (Schema schema : field.schema().getTypes()) {
 
                 if (schema.equals(NULL_SCHEMA)) {
 
@@ -1258,45 +1243,43 @@ public class AvroUtils {
         }
         try {
             switch (avroType) {
-                case DOUBLE:
-                    if (!(value instanceof Double)) {
-                        return Double.valueOf(value.toString());
-                    }
-                    break;
-                case FLOAT:
-                    if (!(value instanceof Float)) {
-                        return Float.valueOf(value.toString());
-                    }
-                    break;
-                case INT:
-                    if (!(value instanceof Integer)) {
-                        return Integer.valueOf(value.toString());
-                    }
-                    break;
-                case LONG:
-                    if (!(value instanceof Long)) {
-                        return Long.valueOf(value.toString());
-                    }
-                    break;
-                case BOOLEAN:
-                    if (!(value instanceof Boolean)) {
-                        return Boolean.valueOf(value.toString());
-                    }
-                    break;
-                default:
-                    break;
+            case DOUBLE:
+                if (!(value instanceof Double)) {
+                    return Double.valueOf(value.toString());
+                }
+                break;
+            case FLOAT:
+                if (!(value instanceof Float)) {
+                    return Float.valueOf(value.toString());
+                }
+                break;
+            case INT:
+                if (!(value instanceof Integer)) {
+                    return Integer.valueOf(value.toString());
+                }
+                break;
+            case LONG:
+                if (!(value instanceof Long)) {
+                    return Long.valueOf(value.toString());
+                }
+                break;
+            case BOOLEAN:
+                if (!(value instanceof Boolean)) {
+                    return Boolean.valueOf(value.toString());
+                }
+                break;
+            default:
+                break;
             }
         } catch (Exception ex) {
-            log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value="
-                    + value);
+            log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value=" + value);
             value = null;
         }
         return value;
     }
 
-    public static void createAvroFileByData(Configuration yarnConfiguration,
-            List<Pair<String, Class<?>>> columns, Object[][] data, String avroDir, String avroFile)
-            throws Exception {
+    public static void createAvroFileByData(Configuration yarnConfiguration, List<Pair<String, Class<?>>> columns,
+            Object[][] data, String avroDir, String avroFile) throws Exception {
         Map<String, Class<?>> schemaMap = new HashMap<>();
         for (int i = 0; i < columns.size(); i++) {
             schemaMap.put(columns.get(i).getKey(), columns.get(i).getValue());

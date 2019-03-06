@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
@@ -174,36 +172,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         return step;
     }
 
-    private TransformationStepConfig createSlimTable(List<Integer> inputSteps, String tablePrefix) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(inputSteps);
-        step.setTransformer(TRANSFORMER_COPIER);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(tablePrefix + "_Slim");
-        step.setTargetTable(targetTable);
-
-        CopierConfig conf = new CopierConfig();
-        List<String> slimFields = Arrays.asList(batchStorePrimaryKey, InterfaceName.LatticeAccountId.name());
-        conf.setRetainAttrs(slimFields);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
-        return step;
-    }
-
-    private TransformationStepConfig mergeMatch(List<Integer> inputSteps) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(inputSteps);
-        step.setTransformer("bulkMatchMergerTransformer");
-
-        BulkMatchMergerTransformerConfig conf = new BulkMatchMergerTransformerConfig();
-        conf.setJoinField(batchStorePrimaryKey);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
-        return step;
-    }
-
     private TransformationStepConfig mergeMaster(List<Integer> inputSteps) {
         TargetTable targetTable;
         TransformationStepConfig step = new TransformationStepConfig();
@@ -281,11 +249,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setFetchOnly(true);
 
         // Prepare Entity Key Map for Fetch Oly Match.
-        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(Arrays.asList(InterfaceName.EntityId.name()));
-        keyMap.put(MatchKey.EntityId, Arrays.asList(InterfaceName.EntityId.name()));
+        Map<MatchKey, List<String>> keyMap = //
+                MatchKeyUtils.resolveKeyMap(Collections.singletonList(InterfaceName.EntityId.name()));
+        keyMap.put(MatchKey.EntityId, Collections.singletonList(InterfaceName.EntityId.name()));
         EntityKeyMap entityKeyMap = new EntityKeyMap();
         entityKeyMap.setKeyMap(keyMap);
-        entityKeyMap.setSystemIdPriority(Collections.EMPTY_LIST);
+        entityKeyMap.setSystemIdPriority(Collections.emptyList());
         Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
         entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
         matchInput.setEntityKeyMaps(entityKeyMaps);
@@ -338,7 +307,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     }
 
     @Override
-    protected Table enrichTableSchema(Table table) {
+    protected void enrichTableSchema(Table table) {
         List<Attribute> attrs = new ArrayList<>();
         table.getAttributes().forEach(attr0 -> {
             attr0.setTags(Tag.INTERNAL);
@@ -346,7 +315,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         });
         table.setAttributes(attrs);
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
-        return table;
     }
 
     @Override
@@ -377,4 +345,5 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 TableRoleInCollection.AccountDiffSlim, inactive);
 
     }
+
 }
