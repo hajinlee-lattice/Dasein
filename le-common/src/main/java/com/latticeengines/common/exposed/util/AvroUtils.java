@@ -1046,14 +1046,6 @@ public class AvroUtils {
         }
     }
 
-    public static Iterator<GenericRecord> iterator(Configuration configuration, Collection<String> paths) {
-        try {
-            return new AvroFilesIterator(configuration, paths);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static AvroFilesIterator avroFileIterator(Configuration configuration, String path) {
         try {
             return new AvroFilesIterator(configuration, path);
@@ -1124,15 +1116,17 @@ public class AvroUtils {
         }
 
         @Override
-        public void close() throws IOException {
-            if (reader == null)
+        public void close() {
+            if (reader == null) {
                 return;
+            }
             try {
                 reader.close();
+            } catch (IOException e) {
+                log.error("Failed to close avro file reader.");
             } finally {
                 reader = null;
             }
-
         }
     }
 
