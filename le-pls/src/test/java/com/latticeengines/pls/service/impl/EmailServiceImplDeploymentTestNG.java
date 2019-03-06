@@ -4,6 +4,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +26,8 @@ import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -213,13 +216,21 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         return "";
     }
 
-    private long getTimeWorldClockApi() {
-        RestTemplate restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
-        JsonNode jsonNode = restTemplate.getForObject("http://worldclockapi.com/api/json/utc/now", JsonNode.class);
-        Assert.assertNotNull(jsonNode);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
-        LocalDateTime localDateTime = LocalDateTime.parse(jsonNode.get("currentDateTime").asText(), formatter);
-        long milli = localDateTime.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+    private long getTimeWorldClockApi() throws IOException {
+        long milli;
+        try {
+            RestTemplate restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+            JsonNode jsonNode = restTemplate.getForObject("http://worldclockapi.com/api/json/utc/now", JsonNode.class);
+            Assert.assertNotNull(jsonNode);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
+            LocalDateTime localDateTime = LocalDateTime.parse(jsonNode.get("currentDateTime").asText(), formatter);
+            milli = localDateTime.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+        } catch (RuntimeException e) {
+            NTPUDPClient timeClient = new NTPUDPClient();
+            InetAddress inetAddress = InetAddress.getByName("time-a.nist.gov");
+            TimeInfo timeInfo = timeClient.getTime(inetAddress);
+            milli = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+        }
         return milli - TimeUnit.SECONDS.toMillis(30);
     }
 
