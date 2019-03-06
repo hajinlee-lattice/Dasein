@@ -1038,6 +1038,7 @@ public class AvroUtils {
         return records;
     }
 
+    @Deprecated
     public static Iterator<GenericRecord> iterator(Configuration configuration, String path) {
         try {
             return new AvroFilesIterator(configuration, path);
