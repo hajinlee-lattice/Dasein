@@ -1,7 +1,13 @@
+import { MessagingFactory } from 'common/app/utilities/messaging-service';
+import Message, {
+    MODAL,
+    WARNING,
+    CLOSE_MODAL
+} from 'common/app/utilities/message';
 angular.module('lp.jobs.row.subjobs', [])
-
+    .factory('LeMessaging', MessagingFactory)
     .directive('importJobRowSubJobs', [function () {
-        var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', function ($scope, JobsStore, JobsService, BrowserStorageUtility) {
+        var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', 'LeMessaging', function ($scope, JobsStore, JobsService, BrowserStorageUtility, LeMessaging) {
             $scope.typesGroupd = {};
             $scope.watcher = null;
             function init() {
@@ -206,6 +212,43 @@ angular.module('lp.jobs.row.subjobs', [])
             $scope.hasErrors = function(subjob) {
                 return subjob.jobType == 'cdlDataFeedImportWorkflow' && subjob.outputs && subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES;
             }
+            $scope.showCancel = function(){
+                let status = this.getjobstatus();
+                console.log(status);
+                switch(status){
+                    case 'Ready':
+                    return true;
+                    default:
+                    return false;
+                }
+                // return true;
+            }
+            $scope.confirmCancelAction = function(subjob){
+                let name = $scope.getActionName(subjob);
+                let p = '<span>Are you sure you want to cancel the action</span><br>';
+                let n = `${'<p><strong>'}${name}${'</strong>?</p>'}`;
+                let msg = new Message(
+                    'Test',
+                    MODAL,
+                    WARNING,
+                    'Confirm',
+                    `${p}${n}`
+                );
+                msg.setConfirmText('Yes, Cancel');
+                msg.setDiscardText('No');
+                msg.setIcon('fa fa-exclamation-circle');
+                msg.setCallbackFn((args) => {
+                    console.log(args);
+                    let closeMsg = new Message([], CLOSE_MODAL);
+                    closeMsg.setName(args.name);
+                    // closeMsg.setCallbackFn();
+                    LeMessaging.sendMessage(closeMsg);
+                    if (args.action == "ok") {
+                        console.log('Feature not connected to apis?');
+                    }
+                });
+                LeMessaging.sendMessage(msg);
+            }
 
             init();
         }];
@@ -215,7 +258,8 @@ angular.module('lp.jobs.row.subjobs', [])
             replace: true,
             scope: {
                 subjobs: '=',
-                applicationId: '='
+                applicationId: '=',
+                getjobstatus: '&'
             },
             controller: controller,
             templateUrl: "app/jobs/processing/subjobs/import-job-row-subjobs.component.html",

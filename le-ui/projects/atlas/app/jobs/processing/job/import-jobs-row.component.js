@@ -194,16 +194,6 @@ angular.module('lp.jobs.import.row', [
                 return '';
             }
         };
-
-        // $scope.showScheduleTime = function(job){
-        //     console.log('TEST');
-        //     if((job.endTimestamp !== null)||(!$scope.disableRunButton(job) && $scope.showRunButton(job))){
-        //         return true;
-        //     }else{
-        //         console.log(job.endTimestamp);
-        //         return false;
-        //     }
-        // };
         
         $scope.mouseDownRun  = function(job){
             $scope.disableButton = true;
@@ -214,7 +204,9 @@ angular.module('lp.jobs.import.row', [
             return job.jobStatus;
         
         };
-
+        $scope.getJobStatusFn = function(job){
+            return $scope.getJobStatus(job);
+        }
         $scope.disableRunButton = function (job) {
             var oneCompleted = $scope.isOneActionCompleted(job);
             var canRun = $scope.vm.canLastJobRun();

@@ -29,6 +29,13 @@ export default class Message {
     getConfirmText(){
         return this.confirmText;
     }
+    setDiscardText(discardText){
+        this.discardText = discardText;
+    }
+
+    getDiscardText(discardText){
+        return this.discardText;
+    }
 
     setIcon(icon){
         this.icon = icon;

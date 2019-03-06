@@ -45,7 +45,7 @@
         Report
     </a>
     <span>
-        <span ng-if="isJobFailed(job)">Please Contact Lattice Support</span>
+        <span ng-if="isJobFailed(job)">Please contact Lattice support</span>
     </span>
 </div>
 <div class="le-cell le-col-start-10 le-col-span-1 le-cell-right-align">
@@ -71,7 +71,7 @@
     </div>
 </div>
 <chevron class="le-row" chevronconfig="chevronConfig" stepscompleted="job.steps" jobstatus="job.jobStatus" ng-if="showChevron(job)"></chevron>
-<import-job-row-sub-jobs ng-if="expanded" subjobs="job.subJobs"></import-job-row-sub-jobs>
+<import-job-row-sub-jobs ng-if="expanded" subjobs="job.subJobs" getjobstatus='getJobStatusFn(job)'></import-job-row-sub-jobs>
 <div class="le-row le-cell le-col-start-1 le-col-span-12" ng-if="expanded && job.applicationId && job.applicationLogUrl != null && hasRight()">
     <span>Application Id: <a ng-href="{{job.applicationLogUrl}}" target="_blank">{{job.applicationId}}</a></span>
 </div>

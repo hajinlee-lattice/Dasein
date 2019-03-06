@@ -27,7 +27,8 @@ export const MessagingFactory = () => {
     return {
         subscribe: observer => {
             messagingService.addSubscriber(observer);
-        }
+        },
+        sendMessage: message => {messagingService.sendMessage(message)},
     };
 };
 

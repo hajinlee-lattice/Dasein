@@ -1,50 +1,64 @@
 <div class="job-subactions le-row">
     <div class="le-col-start-1 le-col-span-12 le-grid">
         <div class="le-header le-header-expand le-row">
-            <div class="le-cell le-col-start-1 le-col-span-1">Start Time</div>
-            <div class="le-cell le-col-start-2 le-col-span-2">Actions</div>
-            <div class="le-cell le-col-start-4 le-col-span-1">Validation</div>
-            <div class="le-cell le-col-start-5 le-col-span-2">Record Found</div>
-            <div class="le-cell le-col-start-7 le-col-span-2">Record Failed</div>
-            <div class="le-cell le-col-start-9 le-col-span-2">Record Uploaded</div>
-            <div class="le-cell le-col-start-11 le-col-span-2">User</div>
+            <div class="le-cell le-col-start-1 le-col-span-2">Start Time</div>
+            <div class="le-cell le-col-start-3 le-col-span-2">Actions</div>
+            <div class="le-cell le-col-start-5 le-col-span-1">Actions Status</div>
+            <div class="le-cell le-col-start-6 le-col-span-1">Record Found</div>
+            <div class="le-cell le-col-start-7 le-col-span-1">Record Failed</div>
+            <div class="le-cell le-col-start-8 le-col-span-2">Record Uploaded</div>
+            <div class="le-cell le-col-start-10 le-col-span-2">User</div>
+            <div class="le-cell le-col-start-11 le-col-span-1"></div>
         </div>
-        
+
         <div class="le-row" ng-repeat="subjob in sobjobsGrouped | orderBy:'-startTimestamp'">
-            <div class="le-cell le-col-start-1 le-col-span-1">
+            <div class="le-cell le-col-start-1 le-col-span-2">
                 {{subjob.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
             </div>
-            <div class="le-cell le-col-start-2 le-col-span-2">
+            <div class="le-cell le-col-start-3 le-col-span-2">
                 <span class="text-ellipsis">
                     {{getActionType(subjob)}}
-                    <a href="{{getDownloadLink(subjob)}}" title="{{getActionName(subjob)}}" ng-if="canBeDownload(subjob)">
+                    <a href="{{getDownloadLink(subjob)}}" title="{{getActionName(subjob)}}"
+                        ng-if="canBeDownload(subjob)">
                         <span>{{getActionName(subjob)}}</span>
                     </a>
-                    <span ng-if="!canBeDownload(subjob)" title="{{getActionName(subjob)}}">{{getActionName(subjob)}}</span>
+                    <span ng-if="!canBeDownload(subjob)"
+                        title="{{getActionName(subjob)}}">{{getActionName(subjob)}}</span>
                 </span>
 
             </div>
-            <div class="le-cell le-col-start-4 le-col-span-1" ng-class="{'partial': getValidation(subjob) == 'Partial Success', 'failed': getValidation(subjob) == 'Failed'}">
+            <div class="le-cell le-col-start-5 le-col-span-1"
+                ng-class="{'partial': getValidation(subjob) == 'Partial Success', 'failed': getValidation(subjob) == 'Failed'}">
                 {{getValidation(subjob)}}
             </div>
-            <div class="le-cell le-col-start-5 le-col-span-2">
+            <div class="le-cell le-col-start-6 le-col-span-1">
                 {{getRecordFound(subjob)}}
             </div>
-            <div class="le-cell le-col-start-7 le-col-span-2">
-                <a href="{{getErrorsLink(subjob)}}" ng-if="hasErrors(subjob)"> 
+            <div class="le-cell le-col-start-7 le-col-span-1">
+                <a href="{{getErrorsLink(subjob)}}" ng-if="hasErrors(subjob)">
                     <span> {{getRecordFailed(subjob)}} </span>
                 </a>
                 <span ng-if="!hasErrors(subjob)"> {{getRecordFailed(subjob)}} </span>
             </div>
-            <div class="le-cell le-col-start-9 le-col-span-2">
+            <div class="le-cell le-col-start-8 le-col-span-2">
                 {{getRecordUploaded(subjob)}}
             </div>
-            <div class="le-cell le-col-start-11 le-col-span-2">
+            <div class="le-cell le-col-start-10 le-col-span-2">
                 <span class="word-break">
                     {{getUser(subjob)}}
                 </span>
             </div>
-
+            <div class="le-cell le-col-start-11 le-col-span-1 cancel-action" ng-if="showCancel()">
+                <span class="word-break">
+                    <li class="import show-tooltip title-tooltip top">
+                        <div>
+                            <button class="button borderless-button" ng-click="confirmCancelAction(subjob)">
+                                <i class="fa fa-times">
+                                </i>
+                            </button>
+                    </li>
+                </span>
+            </div>
         </div>
     </div>
 </div>
