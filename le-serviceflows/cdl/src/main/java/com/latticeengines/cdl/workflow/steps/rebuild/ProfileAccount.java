@@ -539,8 +539,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         });
         if (updatedAttrs.get() > 0) {
             log.info("Found " + updatedAttrs.get() + " attrs to update, refresh master table schema.");
-            table.setAttributes(attrs);
-            metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+            // table.setAttributes(attrs);
+            // metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
         }
     }
 
