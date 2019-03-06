@@ -50,6 +50,11 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Contact)) {

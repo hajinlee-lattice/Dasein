@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -34,14 +32,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -263,47 +259,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         return JsonUtils.serialize(config);
     }
 
-    private MatchInput getBaseMatchInput() {
-        MatchInput matchInput = new MatchInput();
-        matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
-        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
-        matchInput.setExcludePublicDomain(false);
-        matchInput.setPublicDomainAsNormalDomain(false);
-        matchInput.setDataCloudVersion(getDataCloudVersion());
-        matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(true);
-        matchInput.setLogDnBBulkResult(false);
-        matchInput.setMatchDebugEnabled(false);
-        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-
-        return matchInput;
-    }
-
     private Map<MatchKey, List<String>> getMatchKeys() {
-        String tableName = inputTableNames.get(0);
-        List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace.toString(), tableName);
-        Set<String> names = cms.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+        Set<String> names = getInputTableColumnNames(0);
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
-        addMatchKeyIfExists(names, matchKeys, MatchKey.Domain, InterfaceName.Website.name());
-        addMatchKeyIfExists(names, matchKeys, MatchKey.DUNS, InterfaceName.DUNS.name());
-
-        addMatchKeyIfExists(names, matchKeys, MatchKey.Name, InterfaceName.CompanyName.name());
-        addMatchKeyIfExists(names, matchKeys, MatchKey.City, InterfaceName.City.name());
-        addMatchKeyIfExists(names, matchKeys, MatchKey.State, InterfaceName.State.name());
-        addMatchKeyIfExists(names, matchKeys, MatchKey.Country, InterfaceName.Country.name());
-
-        addMatchKeyIfExists(names, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
-        addMatchKeyIfExists(names, matchKeys, MatchKey.Zipcode, InterfaceName.PostalCode.name());
-
+        addLDCMatchKeysIfExist(names, matchKeys);
         log.info("Using match keys: " + JsonUtils.serialize(matchKeys));
         return matchKeys;
-    }
-
-    private void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key,
-            String columnName) {
-        if (cols.contains(columnName)) {
-            keyMap.put(key, Collections.singletonList(columnName));
-        }
     }
 
     @Override
