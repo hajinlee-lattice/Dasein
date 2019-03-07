@@ -17,6 +17,9 @@ public class LatticeSchemaField {
     @JsonProperty
     private String requiredIfNoField;
 
+    @JsonProperty
+    private Boolean fromExistingTemplate = false;
+
     public String getName() {
         return this.name;
     }
@@ -47,5 +50,13 @@ public class LatticeSchemaField {
 
     public void setRequiredIfNoField(String requiredIfNoField) {
         this.requiredIfNoField = requiredIfNoField;
+    }
+
+    public Boolean getFromExistingTemplate() {
+        return fromExistingTemplate;
+    }
+
+    public void setFromExistingTemplate(Boolean fromExistingTemplate) {
+        this.fromExistingTemplate = fromExistingTemplate;
     }
 }
