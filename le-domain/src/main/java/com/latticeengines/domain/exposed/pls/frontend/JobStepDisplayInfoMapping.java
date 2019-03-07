@@ -66,9 +66,23 @@ public final class JobStepDisplayInfoMapping {
             "score_training_set" //
     };
 
-    private static final String[] RATING_IMPORT_MATCH_AND_MODEL_STEPS = { //
+    private static final String[] CROSS_SELL_IMPORT_MATCH_AND_MODEL_STEPS = { //
             "load_data", //
             "load_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
             "create_global_target_market", //
             "create_global_target_market", //
             "create_global_target_market", //
@@ -278,19 +292,7 @@ public final class JobStepDisplayInfoMapping {
             "Scoring" //
     };
 
-    private static final String[] RTS_BULK_SCORE_STEPS = { "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-            "scoring_targeted_accounts", //
-    };
-
-    private static final String[] RATING_BULK_SCORE_STEPS = { "scoring_targeted_accounts", //
+    private static final String[] RTS_BULK_SCORE_STEPS = {
             "scoring_targeted_accounts", //
             "scoring_targeted_accounts", //
             "scoring_targeted_accounts", //
@@ -303,11 +305,27 @@ public final class JobStepDisplayInfoMapping {
             "scoring_targeted_accounts", //
     };
 
-    private static final String[] CDL_DATA_FEED_IMPORT_STEPS = { "load_data", //
+    private static final String[] RATING_BULK_SCORE_STEPS = {
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+    };
+
+    private static final String[] CDL_DATA_FEED_IMPORT_STEPS = {
+            "load_data", //
             "load_data" //
     };
 
-    private static final String[] IMPORT_MATCH_AND_SCORE_STEPS = { "load_data", //
+    private static final String[] IMPORT_MATCH_AND_SCORE_STEPS = {
+            "load_data", //
             "load_data", //
             "load_data", //
             "load_data", //
@@ -333,7 +351,8 @@ public final class JobStepDisplayInfoMapping {
             "score_data", //
             "score_data" };
 
-    private static final String[] CUSTOM_EVENT_MODELING_STEPS = { "load_data", //
+    private static final String[] CUSTOM_EVENT_MODELING_STEPS = {
+            "load_data", //
             "load_data", //
             "load_data", //
             "load_data", //
@@ -398,7 +417,8 @@ public final class JobStepDisplayInfoMapping {
             "score_training_set", //
             "score_training_set" };
 
-    private static final String[] CDL_OPERATION_STEPS = { "delete_file_upload", //
+    private static final String[] CDL_OPERATION_STEPS = {
+            "delete_file_upload", //
             "delete_file_upload", //
             "delete_file_upload", //
             "start_maintenance", //
@@ -411,7 +431,8 @@ public final class JobStepDisplayInfoMapping {
             "operation_execute", //
             "operation_execute" };
 
-    private static final String[] IMPORT_AND_RTS_BULK_SCORE_STEPS = { "import_data", //
+    private static final String[] IMPORT_AND_RTS_BULK_SCORE_STEPS = {
+            "import_data", //
             "import_data", //
             "create_table_import_report", //
             "create_table_import_report", //
@@ -424,7 +445,8 @@ public final class JobStepDisplayInfoMapping {
             "score_training_set", //
             "score_training_set" };
 
-    private static final String[] SCORE_STEPS = { "match_data", //
+    private static final String[] SCORE_STEPS = {
+            "match_data", //
             "match_data", //
             "match_data", //
             "match_data", //
@@ -439,7 +461,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_NAME.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_NAME.put("crossSellImportMatchAndModelWorkflow",
-                RATING_IMPORT_MATCH_AND_MODEL_STEPS);
+                CROSS_SELL_IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_NAME.put("ratingEngineScoreWorkflow", RATING_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("ratingEngineModelAndEmailWorkflow", RATING_MODEL_AND_EMAIL_STEPS);
         DISPLAY_NAME.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
@@ -458,7 +480,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("crossSellImportMatchAndModelWorkflow",
-                RATING_IMPORT_MATCH_AND_MODEL_STEPS);
+                CROSS_SELL_IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("ratingEngineScoreWorkflow", RATING_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("ratingEngineModelAndEmailWorkflow", RATING_MODEL_AND_EMAIL_STEPS);
         DISPLAY_DESCRIPTION.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);

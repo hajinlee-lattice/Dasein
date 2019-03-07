@@ -101,7 +101,7 @@ angular.module('lp.jobs.import.row', [
             for (var i = 0; i < $scope.job.subJobs.length; i++) {
                 var found = getRecordFound($scope.job.subJobs[i]);
                 var uploaded = getRecordUploaded($scope.job.subJobs[i]);
-                if (found != uploaded && $scope.job.subJobs[i].inputs != undefined) {
+                if (found != uploaded && $scope.job.subJobs[i].inputs != undefined && $scope.job.subJobs[i].jobStatus != "Cancelled" ) {
                     listPartialSuccess.push($scope.job.subJobs[i]);
                 }
             }

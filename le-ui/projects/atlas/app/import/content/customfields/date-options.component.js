@@ -13,7 +13,6 @@ angular.module('lp.import.wizard.customfields')
 
             this.$onInit = function () {
                 this.redux = $state.get('home.import').data.redux;
-                console.log("RRRRRR ",this.field);
                 this.dateFormats = this.redux.store.dateFormats;
                 this.timeFormats = this.redux.store.timeFormats;
                 this.timeZones = this.redux.store.timezones;
@@ -21,8 +20,6 @@ angular.module('lp.import.wizard.customfields')
                 this.timeFormat = DateUtils.getTimeFormat(this.field, this.timeFormats);
                 this.timezone = DateUtils.getTimezone(this.field, this.timeZones);
                 this.formerTemplates = this.field.fromExistingTemplate;
-                
-                console.log('REDUX ', this.redux.store, this.dateFormat, this.timeFormat, this.timezone);
             };
             this.getTooltip = () => {
                 return this.tooltiptxt;
