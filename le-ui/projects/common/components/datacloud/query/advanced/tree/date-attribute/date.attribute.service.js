@@ -28,7 +28,8 @@ angular
           type: "Time",
           min: "1",
           max: "",
-          pattern: "\\d*"
+          pattern: "\\d*",
+          step: 1
         },
         to: {
           name: "to-period",
@@ -37,7 +38,8 @@ angular
           type: "Time",
           min: "1",
           max: "",
-          pattern: "\\d*"
+          pattern: "\\d*",
+          step: 1
         }
       };
     };
@@ -50,7 +52,8 @@ angular
           position: 0,
           type: "Time",
           visible: true,
-          pattern: "\\d+"
+          pattern: "\\d*",
+          step: 1
         },
         to: {
           name: "to-time",
@@ -58,7 +61,8 @@ angular
           position: 1,
           type: "Time",
           visible: true,
-          pattern: "\\d+"
+          pattern: "\\d*",
+          step: 1
         }
       };
     };
