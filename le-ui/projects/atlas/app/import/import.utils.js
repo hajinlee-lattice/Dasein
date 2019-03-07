@@ -63,6 +63,11 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         latticeSchema = {};
     }
     
+    this.getFieldFromLaticeSchema = function(entity, name){
+        var entity = latticeSchema[entity];
+        let field = entity.map[name];
+        return field;
+    }
     /**
      * It sets the entities and all the fields associated with it
      */
