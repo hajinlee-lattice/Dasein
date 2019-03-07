@@ -6,12 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -94,6 +98,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyDataCollectionStatus(DataCollection.Version.Green);
         verifyNumAttrsInAccount();
         verifyAccountFeatures();
+        verifyDateAttrs();
 
         // Check that stats cubes only exist for the entities specified below.
         verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact,
@@ -126,6 +131,14 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         createTestSegmentCuratedAttr();
         verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_1));
         verifyUpdateActions();
+    }
+
+    private void verifyDateAttrs() {
+        Table table = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.Account.getBatchStore());
+        Assert.assertNotNull(table);
+        Attribute attribute = table.getAttribute("user_Test_Date");
+        Assert.assertNotNull(attribute);
+        Assert.assertTrue(StringUtils.isNotBlank(attribute.getLastDataRefresh()), JsonUtils.serialize(attribute));
     }
 
     private void verifyNumAttrsInAccount() {
