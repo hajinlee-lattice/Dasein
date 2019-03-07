@@ -3,8 +3,10 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
@@ -46,6 +49,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageR
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
