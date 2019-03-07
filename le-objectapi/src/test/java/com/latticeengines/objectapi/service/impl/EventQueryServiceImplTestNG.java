@@ -1,13 +1,17 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -36,14 +40,27 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("1");
+        super.setup("3");
+    }
+
+    @Test(groups = "functional")
+    public void testEventQuery() throws IOException {
+        String str = FileUtils.readFileToString(new File("/Users/ygao/Downloads/test_query_1_accountQ_in_seg.json"),
+                "Utf-8");
+        EventFrontEndQuery eventQuery = JsonUtils.deserialize(str, EventFrontEndQuery.class);
+        System.out.println("mainEntity for eQuery: " + eventQuery.getSegmentQuery().getMainEntity());
+
+        long count = eventQueryService.getScoringCount(eventQuery, DataCollection.Version.Blue);
+        System.out.println("count: " + count);
     }
 
     @Test(groups = "functional")
     public void testScoringCount() {
         // Ever, Amount > 0 and Quantity > 0
-        AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
-        Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), greaterThan0, greaterThan0, false);
+        AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN,
+                Collections.singletonList(0));
+        Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), greaterThan0, greaterThan0,
+                false);
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Restriction txnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
         Restriction accRestriction1 = Restriction.builder() //

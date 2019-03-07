@@ -54,6 +54,18 @@ abstract class QueryTranslator {
         this.repository = repository;
     }
 
+    Restriction translateEntityQueryRestriction(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
+            String sqlUser) {
+        Restriction restriction;
+        BusinessEntity mainEntity = frontEndQuery.getMainEntity();
+        log.info("mainentity is " + mainEntity);
+        restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery),
+                timeTranslator, sqlUser, true);
+        restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
+        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
+        return restriction;
+    }
+
     Query translateProductQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         QueryBuilder queryBuilder = Query.builder();
         BusinessEntity mainEntity = BusinessEntity.Product;
@@ -123,6 +135,25 @@ abstract class QueryTranslator {
             }
         }
         return restriction;
+    }
+
+    Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+            Restriction outerRestriction, TimeFilterTranslator timeTranslator, String sqlUser) {
+        BusinessEntity innerEntity = null;
+        switch (outerEntity) {
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            break;
+        default:
+            break;
+        }
+        FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser,
+                true);
+        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
     Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
