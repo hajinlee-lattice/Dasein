@@ -27,6 +27,7 @@ angular.module('lp.import.entry', [
         uploaded: false,
         goState: null,
         next: false,
+        showButtonSpinner: false,
         showProductBundleImport: false,
         showProductHierarchyImport: false,
         showProductPurchaseImport: false
@@ -175,6 +176,8 @@ angular.module('lp.import.entry', [
     }
 
     vm.click = function() {
+        vm.next = false;
+        vm.showButtonSpinner = true;
         if(vm.formType != 'Import'){
             $state.go('home.import.data.' + vm.goState + '.ids');
         } else {

@@ -53,6 +53,7 @@
                 class="button blue-button"
                 ng-disabled="!vm.next"
                 ng-click="vm.click()">
+                <span ng-if="vm.showButtonSpinner" class="fa fa-spinner fa-spin fa-fw"></span>
                 {{ vm.nextButtonText }}
             </button>
         </div>
