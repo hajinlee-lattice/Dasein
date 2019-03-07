@@ -220,7 +220,9 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.showWarning = function(subjob){
-                if(subjob.errorMsg != null){
+                let status = $scope.getValidation(subjob);
+                // console.log(status);
+                if(subjob.errorMsg != null || status == 'Failed' || status == 'Partial Success'){
                     return true;
                 }else{
                     return false;
@@ -241,7 +243,11 @@ angular.module('lp.jobs.row.subjobs', [])
                 }
             }
             $scope.getErrorMessage = function(subjob){
-                return subjob.errorMsg != null ? subjob.errorMsg : 'Unknown';
+                if(subjob.errorMsg != null){ 
+                     subjob.errorMsg
+                } else{
+                    return 'Please click on the number of Record Failed to check the error messages';
+                }   
             }
             $scope.confirmCancelAction = function (subjob) {
                 console.log(subjob);
