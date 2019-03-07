@@ -1,5 +1,7 @@
 package com.latticeengines.pls.end2end;
 
+import java.util.List;
+
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -13,9 +15,11 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 
 public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
+    private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -27,23 +31,36 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     @Test(groups = "deployment")
     public void testContactDate() {
         baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
-
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_DATE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_DATE_FILE));
         String feedType = ENTITY_CONTACT + FEED_TYPE_SUFFIX;
+        List<LatticeSchemaField> latticeSchema =
+                modelingFileMetadataService.getSchemaToLatticeSchemaFields(ENTITY_CONTACT, SOURCE, feedType);
+
+        boolean createdDate = false;
+        boolean lastModifiedDate = false;
+        for (LatticeSchemaField schemaField : latticeSchema) {
+            if (schemaField.getName().equals("CreatedDate")) {
+                createdDate = true;
+                Assert.assertEquals(schemaField.getFieldType(), UserDefinedType.DATE);
+                Assert.assertFalse(schemaField.getFromExistingTemplate());
+            }
+            if (schemaField.getName().equals("LastModifiedDate")) {
+                lastModifiedDate = true;
+                Assert.assertEquals(schemaField.getFieldType(), UserDefinedType.DATE);
+                Assert.assertFalse(schemaField.getFromExistingTemplate());
+            }
+        }
+        Assert.assertTrue(createdDate);
+        Assert.assertTrue(lastModifiedDate);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(baseContactFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("Created Date")) {
-                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
+                Assert.assertTrue(fieldMapping.isMappedToLatticeField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
                 Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
-            } else if (fieldMapping.getUserField().equals("LastModifiedDate")) {
-                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
-                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
-                Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
             }
         }
         modelingFileMetadataService.resolveMetadata(baseContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
@@ -55,8 +72,27 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         Assert.assertNotNull(baseContactFile);
         Assert.assertNotNull(dfIdExtra);
 
+        SourceFile newContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        latticeSchema = modelingFileMetadataService.getSchemaToLatticeSchemaFields(ENTITY_CONTACT, SOURCE, feedType);
+        createdDate = false;
+        lastModifiedDate = false;
+        for (LatticeSchemaField schemaField : latticeSchema) {
+            if (schemaField.getName().equals("CreatedDate")) {
+                createdDate = true;
+                Assert.assertEquals(schemaField.getFieldType(), UserDefinedType.DATE);
+                Assert.assertTrue(schemaField.getFromExistingTemplate());
+            }
+            if (schemaField.getName().equals("LastModifiedDate")) {
+                lastModifiedDate = true;
+            }
+        }
+        Assert.assertTrue(createdDate);
+        Assert.assertFalse(lastModifiedDate);
+
         fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(baseContactFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
+                .getFieldMappingDocumentBestEffort(newContactFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("Created Date")) {
                 Assert.assertTrue(fieldMapping.isMappedToLatticeField());
@@ -64,9 +100,9 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 Assert.assertEquals(fieldMapping.isMappedToDateBefore(), true);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
             } else if (fieldMapping.getUserField().equals("LastModifiedDate")) {
-                Assert.assertTrue(fieldMapping.isMappedToLatticeField());
+                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), true);
+                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
                 Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
             }
         }

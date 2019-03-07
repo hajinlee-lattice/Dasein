@@ -740,6 +740,15 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                             attr2.getPhysicalDataType()));
                     return false;
                 }
+            } else if (InterfaceName.CreatedDate.equals(attr1.getInterfaceName())
+                        || InterfaceName.LastModifiedDate.equals(attr1.getInterfaceName())) {
+                if (!attr2.getPhysicalDataType().equalsIgnoreCase("string")
+                        && !attr2.getPhysicalDataType().equalsIgnoreCase("long")) {
+                    log.error(String.format("Attribute %s has wrong physicalDataType %s", attr2.getName(),
+                            attr2.getPhysicalDataType()));
+                    return false;
+                }
+
             } else {
                 log.error("PhysicalDataType is not the same for attribute: " + attr1.getName());
                 return false;
