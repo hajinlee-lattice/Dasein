@@ -539,8 +539,18 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         });
         if (updatedAttrs.get() > 0) {
             log.info("Found " + updatedAttrs.get() + " attrs to update, refresh master table schema.");
-            // table.setAttributes(attrs);
-            // metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+            table.setAttributes(attrs);
+            String customerSpaceStr = customerSpace.toString();
+            TableRoleInCollection batchStoreRole = entity.getBatchStore();
+            String inactiveLink = dataCollectionProxy.getTableName(customerSpaceStr, batchStoreRole, inactive);
+            String activeLink = dataCollectionProxy.getTableName(customerSpaceStr, batchStoreRole, active);
+            metadataProxy.updateTable(customerSpaceStr, table.getName(), table);
+            if (StringUtils.isNotBlank(inactiveLink) && inactiveLink.equalsIgnoreCase(table.getName())) {
+                dataCollectionProxy.upsertTable(customerSpaceStr, inactiveLink, batchStoreRole, inactive);
+            }
+            if (StringUtils.isNotBlank(activeLink) && activeLink.equalsIgnoreCase(table.getName())) {
+                dataCollectionProxy.upsertTable(customerSpaceStr, activeLink, batchStoreRole, active);
+            }
         }
     }
 
