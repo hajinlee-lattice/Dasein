@@ -80,6 +80,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
+            log.info("query is " + queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
@@ -99,6 +100,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return new DataPage(data);
     }
 
+    @Override
     public String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         Query query = getDataQuery(frontEndQuery, version, sqlUser);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
