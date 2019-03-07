@@ -156,7 +156,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             if (path.endsWith(".avro") || path.endsWith("/")) {
                 path = path.substring(0, path.lastIndexOf("/"));
             }
-            return path;
+            return path + "/*.avro";
         }
 
         private void registerDataUnit(DynamoExportConfig config) {
