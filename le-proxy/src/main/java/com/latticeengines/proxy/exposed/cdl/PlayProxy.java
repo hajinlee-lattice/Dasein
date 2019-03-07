@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -230,6 +231,13 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         log.info("url is " + url);
         List list = get("get Play Launches", url, List.class);
         return JsonUtils.convertList(list, PlayLaunch.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public PlayLaunchConfigurations getPlayLaunchConfigurations(String customerSpace, String playName) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches/configurations", shortenCustomerSpace(customerSpace), playName);
+        log.info("url is " + url);
+        return get("get PlayLaunchConfigurations", url, PlayLaunchConfigurations.class);
     }
 
     public PlayLaunch getPlayLaunch(String customerSpace, String playName, String launchId) {

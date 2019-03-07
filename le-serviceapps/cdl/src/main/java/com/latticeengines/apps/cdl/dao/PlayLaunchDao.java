@@ -2,9 +2,7 @@ package com.latticeengines.apps.cdl.dao;
 
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.lang3.tuple.Pair;
-
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -20,10 +18,13 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
     PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states);
 
+    PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId);
+
     List<PlayLaunch> findByState(LaunchState state);
 
     List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
-            Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType);
+            Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
+            String externalSysType);
 
     Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType);
