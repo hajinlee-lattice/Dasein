@@ -4,6 +4,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +14,11 @@ import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataflow.runtime.cascading.cdl.CalculateFittedExpectedRevenueFunction;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
@@ -103,9 +107,22 @@ public class CalculateExpectedRevenuePercentileDetailedTestNG extends ScoringSer
         expectedResultsRecordsMap.keySet().forEach(k -> {
             GenericRecord outputRecord = outputRecordsMap.get(k);
             GenericRecord expectedResultRecord = expectedResultsRecordsMap.get(k);
+            Double probability = (Double) outputRecord.get(ScoreResultField.Probability.displayName);
+            Double predictedRevenue = (Double) outputRecord.get(ScoreResultField.PredictedRevenue.displayName);
+            Double expectedRevenue = (Double) outputRecord.get(ScoreResultField.ExpectedRevenue.displayName);
+            if (expectedRevenue != null) {
+                Assert.assertEquals(expectedRevenue,
+                        BigDecimal.valueOf(probability * predictedRevenue)
+                                .setScale( //
+                                        CalculateFittedExpectedRevenueFunction //
+                                                .EV_REVENUE_PRECISION,
+                                        RoundingMode.HALF_UP)
+                                .doubleValue());
+            }
 
             expectedResultRecord.getSchema().getFields().stream().forEach(f -> {
-                if (f.name().equals("ExpectedRevenuePercentile") || f.name().equals("Score")) {
+                if (f.name().equals(ScoreResultField.ExpectedRevenuePercentile.displayName)
+                        || f.name().equals(ScoreResultField.Percentile.displayName)) {
                     assertTrue(
                             Math.abs(Integer.parseInt(outputRecord.get(f.name()).toString())
                                     - Integer.parseInt(expectedResultRecord.get(f.name()).toString())) == 0,
