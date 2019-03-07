@@ -2,7 +2,9 @@ package com.latticeengines.apps.cdl.dao;
 
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
+
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
