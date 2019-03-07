@@ -69,7 +69,6 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
 
         Table inputTable = metadataProxy.getTable(
                 customerSpace.toString(), TableUtils.getFullTableName(mergedBatchStoreName, pipelineVersion));
-        isDataQuotaLimit(inputTable);
         List<Product> inputProducts = ProductUtils.loadProducts(
                 yarnConfiguration, inputTable.getExtracts().get(0).getPath());
 
@@ -77,6 +76,10 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         List<Product> currentProducts = getCurrentProducts(currentTable);
 
         Map<String, Integer> productCounts = countProducts(currentProducts);
+        if (configuration.getDataQuotaLimit() < productCounts.get("nProductBundles"))
+            throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+                    ", The data you uploaded has exceeded the limit.");
+        log.info("stored data is " + productCounts.get("nProductBundles") + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
         mergeReport = constructMergeReport(productCounts, currentProducts.size());
 
         List<Product> productList = new ArrayList<>();
