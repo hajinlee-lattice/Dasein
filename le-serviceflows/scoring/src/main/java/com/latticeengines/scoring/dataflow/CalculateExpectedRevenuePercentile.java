@@ -61,7 +61,11 @@ public class CalculateExpectedRevenuePercentile
         context = new ParsedContext(parameters);
 
         Node inputTable = addSource(context.inputTableName);
-        Node addPercentileColumn = inputTable.addColumnWithFixedValue(context.percentileFieldName, null, Integer.class);
+        Node addBackupPredictedRevColumn = inputTable.addColumnWithFixedValue(context.backupPredictedRevFieldName, null,
+                Double.class);
+        Node addPercentileColumn = addBackupPredictedRevColumn.addColumnWithFixedValue(context.percentileFieldName,
+                null, Integer.class);
+
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());
 
         if (MapUtils.isNotEmpty(context.originalScoreFieldMap)) {
@@ -191,6 +195,8 @@ public class CalculateExpectedRevenuePercentile
 
         public final String standardScoreField = ScoreResultField.Percentile.displayName;
         public final String expectedRevenueField = ScoreResultField.ExpectedRevenue.displayName;
+        public final String probabilityField = ScoreResultField.Probability.displayName;
+        public final String predictedRevenueField = ScoreResultField.PredictedRevenue.displayName;
 
         public CustomerSpace customerSpace;
         public int minPct = 5;
@@ -202,6 +208,7 @@ public class CalculateExpectedRevenuePercentile
         public Map<String, String> fitFunctionParametersMap;
         public String outputPercentileFieldName;
         public String outputExpRevFieldName;
+        public String backupPredictedRevFieldName;
         public String scoreCountFieldName;
         public Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
@@ -218,6 +225,7 @@ public class CalculateExpectedRevenuePercentile
             outputExpRevFieldName = String.format("%sev_%d", PREFIX_TEMP_COL, timestamp);
             scoreCountFieldName = String.format("%scount_%d", PREFIX_TEMP_COL, timestamp);
             scoreDerivationMaps = parameters.getScoreDerivationMaps();
+            backupPredictedRevFieldName = String.format("__%s_%s", predictedRevenueField, "raw");
         }
     }
 }

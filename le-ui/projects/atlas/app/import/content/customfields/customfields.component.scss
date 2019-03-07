@@ -4,9 +4,6 @@
       background-image: url("/assets/images/ico-custom-fields-dark.png");
       margin-bottom: 20px;
     }
-    p {
-      margin-bottom: 20px;
-    }
   }
 
   .alert {
@@ -16,7 +13,7 @@
     background-color: #457eba;
     padding: 5px 10px;
     padding-left: 30px;
-    margin-bottom: 20px;
+    margin-top: 20px;
     img {
       margin-right: 10px;
     }
@@ -31,6 +28,18 @@
       background-color: #70bf4a;
       &:after {
         @include font-awesome-inline("\f00c");
+      }
+    }
+    &.existing-mappings {
+      background-color: #6fbf4a;
+      &:after {
+        @include font-awesome-inline("\f00c");
+      }
+    }
+    &.missing-mappings {
+      background-color: #f16a24;
+      &:after {
+        @include font-awesome-inline("\f071");
       }
     }
   }

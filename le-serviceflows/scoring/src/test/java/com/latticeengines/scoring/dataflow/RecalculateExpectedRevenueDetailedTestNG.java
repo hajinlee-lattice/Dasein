@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -107,6 +108,10 @@ public class RecalculateExpectedRevenueDetailedTestNG extends ServiceFlowsDataFl
             GenericRecord expectedResultRecord = expectedResultsRecordsMap.get(k);
 
             expectedResultRecord.getSchema().getFields().stream().forEach(f -> {
+                if (f.name().equals(ScoreResultField.Probability.displayName)) {
+                    Assert.assertTrue((Double) outputRecord.get(f.name()) < 1D);
+                    Assert.assertTrue((Double) outputRecord.get(f.name()) > 0D);
+                }
                 assertEquals(outputRecord.get(f.name()), expectedResultRecord.get(f.name()), f.name());
             });
         });

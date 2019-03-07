@@ -21,7 +21,6 @@ public class CalculateFittedExpectedRevenueHelper {
     private NodeSplitter nodeSplitter;
 
     public Node calculate(ParsedContext context, Node calculatePercentile, FieldList retainedFields) {
-
         Map<String, Node> nodes = nodeSplitter.split(calculatePercentile, context.originalScoreFieldMap,
                 context.modelGuidFieldName);
         Node merged = null;
@@ -36,7 +35,11 @@ public class CalculateFittedExpectedRevenueHelper {
                 node = node.apply(
                         new CalculateFittedExpectedRevenueFunction(new Fields(node.getFieldNamesArray()),
                                 context.expectedRevenueField, //
-                                context.outputPercentileFieldName, evFitFunctionParamsStr),
+                                context.outputPercentileFieldName, //
+                                context.probabilityField, //
+                                context.predictedRevenueField, //
+                                context.backupPredictedRevFieldName, //
+                                evFitFunctionParamsStr),
                         new FieldList(node.getFieldNamesArray()), node.getSchema(), null, Fields.REPLACE);
             }
 
