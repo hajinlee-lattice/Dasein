@@ -10,8 +10,9 @@
   </div>
   <div class="alert">
     <p>
-      New Custom Field(s) found:
-      {{ filtered.length - vm.getNumberDroppedFields() }}
+      {{ filtered.length - vm.getNumberDroppedFields() }} 
+      new Custom Fields have been found.
+      
     </p>
     <p ng-if="vm.getNumberDroppedFields() > 0">
       Field(s) dropped by default: {{ vm.getNumberDroppedFields() }}
@@ -56,7 +57,6 @@
         </div>
         <div class="le-cell le-col-span-2">
           <div class="container-flex">
-            Ignore
             <input
               type="checkbox"
               name="ignore_all"
@@ -64,6 +64,7 @@
               ng-model="checked"
               ng-change="vm.toggleIgnores(checked, fieldMapping)"
             />
+            <label for="toggleIgnore">Ignore</label>
             <div>
               <span class="more-info">&#105;
                 <div class="tooltip_">
@@ -106,8 +107,89 @@
         <div class="le-cell le-col-span-2">
           <input type="checkbox" id="{{ field.userField }}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"
             ng-disabled="field.defaultIgnored === true" />
+          <label for="{{ field.userField }}">Ignore</label>
         </div>
       </div>
     </div>
   </form>
+
+  <div ng-if="vm.extraFieldMappingInfo.existing_mappings.length">
+    <div class="alert existing-mappings">
+      <p>
+        {{vm.extraFieldMappingInfo.existing_mappings.length}} 
+        pre-existing Custom Fields have been found. This will overwrite the existing information.
+      </p>
+    </div>
+    <form name="form">
+      <div class="le-grid custom-fields-grid">
+        <div class="le-header le-row">
+          <div class="le-cell le-col-span-5">
+            <div class="container-flex">
+              <span>Custom Field</span>
+            </div>
+          </div>
+          <div class="le-cell le-col-span-5">
+            <div class="container-flex">
+              Type
+            </div>
+          </div>
+          <div class="le-cell le-col-span-2">
+            <div class="container-flex">
+              <input type="checkbox" ng-disabled="true"/> <label>Ignore</label>
+            </div>
+          </div>
+        </div>
+        <div class="grid-body le-row" ng-repeat="field in vm.extraFieldMappingInfo.existing_mappings">
+          <div class="le-cell le-col-span-5">
+            <span>{{ field.userField }}</span>
+          </div>
+          <div class="le-cell le-col-span-5">
+            <div class="field-type">
+              <select ng-disabled="true" class="form-control select-type">
+                <option value="TEXT" selected>Text</option>
+              </select>
+            </div>
+          </div>
+          <div class="le-cell le-col-span-2">
+            <input type="checkbox" ng-disabled="true" /> <label>Ignore</label>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div ng-if="vm.extraFieldMappingInfo.missed_mappings.length">
+    <div class="alert missing-mappings">
+      <p>
+        {{vm.extraFieldMappingInfo.missed_mappings.length}} 
+        pre-existing Custom Fields are missing from your import file. New accounts will be missing that information.
+      </p>
+    </div>
+    <form name="form">
+      <div class="le-grid custom-fields-grid">
+        <div class="le-header le-row">
+          <div class="le-cell le-col-span-5">
+            <div class="container-flex">
+              <span>Custom Field</span>
+            </div>
+          </div>
+          <div class="le-cell le-col-span-5">
+            <div class="container-flex">
+              Type
+            </div>
+          </div>
+        </div>
+        <div class="grid-body le-row" ng-repeat="field in vm.extraFieldMappingInfo.missed_mappings ">
+          <div class="le-cell le-col-span-5">
+            <span>{{ field.userField }}</span>
+          </div>
+          <div class="le-cell le-col-span-5">
+            <div class="field-type">
+              Text
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>

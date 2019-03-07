@@ -5,7 +5,10 @@ angular.module('lp.import.wizard.customfields', [])
     ImportUtils, $transition$
 ) {
     var vm = this;
-    var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
+    var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name),
+        extraFieldMappingInfo = FieldDocument.extraFieldMappingInfo;
+
+
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
     }else{
@@ -19,7 +22,8 @@ angular.module('lp.import.wizard.customfields', [])
         mergedFields: mergedFieldDocument.main || mergedFieldDocument,
         fieldMappingIgnore: {},
         defaultsIgnored: [],
-        fieldDateTooltip : ImportWizardStore.tooltipDateTxt
+        fieldDateTooltip: ImportWizardStore.tooltipDateTxt,
+        extraFieldMappingInfo: extraFieldMappingInfo
     });
     // console.log('STORE TOOLTIP ', vm.fieldDateTooltip)
     vm.getTooltip = () => {
