@@ -58,6 +58,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 2, "Contact");
         Thread.sleep(2000);
+
         // TODO: (Yintao) should be changed to mock vdb import
         mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
