@@ -84,7 +84,7 @@ public class LivySessionHolder {
 
     private Map<String, String> getSparkConf() {
         Map<String, String> conf = new HashMap<>();
-        conf.put("spark.executor.instances", minExecutors);
+        conf.put("spark.executor.instances", String.valueOf(Math.max(Integer.valueOf(minExecutors), 1)));
         conf.put("spark.dynamicAllocation.minExecutors", minExecutors);
         conf.put("spark.dynamicAllocation.maxExecutors", maxExecutors);
         return conf;
