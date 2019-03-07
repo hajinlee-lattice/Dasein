@@ -55,7 +55,7 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
             }
         }
 
-        assertEquals(3210, modelRecordMap.get(evModelGuid).size());
+        assertEquals(modelRecordMap.get(evModelGuid).size(), 2399);
 
         String[] evModelGuids = { evModelGuid, };
 
