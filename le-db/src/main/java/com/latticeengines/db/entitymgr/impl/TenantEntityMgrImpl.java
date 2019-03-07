@@ -2,6 +2,7 @@ package com.latticeengines.db.entitymgr.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -68,6 +69,11 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(new Date().getTime());
+        }
+        if (tenant.getRegisteredTime() == null) {
+            // expired date = registered + 90
+            Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
+            tenant.setExpiredTime(expiredTime);
         }
         super.create(tenant);
     }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.curator.framework.CuratorFramework;
@@ -89,6 +90,7 @@ public class BatonServiceImpl implements BatonService {
             // Timestamp
             tenantInfo.properties.created = new DateTime().getMillis();
             tenantInfo.properties.lastModified = new DateTime().getMillis();
+            tenantInfo.properties.expiredTime = new DateTime().getMillis() + TimeUnit.DAYS.toMillis(90);
 
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);
 
