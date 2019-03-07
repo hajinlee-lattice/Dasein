@@ -9,6 +9,7 @@ export default function () {
             $scope, $state, $timeout, $interval, FeatureFlagService, QueryStore,
             DataCloudStore, SegmentStore, RatingsEngineStore, AuthorizationUtility
         ) {
+
             'ngInject';
 
             var vm = $scope.vm;
@@ -26,6 +27,19 @@ export default function () {
                     iconclass: 'white-button select-more',
                     iconrotate: false,
                     tooltip: 'Download Enrichments'
+                },
+                header: {
+                    sort_modeliteration: {
+                        label: 'Sort By',
+                        icon: 'numeric',
+                        order: '',
+                        property: 'PredictivePower',
+                        items: [
+                            { label: 'Predictive Power', icon: 'numeric', property: 'PredictivePower' },
+                            { label: 'Display Name', icon: 'alpha', property: 'DisplayName' },
+                            { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }
+                        ]
+                    },
                 },
                 sortPrefix: '+',
                 view: 'list',
@@ -213,7 +227,11 @@ export default function () {
             };
 
             vm.sortOrder = function () {
-                var sortPrefix = vm.sortPrefix.replace('+', '');
+                if (vm.section == 're.model_iteration') {
+                    var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
+                } else {
+                    var sortPrefix = vm.sortPrefix.replace('+', '');
+                }
                 if (!vm.category) {
                     return handleFilterOrder(vm.orders.category);
                 } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
@@ -229,13 +247,31 @@ export default function () {
 
             var handleFilterOrder = function (order, sortPrefix) {
                 var sortPrefix = sortPrefix || vm.sortPrefix.replace('+', '');
+
                 if (typeof order === 'object') {
                     var sortArr = order,
                         retArr = [];
 
-                    sortArr.forEach(function (item, index) {
-                        retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
-                    });
+                    if (vm.section == 're.model_iteration') {
+                        var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
+                        var importance = 'ImportanceOrdering';
+                        var predictive = 'PredictivePower';
+                        var name = sortPrefix + 'DisplayName';
+
+                        if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
+                            retArr.push(importance);
+                        }
+
+                        if (vm.header.sort_modeliteration.property == 'PredictivePower') {
+                            retArr.push(predictive);
+                        }
+
+                        retArr.push(name);
+                    } else {
+                        sortArr.forEach(function (item, index) {
+                            retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
+                        });
+                    }
 
                     return retArr;
                 }
@@ -282,6 +318,18 @@ export default function () {
                     filter.IsRatingsEngineAttribute = (vm.metadata.toggle.show.selected_ratingsengine_attributes ? true : '');
                 }
 
+                if (DataCloudStore.ratingIterationFilter == 'used') {
+                    filter.ImportanceOrdering = '!!';
+                }
+
+                if (DataCloudStore.ratingIterationFilter == 'warnings') {
+                    filter.HasWarnings = '!!';
+                }
+
+                if (DataCloudStore.ratingIterationFilter == 'disabled') {
+                    filter.ApprovedUsage = 'None';
+                }
+
                 return filter;
             };
 
@@ -323,3 +371,4 @@ export default function () {
         }
     };
 };
+    
