@@ -65,13 +65,18 @@ public abstract class AvroExportJob extends MRJobCustomizationBase {
             AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
 
-            List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, ".*.avro$");
-            String filename = files.size() > 0 ? files.get(0) : null;
-            if (filename == null) {
-                throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
+            String fileGlob;
+            if (!inputDir.endsWith("/*.avro")) {
+                List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, ".*.avro$");
+                fileGlob = files.size() > 0 ? files.get(0) : null;
+                if (fileGlob == null) {
+                    throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
+                }
+            } else {
+                fileGlob = inputDir;
             }
-            log.info("Extracting schema from glob: " + filename);
-            Schema schema = AvroUtils.getSchemaFromGlob(config, filename);
+            log.info("Extracting schema from glob: " + fileGlob);
+            Schema schema = AvroUtils.getSchemaFromGlob(config, fileGlob);
             AvroJob.setInputKeySchema(mrJob, schema);
 
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
