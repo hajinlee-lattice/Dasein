@@ -1,11 +1,9 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -18,16 +16,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -64,11 +61,15 @@ public class PlayResource {
             @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
                     + "should consider play launches across all plays", required = false) //
             @RequestParam(value = "playName", required = false) String playName, //
-            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
+            @ApiParam(
+                    value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                            + "should consider play launches across all org ids and external system type",
+                    required = false) //
             @RequestParam(value = "orgId", required = false) String orgId, //
-            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
+            @ApiParam(
+                    value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                            + "should consider play launches across all org ids and external system type",
+                    required = false) //
             @RequestParam(value = "externalSysType", required = false) String externalSysType, //
             @ApiParam(value = "List of launch states to consider", required = false) //
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
@@ -89,18 +90,23 @@ public class PlayResource {
                 sortby, descending, endTimestamp, orgId, externalSysType);
     }
 
-    @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Play entries count for launch dashboard for a tenant")
     public Long getPlayLaunchDashboardEntriesCount(HttpServletRequest request, //
             @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
                     + "should consider play launches across all plays", required = false) //
             @RequestParam(value = "playName", required = false) String playName, //
-            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
+            @ApiParam(
+                    value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                            + "should consider play launches across all org ids and external system type",
+                    required = false) //
             @RequestParam(value = "orgId", required = false) String orgId, //
-            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
+            @ApiParam(
+                    value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                            + "should consider play launches across all org ids and external system type",
+                    required = false) //
             @RequestParam(value = "externalSysType", required = false) String externalSysType, //
             @ApiParam(value = "List of launch states to consider", required = false) //
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
@@ -123,8 +129,8 @@ public class PlayResource {
 
     @RequestMapping(value = "", method = RequestMethod.POST, //
             // headers = "Accept=application/json", //
-            consumes = { KryoHttpMessageConverter.KRYO_VALUE, MediaType.APPLICATION_JSON_VALUE,
-                    "application/x-kryo;charset=UTF-8" })
+            consumes = {KryoHttpMessageConverter.KRYO_VALUE, MediaType.APPLICATION_JSON_VALUE,
+                    "application/x-kryo;charset=UTF-8"})
     @ResponseBody
     @ApiOperation(value = "Register a play")
     @PreAuthorize("hasRole('Create_PLS_Plays')")
@@ -175,7 +181,8 @@ public class PlayResource {
         return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
     }
 
-    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.POST,
+            headers = "Accept=application/json")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Update play launch for a given play")
@@ -194,7 +201,8 @@ public class PlayResource {
         return playProxy.updatePlayLaunch(tenant.getId(), playName, launchId, playLaunch);
     }
 
-    @RequestMapping(value = "/{playName}/launches/{launchId}/launch", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{playName}/launches/{launchId}/launch", method = RequestMethod.POST,
+            headers = "Accept=application/json")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Launch a given play")
@@ -211,6 +219,14 @@ public class PlayResource {
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayLaunches(tenant.getId(), playName, launchStates);
+    }
+
+    @RequestMapping(value = "/{playName}/launches/configurations", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "For the given play, get a map between each system org and their most recent play launch")
+    public PlayLaunchConfigurations getPlayLaunchConfigurations(@PathVariable("playName") String playName) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlayLaunchConfigurations(tenant.getId(), playName);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)
