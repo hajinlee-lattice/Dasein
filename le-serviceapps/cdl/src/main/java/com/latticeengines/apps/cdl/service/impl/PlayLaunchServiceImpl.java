@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
@@ -82,6 +83,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
+    public PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId) {
+        return playLaunchEntityMgr.findLatestByPlayAndSysOrg(playId, orgId);
+    }
+
+    @Override
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchEntityMgr.findByState(state);
     }
@@ -129,8 +135,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 : lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(), null, null, true);
         List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
                 launchStates, startTimestamp, endTimestamp, orgId, externalSysType);
-        Map<String, List<LookupIdMap>> uniqueLookupIdMapping = mergeLookupIdMapping(allLookupIdMapping,
-                uniqueOrgIdList);
+        Map<String, List<LookupIdMap>> uniqueLookupIdMapping =
+                mergeLookupIdMapping(allLookupIdMapping, uniqueOrgIdList);
         return uniqueLookupIdMapping;
     }
 
@@ -195,5 +201,33 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                     });
         }
         return uniqueLookupIdMapping;
+    }
+
+
+    @Override
+    public PlayLaunchConfigurations getPlayLaunchConfigurations(Long playId) {
+        PlayLaunchConfigurations configurations = new PlayLaunchConfigurations();
+        Tenant tenant = MultiTenantContext.getTenant();
+        Map<String, List<LookupIdMap>> allLookupIdMapping =
+                lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(), null, null, true);
+        configurations.setUniqueLookupIdMapping(allLookupIdMapping);
+        configurations.setLaunchConfigurations(createLaunchConfigurationMap(playId, allLookupIdMapping));
+        return configurations;
+    }
+
+    private Map<String, PlayLaunch> createLaunchConfigurationMap(Long playId,
+            Map<String, List<LookupIdMap>> allLookupIdMapping) {
+        Map<String, PlayLaunch> configurationMap = new HashMap<>();
+
+        if (MapUtils.isNotEmpty(allLookupIdMapping)) {
+            allLookupIdMapping.keySet().stream() //
+                    .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream().forEach(mapping -> {
+                        String orgId = mapping.getOrgId();
+                        configurationMap.put(orgId, findLatestByPlayAndSysOrg(playId, orgId));
+                    }));
+        }
+
+        return configurationMap;
     }
 }

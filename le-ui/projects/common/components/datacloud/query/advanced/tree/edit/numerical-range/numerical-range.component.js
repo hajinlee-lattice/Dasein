@@ -72,6 +72,10 @@ angular
                     $scope.values = JSON.parse($scope.config);
                 }
 
+                $scope.getSteps = function(position){
+                    var conf = getConfigField(position);
+                    return conf.step ? conf.step : 0.1;
+                }
 
                 /**
                  * Return the min value from the model.
@@ -92,7 +96,7 @@ angular
                         case 1: {
                             var fromVal = $scope.values.from.value;
                             if (fromVal) {
-                                return fromVal + 0.1;
+                                return fromVal + (conf.step ? conf.step : 0.1);
                             } else {
                                 return conf.min != undefined ? conf.min : '';
                             }
@@ -122,7 +126,7 @@ angular
                         case 0: {
                             var toVal = $scope.values.to.value;
                             if (toVal) {
-                                return toVal - 0.1;
+                                return toVal - (conf.step ? conf.step : 0.1);
                             } else {
                                 return conf.max != undefined ? conf.max : '';
                             }
@@ -195,7 +199,7 @@ angular
                                 $scope.changed({ type: conf.type, position: position, value: value });
                                 var toInput = $element[0].querySelector('input[name="' + getConfigField(1).name + '"]');
                                 if (toInput) {
-                                    toInput.min = Number(Number(value) + 1);
+                                    toInput.min = Number(Number(value) + (conf.step ? conf.step : 0.1));
                                 }
                                 break;
                             }
@@ -204,7 +208,7 @@ angular
                                 $scope.changed({ type: conf.type, position: position, value: value });
                                 var fromInput = $element[0].querySelector('input[name="' + getConfigField(0).name + '"]');
                                 if (fromInput) {
-                                    fromInput.max = Number(Number(value) - 1);
+                                    fromInput.max = Number(Number(value) - (conf.step ? conf.step : 0.1));
                                 }
                                 break;
                             }
@@ -221,11 +225,13 @@ angular
                     var conf = getConfigField(position);
                     var valid = true;
                     if($scope.form[conf.name]){
+                        // console.log($scope.form[conf.name]);
                         if ($scope.form[conf.name].$dirty === true || 
                             ($scope.form[conf.name].$dirty === false) && $scope.initialvalidation === true) {
                             valid = $scope.form[conf.name].$valid;
                         }
                     }
+                    // console.log(valid);
                     return valid;
                 }
 
