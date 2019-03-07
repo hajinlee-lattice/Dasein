@@ -493,13 +493,27 @@ angular
                         // { name: 'Website', displayName: '' },
                    ];
                 },
-               AnalysisFields: function(ImportWizardStore) {
-                    return [
+               AnalysisFields: function(ImportWizardStore, ImportUtils) {
+                   let createdDate = ImportUtils.getFieldFromLaticeSchema(ImportWizardStore.getEntityType(), 'CreatedDate');
+                   if(!createdDate){
+                       createdDate = {
+                            fromExistingTemplate: false,
+                            fieldType: 'DATE'
+                       }
+                   }
+                   let lastModifiedDate = ImportUtils.getFieldFromLaticeSchema(ImportWizardStore.getEntityType(), 'LastModifiedDate');
+                   if(!lastModifiedDate){
+                        lastModifiedDate = {
+                            fromExistingTemplate: false,
+                            fieldType: 'DATE'
+                        }
+                } 
+                   return [
                         { name: 'LeadStatus', displayName: 'Lead Status', type: 'TEXT'},
                         { name: 'LeadSource', displayName: 'Lead Source', type: 'TEXT'},
                         { name: 'LeadType', displayName: 'Lead Type', type: 'TEXT'},
-                        { name: 'CreatedDate', displayName: 'Created Date', type: 'DATE' },
-                        { name: 'LastModifiedDate', displayName: 'Last Modified Date', type: 'DATE'},
+                        { name: 'CreatedDate', displayName: 'Created Date', type: createdDate.fieldType, fromExistingTemplate: createdDate.fromExistingTemplate },
+                        { name: 'LastModifiedDate', displayName: 'Last Modified Date', type: lastModifiedDate.fieldType, fromExistingTemplate: lastModifiedDate.fromExistingTemplate},
                         { name: 'DoNotMail', displayName: 'Has Opted Out of Email',  type: 'TEXT' },
                         { name: 'DoNotCall', displayName: 'Has Opted Out of Phone Calls', type: 'TEXT' }
                     ];

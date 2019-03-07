@@ -51,22 +51,18 @@
 		margin-bottom: 16px;
 	}
 .analysis-container{
-	// border: 1px solid red;
 	.date-field{
 		display: inline-flex;
 		margin-top: 2px;
-		// border:1px solid green;
+		width: 100%;
+		select{
+			flex: 1;
+		}
 		.date-options{
-			// border: 1px solid red;
 			margin-left: 0.5em;
 			.date-format-container{
 				display: inline-flex;
 				width: 100%;
-				select{
-					// margin-left: 2px;
-					// margin: 2px 0;
-					// margin-right: 2px;
-				}
 			}
 			.time-format{
 				margin-top: 2px;
