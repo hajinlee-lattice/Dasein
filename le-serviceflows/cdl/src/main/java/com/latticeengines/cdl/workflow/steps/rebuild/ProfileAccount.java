@@ -106,7 +106,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
-        enrichMasterTableSchema(masterTable);
+        enrichMasterTableSchema(masterTable.getName());
         createAccountFeatures();
         registerDynamoExport();
     }
@@ -512,7 +512,9 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         }
     }
 
-    private void enrichMasterTableSchema(Table table) {
+    private void enrichMasterTableSchema(String tableName) {
+        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+        log.info("Attempt to enrich master table schema: " + table.getName());
         final List<Attribute> attrs = new ArrayList<>();
         final String evaluationDateStr = findEvaluationDate();
         final String ldrFieldValue = //
