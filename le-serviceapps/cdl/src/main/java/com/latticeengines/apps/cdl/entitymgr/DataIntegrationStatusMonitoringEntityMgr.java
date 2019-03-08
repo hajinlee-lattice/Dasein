@@ -13,4 +13,7 @@ public interface DataIntegrationStatusMonitoringEntityMgr {
     public DataIntegrationStatusMonitor updateStatus(DataIntegrationStatusMonitor status);
 
     public List<DataIntegrationStatusMonitor> getAllStatuses(Long tenantId);
+
+    public List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(Long tenantPid, String entityName,
+            List<String> entityIds);
 }
