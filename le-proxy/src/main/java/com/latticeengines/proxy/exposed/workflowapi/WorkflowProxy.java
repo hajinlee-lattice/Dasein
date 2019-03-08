@@ -331,9 +331,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
     }
 
     public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses( String clusterId, List<String> types, List<String> statuses) {
-        String baseUrl = "/querybyclusteridandtypesandstatuses";
+        String baseUrl = "/jobsbycluster";
         String url = generateGetWorkflowUrls(baseUrl, clusterId, types, statuses);
-        return JsonUtils.convertList(get("queryByClusterIDAndTypesAndStatuses", url, List.class), WorkflowJob.class);
+        return JsonUtils.convertList(get("jobsByCluster", url, List.class), WorkflowJob.class);
     }
 
     private void checkCustomerSpace(String customerSpace) {
