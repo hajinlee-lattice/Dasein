@@ -73,7 +73,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                     frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-            log.info("query is " + queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser));
+            System.out.println("entity query is " + queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //

@@ -40,10 +40,10 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("3");
+        super.setup("1");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testEventQuery() throws IOException {
         String str = FileUtils.readFileToString(new File("/Users/ygao/Downloads/test_query_1_accountQ_in_seg.json"),
                 "Utf-8");

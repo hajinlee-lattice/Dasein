@@ -79,7 +79,6 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                     frontEndQuery.getSegmentQuery());
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator,
                     SEGMENT_USER);
-            System.out.println("query is " + queryEvaluatorService.getQueryStr(attrRepo, query, SEGMENT_USER));
             return queryEvaluatorService.getCount(attrRepo, query, SEGMENT_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
