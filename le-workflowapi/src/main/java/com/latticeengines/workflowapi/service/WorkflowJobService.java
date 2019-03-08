@@ -97,4 +97,5 @@ public interface WorkflowJobService {
      */
     int getNonTerminalJobCount(String customerSpace, List<String> types);
 
+    List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes, List<String> statuses);
 }
