@@ -385,7 +385,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String templateName = strings.get(1);
         Date now = new Date();
         String fileName = String.format("%s-%d.avro", entity.name(), fileIdx);
-        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION, fileName);
+        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(), fileName);
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String extractPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
@@ -410,7 +410,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private Table getMockTemplate(BusinessEntity entity, String feedType) {
         String templateFileName = String.format("%s_%s.json", entity.name(), feedType);
-        InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION,
+        InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(),
                 templateFileName);
         ObjectMapper om = new ObjectMapper();
         try {
@@ -543,6 +543,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             log.info("Importing S3 file " + s3FileName.get(count) + " for " + entity + " is finished.");
             count++;
         }
+    }
+
+    protected String getAvroFileVersion() {
+        return S3_AVRO_VERSION;
     }
 
     private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
