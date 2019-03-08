@@ -765,15 +765,15 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE")) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalType(LogicalDataType.Date) //
                 .fundamentalType(FundamentalType.DATE.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
                 .allowedDisplayNames(
-                        Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) // )__
+                        Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalType(LogicalDataType.Date) //
                 .fundamentalType(FundamentalType.DATE.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         if (enableEntityMatch) {
