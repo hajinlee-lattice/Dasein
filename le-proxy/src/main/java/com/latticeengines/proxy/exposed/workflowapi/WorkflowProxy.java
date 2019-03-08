@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -329,6 +330,12 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return get("get log links", url, WorkflowLogLinks.class);
     }
 
+    public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses( String clusterId, List<String> types, List<String> statuses) {
+        String baseUrl = "/jobsbycluster";
+        String url = generateGetWorkflowUrls(baseUrl, clusterId, types, statuses);
+        return JsonUtils.convertList(get("jobsByCluster", url, List.class), WorkflowJob.class);
+    }
+
     private void checkCustomerSpace(String customerSpace) {
         if (StringUtils.isBlank(customerSpace)) {
             throw new RuntimeException(CUSTOMER_SPACE_ERROR);
@@ -391,6 +398,27 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
         if (hasParentId != null) {
             urlStr.append("hasParentId=").append(String.valueOf(hasParentId));
+        }
+        if (urlStr.charAt(urlStr.length() - 1) == '&') {
+            urlStr.setLength(urlStr.length() - 1);
+        }
+        return constructUrl(urlStr.toString());
+    }
+
+    @VisibleForTesting
+    String generateGetWorkflowUrls(String baseUrl, String clusterId, List<String> types, List<String> statuses) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(baseUrl);
+        urlStr.append("?");
+
+        if (StringUtils.isNotEmpty(clusterId)) {
+            urlStr.append("clusterId=").append(clusterId).append("&");
+        }
+        if (CollectionUtils.isNotEmpty(types)) {
+            urlStr.append(buildQueryString("type", types)).append("&");
+        }
+        if (CollectionUtils.isNotEmpty(statuses)) {
+            urlStr.append(buildQueryString("status", statuses)).append("&");
         }
         if (urlStr.charAt(urlStr.length() - 1) == '&') {
             urlStr.setLength(urlStr.length() - 1);

@@ -248,4 +248,12 @@ public class WorkflowResource {
     public WorkflowLogLinks getLogLinkByWorkflowPid(@PathVariable long workflowPid) {
         return workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
     }
+
+    @GetMapping(value = "/jobsbycluster", headers = "Accept=application/json")
+    @ApiOperation(value = "Get list of workflow jobs by given clusterId or list of job types or job statuses.")
+    public List<WorkflowJob> jobsByCluster(@RequestParam(required = false) String clusterId,
+                                           @RequestParam(value = "type", required = false) List<String> workflowTypes,
+                                           @RequestParam(value = "status", required = false) List<String> statuses) {
+        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+    }
 }
