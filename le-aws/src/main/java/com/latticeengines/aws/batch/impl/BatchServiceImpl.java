@@ -30,6 +30,9 @@ public class BatchServiceImpl implements BatchService {
 
     private static final Logger log = LoggerFactory.getLogger(BatchServiceImpl.class);
 
+    @Value("${hadoop.leds.version}")
+    private String ledsVersion;
+
     private AWSBatch awsBatch = null;
 
     @Autowired
@@ -50,7 +53,8 @@ public class BatchServiceImpl implements BatchService {
     private SubmitJobRequest toJobRequest(JobRequest request) {
         SubmitJobRequest submitJobRequest = new SubmitJobRequest();
         submitJobRequest.setJobName(request.getJobName());
-        submitJobRequest.setJobDefinition(request.getJobDefinition());
+        String definitionName = request.getJobDefinition() + "-" + ledsVersion.replaceAll("[.]", "-");
+        submitJobRequest.setJobDefinition(definitionName);
         submitJobRequest.setJobQueue(request.getJobQueue());
         submitJobRequest.setParameters(request.getParameters());
 
