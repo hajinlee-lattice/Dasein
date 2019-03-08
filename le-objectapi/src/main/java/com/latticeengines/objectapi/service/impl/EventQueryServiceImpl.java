@@ -23,7 +23,7 @@ import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 @Service("eventQueryService")
-public class EventQueryServiceImpl implements EventQueryService {
+public class EventQueryServiceImpl extends BaseQueryServiceImpl implements EventQueryService {
 
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
     private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
@@ -79,7 +79,6 @@ public class EventQueryServiceImpl implements EventQueryService {
                     frontEndQuery.getSegmentQuery());
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator,
                     SEGMENT_USER);
-            System.out.println("query is " + queryEvaluatorService.getQueryStr(attrRepo, query, SEGMENT_USER));
             return queryEvaluatorService.getCount(attrRepo, query, SEGMENT_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
