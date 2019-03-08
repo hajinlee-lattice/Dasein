@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -129,6 +131,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     private DnbMatchCommandService dnbMatchCommandService;
 
     private ExecutorService dnbDataSourceServiceExecutor;
+    private ExecutorService dnbFetchExecutor;
 
     private final List<DnBBatchMatchContext> unsubmittedBatches = Collections.synchronizedList(new ArrayList<>());
     private final List<DnBBatchMatchContext> submittedBatches = Collections.synchronizedList(new ArrayList<>());
@@ -143,8 +146,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Qualifier("dnbBatchScheduler")
     private ThreadPoolTaskScheduler dnbTimerStatus;
 
+    // flag to indicate whether background executors should keep running
+    private volatile boolean shouldTerminate = false;
+
     @PostConstruct
-    public void postConstruct() {
+    private void postConstruct() {
         initDnBDataSourceThreadPool();
         realtimeTimeout = realtimeTimeoutMinute * 60 * 1000;
         bulkTimeout = bulkTimeoutMinute * 60 * 1000;
@@ -175,10 +181,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
 
             log.info("Initialize DnB batch fetcher executors.");
-            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("dnb-batch-fetcher", batchFetchers);
+            dnbFetchExecutor = ThreadPoolUtils.getFixedSizeThreadPool("dnb-batch-fetcher", batchFetchers);
 
             for (int i = 0; i < batchFetchers; i++) {
-                executor.submit(new BatchFetcher());
+                dnbFetchExecutor.submit(new BatchFetcher());
             }
 
             batchFetchersInitiated.set(true);
@@ -186,8 +192,31 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     }
 
     @PreDestroy
-    public void preDestroy() {
-        dnbDataSourceServiceExecutor.shutdown();
+    private void predestroy() {
+        try {
+            if (shouldTerminate) {
+                return;
+            }
+            log.info("Shutting down DnB lookup executors");
+            shouldTerminate = true;
+            if (dnbTimerDispatcher != null) {
+                dnbTimerDispatcher.shutdown();
+            }
+            if (dnbTimerStatus != null) {
+                dnbTimerStatus.shutdown();
+            }
+            if (dnbDataSourceServiceExecutor != null) {
+                dnbDataSourceServiceExecutor.shutdownNow();
+                dnbDataSourceServiceExecutor.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            if (dnbFetchExecutor != null) {
+                dnbFetchExecutor.shutdownNow();
+                dnbFetchExecutor.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            log.info("Completed shutting down of DnB lookup executors");
+        } catch (Exception e) {
+            log.error("Fail to finish all pre-destroy actions", e);
+        }
     }
 
     @Override
@@ -331,6 +360,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             if (unsubmittedBatches.isEmpty()) {
                 return;
             }
+            // Lazily initialize DnB fetch executor. If no requests to submit,
+            // no need to start fetch executor
+            if (!batchFetchersInitiated.get()) {
+                initExecutors();
+            }
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             List<DnBBatchMatchContext> batchesToSubmit = new ArrayList<>();
@@ -398,7 +432,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private void dnbBatchCheckStatus() {
         if (!batchFetchersInitiated.get()) {
-            initExecutors();
+            return;
         }
         try {
             // Batch requests to retry
@@ -485,15 +519,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     private class BatchFetcher implements Runnable {
         @Override
         public void run() {
-            while (true) {
+            while (!shouldTerminate) {
                 DnBBatchMatchContext finishedBatch = null;
                 synchronized (finishedBatches) {
-                    while (finishedBatches.isEmpty()) {
+                    while (!shouldTerminate && finishedBatches.isEmpty()) {
                         try {
                             finishedBatches.wait();
                         } catch (InterruptedException e) {
-                            log.error(String.format("Encounter InterruptedException in DnB batch fetcher: %s",
-                                    e.getMessage()));
+                            if (!shouldTerminate) {
+                                log.warn("DnB lookup executor (in background) is interrupted");
+                            }
                         }
                     }
                     finishedBatch = finishedBatches.poll();

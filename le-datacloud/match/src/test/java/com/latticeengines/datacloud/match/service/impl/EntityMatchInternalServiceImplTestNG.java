@@ -136,7 +136,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
     @AfterClass(groups = "functional")
     private void tearDownShared() throws Exception {
-        entityMatchInternalService.shutdownAndAwaitTermination();
+        entityMatchInternalService.predestroy();
         // test entries are sync asynchronously, cleanup here just in case
         cleanup(TEST_TENANT, TEST_ENTRIES.toArray(new EntityLookupEntry[0]));
     }

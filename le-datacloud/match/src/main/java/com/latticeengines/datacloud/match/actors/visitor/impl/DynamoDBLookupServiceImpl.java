@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +9,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +51,11 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
 
     private final Queue<String> pendingReqIds = new ConcurrentLinkedQueue<>();
 
+    private ExecutorService dynamoFetcher;
+
+    // flag to indicate whether background fetcher should keep running
+    private volatile boolean shouldTerminate = false;
+
     private void initExecutors() {
         synchronized (fetchersInitiated) {
             if (fetchersInitiated.get()) {
@@ -55,13 +65,31 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
 
             log.info("Initialize dynamo fetcher executors.");
             Integer num = isBatchMode() ? batchFetcherNum : fetcherNum;
-            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-fetcher", num);
+            dynamoFetcher = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-fetcher", num);
 
             for (int i = 0; i < num; i++) {
-                executor.submit(new Fetcher());
+                dynamoFetcher.submit(new Fetcher());
             }
 
             fetchersInitiated.set(true);
+        }
+    }
+
+    @PreDestroy
+    private void preDestroy() {
+        try {
+            if (shouldTerminate) {
+                return;
+            }
+            log.info("Shutting down Dynamo fetchers");
+            shouldTerminate = true;
+            if (dynamoFetcher != null) {
+                dynamoFetcher.shutdownNow();
+                dynamoFetcher.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            log.info("Completed shutting down of Dynamo fetchers");
+        } catch (Exception e) {
+            log.error("Fail to finish all pre-destroy actions", e);
         }
     }
 
@@ -151,17 +179,18 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
     private class Fetcher implements Runnable {
         @Override
         public void run() {
-            while(true) {
+            while (!shouldTerminate) {
                 // DataCloudVersion -> ReqIds
                 Map<String, List<String>> reqIdsWithVersion = new HashMap<>();
                 Map<String, AccountLookupRequest> lookupReqWithVersion = new HashMap<String, AccountLookupRequest>();
                 synchronized (pendingReqIds) {
-                    while (pendingReqIds.isEmpty()) {
+                    while (!shouldTerminate && pendingReqIds.isEmpty()) {
                         try {
                             pendingReqIds.wait();
                         } catch (InterruptedException e) {
-                            log.error(String.format("Encounter InterruptedException in Dynamo fetcher: %s",
-                                    e.getMessage()));
+                            if (!shouldTerminate) {
+                                log.warn("Dynamo fetcher (in background) is interrupted");
+                            }
                         }
                     }
                     for (int i = 0; i < Math.min(pendingReqIds.size(), chunkSize); i++) {
@@ -244,7 +273,6 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
                             }
                         }
                     }
-
                 }
             }
         }

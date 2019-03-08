@@ -78,4 +78,6 @@ public final class MatchConstants {
     static final String MODEL = Predefined.Model.getName();
     static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();
     static final String RTS = Predefined.RTS.getName();
+
+    public static final long TERMINATE_EXECUTOR_TIMEOUT_MS = 30_000;
 }
