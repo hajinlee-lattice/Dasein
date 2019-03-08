@@ -329,6 +329,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return CollectionUtils.size(workflowJobs);
     }
 
+    @Override
+    public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId,
+         List<String> workflowTypes, List<String> statuses) {
+        return workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+    }
+
     @WithCustomerSpace
     public JobExecution getJobExecutionByWorkflowId(String customerSpace, Long workflowId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);

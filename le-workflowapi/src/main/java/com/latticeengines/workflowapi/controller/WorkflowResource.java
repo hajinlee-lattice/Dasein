@@ -1,9 +1,12 @@
 package com.latticeengines.workflowapi.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,10 +37,6 @@ import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
@@ -247,5 +246,13 @@ public class WorkflowResource {
     @ApiOperation("Get log url for a workflow by pid.")
     public WorkflowLogLinks getLogLinkByWorkflowPid(@PathVariable long workflowPid) {
         return workflowContainerService.getLogUrlByWorkflowPid(workflowPid);
+    }
+
+    @GetMapping(value = "/querybyclusteridandtypesandstatuses", headers = "Accept=application/json")
+    @ApiOperation(value = "Get list of workflow jobs by given clusterId or list of job types or job statuses.")
+    public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(@RequestParam(required = false) String clusterId,
+                                                                 @RequestParam(value = "type", required = false) List<String> workflowTypes,
+                                                                 @RequestParam(value = "status", required = false) List<String> statuses) {
+        return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
     }
 }
