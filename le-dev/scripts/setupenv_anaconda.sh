@@ -176,6 +176,7 @@ ${ANACONDA_HOME}/bin/conda install -y \
 	jupyter_contrib_nbextensions \
 	jupyter_nbextensions_configurator \
 	ipython \
+	ipykernel=4.9.0 \
 	prompt_toolkit \
 	pyyaml \
 	jinja2
