@@ -100,7 +100,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("fk_play_id", playId);
+        query.setLong("play_id", playId);
         query.setString("orgId", orgId.trim());
         List list = query.list();
         if (list.size() == 0) {
