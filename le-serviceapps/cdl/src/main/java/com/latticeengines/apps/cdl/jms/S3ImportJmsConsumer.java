@@ -85,7 +85,7 @@ public class S3ImportJmsConsumer {
     @Value("${cdl.sqs.buffer.message.count:30000}")
     private int bufferedMessageIdCount;
 
-    @Value("${cdl.sqs.key.idle.frame:60}")
+    @Value("${cdl.sqs.key.idle.frame:300}")
     private int idleFrame;  //Same key in this time frame won't trigger import.
 
     @JmsListener(destination = "${cdl.s3.file.import.sqs.name}")
@@ -191,7 +191,7 @@ public class S3ImportJmsConsumer {
             bufferedMessageIdCount = 30000;
         }
         if (idleFrame <= 0) {
-            idleFrame = 60;
+            idleFrame = 300;
         }
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
     }
