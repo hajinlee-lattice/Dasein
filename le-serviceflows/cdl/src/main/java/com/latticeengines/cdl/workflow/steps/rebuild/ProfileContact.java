@@ -17,12 +17,15 @@ import com.google.common.collect.ImmutableList;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 @Component(ProfileContact.BEAN_NAME)
@@ -96,6 +99,17 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
                     attr.setLastDataRefresh("Last Data Refresh: " + evaluationDateStr);
                 }
                 masterCount.incrementAndGet();
+            }
+            // update metadata for AccountId attribute since it is only created after lead
+            // to account match and does not have the correct metadata
+            if (configuration.isEntityMatchEnabled() && InterfaceName.AccountId.name().equals(attr.getName())) {
+                attr.setInterfaceName(InterfaceName.AccountId);
+                attr.setTags(Tag.INTERNAL);
+                attr.setLogicalDataType(LogicalDataType.Id);
+                attr.setNullable(false);
+                attr.setApprovedUsage(ApprovedUsage.NONE);
+                attr.setSourceLogicalDataType(attr.getPhysicalDataType());
+                attr.setFundamentalType(FundamentalType.ALPHA.getName());
             }
             attr.setCategory(Category.CONTACT_ATTRIBUTES);
             attr.setSubcategory(null);

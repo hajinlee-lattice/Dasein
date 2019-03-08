@@ -9,10 +9,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAccountDeploymentTestNG {
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountWithAdvancedMatchDeploymentTestNG.class);
 
+    private static final String ADVANCED_MATCH_AVRO_VERSION = "5";
 
     @BeforeClass(groups = { "end2end" })
     @Override
@@ -30,5 +33,31 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     public void runTest() throws Exception {
         super.runTest();
+    }
+
+    @Override
+    protected void importData() throws Exception {
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
+        mockCSVImport(BusinessEntity.Account, 1, "Account");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Contact, 4, "Contact_EntityMatch");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Account, 2, "Account");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Contact, 5, "Contact_EntityMatch");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
+        Thread.sleep(2000);
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
+    }
+
+    @Override
+    protected String getAvroFileVersion() {
+        // advanced matching should use a different version
+        return ADVANCED_MATCH_AVRO_VERSION;
     }
 }

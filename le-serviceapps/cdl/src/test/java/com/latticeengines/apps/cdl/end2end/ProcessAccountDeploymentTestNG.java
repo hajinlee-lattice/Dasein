@@ -44,7 +44,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     // Add sleep between each import to avoid 2 import jobs generate table
     // extract with same timestamp in second, then extract could overwrite
     // between each other
-    private void importData() throws Exception {
+    protected void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 1, "Account");
         Thread.sleep(2000);

@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,14 +17,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -171,6 +175,64 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 step.setBaseTables(baseTables);
             }
         }
+    }
+
+    MatchInput getBaseMatchInput() {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
+        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
+        matchInput.setExcludePublicDomain(false);
+        matchInput.setPublicDomainAsNormalDomain(false);
+        matchInput.setDataCloudVersion(getDataCloudVersion());
+        matchInput.setUseDnBCache(true);
+        matchInput.setUseRemoteDnB(true);
+        matchInput.setLogDnBBulkResult(false);
+        matchInput.setMatchDebugEnabled(false);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+
+        return matchInput;
+    }
+
+    /**
+     * Add all LDC match keys to the key map only if they are provided in the import
+     * file.
+     *
+     * @param cols
+     *            columns in the import file
+     * @param keyMap
+     *            key map that will be used for bulk match
+     */
+    void addLDCMatchKeysIfExist(Set<String> cols, Map<MatchKey, List<String>> keyMap) {
+        addMatchKeyIfExists(cols, keyMap, MatchKey.Domain, InterfaceName.Website.name());
+        addMatchKeyIfExists(cols, keyMap, MatchKey.DUNS, InterfaceName.DUNS.name());
+
+        addMatchKeyIfExists(cols, keyMap, MatchKey.Name, InterfaceName.CompanyName.name());
+        addMatchKeyIfExists(cols, keyMap, MatchKey.City, InterfaceName.City.name());
+        addMatchKeyIfExists(cols, keyMap, MatchKey.State, InterfaceName.State.name());
+        addMatchKeyIfExists(cols, keyMap, MatchKey.Country, InterfaceName.Country.name());
+
+        addMatchKeyIfExists(cols, keyMap, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
+        addMatchKeyIfExists(cols, keyMap, MatchKey.Zipcode, InterfaceName.PostalCode.name());
+    }
+
+    /*
+     * if columnName exists in cols (columns of import file), add columnName to the
+     * list in the keyMap (for the specified match key). a new list will be created
+     * if not exist.
+     */
+    void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key, String columnName) {
+        if (cols.contains(columnName)) {
+            keyMap.putIfAbsent(key, new ArrayList<>());
+            keyMap.get(key).add(columnName);
+        }
+    }
+
+    Set<String> getInputTableColumnNames(int tableIdx) {
+        String tableName = inputTableNames.get(tableIdx);
+        return metadataProxy.getTableColumns(customerSpace.toString(), tableName) //
+                .stream() //
+                .map(ColumnMetadata::getAttrName) //
+                .collect(Collectors.toSet());
     }
 
     protected void enrichTableSchema(Table table) {
