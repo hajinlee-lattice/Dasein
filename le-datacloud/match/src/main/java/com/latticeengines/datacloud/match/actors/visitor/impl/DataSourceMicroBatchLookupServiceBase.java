@@ -1,11 +1,16 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
+
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,7 +36,9 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
     private volatile String className = getClass().getSimpleName();
     private volatile boolean initialized;
     private final Queue<String> pendingRequestIds = new ConcurrentLinkedQueue<>();
-    private ExecutorService executorService;
+    private ExecutorService dataSourceExecutor;
+    // flag to indicate whether background executors should keep running
+    private volatile boolean shouldTerminate = false;
 
     @Override
     protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request, String returnAddress) {
@@ -43,6 +50,24 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
         synchronized (pendingRequestIds) {
             // just notify all is safer
             pendingRequestIds.notifyAll();
+        }
+    }
+
+    @PreDestroy
+    protected void predestroy() {
+        try {
+            if (shouldTerminate) {
+                return;
+            }
+            log.info("Shutting down data source lookup executors");
+            shouldTerminate = true;
+            if (dataSourceExecutor != null) {
+                dataSourceExecutor.shutdownNow();
+                dataSourceExecutor.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            log.info("Completed shutting down of data source lookup executors");
+        } catch (Exception e) {
+            log.error("Fail to finish all pre-destroy actions", e);
         }
     }
 
@@ -107,15 +132,16 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
         @Override
         public void run() {
             int chunkSize = getChunkSize();
-            String name = getClass().getSimpleName();
-            while (true) {
+            while (!shouldTerminate) {
                 List<String> requestIds = new ArrayList<>();
                 synchronized (pendingRequestIds) {
-                    while (pendingRequestIds.isEmpty()) {
+                    while (!shouldTerminate && pendingRequestIds.isEmpty()) {
                         try {
                             pendingRequestIds.wait();
                         } catch (InterruptedException e) {
-                            log.error("Encounter InterruptedException in {} fetcher, err={}", name, e.getMessage());
+                            if (!shouldTerminate) {
+                                log.warn("Data source executor (in background) is interrupted");
+                            }
                         }
                     }
 
@@ -124,6 +150,10 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
                     for (int i = 0; i < size; i++) {
                         requestIds.add(pendingRequestIds.poll());
                     }
+                }
+
+                if (CollectionUtils.isEmpty(requestIds)) {
+                    continue;
                 }
 
                 try {
@@ -154,8 +184,8 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
             String poolName = getThreadPoolName();
             int nThreads = getThreadCount();
             log.info("Initializing fetcher for {}, nThreads = {}, ", poolName, nThreads);
-            executorService = ThreadPoolUtils.getFixedSizeThreadPool(poolName, nThreads);
-            IntStream.range(0, nThreads).forEach(idx -> executorService.execute(new Fetcher()));
+            dataSourceExecutor = ThreadPoolUtils.getFixedSizeThreadPool(poolName, nThreads);
+            IntStream.range(0, nThreads).forEach(idx -> dataSourceExecutor.execute(new Fetcher()));
 
             initialized = true;
         }

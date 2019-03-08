@@ -1,8 +1,11 @@
 package com.latticeengines.actors.template;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
@@ -47,6 +50,28 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
     // Travelers waiting to be processed
     private final Queue<Traveler> travelers = new ConcurrentLinkedQueue<>();
 
+    private ExecutorService executor;
+    // flag to indicate whether background executors should keep running
+    private volatile boolean shouldTerminate = false;
+
+    @Override
+    public void postStop() {
+        try {
+            if (shouldTerminate) {
+                return;
+            }
+            log.info("Shutting down executors");
+            shouldTerminate = true;
+            if (executor != null) {
+                executor.shutdownNow();
+                executor.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            log.info("Completed shutting down of executors");
+        } catch (Exception e) {
+            log.error("Fail to finish all post-stop actions", e);
+        }
+    }
+
     @Override
     protected boolean needAssistantActor() {
         return false;
@@ -78,7 +103,7 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
                 return;
             }
 
-            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool(getActorName(self()) + "-Executor",
+            executor = ThreadPoolUtils.getFixedSizeThreadPool(getActorName(self()) + "-Executor",
                     getExecutorNum());
             IntStream.range(0, getExecutorNum()).forEach(i -> {
                 executor.submit(new Executor());
@@ -99,15 +124,16 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
 
         @Override
         public void run() {
-            while (true) {
+            while (!shouldTerminate) {
                 Traveler traveler = null;
                 synchronized (travelers) {
-                    while (travelers.isEmpty()) {
+                    while (!shouldTerminate && travelers.isEmpty()) {
                         try {
                             travelers.wait();
                         } catch (InterruptedException e) {
-                            log.error(String.format("Encounter InterruptedException in executor at %s: %s",
-                                    getActorName(self()), e.getMessage()));
+                            if (!shouldTerminate) {
+                                log.warn("Executor (in background) is interrupted");
+                            }
                         }
                     }
                     traveler = travelers.poll();
