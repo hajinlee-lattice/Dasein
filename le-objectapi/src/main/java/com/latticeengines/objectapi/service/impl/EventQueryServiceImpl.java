@@ -26,7 +26,6 @@ import com.latticeengines.query.factory.RedshiftQueryProvider;
 public class EventQueryServiceImpl extends BaseQueryServiceImpl implements EventQueryService {
 
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
-    private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
 
     private final QueryEvaluatorService queryEvaluatorService;
 
@@ -68,6 +67,11 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event, version);
     }
 
+    /*
+     * This query seems to be super complex and in some cases each query is as big as 16 pages with different product selections and time periods by user
+     * As this query is adding so much load on Leader, it is blocking all other SEGMENT_USER queries.
+     * So, changed it back to BATCH_USER
+     */
     private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
             DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
@@ -78,8 +82,8 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                     frontEndQuery.getSegmentQuery());
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator,
-                    SEGMENT_USER);
-            return queryEvaluatorService.getCount(attrRepo, query, SEGMENT_USER);
+                    BATCH_USER);
+            return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
