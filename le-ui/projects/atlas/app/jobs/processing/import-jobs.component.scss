@@ -196,11 +196,6 @@ section.import-jobs {
     transform: translate(-10%, -160%);
   }
 
-//   .tooltip-container:hover{
-//       position: absolute;
-//       width: 100%;
-      
-//   }
   .tooltip-cell{
       display: inline-flex;
       justify-content: space-between;
@@ -210,17 +205,21 @@ section.import-jobs {
       .text-container{
           flex: 1;
       }
-    //   flex-wrap: wrap;
       .text-icon-tooltip-container{
         width: 50%;
         height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        // border: 1px solid;
         .tooltip-container-text:hover{
             position: absolute;
-            // margin-bottom: 10px;
+            .tooltip_ {
+                .cover{
+                    width: 20em;
+                    height: 4em;
+                    white-space: initial;
+                }
+            }
         }
       }
       
