@@ -145,19 +145,27 @@ class ViewAllComponent extends Component {
                       onlyTemplate: true,
                       colSpan: 2,
                       template: cell => {
-                          return (
-                              <LeButton
-                                name="view-model"
-                                callback={() => {
-                                    console.log(this.props.$stateParams);
-                                    this.props.$state.go('home.model.datacloud', { rating_id: this.props.$stateParams.rating_id, modelId: cell.props.rowData.modelSummaryId, aiModel: cell.props.rowData.id})
-                                }}
-                                config={{
-                                    label: "View Model",
-                                    classNames: "link-button"
-                                }}
-                              />
-                          )
+
+                          let completed = cell.props.rowData.modelingJobStatus == 'Completed';
+
+                          if (completed) {
+                            return (
+                                <LeButton
+                                  name="view-model"
+                                  callback={() => {
+                                      console.log(this.props.$stateParams);
+                                      this.props.$state.go('home.model.datacloud', { rating_id: this.props.$stateParams.rating_id, modelId: cell.props.rowData.modelSummaryId, aiModel: cell.props.rowData.id})
+                                  }}
+                                  config={{
+                                      label: "View Model",
+                                      classNames: "link-button"
+                                  }}
+                                />
+                            )  
+                          } else {
+                            return '';
+                          }
+                          
                       }
                   }
                 ]
