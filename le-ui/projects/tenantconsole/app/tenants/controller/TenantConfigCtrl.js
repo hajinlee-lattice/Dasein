@@ -654,6 +654,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.saveTenantInfo = function() {
         $scope.isEditingTenantInfo = false;
         $scope.isSavingTenantInfo = true;
+        if ($scope.tenantInfo.properties.expiredTime) {
+        	$scope.tenantInfo.properties.expiredTime = Date.parse($scope.tenantInfo.properties.expiredTime);
+        }
         TenantService.UpdateTenantInfo($scope.contractId, $scope.tenantId, $scope.tenantInfo).then(function(result) {
             $scope.isSavingTenantInfo = false;
             if (result === false) {

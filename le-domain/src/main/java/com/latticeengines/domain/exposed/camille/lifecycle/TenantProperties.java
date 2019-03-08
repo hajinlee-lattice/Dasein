@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.camille.lifecycle;
 public class TenantProperties extends BaseProperties {
     public Long created;
     public Long lastModified;
+    public Long expiredTime;
     public String status;
     public String tenantType;
     public String contract;
