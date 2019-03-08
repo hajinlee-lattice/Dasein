@@ -68,7 +68,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     }
 
     /*
-     * This query seems to be super complex and in some cases each query is as big as 16 pages with different product selections and time periods by user
+     * This query seems to be super complex and in some cases each query is as big as 16 pages with different product and time periods selections by user
      * As this query is adding so much load on Leader, it is blocking all other SEGMENT_USER queries.
      * So, changed it back to BATCH_USER
      */
