@@ -11,12 +11,16 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.util.Tool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.yarn.exposed.client.mapreduce.MRJobCustomization;
 
 public abstract class MRJobCustomizationBase extends Configured implements Tool, MRJobCustomization {
+
+    private static final Logger log = LoggerFactory.getLogger(MRJobCustomizationBase.class);
 
     public MRJobCustomizationBase(Configuration config) {
         setConf(config);
@@ -44,9 +48,13 @@ public abstract class MRJobCustomizationBase extends Configured implements Tool,
             try {
 
                 if (this.getConf().get(FileInputFormat.INPUT_DIR).contains(path.toString())) {
+                    // FIXME: temp log for M27
+                    log.info("Accept path " + path.toString());
                     return true;
                 }
                 if (!fs.isDirectory(path) && path.toString().endsWith(".avro")) {
+                    // FIXME: temp log for M27
+                    log.info("Accept path " + path.toString());
                     return true;
                 }
             } catch (IOException e) {
