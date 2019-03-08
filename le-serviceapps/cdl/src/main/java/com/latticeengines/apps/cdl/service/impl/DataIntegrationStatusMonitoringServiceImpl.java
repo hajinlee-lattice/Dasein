@@ -94,6 +94,14 @@ public class DataIntegrationStatusMonitoringServiceImpl
         return dataIntegrationStatusMonitoringEntityMgr.getAllStatuses(tenant.getPid());
     }
 
+    @Override
+    public List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(String tenantId, String entityName,
+            List<String> entityIds) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        return dataIntegrationStatusMonitoringEntityMgr.getAllStatusesByEntityNameAndIds(tenant.getPid(), entityName,
+                entityIds);
+    }
+
     private WorkflowStatusHandler getWorkflowStatusHandler(String type) {
         DataIntegrationEventType eventType = DataIntegrationEventType.valueOf(type);
         WorkflowStatusHandler workflowStatusHandler = null;

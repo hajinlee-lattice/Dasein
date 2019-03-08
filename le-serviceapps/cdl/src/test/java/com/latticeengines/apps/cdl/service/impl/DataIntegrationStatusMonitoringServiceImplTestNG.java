@@ -1,5 +1,10 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -31,8 +36,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
     @Inject
     DataIntegrationStatusMessageEntityMgr dataIntegrationStatusMessageEntityMgr;
 
-    private String ENTITY_NAME = "PLAY";
-    private String ENTITY_ID = "launch" + UUID.randomUUID().toString();
+    private String ENTITY_NAME = "PlayLaunch";
+    private String ENTITY_ID = "launch_" + UUID.randomUUID().toString();
     private String SOURCE_FILE = "s3://";
     private String EXTERNAL_SYSTEM_ID = "crm_" + UUID.randomUUID().toString();
 
@@ -48,8 +53,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
                 DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage);
 
-        DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitoringService
-                .getStatus(statusMessage.getWorkflowRequestId());
+        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
         Assert.assertEquals(DataIntegrationEventType.WORKFLOW_SUBMITTED.toString(), statusMonitor.getStatus());
@@ -61,7 +65,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         DataIntegrationStatusMonitorMessage statusMessage = new DataIntegrationStatusMonitorMessage();
         statusMessage.setTenantId(mainTestTenant.getName());
         statusMessage.setWorkflowRequestId(workflowRequestId);
-        statusMessage.setEntityId(ENTITY_NAME);
+        statusMessage.setEntityId(ENTITY_ID);
         statusMessage.setEntityName(ENTITY_NAME);
         statusMessage.setExternalSystemId(EXTERNAL_SYSTEM_ID);
         statusMessage.setOperation("export");
@@ -72,7 +76,14 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         statusMessage.setSourceFile(SOURCE_FILE);
         return statusMessage;
     }
-    
+
+    private DataIntegrationStatusMonitor findDataIntegrationMonitorByWorkflowReqId(String workflowRequestId) {
+        addReaderDelay();
+        DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitoringService
+                .getStatus(workflowRequestId);
+        return statusMonitor;
+    }
+
     @Test(groups = "functional")
     public void testCreateWithIncorrectOrder() {
         String workflowRequestId = UUID.randomUUID().toString();
@@ -101,8 +112,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
                 DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(createStatusMonitorMessage);
-        DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitoringService
-                .getStatus(workflowRequestId);
+        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
 
@@ -114,9 +124,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setMessage("test");
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
-
-        statusMonitor = dataIntegrationStatusMonitoringService
-                .getStatus(updateStatusMonitorMessage.getWorkflowRequestId());
+        statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
         Assert.assertNotNull(statusMonitor.getTenant());
@@ -131,6 +139,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertEquals(messages.size(), 2);
     }
 
+
     @Test(groups = "functional")
     public void testUpdateWithIncorrectOrder() {
         String workflowRequestId = UUID.randomUUID().toString();
@@ -138,8 +147,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
                 DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(createStatusMonitorMessage);
-        DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitoringService
-                .getStatus(createStatusMonitorMessage.getWorkflowRequestId());
+        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
 
@@ -151,9 +159,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setMessage("test");
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
-
-        statusMonitor = dataIntegrationStatusMonitoringService
-                .getStatus(updateStatusMonitorMessage.getWorkflowRequestId());
+        statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
@@ -168,8 +174,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setMessage("test");
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
-
-        statusMonitor = dataIntegrationStatusMonitoringService.getStatus(workflowRequestId);
+        statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
@@ -185,4 +190,22 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
     }
 
+    private void addReaderDelay() {
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            //Ignore
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testGetAllStatusesByEntityNameAndIds() {
+        List<DataIntegrationStatusMonitor> dataIntegrationStatusMonitors = dataIntegrationStatusMonitoringService
+                .getAllStatusesByEntityNameAndIds(mainTestTenant.getId(), ENTITY_NAME, Arrays.asList(ENTITY_ID));
+        assertNotNull(dataIntegrationStatusMonitors);
+        assertTrue(dataIntegrationStatusMonitors.size() == 1);
+        DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitors.get(0);
+        assertNotNull(statusMonitor);
+        assertEquals(statusMonitor.getEntityId(), ENTITY_ID);
+    }
 }

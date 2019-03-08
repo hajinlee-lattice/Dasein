@@ -11,4 +11,6 @@ public interface DataIntegrationStatusMonitoringService {
     public DataIntegrationStatusMonitor getStatus(String eventId);
 
     public List<DataIntegrationStatusMonitor> getAllStatuses(String tenantId);
+
+    public List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(String tenantId, String entityName, List<String> entityIds);
 }
