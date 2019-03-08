@@ -420,13 +420,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
             LOG.warn(e.getMessage());
-            throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.", fieldCsvValue,
-                    avroType, attr.getDisplayName()));
+            throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.\n" +
+                    "Error message was: %s", fieldCsvValue, avroType, attr.getDisplayName(), e.getMessage()), e);
         } catch (Exception e) {
             fieldMalFormed = true;
             LOG.warn(e.getMessage());
-            throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.", fieldCsvValue,
-                    attr.getPhysicalDataType(), attr.getDisplayName()));
+            throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.\n" +
+                    "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
+                    e.getMessage()), e);
         }
     }
 
