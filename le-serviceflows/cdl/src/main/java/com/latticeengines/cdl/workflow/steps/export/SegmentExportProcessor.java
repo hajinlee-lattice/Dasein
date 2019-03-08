@@ -145,7 +145,7 @@ public abstract class SegmentExportProcessor {
 
             Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Account
-                            && InterfaceName.AccountId.equals(tuple.getMiddle())) //
+                            && InterfaceName.AccountId.name().equals(tuple.getMiddle())) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Account.name() + SEPARATOR + tuple.getMiddle());
@@ -179,12 +179,11 @@ public abstract class SegmentExportProcessor {
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT
                 || exportType == MetadataSegmentExportType.ORPHAN_CONTACT) {
             configuredContactAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Contact));
-
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
             exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact
-                            && (InterfaceName.ContactId.equals(tuple.getMiddle())
-                                    || InterfaceName.AccountId.equals(tuple.getMiddle()))) //
+                            && (InterfaceName.ContactId.name().equals(tuple.getMiddle())
+                                    || InterfaceName.AccountId.name().equals(tuple.getMiddle()))) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());
@@ -194,7 +193,6 @@ public abstract class SegmentExportProcessor {
                         return attribute;
                     }) //
                     .forEach(att -> defaultContactAttributesMap.put(att.getName(), att));
-
             configuredContactAttributes.forEach(attr -> defaultContactAttributesMap.remove(attr.getName()));
 
             if (MapUtils.isNotEmpty(defaultContactAttributesMap)) {
