@@ -54,9 +54,10 @@ public class ModelingQueryTranslator extends QueryTranslator {
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
 
         if (frontEndQuery.getSegmentQuery() != null) {
-            Restriction segmentRestriction = translateSegmentQuery(frontEndQuery.getSegmentQuery(), timeTranslator,
-                    sqlUser);
-            restriction = Restriction.builder().and(segmentRestriction, restriction).build();
+            frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
+            Restriction segmentRestriction = translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(),
+                    timeTranslator, sqlUser);
+            restriction = joinRestrictions(segmentRestriction, restriction);
         }
 
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
@@ -101,15 +102,6 @@ public class ModelingQueryTranslator extends QueryTranslator {
         }
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
         return frontEndRestriction == null || frontEndRestriction.getRestriction() == null;
-    }
-
-    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery, TimeFilterTranslator timeTranslator, String sqlUser) {
-        FrontEndRestriction segmentAccountRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
-                segmentQuery);
-        Restriction segmentRestriction = translateFrontEndRestriction(segmentAccountRestriction, timeTranslator,
-                                                                      sqlUser, true);
-        segmentRestriction = translateInnerRestriction(segmentQuery, BusinessEntity.Account, segmentRestriction);
-        return segmentRestriction;
     }
 
     private void setTargetProducts(Restriction rootRestriction, List<String> targetProducts) {

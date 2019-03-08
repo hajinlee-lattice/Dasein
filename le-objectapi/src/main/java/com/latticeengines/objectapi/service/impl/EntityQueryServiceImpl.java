@@ -13,8 +13,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,10 +39,7 @@ import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuer
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
-import com.latticeengines.objectapi.util.AccountQueryDecorator;
-import com.latticeengines.objectapi.util.ContactQueryDecorator;
 import com.latticeengines.objectapi.util.EntityQueryTranslator;
-import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -53,9 +48,7 @@ import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import reactor.core.publisher.Flux;
 
 @Service("entityQueryService")
-public class EntityQueryServiceImpl implements EntityQueryService {
-
-    private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImpl.class);
+public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements EntityQueryService {
 
     private final QueryEvaluatorService queryEvaluatorService;
 
@@ -80,7 +73,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-            log.info("query is " + queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser));
+            System.out.println("entity query is " + queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
@@ -297,20 +290,6 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     });
         }
         return result;
-    }
-
-    private QueryDecorator getDecorator(BusinessEntity entity, boolean isDataQuery) {
-        switch (entity) {
-        case Account:
-            return isDataQuery ? AccountQueryDecorator.DATA_QUERY : AccountQueryDecorator.COUNT_QUERY;
-        case Contact:
-            return isDataQuery ? ContactQueryDecorator.DATA_QUERY : ContactQueryDecorator.COUNT_QUERY;
-        case Product:
-            return isDataQuery ? ProductQueryDecorator.DATA_QUERY : ProductQueryDecorator.COUNT_QUERY;
-        default:
-            log.warn("Cannot find a decorator for entity " + entity);
-            return null;
-        }
     }
 
 }
