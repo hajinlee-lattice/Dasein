@@ -194,6 +194,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @PreDestroy
     private void predestroy() {
         try {
+            if (shouldTerminate) {
+                return;
+            }
             log.info("Shutting down DnB lookup executors");
             shouldTerminate = true;
             if (dnbTimerDispatcher != null) {

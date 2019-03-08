@@ -297,6 +297,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @VisibleForTesting
     synchronized void predestroy() {
         try {
+            if (shouldTerminate) {
+                return;
+            }
             log.info("Shutting down staging lookup entry publishers");
             shouldTerminate = true;
             if (lookupExecutorService != null) {

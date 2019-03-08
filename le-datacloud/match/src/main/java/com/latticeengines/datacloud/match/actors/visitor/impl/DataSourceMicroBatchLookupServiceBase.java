@@ -56,6 +56,9 @@ public abstract class DataSourceMicroBatchLookupServiceBase extends DataSourceLo
     @PreDestroy
     protected void predestroy() {
         try {
+            if (shouldTerminate) {
+                return;
+            }
             log.info("Shutting down data source lookup executors");
             shouldTerminate = true;
             if (dataSourceExecutor != null) {

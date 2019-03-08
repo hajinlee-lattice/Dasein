@@ -77,8 +77,11 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
 
     @PreDestroy
     private void preDestroy() {
-        log.info("Shutting down Dynamo fetchers");
         try {
+            if (shouldTerminate) {
+                return;
+            }
+            log.info("Shutting down Dynamo fetchers");
             shouldTerminate = true;
             if (dynamoFetcher != null) {
                 dynamoFetcher.shutdownNow();

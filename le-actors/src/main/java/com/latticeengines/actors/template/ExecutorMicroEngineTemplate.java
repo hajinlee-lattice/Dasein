@@ -57,6 +57,9 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
     @Override
     public void postStop() {
         try {
+            if (shouldTerminate) {
+                return;
+            }
             log.info("Shutting down executors");
             shouldTerminate = true;
             if (executor != null) {
