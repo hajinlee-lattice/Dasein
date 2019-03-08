@@ -565,6 +565,9 @@ public class TenantServiceImpl implements TenantService {
             if (StringUtils.isNotBlank(tenantInfo.properties.tenantType)) {
                 tenant.setTenantType(TenantType.valueOf(tenantInfo.properties.tenantType));
             }
+            if (tenantInfo.properties.expiredTime != null) {
+                tenant.setExpiredTime(tenantInfo.properties.expiredTime);
+            }
             tenant.setContract(tenantInfo.properties.contract);
             tenantService.updateTenant(tenant);
         } catch (Exception e) {

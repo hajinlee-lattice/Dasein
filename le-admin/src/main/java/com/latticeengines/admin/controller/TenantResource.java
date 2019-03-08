@@ -212,7 +212,7 @@ public class TenantResource {
 
     @PutMapping("/{contractId}/{tenantId}")
     @ResponseBody
-    @ApiOperation(value = "Bootstrap a Lattice tenant service")
+    @ApiOperation(value = "update tenant info")
     public boolean updateTenantInfo(@PathVariable(value = "contractId") String contractId, //
             @PathVariable String tenantId, //
             @RequestBody TenantInfo tenantInfo) {

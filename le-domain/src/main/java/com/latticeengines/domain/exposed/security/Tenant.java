@@ -83,6 +83,10 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "CONTRACT")
     private String contract;
 
+    @JsonProperty("ExpiredTime")
+    @Column(name = "EXPIRED_TIME")
+    private Long expiredTime;
+
     public Tenant() {
     }
 
@@ -176,6 +180,14 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     public void setContract(String contract) {
         this.contract = contract;
+    }
+
+    public Long getExpiredTime() {
+        return expiredTime;
+    }
+
+    public void setExpiredTime(Long expiredTime) {
+        this.expiredTime = expiredTime;
     }
 
     @Override
