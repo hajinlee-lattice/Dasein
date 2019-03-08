@@ -1,6 +1,7 @@
 package com.latticeengines.db.entitymgr.impl;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -68,9 +69,9 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
-            tenant.setRegisteredTime(new Date().getTime());
+            tenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli());
         }
-        if (tenant.getRegisteredTime() == null) {
+        if (tenant.getExpiredTime() == null) {
             // expired date = registered + 90
             Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
             tenant.setExpiredTime(expiredTime);

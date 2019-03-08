@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service.impl;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +64,7 @@ public class TenantServiceImpl implements TenantService {
         oldTenant.setStatus(tenant.getStatus());
         oldTenant.setContract(tenant.getContract());
         if (tenant.getRegisteredTime() == null) {
-            oldTenant.setRegisteredTime(new Date().getTime());
+            oldTenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli());
         } else {
             oldTenant.setRegisteredTime(tenant.getRegisteredTime());
         }

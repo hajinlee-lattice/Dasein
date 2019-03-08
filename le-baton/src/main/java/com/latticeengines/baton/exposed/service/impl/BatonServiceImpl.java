@@ -3,6 +3,8 @@ package com.latticeengines.baton.exposed.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +23,6 @@ import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,9 +89,9 @@ public class BatonServiceImpl implements BatonService {
                 ContractLifecycleManager.create(contractId, contractInfo);
             }
             // Timestamp
-            tenantInfo.properties.created = new DateTime().getMillis();
-            tenantInfo.properties.lastModified = new DateTime().getMillis();
-            tenantInfo.properties.expiredTime = new DateTime().getMillis() + TimeUnit.DAYS.toMillis(90);
+            tenantInfo.properties.created = LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+            tenantInfo.properties.lastModified = tenantInfo.properties.created;
+            tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(90);
 
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);
 
