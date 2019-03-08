@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,13 +16,17 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -38,10 +43,15 @@ import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
 
+    private static Logger log = LoggerFactory.getLogger(PlayLaunchServiceImpl.class);
+
     private static final String NULL_KEY = "NULL_KEY";
 
     @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
+
+    @Inject
+    DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
@@ -112,12 +122,30 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
                 startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
 
+        addDataIntegrationStatusFor(launchSummaries);
         dashboard.setLaunchSummaries(launchSummaries);
         dashboard.setCumulativeStats(totalCounts);
         dashboard.setUniquePlaysWithLaunches(uniquePlaysWithLaunches);
         dashboard.setUniqueLookupIdMapping(calculateUniqueLookupIdMapping(playId, launchStates, startTimestamp,
                 endTimestamp, orgId, externalSysType, skipLoadingAllLookupIdMapping));
         return dashboard;
+    }
+
+    private void addDataIntegrationStatusFor(List<LaunchSummary> launchSummaries) {
+        if (CollectionUtils.isEmpty(launchSummaries)) {
+            return;
+        }
+        List<String> launchIds = launchSummaries.stream().map(ls -> ls.getLaunchId())
+                .filter(launchId -> StringUtils.isNotBlank(launchId)).collect(Collectors.toList());
+        List<DataIntegrationStatusMonitor> dataIntegrationStatusMonitors = dataIntegrationStatusMonitoringEntityMgr
+                .getAllStatusesByEntityNameAndIds(MultiTenantContext.getTenant().getPid(), "PlayLaunch", launchIds);
+        log.debug("For given {} PlayLaunch objects, {} DataIntegrationStatus objects found", launchIds.size(), dataIntegrationStatusMonitors.size());
+        if (CollectionUtils.isEmpty(dataIntegrationStatusMonitors)) {
+            return;
+        }
+        Map<String, DataIntegrationStatusMonitor> dataIntegrationStatusMap = dataIntegrationStatusMonitors.stream()
+                .collect(Collectors.toMap(dism -> dism.getEntityId(), dism -> dism));
+        launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
     }
 
     @Override
