@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.workflowapi;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -23,8 +25,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
-
-import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 @Component
 public class WorkflowProxy extends MicroserviceRestApiProxy {
