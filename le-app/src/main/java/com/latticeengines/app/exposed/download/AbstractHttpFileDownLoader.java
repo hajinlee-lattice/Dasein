@@ -122,18 +122,18 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                 deleteFile(sb.toString());
                 break;
             }
-        } catch (Exception ex) {
-            log.error("Failed to download file.", ex);
-            throw new LedpException(LedpCode.LEDP_18022, ex);
+        } catch (Exception exc) {
+            log.error("Failed to download file.", exc);
+            throw new LedpException(LedpCode.LEDP_18022, exc);
         }
     }
 
     private void deleteFile(String filename) {
-        log.info("Start deleting file " + filename);
         if (StringUtils.isNotBlank(filename)) {
             File file = new File(filename);
             try {
                 FileUtils.forceDelete(file);
+                log.info("Delete file " + filename);
             } catch (IOException exc) {
                 log.warn("Cannot delete file " + filename);
             }
@@ -212,19 +212,22 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     }
 
     @VisibleForTesting
-    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats, StringBuilder filenameBuilder) {
-        log.info("Start to reformat date for tenant " + MultiTenantContext.getShortTenantId());
-        log.info("dateToFormats=" + JsonUtils.serialize(dateToFormats));
+    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats,
+                              StringBuilder filenameBuilder) {
+        String tenant = MultiTenantContext.getShortTenantId();
+        log.info(String.format("dateToFormats=%s. Tenant=%s", JsonUtils.serialize(dateToFormats), tenant));
         String tmpdir = System.getProperty("java.io.tmpdir");
+        if (tmpdir.endsWith("/")) {
+            tmpdir = tmpdir.substring(0, tmpdir.length() - 1);
+        }
         filenameBuilder.append(tmpdir).append(NamingUtils.uuid("/download"));
         String filename = filenameBuilder.toString();
-        log.info(String.format("Use file %s temporarily.", filename));
+        log.info(String.format("Use temporary file=%s. Tenant=%s", filename, tenant));
         BufferedWriter bw;
         try {
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
         } catch (FileNotFoundException exc) {
-            log.error("Error while opening the temporary file " + filename, exc);
-            exc.printStackTrace();
+            log.error(String.format("Error while opening the temporary file %s. Tenant=%s", filename, tenant), exc);
             return inputStream;
         }
 
@@ -275,17 +278,15 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     }
                 }
             }
-        } catch (IOException e) {
-            log.error("Error reading the input stream.", e);
-            e.printStackTrace();
+        } catch (IOException exc) {
+            log.error(String.format("Error reading the input stream. Tenant=%s", tenant), exc);
             return inputStream;
         }
 
         try {
             return new FileInputStream(filename);
         } catch (FileNotFoundException exc) {
-            log.error("Error while reading temporary file " + filename, exc);
-            exc.printStackTrace();
+            log.error(String.format("Error while reading temporary file %s. Tenant=%s", filename, tenant), exc);
             return inputStream;
         }
     }
