@@ -41,15 +41,6 @@ class ConnectorService {
     getImgByConnector(connectorName) {
         let element = this._connectors[connectorName];
         return element.config.img;
-        // let path = ''
-        // this._connectorsList.forEach(element => {
-        //     if (element.name === connectorName) {
-
-        //         path = element.config.img;
-        //         return;
-        //     }
-        // });
-        // return path;
     }
     getConnectorCreationTitle(otherTxt) {
         switch (this.connectorInfo.name) {
@@ -65,7 +56,11 @@ class ConnectorService {
     getConnectorCreationBody() {
         let system = this.getConnectorCreationTitle();
         let h5 = `${'<h5>'}${system} ${'org Authentication</h5>'}`;
-        let p = '<p>Generate a One-time Authentication token below to connect the BIS application with Lattice platform</p>';
+        let to = 'BIS';
+        if(ELOQUA == this.connectorInfo.name){
+            to = 'Lattice Predictive Campaigns';
+        }
+        let p = `${'<p>Generate a One-time Authentication token below to connect the'} ${to} ${'application with Lattice platform</p>'}`;
         return `${h5}${p}`;
     }
 
