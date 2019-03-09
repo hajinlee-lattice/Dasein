@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -13,7 +12,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.apps.cdl.dao.PlayLaunchDao;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -100,7 +98,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("play_id", playId);
+        query.setLong("playId", playId);
         query.setString("orgId", orgId.trim());
         List list = query.list();
         if (list.size() == 0) {
