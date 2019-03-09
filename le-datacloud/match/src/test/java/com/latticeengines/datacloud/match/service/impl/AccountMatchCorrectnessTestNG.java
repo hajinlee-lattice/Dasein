@@ -12,6 +12,7 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -108,6 +109,14 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                         Arrays.asList(MatchKey.Name.name(), MatchKey.Country.name())));
     }
 
+    // MatchKeys used in Account match decision graph (Don't consider MatchKey
+    // combinations in LDC match)
+    private final static String[] ACCOUNT_KEYS_PRIORITIZED = { ID_SFDC, ID_MKTO, MatchKey.DUNS.name(),
+            MatchKey.Domain.name(), MatchKey.Name.name() };
+    // Account MatchKey -> Index in FIELDS
+    private final static Map<String, Integer> ACCOUNT_KEYIDX_MAP = Stream.of(ACCOUNT_KEYS_PRIORITIZED)
+            .collect(Collectors.toMap(key -> key, key -> Arrays.asList(FIELDS).indexOf(key)));
+
     private static final EntityMatchEnvironment DEST_ENV = EntityMatchEnvironment.SERVING;
 
     @Inject
@@ -127,6 +136,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         // prevent old data from affecting the test
         testEntityMatchService.bumpVersion(TEST_TENANT_ID);
 
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS
         // test allocate mode
         List<Object> data = Arrays.asList("sfdc_1", "mkto_1", null, "GOOGLE", null, "USA", null, null);
         MatchOutput output = matchAccount(data, true, null, null).getRight();
@@ -148,6 +159,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         // prevent old data from affecting the test
         testEntityMatchService.bumpVersion(TEST_TENANT_ID);
 
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS
         // public domain without duns/name, and not in email format, treat as
         // normal domain
         List<Object> data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, null);
@@ -170,6 +183,101 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     }
 
     /**
+     * Test scenario: Able to find a matched MatchKey and there is no conflict
+     * in MatchKeys with higher priority
+     *
+     * Run 2 test for each test case
+     *
+     * Test 1: Construct 2 records. 1st record with full Account MatchKeys
+     * (ACCOUNT_KEYS_PRIORITIZED), 2nd record with partial Account MatchKeys
+     * (try all the combo). So overlapped MatchKeys between 2 records is just
+     * 2nd record's MatchKeys. Set 2nd record's HIGHEST priority MatchKey with
+     * same input data with 1st record and all the other LOWER priority keys
+     * with different input data
+     *
+     * eg. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain_1.com, fakename_1]
+     * Record2: [mkto_id_1, 884745530, fakedomain_2.com]
+     * (ID_MKTO is highest priority key)
+     *
+     * Test 2: Construct 2 records. MatchKeys preparation is same as Test1,
+     * while data preparation is different. Set 2nd record's LOWEST priority
+     * MatchKey with same input data with 1st record and all the other HIGHER
+     * priority keys with different input data. Also, set 1st record with null
+     * value for those higher priority MatchKeys of 2ND record
+     *
+     * eg. Record1: [sfdc_id_1, null, null, fakedomain_1.com, fakename_1]
+     * Record2: [mkto_id_2, 884745530, fakedomain_1.com]
+     *
+     * NOTE for data preparation: Prepare both Domain and Name with values which
+     * don't exist in AccountMaster so that DUNS used in Account match is purely
+     * from input
+     *
+     * @param caseIdx
+     * @param partialKeys:
+     *            Guaranteed to be prioritized
+     */
+    @Test(groups = "functional", priority = 3, dataProvider = "allKeysComboPrioritized", enabled = true)
+    private void testMatchedPairWithHighPriKeyMatch(Integer caseIdx, List<String> partialKeys) {
+        List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
+        log.info("CaseIdx: {}   Full Key: {}   Partial Key: {}", caseIdx, String.join(",", fullKeys),
+                String.join(",", partialKeys));
+        // Use different tenant for each test case because data provider is set
+        // with parallel execution
+        String tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        Tenant tenant = new Tenant(tenantId);
+
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS (ID_ELOQUA, Country, State are not used in this test;
+        // DUNS needs to be real DUNS otherwise LDC match will not return
+        // DUNS to Account match)
+        List<Object> baseData1 = Arrays.asList("sfdc_id_1", "mkto_id_1", null, "fakename_1", "fakedomain_1.com", null,
+                null, "060902413");
+        List<Object> baseData2 = Arrays.asList("sfdc_id_2", "mkto_id_2", null, "fakename_2", "fakedomain_2.com", null,
+                null, "884745530");
+
+        // Test 1
+        List<Object> test1Data1 = baseData1;
+        List<Object> test1Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
+        // partialKeys is guaranteed to be prioritized already
+        // Set 2nd record's HIGHEST priority MatchKey with same input data with
+        // 1st record
+        test1Data2.set(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(0)),
+                baseData1.get(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(0))));
+        // Set all the other lower priority keys in 2nd record with different
+        // input data compared to 1st record
+        IntStream.range(1, partialKeys.size()).forEach(idx -> {
+            test1Data2.set(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(idx)),
+                    baseData2.get(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(idx))));
+        });
+        runAndVerifyMatchPair(tenant, fullKeys, test1Data1, partialKeys, test1Data2);
+
+        // Test 2
+        if (partialKeys.size() == 1) {
+            return;
+        }
+        List<Object> test2Data1 = new ArrayList<>(baseData1);
+        List<Object> test2Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
+        // Set 2nd record's LOWEST priority MatchKey with same input data with
+        // 1st record.
+        test2Data2.set(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(partialKeys.size() - 1)),
+                baseData1.get(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(partialKeys.size() - 1))));
+        // Set all the other higher priority keys in 2nd record with different
+        // input data compared to 1st record
+        IntStream.range(0, partialKeys.size() - 1).forEach(idx -> {
+            test2Data2.set(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(idx)),
+                    baseData2.get(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(idx))));
+        });
+        // Set 1st record with null value for those higher priority MatchKeys of
+        // 2ND record
+        IntStream.range(0, partialKeys.size() - 1).forEach(idx -> {
+            test2Data1.set(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(idx)), null);
+        });
+        runAndVerifyMatchPair(tenant, fullKeys, test1Data1, partialKeys, test1Data2);
+    }
+
+    /**
+     * Test scenario: All MatchKeys are matched
+     *
      * Definition of MatchKey group: see comment of variable KEY_GROUP_MAP
      *
      * Every time construct 2 records.
@@ -188,7 +296,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      */
     @Test(groups = "functional", priority = 10, dataProvider = "exhaustiveKeysPairWithOverlap", enabled = false)
     private void testMatchedPairs(Integer caseIdx, List<String> keys1, List<String> keys2) {
-        log.info("CaseIdx: {}   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1), String.join(",", keys2));
+        log.info("CaseIdx: {} (Out of 916)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
+                String.join(",", keys2));
 
         // Use different tenant for each test case because data provider is set
         // with parallel execution
@@ -199,20 +308,25 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         List<Object> data = Arrays.asList("sfdc_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
                 "060902413");
 
-        Pair<MatchInput, MatchOutput> inputOutput1 = matchAccount(data, true, tenant, getEntityKeyMap(keys1));
+        runAndVerifyMatchPair(tenant, keys1, data, keys2, data);
+    }
+
+    private void runAndVerifyMatchPair(Tenant tenant, List<String> keys1, List<Object> data1, List<String> keys2,
+            List<Object> data2) {
+        Pair<MatchInput, MatchOutput> inputOutput1 = matchAccount(data1, true, tenant, getEntityKeyMap(keys1));
         MatchOutput output1 = inputOutput1.getRight();
         String entityId1 = verifyAndGetEntityId(output1);
         Assert.assertNotNull(entityId1);
 
-        Pair<MatchInput, MatchOutput> inputOutput2 = matchAccount(data, true, tenant, getEntityKeyMap(keys2));
+        Pair<MatchInput, MatchOutput> inputOutput2 = matchAccount(data2, true, tenant, getEntityKeyMap(keys2));
         MatchOutput output2 = inputOutput2.getRight();
         String entityId2 = verifyAndGetEntityId(output2);
         Assert.assertNotNull(entityId2);
 
         Assert.assertEquals(entityId1, entityId2,
                 String.format("EntityIds are different for Keys1=%s vs Keys2=%s    MatchInput1=%s    MatchInput2=%s",
-                        String.join(",", keys1), String.join(",", keys2),
-                        JsonUtils.serialize(inputOutput1.getLeft()), JsonUtils.serialize(inputOutput2.getLeft())));
+                        String.join(",", keys1), String.join(",", keys2), JsonUtils.serialize(inputOutput1.getLeft()),
+                        JsonUtils.serialize(inputOutput2.getLeft())));
     }
 
     private String lookupAccount(String sfdcId, String mktoId, String eloquaId, String name, String domain,
@@ -304,6 +418,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
             case ID_SFDC:
             case ID_MKTO:
             case ID_ELOQUA:
+                // Priority is same as their order in keys list
                 map.addMatchKey(MatchKey.SystemId, key);
                 break;
             default:
@@ -369,32 +484,50 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 .toArray(Object[][]::new);
     }
 
+    @DataProvider(name = "allKeysComboPrioritized", parallel = true)
+    private static Object[][] getAllKeysComboPrioritized() {
+        List<String> accountKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
+        List<List<String>> allCombos = getAllKeyGroupSubsets(accountKeys);
+        return IntStream.range(0, allCombos.size()).mapToObj(idx -> new Object[] { idx, allCombos.get(idx) })
+                .toArray(Object[][]::new);
+    }
+
     /**
      * Find all possible subsets of key groups
+     *
+     * Returned keys in each subset are guaranteed to be in same order as
+     * original input list
      *
      * @param keyGroups
      * @return
      */
     private static List<List<String>> getAllKeyGroupSubsets(List<String> keyGroups) {
         int total = (int) Math.pow(2d, Double.valueOf(keyGroups.size()));
-        List<List<String>> combinations = new ArrayList<>();
+        List<List<String>> combos = new ArrayList<>();
         // To verify correctness of all combinations
-        Set<String> combinationSet = new HashSet<>();
+        Set<String> comboSet = new HashSet<>();
         for (int i = 1; i < total; i++) {
             String code = Integer.toBinaryString(total | i).substring(1);
-            List<String> combination = new ArrayList<>();
+            List<String> combo = new ArrayList<>();
             for (int j = 0; j < keyGroups.size(); j++) {
                 if (code.charAt(j) == '1') {
-                    combination.add(keyGroups.get(j));
+                    combo.add(keyGroups.get(j));
                 }
             }
-            Collections.sort(combination);
-            combinations.add(combination);
-            combinationSet.add(String.join("", combination));
+            combos.add(combo);
+            comboSet.add(String.join("", combo));
         }
         // Verify there is no duplicate in all combinations
-        Assert.assertEquals(combinationSet.size(), total - 1);
-        return combinations;
+        Assert.assertEquals(comboSet.size(), total - 1);
+        // Verify keys order in each subset is maintained as original input list
+        // key/key group -> idx of key/key group in input list keyGroups
+        Map<String, Integer> idxMap = IntStream.range(0, keyGroups.size()).boxed()
+                .collect(Collectors.toMap(idx -> keyGroups.get(idx), idx -> idx));
+        combos.forEach(combo -> {
+            Assert.assertFalse(IntStream.range(1, combo.size())
+                    .anyMatch(i -> idxMap.get(combo.get(i)) <= idxMap.get(combo.get(i - 1))));
+        });
+        return combos;
     }
 
     /**
@@ -455,10 +588,10 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *                  [ID_SFDC, Domain, Country, Name], (Deduped from [ID_SFDC, Domain, Country, Name, Country])
      *                  [ID_SFDC, Name, Country], (Deduped from [ID_SFDC, Name, Country, Name])
      *                  [ID_SFDC, Name, Country], (Deduped from [ID_SFDC, Name, Country, Name, Country])
-     * dedup keys = [ID_SFDC, Customer DUNS, Name],
-     *              [ID_SFDC, Customer DUNS, Name, Country],
-     *              [ID_SFDC, Domain, Country, Name],
-     *              [ID_SFDC, Name, Country]
+     * After dedup keys = [ID_SFDC, Customer DUNS, Name],
+     *                    [ID_SFDC, Customer DUNS, Name, Country],
+     *                    [ID_SFDC, Domain, Country, Name],
+     *                    [ID_SFDC, Name, Country]
      *
      * @param keyGroups
      * @return
