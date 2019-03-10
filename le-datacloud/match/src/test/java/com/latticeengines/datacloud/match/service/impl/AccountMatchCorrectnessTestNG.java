@@ -641,8 +641,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     /**
      * @param data
      * @param isAllocateMode
-     * @param tenant:
-     *            If null, use default tenant TEST_TENANT
+     * @param tenant
      * @param entityKeyMap:
      *            If null, use getEntityKeyMap(Account)
      * @return
