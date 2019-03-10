@@ -351,7 +351,7 @@ public enum LedpCode {
                     "No User Email key/value"), LEDP_19011("No return_to key/value"), LEDP_19012(
                             "No source_ref key/value "), LEDP_19013("Service not found."), //
     LEDP_19014("Unsupport error."), //
-    LEDP_19015("Too many invalid input attempts, please reset password!"), //
+    LEDP_19015("Your account has been locked, please reset password."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //
