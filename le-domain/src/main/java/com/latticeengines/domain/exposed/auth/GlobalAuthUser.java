@@ -63,6 +63,10 @@ public class GlobalAuthUser extends BaseGlobalAuthObject implements HasPid {
     @Column(name = "Created_By_User", nullable = true)
     private String createdByUser;
 
+    @JsonProperty("invalid_login_attempts")
+    @Column(name = "InvalidLoginAttempts")
+    private int invalidLoginAttempts = 0;
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "globalAuthUser")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthAuthentication> gaAuthentications;
@@ -148,5 +152,13 @@ public class GlobalAuthUser extends BaseGlobalAuthObject implements HasPid {
 
     public void setUserTenantRights(List<GlobalAuthUserTenantRight> gaUserTenantRights) {
         this.gaUserTenantRights = gaUserTenantRights;
+    }
+
+    public int getInvalidLoginAttempts() {
+        return invalidLoginAttempts;
+    }
+
+    public void setInvalidLoginAttempts(int invalidLoginAttempts) {
+        this.invalidLoginAttempts = invalidLoginAttempts;
     }
 }
