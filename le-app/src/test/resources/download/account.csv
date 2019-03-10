@@ -1,5 +1,5 @@
 AccountId,Name,Domain,CreatedTime,LastUpdatedTime
 ACCT_0001,Company 1,company1.com,1541546115000,1541564420000
 ACCT_0002,Company 2,company2.com,1541546115000,1541564420000
-ACCT_0003,Organization 3,orgnization3.org,1541546115000,
-ACCT_0004,Organization 4,orgnization4.org,,
+ACCT_0003,Organization 3,organization3.org,1541546115000,
+ACCT_0004,Organization 4,organization4.org,,

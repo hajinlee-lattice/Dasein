@@ -15,13 +15,11 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 
 public class EntityQueryTranslator extends QueryTranslator {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(EntityQueryTranslator.class);
 
     public EntityQueryTranslator(QueryFactory queryFactory, AttributeRepository repository) {
@@ -36,14 +34,8 @@ public class EntityQueryTranslator extends QueryTranslator {
             return translateProductQuery(frontEndQuery, decorator);
         }
 
-        Restriction restriction;
+        Restriction restriction = translateEntityQueryRestriction(frontEndQuery, timeTranslator, sqlUser);
         QueryBuilder queryBuilder = Query.builder();
-
-        restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery),
-                                                   timeTranslator, sqlUser, true);
-        restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
-        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
-
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
                 .page(frontEndQuery.getPageFilter()) //
@@ -60,7 +52,7 @@ public class EntityQueryTranslator extends QueryTranslator {
 
         if (decorator != null && StringUtils.isNotBlank(frontEndQuery.getFreeFormTextSearch())) {
             List<AttributeLookup> attrs = new ArrayList<>();
-            for (AttributeLookup attributeLookup: decorator.getFreeTextSearchAttrs()) {
+            for (AttributeLookup attributeLookup : decorator.getFreeTextSearchAttrs()) {
                 if (repository != null && repository.getColumnMetadata(attributeLookup) != null) {
                     attrs.add(attributeLookup);
                 }
@@ -75,25 +67,6 @@ public class EntityQueryTranslator extends QueryTranslator {
         configurePagination(frontEndQuery);
 
         return queryBuilder.build();
-    }
-
-    private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            Restriction outerRestriction, TimeFilterTranslator timeTranslator, String sqlUser) {
-        BusinessEntity innerEntity = null;
-        switch (outerEntity) {
-        case Contact:
-            innerEntity = BusinessEntity.Account;
-            break;
-        case Account:
-            innerEntity = BusinessEntity.Contact;
-            break;
-        default:
-            break;
-        }
-        FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser,
-                                                                    true);
-        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
 }

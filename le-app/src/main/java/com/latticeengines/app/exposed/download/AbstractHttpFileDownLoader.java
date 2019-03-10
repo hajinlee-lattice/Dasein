@@ -1,9 +1,15 @@
 package com.latticeengines.app.exposed.download;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -26,6 +32,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +47,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -95,7 +103,9 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                 try (InputStream is = getFileInputStream()) {
                     try (OutputStream os = response.getOutputStream()) {
                         if (shouldReformatDate) {
-                            GzipUtils.copyAndCompressStream(processDates(is), os);
+                            StringBuilder sb = new StringBuilder();
+                            GzipUtils.copyAndCompressStream(processDates(is, sb), os);
+                            deleteFile(sb.toString());
                         } else {
                             GzipUtils.copyAndCompressStream(is, os);
                         }
@@ -106,17 +116,32 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                 response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", //
                         StringUtils.substringBeforeLast(getFileName(), ".") + ".csv"));
             default:
-                FileCopyUtils.copy(processInputStreamBasedOnMode(getFileInputStream(), mode),
+                StringBuilder sb = new StringBuilder();
+                FileCopyUtils.copy(processInputStreamBasedOnMode(getFileInputStream(), mode, sb),
                         response.getOutputStream());
+                deleteFile(sb.toString());
                 break;
             }
-        } catch (Exception ex) {
-            log.error("Failed to download file.", ex);
-            throw new LedpException(LedpCode.LEDP_18022, ex);
+        } catch (Exception exc) {
+            log.error("Failed to download file.", exc);
+            throw new LedpException(LedpCode.LEDP_18022, exc);
         }
     }
 
-    private InputStream processInputStreamBasedOnMode(InputStream inputStream, DownloadMode mode) {
+    private void deleteFile(String filename) {
+        if (StringUtils.isNotBlank(filename)) {
+            File file = new File(filename);
+            try {
+                FileUtils.forceDelete(file);
+                log.info("Delete file " + filename);
+            } catch (IOException exc) {
+                log.warn("Cannot delete file " + filename);
+            }
+        }
+    }
+
+    private InputStream processInputStreamBasedOnMode(InputStream inputStream, DownloadMode mode,
+                                                      StringBuilder filenameBuilder) {
         switch (mode) {
         case TOP_PREDICTOR:
             return processTopPredictorFile(inputStream);
@@ -124,11 +149,11 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             return processRfModel(inputStream);
         case DEFAULT:
         default:
-            return processDates(inputStream);
+            return processDates(inputStream, filenameBuilder);
         }
     }
 
-    private InputStream processDates(InputStream inputStream) {
+    private InputStream processDates(InputStream inputStream, StringBuilder filenameBuilder) {
         if (!shouldReformatDate) {
             return inputStream;
         }
@@ -142,7 +167,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         if (CollectionUtils.isNotEmpty(dateAttributes)) {
             Map<String, String> dateToFormats = new HashMap<>();
             dateAttributes.forEach(attrib -> dateToFormats.put(attrib, DATE_FORMAT));
-            return reformatDates(inputStream, dateToFormats);
+            return reformatDates(inputStream, dateToFormats, filenameBuilder);
         }
         return inputStream;
     }
@@ -187,11 +212,25 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     }
 
     @VisibleForTesting
-    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats) {
-        log.info("Start to reformat date for tenant " + MultiTenantContext.getShortTenantId());
-        log.info("dateToFormats=" + JsonUtils.serialize(dateToFormats));
+    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats,
+                              StringBuilder filenameBuilder) {
+        String tenant = MultiTenantContext.getShortTenantId();
+        log.info(String.format("dateToFormats=%s. Tenant=%s", JsonUtils.serialize(dateToFormats), tenant));
+        String tmpdir = System.getProperty("java.io.tmpdir");
+        if (tmpdir.endsWith("/")) {
+            tmpdir = tmpdir.substring(0, tmpdir.length() - 1);
+        }
+        filenameBuilder.append(tmpdir).append(NamingUtils.uuid("/download"));
+        String filename = filenameBuilder.toString();
+        log.info(String.format("Use temporary file=%s. Tenant=%s", filename, tenant));
+        BufferedWriter bw;
+        try {
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
+        } catch (FileNotFoundException exc) {
+            log.error(String.format("Error while opening the temporary file %s. Tenant=%s", filename, tenant), exc);
+            return inputStream;
+        }
 
-        StringBuilder sb = new StringBuilder();
         try (InputStreamReader reader = new InputStreamReader(
                 new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                         ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
@@ -199,7 +238,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             CSVFormat format = LECSVFormat.format;
             try (CSVParser parser = new CSVParser(reader, format)) {
                 Map<String, Integer> headerMap = parser.getHeaderMap();
-                try (CSVPrinter printer = new CSVPrinter(sb,
+                try (CSVPrinter printer = new CSVPrinter(bw,
                         CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                     List<CSVRecord> recordsWithErrors = new ArrayList<>();
                     for (CSVRecord record : parser) {
@@ -239,13 +278,17 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     }
                 }
             }
-        } catch (IOException e) {
-            log.error("Error reading the input stream.");
-            e.printStackTrace();
+        } catch (IOException exc) {
+            log.error(String.format("Error reading the input stream. Tenant=%s", tenant), exc);
             return inputStream;
         }
 
-        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
+        try {
+            return new FileInputStream(filename);
+        } catch (FileNotFoundException exc) {
+            log.error(String.format("Error while reading temporary file %s. Tenant=%s", filename, tenant), exc);
+            return inputStream;
+        }
     }
 
     private InputStream processRfModel(InputStream inputStream) {

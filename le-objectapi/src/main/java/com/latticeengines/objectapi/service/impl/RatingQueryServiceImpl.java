@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -40,9 +38,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.RatingQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
-import com.latticeengines.objectapi.util.AccountQueryDecorator;
-import com.latticeengines.objectapi.util.ContactQueryDecorator;
-import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.RatingQueryTranslator;
@@ -52,11 +47,8 @@ import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
 import reactor.core.publisher.Flux;
 
-
 @Service("ratingQueryService")
-public class RatingQueryServiceImpl implements RatingQueryService {
-
-    private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceImpl.class);
+public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements RatingQueryService {
 
     private final QueryEvaluatorService queryEvaluatorService;
 
@@ -131,7 +123,8 @@ public class RatingQueryServiceImpl implements RatingQueryService {
         return preProcess(frontEndQuery.getMainEntity(), query);
     }
 
-    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version,
+            String sqlUser) {
         Query query = getDataQuery(frontEndQuery, version, sqlUser);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
@@ -150,17 +143,18 @@ public class RatingQueryServiceImpl implements RatingQueryService {
     }
 
     @Override
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version,
+            String sqlUser) {
         try {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser);
-            List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query, sqlUser)
-                    .getData();
+            List<Map<String, Object>> data = queryEvaluatorService
+                    .getData(customerSpace.toString(), version, query, sqlUser).getData();
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
             TreeMap<String, Long> counts = new TreeMap<>();
             data.forEach(map -> {
-                String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
+                String key = lblMap.get(map.get(QueryEvaluator.SCORE));
                 if (!counts.containsKey(key)) {
                     counts.put(key, 0L);
                 }
@@ -178,7 +172,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,
-                                   DataCollection.Version version, String sqlUser) {
+            DataCollection.Version version, String sqlUser) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
             Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
@@ -279,20 +273,6 @@ public class RatingQueryServiceImpl implements RatingQueryService {
             }
         }
         return processed;
-    }
-
-    private QueryDecorator getDecorator(BusinessEntity entity, boolean isDataQuery) {
-        switch (entity) {
-            case Account:
-                return isDataQuery ? AccountQueryDecorator.DATA_QUERY : AccountQueryDecorator.COUNT_QUERY;
-            case Contact:
-                return isDataQuery ? ContactQueryDecorator.DATA_QUERY : ContactQueryDecorator.COUNT_QUERY;
-            case Product:
-                return isDataQuery ? ProductQueryDecorator.DATA_QUERY : ProductQueryDecorator.COUNT_QUERY;
-            default:
-                log.warn("Cannot find a decorator for entity " + entity);
-                return null;
-        }
     }
 
     private static Map<String, String> ruleLabelReverseMapping(RatingRule ratingRule) {

@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.download;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,6 +12,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -100,7 +102,8 @@ public class HdfsFileHttpDownloaderUnitTestNG {
 
     @Test(groups = "unit")
     public void testReformatDates() throws IOException {
-        InputStream stream = downloader.reformatDates(dateInputStream, dateMap);
+        StringBuilder sb = new StringBuilder();
+        InputStream stream = downloader.reformatDates(dateInputStream, dateMap, sb);
         try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
                 ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                 StandardCharsets.UTF_8)) {
@@ -120,6 +123,13 @@ public class HdfsFileHttpDownloaderUnitTestNG {
                 }
             }
             Assert.assertEquals(i, 4);
+
+            String filename = sb.toString();
+            if (StringUtils.isNotBlank(filename)) {
+                System.out.println("Delete temporary file " + filename);
+                File file = new File(filename);
+                FileUtils.forceDelete(file);
+            }
         }
     }
 

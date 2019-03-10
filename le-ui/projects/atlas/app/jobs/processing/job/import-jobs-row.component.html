@@ -10,19 +10,26 @@
     </span>
 </div>
 <div class="le-cell le-col-start-5 le-col-span-1">
-    <span ng-class="getSubJobsPartialSuccess().length > 0 ? 'le-tooltip' : ''">
-        {{getActionsCount()}}
-        <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="getSubJobsPartialSuccess().length > 0">
-            <div class="tooltip-content">
-                <h3>Partial Success</h3>
-                <p>The following actions are partially validated and will not be taken into data processing:</p>
-                <ol>
-                    <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip">{{getSubjobActionName($index+1, subjob)}}</li>
-                    <li ng-if="actions.length > maxRowsTooltip ">And {{actions.length - maxRowsTooltip}} other partial success</li>
-                </ol>
+        <div class="tooltip-cell">
+                <div class="text-ellipsis text-container"><span>{{getActionsCount()}}</span></div>
+                <div ng-if="getSubJobsPartialSuccess().length > 0" class="text-icon-tooltip-container">
+                    <span class="tooltip-container-text">
+                        <li class="show-tooltip title-tooltip top delay">
+                            <div class="tooltip_">
+                                <div class="cover">
+                                        <h3>Partial Success</h3>
+                                        <p>The following actions are partially validated and will not be taken into data processing:</p>
+                                        <ol>
+                                            <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip">{{getSubjobActionName($index+1, subjob)}}</li>
+                                            <li ng-if="actions.length > maxRowsTooltip ">And {{actions.length - maxRowsTooltip}} other partial success</li>
+                                        </ol>
+                                </div>
+                            </div>
+                            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true"></i>
+                        </li>
+                    </span>
+                </div>
             </div>
-        </i>
-    </span>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
     <span>

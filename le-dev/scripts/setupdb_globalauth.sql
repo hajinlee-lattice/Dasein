@@ -43,7 +43,8 @@ INSERT INTO GlobalUser (
   Creation_Date,
   Last_Modification_Date,
   Created_By,
-  Last_Modified_by
+  Last_Modified_by,
+  InvalidLoginAttempts
 ) VALUES (
   'ga_dev@lattice-engines.com',
   'Super',
@@ -53,6 +54,7 @@ INSERT INTO GlobalUser (
   1,
   NOW(),
   NOW(),
+  0,
   0,
   0
 ), (
@@ -64,6 +66,7 @@ INSERT INTO GlobalUser (
   1,
   NOW(),
   NOW(),
+  0,
   0,
   0
 );

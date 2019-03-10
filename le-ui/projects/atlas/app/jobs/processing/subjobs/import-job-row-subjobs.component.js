@@ -222,7 +222,7 @@ angular.module('lp.jobs.row.subjobs', [])
             $scope.showWarning = function(subjob){
                 let status = $scope.getValidation(subjob);
                 // console.log(status);
-                if(subjob.errorMsg != null || status == 'Failed' || status == 'Partial Success'){
+                if(subjob.jobType =='cdlDataFeedImportWorkflow' && (subjob.errorMsg != null || status == 'Failed' || status == 'Partial Success')){
                     return true;
                 }else{
                     return false;
@@ -246,7 +246,7 @@ angular.module('lp.jobs.row.subjobs', [])
                 if(subjob.errorMsg != null){ 
                      subjob.errorMsg
                 } else{
-                    return 'Please click on the number of Record Failed to check the error messages';
+                    return "Please click on the number of Record Failed to check the error messages";
                 }   
             }
             $scope.confirmCancelAction = function (subjob) {

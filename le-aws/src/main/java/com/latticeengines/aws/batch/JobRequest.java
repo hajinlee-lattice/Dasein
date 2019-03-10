@@ -7,7 +7,7 @@ public class JobRequest {
     private Map<String, String> parameters;
     private String jobQueue = "AWS-Python-Workflow-Job-Queue";
     private String jobName;
-    private String jobDefinition = "AWS-Python-Workflow-Job-Definition";
+    private String jobDefinition = "Python-App";
     private Integer cpus;
     private Integer memory;
     private Map<String, String> envs;

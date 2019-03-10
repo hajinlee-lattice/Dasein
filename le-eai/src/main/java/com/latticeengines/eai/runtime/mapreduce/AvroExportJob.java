@@ -1,6 +1,5 @@
 package com.latticeengines.eai.runtime.mapreduce;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
@@ -62,19 +61,12 @@ public abstract class AvroExportJob extends MRJobCustomizationBase {
             config.set("mapreduce.job.queuename", queueName);
 
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
-            AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
+            inputDir = PathUtils.toDirWithoutTrailingSlash(inputDir);
+            log.info("Reading from inputDir=" + inputDir);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
+            AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
 
-            String fileGlob;
-            if (!inputDir.endsWith("/*.avro")) {
-                List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, ".*.avro$");
-                fileGlob = files.size() > 0 ? files.get(0) : null;
-                if (fileGlob == null) {
-                    throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
-                }
-            } else {
-                fileGlob = inputDir;
-            }
+            String fileGlob = PathUtils.toAvroGlob(inputDir);
             log.info("Extracting schema from glob: " + fileGlob);
             Schema schema = AvroUtils.getSchemaFromGlob(config, fileGlob);
             AvroJob.setInputKeySchema(mrJob, schema);
@@ -107,9 +99,6 @@ public abstract class AvroExportJob extends MRJobCustomizationBase {
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
             config.set(MRJobConfig.MAP_JAVA_OPTS,
                     opts + " -Dlog4j.configurationFile=log4j2-yarn.xml " + CipherUtils.getSecretPropertyStr());
-            // config.set(MRJobConfig.MAP_JAVA_OPTS,
-            // "-Xdebug -Xnoagent -Djava.compiler=NONE
-            // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);

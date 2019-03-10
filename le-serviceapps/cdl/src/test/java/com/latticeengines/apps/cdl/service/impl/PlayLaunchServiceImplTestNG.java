@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -24,12 +25,17 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
+import com.latticeengines.apps.cdl.service.DataIntegrationStatusMonitoringService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
+import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -59,6 +65,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private PlayTypeService playTypeService;
+
+    @Inject
+    private DataIntegrationStatusMonitoringService dataIntegrationStatusMonitoringService;
 
     private Play play;
 
@@ -137,6 +146,23 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setCreatedBy(CREATED_BY);
         playLaunch2.setUpdatedBy(CREATED_BY);
 
+    }
+
+    private DataIntegrationStatusMonitorMessage constructDefaultStatusMessage(String workflowRequestId,
+            DataIntegrationEventType eventType, PlayLaunch pl) {
+        DataIntegrationStatusMonitorMessage statusMessage = new DataIntegrationStatusMonitorMessage();
+        statusMessage.setTenantId(mainTestTenant.getName());
+        statusMessage.setWorkflowRequestId(workflowRequestId);
+        statusMessage.setEntityId(pl.getLaunchId());
+        statusMessage.setEntityName("PlayLaunch");
+        statusMessage.setExternalSystemId(UUID.randomUUID().toString());
+        statusMessage.setOperation("export");
+        statusMessage.setMessageType(MessageType.EVENT.toString());
+        statusMessage.setMessage("This workflow has been submitted");
+        statusMessage.setEventType(eventType.toString());
+        statusMessage.setEventTime(new Date());
+        statusMessage.setSourceFile("dropfolder/source.csv");
+        return statusMessage;
     }
 
     private void assertPlayTargetSegment(Play testPlay) {
@@ -289,6 +315,28 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
+    public void testCreateExportIntegrationStatusMonitor() throws InterruptedException {
+        // Simulate workflow Launch and external integration with Tray Export Flow
+        DataIntegrationStatusMonitorMessage statusMessage1 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
+                DataIntegrationEventType.WORKFLOW_SUBMITTED, playLaunch1);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage1);
+        DataIntegrationStatusMonitorMessage statusMessage2 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
+                DataIntegrationEventType.WORKFLOW_SUBMITTED, playLaunch2);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
+
+        Thread.sleep(2000L);
+        List<DataIntegrationStatusMonitor> statusMonitorList = dataIntegrationStatusMonitoringService
+                .getAllStatuses(mainTestTenant.getId());
+        assertNotNull(statusMonitorList);
+        assertEquals(statusMonitorList.size(), 2);
+
+        statusMessage2.setEventType(DataIntegrationEventType.WORKFLOW_COMPLETED.toString());
+        statusMessage2.setMessage("Workflow marked as Complete");
+        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
+        Thread.sleep(1000L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCreateExportIntegrationStatusMonitor" })
     public void testEntriesDashboard() {
         Long badPlayId = System.currentTimeMillis();
         List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
@@ -429,6 +477,10 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
                         Assert.assertNotNull(entry.getDestinationSysType());
                         Assert.assertTrue(orgSet.contains(entry.getDestinationOrgId()));
                         Assert.assertNotNull(entry.getDestinationAccountId());
+
+                        // Check for DataIntegrationStatusMonitor
+                        assertNotNull(entry.getIntegrationStatusMonitor());
+                        assertEquals(entry.getIntegrationStatusMonitor().getEntityId(), entry.getLaunchId());
                     });
 
             Set<String> playIdSet = ConcurrentHashMap.newKeySet();

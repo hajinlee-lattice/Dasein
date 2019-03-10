@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 
 public class PlayLaunchDashboard {
 
@@ -69,6 +70,8 @@ public class PlayLaunchDashboard {
         private CDLExternalSystemType destinationSysType;
 
         private String destinationAccountId;
+
+        private DataIntegrationStatusMonitor integrationStatusMonitor;
 
         public String getPlayName() {
             return playName;
@@ -148,6 +151,14 @@ public class PlayLaunchDashboard {
 
         public void setDestinationAccountId(String destinationAccountId) {
             this.destinationAccountId = destinationAccountId;
+        }
+
+        public DataIntegrationStatusMonitor getIntegrationStatusMonitor() {
+            return integrationStatusMonitor;
+        }
+
+        public void setIntegrationStatusMonitor(DataIntegrationStatusMonitor integrationStatusMonitor) {
+            this.integrationStatusMonitor = integrationStatusMonitor;
         }
     }
 

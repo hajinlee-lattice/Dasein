@@ -73,7 +73,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                         + " AND created = :created ", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setLong("fk_play_id", playId);
+        query.setLong("playId", playId);
         query.setDate("created", created);
         List list = query.list();
         if (list.size() == 0) {
@@ -100,7 +100,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("fk_play_id", playId);
+        query.setLong("playId", playId);
         query.setString("orgId", orgId.trim());
         List list = query.list();
         if (list.size() == 0) {
