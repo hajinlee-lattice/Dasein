@@ -38,6 +38,8 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthenticationServiceImpl.class);
 
+    private static final int MAX_INVALID_LOGIN_ATTEMPTS = 5;
+
     @Autowired
     private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
 
@@ -56,6 +58,8 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
                 Thread.sleep(500); // wait for replication lag
             }
             return ticket;
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { user });
         }
@@ -67,18 +71,28 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         if (latticeAuthenticationData == null || latticeAuthenticationData.getGlobalAuthUser() == null) {
             throw new Exception("The specified user doesn't exists");
         }
-
-        boolean isActive = latticeAuthenticationData.getGlobalAuthUser().getIsActive();
+        GlobalAuthUser user = latticeAuthenticationData.getGlobalAuthUser();
+        boolean isActive = user.getIsActive();
         if (!isActive) {
             throw new Exception("The user is inactive!");
         }
-        Ticket ticket = authenticate(username, password);
-        if (ticket != null) {
-            return ticket;
+        int invalidLogin = user.getInvalidLoginAttempts();
+        if (invalidLogin >= MAX_INVALID_LOGIN_ATTEMPTS) {
+            throw new LedpException(LedpCode.LEDP_19015);
         }
 
-        log.warn("The credentials provided for login are incorrect.");
-        return null;
+        Ticket ticket = authenticate(username, password);
+        if (ticket != null) {
+            user.setInvalidLoginAttempts(0);
+            gaUserEntityMgr.update(user);
+            return ticket;
+        } else {
+
+            user.setInvalidLoginAttempts(invalidLogin + 1);
+            gaUserEntityMgr.update(user);
+            log.warn("The credentials provided for login are incorrect.");
+            throw new LedpException(LedpCode.LEDP_18001);
+        }
     }
 
     private Ticket authenticate(String username, String password) {

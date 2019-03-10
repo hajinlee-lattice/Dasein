@@ -128,10 +128,7 @@ public class LoginResource {
             }
             doc.setResult(result);
         } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
+            doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
         }
         return doc;
     }

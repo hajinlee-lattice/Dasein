@@ -502,6 +502,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 .encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
+        userData.setInvalidLoginAttempts(0);
+        gaUserEntityMgr.update(userData);
 
         if (isZendeskEnabled(userData.getEmail())) {
             List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(userData.getEmail());
@@ -852,8 +854,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     /**
      * Make sure a zendesk user with specified email exists and update its name/verified/suspended properties
-     * @param email target zendesk user's email
-     * @param name display name of the zendesk user
+     * @param user target zendesk user info
      * @return entire zendesk user after the operation
      */
     private ZendeskUser upsertZendeskUser(GlobalAuthUser user) {
