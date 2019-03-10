@@ -113,6 +113,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     // combinations in LDC match)
     private final static String[] ACCOUNT_KEYS_PRIORITIZED = { ID_SFDC, ID_MKTO, MatchKey.DUNS.name(),
             MatchKey.Domain.name(), MatchKey.Name.name() };
+    // Only one key per actor to reduce # test case
+    private final static String[] ACCOUNT_KEYS_REDUCED = { ID_SFDC, MatchKey.DUNS.name(), MatchKey.Domain.name(),
+            MatchKey.Name.name() };
     // Account MatchKey -> Index in FIELDS
     private final static Map<String, Integer> ACCOUNT_KEYIDX_MAP = Stream.of(ACCOUNT_KEYS_PRIORITIZED)
             .collect(Collectors.toMap(key -> key, key -> Arrays.asList(FIELDS).indexOf(key)));
@@ -199,8 +202,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * same input data with 1st record and all the other LOWER priority keys
      * with different input data
      *
-     * eg. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain_1.com, fakename_1]
-     * Record2: [mkto_id_1, 884745530, fakedomain_2.com] (ID_MKTO is highest priority key)
+     * eg. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
+     * Record2: [mkto_id_1, 884745530, fakedomain2.com] (ID_MKTO is highest priority key)
      *
      * Test 2: Construct 2 records. MatchKeys preparation is same as Test1,
      * while data preparation is different. Set 2nd record's LOWEST priority
@@ -208,8 +211,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * priority keys with different input data. Also, set 1st record with null
      * value for those higher priority MatchKeys of 2ND record
      *
-     * eg. Record1: [sfdc_id_1, null, null, fakedomain_1.com, fakename_1]
-     * Record2: [mkto_id_2, 884745530, fakedomain_1.com]
+     * eg. Record1: [sfdc_id_1, null, null, fakedomain1.com, fakename1]
+     * Record2: [mkto_id_2, 884745530, fakedomain1.com]
      *
      * Test 3: Construct 2 records. MatchKey preparation is same as Test2, and
      * data preparation is very similar except the following case: If HIGHER
@@ -217,8 +220,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * (Domain/Name), DO NOT set 1ST record with null value for these HIGHER
      * priority MatchKeys
      *
-     * eg. Record1: [sfdc_id_1, null, null, fakedomain_1.com, fakename_1]
-     * Record2: [mkto_id_2, 884745530, fakedomain_2.com, fakename_1]
+     * eg. Record1: [sfdc_id_1, null, null, fakedomain1.com, fakename1]
+     * Record2: [mkto_id_2, 884745530, fakedomain2.com, fakename1]
      *
      * NOTE for data preparation: Prepare both Domain and Name with values which
      * don't exist in AccountMaster so that DUNS used in Account match is purely
@@ -247,7 +250,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         List<Object> baseData2 = Arrays.asList("sfdc_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
                 null, "884745530");
 
-        
         // Test 1
         List<Object> test1Data1 = baseData1;
         List<Object> test1Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
@@ -333,11 +335,15 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * with same input data. If 2nd record's HIGHEST priority MatchKey has
      * many-to-many relationship with Account, between match of 1st and 2nd records,
      * need to submit another match whose highest priority MatchKey has same value
-     * as 2nd record. So that we can make sure when matching 2nd record, highest
+     * as 2nd record and all other MatchKeys as null to make sure another EntityId
+     * is allocated. Thus we can make sure when matching 2nd record, highest
      * priority key has conflict with 1st record
      *
-     * eg. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain_1.com, fakename_1]
-     * Record2: [mkto_id_2, 060902413, fakedomain_1.com] (ID_MKTO is highest priority key )
+     * eg1. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
+     * Record2: [mkto_id_2, 060902413, fakedomain1.com] (ID_MKTO is highest priority key)
+     * eg2. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
+     * Record2: [fakedomain2.com, fakename1]
+     * (Domain is highest priority key. Need to allocate another EntityId for fakedomain2.com first)
      *
      * NOTE for data preparation: Prepare both Domain and Name with values which
      * don't exist in AccountMaster so that DUNS used in Account match is purely
@@ -348,7 +354,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *            Guaranteed to be prioritized
      */
     @Test(groups = "functional", priority = 4, dataProvider = "allKeysComboPrioritized", enabled = true)
-    private void testMatchedPairWithHighPriKeyMismatch(Integer caseIdx, List<String> partialKeys) {
+    private void testPairWithHighPriKeyMismatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         log.info("CaseIdx: {} (Out of 31)   Full Key: {}   Partial Key: {}", caseIdx, String.join(",", fullKeys),
                 String.join(",", partialKeys));
@@ -391,6 +397,59 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
             matchAccount(data3, true, tenant, getEntityKeyMap(partialKeys));
         }
         runAndVerifyMatchPair(tenant, fullKeys, data1, partialKeys, data2, false);
+    }
+
+    /**
+     * Test scenario: No any matched keys
+     * Expectation: Match to different Account
+     *
+     * Construct 2 records. Both of them try all combinations of MatchKeys.
+     * For non-overlapped keys, set with same input values.
+     * For overlapped keys, set with different input values.
+     *
+     * NOTE for data preparation: Prepare both Domain and Name with values which
+     * don't exist in AccountMaster so that DUNS used in Account match is purely
+     * from input
+     *
+     * @param caseIdx
+     * @param keys1
+     * @param keys2
+     */
+    @Test(groups = "functional", priority = 5, dataProvider = "allReducedKeysPairs", enabled = true)
+    private void testPairAllMismatch(Integer caseIdx, List<String> keys1, List<String> keys2) {
+        log.info("CaseIdx: {} (Out of 225)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
+                String.join(",", keys2));
+        // Use different tenant for each test case because data provider is set
+        // with parallel execution
+        String tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        Tenant tenant = new Tenant(tenantId);
+
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS (ID_MKTO, ID_ELOQUA, Country, State are not used in this
+        // test;
+        // DUNS needs to be real DUNS otherwise LDC match will not return
+        // DUNS to Account match)
+        List<Object> baseData1 = Arrays.asList("sfdc_id_1", null, null, "fakename1", "fakedomain1.com", null,
+                null, "060902413");
+        List<Object> baseData2 = Arrays.asList("sfdc_id_2", null, null, "fakename2", "fakedomain2.com", null,
+                null, "884745530");
+
+        List<String> keysIntersection = getKeysIntersection(keys1, keys2);
+        List<Object> data1 = new ArrayList<>(Collections.nCopies(baseData1.size(), null));
+        List<Object> data2 = new ArrayList<>(Collections.nCopies(baseData1.size(), null));
+        // Use baseData1 to initialize both 2 records based on their MatchKeys
+        IntStream.range(0, keys1.size()).forEach(idx -> {
+            data1.set(ACCOUNT_KEYIDX_MAP.get(keys1.get(idx)), baseData1.get(ACCOUNT_KEYIDX_MAP.get(keys1.get(idx))));
+        });
+        IntStream.range(0, keys2.size()).forEach(idx -> {
+            data2.set(ACCOUNT_KEYIDX_MAP.get(keys2.get(idx)), baseData1.get(ACCOUNT_KEYIDX_MAP.get(keys2.get(idx))));
+        });
+        // For overlapped keys, set with different input values
+        IntStream.range(0, keysIntersection.size()).forEach(idx -> {
+            data2.set(ACCOUNT_KEYIDX_MAP.get(keysIntersection.get(idx)),
+                    baseData2.get(ACCOUNT_KEYIDX_MAP.get(keysIntersection.get(idx))));
+        });
+        runAndVerifyMatchPair(tenant, keys1, data1, keys2, data2, false);
     }
 
     /**
@@ -614,11 +673,35 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 .toArray(Object[][]::new);
     }
 
+    /**
+     * @return {{CaseIdx, List<String>, List<String>},
+     *          {CaseIdx, List<String>, List<String>},
+     *          ...}
+     */
     @DataProvider(name = "allKeysComboPrioritized", parallel = true)
     private static Object[][] getAllKeysComboPrioritized() {
         List<String> accountKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         List<List<String>> allCombos = getAllKeyGroupSubsets(accountKeys);
         return IntStream.range(0, allCombos.size()).mapToObj(idx -> new Object[] { idx, allCombos.get(idx) })
+                .toArray(Object[][]::new);
+    }
+
+    /**
+     * @return {{CaseIdx, List<String>, List<String>},
+     *          {CaseIdx, List<String>, List<String>},
+     *          ...}
+     */
+    @DataProvider(name = "allReducedKeysPairs", parallel = true)
+    private static Object[][] getAllReducedKeysPairs() {
+        List<String> accountKeys = Arrays.asList(ACCOUNT_KEYS_REDUCED);
+        List<List<String>> allCombos = getAllKeyGroupSubsets(accountKeys);
+        List<Pair<List<String>, List<String>>> keysPairs = new ArrayList<>();
+        for (List<String> keys1 : allCombos)
+            for (List<String> keys2 : allCombos) {
+                keysPairs.add(Pair.of(keys1, keys2));
+            }
+        return IntStream.range(0, keysPairs.size())
+                .mapToObj(idx -> new Object[] { idx, keysPairs.get(idx).getLeft(), keysPairs.get(idx).getRight() })
                 .toArray(Object[][]::new);
     }
 
@@ -819,5 +902,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
             }
         });
         return toReturn;
+    }
+
+    private static List<String> getKeysIntersection(List<String> keys1, List<String> keys2) {
+        return keys1.stream().filter(keys2::contains).collect(Collectors.toList());
     }
 }
