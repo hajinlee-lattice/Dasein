@@ -56,9 +56,12 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     private static final String TEST_TENANT_ID = createNewTenantId();
     private static final Tenant TEST_TENANT = new Tenant(TEST_TENANT_ID);
 
-    /*************************************************
-     * Please DO NOT re-format comments in this class
-     *************************************************/
+    /*****************************************************************************
+     * ATTENTION:
+     * 1. Please DO NOT re-format comments in this class
+     * 2. For tests which use shared tenant TEST_TENANT, please set priority to make
+     * sure they are executed sequentially. Otherwise they could impact each other
+     *****************************************************************************/
 
     /**
      * <pre>
@@ -235,7 +238,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @param partialKeys:
      *            Guaranteed to be prioritized
      */
-    @Test(groups = "functional", priority = 3, dataProvider = "allKeysComboPrioritized", enabled = true)
+    @Test(groups = "functional", dataProvider = "allKeysComboPrioritized", enabled = true)
     private void testPairsWithHighPriKeyMatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         log.info("CaseIdx: {} (Out of 31)   Full Keys: {}   Partial Keys: {}", caseIdx, String.join(",", fullKeys),
@@ -274,7 +277,11 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         if (partialKeys.size() == 1) {
             return;
         }
-        testEntityMatchService.bumpVersion(tenantId);
+        // FIXME: If only bump version without changing tenant, will hit NPE in
+        // EntityAssociateServiceImpl
+        // testEntityMatchService.bumpVersion(tenantId);
+        tenantId = createNewTenantId();
+        tenant = new Tenant(tenantId);
         List<Object> test2Data1 = new ArrayList<>(baseData1);
         List<Object> test2Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
         // Set 2nd record's LOWEST priority MatchKey with same input data with
@@ -357,7 +364,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @param partialKeys:
      *            Guaranteed to be prioritized
      */
-    @Test(groups = "functional", priority = 4, dataProvider = "allKeysComboPrioritized", enabled = true)
+    @Test(groups = "functional", dataProvider = "allKeysComboPrioritized", enabled = true)
     private void testPairsWithHighPriKeyMismatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         log.info("CaseIdx: {} (Out of 31)   Full Key: {}   Partial Key: {}", caseIdx, String.join(",", fullKeys),
@@ -419,7 +426,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @param keys1
      * @param keys2
      */
-    @Test(groups = "functional", priority = 5, dataProvider = "allReducedKeysPairs", enabled = true)
+    @Test(groups = "functional", dataProvider = "allReducedKeysPairs", enabled = true)
     private void testPairAllMismatch(Integer caseIdx, List<String> keys1, List<String> keys2) {
         log.info("CaseIdx: {} (Out of 225)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
                 String.join(",", keys2));
@@ -477,7 +484,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * NOTE: This test takes 3.5 mins and totally 916 test cases
      * Disable this test for now due to some cases are failing which need fix in DP-9300
      */
-    @Test(groups = "functional", priority = 6, dataProvider = "exhaustiveKeysPairWithOverlap", enabled = false)
+    @Test(groups = "functional", dataProvider = "exhaustiveKeysPairWithOverlap", enabled = false)
     private void testMatchedPairs(Integer caseIdx, List<String> keys1, List<String> keys2) {
         log.info("CaseIdx: {} (Out of 916)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
                 String.join(",", keys2));
@@ -492,6 +499,52 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 "060902413");
 
         runAndVerifyMatchPair(tenant, keys1, data, keys2, data, true);
+    }
+
+    // TODO (@Jonathan - DP-9332)
+    @Test(groups = "functional", priority = 3)
+    private void testMultiDomainKeys() {
+
+    }
+
+    /**
+     * AC for DUNS keys
+     *
+     * 1. If customer provided DUNS doesn't exist in LDC, don't use it in
+     * Account match. If using other match keys in LDC could find DUNS, use
+     * matched LDC_DUNS in Account match instead. If no LDC_DUNS matched, return
+     * orphan EntityId
+     *
+     * 2. For any MatchKeys supported in LDC match, as long as it can match to
+     * LatticeAccountId, it should be able to return DUNS of that
+     * LatticeAccountId to Account match (TODO together with DP-9300)
+     */
+    @Test(groups = "functional", priority = 4)
+    private void testDunsKey() {
+        // prevent old data from affecting the test
+        testEntityMatchService.bumpVersion(TEST_TENANT_ID);
+
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS
+        // Duns in input doesn't exist in LDC and there is no other match key,
+        // return orphan EntityId
+        List<Object> data = Arrays.asList(null, null, null, null, null, null, null, "000000000");
+        MatchOutput output = matchAccount(data, true, null, null).getRight();
+        Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
+
+        // If customer provided DUNS doesn't exist in LDC, don't use it in
+        // Account match. If using other match keys in LDC could find DUNS, use
+        // matched LDC_DUNS in Account match instead
+        testEntityMatchService.bumpVersion(TEST_TENANT_ID);
+        data = Arrays.asList(null, null, null, null, null, null, null, "060902413");
+        output = matchAccount(data, true, null, null).getRight();
+        String entityId1 = verifyAndGetEntityId(output);
+        Assert.assertNotNull(entityId1);
+        data = Arrays.asList(null, null, null, "google", null, "usa", "ca", "000000000");
+        output = matchAccount(data, true, null, null).getRight();
+        String entityId2 = verifyAndGetEntityId(output);
+        Assert.assertNotNull(entityId2);
+        Assert.assertEquals(entityId1, entityId2);
     }
 
     private void runAndVerifyMatchPair(Tenant tenant, List<String> keys1, List<Object> data1, List<String> keys2,
