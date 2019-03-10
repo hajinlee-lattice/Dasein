@@ -265,34 +265,6 @@ angular
                 );
         };
 
-        vm.remodel = function () {
-
-            console.log($stateParams);
-
-            var engineId = $stateParams.rating_id,
-                iteration = RatingsEngineStore.getRemodelIteration(),
-                iterationId = iteration.id;
-
-            RatingsEngineStore.getRating(engineId).then(function (engine) {
-                RatingsEngineStore.setRatingEngine(engine);
-            });
-
-            vm.remodelingProgress = true;
-
-            RatingsEngineStore.getRatingModel(engineId, iterationId).then(function (result) {
-                RatingsEngineStore.setRemodelIteration(result);
-                RatingsEngineStore.saveIteration('attributes').then(function (result) {
-                    if (!result.result) {
-                        Banner.success({
-                            message:
-                                "A remodel job has started. You can track it's progress on the jobs page."
-                        });
-                    }
-                    vm.remodelingProgress = result.showProgress;
-                });
-            });
-        }
-
         vm.changeSettings = function () {
             var iteration = RatingsEngineStore.getRemodelIteration(),
                 modelId = iteration.modelSummaryId,

@@ -39,7 +39,7 @@
     <li ng-if="
         (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
         (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
-        <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
+        <a ui-sref="home.model.datacloud({ aiModel: vm.stateParams.aiModel })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico ico-attributes ico-light-gray"></span>
             </span>
