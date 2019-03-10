@@ -300,7 +300,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                     ModelReviewStore.GetReviewData(
                         modelId
                     ).then(function (result) {
-                        console.log('### ReviewData result', result);
+                        // console.log('### ReviewData result', result);
                         var warnings = {};
                         result.forEach(item => {
                             warnings[item.name] = item;
@@ -717,11 +717,15 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                     var deferred = $q.defer(),
                         modelId = $stateParams.modelId;
 
-                    RemodelStore.GetModelReviewDataRules(modelId).then(function (
-                        result
-                    ) {
-                        deferred.resolve(result);
-                    });
+                    if (modelId != undefined) {
+                        RemodelStore.GetModelReviewDataRules(modelId).then(function (
+                            result
+                        ) {
+                            deferred.resolve(result);
+                        });
+                    } else {
+                        deferred.reject();
+                    }
 
                     return deferred.promise;
                 },
