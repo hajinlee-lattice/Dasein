@@ -44,19 +44,11 @@
     </ul>
     <ul class="subheader-tabs-buttons">
         <li class="save-segment" ng-if="vm.checkState('model_iteration')">
-            <div class="split-button">
-                <button 
-                    class="button orange-button"
-                    ng-class="{disabled: vm.remodelingProgress}"
-                    ng-disabled="vm.remodelingProgress"
-                    ng-click="vm.remodel()">
-                    <i ng-if="vm.remodelingProgress" class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                    Remodel</button><button 
-                    class="button orange-button"
-                    ng-class="{disabled: vm.remodelingProgress}"
-                    ng-disabled="vm.remodelingProgress"
-                    ng-click="vm.changeSettings()"><i class="fa fa-cog" aria-hidden="true"></i></button>
-            </div>
+            <button 
+                class="button orange-button"
+                ng-click="vm.changeSettings()">
+                Remodel
+            </button>
         </li>
         <li class="save-segment" ng-if="!vm.checkState('model_iteration')">
             <span ng-if="vm.enableSaveSegmentMsg" class="confirmation-title"><i class="fa fa-check confermation-ok"
