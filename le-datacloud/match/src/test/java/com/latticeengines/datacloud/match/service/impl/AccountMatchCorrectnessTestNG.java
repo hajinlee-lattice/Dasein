@@ -46,12 +46,14 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 
+/**
+ * This test is mainly focused on Account match with AllocateId mode
+ */
 public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AccountMatchCorrectnessTestNG.class);
 
-    private static final String TEST_TENANT_ID = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_"
-            + UUID.randomUUID().toString();
+    private static final String TEST_TENANT_ID = createNewTenantId();
     private static final Tenant TEST_TENANT = new Tenant(TEST_TENANT_ID);
 
     /*************************************************
@@ -89,8 +91,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *       Name + Country: DUNS is from DnB, then confirm existence in AMLookup
      *       Domain + Country: DUNS is from AMLookup
      *       Each path only select 1 set of MatchKeys because this test is focused on Account match, not LDC match
-     * Domain -> [Domain + Country]
-     * Name -> [Name + Country]
+     * Domain -> [Domain + Country] or [Domain]
+     * Name -> [Name + Country] or [Name]
+     * NOTE: Be cautious to add more key groups / mapped keys. It could make some test case sets too large
      **/
     private final static Map<String, List<List<String>>> KEY_GROUP_MAP = new HashMap<>();
     static {
@@ -113,7 +116,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     // combinations in LDC match)
     private final static String[] ACCOUNT_KEYS_PRIORITIZED = { ID_SFDC, ID_MKTO, MatchKey.DUNS.name(),
             MatchKey.Domain.name(), MatchKey.Name.name() };
-    // Only one key per actor to reduce # test case
+    // Reduced set of MatchKeys used in Account match decision graph. Only one
+    // key per actor to reduce # test case
     private final static String[] ACCOUNT_KEYS_REDUCED = { ID_SFDC, MatchKey.DUNS.name(), MatchKey.Domain.name(),
             MatchKey.Name.name() };
     // Account MatchKey -> Index in FIELDS
@@ -197,7 +201,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *
      * Test 1: Construct 2 records. 1st record with full Account MatchKeys
      * (ACCOUNT_KEYS_PRIORITIZED), 2nd record with partial Account MatchKeys
-     * (try all the combo). So overlapped MatchKeys between 2 records is just
+     * (try all the combo). So MatchKeys intersection between 2 records is just
      * 2nd record's MatchKeys. Set 2nd record's HIGHEST priority MatchKey with
      * same input data with 1st record and all the other LOWER priority keys
      * with different input data
@@ -208,7 +212,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * Test 2: Construct 2 records. MatchKeys preparation is same as Test1,
      * while data preparation is different. Set 2nd record's LOWEST priority
      * MatchKey with same input data with 1st record and all the other HIGHER
-     * priority keys with different input data. Also, set 1st record with null
+     * priority keys with different input data. Meanwhile, set 1st record with null
      * value for those higher priority MatchKeys of 2ND record
      *
      * eg. Record1: [sfdc_id_1, null, null, fakedomain1.com, fakename1]
@@ -232,19 +236,19 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *            Guaranteed to be prioritized
      */
     @Test(groups = "functional", priority = 3, dataProvider = "allKeysComboPrioritized", enabled = true)
-    private void testMatchedPairWithHighPriKeyMatch(Integer caseIdx, List<String> partialKeys) {
+    private void testPairsWithHighPriKeyMatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
-        log.info("CaseIdx: {} (Out of 31)   Full Key: {}   Partial Key: {}", caseIdx, String.join(",", fullKeys),
+        log.info("CaseIdx: {} (Out of 31)   Full Keys: {}   Partial Keys: {}", caseIdx, String.join(",", fullKeys),
                 String.join(",", partialKeys));
         // Use different tenant for each test case because data provider is set
         // with parallel execution
-        String tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
         // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
-        // State, DUNS (ID_ELOQUA, Country, State are not used in this test;
+        // State, DUNS (ID_ELOQUA, Country, State are not used in this test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
-        // DUNS to Account match)
+        // DUNS to Account match
         List<Object> baseData1 = Arrays.asList("sfdc_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
                 null, "060902413");
         List<Object> baseData2 = Arrays.asList("sfdc_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
@@ -296,10 +300,10 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 .anyMatch(idx -> ACCOUNT_KEYS_MANY_TO_MANY.contains(partialKeys.get(idx)))) {
             return;
         }
-        // FIXME: If only bump version without change tenant, will hit NPE in
+        // FIXME: If only bump version without changing tenant, will hit NPE in
         // EntityAssociateServiceImpl
         // testEntityMatchService.bumpVersion(tenantId);
-        tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        tenantId = createNewTenantId();
         tenant = new Tenant(tenantId);
         List<Object> test3Data1 = new ArrayList<>(baseData1);
         List<Object> test3Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
@@ -329,7 +333,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *
      * Construct 2 records. 1st record with full Account MatchKeys
      * (ACCOUNT_KEYS_PRIORITIZED), 2nd record with partial Account MatchKeys
-     * (try all the combo). So overlapped MatchKeys between 2 records is just
+     * (try all the combo). So MatchKeys intersection between 2 records is just
      * 2nd record's MatchKeys. Set 2nd record's HIGHEST priority MatchKey with
      * different input data with 1st record and all the other LOWER priority keys
      * with same input data. If 2nd record's HIGHEST priority MatchKey has
@@ -354,19 +358,19 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *            Guaranteed to be prioritized
      */
     @Test(groups = "functional", priority = 4, dataProvider = "allKeysComboPrioritized", enabled = true)
-    private void testPairWithHighPriKeyMismatch(Integer caseIdx, List<String> partialKeys) {
+    private void testPairsWithHighPriKeyMismatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         log.info("CaseIdx: {} (Out of 31)   Full Key: {}   Partial Key: {}", caseIdx, String.join(",", fullKeys),
                 String.join(",", partialKeys));
         // Use different tenant for each test case because data provider is set
         // with parallel execution
-        String tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
         // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
-        // State, DUNS (ID_ELOQUA, Country, State are not used in this test;
+        // State, DUNS (ID_ELOQUA, Country, State are not used in this test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
-        // DUNS to Account match)
+        // DUNS to Account match
         List<Object> baseData1 = Arrays.asList("sfdc_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
                 null, "060902413");
         List<Object> baseData2 = Arrays.asList("sfdc_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
@@ -421,14 +425,14 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 String.join(",", keys2));
         // Use different tenant for each test case because data provider is set
         // with parallel execution
-        String tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
         // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS (ID_MKTO, ID_ELOQUA, Country, State are not used in this
-        // test;
+        // test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
-        // DUNS to Account match)
+        // DUNS to Account match
         List<Object> baseData1 = Arrays.asList("sfdc_id_1", null, null, "fakename1", "fakedomain1.com", null,
                 null, "060902413");
         List<Object> baseData2 = Arrays.asList("sfdc_id_2", null, null, "fakename2", "fakedomain2.com", null,
@@ -461,7 +465,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * Every time construct 2 records.
      * Each record uses a sets of MatchKey groups as match keys.
      * 2 records have some overlapped MatchKey groups and all overlapped MatchKey groups have matched value (no conflict)
-     * Expectation: Submit 2 records to match service sequentially and should always return same EntityId
+     * Submit 2 records to match service sequentially and should always return same EntityId
      *
      * eg.
      * Record 1: MatchKey group = ID_SFDC + DUNS, MatchKey = ID_SFDC + Name + Country
@@ -471,15 +475,16 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * they do overlapped MatchKeys in Account match
      *
      * NOTE: This test takes 3.5 mins and totally 916 test cases
+     * Disable this test for now due to some cases are failing which need fix in DP-9300
      */
-    @Test(groups = "functional", priority = 10, dataProvider = "exhaustiveKeysPairWithOverlap", enabled = false)
+    @Test(groups = "functional", priority = 6, dataProvider = "exhaustiveKeysPairWithOverlap", enabled = false)
     private void testMatchedPairs(Integer caseIdx, List<String> keys1, List<String> keys2) {
         log.info("CaseIdx: {} (Out of 916)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
                 String.join(",", keys2));
 
         // Use different tenant for each test case because data provider is set
         // with parallel execution
-        String tenantId = AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+        String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
         // Data and Fields are all the same, but MatchKey passed to MatchInput
         // are different
@@ -906,5 +911,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     private static List<String> getKeysIntersection(List<String> keys1, List<String> keys2) {
         return keys1.stream().filter(keys2::contains).collect(Collectors.toList());
+    }
+
+    private static String createNewTenantId() {
+        return AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
     }
 }
