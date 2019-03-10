@@ -154,4 +154,9 @@ public class TenantServiceImpl implements TenantService {
         return tenantEntityMgr.findByTenantName(tenantName);
     }
 
+    @Override
+    public List<Tenant> findByTenantType(TenantType tenantType) {
+        return tenantEntityMgr.findByTenantType(tenantType);
+    }
+
 }

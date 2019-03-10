@@ -3,7 +3,10 @@ package com.latticeengines.security.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.security.Tenant;
+<<<<<<< 4d6afe0b5f92e8abd0b4cc91823b8feb407296ae
 import com.latticeengines.domain.exposed.security.TenantStatus;
+=======
+>>>>>>> new changes on POC tenant clean up process
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public interface TenantService {
@@ -31,4 +34,6 @@ public interface TenantService {
     Tenant findByTenantId(String tenantId);
 
     Tenant findByTenantName(String tenantName);
+
+    List<Tenant> findByTenantType(TenantType poc);
 }
