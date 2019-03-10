@@ -83,8 +83,10 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
         Ticket ticket = authenticate(username, password);
         if (ticket != null) {
-            user.setInvalidLoginAttempts(0);
-            gaUserEntityMgr.update(user);
+            if (user.getInvalidLoginAttempts() > 0) {
+                user.setInvalidLoginAttempts(0);
+                gaUserEntityMgr.update(user);
+            }
             return ticket;
         } else {
 
