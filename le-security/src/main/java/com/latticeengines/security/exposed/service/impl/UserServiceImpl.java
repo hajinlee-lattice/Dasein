@@ -424,6 +424,9 @@ public class UserServiceImpl implements UserService {
                     return false;
                 }
             } catch (LedpException e) {
+                if (LedpCode.LEDP_18001.equals(e.getCode()) || LedpCode.LEDP_19015.equals(e.getCode())) {
+                    return false;
+                }
                 throw new LoginException(e);
             }
 
