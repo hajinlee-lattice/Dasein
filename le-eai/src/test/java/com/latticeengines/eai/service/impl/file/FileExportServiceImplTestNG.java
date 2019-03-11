@@ -63,7 +63,7 @@ public class FileExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
     public void setup() throws Exception {
         super.setup();
         dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file.avro");
-        sourceFilePath = "/tmp/sourceFiles/file.avro";
+        sourceFilePath = "/tmp/sourceFiles";
         targetCSVPath = "output";
         HdfsUtils.rmdir(miniclusterConfiguration, sourceFilePath);
         HdfsUtils.mkdir(miniclusterConfiguration, sourceFilePath);
