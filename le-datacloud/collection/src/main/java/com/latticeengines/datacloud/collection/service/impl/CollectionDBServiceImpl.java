@@ -1063,6 +1063,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     public void consolidate() {
 
+        /*
         if (consolidationExecPeriod == 86400 * 7) {
 
             int weekDay = getWeekDay(System.currentTimeMillis());
@@ -1072,7 +1073,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             }
 
-        }
+        }*/
 
         //current workers ingested
         List<String> statusList = Collections.singletonList(CollectionWorker.STATUS_INGESTED);
@@ -1104,13 +1105,14 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                 //check consolidation period
                 Timestamp ts = vendorConfig.getLastConsolidated();
+                /*
                 boolean triggerConsolidation =
                         ts == null || (now - ts.getTime()) / 1000 >= consolidationExecPeriod;
                 if (!triggerConsolidation) {
 
                     continue;
 
-                }
+                }*/
 
                 //log prelude
                 log.info("issue consolidation request to datacloudapi for " + vendor);
