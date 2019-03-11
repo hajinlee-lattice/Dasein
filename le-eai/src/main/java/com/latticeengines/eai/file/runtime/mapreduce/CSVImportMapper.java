@@ -434,7 +434,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     @VisibleForTesting
     Number parseStringToNumber(String inputStr) throws ParseException,NullPointerException {
         inputStr = inputStr.trim();
-        LOG.info("inputStr is " + inputStr);
         if (SCIENTIFIC_PTN.matcher(inputStr).matches()) {
             // handle scientific notation
             return Double.parseDouble(inputStr);
