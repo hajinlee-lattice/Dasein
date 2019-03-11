@@ -46,7 +46,7 @@
         }
         &.mini-tile {
             width:15%; 
-            padding: 2px 0 2px;
+            padding: 0;
         }
         &.extended-tile {
             margin-left:10px;
@@ -78,8 +78,12 @@
 
 .jobs-tile-header {
     word-wrap: break-word;
-    margin-bottom: 20px;
-    margin-top: 10px;
+    padding: 8px 10px 7px 9px;
+    &:after{
+        content: "";
+        display: table;
+        clear: both;
+    }
     h2 {
         background-size: 15px;
         background-repeat: no-repeat;
@@ -94,22 +98,22 @@
             padding-left: 0px;
         }
         &.new-count {
-            padding-top: 10px; 
+            padding-top: 2px; 
             float:left;
             color: #32CD32;
         }
         &.update-count {
-            padding-top: 10px; 
+            padding-top: 2px; 
             float:left;
             color: #32CD32;
         }
         &.delete-count {
-            padding-top: 10px; 
+            padding-top: 2px; 
             float:left;
             color: #4682B4;
         }
         &.unmatched-count {
-            padding-top: 10px; 
+            padding-top: 2px; 
             float:left; 
             color: #EF6A30;
         }
@@ -121,6 +125,9 @@
             right: 1em;
             position: absolute;
         }
+    }
+    span.fa {
+        @include vertical-center-anything;    
     }
 }
 

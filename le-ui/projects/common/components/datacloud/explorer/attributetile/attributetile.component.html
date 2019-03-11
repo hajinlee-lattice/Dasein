@@ -68,7 +68,19 @@
                         <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                     </div>
                 </div>
-                <strong>{{enrichment.DisplayName}}</strong>
+                <div class="category-label">
+                    <span class="category-label-span">{{enrichment.DisplayName}}</span>
+                    <span class="more-info show-tooltip top right delay" ng-if="enrichment.LastDataRefresh">
+                        i
+                        <div class="tooltip_ small">
+                            <div class="cover">
+                                <p>
+                                    {{enrichment.LastDataRefresh}}
+                                </p>
+                            </div>
+                        </div>
+                    </span>
+                </div>
             </h2>
             <!--// keep this below the h2 so that the z-indexes work with out setting z-index in the css -->
             <ul class="tags">
