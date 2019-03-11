@@ -11,6 +11,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -26,6 +28,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class MatchInputValidatorUnitTestNG {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchInputValidatorUnitTestNG.class);
 
     private final int maxRealTimeInput = 1000;
 
@@ -74,6 +78,7 @@ public class MatchInputValidatorUnitTestNG {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
         input.setPredefinedSelection(Predefined.Model);
+        input.setDataCloudVersion("2.0.17");
         Boolean failed;
 
 
@@ -155,8 +160,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
-            System.out.println("Match Input Validation failed unexpectedly with exception: " +  e.getMessage());
-            e.printStackTrace();
+            log.error("Match Input Validation failed unexpectedly with exception", e);
         }
         Assert.assertFalse(failed, "Should pass on valid data.");
 
@@ -172,8 +176,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
-            System.out.println("Match Input Validation failed unexpectedly with exception: " +  e.getMessage());
-            e.printStackTrace();
+            log.error("Match Input Validation failed unexpectedly with exception", e);
         }
         Assert.assertFalse(failed, "Should pass on DUNS only validation.");
     }
