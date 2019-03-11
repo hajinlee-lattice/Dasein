@@ -82,12 +82,13 @@ public class MatchKeyUtils {
     public static Map<MatchKey, List<String>> resolveKeyMap(List<String> fields) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
 
-        keyMap.put(MatchKey.Domain, new ArrayList<>());
-
         for (String domainField : domainFields) {
             for (String field : fields) {
                 String lowerField = field.toLowerCase();
                 if (domainField.equals(lowerField)) {
+                    if (keyMap.get(MatchKey.Domain) == null) {
+                        keyMap.put(MatchKey.Domain, new ArrayList<>());
+                    }
                     keyMap.get(MatchKey.Domain).add(field);
                 }
             }
