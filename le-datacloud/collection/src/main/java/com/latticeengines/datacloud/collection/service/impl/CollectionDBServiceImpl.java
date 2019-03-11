@@ -145,11 +145,12 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.orbintelligencev2.timestamp}")
     private String orbIntelligenceV2TimestampColumn;
 
+    /*
     @Value("${datacloud.collection.consolidation.exec.period}")
     private int consolidationExecPeriod;
 
     @Value("${datacloud.collection.consolidation.exec.weekday}")
-    private int consolidationExecWeekDay;
+    private int consolidationExecWeekDay;*/
 
     private long prevCollectMillis = 0;
     private int prevCollectTasks;
