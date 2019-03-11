@@ -23,11 +23,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
+import com.latticeengines.datacloud.match.service.impl.EntityMatchInternalServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -49,6 +51,9 @@ public class TestEntityMatchService {
 
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
+
+    @Inject
+    private EntityMatchInternalServiceImpl entityMatchInternalService;
 
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
@@ -125,6 +130,10 @@ public class TestEntityMatchService {
      */
     public void bumpVersion(@NotNull String tenantId) {
         Arrays.stream(EntityMatchEnvironment.values()).forEach(env -> bumpVersion(tenantId, env));
+
+        // cleanup seed & lookup cache otherwise invalid entries with old version will
+        // still be looked up
+        invalidateSeedLookupCache();
     }
 
     /**
@@ -141,6 +150,24 @@ public class TestEntityMatchService {
         // standardize tenant ID
         Tenant tenant = new Tenant(CustomerSpace.parse(tenantId).getTenantId());
         entityMatchVersionService.bumpVersion(env, tenant);
+
+        // cleanup seed & lookup cache otherwise invalid entries with old version will
+        // still be looked up
+        invalidateSeedLookupCache();
+    }
+
+    /*
+     * cleanup lookup & seed cache if they are already instantiated
+     */
+    private void invalidateSeedLookupCache() {
+        Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService.getSeedCache();
+        if (seedCache != null) {
+            seedCache.invalidateAll();
+        }
+        Cache<Pair<String, EntityLookupEntry>, String> lookupCache = entityMatchInternalService.getLookupCache();
+        if (lookupCache != null) {
+            lookupCache.invalidateAll();
+        }
     }
 
     private <R> R prepareTestData(@NotNull Tenant tenant, @NotNull EntityMatchEnvironment env, @NotNull String entity,
