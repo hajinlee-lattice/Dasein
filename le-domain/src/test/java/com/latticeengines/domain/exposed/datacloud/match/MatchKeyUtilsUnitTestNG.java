@@ -2,13 +2,22 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MatchKeyUtilsUnitTestNG {
 
@@ -62,6 +71,58 @@ public class MatchKeyUtilsUnitTestNG {
             keyPartition = MatchKeyUtils.evalKeyPartition(tuple);
             Assert.assertEquals(keyPartition, expectedKeyPartition);
         }
+    }
+
+    @Test(groups = "unit")
+    public void testResolveKeyPosition() {
+        List<String> fields = Arrays
+                .asList(new String[] { MatchKey.Name.name(), MatchKey.Country.name(), MatchKey.State.name(),
+                        MatchKey.City.name(), MatchKey.DUNS.name(), MatchKey.Domain.name(), MatchKey.Email.name(),
+                        MatchKey.EntityId.name(), InterfaceName.AccountId.name(), "SFDC_ID", "MKTO_ID" });
+        MatchInput input = new MatchInput();
+        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(fields);
+        keyMap.put(MatchKey.SystemId, Arrays.asList(InterfaceName.AccountId.name(), "SFDC_ID", "MKTO_ID"));
+        EntityKeyMap entityKeyMap = new EntityKeyMap();
+        entityKeyMap.setKeyMap(keyMap);
+        input.setFields(fields);
+        input.setKeyMap(keyMap);
+        input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), entityKeyMap));
+
+        Map<MatchKey, List<Integer>> keyPos = MatchKeyUtils.getKeyPositionMap(input);
+        Assert.assertNotNull(keyPos);
+        verifyResolvedKeyPos(fields, keyMap, keyPos);
+        Map<String, Map<MatchKey, List<Integer>>> entityKeyPos = MatchKeyUtils.getEntityKeyPositionMaps(input);
+        Assert.assertNotNull(entityKeyPos);
+        Assert.assertNotNull(entityKeyPos.get(BusinessEntity.Account.name()));
+        verifyResolvedKeyPos(fields, keyMap, entityKeyPos.get(BusinessEntity.Account.name()));
+    }
+
+    private void verifyResolvedKeyPos(List<String> fields, Map<MatchKey, List<String>> keyMap,
+            Map<MatchKey, List<Integer>> keyPos) {
+        Set<String> resolvedFldSet = new HashSet<>();
+        Set<Integer> resolvedFldPosSet = new HashSet<>();
+        Assert.assertTrue(MapUtils.isNotEmpty(keyMap));
+        Assert.assertTrue(MapUtils.isNotEmpty(keyPos));
+        Assert.assertEquals(keyMap.size(), keyPos.size());
+        for (Map.Entry<MatchKey, List<String>> ent : keyMap.entrySet()) {
+            List<String> keyFields = ent.getValue();
+            List<Integer> keyIndexes = keyPos.get(ent.getKey());
+            Assert.assertTrue(CollectionUtils.isNotEmpty(keyFields));
+            Assert.assertTrue(CollectionUtils.isNotEmpty(keyIndexes));
+            Assert.assertEquals(keyFields.size(), keyIndexes.size());
+            for (int i = 0; i < keyFields.size(); i++) {
+                // Verify no duplicate
+                Assert.assertFalse(resolvedFldSet.contains(keyFields.get(i)));
+                resolvedFldSet.add(keyFields.get(i));
+                Assert.assertFalse(resolvedFldPosSet.contains(keyIndexes.get(i)));
+                resolvedFldPosSet.add(keyIndexes.get(i));
+                // Verify correctness of field position
+                Assert.assertEquals(keyFields.get(i), fields.get(keyIndexes.get(i)));
+            }
+        }
+        // Verify all the field positions are resolved
+        Assert.assertEquals(resolvedFldSet.size(), fields.size());
+        Assert.assertEquals(resolvedFldPosSet.size(), fields.size());
     }
 
     // name, countrycode, state, city, expected match key level
