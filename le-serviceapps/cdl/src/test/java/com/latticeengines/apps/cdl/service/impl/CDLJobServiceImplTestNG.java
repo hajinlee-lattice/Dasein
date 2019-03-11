@@ -79,7 +79,7 @@ public class CDLJobServiceImplTestNG {
                 () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testSubmitJob1() {
         when(dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE)).thenReturn(null);
 
