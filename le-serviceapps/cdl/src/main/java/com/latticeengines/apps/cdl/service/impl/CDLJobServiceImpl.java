@@ -8,16 +8,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
@@ -26,6 +31,8 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -46,8 +53,8 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @Component("cdlJobService")
 public class CDLJobServiceImpl implements CDLJobService {
@@ -57,6 +64,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String LE_STACK = "LE_STACK";
     private static final String QUARTZ_STACK = "quartz";
     private static final String USERID = "Auto Scheduled";
+    private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
@@ -105,14 +113,14 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private CDLProxy cdlProxy;
 
-    @Value("${yarn.pls.url}")
-    private String internalResourceHostPort;
+    @Value("${cdl.app.public.url:https://localhost:9081}")
+    private String appPublicUrl;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @PostConstruct
     public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -183,11 +191,13 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void orchestrateJob() {
-        Map<String, String> activeStack = internalResourceRestApiProxy.getActiveStack();
-        String clusterId = activeStack.get("EMRClusterId");
+        String clusterId = getCurrentClusterID();
         log.info(String.format("Current cluster id is : %s.", clusterId));
 
-        List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types, jobStatuses);
+        List<WorkflowJob> runningPAJobs = new ArrayList<>();
+        if (StringUtils.isNotEmpty(clusterId)) {
+            runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types, jobStatuses);
+        }
         int runningPAJobsCount = runningPAJobs.size();
         int autoScheduledPAJobsCount = 0;
         for (WorkflowJob workflowJob : runningPAJobs) {
@@ -217,6 +227,28 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String getCurrentClusterID() {
+        String url = appPublicUrl + STACK_INFO_URL;
+        String clusterId = null;
+        try {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                    Collections.singleton(HttpServerErrorException.class), null);
+            AtomicReference<Map<String, String>> stackInfo = new AtomicReference<>();
+            retry.execute(retryContext -> {
+                stackInfo.set(restTemplate.getForObject(url, Map.class));
+                return true;
+            });
+            if (MapUtils.isNotEmpty(stackInfo.get()) && stackInfo.get().containsKey("EMRClusterId")) {
+                clusterId = stackInfo.get().get("EMRClusterId");
+            }
+        } catch (Exception e) {
+            log.error("Get current cluster id failed. ", e);
+        }
+
+        return clusterId;
     }
 
     private List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> getNeedInvokeDataFeedMap() {
