@@ -869,7 +869,7 @@ attr-categories,
                         font-size: 16px;
                         margin: 0.45em 0 1.25em;
                         font-weight: bold;
-                        .category-icon {
+                        .category-icon { 
                             position: relative;
                             height: 36px;
                             width: 36px;
@@ -905,6 +905,23 @@ attr-categories,
                             display: block;
                             max-height: 3.2em;
                             overflow: hidden;
+                        }
+                        .more-info {
+                            padding: 2px;
+                            text-align: center;
+                            width: 11px;
+                            height: 11px;
+                            position: relative;
+                            top: -2px;
+                            font-size: 8px;
+                            text-transform: none;
+                            cursor: pointer;
+                            .tooltip_ {
+                                .cover {
+                                    text-align: center;
+                                    color: white;
+                                }
+                            }
                         }
                     }
                 }
