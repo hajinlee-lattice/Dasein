@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
@@ -116,6 +118,16 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public List<Tenant> getAllTenants() {
         return tenantEntityMgr.findAll();
+    }
+
+    @Override
+    public List<Tenant> getTenantsByStatus(TenantStatus status) {
+        return tenantEntityMgr.findAllByStatus(status);
+    }
+
+    @Override
+    public List<Tenant> getTenantByType(TenantType type) {
+        return tenantEntityMgr.findAllByType(type);
     }
 
     @Override

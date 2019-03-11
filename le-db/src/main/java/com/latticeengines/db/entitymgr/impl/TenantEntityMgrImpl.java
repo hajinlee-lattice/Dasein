@@ -18,6 +18,8 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.repository.TenantRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 @Component("tenantEntityMgr")
 public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Long> implements TenantEntityMgr {
@@ -63,6 +65,16 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantName(String tenantName) {
         return tenantRepository.findByName(tenantName);
+    }
+
+    @Override
+    public List<Tenant> findAllByStatus(TenantStatus status) {
+        return tenantRepository.findAllByStatus(status);
+    }
+
+    @Override
+    public List<Tenant> findAllByType(TenantType type) {
+        return tenantRepository.findAllByTenantType(type);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.latticeengines.admin.service.impl;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +37,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        List<Tenant> tenants = tenantService.getAllTenants();
-        List<Tenant> tempTenants = tenants.stream().filter(tenant -> TenantType.POC.equals(tenant.getTenantType()))
-                .collect(Collectors.toList());
+        List<Tenant> tempTenants = tenantService.getTenantByType(TenantType.POC);
         for (Tenant tenant : tempTenants) {
             long registerTime = tenant.getRegisteredTime();
             long currentTime = System.currentTimeMillis();

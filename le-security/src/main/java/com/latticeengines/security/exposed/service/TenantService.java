@@ -3,6 +3,8 @@ package com.latticeengines.security.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 public interface TenantService {
 
@@ -17,6 +19,10 @@ public interface TenantService {
     void discardTenant(Tenant tenant);
     
     List<Tenant> getAllTenants();
+
+    List<Tenant> getTenantsByStatus(TenantStatus status);
+
+    List<Tenant> getTenantByType(TenantType type);
 
     boolean getTenantEmailFlag(String tenantId);
 

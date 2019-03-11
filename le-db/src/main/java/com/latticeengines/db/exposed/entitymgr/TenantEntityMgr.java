@@ -3,6 +3,8 @@ package com.latticeengines.db.exposed.entitymgr;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
 
@@ -13,5 +15,9 @@ public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
     List<String> findAllTenantId();
 
     Tenant findByTenantName(String tenantName);
+
+    List<Tenant> findAllByStatus(TenantStatus status);
+
+    List<Tenant> findAllByType(TenantType type);
 
 }
