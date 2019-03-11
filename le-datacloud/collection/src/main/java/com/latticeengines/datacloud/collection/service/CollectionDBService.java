@@ -21,5 +21,7 @@ public interface CollectionDBService {
 
     void ingest();
 
+    void consolidate();
+
     void cleanup(Timestamp start, Timestamp end);
 }
