@@ -61,7 +61,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     /**
      * <pre>
-     * FIXME change the field headers to use test helper classes Fields:
      * [ SFDC, MKTO, ELOQUA, Name, Domain, Country, State ]
      * </pre>
      */
@@ -363,11 +362,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         if (partialKeys.size() == 1) {
             return;
         }
-        // FIXME If bump version without changing tenant, got NPE at
-        // EntityAssociateServiceImpl.lambda$getOrAllocate$9(EntityAssociateServiceImpl.java:206
-        // testEntityMatchService.bumpVersion(tenantId);
-        tenantId = createNewTenantId();
-        tenant = new Tenant(tenantId);
+        testEntityMatchService.bumpVersion(tenantId);
         List<Object> test2Data1 = new ArrayList<>(baseData1);
         List<Object> test2Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
         // Set 2nd record's LOWEST priority MatchKey with same input data with
@@ -393,11 +388,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 .anyMatch(idx -> ACCOUNT_KEYS_MANY_TO_MANY.contains(partialKeys.get(idx)))) {
             return;
         }
-        // FIXME If bump version without changing tenant, got NPE at
-        // EntityAssociateServiceImpl.lambda$getOrAllocate$9(EntityAssociateServiceImpl.java:206
-        // testEntityMatchService.bumpVersion(tenantId);
-        tenantId = createNewTenantId();
-        tenant = new Tenant(tenantId);
+        testEntityMatchService.bumpVersion(tenantId);
         List<Object> test3Data1 = new ArrayList<>(baseData1);
         List<Object> test3Data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
         // Set 2nd record's LOWEST priority MatchKey with same input data with
