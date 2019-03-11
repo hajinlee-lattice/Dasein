@@ -581,8 +581,12 @@ angular.module('common.datacloud')
                 offset = opts.offset || 0,
                 max = opts.max || null,
                 onlySelectedAttributes = opts.onlySelectedAttributes || null,
-                url = opts.url || this.url('/attributes', '/insights');
-
+                url = opts.url || this.url('/attributes', '/insights'); 
+                /**
+                 * /datacollection/attributes
+                 *  - or - 
+                 * /datacollection/insights
+                 */
             $http({
                 method: 'get',
                 url: url,
@@ -593,6 +597,7 @@ angular.module('common.datacloud')
                 }
             }).then(function (response) {
                 deferred.resolve(response);
+                console.log(response);
             });
 
             return deferred.promise;
