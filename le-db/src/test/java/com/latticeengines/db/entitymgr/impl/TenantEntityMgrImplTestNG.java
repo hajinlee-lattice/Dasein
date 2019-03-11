@@ -64,7 +64,7 @@ public class TenantEntityMgrImplTestNG extends DbFunctionalTestNGBase {
         assertEquals(t.getId(), TENANT_ID);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void findAllByStatus() {
         List<Tenant> tenantList = tenantEntityMgr.findAllByStatus(TenantStatus.ACTIVE);
         log.info(JsonUtils.serialize(tenantList));
@@ -72,7 +72,7 @@ public class TenantEntityMgrImplTestNG extends DbFunctionalTestNGBase {
         assertTrue(tenantList.contains(t));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void findAllByTenantType() {
         List<Tenant> tenantList = tenantEntityMgr.findAllByType(TenantType.QA);
         log.info(JsonUtils.serialize(tenantList));
