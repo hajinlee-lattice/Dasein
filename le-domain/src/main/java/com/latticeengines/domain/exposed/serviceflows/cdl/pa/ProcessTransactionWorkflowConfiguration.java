@@ -57,13 +57,6 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder apsRollingPeriod(String apsRollingPeriod) {
-            updateTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
-            rebuildTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
-
-            return this;
-        }
-
         public Builder dataQuotaLimit(Long dataQuotaLimit) {
             processTransactionStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
             updateTransactionWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);

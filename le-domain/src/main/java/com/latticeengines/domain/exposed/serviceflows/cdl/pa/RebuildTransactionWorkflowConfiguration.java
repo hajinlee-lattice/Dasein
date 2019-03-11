@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 
 public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -17,12 +16,10 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
 
         private RebuildTransactionWorkflowConfiguration configuration = new RebuildTransactionWorkflowConfiguration();
         private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
-        private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             processTransactionStepConfiguration.setCustomerSpace(customerSpace);
-            awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -30,12 +27,10 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             processTransactionStepConfiguration
                     .setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -63,11 +58,6 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder apsRollingPeriod(String apsRollingPeriod) {
-            awsPythonDataConfiguration.setRollingPeriod(apsRollingPeriod);
-            return this;
-        }
-
         public Builder dataQuotaLimit(Long dataQuotaLimit) {
             processTransactionStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
             return this;
@@ -77,8 +67,6 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             configuration.setContainerConfiguration("rebuildTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processTransactionStepConfiguration);
-            awsPythonDataConfiguration.setSubmission(true);
-            configuration.add(awsPythonDataConfiguration);
             return configuration;
         }
     }

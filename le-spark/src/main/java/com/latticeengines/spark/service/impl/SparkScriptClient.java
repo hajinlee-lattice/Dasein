@@ -1,5 +1,6 @@
 package com.latticeengines.spark.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -11,7 +12,6 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -64,13 +64,18 @@ class SparkScriptClient {
         if (params == null) {
             params = om.createObjectNode();
         }
+        String workspace = config.getWorkspace();
+        String checkpointDir = "/spark-checkpoints";
+        if (StringUtils.isNotBlank(workspace)) {
+            checkpointDir = workspace + File.separator + "checkpoints";
+        }
         String statement = getInitializeTemplate( //
                 JsonUtils.serialize(targets), //
                 JsonUtils.serialize(input), //
-                JsonUtils.serialize(params));
-        String result = runStatement(statement);
+                JsonUtils.serialize(params),
+                checkpointDir);
+        runStatement(statement);
         log.info("Script env initialized.");
-        log.debug("Initialized:\n" + result);
     }
 
     String printOutputStr() {
@@ -82,7 +87,6 @@ class SparkScriptClient {
         String statement = getFinalizeTemplate();
         String result = runStatement(statement);
         log.info("Script env finalized.");
-        log.debug("Finalize:\n" + result);
         try {
             return om.readValue(result, new TypeReference<List<HdfsDataUnit>>() {
             });
@@ -93,7 +97,9 @@ class SparkScriptClient {
 
     String runStatement(String statement) {
         int id = submitStatement(statement);
-        return waitStatementOutput(id).block();
+        String statementPrint = waitStatementOutput(id).block();
+        log.info("Statement " + id + " prints: " + statementPrint);
+        return statementPrint;
     }
 
     private int submitStatement(String statement) {
@@ -120,7 +126,7 @@ class SparkScriptClient {
                 Thread.sleep(10000L);
                 statement = getStatement(id);
                 log.info("Statement " + id +" is " + statement.state //
-                        + " - " + String.valueOf(statement.progress * 100));
+                        + " - " + statement.progress * 100);
             }
             if (LivyStatement.State.available.equals(statement.state)) {
                 if ("error".equals(statement.output.status)) {
@@ -139,7 +145,7 @@ class SparkScriptClient {
     private LivyStatement getStatement(int id) {
         String resp = webClient //
                 .method(HttpMethod.GET) //
-                .uri(URI_STATEMENTS + "/" + String.valueOf(id)) //
+                .uri(URI_STATEMENTS + "/" + id) //
                 .retrieve() //
                 .bodyToMono(String.class) //
                 .block();
@@ -150,11 +156,12 @@ class SparkScriptClient {
         }
     }
 
-    private String getInitializeTemplate(String targets, String input, String params) {
+    private String getInitializeTemplate(String targets, String input, String params, String checkpointDir) {
         return getTemplate("initialize", ImmutableMap.of( //
-                "{{TARGETS}}", targets,
-                "{{INPUT}}", input,
-                "{{PARAMS}}", params
+                "{{TARGETS}}", targets, //
+                "{{INPUT}}", input, //
+                "{{PARAMS}}", params, //
+                "{{CHECKPOINT_DIR}}", checkpointDir //
         ));
     }
 
@@ -181,18 +188,14 @@ class SparkScriptClient {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
         String result;
         try {
-            result = IOUtils.toString(is, Charset.forName("UTF-8"));
+            result = IOUtils.toString(is, Charset.defaultCharset());
         } catch (IOException e) {
             throw new RuntimeException("Failed to read " + resource, e);
         }
         for (Map.Entry<String, String> entry: replace.entrySet()) {
             String token = entry.getKey();
             String value = entry.getValue();
-            if (SparkInterpreter.Scala.equals(interpreter)) {
-                result = result.replace(token, StringEscapeUtils.escapeJava(value));
-            } else {
-                result = result.replace(token, value);
-            }
+            result = result.replace(token, value);
         }
         return result;
     }

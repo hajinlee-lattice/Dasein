@@ -47,10 +47,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
@@ -726,5 +728,16 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             return attributes.stream().map(Attribute::getColumnMetadata)
                     .collect(Collectors.toList());
         }
+    }
+
+    @JsonProperty
+    public HdfsDataUnit toHdfsDataUnit(String alias) {
+        if (StringUtils.isBlank(alias)) {
+            alias = this.getName();
+        }
+        HdfsDataUnit unit = new HdfsDataUnit();
+        unit.setName(alias);
+        unit.setPath(PathUtils.toAvroGlob(this.getExtracts().get(0).getPath()));
+        return unit;
     }
 }

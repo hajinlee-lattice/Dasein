@@ -46,22 +46,23 @@ public class LivySessionHolder {
 
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
-    public LivySession getOrCreateLivySession(String jobName) {
+    public LivySession createLivySession(String jobName) {
         LivySession session = livySessionHolder.get();
-        if (session == null) {
-            String livyHost;
-            if (Boolean.TRUE.equals(useEmr)) {
-                livyHost = emrCacheService.getLivyUrl();
-            } else {
-                livyHost = "http://localhost:8998";
-            }
-            Runtime.getRuntime().addShutdownHook(new Thread(this::killSession));
-            if (StringUtils.isBlank(jobName)) {
-                jobName = "Workflow";
-            }
-            session = sessionService.startSession(livyHost, jobName, getLivyConf(), getSparkConf());
-            livySessionHolder.set(session);
+        if (session != null) {
+            killSession();
         }
+        String livyHost;
+        if (Boolean.TRUE.equals(useEmr)) {
+            livyHost = emrCacheService.getLivyUrl();
+        } else {
+            livyHost = "http://localhost:8998";
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(this::killSession));
+        if (StringUtils.isBlank(jobName)) {
+            jobName = "Workflow";
+        }
+        session = sessionService.startSession(livyHost, jobName, getLivyConf(), getSparkConf());
+        livySessionHolder.set(session);
         return session;
     }
 

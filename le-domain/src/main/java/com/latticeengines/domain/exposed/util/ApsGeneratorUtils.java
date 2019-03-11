@@ -19,9 +19,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
-public class AwsApsGeneratorUtils {
+public class ApsGeneratorUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(AwsApsGeneratorUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ApsGeneratorUtils.class);
 
     public static void setupMetaData(Table apsTable, Map<String, List<Product>> productMap) {
         List<Attribute> attributes = apsTable.getAttributes();
