@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -649,6 +650,13 @@ public class MatchInput implements Fact, Dimension {
 
         public void setSystemIdPriority(List<String> systemIdPriority) {
             this.systemIdPriority = systemIdPriority;
+        }
+
+        public void addMatchKey(MatchKey key, String attr) {
+            if (keyMap.get(key) == null) {
+                keyMap.put(key, new ArrayList<>());
+            }
+            keyMap.get(key).add(attr);
         }
 
     }
