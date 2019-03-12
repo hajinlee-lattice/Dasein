@@ -58,16 +58,6 @@ angular
         $state.go('home.ratingsengine.dashboard', { "rating_id": vm.stateParams.rating_id, "modelId": vm.stateParams.modelId, viewingIteration: false });
     }
 
-    vm.remodelIteration = function() {
-        var engineId = vm.ratingEngine.id,
-            modelId = vm.model.ModelDetails.Name;
-
-        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-            $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
-        });
-    }
-
     vm.checkToState = function(toState) {
         return StateHistory.lastTo().name == toState;
     }
