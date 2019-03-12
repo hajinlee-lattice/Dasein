@@ -5,6 +5,7 @@ import './customfields/customfields.component';
 import './customfields/date-options.component';
 import './jobstatus/jobstatus.component';
 import './latticefields/latticefields.component';
+import './matchtoaccounts/matchtoaccounts.component';
 import './producthierarchy/producthierarchy.component';
 import './producthierarchyids/producthierarchyids.component';
 import './productids/productids.component';

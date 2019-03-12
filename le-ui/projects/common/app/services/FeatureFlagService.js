@@ -59,6 +59,7 @@ angular.module('common.services.featureflag', [
         // These are actually product flag (whether the customer has purchased the product or not)
         ENABLE_CDL: 'EnableCdl',
         IMPORT_WITHOUT_IDS: 'ImportWithoutIds',
+        ENTITY_MATCH_ENABLED: 'EntityMatchEnabled',
         // ====================
         // END: product flags
         // ====================
@@ -155,6 +156,7 @@ angular.module('common.services.featureflag', [
             // product flags
             SetFlag(flags.ENABLE_CDL, false);
             SetFlag(flags.IMPORT_WITHOUT_IDS, true);
+            SetFlag(flags.ENTITY_MATCH_ENABLED, false);
 
             // update user-level flags
             if (ApiHost !== '/ulysses') {

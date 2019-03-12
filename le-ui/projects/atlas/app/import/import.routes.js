@@ -7,6 +7,7 @@ angular
     'lp.import.calendar',
     'lp.import.wizard.thirdpartyids',
     'lp.import.wizard.latticefields',
+    'lp.import.wizard.matchtoaccounts',
     'lp.import.wizard.jobstatus',
     'lp.import.wizard.customfields',
     'lp.import.wizard.accountids',
@@ -493,7 +494,7 @@ angular
                         // { name: 'Website', displayName: '' },
                    ];
                 },
-               AnalysisFields: function(ImportWizardStore, ImportUtils) {
+                AnalysisFields: function(ImportWizardStore, ImportUtils) {
                    let createdDate = ImportUtils.getFieldFromLaticeSchema(ImportWizardStore.getEntityType(), 'CreatedDate');
                    if(!createdDate){
                        createdDate = {
@@ -527,13 +528,51 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.customfields', {
-            url: '/customfields',
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts', {
+            url: '/matchtoaccounts',
             onExit: function($transition$, ImportWizardStore){
                 ImportWizardStore.setIgnore([]);
                 var to = $transition$._targetState._definition.name;
                 if(to === 'home.import.data.contacts.ids.latticefields'){
-                    ImportWizardStore.removeFromState('home.import.data.contacts.ids.latticefields.customfields');
+                    ImportWizardStore.removeFromState('home.import.data.contacts.ids.latticefields.matchtoaccounts');
+                }
+                
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    return ImportWizardStore.getUnmappedFields();
+                },
+                mergedFieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.mergeFieldDocument({segment: true, save: false});
+                },
+                MatchingFields: function() {
+                    return [
+                        //{ name: 'ContactName', displayName: 'Contact Name' },
+                        { name: 'FirstName', displayName: 'First Name' },
+                        { name: 'LastName', displayName: 'Last Name' },
+                        { name: 'Title', displayName: '' },
+                        { name: 'Email', displayName: '' }
+                   ];
+                },
+            },
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardMatchToAccounts',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/matchtoaccounts/matchtoaccounts.component.html'
+                }
+            }
+        })
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', {
+            url: '/customfields',
+            onExit: function($transition$, ImportWizardStore){
+                ImportWizardStore.setIgnore([]);
+                var to = $transition$._targetState._definition.name;
+                if(to === 'home.import.data.contacts.ids.latticefields.matchtoaccounts'){
+                    ImportWizardStore.removeFromState('home.import.data.contacts.ids.latticefields.matchtoaccounts.customfields');
                     // ImportWizardStore.saveDocumentFields('home.import.data.contacts.ids.latticefields');
                 }
             },
@@ -550,7 +589,7 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
