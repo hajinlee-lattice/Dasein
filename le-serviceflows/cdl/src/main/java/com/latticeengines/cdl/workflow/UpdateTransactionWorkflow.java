@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.cdl.workflow.steps.update.ProcessTransactionDiffWrapper;
@@ -30,16 +29,12 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<UpdateTransactio
     @Inject
     private ProcessTransactionDiffWrapper processTransactionDiffWrapper;
 
-    @Inject
-    private AwsApsGeneratorStep awsApsGeneratorStep;
-
     @Override
     public Workflow defineWorkflow(UpdateTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(cloneTransaction) //
                 .next(clonePurchaseHistory) //
                 .next(processTransactionDiffWrapper) //
-                .next(awsApsGeneratorStep) //
                 .build();
     }
 }

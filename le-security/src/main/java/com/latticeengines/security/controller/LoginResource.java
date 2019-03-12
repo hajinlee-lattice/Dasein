@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -112,9 +111,7 @@ public class LoginResource {
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
             result.setPasswordLastModified(ticket.getPasswordLastModified());
-            List<Tenant> tenants = tenantService.getAllTenants();
-            tenants = tenants.stream().filter(tenant -> TenantStatus.ACTIVE.equals(tenant.getStatus()))
-                    .collect(Collectors.toList());
+            List<Tenant> tenants = tenantService.getTenantsByStatus(TenantStatus.ACTIVE);
             List<Tenant> gaTenants = null;
             if (ticket.getTenants()!= null) {
                 gaTenants = new ArrayList<>(ticket.getTenants());

@@ -75,7 +75,7 @@ else
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC -XX:+PrintGCTimeStamps"
 fi
 
-export CATALINA_OPTS="-Dfile.encoding=UTF8 -Duser.timezone=UTC"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dfile.encoding=UTF8 -Duser.timezone=UTC"
 export CATALINA_OPTS="${CATALINA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"
@@ -87,14 +87,24 @@ export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.authentica
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export CATALINA_OPTS="${CATALINA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 
-if [[ "${DISABLE_JMXTRANS}" != "true" ]] && [[ -f "/var/lib/jmxtransa-gent.jar" ]]; then
-    echo "Found jmxtrans-agent.jar, setting its java agent"
-    export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
+if [[ "${DISABLE_JMXTRANS}" != "true" ]]; then
+    if [[ -f "/var/lib/jmxtrans-agent.jar" ]]; then
+        echo "Found jmxtrans-agent.jar, setting its java agent"
+        export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
+    else
+        echo "Cannot find /var/lib/jmxtransa-gent.jar"
+        exit -1
+    fi
 fi
 
-if [[ "${ENABLE_JACOCO}" == "true" ]] && [[ -f "/var/lib/jacocoagent.jar" ]]; then
-    JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
-    export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jacocoagent.jar=destfile=${JACOCO_DEST_FILE},append=true,includes=com.latticeengines.*,jmx=true"
+if [[ "${ENABLE_JACOCO}" == "true" ]]; then
+    if [[  -f "/var/lib/jacocoagent.jar" ]]; then
+        JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
+        export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jacocoagent.jar=destfile=${JACOCO_DEST_FILE},append=true,includes=com.latticeengines.*,jmx=true"
+    else
+        echo "Cannot find /var/lib/jacocoagent.jar"
+        exit -1
+    fi
 fi
 
 echo ${CATALINA_OPTS}

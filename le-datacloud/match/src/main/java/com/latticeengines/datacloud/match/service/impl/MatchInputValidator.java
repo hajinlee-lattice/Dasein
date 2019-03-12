@@ -48,7 +48,11 @@ public class MatchInputValidator {
             validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
-            validateLDCAccountMatchKeys(input.getKeyMap().keySet());
+            if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
+                validateRTSMatchKeys(input.getKeyMap().keySet());
+            } else {
+                validateLDCAccountMatchKeys(input.getKeyMap().keySet());
+            }
         }
 
         validateInputData(input, maxRealTimeInput);
@@ -95,7 +99,11 @@ public class MatchInputValidator {
             validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
-            validateLDCAccountMatchKeys(input.getKeyMap().keySet());
+            if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
+                validateRTSMatchKeys(input.getKeyMap().keySet());
+            } else {
+                validateLDCAccountMatchKeys(input.getKeyMap().keySet());
+            }
         }
     }
 
@@ -145,25 +153,6 @@ public class MatchInputValidator {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
             validateAccountMatchKeys(keyMap, input.isFetchOnly());
-
-            // For the Account Entity Key Map, also validate that the System ID priority matches the
-            // order in the key map.
-            if (keyMap.containsKey(MatchKey.SystemId)) {
-                List<String> values = keyMap.get(MatchKey.SystemId);
-                if (values.size() != entityKeyMap.getSystemIdPriority().size()) {
-                    throw new IllegalArgumentException(
-                            "System ID MatchKey values and System ID priority list are not the same size.");
-                }
-                if (entityKeyMap.getSystemIdPriority().isEmpty()) {
-                    throw new IllegalArgumentException("System ID priority list is empty.");
-                }
-                for (int i = 0; i < values.size(); i++) {
-                    if (!values.get(i).equals(entityKeyMap.getSystemIdPriority().get(i))) {
-                        throw new IllegalArgumentException(
-                                "System ID MatchKey values and System ID priority list mismatch at index " + i + ".");
-                    }
-                }
-            }
         } else {
             // TODO(jwinter): Remove this constraint once we start supporting other entities.
             // For now, require that the map of EntityKeyMaps has a EntityKeyMap for Account Entity.
@@ -325,19 +314,46 @@ public class MatchInputValidator {
         }
     }
 
-    // TODO: Split key validation for 1.0 matcher and 2.0 matcher (Will provide
-    // detailed comments after spliting is done)
+
+    /**
+     * For 2.0 AccountMaster based LDC matcher:
+     *
+     * We require one of following MatchKey provided:
+     *
+     * LatticeAccountId (Fetch-Only), Domain, DUNS, Name, LookupId (CDL Lookup)
+     *
+     * @param keySet
+     */
     private static void validateLDCAccountMatchKeys(Set<MatchKey> keySet) {
         if (!keySet.contains(MatchKey.DUNS) && !keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
+                && !keySet.contains(MatchKey.LatticeAccountID) && !keySet.contains(MatchKey.LookupId)) {
+            throw new IllegalArgumentException(
+                    "Neither domain nor name nor duns nor lattice account id not cdl id is provided for LDC 2.0 matcher");
+        }
+    }
+
+    /**
+     * For 1.0 RTS matcher whose target is sql table DerivedColumnsCache:
+     *
+     * For exact sql lookup in DerivedColumnsCache (no fuzzy match), we require
+     * one of following MatchKey (combination) provided:
+     *
+     * LatticeAccountId (Fetch-Only), Domain, [Name, Country, State]
+     *
+     * @param keySet
+     */
+    private static void validateRTSMatchKeys(Set<MatchKey> keySet) {
+        if (!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
                 && !keySet.contains(MatchKey.LatticeAccountID)) {
-            throw new IllegalArgumentException("Neither domain nor name nor lattice account id nor duns is provided.");
+            throw new IllegalArgumentException(
+                    "Neither domain nor name nor lattice account id is provided for RTS 1.0 matcher");
         }
 
-        if ((!keySet.contains(MatchKey.DUNS) && !keySet.contains(MatchKey.Domain)
-                && !keySet.contains(MatchKey.LatticeAccountID))
+        if ((!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.LatticeAccountID))
                 && keySet.contains(MatchKey.Name)
                 && (!keySet.contains(MatchKey.Country) || !keySet.contains(MatchKey.State))) {
-            throw new IllegalArgumentException("Name location based match must has country and state.");
+            throw new IllegalArgumentException(
+                    "Name location based match must has country and state for RTS 1.0 matcher");
         }
     }
 
@@ -349,12 +365,7 @@ public class MatchInputValidator {
      *
      * Compare to validateLDCAccountMatchKeys():
      *
-     * Difference 1 in Name+Location only match: Remove check that Country +
-     * State must exist. This check is actually for 1.0 LDC matcher (purely sql
-     * based), even 2.0 ldc matcher should not have this check since if country
-     * is missing, we use USA as default and state is not mandatory either
-     *
-     * Difference 2: Don't allow setting MatchKey without mapping any fields. In
+     * Don't allow setting MatchKey without mapping any fields. In
      * validateLDCAccountMatchKeys(), if setting match key without mapping
      * field, matcher interprets it as not using this match key. Feel this
      * tolerance makes match key config confusing. If don't use, then don't set.

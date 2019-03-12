@@ -18,6 +18,8 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.repository.TenantRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 @Component("tenantEntityMgr")
 public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Long> implements TenantEntityMgr {
@@ -66,10 +68,22 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Tenant> findAllByStatus(TenantStatus status) {
+        return tenantRepository.findAllByStatus(status);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Tenant> findAllByType(TenantType type) {
+        return tenantRepository.findAllByTenantType(type);
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
-            tenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli());
+            tenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
         if (tenant.getExpiredTime() == null) {
             // expired date = registered + 90
@@ -91,5 +105,6 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     public void update(Tenant tenant) {
         super.update(tenant);
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -628,12 +629,12 @@ public class MatchInput implements Fact, Dimension {
 
     public static class EntityKeyMap {
 
+        // MatchKey -> mapped fields (prioritized)
+        // SystemId MatchKey: the priority is decided by mapped fields order
+        // Domain MatchKey: choose 1st mapped field whose domain value is
+        // not empty and not public domain
         @JsonProperty("KeyMap")
         private Map<MatchKey, List<String>> keyMap;
-
-        // The order of System IDs in this list matters and must match the order in the Key Map above.
-        @JsonProperty("SystemIdPriority")
-        private List<String> systemIdPriority;
 
         public Map<MatchKey, List<String>> getKeyMap() {
             return keyMap;
@@ -643,12 +644,11 @@ public class MatchInput implements Fact, Dimension {
             this.keyMap = keyMap;
         }
 
-        public List<String> getSystemIdPriority() {
-            return systemIdPriority;
-        }
-
-        public void setSystemIdPriority(List<String> systemIdPriority) {
-            this.systemIdPriority = systemIdPriority;
+        public void addMatchKey(MatchKey key, String attr) {
+            if (keyMap.get(key) == null) {
+                keyMap.put(key, new ArrayList<>());
+            }
+            keyMap.get(key).add(attr);
         }
 
     }

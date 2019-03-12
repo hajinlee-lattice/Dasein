@@ -379,13 +379,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }
 
+    protected Pair<String, InputStream> getTestAvroFile(BusinessEntity entity, int fileIdx) {
+        String fileName = String.format("%s-%d.avro", entity.name(), fileIdx);
+        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(), fileName);
+        return Pair.of(fileName, is);
+    }
+
     void mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
         List<String> strings = registerMockDataFeedTask(entity, feedType);
         String feedTaskId = strings.get(0);
         String templateName = strings.get(1);
         Date now = new Date();
-        String fileName = String.format("%s-%d.avro", entity.name(), fileIdx);
-        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(), fileName);
+        Pair<String, InputStream> testAvroArtifact = getTestAvroFile(entity, fileIdx);
+        String fileName = testAvroArtifact.getLeft();
+        InputStream is = testAvroArtifact.getRight();
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String extractPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),

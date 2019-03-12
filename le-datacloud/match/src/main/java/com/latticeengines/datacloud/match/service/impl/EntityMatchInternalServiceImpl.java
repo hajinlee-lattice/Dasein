@@ -276,12 +276,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @VisibleForTesting
-    Cache<Pair<String, EntityLookupEntry>, String> getLookupCache() {
+    public Cache<Pair<String, EntityLookupEntry>, String> getLookupCache() {
         return lookupCache;
     }
 
     @VisibleForTesting
-    Cache<Pair<Pair<String, String>, String>, EntityRawSeed> getSeedCache() {
+    public Cache<Pair<Pair<String, String>, String>, EntityRawSeed> getSeedCache() {
         return seedCache;
     }
 

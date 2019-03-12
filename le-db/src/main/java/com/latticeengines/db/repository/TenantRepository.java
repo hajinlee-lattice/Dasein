@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 public interface TenantRepository extends BaseJpaRepository<Tenant, Long> {
 
@@ -17,5 +19,10 @@ public interface TenantRepository extends BaseJpaRepository<Tenant, Long> {
 
     Tenant findByName(String tenantName);
 
+    List<Tenant> findAllByStatus(TenantStatus status);
+
+    List<Tenant> findAllByTenantType(TenantType type);
+
     List<Tenant> findByNameStartingWith(String tenantName);
+
 }
