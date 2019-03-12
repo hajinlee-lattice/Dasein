@@ -476,7 +476,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             map.put(MatchKey.SystemId, Arrays.asList(systemIdFields));
         }
         keyMap.setKeyMap(map);
-        keyMap.setSystemIdPriority(map.get(MatchKey.SystemId));
         keyMaps.put(BusinessEntity.Account.name(), keyMap);
 
         return keyMaps;

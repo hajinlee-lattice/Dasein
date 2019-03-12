@@ -163,7 +163,6 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
         map.setKeyMap(
                 Collections.singletonMap(MatchKey.SystemId, Collections.singletonList(InterfaceName.AccountId.name())));
-        map.setSystemIdPriority(map.getKeyMap().get(MatchKey.SystemId));
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
 
         // set field

@@ -153,25 +153,6 @@ public class MatchInputValidator {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
             validateAccountMatchKeys(keyMap, input.isFetchOnly());
-
-            // For the Account Entity Key Map, also validate that the System ID priority matches the
-            // order in the key map.
-            if (keyMap.containsKey(MatchKey.SystemId)) {
-                List<String> values = keyMap.get(MatchKey.SystemId);
-                if (values.size() != entityKeyMap.getSystemIdPriority().size()) {
-                    throw new IllegalArgumentException(
-                            "System ID MatchKey values and System ID priority list are not the same size.");
-                }
-                if (entityKeyMap.getSystemIdPriority().isEmpty()) {
-                    throw new IllegalArgumentException("System ID priority list is empty.");
-                }
-                for (int i = 0; i < values.size(); i++) {
-                    if (!values.get(i).equals(entityKeyMap.getSystemIdPriority().get(i))) {
-                        throw new IllegalArgumentException(
-                                "System ID MatchKey values and System ID priority list mismatch at index " + i + ".");
-                    }
-                }
-            }
         } else {
             // TODO(jwinter): Remove this constraint once we start supporting other entities.
             // For now, require that the map of EntityKeyMaps has a EntityKeyMap for Account Entity.
