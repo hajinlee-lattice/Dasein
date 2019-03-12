@@ -22,4 +22,7 @@ public interface TenantRepository extends BaseJpaRepository<Tenant, Long> {
     List<Tenant> findAllByStatus(TenantStatus status);
 
     List<Tenant> findAllByTenantType(TenantType type);
+
+    List<Tenant> findByNameStartingWith(String tenantName);
+
 }

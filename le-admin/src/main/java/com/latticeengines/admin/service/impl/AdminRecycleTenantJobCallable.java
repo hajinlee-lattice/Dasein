@@ -1,5 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -16,8 +18,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
-    private static final long inAccessPeriod = TimeUnit.DAYS.toMillis(90);
-    private static final long exiprePeriod = TimeUnit.DAYS.toMillis(210);
+    private static final long InAcessPeriod = TimeUnit.DAYS.toMillis(120);
     private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
     @SuppressWarnings("unused")
     private String jobArguments;
@@ -39,33 +40,37 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     public Boolean call() throws Exception {
         List<Tenant> tempTenants = tenantService.getTenantByType(TenantType.POC);
         for (Tenant tenant : tempTenants) {
-            long registerTime = tenant.getRegisteredTime();
-            long currentTime = System.currentTimeMillis();
-            // send email two weeks before user can't access tenant or delete
-            // tenant
-            if (registerTime + inAccessPeriod - emailPeriod < currentTime
-                    && currentTime < registerTime + inAccessPeriod) {
-                log.info(String.format("send POC tenant %s inactive email", tenant.getName()));
-                int days = (int) Math.ceil((registerTime + inAccessPeriod - currentTime) /  TimeUnit.DAYS.toMillis(1));
+            long expiredTime = tenant.getExpiredTime();
+            long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            // send email two weeks before user can't access tenant
+            if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                 List<User> users = userService.getUsers(tenant.getId());
-                users.forEach(user -> emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days));
-
-            } else if (currentTime > registerTime + inAccessPeriod && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
-                log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
+                users.forEach(user -> {
+                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                    log.info(String.format("send POC tenant %s inactive notification to user %s.", tenant.getName(),
+                            user.getUsername()));
+                });
+            } else if (currentTime > expiredTime && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
                 tenant.setStatus(TenantStatus.INACTIVE);
                 tenantService.updateTenant(tenant);
-            } else if (registerTime + exiprePeriod - emailPeriod < currentTime
-                    && currentTime < registerTime + exiprePeriod) {
-                log.info(String.format("send POC tenant %s inaccessible email", tenant.getName()));
-                int days = (int) Math.ceil((registerTime + exiprePeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
+                log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
+            } else if (expiredTime + InAcessPeriod - emailPeriod < currentTime
+                    && currentTime < expiredTime + InAcessPeriod) {
+                // send email to user who can visit tenant two weeks before
+                // delete tenant
+                int days = (int) Math.ceil((expiredTime + InAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
                 List<User> users = userService.getUsers(tenant.getId());
-                users.forEach(user -> emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days));
+                users.forEach(user -> {
+                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
+                    log.info(String.format("send POC tenant %s inaccessible notification to user %s.", tenant.getName(),
+                            user.getUsername()));
+                });
 
-            } else if (currentTime > registerTime + exiprePeriod) {
-                log.info(String.format("POC tenant %s will be deleted", tenant.getName()));
+            } else if (currentTime > expiredTime + InAcessPeriod) {
                 CustomerSpace space = CustomerSpace.parse(tenant.getId());
                 adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
-
+                log.info(String.format("POC tenant %s has been deleted", tenant.getName()));
             }
         }
         return null;

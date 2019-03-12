@@ -31,4 +31,5 @@ public interface TenantService {
     Tenant findByTenantId(String tenantId);
 
     Tenant findByTenantName(String tenantName);
+
 }
