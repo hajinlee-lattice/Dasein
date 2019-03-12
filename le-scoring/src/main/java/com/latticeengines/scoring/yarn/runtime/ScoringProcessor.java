@@ -16,10 +16,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -36,8 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +46,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -76,7 +73,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringProcessor.class);
-    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
     public static final String RECORD_RULE = "manual";
     public static final String RECORD_SOURCE = "file";
@@ -87,7 +83,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private int threadpoolSize = 5;
 
     @Value("${scoring.processor.threadpool.timeoutmin}")
-    private long threadPoolTimeoutMin = 1440;
+    private int threadPoolTimeoutMin = 1440;
+
+    @Value("${scoring.processor.thread.timeoutsec}")
+    private int threadTimeoutSec = 21600;
 
     @Value("${scoring.processor.bulkrecord.size}")
     private int bulkRecordSize = 100;
@@ -109,8 +108,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private String idColumnName = InterfaceName.Id.name();
 
     private boolean isEnableDebug = false;
-
-    // private Map<String, Long> idToInternalIdMap = new HashMap<>();
 
     private RTSBulkScoringConfiguration rtsBulkScoringConfig;
 
@@ -177,13 +174,12 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
         log.info(String.format("schema is %s", schema));
 
-        try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath())) {
+        try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath());
+                DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
             Iterator<GenericRecord> iterator = instantiateIteratorForBulkScoreRequest(path);
-            DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName);
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             execute(rtsBulkScoringConfig, iterator, dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter,
                     recordCount, fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching);
-            dataFileWriter.close();
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
@@ -547,7 +543,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 count++;
             }
         }
-        // TODO ygao will delete this
         if (recordScoreResponseList.size() != count) {
             log.info("response is " + Arrays.toString(recordScoreResponseList.toArray()));
         }
@@ -578,32 +573,17 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             Map<String, String> fieldNameMapping, boolean enrichmentEnabledForInternalAttributes,
             boolean enableMatching) throws Exception {
 
-        List<Future<Integer>> futures = new ArrayList<>();
-        ExecutorService scoreExecutorService = Executors.newFixedThreadPool(threadpoolSize);
+        ExecutorService scoreExecutorService = ThreadPoolUtils.getFixedSizeThreadPool("ScoringProcessorThreads",
+                threadpoolSize);
         final AtomicLong counter = new AtomicLong(0);
+        List<Callable<Integer>> callables = new ArrayList<>();
+        IntStream.range(0, threadpoolSize)
+                .forEach(i -> callables.add(new BulkScoreApiCallable(rtsBulkScoringConfig, iterator, dataFileWriter,
+                        builder, leadEnrichmentAttributeMap, csvFilePrinter, counter, recordCount, fieldNameMapping,
+                        enrichmentEnabledForInternalAttributes, enableMatching)));
 
-        for (int i = 0; i < threadpoolSize; i++) {
-            futures.add(scoreExecutorService.submit(new BulkScoreApiCallable(rtsBulkScoringConfig, iterator,
-                    dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter, counter, recordCount,
-                    fieldNameMapping, enrichmentEnabledForInternalAttributes, enableMatching)));
-        }
-
-        for (Future<Integer> future : futures) {
-            try {
-                future.get(threadPoolTimeoutMin, TimeUnit.MINUTES);
-            } catch (Exception e) {
-                log.error(fatal, e.getMessage(), e);
-                throw e;
-            }
-        }
-
-        scoreExecutorService.shutdown();
-        try {
-            scoreExecutorService.awaitTermination(threadPoolTimeoutMin, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            // ignore
-            log.error("Interrupted.");
-        }
+        ThreadPoolUtils.runCallablesInParallel(scoreExecutorService, callables, threadPoolTimeoutMin, threadTimeoutSec);
+        ThreadPoolUtils.shutdownAndAwaitTermination(scoreExecutorService, threadPoolTimeoutMin);
     }
 
     class BulkScoreApiCallable implements Callable<Integer> {
@@ -665,7 +645,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
                 log.info(String.format("Scored %d out of %d total records",
                         counter.addAndGet(scoreRequest.getRecords().size()), recordCount));
-                // TODO ygao will delete this
                 if (scoreResponseList.size() != scoreRequest.getRecords().size()) {
                     log.info("Not all records are scored for " + scoreRequest);
                 }

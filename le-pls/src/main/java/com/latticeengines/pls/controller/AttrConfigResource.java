@@ -55,7 +55,7 @@ public class AttrConfigResource {
 
     @GetMapping(value = "/name/overview")
     @ResponseBody
-    @ApiOperation("get activation overview")
+    @ApiOperation("get Name overview")
     public AttrConfigStateOverview getNameOverview() {
         return attrConfigService.getOverallAttrConfigNameOverview();
     }
