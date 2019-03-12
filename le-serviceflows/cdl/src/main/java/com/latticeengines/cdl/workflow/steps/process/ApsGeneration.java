@@ -145,8 +145,9 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomer(),
                 productTable.getName()));
-        List<Product> productList = new ArrayList<>(
-                ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
-        return ProductUtils.getProductMap(productList, ProductType.Analytic.name());
+        List<Product> productList = new ArrayList<>(ProductUtils.loadProducts(yarnConfiguration, //
+                productTable.getExtracts().get(0).getPath(), //
+                Collections.singletonList(ProductType.Analytic.name()), null));
+        return ProductUtils.getProductMap(productList);
     }
 }
