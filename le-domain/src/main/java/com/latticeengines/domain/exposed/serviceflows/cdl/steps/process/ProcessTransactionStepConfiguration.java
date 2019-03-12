@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.process;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepConfiguration {
@@ -27,6 +28,11 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
 
     public Long getDataQuotaLimit() {
         return dataQuotaLimit;
+    }
+
+    @Override
+    public Long getDataQuotaLimit(ProductType type) {
+        return null;
     }
 
     public void setDataQuotaLimit(Long dataQuotaLimit) {

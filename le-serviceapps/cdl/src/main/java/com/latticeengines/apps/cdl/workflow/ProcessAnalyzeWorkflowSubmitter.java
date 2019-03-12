@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -87,8 +88,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.contact.dataquota.limit:10000000}")
     private Long defaultContactQuotaLimit;
 
-    @Value("${cdl.product.dataquota.limit:6000000}")
-    private Long defaultProductQuotaLimit;
+    @Value("${cdl.product.dataquota.limit:200}")
+    private Long defaultProductBundlesQuotaLimit;
+
+    @Value("${cdl.productsku.dataquota.limit:100000}")
+    private Long defaultProductSkuQuotaLimit;
 
     @Value("${cdl.transaction.dataquota.limit:20000000}")
     private Long defaultTransactionQuotaLimit;
@@ -480,7 +484,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)//put dataQuotaLimit into
                 // stepConfiguration
                 .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
-                .dataQuotaLimit(defaultProductQuotaLimit, BusinessEntity.Product)
+                .dataQuotaLimit(defaultProductBundlesQuotaLimit, ProductType.Analytic)
+                .dataQuotaLimit(defaultProductSkuQuotaLimit, ProductType.Spending)
                 .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
                 .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
                 .build();
@@ -539,8 +544,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
         Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
         defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
-        Long productDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Product);
-        defaultProductQuotaLimit = productDataLimit != null ? productDataLimit : defaultProductQuotaLimit;
+        Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                ProductType.Analytic);
+        defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
+        Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                ProductType.Spending);
+        defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
         Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 BusinessEntity.Transaction);
         defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
