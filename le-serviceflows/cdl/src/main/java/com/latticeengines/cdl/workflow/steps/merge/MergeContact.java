@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -52,6 +51,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     private int upsertMasterStep;
     private int diffStep;
 
+    @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         try {
 
@@ -163,11 +163,6 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         input.setPredefinedSelection(ColumnSelection.Predefined.LeadToAcct);
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
         entityKeyMap.setKeyMap(getMatchKeys());
-        // set system ID priority (TODO retire this later)
-        List<String> systemIdColumns = entityKeyMap.getKeyMap().get(MatchKey.SystemId);
-        if (CollectionUtils.isNotEmpty(systemIdColumns)) {
-            entityKeyMap.setSystemIdPriority(systemIdColumns);
-        }
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), entityKeyMap));
         return input;
     }

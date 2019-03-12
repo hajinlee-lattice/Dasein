@@ -296,7 +296,6 @@ public class MatchInputValidatorUnitTestNG {
         failed = false;
         input.getEntityKeyMaps().remove(BusinessEntity.Account.name());
         EntityKeyMap entityKeyMap = new EntityKeyMap();
-        entityKeyMap.setSystemIdPriority(Arrays.asList("ID"));
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
 
         try {
@@ -373,43 +372,9 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "MatchKey value list cannot contain null or empty elements.");
 
 
-        // Should fail on System ID MatchKey values / System ID priority list length mismatch.
-        failed = false;
-        entityKeyMap.getKeyMap().put(MatchKey.SystemId, Arrays.asList("ID", "SfdcId", "MktoId"));
-
-        try {
-            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (IllegalArgumentException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains(
-                    "System ID MatchKey values and System ID priority list are not the same size."),
-                    "Wrong error message: " + e.getMessage());
-        } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
-        }
-        Assert.assertTrue(failed, "System ID MatchKey values and System ID priority list must be same length.");
-
-
-        // Should fail on System Id priority mismatch.
-        failed = false;
-        entityKeyMap.setSystemIdPriority(Arrays.asList("ID", "MktoId", "SfdcId"));
-
-        try {
-            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (IllegalArgumentException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains(
-                    "System ID MatchKey values and System ID priority list mismatch at index 1."),
-                    "Wrong error message: " + e.getMessage());
-        } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
-        }
-        Assert.assertTrue(failed, "System ID MatchKey values and System ID priority list must match.");
-
-
         // EntityKeyMaps must contain Account Key Map.
         failed = false;
-        entityKeyMap.setSystemIdPriority(Arrays.asList("ID", "SfdcId", "MktoId"));
+        entityKeyMap.getKeyMap().put(MatchKey.SystemId, Arrays.asList("ID", "SfdcId", "MktoId"));
         input.getEntityKeyMaps().remove(BusinessEntity.Account.name());
         input.getEntityKeyMaps().put(BusinessEntity.Contact.name(), entityKeyMap);
 
@@ -600,7 +565,6 @@ public class MatchInputValidatorUnitTestNG {
                 keyMap.put(key, new ArrayList<>());
                 if (mapField) {
                     keyMap.get(key).add(key.name());
-                    entityKeyMap.setSystemIdPriority(keyMap.get(MatchKey.SystemId));
                 }
             }
         }

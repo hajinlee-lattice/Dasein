@@ -673,7 +673,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     private static MatchInput.EntityKeyMap getEntityKeyMap() {
         MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
-        map.setSystemIdPriority(Arrays.asList(SYSTEM_ID_FIELDS));
         Map<MatchKey, List<String>> fieldMap = Arrays.stream(MATCH_KEY_FIELDS).collect(
                 Collectors.toMap(matchKey -> matchKey, matchKey -> Collections.singletonList(matchKey.name())));
         fieldMap.put(MatchKey.SystemId, Arrays.asList(SYSTEM_ID_FIELDS));
@@ -697,7 +696,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 break;
             }
         });
-        map.setSystemIdPriority(keyMap.get(MatchKey.SystemId));
         return map;
     }
 

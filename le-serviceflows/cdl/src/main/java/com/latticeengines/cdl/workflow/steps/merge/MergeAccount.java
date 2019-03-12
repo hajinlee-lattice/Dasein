@@ -59,6 +59,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     //private int slimMasterStep;
     private int diffStep;
 
+    @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         try {
 
@@ -214,7 +215,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     // For now, we hard code the SystemID MatchKey and SystemId Priority List to contain only AccountId.
                     List<String> systemIdList = Collections.singletonList(InterfaceName.AccountId.toString());
                     entityKeyMap.getKeyMap().put(MatchKey.SystemId, systemIdList);
-                    entityKeyMap.setSystemIdPriority(systemIdList);
                 }
             }
 
@@ -250,7 +250,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         keyMap.put(MatchKey.EntityId, Collections.singletonList(InterfaceName.EntityId.name()));
         EntityKeyMap entityKeyMap = new EntityKeyMap();
         entityKeyMap.setKeyMap(keyMap);
-        entityKeyMap.setSystemIdPriority(Collections.emptyList());
         Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
         entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
         matchInput.setEntityKeyMaps(entityKeyMaps);
