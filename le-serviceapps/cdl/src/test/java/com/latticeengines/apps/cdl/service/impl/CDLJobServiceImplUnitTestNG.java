@@ -1,22 +1,29 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyList;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
@@ -26,7 +33,7 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-public class CDLJobServiceImplTestNG {
+public class CDLJobServiceImplUnitTestNG {
 
     @Mock
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
@@ -41,6 +48,7 @@ public class CDLJobServiceImplTestNG {
     private DataFeedProxy dataFeedProxy;
 
     @InjectMocks
+    @Spy
     private CDLJobServiceImpl cdlJobService;
 
     private String USERID = "Auto Scheduled";
@@ -49,67 +57,111 @@ public class CDLJobServiceImplTestNG {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        cdlJobService.concurrentProcessAnalyzeJobs = 8;
+        cdlJobService.minimumScheduledJobCount = 3;
+        cdlJobService.maximumScheduledJobCount = 5;
+
         CDLJobDetail cdlJobDetail = new CDLJobDetail();
         when(cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(Collections.singletonList(cdlJobDetail));
+        when(cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(cdlJobDetail);
 
-        try {
-            Field field1 = cdlJobService.getClass().getDeclaredField("concurrentProcessAnalyzeJobs");
-            field1.setAccessible(true);
-            field1.setInt(cdlJobService, 6);
+        Tenant tenant1 = new Tenant();
+        tenant1.setPid(1L);
+        tenant1.setId("testTenant1");
+        SimpleDataFeed simpleDataFeed1 = new SimpleDataFeed();
+        simpleDataFeed1.setStatus(DataFeed.Status.Active);
+        simpleDataFeed1.setTenant(tenant1);
 
-            Field field2 = cdlJobService.getClass().getDeclaredField("minimumScheduledJobCount");
-            field2.setAccessible(true);
-            field2.setInt(cdlJobService, 2);
+        Tenant tenant2 = new Tenant();
+        tenant2.setPid(2L);
+        tenant2.setId("testTenant2");
+        SimpleDataFeed simpleDataFeed2 = new SimpleDataFeed();
+        simpleDataFeed2.setStatus(DataFeed.Status.ProcessAnalyzing);
+        simpleDataFeed2.setTenant(tenant2);
 
-            Field field3 = cdlJobService.getClass().getDeclaredField("maximumScheduledJobCount");
-            field3.setAccessible(true);
-            field3.setInt(cdlJobService, 4);
-        } catch (Exception e) {}
+        List<SimpleDataFeed> simpleDataFeeds = new ArrayList<>();
+        simpleDataFeeds.add(simpleDataFeed1);
+        simpleDataFeeds.add(simpleDataFeed2);
+        when(dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE)).thenReturn(simpleDataFeeds);
+
+        long currentTimeMillis = System.currentTimeMillis();
+        Date currentTime = new Date(currentTimeMillis - 1000);
+        doReturn(currentTime).when(cdlJobService).getNextInvokeTime(any(CustomerSpace.class), any(Tenant.class), any(CDLJobDetail.class));
+
+        doNothing().when(dataFeedProxy).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
+
+        doReturn(true).when(cdlJobService).submitProcessAnalyzeJob(any(Tenant.class), any(CDLJobDetail.class));
     }
 
-    @Test(groups = "unit", enabled = false)
-    public void testSubmitJob() {
-        List<WorkflowJob> runningPAJobs = new ArrayList<>();
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(runningPAJobs);
-
-        when(dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE)).thenReturn(null);
-
-        Assert.assertThrows(
-                NullPointerException.class,
-                () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
-    }
-
-    @Test(groups = "unit", enabled = false)
-    public void testSubmitJob1() {
-        when(dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE)).thenReturn(null);
-
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs1());
-        Assert.assertThrows(
-                NullPointerException.class,
-                () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
-
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs2());
-        Assert.assertThrows(
-                NullPointerException.class,
-                () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
-
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs3());
-        Assert.assertThrows(
-                NullPointerException.class,
-                () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
-
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs4());
-        Assert.assertThrows(
-                NullPointerException.class,
-                () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
-
-        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs5());
-        Assert.assertThrows(
-                NullPointerException.class,
-                () -> cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null));
+    @Test(groups = "unit")
+    public void test_ClusterIDIsNotEmpty() {
+        doReturn("abc").when(cdlJobService).getCurrentClusterID();
 
         Exception e = null;
+
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(new ArrayList<>());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs1());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs2());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs3());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs4());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+
+        when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs5());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+
         when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs6());
+        try {
+            cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNull(e);
+    }
+
+    @Test(groups = "unit")
+    public void test_ClusterIDIsEmpty() {
+        doReturn(null).when(cdlJobService).getCurrentClusterID();
+
+        Exception e = null;
+
         try {
             cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);
         } catch (Exception ex) {
