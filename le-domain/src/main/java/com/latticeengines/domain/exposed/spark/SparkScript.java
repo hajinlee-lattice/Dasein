@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "Type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = InputStreamSparkScript.class, name = "InputStream")
+        @JsonSubTypes.Type(value = InputStreamSparkScript.class, name = "InputStream"),
+        @JsonSubTypes.Type(value = LocalFileSparkScript.class, name = "LoacalFile")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,7 +37,7 @@ public abstract class SparkScript {
     }
 
     public enum Type {
-        InputStream
+        InputStream, LocalFile
     }
 
 }

@@ -1,6 +1,5 @@
 import json
 
-
 class LatticeContext:
     def __init__(self, input, params, targets):
         self.input = input
@@ -25,6 +24,13 @@ def load_hdfs_unit(unit):
             path += "/*.avro"
     path = "hdfs://%s" % path
     return spark.read.format("avro").load(path)
+
+checkpoint_dir = '''{{CHECKPOINT_DIR}}'''
+if checkpoint_dir != "":
+    print("----- BEGIN SCRIPT OUTPUT -----")
+    print("Checkpoint Dir:", checkpoint_dir)
+    print("----- END SCRIPT OUTPUT -----")
+    spark.sparkContext.setCheckpointDir(checkpoint_dir)
 
 script_targets = json.loads('''{{TARGETS}}''')
 print("----- BEGIN SCRIPT OUTPUT -----")

@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
-import com.latticeengines.domain.exposed.util.AwsApsGeneratorUtils;
+import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
@@ -121,7 +121,7 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                 if (productMap == null || productMap.size() == 0) {
                     throw new RuntimeException("There's no product table or no Analytic products");
                 }
-                AwsApsGeneratorUtils.setupMetaData(apsTable, productMap);
+                ApsGeneratorUtils.setupMetaData(apsTable, productMap);
                 metadataProxy.updateTable(customerSpace, config.getTableName(), apsTable);
                 dataCollectionProxy.upsertTable(customerSpace, config.getTableName(),
                         TableRoleInCollection.AnalyticPurchaseState, config.getVersion());

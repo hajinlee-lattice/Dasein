@@ -63,10 +63,7 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         preMatchTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
         if (preMatchTable != null) {
             log.info("PreMatchTable=" + JsonUtils.serialize(preMatchTable));
-            // TODO: move to Table.toHdfsDatUnit() method
-            HdfsDataUnit eventTable = new HdfsDataUnit();
-            eventTable.setName("eventTable");
-            eventTable.setPath(preMatchTable.getExtracts().get(0).getPath());
+            HdfsDataUnit eventTable = preMatchTable.toHdfsDataUnit("eventTable");
             inputUnits.add(eventTable);
         }
         log.info("InputUnits=" + JsonUtils.serialize(inputUnits));

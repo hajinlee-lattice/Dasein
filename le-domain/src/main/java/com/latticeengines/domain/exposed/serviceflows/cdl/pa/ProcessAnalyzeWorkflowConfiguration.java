@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
@@ -53,6 +54,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
+        private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
@@ -74,6 +76,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
+            apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
             importExportS3.setCustomerSpace(customerSpace);
             return this;
         }
@@ -196,9 +199,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder apsRollingPeriod(String apsRollingPeriod) {
             awsPythonDataConfiguration.setRollingPeriod(apsRollingPeriod);
+            apsGenerationStepConfiguration.setRollingPeriod(apsRollingPeriod);
             processStepConfiguration.setApsRollingPeriod(apsRollingPeriod);
-            processTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
-
             return this;
         }
 
@@ -212,6 +214,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder skipSteps(Set<BusinessEntity> entities, boolean skipAPS) {
             processStepConfiguration.setSkipEntities(entities);
             awsPythonDataConfiguration.setSkipStep(skipAPS);
+            apsGenerationStepConfiguration.setSkipStep(skipAPS);
             return this;
         }
 
@@ -241,6 +244,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(exportToRedshift);
             configuration.add(exportToDynamo);
             configuration.add(awsPythonDataConfiguration);
+            configuration.add(apsGenerationStepConfiguration);
             configuration.add(importExportS3);
             return configuration;
         }

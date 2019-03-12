@@ -6,6 +6,12 @@ function upload_artifact() {
     MD5SUM="${ARTIFACT_DIR}/${ARTIFACT}.md5"
     TO_UPLOAD="false"
 
+    if [[ "${ARTIFACT}" == "spark"* ]]; then
+        S3_DIR=${S3_DIR_1}
+    else
+        S3_DIR=${S3_DIR_0}
+    fi
+
     hdfs dfs -copyToLocal ${DS_ROOT}/${ARTIFACT}.md5 ${MD5SUM}.hdfs
     if [[ -f "${MD5SUM}.hdfs" ]]; then
         aws s3 cp s3://${S3_BUCKET}/${S3_DIR}/${ARTIFACT}.md5 ${MD5SUM}.s3
@@ -45,14 +51,16 @@ DS_ROOT="/datascience/${LEDS_VERSION}"
 S3_BUCKET="latticeengines-dev-buildartifacts"
 if [[ ${LEDS_VERSION} =~ .*SNAPSHOT ]]; then
     echo "Downloading snapshot ${LEDS_VERSION} ..."
-    S3_DIR="snapshot/sklearn-pipeline/v${LEDS_VERSION}"
+    S3_DIR_0="snapshot/sklearn-pipeline/v${LEDS_VERSION}"
+    S3_DIR_1="snapshot/spark-scripts/v${LEDS_VERSION}"
 else
     echo "Downloading release ${LEDS_VERSION} ..."
-    S3_DIR="release/sklearn-pipeline/v${LEDS_VERSION}"
+    S3_DIR_0="release/sklearn-pipeline/v${LEDS_VERSION}"
+    S3_DIR_1="release/spark-scripts/v${LEDS_VERSION}"
 fi
 
 HAS_CHANGE=""
-for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts'; do
+for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts' 'spark|spark|scripts'; do
     artifact=$(echo ${params} | cut -d \| -f 1)
     dir1=$(echo ${params} | cut -d \| -f 2)
     dir2=$(echo ${params} | cut -d \| -f 3)
