@@ -1,6 +1,12 @@
 <div class="match-to-accounts container file-import-content">
+    <div class="header">
+        <h2>Match to Accounts</h2>
+        <p>
+            <strong>Select your Account ID to match your contact records to exsiting accounts.</strong>
+        </p>
+    </div>
     <form name="form">
-        <div class="id-options" ng-init="vm.checkFieldsDelay(form)">
+        <div class="id-option" ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
                 <div>
                     <label for="dedupeField">Unique Account Identifier</label>
@@ -18,5 +24,29 @@
                 </div>
             </div>
         </div>
+        <div class="matching-fields" ng-if="vm.entityMatchEnabled">
+            <p>
+                If a contact doesn't have an account ID, Atlas will use the following account information to match your contacts to the accounts. Please map as many fields as possible.
+            </p>
+            <ul ng-init="vm.fieldMapping = vm.fieldMapping || {}; vm.checkMatchingFieldsDelay(form);">
+                <li ng-repeat="field in vm.matchingFieldsList">
+                    <label>{{field.displayName || field.name}}</label>
+                    <select class="form-control" ng-model="vm.fieldMapping[field.name].userField"
+                        ng-init="vm.checkValidDelay(form)" ng-change="vm.changeMatchingFields(vm.fieldMapping, form)"
+                        ng-required="field.required" ng-class="{'required': field.required}">
+
+                        <option value="">{{vm.ignoredFieldLabel}}</option>
+                        <option ng-repeat="AvailableField in vm.AvailableFields"
+                            value="{{field.name}}^/{{AvailableField.userField}}"
+                            ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
+                            ng-init="(AvailableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + '^/' + AvailableField.userField : '')">
+                            {{AvailableField.userField}}
+                        </option>
+
+                    </select>
+                </li>
+            </ul>
+        </div>
+
     </form>
 </div>
