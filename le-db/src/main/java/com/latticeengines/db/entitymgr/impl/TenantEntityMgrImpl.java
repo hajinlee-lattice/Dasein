@@ -73,6 +73,7 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Tenant> findAllByType(TenantType type) {
         return tenantRepository.findAllByTenantType(type);
     }
@@ -104,10 +105,5 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
         super.update(tenant);
     }
 
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Tenant> findByTenantType(TenantType tenantType) {
-        return tenantRepository.findByTenantType(tenantType);
-    }
 
 }

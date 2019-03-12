@@ -20,6 +20,4 @@ public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
 
     List<Tenant> findAllByType(TenantType type);
 
-    List<Tenant> findByTenantType(TenantType tenantType);
-
 }

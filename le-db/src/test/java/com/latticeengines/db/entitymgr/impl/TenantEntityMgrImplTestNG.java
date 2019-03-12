@@ -78,7 +78,7 @@ public class TenantEntityMgrImplTestNG extends DbFunctionalTestNGBase {
         Tenant t = tenantEntityMgr.findByTenantName(TENANT_ID);
         assertTrue(tenantList.contains(t));
         for (Tenant tenant : tenantList) {
-            Assert.assertEquals(tenant.getTenantType(), TenantType.POC);
+            Assert.assertEquals(tenant.getTenantType(), TenantType.QA);
         }
     }
 

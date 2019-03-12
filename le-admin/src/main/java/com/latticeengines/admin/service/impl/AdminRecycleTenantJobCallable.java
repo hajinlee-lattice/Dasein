@@ -38,7 +38,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        List<Tenant> tempTenants = tenantService.findByTenantType(TenantType.POC);
+        List<Tenant> tempTenants = tenantService.getTenantByType(TenantType.POC);
         for (Tenant tenant : tempTenants) {
             long expiredTime = tenant.getExpiredTime();
             long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();

@@ -25,5 +25,4 @@ public interface TenantRepository extends BaseJpaRepository<Tenant, Long> {
 
     List<Tenant> findByNameStartingWith(String tenantName);
 
-    List<Tenant> findByTenantType(TenantType tenantType);
 }
