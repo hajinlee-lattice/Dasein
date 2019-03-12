@@ -46,7 +46,6 @@ public abstract class MRJobCustomizationBase extends Configured implements Tool,
         @Override
         public boolean accept(Path path) {
             try {
-
                 if (this.getConf().get(FileInputFormat.INPUT_DIR).contains(path.toString())) {
                     // FIXME: temp log for M27
                     log.info("Accept path " + path.toString());
