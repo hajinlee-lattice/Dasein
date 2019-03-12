@@ -178,7 +178,7 @@ public class MatchResource {
         }
     }
 
-    @PostMapping(value = "/publishentity")
+    @PostMapping(value = "/entity/publish")
     @ResponseBody
     @ApiOperation(value = "Publish entity seed/lookup entries "
             + "from source tenant (staging env) to dest tenant (staging/serving env). "
