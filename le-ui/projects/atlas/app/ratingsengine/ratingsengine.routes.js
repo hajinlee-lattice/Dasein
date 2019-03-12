@@ -378,13 +378,13 @@ angular
                     }],
                     iteration: ['$q', '$stateParams', 'RatingsEngineStore', 'ratingEngine', function($q, $stateParams, RatingsEngineStore, ratingEngine){
                         var deferred = $q.defer(),
-                            engineId = $stateParams.rating_id,
-                            modelId = $stateParams.modelId;
+                            engineId = ratingEngine.id,
+                            iteration = RatingsEngineStore.getRemodelIteration(),
+                            modelId = iteration.id;
 
                         RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
                             RatingsEngineStore.setRemodelIteration(result);
                             RatingsEngineStore.setRatingEngine(ratingEngine);
-
                             deferred.resolve(result);
                         });
                         return deferred.promise;

@@ -30,6 +30,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -46,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
@@ -57,6 +61,7 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -76,6 +81,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private MatchProxy matchProxy;
 
     @Inject
     private PeriodProxy periodProxy;
@@ -128,6 +136,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         createReportJson();
         setupInactiveVersion();
         setGrapherContext();
+        bumpEntityMatchVersion();
         // clearPhaseForRetry();
     }
 
@@ -456,6 +465,50 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
         log.info("Removing stats in " + inactiveVersion);
         dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
+    }
+
+    /*
+     * bump up entity match version
+     */
+    private void bumpEntityMatchVersion() {
+        if (!configuration.isEntityMatchEnabled()) {
+            log.debug("Entity match is not enabled, not bumping up version");
+            return;
+        }
+
+        List<EntityMatchEnvironment> environments = getEnvironmentsToBumpVersion();
+        if (CollectionUtils.isNotEmpty(environments)) {
+            BumpVersionRequest request = new BumpVersionRequest();
+            request.setTenant(new Tenant(customerSpace.toString()));
+            request.setEnvironments(environments);
+            log.info("Bump up entity match version for environments = {}", environments);
+            BumpVersionResponse response = matchProxy.bumpVersion(request);
+            log.info("Current entity match versions = {}", response.getVersions());
+        } else {
+            log.debug("No entity match environment requires bump up version");
+        }
+    }
+
+    /*
+     * Get all entity match environments that requires bump up version. Currently
+     * only consider Account import & rebuild.
+     */
+    @VisibleForTesting
+    List<EntityMatchEnvironment> getEnvironmentsToBumpVersion() {
+        Set<EntityMatchEnvironment> environments = new HashSet<>();
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                BusinessEntity.class, List.class);
+        if (MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(BusinessEntity.Account)) {
+            // if there is account import, bump up staging version
+            environments.add(EntityMatchEnvironment.STAGING);
+        }
+        if (CollectionUtils.isNotEmpty(configuration.getRebuildEntities())
+                && configuration.getRebuildEntities().contains(BusinessEntity.Account)) {
+            // when rebuilding for account, bump up both staging & serving version
+            environments.add(EntityMatchEnvironment.STAGING);
+            environments.add(EntityMatchEnvironment.SERVING);
+        }
+        return new ArrayList<>(environments);
     }
 
     public static class RebuildEntitiesProvider {
