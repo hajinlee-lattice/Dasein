@@ -629,6 +629,10 @@ public class MatchInput implements Fact, Dimension {
 
     public static class EntityKeyMap {
 
+        // MatchKey -> mapped fields (prioritized)
+        // SystemId MatchKey: the priority is decided by mapped fields order
+        // Domain MatchKey: choose 1st mapped field whose domain value is
+        // not empty and not public domain
         @JsonProperty("KeyMap")
         private Map<MatchKey, List<String>> keyMap;
 
