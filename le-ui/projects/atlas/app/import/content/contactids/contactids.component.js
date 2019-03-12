@@ -20,8 +20,7 @@ angular.module('lp.import.wizard.contactids', [])
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
         keyMap: {},
-        saveMap: {},
-        entityMatchEnabled: ImportWizardStore.entityMatchEnabled
+        saveMap: {}
     });
 
     vm.init = function() {

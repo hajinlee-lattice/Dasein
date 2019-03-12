@@ -4,6 +4,23 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
     ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields
 ) {
     var vm = this;
+    var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
+    // console.log(alreadySaved)
+    if(alreadySaved){
+        FieldDocument.fieldMappings = alreadySaved;
+        // vm.updateAnalysisFields();
+    }
+    var makeList = function(object) {
+        var list = [];
+        for(var i in object) {
+            list.push(object[i]);
+        }
+        return list;
+    }
+
+    var matchingFieldsList = makeList(MatchingFields),
+        ignoredFieldLabel = '-- Unmapped Field --',
+        noFieldLabel = '-- No Fields Available --';
 
     angular.extend(vm, {
         state: ImportWizardStore.getAccountIdState(),
@@ -15,14 +32,18 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
             contact: 'ContactId',
-            account: 'AccountId',
+            account: 'CustomerAccountId',
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
         keyMap: {},
         saveMap: {},
-        entityMatchEnabled: ImportWizardStore.entityMatchEnabled
+        entityMatchEnabled: ImportWizardStore.entityMatchEnabled,
+        ignoredFields: FieldDocument.ignoredFields || [],
+        ignoredFieldLabel: ignoredFieldLabel,
+        matchingFieldsList: angular.copy(matchingFieldsList),
+        matchingFields: MatchingFields,
     });
 
     vm.init = function() {
@@ -85,6 +106,62 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         vm.checkValid(form);
     };
 
+
+    /**
+     * NOTE: The delimiter could cause a problem if the column name has : as separator 
+     * @param {*} string 
+     * @param {*} delimiter 
+     */
+    var makeObject = function(string, delimiter) {
+        var delimiter = delimiter || '^/',
+            string = string || '',
+            pieces = string.split(delimiter);
+
+        return {
+            mappedField: pieces[0],
+            userField: (pieces[1] === "" ? fallbackUserField : pieces[1]) // allows unmapping
+        }
+    }
+
+    vm.changeMatchingFields = function(mapping, form) {
+        var _mapping = [];
+        vm.unavailableFields = [];
+        vm.ignoredFieldLabel = ignoredFieldLabel;
+
+        for(var i in mapping) {
+            var item = mapping[i],
+                map = makeObject(item.userField);
+
+            if(!map.userField) {
+                /**
+                 * to unmap find the userField using the original fieldMappings object
+                 */
+                var fieldItem = vm.fieldMappings.find(function(item) {
+                    return item.mappedField === i;
+                });
+                if(fieldItem && fieldItem.userField) {
+                    map.userField = fieldItem.userField;
+                    map.mappedField = null;
+                    map.unmap = true;
+                }
+            }
+
+            if(item.userField) {
+                vm.unavailableFields.push(map.userField);
+            }
+
+            if(map.userField) {
+                _mapping.push(map);
+            }
+        }
+
+        if(vm.unavailableFields.length >= vm.AvailableFields.length) {
+            vm.ignoredFieldLabel = noFieldLabel;
+        }
+        ImportWizardStore.setSaveObjects(_mapping);
+        vm.checkValid(form);
+    };
+
     vm.checkFieldsDelay = function(form) {
         var mapped = [];
         $timeout(function() {
@@ -101,6 +178,23 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         }, 1);
     }
 
+    vm.checkMatchingFieldsDelay = function(form) {
+        $timeout(function() {
+            for(var i in vm.fieldMapping) {
+                var key = i,
+                userField = vm.fieldMapping[key];
+
+                vm.keyMap[key] = userField;
+                vm.initialMapping[key] = userField;
+
+                var fieldMapping = vm.fieldMapping[i],
+                fieldObj = makeObject(fieldMapping.userField);
+
+                vm.unavailableFields.push(fieldObj.userField);
+            }
+        }, 1);
+    }
+
     vm.checkValidDelay = function(form) {
         $timeout(function() {
             vm.checkValid(form);
@@ -108,7 +202,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('ids', form.$valid);
+        ImportWizardStore.setValidation('matchtoaccounts', form.$valid);
     }
 
 
