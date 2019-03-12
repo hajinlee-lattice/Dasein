@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -9,17 +10,20 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.choreographers.ProcessAnalyzeChoreographer;
 import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
+import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
 import com.latticeengines.cdl.workflow.steps.process.GenerateProcessingReport;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportProcessAnalyzeToS3;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
 import com.latticeengines.serviceflows.workflow.match.CommitEntityMatchWorkflow;
+import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -60,6 +64,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private AwsApsGeneratorStep awsApsGeneratorStep;
 
     @Inject
+    private ApsGeneration apsGeneration;
+
+    @Inject
     private CuratedAttributesWorkflow curatedAttributesWorkflow;
 
     @Inject
@@ -73,7 +80,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
 
     @Inject
     private ImportProcessAnalyzeFromS3 importProcessAnalyzeFromS3;
-    
+
     @Inject
     private ExportProcessAnalyzeToS3 exportProcessAnalyzeToS3;
 
@@ -83,8 +90,12 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private CommitEntityMatchWorkflow commitEntityMatchWorkflow;
 
+    @Value("${cdl.aps.use.spark}")
+    private boolean apsUseSpark;
+
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+        AbstractStep<? extends BaseStepConfiguration> apsStep = apsUseSpark ? apsGeneration : awsApsGeneratorStep;
         return new WorkflowBuilder(name(), config) //
                 .next(startProcessing) //
                 .next(importProcessAnalyzeFromS3) //
@@ -92,14 +103,14 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //
                 .next(processTransactionWorkflow) //
+                .next(apsStep) //
                 .next(curatedAttributesWorkflow) //
                 .next(combineStatistics) //
                 .next(exportToRedshift) //
                 .next(exportToDynamo) //
                 .next(processRatingWorkflow) //
                 .next(generateProcessingReport) //
-                .next(commitEntityMatchWorkflow)
-                .next(awsApsGeneratorStep) //
+                .next(commitEntityMatchWorkflow) //
                 .next(exportProcessAnalyzeToS3) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //

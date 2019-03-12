@@ -12,8 +12,15 @@ val mapper = new ObjectMapper() with ScalaObjectMapper
 mapper.registerModule(DefaultScalaModule)
 
 val spark = SparkSession.builder().appName("SparkSession").getOrCreate()
+val checkpointDir = """{{CHECKPOINT_DIR}}""";
+if (checkpointDir.length > 0) {
+  spark.sparkContext.setCheckpointDir(checkpointDir)
+  println("----- BEGIN SCRIPT OUTPUT -----")
+  println(s"Checkpoint Dir: $checkpointDir")
+  println("----- END SCRIPT OUTPUT -----")
+}
 
-val rawInput = mapper.readValue[List[JsonNode]]("{{INPUT}}")
+val rawInput = mapper.readValue[List[JsonNode]]("""{{INPUT}}""")
 
 def loadHdfsUnit(unit: JsonNode): DataFrame = {
   var path = unit.get("Path").asText()
@@ -39,13 +46,13 @@ println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"Input: $scriptInput")
 println("----- END SCRIPT OUTPUT -----")
 
-val scriptParams = mapper.readValue[JsonNode]("{{PARAMS}}")
+val scriptParams = mapper.readValue[JsonNode]("""{{PARAMS}}""")
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"Params: $scriptParams")
 println("----- END SCRIPT OUTPUT -----")
 
-val scriptTargets = mapper.readValue[List[JsonNode]]("{{TARGETS}}")
+val scriptTargets = mapper.readValue[List[JsonNode]]("""{{TARGETS}}""")
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"Targets: $scriptTargets")

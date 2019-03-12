@@ -1,5 +1,6 @@
 package com.latticeengines.spark.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.InputStreamSparkScript;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.domain.exposed.spark.LocalFileSparkScript;
 import com.latticeengines.domain.exposed.spark.ScriptJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkInterpreter;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -121,15 +124,19 @@ public class SparkJobServiceImpl implements SparkJobService {
         cleanupTargetDirs(config.getTargets());
         SparkScriptClient client = getClient(retrieved, script);
         client.runPreScript(config);
+        String output;
         switch (script.getType()) {
             case InputStream:
-                String output = runInputStreamScript(client, (InputStreamSparkScript) script);
-                if (StringUtils.isNotBlank(output)) {
-                    log.info("Script prints out: " + output);
-                }
+                output = runInputStreamScript(client, (InputStreamSparkScript) script);
+                break;
+            case LocalFile:
+                output = runLocalFileScript(client, (LocalFileSparkScript) script);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown script type " + script.getType());
+        }
+        if (StringUtils.isNotBlank(output)) {
+            log.info("Script prints out: " + output);
         }
         String outputStr = client.printOutputStr();
         List<HdfsDataUnit> targets = client.runPostScript();
@@ -141,16 +148,28 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     private String runInputStreamScript(SparkScriptClient client, InputStreamSparkScript script) {
         InputStream stream = script.getStream();
-        return submitInputStream(client, stream);
-    }
-
-    private String submitInputStream(SparkScriptClient client, InputStream stream) {
         LineIterator lineIterator;
         try {
             lineIterator = IOUtils.lineIterator(stream, Charset.forName("UTF-8"));
         } catch (IOException e) {
             throw new RuntimeException("Failed to iterate lines.", e);
         }
+        return submitLines(client, lineIterator);
+    }
+
+    private String runLocalFileScript(SparkScriptClient client, LocalFileSparkScript script) {
+        File file = script.getFile();
+        LineIterator lineIterator;
+        try {
+            lineIterator = FileUtils.lineIterator(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to iterate lines.", e);
+        }
+        return submitLines(client, lineIterator);
+    }
+
+    private String submitLines(SparkScriptClient client, LineIterator lineIterator) {
+
         List<String> lines = new ArrayList<>();
         String output = null;
         for (String line : (Iterable<String>) () -> lineIterator) {

@@ -20,6 +20,7 @@ import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
+import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -74,6 +75,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Inject
     private AwsApsGeneratorStep awsApsGeneratorStep;
+
+    @Inject
+    private ApsGeneration apsGeneration;
 
     @Inject
     private ExportToRedshift exportToRedshiftStep;
@@ -167,7 +171,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean isApsGenerationStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().equals(awsApsGeneratorStep.name());
+        return step.name().equals(awsApsGeneratorStep.name()) || step.name().equals(apsGeneration.name());
     }
 
     private boolean skipApsGeneration(AbstractStep<? extends BaseStepConfiguration> step) {

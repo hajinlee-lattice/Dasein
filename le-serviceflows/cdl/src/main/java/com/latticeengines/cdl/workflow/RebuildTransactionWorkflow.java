@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileTransactionWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildTransactionWorkflowConfiguration;
@@ -26,14 +25,10 @@ public class RebuildTransactionWorkflow extends AbstractWorkflow<RebuildTransact
     @Inject
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
 
-    @Inject
-    private AwsApsGeneratorStep awsApsGeneratorStep;
-
     @Override
     public Workflow defineWorkflow(RebuildTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(profileTransactionWrapper) //
-                .next(awsApsGeneratorStep) //
                 .next(profilePurchaseHistoryWrapper) //
                 .build();
     }
