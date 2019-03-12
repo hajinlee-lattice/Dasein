@@ -1,6 +1,6 @@
 
 angular.module('lp.import')
-.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils, StringUtility){
+.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils, StringUtility, FeatureFlagService){
     var ImportWizardStore = this;
 
     this.init = function() {
@@ -20,6 +20,7 @@ angular.module('lp.import')
             ids: false,
             thirdpartyids: true,
             latticefields: false,
+            matchtoaccounts: true,
             customfields: true,
             jobstatus: false,
             producthierarchy: false
@@ -45,6 +46,7 @@ angular.module('lp.import')
         this.postBody = null;
         this.autoImport = true;
         this.importOnly = false;
+        this.entityMatchEnabled = true; //FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENTITY_MATCH_ENABLED);
     }
 
     this.init();
@@ -136,8 +138,17 @@ angular.module('lp.import')
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
+                label: 'Match to Fields', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts', 
+                nextLabel: 'Next, Add Custom Fields', 
+                nextFn: function(nextState) {
+                    this.userFieldsType = {};
+                    // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
+                    ImportWizardStore.nextSaveMapping(nextState);
+                } 
+            },{ 
                 label: 'Custom Fields', 
-                state: 'contacts.ids.thirdpartyids.latticefields.customfields', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
@@ -151,7 +162,7 @@ angular.module('lp.import')
                 }
             },{ 
                 label: 'Save Template', 
-                state: 'contacts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {

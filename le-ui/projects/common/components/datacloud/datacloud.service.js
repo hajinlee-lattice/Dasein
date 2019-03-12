@@ -597,7 +597,6 @@ angular.module('common.datacloud')
                 }
             }).then(function (response) {
                 deferred.resolve(response);
-                console.log(response);
             });
 
             return deferred.promise;
