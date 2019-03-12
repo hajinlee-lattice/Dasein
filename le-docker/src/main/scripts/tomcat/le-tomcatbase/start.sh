@@ -88,7 +88,7 @@ export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.local.only
 export CATALINA_OPTS="${CATALINA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 
 if [[ "${DISABLE_JMXTRANS}" != "true" ]]; then
-    if [[ -f "/var/lib/jmxtransa-agent.jar" ]]; then
+    if [[ -f "/var/lib/jmxtrans-agent.jar" ]]; then
         echo "Found jmxtrans-agent.jar, setting its java agent"
         export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
     else
