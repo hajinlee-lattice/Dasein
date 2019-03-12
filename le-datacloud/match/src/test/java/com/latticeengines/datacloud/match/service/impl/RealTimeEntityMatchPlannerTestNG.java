@@ -60,8 +60,6 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         Assert.assertTrue(output.getEntityKeyMaps() != null);
         Assert.assertEquals(output.getEntityKeyMaps().size(), 1);
         Assert.assertTrue(output.getEntityKeyMaps().containsKey(BusinessEntity.Account.name()));
-        MatchInput.EntityKeyMap entityKeyMap = output.getEntityKeyMaps().get(BusinessEntity.Account.name());
-        Assert.assertEquals(entityKeyMap.getSystemIdPriority(), Arrays.asList("AccountId", "MktoId", "SfdcId"));
     }
 
     private MatchInput prepareMatchInput() {
@@ -78,7 +76,6 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         input.setTargetEntity(BusinessEntity.Account.name());
 
         EntityKeyMap entityKeyMap = new EntityKeyMap();
-        entityKeyMap.setSystemIdPriority(Arrays.asList("AccountId", "MktoId", "SfdcId"));
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
         keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));

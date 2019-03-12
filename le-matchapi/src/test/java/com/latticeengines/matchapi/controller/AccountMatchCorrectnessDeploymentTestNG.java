@@ -153,7 +153,6 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         Map<MatchKey, List<String>> map = MatchKeyUtils.resolveKeyMap(Arrays.asList(FIELDS));
         map.put(MatchKey.SystemId, Arrays.asList(FLD_ACCOUNT_ID, FLD_SFDC_ID, FLD_MKTO_ID));
         keyMap.setKeyMap(map);
-        keyMap.setSystemIdPriority(Arrays.asList(FLD_ACCOUNT_ID, FLD_SFDC_ID, FLD_MKTO_ID));
         keyMaps.put(BusinessEntity.Account.name(), keyMap);
         return keyMaps;
     }
