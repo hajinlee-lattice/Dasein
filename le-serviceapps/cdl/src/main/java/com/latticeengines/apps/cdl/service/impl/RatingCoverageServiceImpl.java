@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
@@ -636,6 +637,19 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
                     Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
                     coverageInfo.setUnscoredContactCount(unscoredContactCount);
+
+                    // contacts without emails
+                    Restriction noEmailRestriction = Restriction.builder()
+                            .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNull().build();
+                    Restriction contactsWithoutEmailRest = Restriction.builder()
+                            .and(accountFrontEndQuery.getContactRestriction().getRestriction(), noEmailRestriction).build();
+                    FrontEndQuery noEmailFrontEndQuery = new FrontEndQuery();
+                    noEmailFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+                    noEmailFrontEndQuery.setAccountRestriction(accountFrontEndQuery.getAccountRestriction());
+                    noEmailFrontEndQuery.setContactRestriction(new FrontEndRestriction(contactsWithoutEmailRest));
+                    coverageInfo.setContactCountWithoutEmail(entityProxy.getCount(tenant.getId(), noEmailFrontEndQuery));
+                    
+
                 } catch (Exception ex) {
                     log.info("Got error in fetching contact count", ex);
                 }

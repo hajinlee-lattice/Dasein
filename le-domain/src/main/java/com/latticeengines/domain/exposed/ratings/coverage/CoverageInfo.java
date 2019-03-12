@@ -24,6 +24,9 @@ public class CoverageInfo {
     @JsonProperty("contactCount")
     private Long contactCount;
 
+    @JsonProperty("contactCountWithoutEmail")
+    private Long contactCountWithoutEmail;
+
     @JsonProperty("unscoredAccountCount")
     private Long unscoredAccountCount;
 
@@ -33,8 +36,7 @@ public class CoverageInfo {
     @JsonProperty("bucketCoverageCounts")
     private List<RatingBucketCoverage> bucketCoverageCounts;
 
-    public CoverageInfo() {
-    }
+    public CoverageInfo() {}
 
     public CoverageInfo(Long accountCount, Long contactCount) {
         this.accountCount = accountCount;
@@ -66,13 +68,12 @@ public class CoverageInfo {
 
     public static List<RatingBucketCoverage> fromBuckets(List<BucketMetadata> buckets) {
         if (CollectionUtils.isNotEmpty(buckets)) {
-            return buckets.stream().sorted(Comparator.comparing(BucketMetadata::getBucketName))
-                    .map(bucket -> {
-                        RatingBucketCoverage bktCvg = new RatingBucketCoverage();
-                        bktCvg.setBucket(bucket.getBucket().toValue());
-                        bktCvg.setCount((long) bucket.getNumLeads());
-                        return bktCvg;
-                    }).collect(Collectors.toList());
+            return buckets.stream().sorted(Comparator.comparing(BucketMetadata::getBucketName)).map(bucket -> {
+                RatingBucketCoverage bktCvg = new RatingBucketCoverage();
+                bktCvg.setBucket(bucket.getBucket().toValue());
+                bktCvg.setCount((long) bucket.getNumLeads());
+                return bktCvg;
+            }).collect(Collectors.toList());
         }
         return null;
     }
@@ -91,6 +92,14 @@ public class CoverageInfo {
 
     public void setContactCount(Long contactCount) {
         this.contactCount = contactCount;
+    }
+
+    public Long getContactCountWithoutEmail() {
+        return contactCountWithoutEmail;
+    }
+
+    public void setContactCountWithoutEmail(Long contactCountWithoutEmail) {
+        this.contactCountWithoutEmail = contactCountWithoutEmail;
     }
 
     public Long getUnscoredAccountCount() {
@@ -121,7 +130,7 @@ public class CoverageInfo {
         if (this.bucketCoverageCounts == null) {
             return null;
         }
-        return this.bucketCoverageCounts.stream()
-                .filter(rbc -> rbc.getBucket().equalsIgnoreCase(bucket)).findFirst().orElse(null);
+        return this.bucketCoverageCounts.stream().filter(rbc -> rbc.getBucket().equalsIgnoreCase(bucket)).findFirst()
+                .orElse(null);
     }
 }
