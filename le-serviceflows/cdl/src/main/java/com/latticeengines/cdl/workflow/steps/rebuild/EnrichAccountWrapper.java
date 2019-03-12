@@ -11,22 +11,22 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
-@Component("profileAccountWrapper")
+@Component("enrichAccountWrapper")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProfileAccountWrapper extends BaseTransformationWrapper<ProcessAccountStepConfiguration, ProfileAccount> {
+public class EnrichAccountWrapper extends BaseTransformationWrapper<ProcessAccountStepConfiguration, EnrichAccount> {
 
     @Inject
-    private ProfileAccount profileAccount;
+    private EnrichAccount enrichAccount;
 
     @PostConstruct
     public void overrideTransformationStepBeanName() {
-        setTransformationStepBeanName(ProfileAccount.BEAN_NAME);
+        setTransformationStepBeanName(EnrichAccount.BEAN_NAME);
     }
 
     @Override
-    protected ProfileAccount getWrapperStep() {
-        return profileAccount;
+    protected EnrichAccount getWrapperStep() {
+        return enrichAccount;
     }
 
 }

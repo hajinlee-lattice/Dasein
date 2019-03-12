@@ -125,6 +125,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
     protected static final String PA_TIMESTAMP = "PA_TIMESTAMP";
     public static final String PA_SKIP_ENTITIES = "PA_SKIP_ENTITIES";
+    protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String CLEANUP_TIMESTAMP = "CLEANUP_TIMESTAMP";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";

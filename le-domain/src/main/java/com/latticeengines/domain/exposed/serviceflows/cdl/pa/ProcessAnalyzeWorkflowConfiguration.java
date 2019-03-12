@@ -167,6 +167,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 steps.forEach(s -> rebuildSteps.add(s.toLowerCase()));
             }
             awsPythonDataConfiguration.setRebuildSteps(rebuildSteps);
+            if (rebuildSteps.contains("apsgeneration")) {
+                apsGenerationStepConfiguration.setForceRebuild(true);
+            }
             return this;
         }
 
