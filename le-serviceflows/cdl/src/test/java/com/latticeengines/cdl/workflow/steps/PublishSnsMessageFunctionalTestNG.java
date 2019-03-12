@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.amazonaws.services.sns.model.PublishResult;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -62,6 +63,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
         extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         lookupIdMap.setExternalAuthentication(extSysAuth);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
 
         config.setLookupIdMap(lookupIdMap);
         config.setExternalAudienceId(audienceId);

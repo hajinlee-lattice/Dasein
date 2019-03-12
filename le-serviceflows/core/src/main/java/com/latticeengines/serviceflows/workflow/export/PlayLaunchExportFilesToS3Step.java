@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.apache.velocity.shaded.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -61,6 +62,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     @Inject
     private DataIntegrationMonitoringProxy dataIntegrationMonitoringProxy;
+
+    @Value("${aws.data.integration.exportdata.topic}")
+    protected String exportDataTopic;
 
     private Map<String, List<ExportFileConfig>> sourceFiles = new HashMap<String, List<ExportFileConfig>>();
 
@@ -116,10 +120,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         LookupIdMap lookupIdMap = config.getLookupIdMap();
 
         Map<String, MessageAttributeValue> messageAttributes = new HashMap<String, MessageAttributeValue>();
-        // TODO: Replace with destination org type
         messageAttributes.put(ExternalIntegrationMessageAttribute.TARGET_SYSTEMS.getName(),
                 new MessageAttributeValue().withDataType(STRING)
-                        .withStringValue("Marketo"));
+                        .withStringValue(config.getLookupIdMap().getExternalSystemName().name()));
 
         s3ExportFilePaths.stream().forEach(exportPath -> {
             List<ExportFileConfig> fileConfigs = sourceFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
@@ -148,9 +151,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
             PublishRequest publishRequest = new PublishRequest().withMessage(JsonUtils.serialize(jsonMessage))
                     .withMessageStructure("json").withMessageAttributes(messageAttributes)
                     .withMessageAttributes(messageAttributes);
-            log.info(String.format("Publishing play launch with workflow request id %s ", workflowRequestId));
+            log.info(String.format("Publishing play launch with workflow request id %s to Topic: %s", workflowRequestId, exportDataTopic));
             log.info("Publish Request: " + JsonUtils.serialize(publishRequest));
-            return snsService.publishToTopic("ExportDataTopic", publishRequest);
+            return snsService.publishToTopic(exportDataTopic, publishRequest);
         } catch (Exception e) {
             log.info(e.toString());
             return null;
