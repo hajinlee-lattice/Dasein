@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -147,9 +148,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
-        List<Product> productList = new ArrayList<>(
-                ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
-        Map<String, List<Product>> productMap = ProductUtils.getProductMap(productList, ProductType.Analytic.name());
+        List<Product> productList = new ArrayList<>(ProductUtils.loadProducts(yarnConfiguration,
+                productTable.getExtracts().get(0).getPath(), Arrays.asList(ProductType.Analytic.name()), null));
+        Map<String, List<Product>> productMap = ProductUtils.getProductMap(productList);
         return productMap;
     }
 

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,6 +33,7 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.dataflow.transformation.ConsolidateDataFlow;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -56,6 +58,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
@@ -70,6 +73,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private String tableName2 = "ConsolidateTrxTable2";
     private String tableName3 = "ConsolidateTrxTable3";
     private String accountTableName = "AccountTable1";
+    private String productTableName = "ProductTable1";
 
     private static final String SORTED_TABLE_PREFIX = "SortedDailyTransaction";
     private static final String SORTED_PERIOD_TABLE_PREFIX = "SortedPeriodTransaction";
@@ -110,13 +114,14 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         prepareCleanPod("PipelineConsolidateDeploymentTestNG");
     }
 
-    // @AfterMethod(groups = "deployment")
+    @AfterMethod(groups = "deployment")
     public void afterMethod() {
 
         cleanupProgressTables();
 
         // cleanup intermediate table
         cleanupRegisteredTable(accountTableName);
+        cleanupRegisteredTable(productTableName);
         cleanupRegisteredTable(tableName1);
         cleanupRegisteredTable(tableName2);
         cleanupRegisteredTable(tableName3);
@@ -129,6 +134,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
         uploadAndRegisterAccountTable();
+        uploadAndRegisterProductTable();
         uploadAndRegisterTable1();
         uploadAndRegisterTable2();
         uploadAndRegisterTable3();
@@ -447,8 +453,12 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(productMap);
-        config.setProductTable(null);
+
+        List<String> baseSources = Arrays.asList(productTableName);
+        stepConfig.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(productTableName, new SourceTable(productTableName, customerSpace));
+        stepConfig.setBaseTables(baseTables);
 
         stepConfig.setConfiguration(JsonUtils.serialize(config));
         return stepConfig;
@@ -460,16 +470,16 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         String tableSourceName = "CustomerUniverse";
         String sourceTableName = rawTable.getName();
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
+        List<String> baseSources = Arrays.asList(tableSourceName, productTableName);
         step2.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
+        baseTables.put(productTableName, new SourceTable(productTableName, customerSpace));
         step2.setBaseTables(baseTables);
 
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(productMap);
 
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
@@ -482,6 +492,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         PeriodConvertorConfig config = new PeriodConvertorConfig();
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodField(InterfaceName.PeriodId.name());
+        config.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarMonth));
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }
@@ -545,7 +556,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         step2.setInputSteps(Collections.singletonList(periodsStep));
 
         String tableSourceName = "CustomerUniverse";
-        String sourceTableName = dailyTable.getName();
+        String sourceTableName = periodTable.getName();
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
         List<String> baseSources = Collections.singletonList(tableSourceName);
         step2.setBaseSources(baseSources);
@@ -823,38 +834,10 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
     }
 
-    private void initProductTable() {
-        Product product11 = createProduct("1", "sku1", "b1", null, null, null);
-        Product product12 = createProduct("1", "sku1", "b2", null, null, null);
-        Product product13 = createProduct("1", "sku1", null, "pl1", "pf1", "pc1");
-        Product product3 = createProduct("3", "sku3", "b1", "pl1", "pf1", "pc1");
-        Product product4 = createProduct("4", "sku4", null, null, null, null);
-        Product product5 = createProduct("5", "sku5", "b3", "pl1", "pf1", "pc1");
-
-        List<Product> products1 = Arrays.asList(product11, product12, product13);
-        productMap.put("1", products1);
-        productMap.put("3", Collections.singletonList(product3));
-        productMap.put("4", Collections.singletonList(product4));
-        productMap.put("5", Collections.singletonList(product5));
-    }
-
-    private Product createProduct(String id, String name, String bundle, String productLine, String productFamily,
-            String productCategory) {
-        Product product = new Product();
-        product.setProductId(id);
-        product.setProductName(name);
-        product.setProductBundle(bundle);
-        product.setProductLine(productLine);
-        product.setProductFamily(productFamily);
-        product.setProductCategory(productCategory);
-        return product;
-    }
-
     private void initializeTsStores() {
         rawTable = buildPeriodStore(SchemaInterpretation.TransactionRaw);
         dailyTable = buildPeriodStore(SchemaInterpretation.TransactionDailyAggregation);
         periodTable = buildPeriodStore(SchemaInterpretation.TransactionPeriodAggregation);
-        initProductTable();
     }
 
     private Table buildPeriodStore(SchemaInterpretation schema) {
@@ -900,6 +883,26 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         uploadAndRegisterTableSource(columns, data, accountTableName);
     }
 
+    private List<String> productFields = Arrays.asList(InterfaceName.ProductId.name(), InterfaceName.ProductName.name(),
+            InterfaceName.ProductBundle.name(), InterfaceName.ProductLine.name(), InterfaceName.ProductFamily.name(),
+            InterfaceName.ProductCategory.name(), InterfaceName.ProductStatus.name());
+
+    private void uploadAndRegisterProductTable() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (int i = 0; i < productFields.size(); i++) {
+            columns.add(Pair.of(productFields.get(i), String.class));
+        }
+        Object[][] data = { 
+                { "1", "sku1", "b1", null, null, null, ProductStatus.Active.name() }, //
+                { "1", "sku1", "b2", null, null, null, ProductStatus.Active.name() }, //
+                { "1", "sku1", null, "pl1", "pf1", "pc1", ProductStatus.Active.name() }, //
+                { "3", "sku3", "b1", "pl1", "pf1", "pc1", ProductStatus.Active.name() }, //
+                { "4", "sku4", null, null, null, null, ProductStatus.Active.name() }, //
+                { "5", "sku5", "b3", "pl1", "pf1", "pc1", ProductStatus.Active.name() } //
+        }; //
+        uploadAndRegisterTableSource(columns, data, productTableName);
+    }
+    
     private void uploadAndRegisterTable1() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         for (int i = 0; i < fieldNames.size(); i++) {
