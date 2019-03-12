@@ -9,10 +9,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.testframework.DbFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -67,7 +67,6 @@ public class TenantEntityMgrImplTestNG extends DbFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findAllByStatus() {
         List<Tenant> tenantList = tenantEntityMgr.findAllByStatus(TenantStatus.ACTIVE);
-        log.info(JsonUtils.serialize(tenantList));
         Tenant t = tenantEntityMgr.findByTenantName(TENANT_ID);
         assertTrue(tenantList.contains(t));
     }
@@ -75,9 +74,12 @@ public class TenantEntityMgrImplTestNG extends DbFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findAllByTenantType() {
         List<Tenant> tenantList = tenantEntityMgr.findAllByType(TenantType.QA);
-        log.info(JsonUtils.serialize(tenantList));
+        Assert.assertNotNull(tenantList);
         Tenant t = tenantEntityMgr.findByTenantName(TENANT_ID);
         assertTrue(tenantList.contains(t));
+        for (Tenant tenant : tenantList) {
+            Assert.assertEquals(tenant.getTenantType(), TenantType.QA);
+        }
     }
 
 }

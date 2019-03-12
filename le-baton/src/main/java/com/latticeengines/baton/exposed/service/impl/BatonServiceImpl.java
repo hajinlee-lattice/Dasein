@@ -89,7 +89,8 @@ public class BatonServiceImpl implements BatonService {
                 ContractLifecycleManager.create(contractId, contractInfo);
             }
             // Timestamp
-            tenantInfo.properties.created = LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+            tenantInfo.properties.created = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
+                    .toEpochMilli();
             tenantInfo.properties.lastModified = tenantInfo.properties.created;
             tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(90);
 
