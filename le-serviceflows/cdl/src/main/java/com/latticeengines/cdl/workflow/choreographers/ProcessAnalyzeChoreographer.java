@@ -25,6 +25,7 @@ import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
@@ -205,9 +206,14 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean rebuildAps(AbstractStep<? extends BaseStepConfiguration> step) {
-        AWSPythonBatchConfiguration configuration = (AWSPythonBatchConfiguration) step.getConfiguration();
-        if (CollectionUtils.isNotEmpty(configuration.getRebuildSteps())) {
-            return configuration.getRebuildSteps().contains(step.name().toLowerCase());
+        if (step.getConfiguration() instanceof AWSPythonBatchConfiguration) {
+            AWSPythonBatchConfiguration configuration = (AWSPythonBatchConfiguration) step.getConfiguration();
+            if (CollectionUtils.isNotEmpty(configuration.getRebuildSteps())) {
+                return configuration.getRebuildSteps().contains(step.name().toLowerCase());
+            }
+        } else if (step.getConfiguration() instanceof ApsGenerationStepConfiguration) {
+            ApsGenerationStepConfiguration configuration = (ApsGenerationStepConfiguration) step.getConfiguration();
+            return Boolean.TRUE.equals(configuration.getForceRebuild());
         }
         return false;
     }
