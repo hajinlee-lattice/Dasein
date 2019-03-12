@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
@@ -19,70 +20,62 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings({ "rawtypes", "serial" })
 public class ProductMapperFunction extends BaseOperation implements Function {
 
+    private static final String PREFIX = "__";
     private String productField;
-    private Map<String, List<Product>> productMap;
     private List<String> rolledUpFields;
     private Map<String, Integer> positionMap;
 
-    public ProductMapperFunction(Fields fieldsDeclaration, String productField,
-            Map<String, List<Product>> productMap, List<String> rolledUpFields) {
+    public ProductMapperFunction(Fields fieldsDeclaration, String productField, List<String> rolledUpFields) {
         super(fieldsDeclaration);
         this.positionMap = getPositionMap(fieldsDeclaration);
         this.productField = productField;
         this.rolledUpFields = rolledUpFields;
-        this.productMap = productMap;
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String productId = arguments.getString(productField);
-        List<Product> products = productMap.get(productId);
-
-        if (products != null) {
-            for (Product product : products) {
-                Tuple tuple = arguments.getTupleCopy();
-                switch (ProductType.valueOf(product.getProductType())) {
-                    case Bundle:
-                        updateTuple(tuple, rolledUpFields, Arrays
-                                .asList(product.getProductBundleId(), ProductType.Analytic.name()));
-                        functionCall.getOutputCollector().add(tuple);
-                        break;
-                    case Hierarchy:
-                        if (product.getProductLine() != null) {
-                            updateTuple(tuple, rolledUpFields, Arrays.asList(
-                                    product.getProductLineId(), ProductType.Spending.name()));
-                            functionCall.getOutputCollector().add(tuple);
-                        } else if (product.getProductFamily() != null) {
-                            updateTuple(tuple, rolledUpFields, Arrays.asList(
-                                    product.getProductFamilyId(), ProductType.Spending.name()));
-                            functionCall.getOutputCollector().add(tuple);
-                        } else if (product.getProductCategory() != null) {
-                            updateTuple(tuple, rolledUpFields, Arrays.asList(
-                                    product.getProductCategoryId(), ProductType.Spending.name()));
-                            functionCall.getOutputCollector().add(tuple);
-                        }
-                        break;
-                    case Analytic:
-                        updateTuple(tuple, rolledUpFields,
-                                Arrays.asList(product.getProductId(), ProductType.Analytic.name()));
-                        functionCall.getOutputCollector().add(tuple);
-                        break;
-                    case Spending:
-                        updateTuple(tuple, rolledUpFields,
-                                Arrays.asList(product.getProductId(), ProductType.Spending.name()));
-                        functionCall.getOutputCollector().add(tuple);
-                        break;
-                    default:
-                        break;
+        Tuple tuple = arguments.getTupleCopy();
+        String productId = arguments.getString(PREFIX + productField);
+        if (productId != null) {
+            String typeName = arguments.getString(PREFIX + InterfaceName.ProductType.name());
+            ProductType productType = ProductType.getProductType(typeName);
+            switch (productType) {
+            case Bundle:
+                String bundleId = arguments.getString(PREFIX + InterfaceName.ProductBundleId.name());
+                updateTuple(tuple, rolledUpFields, Arrays.asList(bundleId, ProductType.Analytic.name()));
+                break;
+            case Hierarchy:
+                String line = arguments.getString(PREFIX + InterfaceName.ProductLine.name());
+                String family = arguments.getString(PREFIX + InterfaceName.ProductFamily.name());
+                String category = arguments.getString(PREFIX + InterfaceName.ProductCategory.name());
+                if (line != null) {
+                    updateTuple(tuple, rolledUpFields,
+                            Arrays.asList(arguments.getString(PREFIX + InterfaceName.ProductLineId.name()),
+                                    ProductType.Spending.name()));
+                } else if (family != null) {
+                    updateTuple(tuple, rolledUpFields,
+                            Arrays.asList(arguments.getString(PREFIX + InterfaceName.ProductFamilyId.name()),
+                                    ProductType.Spending.name()));
+                } else if (category != null) {
+                    updateTuple(tuple, rolledUpFields,
+                            Arrays.asList(arguments.getString(PREFIX + InterfaceName.ProductCategoryId.name()),
+                                    ProductType.Spending.name()));
                 }
+                break;
+            case Analytic:
+                updateTuple(tuple, rolledUpFields, Arrays.asList(productId, ProductType.Analytic.name()));
+                break;
+            case Spending:
+                updateTuple(tuple, rolledUpFields, Arrays.asList(productId, ProductType.Spending.name()));
+                break;
+            default:
+                break;
             }
         } else {
-            Tuple tuple = arguments.getTupleCopy();
-            updateTuple(tuple, rolledUpFields,
-                    Arrays.asList(Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name()));
-            functionCall.getOutputCollector().add(tuple);
+            updateTuple(tuple, rolledUpFields, Arrays.asList(Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name()));
         }
+        functionCall.getOutputCollector().add(tuple);
     }
 
     private void updateTuple(Tuple tuple, List<String> fields, List<Object> values) {

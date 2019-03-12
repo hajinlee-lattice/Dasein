@@ -87,7 +87,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.contact.dataquota.limit:10000000}")
     private Long defaultContactQuotaLimit;
 
-    @Value("${cdl.product.dataquota.limit:200}")
+    @Value("${cdl.product.dataquota.limit:6000000}")
     private Long defaultProductQuotaLimit;
 
     @Value("${cdl.transaction.dataquota.limit:20000000}")
