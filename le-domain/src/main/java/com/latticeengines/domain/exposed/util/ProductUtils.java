@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,24 +34,24 @@ public class ProductUtils {
     private static final Logger log = LoggerFactory.getLogger(ProductUtils.class);
     private static String FILE_NAME = "Products.avro";
 
-    public static String getCompositeId(String type, String id, String name, String bundle,
-                                        String category, String family, String line) {
+    public static String getCompositeId(String type, String id, String name, String bundle, String category,
+            String family, String line) {
         if (StringUtils.isBlank(type)) {
             return null;
         } else {
             try {
                 switch (ProductType.valueOf(type)) {
-                    case Bundle:
-                        return StringUtils.join(new String[] { type, id, bundle }, "__");
-                    case Hierarchy:
-                        return StringUtils.join(new String[] { type, id }, "__");
-                    case Analytic:
-                        return StringUtils.join(new String[] { type, name }, "__");
-                    case Spending:
-                        return StringUtils.join(new String[] { type, name, category, family, line }, "__");
-                    case Raw:
-                    default:
-                        return null;
+                case Bundle:
+                    return StringUtils.join(new String[] { type, id, bundle }, "__");
+                case Hierarchy:
+                    return StringUtils.join(new String[] { type, id }, "__");
+                case Analytic:
+                    return StringUtils.join(new String[] { type, name }, "__");
+                case Spending:
+                    return StringUtils.join(new String[] { type, name, category, family, line }, "__");
+                case Raw:
+                default:
+                    return null;
                 }
             } catch (IllegalArgumentException exc) {
                 log.error(String.format("Type %s is unknown for ProductType enum.", type));
@@ -59,14 +60,15 @@ public class ProductUtils {
         }
     }
 
-    public static List<Product> loadProducts(Configuration yarnConfiguration, String filePath) {
+    public static List<Product> loadProducts(Configuration yarnConfiguration, String filePath,
+            List<String> productTypes, List<String> productStatuses) {
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
         List<Product> productList = new ArrayList<>();
-        List<GenericRecord> recordList = AvroUtils.getDataFromGlob(yarnConfiguration,
-                filePath + "/*.avro");
 
-        for (GenericRecord record : recordList) {
+        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        while (iter.hasNext()) {
+            GenericRecord record = iter.next();
             Product product = new Product();
 
             String productId = getString(record, InterfaceName.Id.name());
@@ -86,25 +88,28 @@ public class ProductUtils {
             product.setProductCategoryId(getString(record, InterfaceName.ProductCategoryId.name()));
             product.setProductType(getString(record, InterfaceName.ProductType.name()));
             product.setProductStatus(getString(record, InterfaceName.ProductStatus.name()));
-
+            if (productTypes != null && !productTypes.contains(product.getProductType())) {
+                continue;
+            }
+            if (productStatuses != null && !productStatuses.contains(product.getProductStatus())) {
+                continue;
+            }
             productList.add(product);
         }
-
         if (log.isDebugEnabled()) {
             log.debug("Loaded products " + JsonUtils.serialize(productList));
         }
         return productList;
     }
 
-    public static void saveProducts(Configuration yarnConfiguration, String filePath,
-            List<Product> productList) throws IOException {
+    public static void saveProducts(Configuration yarnConfiguration, String filePath, List<Product> productList)
+            throws IOException {
         filePath = getPath(filePath);
         log.info("Save products to " + filePath + "/" + FILE_NAME);
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        SchemaRepository.instance().getSchema(BusinessEntity.Product).getAttributes()
-                .forEach(attribute -> {
-                    columns.add(Pair.of(attribute.getName(), String.class));
-                });
+        SchemaRepository.instance().getSchema(BusinessEntity.Product).getAttributes().forEach(attribute -> {
+            columns.add(Pair.of(attribute.getName(), String.class));
+        });
         columns.add(Pair.of(InterfaceName.Id.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductBundleId.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductLineId.name(), String.class));
@@ -119,67 +124,64 @@ public class ProductUtils {
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             for (Schema.Field field : schema.getFields()) {
                 switch (InterfaceName.valueOf(field.name())) {
-                    case Id:
-                    case ProductId:
-                        builder.set(field, product.getProductId());
-                        if (field.name().equals(InterfaceName.ProductId.name())) {
-                            builder.set(InterfaceName.Id.name(), product.getProductId());
-                        } else {
-                            builder.set(InterfaceName.ProductId.name(), product.getProductId());
-                        }
-                        break;
-                    case ProductName:
-                        builder.set(field, product.getProductName());
-                        break;
-                    case Description:
-                        builder.set(field, product.getProductDescription());
-                        break;
-                    case ProductBundle:
-                        builder.set(field, product.getProductBundle());
-                        break;
-                    case ProductLine:
-                        builder.set(field, product.getProductLine());
-                        break;
-                    case ProductFamily:
-                        builder.set(field, product.getProductFamily());
-                        break;
-                    case ProductCategory:
-                        builder.set(field, product.getProductCategory());
-                        break;
-                    case ProductType:
-                        builder.set(field, product.getProductType());
-                        break;
-                    case ProductStatus:
-                        builder.set(field, product.getProductStatus());
-                        break;
-                    case ProductBundleId:
-                        builder.set(field, product.getProductBundleId());
-                        break;
-                    case ProductLineId:
-                        builder.set(field, product.getProductLineId());
-                        break;
-                    case ProductFamilyId:
-                        builder.set(field, product.getProductFamilyId());
-                        break;
-                    case ProductCategoryId:
-                        builder.set(field, product.getProductCategoryId());
-                        break;
-                    default:
-                        log.warn(String.format("Found unknown field %s when saving product.",
-                                field.name()));
-                        break;
+                case Id:
+                case ProductId:
+                    builder.set(field, product.getProductId());
+                    if (field.name().equals(InterfaceName.ProductId.name())) {
+                        builder.set(InterfaceName.Id.name(), product.getProductId());
+                    } else {
+                        builder.set(InterfaceName.ProductId.name(), product.getProductId());
+                    }
+                    break;
+                case ProductName:
+                    builder.set(field, product.getProductName());
+                    break;
+                case Description:
+                    builder.set(field, product.getProductDescription());
+                    break;
+                case ProductBundle:
+                    builder.set(field, product.getProductBundle());
+                    break;
+                case ProductLine:
+                    builder.set(field, product.getProductLine());
+                    break;
+                case ProductFamily:
+                    builder.set(field, product.getProductFamily());
+                    break;
+                case ProductCategory:
+                    builder.set(field, product.getProductCategory());
+                    break;
+                case ProductType:
+                    builder.set(field, product.getProductType());
+                    break;
+                case ProductStatus:
+                    builder.set(field, product.getProductStatus());
+                    break;
+                case ProductBundleId:
+                    builder.set(field, product.getProductBundleId());
+                    break;
+                case ProductLineId:
+                    builder.set(field, product.getProductLineId());
+                    break;
+                case ProductFamilyId:
+                    builder.set(field, product.getProductFamilyId());
+                    break;
+                case ProductCategoryId:
+                    builder.set(field, product.getProductCategoryId());
+                    break;
+                default:
+                    log.warn(String.format("Found unknown field %s when saving product.", field.name()));
+                    break;
                 }
             }
             data.add(builder.build());
         }
 
         // log.info("Saving products " + JsonUtils.serialize(data));
-        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data,
-                true);
+        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data, true);
     }
 
-    public static Map<String, List<Product>> getProductMap(List<Product> productList,
-            String... productTypes) {
+    public static Map<String, List<Product>> getProductMap(List<Product> productList, String... productTypes) {
         Map<String, List<Product>> productMap = new HashMap<>();
         productList = filterProductListByType(productList, productTypes);
 
@@ -196,8 +198,7 @@ public class ProductUtils {
         return productMap;
     }
 
-    public static Map<String, List<Product>> getActiveProductMap(List<Product> productList,
-            String... productTypes) {
+    public static Map<String, List<Product>> getActiveProductMap(List<Product> productList, String... productTypes) {
         Map<String, List<Product>> productMap = new HashMap<>();
         productList = filterProductListByType(productList, productTypes);
         productList = filterProductListByStatus(productList, ProductStatus.Active.name());
@@ -215,15 +216,14 @@ public class ProductUtils {
         return productMap;
     }
 
-    public static Map<String, Product> getProductMapByCompositeId(List<Product> productList,
-            String... statuses) {
+    public static Map<String, Product> getProductMapByCompositeId(List<Product> productList, String... statuses) {
         Map<String, Product> productMap = new HashMap<>();
         productList = filterProductListByStatus(productList, statuses);
 
         productList.forEach(product -> {
             String compositeId = getCompositeId(product.getProductType(), product.getProductId(),
-                    product.getProductName(), product.getProductBundle(),
-                    product.getProductCategory(), product.getProductFamily(), product.getProductLine());
+                    product.getProductName(), product.getProductBundle(), product.getProductCategory(),
+                    product.getProductFamily(), product.getProductLine());
             productMap.put(compositeId, product);
         });
 
@@ -231,16 +231,23 @@ public class ProductUtils {
     }
 
     public static boolean hasAnalyticProduct(Configuration yarnConfiguration, Table productTable) {
-        boolean foundAnalyticProduct = false;
-        List<Product> productList = new ArrayList<>(
-                loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
-        for (Product product : productList) {
-            if (ProductType.Analytic.name().equals(product.getProductType())) {
-                foundAnalyticProduct = true;
+        return hasProductType(yarnConfiguration, productTable, ProductType.Analytic.name());
+    }
+
+    public static boolean hasProductType(Configuration yarnConfiguration, Table productTable, String productType) {
+        boolean foundProductType = false;
+        String filePath = getPath(productTable.getExtracts().get(0).getPath());
+        log.info("Load products from " + filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        while (iter.hasNext()) {
+            GenericRecord record = iter.next();
+            String typeInFile = getString(record, InterfaceName.ProductType.name());
+            if (productType.equals(typeInFile)) {
+                foundProductType = true;
                 break;
             }
         }
-        return foundAnalyticProduct;
+        return foundProductType;
     }
 
     private static String getString(GenericRecord record, String field) {
@@ -253,26 +260,22 @@ public class ProductUtils {
         return value;
     }
 
-    private static List<Product> filterProductListByType(List<Product> productList,
-            String... productTypes) {
+    private static List<Product> filterProductListByType(List<Product> productList, String... productTypes) {
         if (productTypes != null && productTypes.length > 0) {
             Set<String> typeSet = new HashSet<>(Arrays.asList(productTypes));
             productList = productList.stream()
-                    .filter(product -> product.getProductType() == null
-                            || typeSet.contains(product.getProductType()))
+                    .filter(product -> product.getProductType() == null || typeSet.contains(product.getProductType()))
                     .collect(Collectors.toList());
         }
 
         return productList;
     }
 
-    private static List<Product> filterProductListByStatus(List<Product> productList,
-            String... productStatuses) {
+    private static List<Product> filterProductListByStatus(List<Product> productList, String... productStatuses) {
         if (productStatuses != null && productStatuses.length > 0) {
             Set<String> statusSet = new HashSet<>(Arrays.asList(productStatuses));
-            productList = productList.stream()
-                    .filter(product -> product.getProductStatus() == null
-                            || statusSet.contains(product.getProductStatus()))
+            productList = productList.stream().filter(
+                    product -> product.getProductStatus() == null || statusSet.contains(product.getProductStatus()))
                     .collect(Collectors.toList());
         }
 

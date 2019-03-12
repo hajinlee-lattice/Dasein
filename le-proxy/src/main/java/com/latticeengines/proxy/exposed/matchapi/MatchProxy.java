@@ -59,7 +59,7 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
 
     @Override
     public EntityPublishStatistics publishEntity(EntityPublishRequest request) {
-        String url = constructUrl("/publishentity");
+        String url = constructUrl("/entity/publish");
         return postKryo("publish_entity", url, request, EntityPublishStatistics.class);
     }
 

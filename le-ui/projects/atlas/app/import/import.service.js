@@ -46,7 +46,7 @@ angular.module('lp.import')
         this.postBody = null;
         this.autoImport = true;
         this.importOnly = false;
-        this.entityMatchEnabled = true; //FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENTITY_MATCH_ENABLED);
+        this.entityMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENTITY_MATCH_ENABLED);
     }
 
     this.init();
@@ -131,7 +131,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Lattice Fields', 
                 state: 'contacts.ids.thirdpartyids.latticefields', 
-                nextLabel: 'Next, Add Custom Fields', 
+                nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     this.userFieldsType = {};
                     // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);

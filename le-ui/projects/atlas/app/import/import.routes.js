@@ -550,11 +550,14 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        //{ name: 'ContactName', displayName: 'Contact Name' },
-                        { name: 'FirstName', displayName: 'First Name' },
-                        { name: 'LastName', displayName: 'Last Name' },
-                        { name: 'Title', displayName: '' },
-                        { name: 'Email', displayName: '' }
+                        { name: 'AccountName', displayName: 'Account Name' },
+                        { name: 'Website', displayName: '' },
+                        { name: 'AccountCity', displayName: 'Account City' },
+                        { name: 'AccountState', displayName: 'Account State' },
+                        { name: 'AccountCountry', displayName: 'Account Country' },
+                        { name: 'AccountPostalCode', displayName: 'Account Postal Code' },
+                        { name: 'DUNS', displayName: '' },
+                        { name: 'AccountPhoneNumber', displayName: 'Account Phone Number' },
                    ];
                 },
             },

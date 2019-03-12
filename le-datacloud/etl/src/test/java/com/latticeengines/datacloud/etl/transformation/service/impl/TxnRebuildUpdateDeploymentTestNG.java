@@ -48,7 +48,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -72,6 +72,7 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
     private GeneralSource source = new GeneralSource(TxnRebuildUpdateDeploymentTestNG.class.getName());
 
     private String actTable = "ActTable";
+    private String productTable = "ProductTable";
     private String rawTxnTable1 = "RawTxnTable1"; // Rebuild
     private String rawTxnTable2 = "RawTxnTable2"; // Rebuild
     private String rawTxnTable3 = "RawTxnTable3"; // Update
@@ -79,7 +80,6 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
     private Table rawTxnStore;
     private Table dailyTxnStore;
     private List<Table> periodTxnStore;
-    private Map<String, List<Product>> productMap = new HashMap<>();
 
     private List<PeriodStrategy> periodStrategies = PeriodStrategy.NATURAL_PERIODS;
 
@@ -91,6 +91,7 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
     @Test(groups = "deployment", enabled = true)
     public void testTransformation() {
         prepareActTable();
+        prepareProductTable();
         prepareRawTxnTablesForRebuild();
         prepareRawTxnTablesForUpdate();
         initializeTsStores();
@@ -147,7 +148,9 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
     private List<TransformationStepConfig> mergeTxnRebuild(List<String> rawTxnTables, boolean update) {
         int txnDateStep, standardizeStep, collectDaysStep;
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(mergeInputs(rawTxnTables, false, false, true));   // Don't use target table
+        steps.add(mergeInputs(rawTxnTables, false, false, true)); // Don't use
+                                                                  // target
+                                                                  // table
         steps.add(addTrxDate(previousStep));
         txnDateStep = previousStep;
         if (update) {
@@ -314,11 +317,12 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         return step;
     }
 
-    // ---------------------- Daily Transaction Aggregation ---------------------- //
+    // ---------------------- Daily Transaction Aggregation
+    // ---------------------- //
     private List<TransformationStepConfig> aggregateDailyTxnRebuild() {
         int dailyPeriodStep;
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(rollupProduct(productMap));
+        steps.add(rollupProduct(productTable));
         steps.add(addPeriod(previousStep, null));
         dailyPeriodStep = previousStep;
         steps.add(aggregateDaily(previousStep));
@@ -333,38 +337,34 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         List<TransformationStepConfig> steps = new ArrayList<>();
         return steps;
         /*
-        int dailyPeriodStep;
-        List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(rollupProduct(productMap));
-        steps.add(addPeriod(previousStep, null));
-        dailyPeriodStep = previousStep;
-        steps.add(aggregateDaily(previousStep));
-        dailyAgrStep = previousStep;
-        steps.add(collectDays(previousStep));
-        steps.add(updateDailyStore(dailyPeriodStep, dailyAgrStep));
-        return steps;
-        */
+         * int dailyPeriodStep; List<TransformationStepConfig> steps = new
+         * ArrayList<>(); steps.add(rollupProduct(productMap));
+         * steps.add(addPeriod(previousStep, null)); dailyPeriodStep =
+         * previousStep; steps.add(aggregateDaily(previousStep)); dailyAgrStep =
+         * previousStep; steps.add(collectDays(previousStep));
+         * steps.add(updateDailyStore(dailyPeriodStep, dailyAgrStep)); return
+         * steps;
+         */
 
     }
 
     // Should be sync with ProfileTransaction.rollupProduct
-    private TransformationStepConfig rollupProduct(Map<String, List<Product>> productMap) {
+    private TransformationStepConfig rollupProduct(String productTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
         String tableSourceName = "CustomerUniverse";
         String sourceTableName = rawTxnStore.getName();
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
+        List<String> baseSources = Arrays.asList(tableSourceName, productTable);
         step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
+        baseTables.put(productTable, new SourceTable(productTable, customerSpace));
         step.setBaseTables(baseTables);
 
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(productMap);
-        config.setProductTable(null);
 
         step.setConfiguration(JsonUtils.serialize(config));
         previousStep++;
@@ -432,7 +432,8 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         return step;
     }
 
-    // ---------------------- Period Transaction Aggregation ---------------------- //
+    // ---------------------- Period Transaction Aggregation
+    // ---------------------- //
     private List<TransformationStepConfig> aggregatePeriodTxnRebuild() {
         int periodsStep, periodAgrStep;
         List<TransformationStepConfig> steps = new ArrayList<>();
@@ -592,7 +593,6 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         rawTxnStore = buildTransactionStore(TableRoleInCollection.ConsolidatedRawTransaction).get(0);
         dailyTxnStore = buildTransactionStore(TableRoleInCollection.ConsolidatedDailyTransaction).get(0);
         periodTxnStore = buildTransactionStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
-        initProductTable();
     }
 
     private List<Table> buildTransactionStore(TableRoleInCollection role) {
@@ -605,32 +605,6 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
             tableNames.add(table.getName());
         });
         return tables;
-    }
-
-    // TODO: Revisit test case of Product
-    private void initProductTable() {
-        Product product1 = createProduct("P1", "SKU1", "B1", null, null, null);
-        Product product2 = createProduct("P2", "SKU2", "B2", null, null, null);
-        Product product3 = createProduct("P3", "SKU3", "B3", null, null, null);
-        Product product4 = createProduct("P4", "SKU4", "B4", null, null, null);
-
-        productMap.put(product1.getProductId(), Collections.singletonList(product1));
-        productMap.put(product2.getProductId(), Collections.singletonList(product2));
-        productMap.put(product3.getProductId(), Collections.singletonList(product3));
-        productMap.put(product4.getProductId(), Collections.singletonList(product4));
-    }
-
-    private Product createProduct(String id, String name, String bundle, String productLine, String productFamily,
-            String productCategory) {
-        Product product = new Product();
-        product.setProductId(id);
-        product.setProductName(name);
-        product.setProductBundle(bundle);
-        product.setProductLine(productLine);
-        product.setProductFamily(productFamily);
-        product.setProductCategory(productCategory);
-        product.setProductType(ProductType.Analytic.name());
-        return product;
     }
 
     /**********************************
@@ -649,6 +623,25 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
         uploadAndRegisterTableSource(schema, data, actTable);
     }
 
+    private List<String> productFields = Arrays.asList(InterfaceName.ProductId.name(), InterfaceName.ProductName.name(),
+            InterfaceName.ProductBundle.name(), InterfaceName.ProductLine.name(), InterfaceName.ProductFamily.name(),
+            InterfaceName.ProductCategory.name(), InterfaceName.ProductType.name(), InterfaceName.ProductStatus.name());
+
+    private void prepareProductTable() {
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        for (int i = 0; i < productFields.size(); i++) {
+            schema.add(Pair.of(productFields.get(i), String.class));
+        }
+        Object[][] data = { //
+                { "P1", "SKU1", "B1", null, null, null, ProductType.Analytic.name(), ProductStatus.Active.name() }, //
+                { "P2", "SKU2", "B2", null, null, null, ProductType.Analytic.name(), ProductStatus.Active.name() }, //
+                { "P3", "SKU3", "B3", null, null, null, ProductType.Analytic.name(), ProductStatus.Active.name() }, //
+                { "P4", "SKU4", "B4", null, null, null, ProductType.Analytic.name(), ProductStatus.Active.name() }, //
+        };
+        uploadAndRegisterTableSource(schema, data, productTable);
+
+    }
+
     private List<String> rawTxnFields = Arrays.asList(InterfaceName.TransactionId.name(),
             InterfaceName.AccountId.name(), InterfaceName.ContactId.name(), InterfaceName.TransactionType.name(),
             InterfaceName.ProductId.name(), InterfaceName.Amount.name(), InterfaceName.Quantity.name(),
@@ -662,7 +655,8 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
             schema.add(Pair.of(rawTxnFields.get(i), rawTxnClz.get(i)));
         }
         // NOTE: TransactionId starts with 1
-        // TransactionId, AccountId, ContactId, TransactionType, ProductId, Amount, Quantity, OrderId,
+        // TransactionId, AccountId, ContactId, TransactionType, ProductId,
+        // Amount, Quantity, OrderId,
         // TransactionTime, ExtensionAttr1
         Object[][] data = { //
                 // (A1, P1) cover multiple week/month/quarter/year.
@@ -730,7 +724,8 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
             schema.add(Pair.of(rawTxnFields.get(i), rawTxnClz.get(i)));
         }
         // NOTE: TransactionId starts with 2
-        // TransactionId, AccountId, ContactId, TransactionType, ProductId, Amount, Quantity, OrderId,
+        // TransactionId, AccountId, ContactId, TransactionType, ProductId,
+        // Amount, Quantity, OrderId,
         // TransactionTime, ExtensionAttr1
         Object[][] data = { //
                 // (A1, P2) has txn in both rawTxn1 and rawTxn2 table with same
