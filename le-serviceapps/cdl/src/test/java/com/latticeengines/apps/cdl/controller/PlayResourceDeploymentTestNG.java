@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -25,8 +26,6 @@ import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
-
-//import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -136,6 +135,11 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), playName,
                 playLaunch.getLaunchId());
 
+        PlayLaunchConfigurations configurations = playProxy.getPlayLaunchConfigurations(mainTestTenant.getId(),
+                playName);
+        Assert.assertEquals(configurations.getLaunchConfigurations().get(playLaunch.getDestinationOrgId()).getPid(),
+                playLaunch.getPid());
+
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
         assertLaunchStats(retrievedLaunch.getAccountsSelected(), totalRatedAccounts);
@@ -151,7 +155,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "searchPlayLaunch" })
-    private void testGetFullPlays() {
+    public void testGetFullPlays() {
         Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
@@ -169,7 +173,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGetFullPlays" })
-    private void testIdempotentCreateOrUpdatePlays() {
+    public void testIdempotentCreateOrUpdatePlays() {
         Play createdPlay1 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), play);
         Assert.assertNotNull(createdPlay1.getTalkingPoints());
 
@@ -190,7 +194,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testDeletePlayLaunch" })
-    private void testPlayDelete() {
+    public void testPlayDelete() {
         List<Play> playList;
         Play retrievedPlay;
         deletePlay(playName);

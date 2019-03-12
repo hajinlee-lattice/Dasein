@@ -201,6 +201,11 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(retreivedPlayLaunch);
         Assert.assertEquals(retreivedPlayLaunch.getPid(), playLaunch_org2_2.getPid());
         Assert.assertTrue(states.contains(retreivedPlayLaunch.getLaunchState()));
+
+        retreivedPlayLaunch = playLaunchEntityMgr.findLatestByPlayAndSysOrg(play.getPid(), org1);
+        Assert.assertNotNull(retreivedPlayLaunch);
+        Assert.assertEquals(retreivedPlayLaunch.getPid(), playLaunch_org1_2.getPid());
+
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })

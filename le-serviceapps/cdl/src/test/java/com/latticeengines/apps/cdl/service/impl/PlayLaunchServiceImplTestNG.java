@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
@@ -277,8 +278,17 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertTrue(actualBucketsToLaunch.contains(expectedBucket));
         }
     }
-
+    
     @Test(groups = "functional", dependsOnMethods = { "testUpdateLaunch" })
+    public void testGetLaunchConfigurations(){
+        PlayLaunchConfigurations configurations = playLaunchService.getPlayLaunchConfigurations(play.getPid());
+        Assert.assertNotNull(configurations);
+        Map<String, PlayLaunch> configurationMap = configurations.getLaunchConfigurations();
+        Assert.assertEquals(configurationMap.get(org1).getPid(), playLaunch1.getPid());
+        Assert.assertEquals(configurationMap.get(org2).getPid(), playLaunch2.getPid());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetLaunchConfigurations" })
     public void testCountDashboard() {
 
         Long badPlayId = System.currentTimeMillis();
