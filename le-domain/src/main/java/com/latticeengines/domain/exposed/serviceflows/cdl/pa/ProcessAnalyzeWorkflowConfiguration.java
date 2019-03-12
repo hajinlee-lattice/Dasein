@@ -145,6 +145,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
+            processStepConfiguration.setRebuildEntities(entities);
             processAccountWorkflowBuilder.rebuildEntities(entities);
             processContactWorkflowBuilder.rebuildEntities(entities);
             processProductWorkflowBuilder.rebuildEntities(entities);
@@ -203,6 +204,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);

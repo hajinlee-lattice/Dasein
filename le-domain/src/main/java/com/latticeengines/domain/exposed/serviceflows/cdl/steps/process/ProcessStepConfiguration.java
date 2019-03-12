@@ -35,6 +35,12 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("skip_entities")
     private Set<BusinessEntity> skipEntities;
 
+    @JsonProperty("rebuild_entities")
+    private Set<BusinessEntity> rebuildEntities;
+
+    @JsonProperty("entity_match_enabled")
+    private boolean entityMatchEnabled;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -99,4 +105,19 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
         this.skipEntities = skipEntities;
     }
 
+    public Set<BusinessEntity> getRebuildEntities() {
+        return rebuildEntities;
+    }
+
+    public void setRebuildEntities(Set<BusinessEntity> rebuildEntities) {
+        this.rebuildEntities = rebuildEntities;
+    }
+
+    public boolean isEntityMatchEnabled() {
+        return entityMatchEnabled;
+    }
+
+    public void setEntityMatchEnabled(boolean entityMatchEnabled) {
+        this.entityMatchEnabled = entityMatchEnabled;
+    }
 }
