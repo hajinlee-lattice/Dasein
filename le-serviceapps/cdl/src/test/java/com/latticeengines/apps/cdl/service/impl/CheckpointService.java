@@ -673,7 +673,9 @@ public class CheckpointService {
     private void printPublicEntityRequest(String checkpointName, String checkpointVersion) {
         StringBuilder msg = new StringBuilder("To publish Entity Match Seed table version " + checkpointVersion +
                 " you must run the following HTTP Request:\n");
-        //msg.append()
+        // TODO(jwinter): Figure out how to determine what host this is run on.
+        String host = "localhost:9076";
+        msg.append("POST https://" + host + "/match/matches/publishentity");
     }
 
     private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role,
