@@ -263,8 +263,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 if (CollectionUtils.isNotEmpty(possibleNames)) {
                     for (String possibleName : possibleNames) {
                         if (headers.contains(possibleName)) {
-                            LOG.info(String.format("Use possible name %s instead of original name %s", possibleName,
-                                    csvColumnName));
                             csvColumnName = possibleName;
                             break;
                         }
