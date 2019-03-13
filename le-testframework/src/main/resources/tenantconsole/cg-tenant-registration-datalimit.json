@@ -70,6 +70,10 @@
           "Data": 10
         },
         {
+          "Node": "ProductSKUsQuotaLimit",
+          "Data": 20
+        },
+        {
           "Node": "TransactionQuotaLimit",
           "Data": 100
         },

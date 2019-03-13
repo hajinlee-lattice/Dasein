@@ -77,10 +77,13 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         List<Product> currentProducts = getCurrentProducts(currentTable);
 
         Map<String, Integer> productCounts = countProducts(currentProducts);
-        if (configuration.getDataQuotaLimit() < productCounts.get("nProductBundles"))
-            throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+        log.info("product count is " + JsonUtils.serialize(productCounts));
+        if (configuration.getDataQuotaLimit(ProductType.Analytic) < productCounts.get("nProductAnalytics"))
+            throw new IllegalStateException("the Analytics Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Analytic) +
                     ", The data you uploaded has exceeded the limit.");
-        log.info("stored data is " + productCounts.get("nProductBundles") + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+        if (configuration.getDataQuotaLimit(ProductType.Spending) < productCounts.get("nProductSpendings"))
+            throw new IllegalStateException("the Spending Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Spending) +
+                    ", The data you uploaded has exceeded the limit.");
         mergeReport = constructMergeReport(productCounts, currentProducts.size());
 
         List<Product> productList = new ArrayList<>();
