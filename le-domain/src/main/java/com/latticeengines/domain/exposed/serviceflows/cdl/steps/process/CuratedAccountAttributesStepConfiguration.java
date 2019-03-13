@@ -13,5 +13,4 @@ public class CuratedAccountAttributesStepConfiguration extends BaseProcessEntity
     public Long getDataQuotaLimit() {
         return null;
     }
-
 }
