@@ -526,7 +526,7 @@ public class CheckpointService {
 
         printSaveRedshiftStatements(checkpointName, checkpointVersion);
         saveCheckpointVersion(checkpointName);
-        printPublicEntityRequest(checkpointName, checkpointVersion);
+        printPublishEntityRequest(checkpointName, checkpointVersion);
     }
 
     public void saveCheckPoint(String checkpointName, String checkpointVersion, String customerSpace) throws
@@ -556,7 +556,7 @@ public class CheckpointService {
         saveCheckpointVersion(checkpointName);
         // Save Workflow Execution Context.
         saveWorkflowExecutionContext(checkpointName, customerSpace);
-        printPublicEntityRequest(checkpointName, checkpointVersion);
+        printPublishEntityRequest(checkpointName, checkpointVersion);
     }
 
     private void saveCheckpointVersion(String checkpoint) throws IOException {
@@ -670,14 +670,6 @@ public class CheckpointService {
         }
     }
 
-    private void printPublicEntityRequest(String checkpointName, String checkpointVersion) {
-        StringBuilder msg = new StringBuilder("To publish Entity Match Seed table version " + checkpointVersion +
-                " you must run the following HTTP Request:\n");
-        // TODO(jwinter): Figure out how to determine what host this is run on.
-        String host = "localhost:9076";
-        msg.append("POST https://" + host + "/match/matches/publishentity");
-    }
-
     private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role,
             String checkpointVersion) {
         return String.format("cdlend2end_%s_%s_%s", checkpoint, role.name(), checkpointVersion);
@@ -707,6 +699,26 @@ public class CheckpointService {
             om.writeValue(new File(jsonFile), executionContextMap);
             log.info("Save Workflow Execution Context to " + jsonFile);
         }
+    }
+
+    private void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
+        StringBuilder msg = new StringBuilder("To publish Entity Match Seed table version " + checkpointVersion +
+                " you must run the following HTTP Request:\n");
+        // TODO(jwinter): Figure out how to determine what host this is run on.
+        String host = "localhost:9076";
+        msg.append("POST https://" + host + "/match/matches/publishentity");
+        msg.append("Body:" +
+                "{" +
+                "    \"Entity\": \"Account\"," +
+                "    \"SrcTenant\": {" +
+                "        \"Identifier\": \"" + mainTestTenant.getId() + "\"" +
+                "    }," +
+                "    \"DestEnv\": \"STAGING\"," +
+                "    \"DestTenant\": {" +
+                "        \"Identifier\": \"cdlend2end_" + checkpointName + "_" + checkpointVersion + "\"" +
+                "    }," +
+                "\"DestTTLEnabled\": true" +
+                "}");
     }
 
 }
