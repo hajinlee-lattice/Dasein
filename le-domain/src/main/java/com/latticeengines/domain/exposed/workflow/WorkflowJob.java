@@ -26,6 +26,7 @@ import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @Index(name = "IX_WORKFLOW_ID", columnList = "WORKFLOW_ID") //
 })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJob.class);
