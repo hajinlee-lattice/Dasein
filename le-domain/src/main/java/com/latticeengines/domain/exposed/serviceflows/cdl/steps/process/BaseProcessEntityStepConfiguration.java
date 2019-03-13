@@ -29,7 +29,7 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     public abstract Long getDataQuotaLimit();
 
-    public abstract Long getDataQuotaLimit(ProductType type);
+    public Long getDataQuotaLimit(ProductType type) { return null; }
 
     public Boolean getRebuild() {
         return rebuild;
