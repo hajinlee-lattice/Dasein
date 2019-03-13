@@ -237,7 +237,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         PlayLaunchConfigurations configurations = new PlayLaunchConfigurations();
         Tenant tenant = MultiTenantContext.getTenant();
         Map<String, List<LookupIdMap>> allLookupIdMapping =
-                lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(), null, null, true);
+                lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         configurations.setUniqueLookupIdMapping(allLookupIdMapping);
         configurations.setLaunchConfigurations(createLaunchConfigurationMap(playId, allLookupIdMapping));
         return configurations;
