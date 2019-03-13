@@ -72,6 +72,8 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     protected CustomerSpace customerSpace;
 
+    protected abstract BusinessEntity getEntity();
+
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
         updateEntityValueMapInContext(getEntity(), key, value, clz);
     }
@@ -83,6 +85,16 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         }
         entityValueMap.put(entity, value);
         putObjectInContext(key, entityValueMap);
+    }
+
+    protected void setBaseTables(String sourceTableName, TransformationStepConfig step) {
+        String tableSourceName = "CustomerUniverse";
+        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
     }
 
     protected TransformationStepConfig profile(String masterTableName) {
@@ -192,8 +204,6 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         step.setBaseTables(baseTables);
         return step;
     }
-
-    protected abstract BusinessEntity getEntity();
 
     protected String renameServingStoreTable(Table servingStoreTable) {
         return renameServingStoreTable(getEntity(), servingStoreTable);

@@ -11,22 +11,22 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
-@Component("profileAccountWrapper")
+@Component("generateBucketedAccountWrapper")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProfileAccountWrapper extends BaseTransformationWrapper<ProcessAccountStepConfiguration, ProfileAccount> {
+public class GenerateBucketedAccountWrapper extends BaseTransformationWrapper<ProcessAccountStepConfiguration, GenerateBucketedAccount> {
 
     @Inject
-    private ProfileAccount profileAccount;
+    private GenerateBucketedAccount generateBucketedAccount;
 
     @PostConstruct
     public void overrideTransformationStepBeanName() {
-        setTransformationStepBeanName(ProfileAccount.BEAN_NAME);
+        setTransformationStepBeanName(GenerateBucketedAccount.BEAN_NAME);
     }
 
     @Override
-    protected ProfileAccount getWrapperStep() {
-        return profileAccount;
+    protected GenerateBucketedAccount getWrapperStep() {
+        return generateBucketedAccount;
     }
 
 }

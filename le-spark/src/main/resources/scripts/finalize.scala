@@ -19,7 +19,7 @@ if (targets.length != output.length) {
 
 val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val tgt = t._1
-  val df = t._2
+  val df = t._2.checkpoint()
   val path = tgt.get("Path").asText()
   df.write.format("avro").save(path)
   val json = mapper.createObjectNode()
