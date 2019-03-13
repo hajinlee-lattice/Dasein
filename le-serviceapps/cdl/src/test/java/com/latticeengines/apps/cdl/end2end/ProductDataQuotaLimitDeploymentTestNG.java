@@ -63,7 +63,7 @@ public class ProductDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importData(BusinessEntity.Product, "Product.csv", "ProductBundle", false, false);
+        importData(BusinessEntity.Product, "Product.csv", "Product", false, false);
     }
 
     protected void processAnalyze() {

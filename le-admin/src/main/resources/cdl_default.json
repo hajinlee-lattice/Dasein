@@ -22,6 +22,10 @@
       "Data": 200
     },
     {
+      "Node": "ProductSKUsQuotaLimit",
+      "Data": 100000
+    },
+    {
       "Node": "TransactionQuotaLimit",
       "Data": 20000000
     },

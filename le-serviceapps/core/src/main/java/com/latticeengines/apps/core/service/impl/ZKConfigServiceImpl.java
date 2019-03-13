@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Service("zKConfigService")
@@ -155,6 +156,33 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     break;
                 case Transaction:
                     entityDataQuotaPath = path.append("TransactionQuotaLimit");
+                    break;
+                default:
+                    break;
+            }
+            Camille camille = CamilleEnvironment.getCamille();
+            if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {
+                dataQuotaLimit = Long.valueOf(camille.get(entityDataQuotaPath).getData());
+            }
+            return dataQuotaLimit;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get DataQuotaLimit from ZK for " + customerSpace.getTenantId(), e);
+        }
+    }
+
+    @Override
+    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, ProductType type) {
+        try {
+            Long dataQuotaLimit = null;
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    componentName);
+            Path entityDataQuotaPath = null;
+            switch (type) {
+                case Analytic:
+                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
+                    break;
+                case Spending:
+                    entityDataQuotaPath = path.append("ProductSKUsQuotaLimit");
                     break;
                 default:
                     break;
