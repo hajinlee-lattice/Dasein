@@ -23,3 +23,4 @@ export STACK_ENV=${LE_STACK}
 export LEUI_BUNDLER=wp
 export LEADMIN_BUNDLER=grunt
 export TRAY_API_URL=https://tray.io/graphql
+export TRAY_MASTER_AUTHORIZATION=7d77ddd9-64af-45cc-acde-e90f81cdb994

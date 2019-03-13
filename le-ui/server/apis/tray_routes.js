@@ -7,14 +7,14 @@ const UIActionsFactory = require('./uiactions-factory');
  */
 
 class TrayRouter {
-    constructor(express, app, bodyParser, chalk, API_URL, PATH, request, proxies) {
+    constructor(express, app, bodyParser, chalk, API_URL, PATH, request, proxies, masterAuthorizationToken) {
         this.router = express.Router();
         this.chalk = chalk;
         this.API_URL = API_URL;
         this.PATH = PATH;
         this.request = request;
         this.proxies = proxies;
-        console.log(bodyParser);
+        this.masterAuthorizationToken = masterAuthorizationToken;
         app.use(bodyParser.json());
     }
 
@@ -22,7 +22,7 @@ class TrayRouter {
 
         var authorization = (req.headers && req.headers.useraccesstoken && useUserAccessToken == true) ?
             req.headers.useraccesstoken :
-            "6cadf407-a686-41be-92e7-36e37c97c1e3";
+            this.masterAuthorizationToken;
 
         const options = {
             url: this.API_URL + this.PATH,
@@ -34,6 +34,23 @@ class TrayRouter {
 
         return options;
     }
+
+    getEphemeralApiOptions(req, useUserAccessToken) {
+
+        var authorization = (req.headers && req.headers.useraccesstoken && useUserAccessToken == true) ?
+            req.headers.useraccesstoken :
+            this.masterAuthorizationToken;
+
+        const options = {
+            url: "https://api.tray.io/v1/artisan/connectors/marketo/2.10/ephemeral",
+            headers: {
+                'Authorization': `Bearer ${authorization}`
+            }
+        };
+
+        return options;
+    }
+
     createRoutes() {
 
         console.log('============> TRAY API ========================');
@@ -200,6 +217,8 @@ class TrayRouter {
                 }
                 let solutionInfo = GraphQLParser.getSolutionInfo(body.data);
                 req.solutionId = solutionInfo.id;
+                console.log("SOLUTIONID: " + req.solutionId);
+
                 next();
             });
         }.bind(this), function(req, res, next) {
@@ -248,7 +267,7 @@ class TrayRouter {
                 }
                 let authorizationCode = GraphQLParser.getAuthorizationCodeInfo(body.data);
                 let solutionConfiguration = GraphQLParser.getSolutionConfigurationInfo(solutionInstanceId, authorizationCode);
-                res.send(solutionConfiguration)
+                res.send(solutionConfiguration);
             });
         }.bind(this));
 
@@ -261,6 +280,40 @@ class TrayRouter {
                 console.log('', body);
             });
             res.send({iframeUrl: ""});
+        }.bind(this));
+
+        this.router.get('/staticlists', function(req, res){
+            var authenticationId = req.query.trayAuthenticationId;
+            let options = this.getEphemeralApiOptions(req, true);
+            options.method = 'POST';
+            options.json = {
+               auth_id: authenticationId,
+               message:"get_static_lists_ddl",
+               step_settings:{
+                  client_id:{
+                     type:"jsonpath",
+                     value:"$.auth.client_id"
+                  },
+                  client_secret:{
+                     type:"jsonpath",
+                     value:"$.auth.client_secret"
+                  },
+                  endpoint:{
+                     type:"jsonpath",
+                     value:"$.auth.endpoint"
+                  }
+               }
+            };
+            console.log(options);
+            this.request(options, function(error, response, body){
+                if (error) {
+                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                    return;
+                }
+                console.log("body: " + JSON.stringify(body));
+
+                res.send(body);
+            });
         }.bind(this));
 
         return this.router;
