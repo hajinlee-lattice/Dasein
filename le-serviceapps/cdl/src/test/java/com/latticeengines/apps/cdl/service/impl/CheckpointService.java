@@ -708,18 +708,18 @@ public class CheckpointService {
         StringBuilder msg = new StringBuilder("To publish Entity Match Seed table version " + checkpointVersion +
                 " you must run the following HTTP Request:\n");
         // TODO(jwinter): Figure out how to determine what host this is run on.
-        msg.append("POST https://" + matchapiHostPort + "/match/matches/publishentity");
-        msg.append("Body:" +
-                "{" +
-                "    \"Entity\": \"Account\"," +
-                "    \"SrcTenant\": {" +
-                "        \"Identifier\": \"" + mainTestTenant.getId() + "\"" +
-                "    }," +
-                "    \"DestEnv\": \"STAGING\"," +
-                "    \"DestTenant\": {" +
-                "        \"Identifier\": \"cdlend2end_" + checkpointName + "_" + checkpointVersion + "\"" +
-                "    }," +
-                "\"DestTTLEnabled\": false" +
+        msg.append("POST https://" + matchapiHostPort + "/match/matches/publishentity\n");
+        msg.append("Body:\n" +
+                "{\n" +
+                "    \"Entity\": \"Account\",\n" +
+                "    \"SrcTenant\": {\n" +
+                "        \"Identifier\": \"" + mainTestTenant.getId() + "\"\n" +
+                "    },\n" +
+                "    \"DestEnv\": \"STAGING\",\n" +
+                "    \"DestTenant\": {\n" +
+                "        \"Identifier\": \"cdlend2end_" + checkpointName + "_" + checkpointVersion + "\"\n" +
+                "    },\n" +
+                "\"DestTTLEnabled\": false\n" +
                 "}");
         log.error("$JAW$  HERE!!!!");
         log.info(msg.toString());
