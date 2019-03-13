@@ -291,7 +291,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException("Cannot find the data feed task!");
         }
         S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(),
-                importConfig.getCSVImportFileInfo().getReportFileName(), dataFeedTask, new Date());
+                importConfig.getCSVImportFileInfo().getReportFileDisplayName(), dataFeedTask, new Date());
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(dataFeedTask.getSource());
         String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
