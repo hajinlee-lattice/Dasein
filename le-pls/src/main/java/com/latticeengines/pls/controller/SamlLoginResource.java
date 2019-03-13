@@ -89,7 +89,8 @@ public class SamlLoginResource {
             // TODO - remove this once UI integration is stable. This is added
             // to help UI to point to QA backend but still get call to local
             // login UI
-            @RequestParam(name = "enforceLocalUI", required = false, defaultValue = "false") boolean enforceLocalUI) {
+            @RequestParam(name = "enforceLocalUI", required = false, defaultValue = "false") boolean enforceLocalUI,
+            @RequestParam(name = "testUserId", required = false, defaultValue = "false") String testUserId) {
         RedirectView redirectView = new RedirectView();
         String baseLoginURL = loginUrl;
 
@@ -106,7 +107,8 @@ public class SamlLoginResource {
                 // local env. For prod this is not allowed.
                 baseLoginURL = "https://localhost:3000";
                 samlLoginResp = new LoginValidationResponse();
-                samlLoginResp.setUserId("bnguyen@test-domain.com");
+                String testUserName = StringUtils.isBlank(testUserId) ? "bnguyen@test-domain.com" : testUserId;
+                samlLoginResp.setUserId(testUserName);
                 samlLoginResp.setValidated(true);
             } else {
                 samlLoginResp = samlProxy.validateSSOLogin(tenantDeploymentId, samlResponse, relayState);
