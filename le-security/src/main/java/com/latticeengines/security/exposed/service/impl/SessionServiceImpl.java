@@ -84,16 +84,12 @@ public class SessionServiceImpl implements SessionService {
     public Session attachSamlUserToTenant(String userName, String tenantDeploymentId) {
         Ticket ticket = samlGlobalAuthenticationService.externallyAuthenticated(userName, tenantDeploymentId);
         ticket.setAuthenticationRoute(AUTH_ROUTE_SSO);
-        GlobalAuthTenant gaTenant = gaTenantEntityMgr.findByTenantId(tenantDeploymentId);
 
         // Update Tenant info into Ticket
-        Tenant tenant = new Tenant();
-        tenant.setId(gaTenant.getId());
-        tenant.setName(gaTenant.getName());
-        // TODO - jaya to fetch tenant from pls multitenant for correct uiVersion
-        // as it is needed by UI
-        tenant.setUiVersion("3.0");
-
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantDeploymentId);
+        if (tenant == null) {
+            throw new RuntimeException("Could not find tenant: " + tenantDeploymentId);
+        }
         ticket.setTenants(Collections.singletonList(tenant));
 
         Session session = attach(ticket);
