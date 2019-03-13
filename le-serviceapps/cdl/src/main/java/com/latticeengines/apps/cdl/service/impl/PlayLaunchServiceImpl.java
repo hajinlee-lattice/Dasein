@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -38,7 +39,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
@@ -54,7 +54,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Inject
-    private LookupIdMappingProxy lookupIdMappingProxy;
+    private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Override
     public void create(PlayLaunch entity) {
@@ -160,7 +160,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             boolean skipLoadingAllLookupIdMapping) {
         Tenant tenant = MultiTenantContext.getTenant();
         Map<String, List<LookupIdMap>> allLookupIdMapping = skipLoadingAllLookupIdMapping ? null
-                : lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(), null, null, true);
+                : lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
                 launchStates, startTimestamp, endTimestamp, orgId, externalSysType);
         Map<String, List<LookupIdMap>> uniqueLookupIdMapping =
