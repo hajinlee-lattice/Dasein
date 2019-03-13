@@ -91,6 +91,31 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
     }
 
     @Test(groups = "deployment")
+    public void submitFileWithException() throws Exception {
+        String pathForMisingFields = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_missing_required_fields.csv";
+        boolean thrown = false;
+        try {
+            submitFile(false, pathForMisingFields, false);
+        } catch (Exception e) {
+            thrown = true;
+            assertTrue(e instanceof RuntimeException);
+        } finally {
+            assertTrue(thrown);
+        }
+
+        String pathForEmptyHeader = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_empty_header.csv";
+        thrown = false;
+        try {
+            submitFile(false, pathForEmptyHeader, false);
+        } catch (Exception e) {
+            thrown = true;
+            assertTrue(e instanceof RuntimeException);
+        } finally {
+            assertTrue(thrown);
+        }
+    }
+
+    @Test(groups = "deployment")
     public void uploadFile() throws Exception {
         switchToExternalUser();
         ResponseDocument<SourceFile> response = submitFile(false, PATH, false);

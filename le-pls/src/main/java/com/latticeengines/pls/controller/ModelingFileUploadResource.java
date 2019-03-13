@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -36,14 +38,19 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 
 import io.swagger.annotations.Api;
@@ -56,6 +63,7 @@ import io.swagger.annotations.ApiOperation;
 public class ModelingFileUploadResource {
 
     private static final Logger log = LoggerFactory.getLogger(ModelingFileUploadResource.class);
+    public static final String UPLOAD_FILE_ERROR_TITLE = "Error In File Uploading.";
 
     @Autowired
     private FileUploadService fileUploadService;
@@ -71,6 +79,9 @@ public class ModelingFileUploadResource {
 
     @Autowired
     private BatonService batonService;
+
+    @Inject
+    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -244,12 +255,22 @@ public class ModelingFileUploadResource {
 
             return fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream, outsizeFlag);
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+            LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                    Status.Error, ledp.getMessage());
+            throw new UIActionException(action, ledp.getCode());
+        } catch (LedpException ledp) {
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                    Status.Error, ledp.getCode().getMessage());
+            throw new UIActionException(action, ledp.getCode());
         } finally {
             try {
                 closeableResourcePool.close();
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+                LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+                UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                        Status.Error, ledp.getMessage());
+                throw new UIActionException(action, ledp.getCode());
             }
         }
     }
