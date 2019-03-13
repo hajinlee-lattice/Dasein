@@ -18,3 +18,4 @@ export LOG_LEVEL=verbose
 export LEUI_BUNDLER=wp
 export LEADMIN_BUNDLER=grunt
 export TRAY_API_URL=https://tray.io/graphql
+export TRAY_MASTER_AUTHORIZATION=6cadf407-a686-41be-92e7-36e37c97c1e3
