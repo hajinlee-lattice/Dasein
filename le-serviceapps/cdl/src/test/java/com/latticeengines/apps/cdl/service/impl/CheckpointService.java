@@ -125,6 +125,9 @@ public class CheckpointService {
     @Value("${common.le.stack}")
     private String leStack;
 
+    @Value("${common.test.matchapi.url}")
+    private String matchapiHostPort;
+
     private ObjectMapper om = new ObjectMapper();
 
     private Tenant mainTestTenant;
@@ -502,7 +505,7 @@ public class CheckpointService {
                 currentDataCloudBuildNumber, mainTestTenant.getId(), initialVersion));
     }
 
-    public void saveCheckPoint(String checkpointName, String checkpointVersion) throws IOException {
+    public void saveCheckpoint(String checkpointName, String checkpointVersion) throws IOException {
         String rootDir = "checkpoints/" + checkpointName;
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
@@ -529,7 +532,7 @@ public class CheckpointService {
         printPublishEntityRequest(checkpointName, checkpointVersion);
     }
 
-    public void saveCheckPoint(String checkpointName, String checkpointVersion, String customerSpace) throws
+    public void saveCheckpoint(String checkpointName, String checkpointVersion, String customerSpace) throws
             IOException {
         String rootDir = "checkpoints/" + checkpointName;
         FileUtils.deleteQuietly(new File(rootDir));
@@ -701,12 +704,11 @@ public class CheckpointService {
         }
     }
 
-    private void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
+    public void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
         StringBuilder msg = new StringBuilder("To publish Entity Match Seed table version " + checkpointVersion +
                 " you must run the following HTTP Request:\n");
         // TODO(jwinter): Figure out how to determine what host this is run on.
-        String host = "localhost:9076";
-        msg.append("POST https://" + host + "/match/matches/publishentity");
+        msg.append("POST https://" + matchapiHostPort + "/match/matches/publishentity");
         msg.append("Body:" +
                 "{" +
                 "    \"Entity\": \"Account\"," +
@@ -717,8 +719,10 @@ public class CheckpointService {
                 "    \"DestTenant\": {" +
                 "        \"Identifier\": \"cdlend2end_" + checkpointName + "_" + checkpointVersion + "\"" +
                 "    }," +
-                "\"DestTTLEnabled\": true" +
+                "\"DestTTLEnabled\": false" +
                 "}");
+        log.error("$JAW$  HERE!!!!");
+        log.info(msg.toString());
     }
 
 }
