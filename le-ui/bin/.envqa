@@ -18,3 +18,4 @@ HTTPS_KEY=./server/certs/privatekey.key
 HTTPS_CRT=./server/certs/certificate.crt
 HTTPS_PASS=false
 WHITELIST=internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com
+TRAY_MASTER_AUTHORIZATION=6cadf407-a686-41be-92e7-36e37c97c1e3
