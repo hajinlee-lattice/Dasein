@@ -832,7 +832,17 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 gaUserTenantRight.setOperationName(level.toString());
                 gaUserTenantRight.setCreatedByUser(userName);
                 log.info(String.format("user %s is granted to %s", email, level));
-                gaUserTenantRightEntityMgr.create(gaUserTenantRight);
+                GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant.getId());
+                if (tenantData == null) {
+                    log.error(String.format("Cannot find tenant %s to grant access", tenant.getId()));
+                } else {
+                    try {
+                        gaUserTenantRightEntityMgr.create(gaUserTenantRight);
+                    } catch (Exception e) {
+                        log.error(String.format("Cannot add user %s with access level %s for tenant %s", email,
+                                level.toString(), tenant.getId()), e);
+                    }
+                }
             }
 
             // active zendesk user
