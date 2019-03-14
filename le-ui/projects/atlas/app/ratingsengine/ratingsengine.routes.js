@@ -1597,33 +1597,7 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.customevent.segment.attributes', {
-                url: '/attributes',
-                params: {
-                    pageIcon: 'ico-model',
-                    pageTitle: 'Models',
-                    section: 'wizard.ratingsengine_segment'
-                },
-                resolve: {
-                    Rating: function ($q, $stateParams, RatingsEngineStore) {
-                        var deferred = $q.defer();
-
-                        RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
-                            deferred.resolve(result)
-                        });
-
-                        return deferred.promise;
-                    }
-                },
-                views: {
-                    'wizard_content@home.ratingsengine.customevent': {
-                        controller: 'RatingsEngineAttributes',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/attributes/attributes.component.html'
-                    }
-                }
-            })
-            .state('home.ratingsengine.customevent.segment.attributes.training', {
+            .state('home.ratingsengine.customevent.segment.training', {
                 url: '/training',
                 views: {
                     'wizard_content@home.ratingsengine.customevent': {
@@ -1633,7 +1607,7 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.customevent.segment.attributes.training.mapping', {
+            .state('home.ratingsengine.customevent.segment.training.mapping', {
                 url: '/mapping',
                 resolve: {
                     FieldDocument: function($q, RatingsEngineStore, ImportWizardService, ImportWizardStore) {
@@ -1665,7 +1639,7 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.customevent.segment.attributes.training.mapping.creation', {
+            .state('home.ratingsengine.customevent.segment.training.mapping.creation', {
                 url: '/creation',
                 params: {
                     pageIcon: 'ico-model',
