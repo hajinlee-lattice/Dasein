@@ -84,6 +84,16 @@ public class BulkEntityMatchWorkflowConfiguration extends BaseDataCloudWorkflowC
             return this;
         }
 
+        public Builder podId(String podId) {
+            cleanup.setPodId(podId);
+            return this;
+        }
+
+        public Builder rootOperationUid(String rootOperationUid) {
+            cleanup.setRootOperationUid(rootOperationUid);
+            return this;
+        }
+
         public Builder bulkMatch(BulkMatchWorkflowConfiguration bulkMatch) {
             this.bulkMatch = bulkMatch;
             return this;
