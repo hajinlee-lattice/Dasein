@@ -329,11 +329,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         // comments on this line but don't check in
         log.error("Saving Checkpoint");
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-
-
-        // TEMP!  Test printPublishEntityRequest
-        checkpointService.printPublishEntityRequest("process1",
-                String.valueOf(S3_CHECKPOINTS_VERSION + 1));
     }
 
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {

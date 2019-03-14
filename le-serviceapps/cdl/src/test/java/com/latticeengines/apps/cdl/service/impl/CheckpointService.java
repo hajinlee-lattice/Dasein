@@ -719,9 +719,8 @@ public class CheckpointService {
                 "    \"DestTenant\": {\n" +
                 "        \"Identifier\": \"cdlend2end_" + checkpointName + "_" + checkpointVersion + "\"\n" +
                 "    },\n" +
-                "\"DestTTLEnabled\": false\n" +
+                "    \"DestTTLEnabled\": false\n" +
                 "}");
-        log.error("$JAW$  HERE!!!!");
         log.info(msg.toString());
     }
 
