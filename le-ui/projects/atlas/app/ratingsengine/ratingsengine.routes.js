@@ -383,7 +383,6 @@ angular
                             modelId = iteration.id;
 
                         RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-                            RatingsEngineStore.setRemodelIteration(result);
                             RatingsEngineStore.setRatingEngine(ratingEngine);
                             deferred.resolve(result);
                         });
