@@ -54,7 +54,6 @@ angular.module('lp.ratingsengine')
         this.remodelAttributes = {};
         this.trainingSegment = null;
         this.trainingProducts = null;
-        this.dataStores = [];
         this.modelTrainingOptions = {
             "deduplicationType": "ONELEADPERDOMAIN",
             "excludePublicDomains": false,
@@ -224,28 +223,18 @@ angular.module('lp.ratingsengine')
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingEngine(nextState);
                     }
-                },
-                {
-                    label:'Attributes',
-                    state:'segment.attributes',
-                    progressDisabled: true,
-                    nextLabel: 'Next',
-                    nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
-                    }
-                },
-                {
+                },{
                     label:'Training',
-                    state:'segment.attributes.training',
+                    state:'segment.training',
                     progressDisabled: true,
                     showNextSpinner: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
                     }
-                }, {
+                },{
                     label:'Field Mapping',
-                    state:'segment.attributes.training.mapping',
+                    state:'segment.training.mapping',
                     progressDisabled: true,
                     nextLabel: 'Model',
                     nextFn: function(nextState) {
@@ -253,7 +242,7 @@ angular.module('lp.ratingsengine')
                     }
                 },{
                     label:'Model Creation',
-                    state:'segment.attributes.training.mapping.creation',
+                    state:'segment.training.mapping.creation',
                     progressDisabled: true,
                     hideBack: true,
                     secondaryLinkLabel: 'Go to Model List',
@@ -821,20 +810,12 @@ angular.module('lp.ratingsengine')
         this.modelTrainingOptions = trainingOptions;
     }
 
-    this.setDataStores = function(dataStores) {
-        this.dataStores = dataStores;
-    }
-
-    this.getDataStores = function() {
-        return this.dataStores;
-    }
-
     this.setCustomEventModelingType = function(customEventModelingType) {
         this.customEventModelingType = customEventModelingType;
     }
 
     this.getCustomEventModelingType = function() {
-        return this.customEventModelingType ;
+        return this.customEventModelingType;
     }
 
     this.setModelingStrategy = function(modelingStrategy) {
@@ -921,8 +902,8 @@ angular.module('lp.ratingsengine')
 
             var model = rating.latest_iteration,
                 predictionType = RatingsEngineStore.getPredictionType(),
-                dataStores = RatingsEngineStore.getDataStores(),
                 customEventModelingType = RatingsEngineStore.getCustomEventModelingType(),
+                dataStores = customEventModelingType == "LPI" ? ["CustomFileAttributes", "DataCloud"] : ["CDL", "DataCloud"],
                 modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions(),
                 fileName = RatingsEngineStore.getCSVFileName(),
                 displayFileName = RatingsEngineStore.getDisplayFileName(),
