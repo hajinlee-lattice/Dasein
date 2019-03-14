@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -56,18 +58,21 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${common.microservice.url}")
     private String microServiceHostPort;
 
-    @Value("${datacloud.match.entity.test.input.s3.bucket:latticeengines-test-artifacts}")
+    @Value("${datacloud.match.entity.test.input.s3.bucket}")
     private String s3Bucket;
 
-    @Value("${datacloud.match.entity.test.input.s3.dir:/le-datacloud/entity-match}")
+    @Value("${datacloud.match.entity.test.input.s3.dir}")
     private String s3InputFileDir;
 
+    @Value("${datacloud.match.entity.test.result.s3.dir}")
+    private String s3ResultDir;
+
     // dir under tenant directory
-    @Value("${datacloud.match.entity.test.input.hdfs.dir:EntityMatchInputFiles}")
+    @Value("${datacloud.match.entity.test.input.hdfs.dir}")
     private String hdfsInputFileDir;
 
     @WithWorkflowJobPid
-    public ApplicationId submit(@NotNull String customerSpace, @NotNull BulkEntityMatchRequest request,
+    public Response submit(@NotNull String customerSpace, @NotNull BulkEntityMatchRequest request,
             @NotNull WorkflowPidWrapper pidWrapper) {
         Preconditions.checkNotNull(customerSpace);
         check(request);
@@ -76,17 +81,23 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
 
         String entity = request.getEntity();
         CustomerSpace space = CustomerSpace.parse(customerSpace);
+        String uid = UUID.randomUUID().toString();
 
         BulkEntityMatchWorkflowConfiguration entityConfig = configureSteps(
-                new BulkEntityMatchWorkflowConfiguration.Builder(entity, space), request, space).build();
+                new BulkEntityMatchWorkflowConfiguration.Builder(entity, space), request, space, uid).build();
 
         log.debug("BulkEntityMatch config = {}", entityConfig);
-        return workflowJobService.submit(entityConfig, pidWrapper.getPid());
+        return getResponse(workflowJobService.submit(entityConfig, pidWrapper.getPid()), uid);
+    }
+
+    private Response getResponse(@NotNull ApplicationId applicationId, @NotNull String uid) {
+        String resultLocation = Paths.get(s3ResultDir, uid).toString();
+        return new Response(applicationId.toString(), resultLocation);
     }
 
     private BulkEntityMatchWorkflowConfiguration.Builder configureSteps(
             @NotNull BulkEntityMatchWorkflowConfiguration.Builder builder, @NotNull BulkEntityMatchRequest request,
-            @NotNull CustomerSpace customerSpace) {
+            @NotNull CustomerSpace customerSpace, @NotNull String uid) {
         // configure bump up version step
         if (request.getBumpVersion() != null) {
             BulkEntityMatchRequest.BumpVersionRequest bumpVersionRequest = request.getBumpVersion();
@@ -110,7 +121,6 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
 
         // configure bulk match step
         if (request.getBulkEntityMatchInput() != null) {
-            String uid = UUID.randomUUID().toString();
             String podId = CamilleEnvironment.getPodId();
             if (CollectionUtils.isNotEmpty(request.getInputFilePaths())) {
                 HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
@@ -140,6 +150,7 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
                             Collections.singletonMap(WorkflowContextConstants.Inputs.JOB_TYPE, "bulkMatchWorkflow"))
                     .build();
             builder.bulkMatch(config);
+            builder.podId(podId).rootOperationUid(uid);
         }
 
         return builder;
@@ -214,6 +225,28 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
             if (matchInput.getTenant() == null) {
                 matchInput.setTenant(new Tenant(CustomerSpace.parse(customerSpace).toString()));
             }
+        }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class Response {
+        @JsonProperty("ApplicationId")
+        private final String applicationId;
+
+        @JsonProperty("ResultLocation")
+        private final String resultLocation;
+
+        public Response(String applicationId, String resultLocation) {
+            this.applicationId = applicationId;
+            this.resultLocation = resultLocation;
+        }
+
+        public String getApplicationId() {
+            return applicationId;
+        }
+
+        public String getResultLocation() {
+            return resultLocation;
         }
     }
 }
