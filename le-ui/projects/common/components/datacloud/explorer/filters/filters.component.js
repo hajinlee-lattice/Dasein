@@ -35,7 +35,12 @@ export default function () {
                         order: '',
                         property: 'PredictivePower',
                         items: [
-                            { label: 'Predictive Power', icon: 'numeric', property: 'PredictivePower' },
+                            { 
+                                label: 'Predictive Power', 
+                                icon: 'numeric', 
+                                property: 'PredictivePower',
+                                tooltip: 'Attributes with more Predictive Power are better at differentiating your higher and lower converting Accounts. Predictive Power is based on the mutual information between an Attribute and your Model Event.'
+                            },
                             { label: 'Display Name', icon: 'alpha', property: 'DisplayName' },
                             { label: 'Feature Importance', icon: 'numeric', property: 'ImportanceOrdering' }
                         ]
