@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,16 +71,19 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         Table inputTable = metadataProxy.getTable(
                 customerSpace.toString(), TableUtils.getFullTableName(mergedBatchStoreName, pipelineVersion));
         List<Product> inputProducts = ProductUtils.loadProducts(
-                yarnConfiguration, inputTable.getExtracts().get(0).getPath());
+                yarnConfiguration, inputTable.getExtracts().get(0).getPath(), null, null);
 
         Table currentTable = getCurrentConsolidateProductTable();
         List<Product> currentProducts = getCurrentProducts(currentTable);
 
         Map<String, Integer> productCounts = countProducts(currentProducts);
-        if (configuration.getDataQuotaLimit() < productCounts.get("nProductBundles"))
-            throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+        log.info("product count is " + JsonUtils.serialize(productCounts));
+        if (configuration.getDataQuotaLimit(ProductType.Analytic) < productCounts.get("nProductAnalytics"))
+            throw new IllegalStateException("the Analytics Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Analytic) +
                     ", The data you uploaded has exceeded the limit.");
-        log.info("stored data is " + productCounts.get("nProductBundles") + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+        if (configuration.getDataQuotaLimit(ProductType.Spending) < productCounts.get("nProductSpendings"))
+            throw new IllegalStateException("the Spending Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Spending) +
+                    ", The data you uploaded has exceeded the limit.");
         mergeReport = constructMergeReport(productCounts, currentProducts.size());
 
         List<Product> productList = new ArrayList<>();
@@ -125,9 +129,10 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         log.info(String.format("Count products in batch store. Tenant=%s. Version=%s. HDFSPath=%s",
                 customerSpace.toString(), inactive, hdfsPath));
         Set<String> skus = new HashSet<>();  // only contains unique SKUs
-        ProductUtils.loadProducts(yarnConfiguration, hdfsPath).stream()
-                .filter(product -> product.getProductType().equals(ProductType.Bundle.name())
-                        || product.getProductType().equals(ProductType.Hierarchy.name()))
+        ProductUtils
+                .loadProducts(yarnConfiguration, hdfsPath,
+                        Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()), null)
+                .stream()
                 .forEach(product -> skus.add(product.getProductId()));
 
         // update product report
@@ -562,7 +567,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         List<Product> currentProducts;
         if (currentConsolidateProductTable != null) {
             currentProducts = ProductUtils.loadProducts(yarnConfiguration,
-                    currentConsolidateProductTable.getExtracts().get(0).getPath());
+                    currentConsolidateProductTable.getExtracts().get(0).getPath(), null, null);
             currentProducts.forEach(product -> {
                 if (product.getProductType() == null) {
                     log.info("Found null product type. ProductId=" + product.getProductId());

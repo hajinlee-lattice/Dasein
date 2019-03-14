@@ -5,6 +5,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
@@ -44,10 +45,10 @@ public class ProcessProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processProductStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            updateProductWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            rebuildProductWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
+        public Builder dataQuotaLimit(ProductType type, Long dataQuotaLimit) {
+            processProductStepConfiguration.setDataQuotaLimit(type, dataQuotaLimit);
+            updateProductWorkflowBuilder.dataQuotaLimit(type, dataQuotaLimit);
+            rebuildProductWorkflowBuilder.dataQuotaLimit(type, dataQuotaLimit);
             return this;
         }
 

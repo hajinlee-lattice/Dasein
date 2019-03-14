@@ -117,7 +117,7 @@ public class ProductUtilsFunctionalTestNG {
 
     @Test(groups = "functional", dependsOnMethods = "testSaveProducts")
     public void testLoadProducts() {
-        loadedProductList = ProductUtils.loadProducts(yarnConfiguration, PATH);
+        loadedProductList = ProductUtils.loadProducts(yarnConfiguration, PATH, null, null);
         Assert.assertEquals(loadedProductList.size(), productList.size());
         Assert.assertEquals(loadedProductList.get(0).getProductType(), ProductType.Analytic.name());
         Assert.assertEquals(loadedProductList.get(0).getProductName(), "Bundle #1");
@@ -206,8 +206,10 @@ public class ProductUtilsFunctionalTestNG {
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku2"));
         Assert.assertTrue(productMap.keySet().contains("Analytic__Bundle #1"));
         Assert.assertTrue(productMap.keySet().contains("Spending__Detergent category #1__Detergent category #1____"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance family #2__Appliance category #2__Appliance family #2__"));
+        Assert.assertTrue(productMap.keySet()
+                .contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
+        Assert.assertTrue(productMap.keySet()
+                .contains("Spending__Appliance family #2__Appliance category #2__Appliance family #2__"));
 
         productMap = ProductUtils.getProductMapByCompositeId(loadedProductList, ProductStatus.Active.name());
         Assert.assertEquals(productMap.size(), 7);
@@ -220,15 +222,17 @@ public class ProductUtilsFunctionalTestNG {
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku2"));
         Assert.assertTrue(productMap.keySet().contains("Analytic__Bundle #1"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
-        Assert.assertTrue(productMap.keySet().contains("Spending__Appliance family #2__Appliance category #2__Appliance family #2__"));
+        Assert.assertTrue(productMap.keySet()
+                .contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
+        Assert.assertTrue(productMap.keySet()
+                .contains("Spending__Appliance family #2__Appliance category #2__Appliance family #2__"));
         Assert.assertFalse(productMap.keySet().contains("Spending__Detergent category #1"));
 
         productMap = ProductUtils.getProductMapByCompositeId(loadedProductList, ProductStatus.Obsolete.name());
         Assert.assertEquals(productMap.size(), 1);
 
-        productMap = ProductUtils.getProductMapByCompositeId(loadedProductList,
-                ProductStatus.Active.name(), ProductStatus.Obsolete.name());
+        productMap = ProductUtils.getProductMapByCompositeId(loadedProductList, ProductStatus.Active.name(),
+                ProductStatus.Obsolete.name());
         Assert.assertEquals(productMap.size(), 7);
 
         loadedProductList.get(1).setProductStatus(ProductStatus.Active.name());

@@ -14,3 +14,4 @@ HTTPS_PORT=3000
 HTTPS_KEY=./server/certs/privatekey.key
 HTTPS_CRT=./server/certs/certificate.crt
 HTTPS_PASS=false
+TRAY_MASTER_AUTHORIZATION=6cadf407-a686-41be-92e7-36e37c97c1e3

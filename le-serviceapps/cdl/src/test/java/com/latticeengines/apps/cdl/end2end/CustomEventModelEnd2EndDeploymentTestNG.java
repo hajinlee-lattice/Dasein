@@ -150,7 +150,6 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         testType = CustomEventModelingType.CDL;
         bootstrap(testType);
         runCustomEventModel(testType);
-        runCustomEventRemodel(testType);
     }
 
     private void runCustomEventModel(CustomEventModelingType type) {

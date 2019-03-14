@@ -253,8 +253,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace.toString(), accountTableName);
         for (ColumnMetadata cm : cms) {
             if (cm.getAttrName().equals(InterfaceName.SpendAnalyticsSegment.name())) {
-                log.info(
-                        "Account table has SpendAnalyticsSegment field which is needed in ShareOfWallet calculation");
+                log.info("Account table has SpendAnalyticsSegment field which is needed in ShareOfWallet calculation");
                 return true;
             }
         }
@@ -299,9 +298,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
-        List<Product> productList = new ArrayList<>(
-                ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
-        productMap = ProductUtils.getProductMap(productList, ProductType.Analytic.name());
+        List<Product> productList = new ArrayList<>(ProductUtils.loadProducts(yarnConfiguration,
+                productTable.getExtracts().get(0).getPath(), Arrays.asList(ProductType.Analytic.name()), null));
+
+        productMap = ProductUtils.getProductMap(productList);
         productTableName = productTable.getName();
     }
 

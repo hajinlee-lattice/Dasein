@@ -8,11 +8,22 @@ public class ApsGenerationStepConfiguration extends SparkScriptStepConfiguration
     @JsonProperty("rolling_period")
     private String rollingPeriod;
 
+    @JsonProperty("force_rebuild")
+    private Boolean forceRebuild;
+
     public String getRollingPeriod() {
         return rollingPeriod;
     }
 
     public void setRollingPeriod(String rollingPeriod) {
         this.rollingPeriod = rollingPeriod;
+    }
+
+    public Boolean getForceRebuild() {
+        return forceRebuild;
+    }
+
+    public void setForceRebuild(Boolean forceRebuild) {
+        this.forceRebuild = forceRebuild;
     }
 }

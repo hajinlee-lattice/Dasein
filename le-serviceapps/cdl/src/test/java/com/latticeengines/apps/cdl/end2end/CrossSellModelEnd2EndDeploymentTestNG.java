@@ -64,22 +64,21 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
-    // Target Products are shared with Refresh Rating test
+    // Target Products are shared with RefreshRatingDeploymentTestNG
     private static final ImmutableList<String> repeatTargetProducts = ImmutableList.of(
-            "6aWAxPIdKjD9bDVN90kMphZgevl8jua", "6mhfUZb1DOQWShBJZvmVPjnDE65Tmrd",
-            "xsfqOtt95Ft5oWdrrEY5XbVca8W52U", "vjQ1pa9f3VAZWOs5B99KooDva2LsF2KB");
+            "1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", "wvgdBuktiOzn3Vb5NMjEV9PnM1CZwluO",
+            "f5v635l5ry87S2sJlinOMBey6YwjKzb", "AdbFXykhUy2A4FPiqP2lEXGbBhd8xuTf");
     private static final ImmutableList<String> firstTargetProducts = ImmutableList
-            .of("6aWAxPIdKjD9bDVN90kMphZgevl8jua");
+            .of("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o");
 
     // Training Products are only used by this test
     private static final ImmutableList<String> repeatTrainingProducts = ImmutableList.of(
-            "9IfG2T5joqw0CIJva0izeZXSCwON1S", "Og8oP4j5zJ1Lieh3G38qTINC6m2Jor",
-            "C4jlopoPp3mNkOqz4axpbpmWGIoU2Ua", "x2tWKKnRNWfJkGnM1qJBjqU6YJa9Zj1S",
-            "ecz3YIqtjwiTGPE8Md0SdUg7ZczGvVA", "snB31hdBFDT9bcNvGMltIgsagzR15io",
-            "650050C066EF46905EC469E9CC2921E0", "vTQ5oBReNHvkiYcWZA86TkrFqkoK15",
-            "fuDcy4WsrfF278qOmcVNGz7FKUnCxHwm", "AWLhcmhd9d9GJGdW9cFdXFou4FmS4Evo");
+            "PQ8ho4EWIq2BpgpMul928bTgYiVoISna", "Og8oP4j5zJ1Lieh3G38qTINC6m2Jor", "NlRV90sf5DW24uZJN7rb1jHOCYxbgtK5", //
+            "NlRV90sf5DW24uZJN7rb1jHOCYxbgtK5", "AA2AE7655F28BFE08EC4D4CB387DB488", //
+            "CrqP4hEDn3tMF3ZConN0j6CVchfOWRAq", "g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J", //
+            "650050C066EF46905EC469E9CC2921E0", "26OcFFnMiag2jvSb3iucbyiwJuxPVY1P");
     private static final ImmutableList<String> firstTrainingProducts = ImmutableList
-            .of("9IfG2T5joqw0CIJva0izeZXSCwON1S");
+            .of("PQ8ho4EWIq2BpgpMul928bTgYiVoISna");
 
     private long targetCount;
 
@@ -97,7 +96,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.EXPECTED_VALUE);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.EXPECTED_VALUE, true);
     }
 
     /**
@@ -110,7 +109,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.PROPENSITY);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.PROPENSITY, true);
         setupAndRunRemodel(PredictionType.PROPENSITY);
     }
 
@@ -131,14 +130,13 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY, false);
         setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE,
-                PredictionType.EXPECTED_VALUE);
-        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
-
+                PredictionType.EXPECTED_VALUE, false);
     }
 
-    private void setupAndRunModel(ModelingStrategy strategy, PredictionType predictionType) {
-        setupTestRatingEngine(strategy, predictionType);
+    private void setupAndRunModel(ModelingStrategy strategy, PredictionType predictionType, boolean testInvalidEngine) {
+        setupTestRatingEngine(strategy, predictionType, testInvalidEngine);
         verifyCounts(strategy);
         log.info("Start Cross Sell modeling ...");
         verifyBucketMetadataNotGenerated();
@@ -244,7 +242,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         targetSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), targetSegment);
     }
 
-    private void setupTestRatingEngine(ModelingStrategy strategy, PredictionType predictionType) {
+    private void setupTestRatingEngine(ModelingStrategy strategy, PredictionType predictionType, //
+                                       boolean testInvalidEngine) {
         log.info("Set up test artifacts for a " + strategy + " model in tenant "
                 + mainTestTenant.getId());
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL,
@@ -256,9 +255,11 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         log.info("Created rating engine " + testModel.getId());
         testIteration1 = (AIModel) testModel.getLatestIteration();
 
-        Assert.assertThrows(LedpException.class,
-                () -> ratingEngineProxy.validateForModelingByRatingEngineId(mainTestTenant.getId(),
-                        testModel.getId(), testIteration1.getId()));
+        if (testInvalidEngine) {
+            Assert.assertThrows(LedpException.class,
+                    () -> ratingEngineProxy.validateForModelingByRatingEngineId(mainTestTenant.getId(),
+                            testModel.getId(), testIteration1.getId()));
+        }
 
         List<String> targetProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)
                 ? repeatTargetProducts
@@ -293,11 +294,11 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 + " eventCount=" + eventCount;
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
             Assert.assertEquals(targetCount, 22, errorMsg);
-            Assert.assertEquals(trainingCount, 295, errorMsg);
-            Assert.assertEquals(eventCount, 250, errorMsg);
+            Assert.assertEquals(trainingCount, 296, errorMsg);
+            Assert.assertEquals(eventCount, 249, errorMsg);
         } else {
             Assert.assertEquals(targetCount, 554, errorMsg);
-            Assert.assertEquals(trainingCount, 3026, errorMsg);
+            Assert.assertEquals(trainingCount, 2618, errorMsg);
             Assert.assertEquals(eventCount, 68, errorMsg);
         }
     }

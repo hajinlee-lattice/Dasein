@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 
@@ -27,6 +28,8 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
     public abstract BusinessEntity getMainEntity();
 
     public abstract Long getDataQuotaLimit();
+
+    public Long getDataQuotaLimit(ProductType type) { return null; }
 
     public Boolean getRebuild() {
         return rebuild;

@@ -282,17 +282,17 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         String tableSourceName = "CustomerUniverse";
         String sourceTableName = rawTable.getName();
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
+        String productTableName = productTable.getName();
+        List<String> baseSources = Arrays.asList(tableSourceName, productTableName);
         step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
+        baseTables.put(productTableName, new SourceTable(productTableName, customerSpace));
         step.setBaseTables(baseTables);
 
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(null);
-        config.setProductTable(productTable);
 
         step.setConfiguration(JsonUtils.serialize(config));
         return step;

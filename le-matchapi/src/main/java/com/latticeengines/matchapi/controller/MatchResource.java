@@ -2,12 +2,15 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.datacloud.core.annotation.PodContextAware;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
@@ -33,18 +37,20 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
 
 @Api(value = "match", description = "REST resource for propdata matches")
 @RestController
@@ -172,7 +178,7 @@ public class MatchResource {
         }
     }
 
-    @PostMapping(value = "/publishentity")
+    @PostMapping(value = "/entity/publish")
     @ResponseBody
     @ApiOperation(value = "Publish entity seed/lookup entries "
             + "from source tenant (staging env) to dest tenant (staging/serving env). "
@@ -192,6 +198,25 @@ public class MatchResource {
         }
     }
 
+    @PostMapping(value = "/entity/versions")
+    @ResponseBody
+    @ApiOperation(value = "Bump up entity match version of a target tenant in a list of specified environments")
+    public BumpVersionResponse bumpVersion(@RequestBody BumpVersionRequest request) {
+        validateBumpVersionRequest(request);
+        Tenant tenant = request.getTenant();
+        // env => entity match version after bump up operation
+        Map<EntityMatchEnvironment, Integer> versionMap = request.getEnvironments().stream().distinct().map(env -> {
+            int version = entityMatchVersionService.bumpVersion(env, tenant);
+            return Pair.of(env, version);
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
+
+        // generate response
+        BumpVersionResponse response = new BumpVersionResponse();
+        response.setTenant(request.getTenant());
+        response.setVersions(versionMap);
+        return response;
+    }
+
     private void validateEntityPublishRequest(EntityPublishRequest request) {
         if (StringUtils.isBlank(request.getEntity())) {
             throw new IllegalArgumentException("Please provide entity");
@@ -209,6 +234,16 @@ public class MatchResource {
                 && EntityMatchEnvironment.STAGING == request.getDestEnv()) {
             throw new IllegalArgumentException("Publish within staging env for same tenant is not allowed");
         }
+    }
+
+    private void validateBumpVersionRequest(BumpVersionRequest request) {
+        Preconditions.checkNotNull(request, "BumpVersionRequest should not be null");
+        Preconditions.checkArgument(request.getTenant() != null && request.getTenant().getId() != null,
+                "Missing tenant with valid tenant id in BumpVersionRequest");
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(request.getEnvironments()),
+                "Missing list of entity match environments in BumpVersionRequest");
+        request.getEnvironments().forEach(
+                env -> Preconditions.checkNotNull(env, "Should not have null environment in BumpVersionRequest"));
     }
 
     private BulkMatchService getBulkMatchService(String matchVersion) {

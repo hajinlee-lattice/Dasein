@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
@@ -148,6 +149,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
+            processStepConfiguration.setRebuildEntities(entities);
             processAccountWorkflowBuilder.rebuildEntities(entities);
             processContactWorkflowBuilder.rebuildEntities(entities);
             processProductWorkflowBuilder.rebuildEntities(entities);
@@ -166,6 +168,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 steps.forEach(s -> rebuildSteps.add(s.toLowerCase()));
             }
             awsPythonDataConfiguration.setRebuildSteps(rebuildSteps);
+            if (rebuildSteps.contains("apsgeneration")) {
+                apsGenerationStepConfiguration.setForceRebuild(true);
+            }
             return this;
         }
 
@@ -205,6 +210,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
@@ -222,10 +228,14 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             switch (businessEntity) {
                 case Account: processAccountWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
                 case Contact: processContactWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
-                case Product: processProductWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
                 case Transaction: processTransactionWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;
                 default:break;
             }
+            return this;
+        }
+
+        public Builder dataQuotaLimit(Long dataQuotaLimit, ProductType type) {
+            processProductWorkflowBuilder.dataQuotaLimit(type, dataQuotaLimit);
             return this;
         }
 

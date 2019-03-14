@@ -206,6 +206,9 @@ public class EMRScalingRunnable implements Runnable {
                 scale(target);
                 resetScaleInCounter();
             }
+        } else {
+            log.info(String.format("No need to scale %s, running=%d, requested=%d, target=%d", //
+                    emrCluster, running, requested, target));
         }
     }
 

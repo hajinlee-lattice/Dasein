@@ -257,23 +257,32 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         for (Attribute attr : table.getAttributes()) {
             Object avroFieldValue = null;
             String csvColumnName = attr.getDisplayName();
-            // renamed field end with underline plus number, need to transform
-            // it to previous name in csv file
-            if (!headers.contains(csvColumnName) && Pattern.matches(".+_\\d+", csvColumnName)) {
-                csvColumnName = csvColumnName.substring(0, csvColumnName.lastIndexOf('_'));
+            // try other possible names:
+            if (!headers.contains(csvColumnName)) {
+                List<String> possibleNames = attr.getPossibleCSVNames();
+                if (CollectionUtils.isNotEmpty(possibleNames)) {
+                    for (String possibleName : possibleNames) {
+                        if (headers.contains(possibleName)) {
+                            csvColumnName = possibleName;
+                            break;
+                        }
+                    }
+                }
             }
             if (headers.contains(csvColumnName) || attr.getDefaultValueStr() != null) {
                 Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
                 String csvFieldValue = null;
                 try {
-                    csvFieldValue = String.valueOf(csvRecord.get(csvColumnName));
+                    if (headers.contains(csvColumnName)) {
+                        csvFieldValue = String.valueOf(csvRecord.get(csvColumnName));
+                    }
                 } catch (Exception e) { // This catch is for the row error
                     rowError = true;
                     LOG.warn(e.getMessage(), e);
                 }
                 try {
                     validateAttribute(csvRecord, attr, csvColumnName);
-                    if (!attr.isNullable() || !StringUtils.isEmpty(csvFieldValue)) {
+                    if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
                         if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                             csvFieldValue = attr.getDefaultValueStr();
                         }
@@ -369,8 +378,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 return new Integer(parseStringToNumber(fieldCsvValue).intValue());
             case LONG:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
-                    LOG.info("Date value from csv: " + fieldCsvValue + " Date Format: " + attr.getDateFormatString()
-                            + " Time Format: " + attr.getTimeFormatString() + " Timezone: " + attr.getTimezone());
                     Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                             attr.getTimeFormatString(), attr.getTimezone());
                     if (timestamp < 0) {
@@ -385,7 +392,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     if (fieldCsvValue.matches("[0-9]+")) {
                         return fieldCsvValue;
                     }
-                    LOG.info("Timestamp value from csv: " + fieldCsvValue);
                     try {
                         Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
                         if (timestamp < 0) {

@@ -181,8 +181,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     }
 
     private void loadProductMap() {
-        productTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedProduct, inactive);
+        productTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.ConsolidatedProduct,
+                inactive);
         if (productTable == null) {
             log.info("Did not find product table in inactive version.");
             productTable = dataCollectionProxy.getTable(customerSpace.toString(),
@@ -221,11 +221,17 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
         step.setInputSteps(Collections.singletonList(dailyRawStep));
+
+        String productTableName = productTable.getName();
+        List<String> baseSources = Arrays.asList(productTableName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(productTableName, new SourceTable(productTableName, customerSpace));
+        step.setBaseTables(baseTables);
+
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(null);
-        config.setProductTable(productTable);
 
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;

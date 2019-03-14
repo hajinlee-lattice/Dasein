@@ -15,7 +15,8 @@ const env_vars = {
     LOG_LEVEL:  process.env.LOG_LEVEL   || 'verbose',
     TIMESTAMP:  DateUtil.getTimeStamp(),
     APP_ROOT:   path.join(__dirname, '../..'),
-    SRC_PATH:   '/projects'
+    SRC_PATH:   '/projects',
+    TRAY_MASTER_AUTHORIZATION: process.env.TRAY_MASTER_AUTHORIZATION || ''
 };
 
 Object.keys(env_vars).forEach(key => {

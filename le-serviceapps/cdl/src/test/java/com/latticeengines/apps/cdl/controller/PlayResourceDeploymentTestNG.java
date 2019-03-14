@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -13,11 +14,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -25,8 +28,6 @@ import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
-
-//import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -56,20 +57,31 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     PlayLaunchConfig playLaunchConfig = null;
     
     @BeforeClass(groups = "deployment-app")
-    public void setup() throws Exception {
-        playLaunchConfig = new PlayLaunchConfig.Builder().build();
+    public void setup() throws Exception { 
         if (USE_EXISTING_TENANT) {
             setupTestEnvironment(EXISTING_TENANT);
         } else {
             setupTestEnvironment();
             cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         }
+        
+        playLaunchConfig = new PlayLaunchConfig.Builder()
+                .existingTenant(EXISTING_TENANT)
+                .mockRatingTable(false)
+                .testPlayCrud(false)
+                .destinationSystemType(CDLExternalSystemType.CRM)
+                .destinationSystemName(CDLExternalSystemName.Salesforce)
+                .destinationSystemId("Salesforce_"+System.currentTimeMillis())
+                .trayAuthenticationId(UUID.randomUUID().toString())
+                .audienceId(UUID.randomUUID().toString())
+                .build();
 
         playCreationHelper.setTenant(mainTestTenant);
-        playCreationHelper.setDestinationOrgId("O" + System.currentTimeMillis());
-        playCreationHelper.setDestinationOrgType(CDLExternalSystemType.CRM);
+        playCreationHelper.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
+        playCreationHelper.setDestinationOrgType(playLaunchConfig.getDestinationSystemType());
         MetadataSegment retrievedSegment = createSegment();
         playCreationHelper.createPlayTargetSegment();
+        playCreationHelper.createLookupIdMapping(playLaunchConfig);
         ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
     }
 
@@ -136,6 +148,12 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), playName,
                 playLaunch.getLaunchId());
 
+        PlayLaunchConfigurations configurations = playProxy.getPlayLaunchConfigurations(mainTestTenant.getId(),
+                playName);
+        Assert.assertNotNull(configurations);
+        Assert.assertEquals(configurations.getLaunchConfigurations().get(playLaunch.getDestinationOrgId()).getPid(),
+                playLaunch.getPid());
+
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
         assertLaunchStats(retrievedLaunch.getAccountsSelected(), totalRatedAccounts);
@@ -151,7 +169,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "searchPlayLaunch" })
-    private void testGetFullPlays() {
+    public void testGetFullPlays() {
         Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
@@ -169,7 +187,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGetFullPlays" })
-    private void testIdempotentCreateOrUpdatePlays() {
+    public void testIdempotentCreateOrUpdatePlays() {
         Play createdPlay1 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), play);
         Assert.assertNotNull(createdPlay1.getTalkingPoints());
 
@@ -190,7 +208,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testDeletePlayLaunch" })
-    private void testPlayDelete() {
+    public void testPlayDelete() {
         List<Play> playList;
         Play retrievedPlay;
         deletePlay(playName);

@@ -92,7 +92,7 @@ if [[ "${DISABLE_JMXTRANS}" != "true" ]]; then
         echo "Found jmxtrans-agent.jar, setting its java agent"
         export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
     else
-        echo "Cannot find /var/lib/jmxtransa-gent.jar"
+        echo "Cannot find /var/lib/jmxtrans-agent.jar"
         exit -1
     fi
 fi

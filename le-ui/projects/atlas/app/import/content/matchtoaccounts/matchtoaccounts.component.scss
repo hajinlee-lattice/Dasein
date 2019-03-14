@@ -1,3 +1,26 @@
 .match-to-accounts {
-	
+    form {
+        margin-top: 20px;
+    }
+    .matching-fields {
+        width: 100%;
+        p {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        ul {
+            flex-wrap: wrap;
+            li {
+                padding: 10px;
+                &:nth-child(odd) {
+                    padding-left: 0;
+                }
+                &:nth-child(even) {
+                    padding-right: 0;
+                }
+                @include flex-item(0 1 50%); 
+            }
+            @include flex-container;
+        }
+    }	
 }

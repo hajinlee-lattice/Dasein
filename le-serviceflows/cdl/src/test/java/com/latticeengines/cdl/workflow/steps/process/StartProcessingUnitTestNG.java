@@ -1,5 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Product;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -12,11 +17,16 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.batch.item.ExecutionContext;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -24,7 +34,9 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
@@ -95,7 +107,7 @@ public class StartProcessingUnitTestNG {
         Job job = new Job();
         job.setOutputs(ImmutableMap.<String, String> builder() //
                 .put(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
-                        JsonUtils.serialize(Collections.singletonList(BusinessEntity.Contact.name()))) //
+                        JsonUtils.serialize(Collections.singletonList(Contact.name()))) //
                 .build());
 
         List<Job> jobs = Collections.singletonList(job);
@@ -106,7 +118,7 @@ public class StartProcessingUnitTestNG {
         action.setType(ActionType.CDL_OPERATION_WORKFLOW);
         action.setActionInitiator("Test_Action_Initiator");
         CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
-        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Contact);
+        cleanupActionConfiguration.addImpactEntity(Contact);
         action.setActionConfiguration(cleanupActionConfiguration);
         List<Action> actions = Collections.singletonList(action);
         ActionProxy actionProxy = mock(ActionProxy.class);
@@ -119,13 +131,13 @@ public class StartProcessingUnitTestNG {
         config.setActionIds(Collections.singletonList(1111L));
         startProcessing.setConfiguration(config);
         Set<BusinessEntity> entities = startProcessing.new RebuildOnDeleteJobTemplate().getRebuildEntities();
-        assertTrue(entities.contains(BusinessEntity.Contact));
+        assertTrue(entities.contains(Contact));
         assertEquals(entities.size(), 1);
 
         job = new Job();
         job.setOutputs(ImmutableMap.<String, String> builder() //
                 .put(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
-                        JsonUtils.serialize(Arrays.asList(BusinessEntity.Account.name(), BusinessEntity.Contact.name(),
+                        JsonUtils.serialize(Arrays.asList(Account.name(), Contact.name(),
                                 BusinessEntity.Product.name(), BusinessEntity.Transaction.name()))) //
                 .build());
 
@@ -134,8 +146,8 @@ public class StartProcessingUnitTestNG {
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 
         cleanupActionConfiguration = new CleanupActionConfiguration();
-        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Account);
-        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Contact);
+        cleanupActionConfiguration.addImpactEntity(Account);
+        cleanupActionConfiguration.addImpactEntity(Contact);
         cleanupActionConfiguration.addImpactEntity(BusinessEntity.Product);
         cleanupActionConfiguration.addImpactEntity(BusinessEntity.Transaction);
         action.setActionConfiguration(cleanupActionConfiguration);
@@ -148,10 +160,86 @@ public class StartProcessingUnitTestNG {
 
         startProcessing.setConfiguration(config);
         entities = startProcessing.new RebuildOnDeleteJobTemplate().getRebuildEntities();
-        assertTrue(entities.contains(BusinessEntity.Account));
-        assertTrue(entities.contains(BusinessEntity.Contact));
+        assertTrue(entities.contains(Account));
+        assertTrue(entities.contains(Contact));
         assertTrue(entities.contains(BusinessEntity.Product));
         assertTrue(entities.contains(BusinessEntity.Transaction));
         assertEquals(entities.size(), 4);
+    }
+
+    @Test(groups = "unit", dataProvider = "bumpEntityMatchVersion")
+    private void testBumpEntityMatchVersion(BusinessEntity[] entitiesWithImport, BusinessEntity[] rebuildEntities,
+            List<EntityMatchEnvironment> expectedEnvironments) {
+        StartProcessing step = mockStepImportAndRebuild(entitiesWithImport, rebuildEntities);
+        Assert.assertEquals(new HashSet<>(step.getEnvironmentsToBumpVersion()), new HashSet<>(expectedEnvironments));
+    }
+
+    @DataProvider(name = "bumpEntityMatchVersion")
+    private Object[][] provideBumpVersionData() {
+        return new Object[][] { //
+                /*
+                 * NO account import, not rebuilding account => does not bump up any env
+                 */
+                { null, null, Collections.emptyList() }, //
+                { new BusinessEntity[] { Contact }, null, Collections.emptyList() }, //
+                { new BusinessEntity[] { Contact, Product }, new BusinessEntity[] { Contact },
+                        Collections.emptyList() }, //
+                /*
+                 * HAS account import, not rebuilding account => bump up STAGING env
+                 */
+                { new BusinessEntity[] { Account }, null, staging() }, //
+                { new BusinessEntity[] { Account, Contact }, null, staging() }, //
+                { new BusinessEntity[] { Account }, new BusinessEntity[] { Contact, Product },
+                        Collections.singletonList(STAGING) }, //
+                { new BusinessEntity[] { Account, Product }, new BusinessEntity[] { Contact },
+                        Collections.singletonList(STAGING) }, //
+                /*
+                 * NO account import, rebuild account => bump up STAGING & SERVING env
+                 */
+                { null, new BusinessEntity[] { Account }, stagingAndServing() }, //
+                { new BusinessEntity[] { Contact, Product }, new BusinessEntity[] { Account }, stagingAndServing() }, //
+                { new BusinessEntity[] { Contact, Product }, new BusinessEntity[] { Account, Contact, Product },
+                        stagingAndServing() }, //
+                /*
+                 * HAS account import, rebuild account => bump up STAGING & SERVING env
+                 */
+                { new BusinessEntity[] { Account }, new BusinessEntity[] { Account }, stagingAndServing() }, //
+                { new BusinessEntity[] { Account }, new BusinessEntity[] { Account, Contact }, stagingAndServing() }, //
+                { new BusinessEntity[] { Account, Product }, new BusinessEntity[] { Account, Contact },
+                        stagingAndServing() }, //
+                { new BusinessEntity[] { Account, Product, Contact },
+                        new BusinessEntity[] { Account, Contact, Product }, stagingAndServing() }, //
+        };
+    }
+
+    /*
+     * mock import map for specified entities and configure rebuild entity set
+     * properly. also set enable entity match flag to true.
+     */
+    private StartProcessing mockStepImportAndRebuild(BusinessEntity[] entitiesWithImport,
+            BusinessEntity[] rebuildEntities) {
+        StartProcessing step = new StartProcessing();
+        step.setExecutionContext(new ExecutionContext());
+        if (entitiesWithImport != null) {
+            Map<String, ArrayList<DataFeedImport>> importMap = Arrays.stream(entitiesWithImport) //
+                    .map(Enum::name) //
+                    .map(entity -> Pair.of(entity, new ArrayList<DataFeedImport>())) //
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            step.putObjectInContext(StartProcessing.CONSOLIDATE_INPUT_IMPORTS, importMap);
+        }
+        step.setConfiguration(new ProcessStepConfiguration());
+        step.getConfiguration().setEntityMatchEnabled(true);
+        if (rebuildEntities != null) {
+            step.getConfiguration().setRebuildEntities(Arrays.stream(rebuildEntities).collect(Collectors.toSet()));
+        }
+        return step;
+    }
+
+    private List<EntityMatchEnvironment> staging() {
+        return Collections.singletonList(STAGING);
+    }
+
+    private List<EntityMatchEnvironment> stagingAndServing() {
+        return Arrays.asList(SERVING, STAGING);
     }
 }

@@ -136,7 +136,7 @@ public class S3ImportJmsConsumer {
                     log.error("Cannot decode object key " + key);
                 }
                 String[] parts = key.split("/");
-                if (parts.length < 4 || !key.endsWith(".csv")) {
+                if (parts.length < 4 || !key.toLowerCase().endsWith(".csv")) {
                     log.warn("S3 import path is not correct: " + key);
                     return;
                 }

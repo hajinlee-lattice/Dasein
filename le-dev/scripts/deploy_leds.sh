@@ -74,7 +74,7 @@ for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scorin
         hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
         hdfs dfs -mkdir -p ${DS_ROOT}/${dir1}
         hdfs dfs -copyFromLocal ${artifact} ${DS_ROOT}/${dir1}/${dir2}
-        hdfs dfs -put ${ARTIFACT_DIR}/${artifact}-${LEDS_VERSION}.zip.md5 ${DS_ROOT}/
+        hdfs dfs -put -f ${ARTIFACT_DIR}/${artifact}-${LEDS_VERSION}.zip.md5 ${DS_ROOT}/
         popd
     fi
 done

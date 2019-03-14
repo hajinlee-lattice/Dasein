@@ -26,11 +26,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.DataIntegrationStatusMonitoringService;
+import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
@@ -38,8 +40,10 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage
 import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
@@ -67,6 +71,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private PlayTypeService playTypeService;
 
     @Inject
+    private LookupIdMappingService lookupIdMappingService;
+
+    @Inject
     private DataIntegrationStatusMonitoringService dataIntegrationStatusMonitoringService;
 
     private Play play;
@@ -86,6 +93,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private Set<RatingBucketName> bucketsToLaunch1;
     private Set<RatingBucketName> bucketsToLaunch2;
     private MetadataSegment playTargetSegment;
+    private LookupIdMap lookupIdMap1;
+    private LookupIdMap lookupIdMap2;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -145,6 +154,18 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch2.setCreatedBy(CREATED_BY);
         playLaunch2.setUpdatedBy(CREATED_BY);
+
+        lookupIdMap1 = new LookupIdMap();
+        lookupIdMap1.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap1.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        lookupIdMap1.setOrgId(org1);
+        lookupIdMap1.setOrgName("org2name");
+
+        lookupIdMap2 = new LookupIdMap();
+        lookupIdMap2.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap2.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        lookupIdMap2.setOrgId(org2);
+        lookupIdMap2.setOrgName("org1name");
 
     }
 
@@ -277,8 +298,20 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertTrue(actualBucketsToLaunch.contains(expectedBucket));
         }
     }
-
+    
     @Test(groups = "functional", dependsOnMethods = { "testUpdateLaunch" })
+    public void testGetLaunchConfigurations(){
+        lookupIdMappingService.registerExternalSystem(lookupIdMap1);
+        lookupIdMappingService.registerExternalSystem(lookupIdMap2);
+
+        PlayLaunchConfigurations configurations = playLaunchService.getPlayLaunchConfigurations(play.getPid());
+        Assert.assertNotNull(configurations);
+        Map<String, PlayLaunch> configurationMap = configurations.getLaunchConfigurations();
+        Assert.assertEquals(configurationMap.get(org1).getPid(), playLaunch1.getPid());
+        Assert.assertEquals(configurationMap.get(org2).getPid(), playLaunch2.getPid());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetLaunchConfigurations" })
     public void testCountDashboard() {
 
         Long badPlayId = System.currentTimeMillis();

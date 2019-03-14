@@ -73,8 +73,8 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private static final String MODELS_RESOURCE_ROOT = "end2end/models";
     private static final boolean ENABLE_AI_RATINGS = true;
 
-    // Target Products are shared with Refresh Rating test
-    private static final ImmutableList<String> targetProducts = ImmutableList.of("6aWAxPIdKjD9bDVN90kMphZgevl8jua");
+    // Target Products are shared with CrossSellModelEnd2EndDeploymentTestNG
+    private static final ImmutableList<String> targetProducts = ImmutableList.of("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o");
 
     private RatingEngine rule1;
     private RatingEngine rule2;

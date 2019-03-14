@@ -86,15 +86,15 @@ public class CDLJobServiceImpl implements CDLJobService {
     private TenantEntityMgr tenantEntityMgr;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.concurrent.job.count:8}")
+    @Value("${cdl.processAnalyze.concurrent.job.count}")
     int concurrentProcessAnalyzeJobs;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.minimum.scheduled.job.count:3}")
+    @Value("${cdl.processAnalyze.minimum.scheduled.job.count}")
     int minimumScheduledJobCount;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.maximum.scheduled.job.count:5}")
+    @Value("${cdl.processAnalyze.maximum.scheduled.job.count}")
     int maximumScheduledJobCount;
 
     @Value("${cdl.processAnalyze.job.retry.count:1}")

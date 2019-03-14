@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -20,46 +21,44 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 
 public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+
+    private static final String PRODUCT_TABLE = "ProductTable";
+    private static final String PRODUCT_DIR = "/tmp/ProductMapperFlowTestNG/product/";
+
     private String[] randomUUIDs = { UUID.randomUUID().toString(), UUID.randomUUID().toString(),
             UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(), UUID.randomUUID().toString()};
+            UUID.randomUUID().toString(), UUID.randomUUID().toString() };
 
-    private List<Product> productList = Arrays.asList(
+    private String[] productFields = new String[] { "ProductId", "ProductName", "Description", "ProductType",
+            "ProductBundle", "ProductLine", "ProductFamily", "ProductCategory", "ProductBundleId", "ProductLineId",
+            "ProductFamilyId", "ProductCategoryId", "ProductStatus" };
+
+    private Object[][] inputProductData = new Object[][] {
+
             // cases of products having differnet ids and same types
-            new Product("1", "sku1", "Soap", ProductType.Hierarchy.name(),
-                    null, null, "Family1", "Category1",
-                    null, null, randomUUIDs[0], null, ProductStatus.Active.name()),
-            new Product("2", "sku2", "Dishwasher", ProductType.Hierarchy.name(),
-                    null, "Line1", "Family1", "Category1",
-                    null, randomUUIDs[1], null, null, ProductStatus.Active.name()),
+            { "1", "sku1", "Soap", ProductType.Hierarchy.name(), null, null, "Family1", "Category1", null, null,
+                    randomUUIDs[0], null, ProductStatus.Active.name() },
+            { "2", "sku2", "Dishwasher", ProductType.Hierarchy.name(), null, "Line1", "Family1", "Category1", null,
+                    randomUUIDs[1], null, null, ProductStatus.Active.name() },
 
             // cases of products having same Ids but different types
-            new Product("3", "sku3", "Pencil", ProductType.Hierarchy.name(),
-                    null, "Line3", "Family3", "Category3",
-                    null, randomUUIDs[2], null, null, ProductStatus.Active.name()),
-            new Product("3", "sku4", "Mouse", ProductType.Bundle.name(),
-                    "Bundle1", null, null, null,
-                    randomUUIDs[3], null, null, null, ProductStatus.Active.name()),
-            new Product("3", "sku5", "Monitor", ProductType.Bundle.name(),
-                    "Bundle2", null, null, null,
-                    randomUUIDs[4], null, null, null, ProductStatus.Active.name()),
+            { "3", "sku3", "Pencil", ProductType.Hierarchy.name(), null, "Line3", "Family3", "Category3", null,
+                    randomUUIDs[2], null, null, ProductStatus.Active.name() },
+            { "3", "sku4", "Mouse", ProductType.Bundle.name(), "Bundle1", null, null, null, randomUUIDs[3], null, null,
+                    null, ProductStatus.Active.name() },
+            { "3", "sku5", "Monitor", ProductType.Bundle.name(), "Bundle2", null, null, null, randomUUIDs[4], null,
+                    null, null, ProductStatus.Active.name() },
 
             // cases of products having different ids and types
-            new Product("4", "sku6", "T-shirt", ProductType.Analytic.name(),
-                    null, "Line999", "Family999", "Category999",
-                    null, randomUUIDs[5], null, null, ProductStatus.Active.name()),
-            new Product("5", "sku7", "Printer", ProductType.Spending.name(),
-                    "Bundle999", null, null, null,
-                    randomUUIDs[6], null, null, null, ProductStatus.Active.name())
-    );
+            { "4", "sku6", "T-shirt", ProductType.Analytic.name(), null, "Line999", "Family999", "Category999", null,
+                    randomUUIDs[5], null, null, ProductStatus.Active.name() },
+            { "5", "sku7", "Printer", ProductType.Spending.name(), "Bundle999", null, null, null, randomUUIDs[6], null,
+                    null, null, ProductStatus.Active.name() } };
 
-    private String[] transactionFields = new String[] {
-            "TransactionId", "TransactionTime", "TransactionType", "AccountId", "Amount", "ExtensionAttr1", "Quantity",
-            "ContactId", "OrderId", "ProductId"
-    };
+    private String[] transactionFields = new String[] { "TransactionId", "TransactionTime", "TransactionType",
+            "AccountId", "Amount", "ExtensionAttr1", "Quantity", "ContactId", "OrderId", "ProductId" };
 
     private Object[][] inputTransactionData = new Object[][] {
             // cases of transactions having productIds in productList
@@ -73,10 +72,10 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
             { 8, 1503001576000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "4" },
             { 9, 1503001578000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "5" },
 
-            // cases of transactions having productIds not in productList (a dummy product will be generated instead)
-            { 10, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext888", 1, "Contact888", "Order888", "888"},
-            { 11, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext999", 1, "Contact999", "Order999", "999"}
-    };
+            // cases of transactions having productIds not in productList (a
+            // dummy product will be generated instead)
+            { 10, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext888", 1, "Contact888", "Order888", "888" },
+            { 11, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext999", 1, "Contact999", "Order999", "999" } };
 
     private Object[][] expectedTransactionData = new Object[][] {
             { 1, 1502755200000L, "PurchaseHistory", 1, 10.0, "Ext1", 1, "Contact1", "Order1", randomUUIDs[0],
@@ -108,8 +107,7 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
             { 10, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext888", 1, "Contact888", "Order888",
                     Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name() },
             { 11, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext999", 1, "Contact999", "Order999",
-                    Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name() }
-    };
+                    Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name() } };
 
     @Override
     protected String getFlowBeanName() {
@@ -128,6 +126,11 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
         return super.executeDataFlow();
     }
 
+    @Override
+    protected Map<String, String> extraSourcePaths() {
+        return ImmutableMap.of(PRODUCT_TABLE, PRODUCT_DIR + PRODUCT_TABLE + ".avro");
+    }
+
     private TransformationFlowParameters prepareInputData() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(transactionFields[0], Integer.class));
@@ -142,8 +145,14 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
         columns.add(Pair.of(transactionFields[9], String.class));
         uploadDataToSharedAvroInput(inputTransactionData, columns);
 
+        columns = new ArrayList<>();
+        for (int i = 0; i < 13; i++) {
+            columns.add(Pair.of(productFields[i], String.class));
+        }
+        uploadAvro(inputProductData, columns, PRODUCT_TABLE, PRODUCT_DIR);
+
         TransformationFlowParameters parameters = new TransformationFlowParameters();
-        parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
+        parameters.setBaseTables(Arrays.asList(AVRO_INPUT, PRODUCT_TABLE));
         parameters.setConfJson(JsonUtils.serialize(getConfiguration()));
         return parameters;
     }
@@ -152,8 +161,6 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
-        config.setProductMap(ProductUtils.getActiveProductMap(productList));
-        config.setProductTable(null);
         return config;
     }
 
