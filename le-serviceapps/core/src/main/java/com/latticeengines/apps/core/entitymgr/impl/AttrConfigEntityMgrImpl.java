@@ -91,6 +91,15 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AttrConfig> findAllInEntitiesInReader(String tenantId, List<BusinessEntity> entities) {
+        List<AttrConfigEntity> attrConfigEntities = readerRepository.findByTenantIdAndEntityIn(tenantId, entities);
+        return attrConfigEntities.stream() //
+                .map(AttrConfigEntity::getDocument) //
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void cleanupTenant(String tenantId) {
         List<AttrConfigEntity> entities = repository.removeByTenantId(tenantId);

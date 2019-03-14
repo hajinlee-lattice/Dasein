@@ -18,6 +18,8 @@ public interface AttrConfigEntityReaderRepository extends MultiTenantDocumentRep
 
     List<AttrConfigEntity> findByTenantIdAndEntity(String tenantId, BusinessEntity entity);
 
+    List<AttrConfigEntity> findByTenantIdAndEntityIn(String tenantId, List<BusinessEntity> entities);
+
     @Transactional
     @Modifying
     List<AttrConfigEntity> removeByTenantIdAndEntity(String tenantId, BusinessEntity entity);
