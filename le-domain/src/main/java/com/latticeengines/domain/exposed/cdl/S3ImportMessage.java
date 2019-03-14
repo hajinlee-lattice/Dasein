@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.cdl;
 
-
 import java.util.Date;
 
 import javax.persistence.Basic;
