@@ -3,7 +3,6 @@ package com.latticeengines.security.exposed.service.impl;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,9 @@ public class TenantServiceImpl implements TenantService {
         } else {
             oldTenant.setRegisteredTime(tenant.getRegisteredTime());
         }
-        oldTenant.setExpiredTime(tenant.getExpiredTime());
+        if (TenantType.POC.equals(oldTenant.getTenantType())) {
+            oldTenant.setExpiredTime(tenant.getExpiredTime());
+        }
         if (!globalTenantManagementService.tenantExists(tenant)) {
             globalTenantManagementService.registerTenant(tenant);
         }
