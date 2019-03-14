@@ -70,12 +70,15 @@ public class TenantServiceImpl implements TenantService {
         } else {
             oldTenant.setRegisteredTime(tenant.getRegisteredTime());
         }
-        if (tenant.getExpiredTime() == null) {
-            // expired date = registered date + 90
-            Long expiredTime = oldTenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
-            oldTenant.setExpiredTime(expiredTime);
-        } else {
-            oldTenant.setExpiredTime(tenant.getExpiredTime());
+        // only POC tenant have expired time
+        if (TenantType.POC.equals(tenant.getTenantType())) {
+            if (tenant.getExpiredTime() == null) {
+                // expired date = registered date + 90
+                Long expiredTime = oldTenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
+                oldTenant.setExpiredTime(expiredTime);
+            } else {
+                oldTenant.setExpiredTime(tenant.getExpiredTime());
+            }
         }
         if (!globalTenantManagementService.tenantExists(tenant)) {
             globalTenantManagementService.registerTenant(tenant);
