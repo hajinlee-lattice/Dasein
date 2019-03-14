@@ -103,17 +103,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                     }
 
                     vm.configFilters = angular.copy(vm.filters);
-
-                    vm.configFilters.dataStores = [];
-                    if(vm.checkboxModel.datacloud === true) {
-                        vm.configFilters.dataStores.push('DataCloud');
-                    }
-                    if(vm.checkboxModel.cdl === true) {
-                        vm.configFilters.dataStores.push('CDL');
-                    }
-                    if(vm.checkboxModel.customFile === true) {
-                        vm.configFilters.dataStores.push('CustomFileAttributes');
-                    }
+                    vm.configFilters.dataStores = ["CDL", "DataCloud"];
 
                     vm.checkForDisable();
                     vm.validateCustomEventForm();
@@ -344,40 +334,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
             if(valid == true){
                 // RatingsEngineStore.setConfigFilters(vm.configFilters);
-                vm.dataStores = vm.configFilters.dataStores;
-
-                if (vm.checkboxModel.datacloud){
-                    $timeout(function () {
-                        if(vm.dataStores.indexOf('DataCloud') == -1){
-                            vm.configFilters.dataStores.push('DataCloud');
-                        }
-                    }, 100);
-                } else {
-                    var index = vm.dataStores.indexOf('DataCloud');
-                    vm.configFilters.dataStores.splice(index, 1);
-                }
-
-                if(vm.checkboxModel.cdl) {
-                    $timeout(function () {
-                        if(vm.dataStores.indexOf('CDL') == -1){
-                            vm.configFilters.dataStores.push('CDL');
-                        }
-                    }, 100);
-                } else {
-                    var index = vm.dataStores.indexOf('CDL');
-                    vm.configFilters.dataStores.splice(index, 1);
-                }
-
-                if(vm.checkboxModel.customFile) {
-                    $timeout(function () {
-                        if(vm.dataStores.indexOf('CustomFileAttributes') == -1){
-                            vm.configFilters.dataStores.push('CustomFileAttributes');
-                        }
-                    }, 200);
-                } else {
-                    var index = vm.dataStores.indexOf('CustomFileAttributes');
-                    vm.configFilters.dataStores.splice(index, 1);
-                }
 
                 if(vm.checkboxModel.deduplicationType) {
                     vm.configFilters.deduplicationType = 'ONELEADPERDOMAIN';

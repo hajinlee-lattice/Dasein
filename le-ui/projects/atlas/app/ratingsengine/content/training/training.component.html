@@ -16,35 +16,6 @@
             <div class="content-body">
 
                 <div ng-if="$ctrl.engineType == 'custom_event'">
-
-                    <p>What attributes will be available for scoring?</p>
-                    <ul class="checkbox-list full-width">
-                        <li class="form-group">
-                            <input 
-                                type="checkbox"
-                                class="form-control"
-                                ng-model="$ctrl.checkboxModel.datacloud"
-                                ng-change="$ctrl.checkForDisable()" />
-                            <div>Your matched 3rd-Party Attributes provided through Lattice</div>
-                        </li>
-                        <li class="form-group" ng-if="$ctrl.filters.customEventModelingType == 'CDL'">
-                            <input 
-                                type="checkbox"
-                                class="form-control"
-                                ng-model="$ctrl.checkboxModel.cdl"
-                                ng-change="$ctrl.checkForDisable()" />
-                            <div>Your Imported 1st-Party Attributes (My Data Attributes)</div>
-                        </li>
-                        <li class="form-group" ng-if="$ctrl.filters.customEventModelingType == 'LPI'">
-                            <input 
-                                type="checkbox"
-                                class="form-control"
-                                ng-model="$ctrl.checkboxModel.customFile"
-                                ng-change="$ctrl.checkForDisable()" />
-                            <div>Attributes in the Training File</div>
-                        </li>
-                    </ul>
-
                     <p>Training Options</p>
                     <ul class="checkbox-list full-width">
                         <li class="form-group">
@@ -69,7 +40,6 @@
                             <div>Use curated attributes</div>
                         </li>
                     </ul>
-
                 </div>
 
                 <ul ng-if="$ctrl.engineType == 'cross_sell'" class="checkbox-list">
