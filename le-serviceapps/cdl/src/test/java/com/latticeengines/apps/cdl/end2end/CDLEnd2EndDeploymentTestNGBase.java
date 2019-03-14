@@ -151,7 +151,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected static final String S3_CSV_VERSION = "5";
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
-    private static final String S3_AVRO_VERSION = "5";
+    private static final String S3_AVRO_VERSION = "4";
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
@@ -327,8 +327,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         // If don't want to remove testing tenant for debug purpose, remove
         // comments on this line but don't check in
-        log.error("Saving Checkpoint");
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        //testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
