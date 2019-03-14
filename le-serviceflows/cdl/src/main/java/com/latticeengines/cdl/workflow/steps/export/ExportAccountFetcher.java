@@ -139,10 +139,8 @@ public class ExportAccountFetcher {
     }
 
     @VisibleForTesting
-    protected DataPage convertToDataPage(MatchOutput matchOutput) {
+    DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = new DataPage();
-
-        Map<String, Object> data;
         if (matchOutput != null //
                 && CollectionUtils.isNotEmpty(matchOutput.getResult())) {
             long unmatched = matchOutput.getResult().stream().filter(output -> !output.isMatched()).count();

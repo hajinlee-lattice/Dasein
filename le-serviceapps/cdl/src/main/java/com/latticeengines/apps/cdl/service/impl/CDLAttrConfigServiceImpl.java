@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
+    @Override
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
         String tenantId = MultiTenantContext.getShortTenantId();
         DataCollection.Version version = dataCollectionService.getActiveVersion(tenantId);
@@ -40,13 +42,16 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
                 .sequential().collectList().block();
     }
 
+    @Override
     protected List<ColumnMetadata> getSystemMetadata(Category category) {
-        BusinessEntity entity = CategoryUtils.getEntity(category);
+        List<BusinessEntity> entities = CategoryUtils.getEntity(category);
         String tenantId = MultiTenantContext.getShortTenantId();
         DataCollection.Version version = dataCollectionService.getActiveVersion(tenantId);
-        return servingStoreService.getSystemMetadata(entity, version) //
+        List<ColumnMetadata> systemMds = new ArrayList<>();
+        entities.forEach(entity -> systemMds.addAll(servingStoreService.getSystemMetadata(entity, version) //
                 .filter(cm -> category.equals(cm.getCategory())) //
-                .sequential().collectList().block();
+                .sequential().collectList().block()));
+        return systemMds;
     }
 
     @Override

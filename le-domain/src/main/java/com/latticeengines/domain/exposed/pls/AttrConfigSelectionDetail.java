@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,9 +20,6 @@ public class AttrConfigSelectionDetail {
 
     @JsonProperty("TotalAttrs")
     private Long totalAttrs;
-
-    @JsonProperty("Entity")
-    private BusinessEntity entity;
 
     @JsonProperty("Subcategories")
     private List<SubcategoryDetail> subcategories;
@@ -50,14 +46,6 @@ public class AttrConfigSelectionDetail {
 
     public void setTotalAttrs(Long totalAttrs) {
         this.totalAttrs = totalAttrs;
-    }
-
-    public BusinessEntity getEntity() {
-        return this.entity;
-    }
-
-    public void setEntity(BusinessEntity entity) {
-        this.entity = entity;
     }
 
     public List<SubcategoryDetail> getSubcategories() {

@@ -68,6 +68,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings.Type;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
+import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
@@ -179,7 +180,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             selection.setDisplayName(mapUsageToDisplayName(property));
             selections.add(selection);
             TreeMap<String, Long> categories = new TreeMap<>(Comparator.comparing(a -> //
-                    Objects.requireNonNull(Category.fromName(a)).getOrder()));
+            Objects.requireNonNull(Category.fromName(a)).getOrder()));
             selection.setCategories(categories);
             long selectedNum = 0L;
             for (String category : map.keySet()) {
@@ -383,23 +384,38 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         }
     }
 
-    @VisibleForTesting
-    void updateAttrConfigsForState(Category category, List<AttrConfig> attrConfigs, String attrName, String property,
-            AttrState selectThisAttr) {
+    private void updateAttrConfigsForState(Category category, List<AttrConfig> attrConfigs, String attrName,
+            String property, AttrState selectThisAttr) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(attrName);
-        config.setEntity(CategoryUtils.getEntity(category));
+        // Only Premium Category can will be able to updated with State.
+        // Take the first element of the list
+        config.setEntity(CategoryUtils.getEntity(category).get(0));
         AttrConfigProp<AttrState> enrichProp = new AttrConfigProp<>();
         enrichProp.setCustomValue(selectThisAttr);
         config.setAttrProps(ImmutableMap.of(property, enrichProp));
         attrConfigs.add(config);
     }
 
-    private void updateAttrConfigs(Category category, List<AttrConfig> attrConfigs, String attrName, String property,
+    @VisibleForTesting
+    void updateAttrConfigsForUsage(Category category, List<AttrConfig> attrConfigs, String attrName, String property,
             Boolean selectThisAttr) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(attrName);
-        config.setEntity(CategoryUtils.getEntity(category));
+
+        // This is for the convenience of UI. Currently UI does not have
+        // the notion of entity, but only Category. In order to keep the same
+        // API, PLS has to distinguish which entity it actually indicates based
+        // on the attribute internal name pattern.
+        if (Category.PRODUCT_SPEND.equals(category)) {
+            if (ApsGeneratorUtils.isApsAttr(attrName)) {
+                config.setEntity(BusinessEntity.APSAttribute);
+            } else {
+                config.setEntity(BusinessEntity.PurchaseHistory);
+            }
+        } else {
+            config.setEntity(CategoryUtils.getEntity(category).get(0));
+        }
         AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
         enrichProp.setCustomValue(selectThisAttr);
         config.setAttrProps(ImmutableMap.of(property, enrichProp));
@@ -410,7 +426,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             AttrDetail request) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(request.getAttribute());
-        config.setEntity(CategoryUtils.getEntity(category));
+        // Only Accont and Contact can will be able to updated with Name &
+        // Description. Take the first element of the list
+        config.setEntity(CategoryUtils.getEntity(category).get(0));
         config.setAttrProps(new HashMap<>());
         if (request.getDisplayName() != null) {
             AttrConfigProp<String> nameProp = new AttrConfigProp<>();
@@ -575,12 +593,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         attrConfigRequest.setAttrConfigs(attrConfigs);
         if (CollectionUtils.isNotEmpty(request.getSelect())) {
             for (String attr : request.getSelect()) {
-                updateAttrConfigs(category, attrConfigs, attr, property, Boolean.TRUE);
+                updateAttrConfigsForUsage(category, attrConfigs, attr, property, Boolean.TRUE);
             }
         }
         if (CollectionUtils.isNotEmpty(request.getDeselect())) {
             for (String attr : request.getDeselect()) {
-                updateAttrConfigs(category, attrConfigs, attr, property, Boolean.FALSE);
+                updateAttrConfigsForUsage(category, attrConfigs, attr, property, Boolean.FALSE);
             }
         }
         return attrConfigRequest;
@@ -697,7 +715,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                              * are: disabled and Deprecated
                              */
                             if (applyActivationFilter) {
-                                if (Boolean.FALSE.equals((Boolean) getActualValue(configProp))
+                                if (Boolean.FALSE.equals(getActualValue(configProp))
                                         && (!configProp.isAllowCustomization()
                                                 || Boolean.TRUE.equals(attrConfig.getShouldDeprecate()))) {
                                     continue;
@@ -755,8 +773,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         }
         attrConfigSelectionDetail.setTotalAttrs(totalAttrs);
         attrConfigSelectionDetail.setSelected(selected);
-        BusinessEntity entity = CategoryUtils.getEntity(resolveCategory(categoryName));
-        attrConfigSelectionDetail.setEntity(entity);
         return attrConfigSelectionDetail;
     }
 
@@ -853,24 +869,30 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Override
     public Map<String, AttributeStats> getStats(String categoryName, @PathVariable String subcatName) {
         Category cat = resolveCategory(categoryName);
-        BusinessEntity entity = CategoryUtils.getEntity(cat);
+        List<BusinessEntity> entities = CategoryUtils.getEntity(cat);
 
         Map<String, StatsCube> cubes = dataLakeService.getStatsCubes();
-        if (MapUtils.isEmpty(cubes) || cubes.get(entity.name()) == null) {
+        if (MapUtils.isEmpty(cubes)) {
             return Collections.<String, AttributeStats> emptyMap();
         }
-        StatsCube cube = cubes.get(entity.name());
-        Map<String, AttributeStats> stats = cube.getStatistics();
-        if (MapUtils.isEmpty(stats)) {
-            return Collections.<String, AttributeStats> emptyMap();
+        Map<String, AttributeStats> result = new HashMap<>();
+        for (BusinessEntity entity : entities) {
+            if (cubes.get(entity.name()) == null) {
+                continue;
+            }
+            StatsCube cube = cubes.get(entity.name());
+            Map<String, AttributeStats> stats = cube.getStatistics();
+            if (MapUtils.isEmpty(stats)) {
+                continue;
+            }
+            Set<String> attrsToRetain = getAttrsWithCatAndSubcat(entity, cat, subcatName);
+            if (CollectionUtils.isEmpty(attrsToRetain)) {
+                continue;
+            }
+            stats.entrySet().removeIf(e -> !attrsToRetain.contains(e.getKey()));
+            result.putAll(stats);
         }
-
-        Set<String> attrsToRetain = getAttrsWithCatAndSubcat(entity, cat, subcatName);
-        if (CollectionUtils.isEmpty(attrsToRetain)) {
-            return Collections.<String, AttributeStats> emptyMap();
-        }
-        stats.entrySet().removeIf(e -> !attrsToRetain.contains(e.getKey()));
-        return stats;
+        return result;
     }
 
     /**

@@ -16,6 +16,8 @@ public interface AttrConfigEntityMgr {
 
     List<AttrConfigEntity> findAllByTenantAndEntity(String tenantId, BusinessEntity entity);
 
+    List<AttrConfig> findAllInEntitiesInReader(String tenantId, List<BusinessEntity> entities);
+
     List<AttrConfig> findAllForEntityInReader(String tenantId, BusinessEntity entity);
 
     void cleanupTenant(String tenantId);
