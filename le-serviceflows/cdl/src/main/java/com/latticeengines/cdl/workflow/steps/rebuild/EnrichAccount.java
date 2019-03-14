@@ -82,6 +82,8 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
                     active);
             if (StringUtils.isNotBlank(masterTableName)) {
                 log.info("Found the batch store in active version " + active + ": " + masterTableName);
+                cloneTableService.setActiveVersion(active);
+                cloneTableService.setCustomerSpace(customerSpace);
                 cloneTableService.linkInactiveTable(batchStore);
             }
         } else {
