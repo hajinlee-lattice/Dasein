@@ -1,5 +1,7 @@
 package com.latticeengines.workflowapi.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -113,6 +115,19 @@ public class WorkflowResource {
             return workflowJobService.getJobByWorkflowId(customerSpace, Long.valueOf(workflowId), true);
         } else {
             return workflowJobService.getJobByWorkflowIdFromCache(customerSpace, Long.valueOf(workflowId), true);
+        }
+    }
+
+    @GetMapping(value = "/job/{workflowPid}/setErrorCategory", headers = "Accept=application/json")
+    @ApiOperation(value = "set error_category")
+    public void setErrorCategoryByJobId(@PathVariable String workflowPid,
+                                    @RequestParam(required = false) String customerSpace,
+                                    @RequestParam(required = false, defaultValue = "UNKNOWN") String errorCategory) {
+        try {
+            workflowJobService.setErrorCategoryByJobPid(customerSpace, Long.valueOf(workflowPid),
+                    URLDecoder.decode(errorCategory, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage());
         }
     }
 

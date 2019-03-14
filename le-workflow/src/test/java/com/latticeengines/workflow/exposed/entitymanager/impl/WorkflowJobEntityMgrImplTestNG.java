@@ -473,7 +473,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.updateErrorDetails(workflowJob2);
         WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
         assertEquals(workflowJob2.getErrorDetailsString(), workflowJob3.getErrorDetailsString());
-        assertEquals(workflowJob3.getError_category(), "User Error");
+        assertEquals(workflowJob3.getErrorCategory(), "User Error");
     }
 
     @Test(groups = "functional", dependsOnMethods = "testUpdateError")

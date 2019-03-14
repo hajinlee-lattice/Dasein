@@ -336,6 +336,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return sb.toString();
     }
 
+    @Override
+    public void setErrorCategoryByJobPid(String jobPid, String errorCategory) {
+        workflowProxy.setErrorCategoryByJobPid(jobPid, errorCategory);
+    }
+
     private String getRecordsFound(ObjectNode payload, String impactedEntity) {
         if (payload != null && payload.has("total_rows")) {
             return getPayloadValue(payload, "total_rows");

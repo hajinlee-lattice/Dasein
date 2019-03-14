@@ -414,10 +414,10 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.error_category=:error_category where workflowjob.pid=:pid",
+                "update %s workflowjob set workflowjob.errorCategory=:errorCategory where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
-        query.setParameter("error_category", workflowJob.getError_category());
+        query.setParameter("errorCategory", workflowJob.getErrorCategory());
         query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }

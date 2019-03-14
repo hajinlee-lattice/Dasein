@@ -97,7 +97,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     private String type;
 
     @Column(name = "ERROR_CATEGORY")
-    private String error_category;
+    private String errorCategory;
 
     @Override
     public Long getPid() {
@@ -340,11 +340,11 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
-    public String getError_category() {
-        return error_category;
+    public String getErrorCategory() {
+        return errorCategory;
     }
 
-    public void setError_category(String error_category) {
-        this.error_category = error_category;
+    public void setErrorCategory(String errorCategory) {
+        this.errorCategory = errorCategory;
     }
 }

@@ -83,6 +83,16 @@ public class JobResource {
         workflowJobService.cancel(jobId);
     }
 
+    @RequestMapping(value = "/{jobPid}/setErrorCategory", method = RequestMethod.GET, headers = "Accept" +
+            "=application/json")
+    @ResponseBody
+    @ApiOperation(value = "set error_category")
+    @PreAuthorize("hasRole('Edit_PLS_Jobs')")
+    public void setErrorCategoryByJobId(@PathVariable String jobPid, @RequestParam(value="errorCategory",
+            required = false) String errorCategory) {
+        workflowJobService.setErrorCategoryByJobPid(jobPid, errorCategory);
+    }
+
     @RequestMapping(value = "/{jobId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Restart a previous job")

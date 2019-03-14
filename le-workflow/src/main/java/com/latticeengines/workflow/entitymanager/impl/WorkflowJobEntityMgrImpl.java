@@ -2,7 +2,6 @@ package com.latticeengines.workflow.entitymanager.impl;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,21 +12,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.dao.WorkflowJobDao;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Component("workflowJobEntityMgr")
 public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> implements WorkflowJobEntityMgr {
@@ -37,7 +30,6 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Autowired
     private WorkflowJobDao workflowJobDao;
 
-    private static ObjectMapper om = new ObjectMapper();
     private static final String DEFAULT_ERROR_CATEGORY = "UNKNOWN";
 
     @Override
@@ -54,8 +46,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(WorkflowJob workflowJob) {
-        if (workflowJob.getErrorDetails() != null && workflowJob.getError_category() == null)
-            workflowJob.setError_category(searchErrorCategory(workflowJob.getErrorDetails()));
+        if (workflowJob.getErrorDetails() != null && workflowJob.getErrorCategory() == null)
+            workflowJob.setErrorCategory(WorkflowJobUtils.searchErrorCategory(workflowJob.getErrorDetails()));
         super.create(workflowJob);
     }
 
@@ -219,8 +211,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateErrorDetails(WorkflowJob workflowJob) {
-        if (workflowJob.getError_category() == null || workflowJob.getError_category().equals(DEFAULT_ERROR_CATEGORY))
-            workflowJob.setError_category(searchErrorCategory(workflowJob.getErrorDetails()));
+        if (workflowJob.getErrorCategory() == null || workflowJob.getErrorCategory().equals(DEFAULT_ERROR_CATEGORY))
+            workflowJob.setErrorCategory(WorkflowJobUtils.searchErrorCategory(workflowJob.getErrorDetails()));
         workflowJobDao.updateErrorDetails(workflowJob);
         workflowJobDao.updateErrorCategory(workflowJob);
     }
@@ -249,47 +241,5 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         workflowJobDao.updateErrorCategory(workflowJob);
     }
 
-    private String searchErrorCategory(ErrorDetails errorDetails) {
-        LedpCode ledpCode = errorDetails.getErrorCode();
-        JsonNode filterJson = getErrorCategoryJsonNode();
-        if (filterJson != null) {
-            String error_category = filterDetail(ledpCode.toString(), filterJson.findValues("ledp"));
-            if (!error_category.equals(DEFAULT_ERROR_CATEGORY)) {
-                log.info("compare with ledp, this job error_category is :" + error_category);
-                return error_category;
-            }
-            error_category = filterDetail(errorDetails.getErrorMsg(), filterJson.findValues("errorMessage"));
-            if (!error_category.equals(DEFAULT_ERROR_CATEGORY)) {
-                log.info("compare with errorMessage, this job error_category is :" + error_category);
-                return error_category;
-            }
-        } else {
-            log.warn("No error_category filter in zk.");
-        }
-        return DEFAULT_ERROR_CATEGORY;
-    }
 
-    private String filterDetail(String detail, List<JsonNode> nodes) {
-        log.info("detail is :" + detail);
-        if (CollectionUtils.isNotEmpty(nodes) && !StringUtils.isEmpty(detail)) {
-            for (JsonNode subjectNode : nodes.get(0)) {
-                if (Pattern.matches(subjectNode.get("filter").asText(), detail)) {
-                    return subjectNode.get("errorType").asText();
-                }
-            }
-        }
-        return DEFAULT_ERROR_CATEGORY;
-    }
-
-    private JsonNode getErrorCategoryJsonNode() {
-        try {
-            Camille c = CamilleEnvironment.getCamille();
-            String content = c.get(PathBuilder.buildErrorCategoryPath(CamilleEnvironment.getPodId())).getData();
-
-            return om.readTree(content);
-        }catch (Exception e) {
-            log.error("Get json node from zk failed.");
-            return null;
-        }
-    }
 }
