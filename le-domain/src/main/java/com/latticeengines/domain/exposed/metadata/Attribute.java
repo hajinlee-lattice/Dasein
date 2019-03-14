@@ -774,6 +774,15 @@ public class Attribute
         properties.put("AllowedDisplayNames", allowedDisplayNames);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<String> getPossibleCSVNames() {
+        return (List<String>) properties.get("PossibleCSVNames");
+    }
+
+    public void setPossibleCSVNames(List<String> possibleCSVNames) {
+        properties.put("PossibleCSVNames", possibleCSVNames);
+    }
+
     public void removeAllowedDisplayNames() {
         properties.remove("AllowedDisplayNames");
     }

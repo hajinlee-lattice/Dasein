@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -450,6 +451,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Table template = dataFeedTask.getImportTemplate();
         String s3Bucket = importConfig.getS3Bucket();
         String s3FilePath = importConfig.getS3FilePath();
+        boolean needUpdateTask = false;
         List<String> warnings = new ArrayList<>();
         try (InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath)) {
             InputStreamReader reader = new InputStreamReader(
@@ -468,6 +470,12 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                             new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
                 }
             }
+            Map<String, String> headerCaseMapping = new HashMap<>();
+            for (String field : headerFields) {
+                if (headerCaseMapping.put(field.toLowerCase(), field) != null) {
+                    throw new LedpException(LedpCode.LEDP_40055);
+                }
+            }
             Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
                     .collect(groupingBy(Attribute::getDisplayName));
             List<String> templateMissing = new ArrayList<>();
@@ -480,26 +488,45 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
             for (Map.Entry<String, List<Attribute>> entry : displayNameMap.entrySet()) {
                 if (!headerFields.contains(entry.getKey())) {
-                    csvMissing.add(entry.getKey());
-                    for (Attribute attr : entry.getValue()) {
-                        if (attr.getRequired()) {
-                            requiredMissing.add(entry.getKey());
+                    if (headerCaseMapping.containsKey(entry.getKey().toLowerCase())) { // case insensitive mapping.
+                        for (Attribute attr : entry.getValue()) {
+                            Set<String> possibleNames =
+                                    CollectionUtils.isEmpty(template.getAttribute(attr.getName()).getPossibleCSVNames()) ?
+                                            new HashSet<>() :
+                                            new HashSet<>(template.getAttribute(attr.getName()).getPossibleCSVNames());
+                            needUpdateTask = possibleNames.add(headerCaseMapping.get(entry.getKey().toLowerCase()));
+                            template.getAttribute(attr.getName()).setPossibleCSVNames(new ArrayList<>(possibleNames));
+                        }
+                    } else {
+                        csvMissing.add(entry.getKey());
+                        for (Attribute attr : entry.getValue()) {
+                            if (attr.getRequired()) {
+                                requiredMissing.add(entry.getKey());
+                            }
                         }
                     }
                 }
             }
             if (CollectionUtils.isNotEmpty(templateMissing)) {
-                log.warn(String.format("Template doesn't contains the following columns: %s",
-                        String.join(",", templateMissing)));
+                String warningMsg = String.format("Template doesn't contains the following columns: %s",
+                        String.join(",", templateMissing));
+                log.warn(warningMsg);
+                warnings.add(warningMsg);
             }
             if (CollectionUtils.isNotEmpty(csvMissing)) {
-                log.warn(String.format("S3File doesn't contains the following columns: %s",
-                        String.join(",", csvMissing)));
+                String warningMsg = String.format("S3File doesn't contains the following columns: %s",
+                        String.join(",", csvMissing));
+                log.warn(warningMsg);
+                warnings.add(warningMsg);
             }
             if (CollectionUtils.isNotEmpty(requiredMissing)) {
                 throw new LedpException(LedpCode.LEDP_40043, new String[] { String.join(",", requiredMissing) });
             }
             parser.close();
+            if (needUpdateTask) {
+                dataFeedTask.setImportTemplate(template);
+                dataFeedProxy.updateDataFeedTask(customerSpace, dataFeedTask);
+            }
             String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
             emailInfo.setErrorMsg(message);
             sendS3ImportEmail(customerSpace, "In_Progress", emailInfo);
