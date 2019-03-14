@@ -1,6 +1,6 @@
 package com.latticeengines.serviceflows.workflow.importdata;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -68,11 +68,12 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
             SourceFile sourceFile = retrieveSourceFile(getConfiguration().getCustomerSpace(), //
                     getConfiguration().getSourceFileName());
             Table metadata = retrieveMetadata(sourceFile);
+            putStringValueInContext(SOURCE_FILE_PATH, sourceFile.getPath());
             sourceImportConfig.setProperty(ImportProperty.HDFSFILE, sourceFile.getPath());
             sourceImportConfig.setProperty(ImportProperty.METADATA, //
                     JsonUtils.serialize(metadata.getModelingMetadata()));
             sourceImportConfig.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
-            sourceImportConfig.setTables(Arrays.asList(metadata));
+            sourceImportConfig.setTables(Collections.singletonList(metadata));
         }
         return importConfig;
     }

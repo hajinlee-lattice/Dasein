@@ -78,7 +78,7 @@ public class ExportModelToS3 extends BaseImportExportS3<ImportExportS3StepConfig
                         pathBuilder.convertAtlasFile(sourceFile.getPath(), podId, tenantId, s3Bucket)));
             }
         } catch (Exception ex) {
-            log.warn("Failed to copy file for taining table =" + modelSummary.getTrainingTableName() + " for tenantId="
+            log.warn("Failed to copy file for training table=" + modelSummary.getTrainingTableName() + " for tenantId="
                     + tenantId);
         }
     }
