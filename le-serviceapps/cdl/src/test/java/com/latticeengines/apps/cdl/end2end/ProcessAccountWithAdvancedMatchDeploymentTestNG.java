@@ -56,16 +56,13 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @BeforeClass(groups = { "end2end" })
     @Override
     public void setup() throws Exception {
-        log.error("$JAW$ Running setup with ENABLE_ENTITY_MATCH enabled!");
+        log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
-        log.error("$JAW$ Setup Complete!");
+        log.info("Setup Complete!");
     }
 
-
-    //@Test(groups = "end2end")
-    //@Test(groups = "end2end", enabled = false)
     @Test(groups = "end2end", enabled = true)
     @Override
     public void runTest() throws Exception {
