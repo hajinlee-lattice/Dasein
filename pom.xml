@@ -15,7 +15,7 @@
     </parent>
 
     <modules>
-        <module>le-parent</module>
+        <module>le-parent2</module>
         <module>le-config</module>
         <module>le-aws</module>
         <module>le-redshiftdb</module>
