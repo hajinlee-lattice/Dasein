@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.service.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -266,9 +267,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     public List<AttrConfig> getRenderedList(Category category) {
         List<AttrConfig> renderedList;
         String tenantId = MultiTenantContext.getShortTenantId();
-        BusinessEntity entity = CategoryUtils.getEntity(category);
+        List<BusinessEntity> entities = CategoryUtils.getEntity(category);
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
+            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllInEntitiesInReader(tenantId, entities);
             List<ColumnMetadata> columns = getSystemMetadata(category);
             Set<String> columnsInSystem = columns.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
             List<AttrConfig> customConfigInCategory = customConfig.stream() //
@@ -279,7 +280,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             renderedList = render(columns, customConfigInCategory);
             modifyInactivateState(renderedList);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
-            String msg = String.format("Rendered %d attr configs", count);
+            String msg = String.format("Rendered %d attr configs for entities %s", count,
+                    Arrays.toString(entities.toArray()));
             timer.setTimerMessage(msg);
         }
         return renderedList;
@@ -539,6 +541,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         attrConfigEntityMgr.cleanupTenant(tenantId);
     }
 
+    @Override
     public void removeAttrConfigForEntity(String tenantId, BusinessEntity entity) {
         attrConfigEntityMgr.deleteAllForEntity(tenantId, entity);
     }

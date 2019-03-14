@@ -36,6 +36,8 @@ public enum InterfaceName {
     ExpectedRevenue, //
     Probability, //
     AnalyticPurchaseState_ID, //
+    LEAccount_ID, //
+    Period_ID, //
     Train, //
     AverageScore, //
 

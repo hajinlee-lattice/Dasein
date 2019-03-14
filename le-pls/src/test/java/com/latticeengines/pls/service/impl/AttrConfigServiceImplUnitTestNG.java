@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
-import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -190,6 +189,17 @@ public class AttrConfigServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testUpdateAttrConfigsForUsage() {
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        attrConfigService.updateAttrConfigsForUsage(Category.PRODUCT_SPEND, attrConfigs,
+                "Product_02622F2BC93FF8CBE5BAF4A29239C543_Revenue", ColumnSelection.Predefined.Model.getName(), true);
+        Assert.assertEquals(attrConfigs.get(0).getEntity(), BusinessEntity.APSAttribute);
+        attrConfigService.updateAttrConfigsForUsage(Category.PRODUCT_SPEND, attrConfigs, "Product_Puchase",
+                ColumnSelection.Predefined.Enrichment.getName(), true);
+        Assert.assertEquals(attrConfigs.get(1).getEntity(), BusinessEntity.PurchaseHistory);
+    }
+
+    @Test(groups = "unit")
     public void testGenerateAttrConfigRequestForActivation() {
         doReturn(AccessLevel.SUPER_ADMIN).when(userService).getAccessLevel(anyString(), nullable(String.class));
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
@@ -291,7 +301,6 @@ public class AttrConfigServiceImplUnitTestNG {
         AttrConfigSelectionDetail activationDetail = attrConfigService
                 .getAttrConfigSelectionDetailForState(Category.CONTACT_ATTRIBUTES.getName());
         log.info("testGetDetailAttrForActivation activationDetail is " + activationDetail);
-        Assert.assertEquals(activationDetail.getEntity(), CategoryUtils.getEntity(Category.CONTACT_ATTRIBUTES));
         Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
         Assert.assertEquals(activationDetail.getTotalAttrs() - 8L, 0);
         Assert.assertEquals(activationDetail.getSubcategories().size(), 8);

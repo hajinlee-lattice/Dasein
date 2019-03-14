@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,11 +26,22 @@ public class ApsGeneratorUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ApsGeneratorUtils.class);
 
+    private static final String PRODUCT_SPEND_IN_LAST_PERIOD_PATTERN = "Product_(.*)_Revenue";
+    private static final String PRODUCT_SPEND_IN_6_PRERIOD_PATTERN = "Product_(.*)_RevenueRollingSum6";
+    private static final String PRODUCT_SPEND_IN_3_PRERIOD_PATTERN = "Product_(.*)_RevenueMomentum3";
+    private static final String UNITS_PURCHASED_PATTERN = "Product_(.*)_Units";
+    private static final String PRODUCT_SPAN_PATTERN = "Product_(.*)_Span";
+
+    public static final Set<String> ApsNamePatternSet = new HashSet<>(
+            Arrays.asList(PRODUCT_SPEND_IN_LAST_PERIOD_PATTERN, PRODUCT_SPEND_IN_6_PRERIOD_PATTERN,
+                    PRODUCT_SPEND_IN_3_PRERIOD_PATTERN, UNITS_PURCHASED_PATTERN, PRODUCT_SPAN_PATTERN));
+
     public static void setupMetaData(Table apsTable, Map<String, List<Product>> productMap) {
         List<Attribute> attributes = apsTable.getAttributes();
         for (Attribute attribute : attributes) {
             String name = attribute.getName();
-            if ("LEAccount_ID".equalsIgnoreCase(name) || "Period_ID".equalsIgnoreCase(name)
+            if (InterfaceName.LEAccount_ID.name().equalsIgnoreCase(name)
+                    || InterfaceName.Period_ID.name().equalsIgnoreCase(name)
                     || InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
                 attribute.setApprovedUsage(ApprovedUsage.NONE);
                 attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
@@ -35,8 +49,7 @@ public class ApsGeneratorUtils {
                 if (InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
                     attribute.setLogicalDataType(LogicalDataType.InternalId);
                 }
-                log.info(String.format("Setting category for %s attribute as %s", name,
-                        Category.DEFAULT.getName()));
+                log.info(String.format("Setting category for %s attribute as %s", name, Category.DEFAULT.getName()));
             } else {
                 attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
                 attribute.setCategory(Category.PRODUCT_SPEND);
@@ -49,36 +62,35 @@ public class ApsGeneratorUtils {
 
     private static void setDisplayNameAndOthers(Attribute attribute, String name,
             Map<String, List<Product>> productMap) {
-        if (name.matches("Product_.*_Revenue")) {
-            Pattern pattern = Pattern.compile("Product_(.*)_Revenue");
+        if (name.matches(PRODUCT_SPEND_IN_LAST_PERIOD_PATTERN)) {
+            Pattern pattern = Pattern.compile(PRODUCT_SPEND_IN_LAST_PERIOD_PATTERN);
             setDisplayName(attribute, name, productMap, pattern, "Last Period Spend for ");
             attribute.setDescription("Product spend in last period");
             attribute.setFundamentalType(FundamentalType.CURRENCY);
             return;
         }
-        if (name.matches("Product_.*_RevenueRollingSum6")) {
-            Pattern pattern = Pattern.compile("Product_(.*)_RevenueRollingSum6");
+        if (name.matches(PRODUCT_SPEND_IN_6_PRERIOD_PATTERN)) {
+            Pattern pattern = Pattern.compile(PRODUCT_SPEND_IN_6_PRERIOD_PATTERN);
             setDisplayName(attribute, name, productMap, pattern, "6-Period Spend for ");
             attribute.setDescription("Product spend for last 6 periods");
             attribute.setFundamentalType(FundamentalType.CURRENCY);
             return;
         }
-        if (name.matches("Product_.*_RevenueMomentum3")) {
-            Pattern pattern = Pattern.compile("Product_(.*)_RevenueMomentum3");
-            setDisplayName(attribute, name, productMap, pattern,
-                    "Rate of Change of 3-Period Spend for ");
+        if (name.matches(PRODUCT_SPEND_IN_3_PRERIOD_PATTERN)) {
+            Pattern pattern = Pattern.compile(PRODUCT_SPEND_IN_3_PRERIOD_PATTERN);
+            setDisplayName(attribute, name, productMap, pattern, "Rate of Change of 3-Period Spend for ");
             attribute.setDescription(
                     "Percent change in the 3 period spend, where values > 0 show increasing spend and < 0 indicate decreasing spend");
             return;
         }
-        if (name.matches("Product_.*_Units")) {
-            Pattern pattern = Pattern.compile("Product_(.*)_Units");
+        if (name.matches(UNITS_PURCHASED_PATTERN)) {
+            Pattern pattern = Pattern.compile(UNITS_PURCHASED_PATTERN);
             setDisplayName(attribute, name, productMap, pattern, "Last Period Units for ");
             attribute.setDescription("Units purchased in last period");
             return;
         }
-        if (name.matches("Product_.*_Span")) {
-            Pattern pattern = Pattern.compile("Product_(.*)_Span");
+        if (name.matches(PRODUCT_SPAN_PATTERN)) {
+            Pattern pattern = Pattern.compile(PRODUCT_SPAN_PATTERN);
             setDisplayName(attribute, name, productMap, pattern, "Purchase Recency for ");
             attribute.setDescription(
                     "Indicator of how recently a customer purchased, where higher values indicate more recent purchase (e.g. 1 = Last Period  and 0 = Never)");
@@ -86,14 +98,17 @@ public class ApsGeneratorUtils {
         }
     }
 
-    private static void setDisplayName(Attribute attribute, String name,
-            Map<String, List<Product>> productMap, Pattern pattern, String descPrefix) {
+    public static boolean isApsAttr(String name) {
+        return ApsNamePatternSet.stream().anyMatch(p -> name.matches(p));
+    }
+
+    private static void setDisplayName(Attribute attribute, String name, Map<String, List<Product>> productMap,
+            Pattern pattern, String descPrefix) {
         Matcher matcher = pattern.matcher(name);
         matcher.matches();
         String productId = matcher.group(1);
         if (productMap != null && CollectionUtils.isNotEmpty(productMap.get(productId))) {
-            attribute
-                    .setDisplayName(descPrefix + productMap.get(productId).get(0).getProductName());
+            attribute.setDisplayName(descPrefix + productMap.get(productId).get(0).getProductName());
         } else {
             attribute.setDisplayName(descPrefix + productId);
         }

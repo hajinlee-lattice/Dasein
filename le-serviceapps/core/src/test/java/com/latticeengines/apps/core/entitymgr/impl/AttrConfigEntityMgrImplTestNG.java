@@ -1,6 +1,7 @@
 package com.latticeengines.apps.core.entitymgr.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -27,14 +29,25 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
     private static final String CHN_DISPALY_NAME = "Display Name 1 你好";
     private static final String EUR_DISPALY_NAME = "â, ê, î, ô, û";
 
+    private String tenantName;
+    private String tenant1;
+    private String tenant2;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
     }
 
+    @AfterClass(groups = "functional")
+    public void cleanup() {
+        Arrays.asList(tenantName, tenant1, tenant2).forEach(t -> {
+            attrConfigEntityMgr.cleanupTenant(t);
+        });
+    }
+
     @Test(groups = "functional")
     public void testCrud() throws InterruptedException {
-        String tenantName = TestFrameworkUtils.generateTenantName();
+        tenantName = TestFrameworkUtils.generateTenantName();
         BusinessEntity entity = BusinessEntity.Account;
 
         AttrConfig attrConfig1 = new AttrConfig();
@@ -93,6 +106,18 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Assert.assertEquals(attrConfigs.size(), 4);
 
+        attrConfigs = attrConfigEntityMgr.findAllInEntitiesInReader(tenantName, Collections.singletonList(entity));
+        Assert.assertEquals(attrConfigs.size(), 4);
+
+        AttrConfig attrConfig5 = new AttrConfig();
+        attrConfig5.setAttrName("Attr5");
+        attrConfig5.setAttrProps(new HashMap<>());
+        attrConfigEntityMgr.save(tenantName, BusinessEntity.Contact, Collections.singletonList(attrConfig5));
+        Thread.sleep(500); // wait for replication lag
+        attrConfigs = attrConfigEntityMgr.findAllInEntitiesInReader(tenantName,
+                Arrays.asList(BusinessEntity.Contact, BusinessEntity.Account));
+        Assert.assertEquals(attrConfigs.size(), 5);
+
         attrConfigEntityMgr.deleteByAttrNameStartingWith("Attr");
         Thread.sleep(500); // wait for replication lag
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
@@ -107,9 +132,9 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void testCleanupTenant() throws InterruptedException {
-        String tenant1 = TestFrameworkUtils.generateTenantName();
+        tenant1 = TestFrameworkUtils.generateTenantName();
         Thread.sleep(10);
-        String tenant2 = TestFrameworkUtils.generateTenantName();
+        tenant2 = TestFrameworkUtils.generateTenantName();
         BusinessEntity entity = BusinessEntity.Account;
 
         AttrConfig attrConfig1 = new AttrConfig();

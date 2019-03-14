@@ -52,8 +52,8 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
 
         if (apsTable != null) {
             FieldList inputGroupFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
-            result = apsTable.join(new FieldList("LEAccount_ID", "Period_ID"), result, inputGroupFields,
-                    JoinType.RIGHT);
+            result = apsTable.join(new FieldList(InterfaceName.LEAccount_ID.name(), InterfaceName.Period_ID.name()),
+                    result, inputGroupFields, JoinType.RIGHT);
         }
 
         result = result.retain(new FieldList(retainFields));
@@ -79,7 +79,6 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         retainFields.removeAll(Arrays.asList(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name()));
         return retainFields;
     }
-
 
     private Collection<String> potentialFieldsToRetain(CreateCdlEventTableParameters parameters) {
         return Arrays.asList( //

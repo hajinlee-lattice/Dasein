@@ -6,7 +6,6 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class AttrConfigSelectionDetailUnitTestNG {
 
@@ -14,7 +13,6 @@ public class AttrConfigSelectionDetailUnitTestNG {
 
     @Test(groups = "unit")
     public void test() {
-        selectionDetail.setEntity(BusinessEntity.Account);
         selectionDetail.setSelected(500L);
         selectionDetail.setLimit(500L);
         selectionDetail.setTotalAttrs(3000L);

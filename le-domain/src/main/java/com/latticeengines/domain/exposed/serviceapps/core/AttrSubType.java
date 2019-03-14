@@ -11,6 +11,7 @@ public enum AttrSubType {
     Rating, //
     ProductBundle, //
     HasPurchased, //
+    APS, //
     CuratedAccount
 
 }
