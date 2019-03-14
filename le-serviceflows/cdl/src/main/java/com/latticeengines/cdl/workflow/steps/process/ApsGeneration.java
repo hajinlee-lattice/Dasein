@@ -98,6 +98,7 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         params.put("ProductIdKey", "ProductId");
         params.put("AmountKey", "TotalAmount");
         params.put("QuantityKey", "TotalQuantity");
+        params.put("ProductTypeKey", "ProductType");
         return JsonUtils.convertValue(params, JsonNode.class);
     }
 
