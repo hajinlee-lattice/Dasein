@@ -2,6 +2,7 @@ package com.latticeengines.eai.file.runtime.mapreduce;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 headers.add(header);
             }
         }
-        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE),
+        csvFilePrinter = new CSVPrinter(new BufferedWriter(new FileWriter(OUTPUT_FILE), 8192 * 2),
                 LECSVFormat.format.withHeader(headers.toArray(new String[] {})));
         return this;
     }
@@ -120,7 +121,9 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             }
             csvFilePrinter.print(fieldValue);
         } else if (field.name() != null) {
-            log.info("Ignore field:" + field.name() + ", value:" + record.get(field.name()));
+            if (log.isTraceEnabled()) {
+                log.trace("Ignore field:" + field.name() + ", value:" + record.get(field.name()));
+            }
         }
     }
 
