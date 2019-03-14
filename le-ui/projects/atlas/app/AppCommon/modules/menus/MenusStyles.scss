@@ -163,6 +163,9 @@
                     margin-right: 0;
                     margin-left: 0;
                 }
+                &.show-tooltip.top>.tooltip_.small {
+                    bottom: calc(1.5em + 5px);
+                }
             }
         }
     }
