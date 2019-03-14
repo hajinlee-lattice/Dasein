@@ -66,9 +66,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
         
         playLaunchConfig = new PlayLaunchConfig.Builder()
-                .existingTenant(EXISTING_TENANT)
-                .mockRatingTable(false)
-                .testPlayCrud(false)
                 .destinationSystemType(CDLExternalSystemType.CRM)
                 .destinationSystemName(CDLExternalSystemName.Salesforce)
                 .destinationSystemId("Salesforce_"+System.currentTimeMillis())
