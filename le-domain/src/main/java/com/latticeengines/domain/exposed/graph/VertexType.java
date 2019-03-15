@@ -9,4 +9,5 @@ public class VertexType {
     public static final String RATING_SCORE_ATTRIBUTE = "ATR.REN.SCO";
     public static final String RATING_PROB_ATTRIBUTE = "ATR.REN.PRB";
     public static final String RATING_EV_ATTRIBUTE = "ATR.REN.EV";
+    public static final String RATING_PREDICTED_REV_ATTRIBUTE = "ATR.REN.PV";
 }

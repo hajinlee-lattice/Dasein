@@ -89,6 +89,8 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
             case PROSPECTING:
                 createRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
+                createRatingAttr(ratingEngine, VertexType.RATING_PREDICTED_REV_ATTRIBUTE,
+                        "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.PredictedRevenue));
             case CUSTOM_EVENT:
                 createRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
@@ -275,6 +277,8 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
             case PROSPECTING:
                 deleteRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
+                deleteRatingAttr(ratingEngine, VertexType.RATING_PREDICTED_REV_ATTRIBUTE,
+                        "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.PredictedRevenue));
             case CUSTOM_EVENT:
                 deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
                         "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
