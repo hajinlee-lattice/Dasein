@@ -58,7 +58,7 @@ export class ConnectorList extends Component {
                 this.props.ConnectorsService.generateAuthToken();
             });
         } else if (ConnectorService.getConnectorName() == MARKETO) {
-            this.getSolutionConfiguration(this.state.userInfo.id, MARKETO, this.state.userName + '_' + MARKETO + '_' + (new Date()).getTime());
+            this.getSolutionConfiguration(this.state.userInfo.id, "Demo", this.state.userName + '_' + MARKETO + '_' + (new Date()).getTime());
         }
 
     }

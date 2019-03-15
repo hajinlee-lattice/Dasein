@@ -43,6 +43,7 @@ class TrayRouter {
 
         const options = {
             url: "https://api.tray.io/v1/artisan/connectors/marketo/2.10/ephemeral",
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${authorization}`
             }
@@ -225,17 +226,18 @@ class TrayRouter {
             /*
                 Get S3 Authorization
             */
-            let options = this.getApiOptions(req);
-            options.json = Queries.getAuthentications();
-            this.request(options, function(error, response, body){
-                if (error || !body.data) {
-                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
-                    return;
-                }
-                let awsAuthenticationId = GraphQLParser.getAwsAuthenticationId(body.data);
-                req.awsAuthenticationId = awsAuthenticationId;
-                next();
-            });
+            // let options = this.getApiOptions(req);
+            // options.json = Queries.getAuthentications();
+            // this.request(options, function(error, response, body){
+            //     if (error || !body.data) {
+            //         res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+            //         return;
+            //     }
+            //     let awsAuthenticationId = GraphQLParser.getAwsAuthenticationId(body.data);
+            //     req.awsAuthenticationId = awsAuthenticationId;
+            //     next();
+            // });
+            next();
         }.bind(this), function(req, res, next) {
             /*
                 Get solution instance id
@@ -243,7 +245,8 @@ class TrayRouter {
             let instanceName = req.query.instanceName;
             let solutionId = req.solutionId;
             let options = this.getApiOptions(req, true);
-            options.json = Queries.getCreateSolutionInstanceMutation(solutionId, instanceName, {externalId: "external_aws_s3_authentication", authId: req.awsAuthenticationId});
+            // options.json = Queries.getCreateSolutionInstanceMutation(solutionId, instanceName, {externalId: "external_aws_s3_authentication", authId: req.awsAuthenticationId});
+            options.json = Queries.getCreateSolutionInstanceMutation(solutionId, instanceName);
             this.request(options, function(error, response, body){
                 if (error || !body.data) {
                     res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
@@ -282,36 +285,35 @@ class TrayRouter {
             res.send({iframeUrl: ""});
         }.bind(this));
 
-        this.router.get('/staticlists', function(req, res){
-            var authenticationId = req.query.trayAuthenticationId;
+
+        /*
+            EPHEMERAL API
+        */
+
+        this.router.get('/marketo/staticlists', function(req, res){
+            var authenticationId = req.query.trayAuthenticationId || '';
+            var programName = req.query.programName || '';
             let options = this.getEphemeralApiOptions(req, true);
-            options.method = 'POST';
-            options.json = {
-               auth_id: authenticationId,
-               message:"get_static_lists_ddl",
-               step_settings:{
-                  client_id:{
-                     type:"jsonpath",
-                     value:"$.auth.client_id"
-                  },
-                  client_secret:{
-                     type:"jsonpath",
-                     value:"$.auth.client_secret"
-                  },
-                  endpoint:{
-                     type:"jsonpath",
-                     value:"$.auth.endpoint"
-                  }
-               }
-            };
-            console.log(options);
+            options.json = Queries.listMarketoStaticLists(authenticationId, programName);
+            console.log("static lists query: " + JSON.stringify(options.json));
             this.request(options, function(error, response, body){
                 if (error) {
                     res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
                     return;
                 }
-                console.log("body: " + JSON.stringify(body));
+                res.send(body);
+            });
+        }.bind(this));
 
+        this.router.get('/marketo/programs', function(req, res){
+            var authenticationId = req.query.trayAuthenticationId || '';
+            let options = this.getEphemeralApiOptions(req, true);
+            options.json = Queries.getMarketoPrograms(authenticationId);
+            this.request(options, function(error, response, body){
+                if (error) {
+                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                    return;
+                }
                 res.send(body);
             });
         }.bind(this));
