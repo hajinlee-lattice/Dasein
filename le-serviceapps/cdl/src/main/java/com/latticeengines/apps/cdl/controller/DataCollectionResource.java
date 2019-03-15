@@ -105,7 +105,7 @@ public class DataCollectionResource {
 
     @GetMapping(value = "/tables")
     @ResponseBody
-    @ApiOperation(value = "Get the default data collection")
+    @ApiOperation(value = "Get the first table based on table role")
     public Table getTable(@PathVariable String customerSpace, @RequestParam(value = "role") TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -119,7 +119,7 @@ public class DataCollectionResource {
 
     @GetMapping(value = "/alltables")
     @ResponseBody
-    @ApiOperation(value = "Get the default data collection")
+    @ApiOperation(value = "Get the all tables based on table role")
     public List<Table> getTables(@PathVariable String customerSpace,
             @RequestParam(value = "role") TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
@@ -134,7 +134,7 @@ public class DataCollectionResource {
 
     @GetMapping(value = "/tablenames")
     @ResponseBody
-    @ApiOperation(value = "Get the default data collection")
+    @ApiOperation(value = "Get the Table names via table role and version")
     public List<String> getTableNames(@PathVariable String customerSpace,
             @RequestParam(value = "role", required = false) TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
@@ -247,7 +247,7 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Reset the full data collection or an business entity")
     public ResponseDocument<String> reset(@PathVariable String customerSpace,
-                                          @RequestParam(value = "entity", required = false) BusinessEntity entity) {
+            @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         String customerSpaceString = CustomerSpace.parse(customerSpace).toString();
         boolean status;
         if (entity == null) {
@@ -281,7 +281,7 @@ public class DataCollectionResource {
     @GetMapping(value = "/dataspace")
     @ResponseBody
     @ApiOperation(value = "Dump out the paths of tenant's CDL data space")
-    public CDLDataSpace getCDLDataSpace(@PathVariable String customerSpace){
+    public CDLDataSpace getCDLDataSpace(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.createCDLDataSpace(customerSpace);
     }
@@ -314,7 +314,7 @@ public class DataCollectionResource {
     @PutMapping(value = "/artifact")
     @ApiOperation(value = "Update a data collection artifact.")
     public DataCollectionArtifact updateArtifact(@PathVariable String customerSpace,
-                                                 @RequestBody DataCollectionArtifact artifact) {
+            @RequestBody DataCollectionArtifact artifact) {
         if (artifact == null) {
             return null;
         }
