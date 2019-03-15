@@ -338,7 +338,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public void setErrorCategoryByJobPid(String jobPid, String errorCategory) {
-        workflowProxy.setErrorCategoryByJobPid(jobPid, errorCategory);
+        workflowProxy.setErrorCategoryByJobPid(jobPid, errorCategory,MultiTenantContext.getCustomerSpace().toString());
     }
 
     private String getRecordsFound(ObjectNode payload, String impactedEntity) {

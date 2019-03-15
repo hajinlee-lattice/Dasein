@@ -88,8 +88,7 @@ public class JobResource {
     @ResponseBody
     @ApiOperation(value = "set error_category")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
-    public void setErrorCategoryByJobId(@PathVariable String jobPid, @RequestParam(value="errorCategory",
-            required = false) String errorCategory) {
+    public void setErrorCategoryByJobId(@PathVariable String jobPid, @RequestParam(value="errorCategory") String errorCategory) {
         workflowJobService.setErrorCategoryByJobPid(jobPid, errorCategory);
     }
 

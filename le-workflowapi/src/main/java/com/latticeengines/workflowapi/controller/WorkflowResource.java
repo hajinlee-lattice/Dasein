@@ -121,8 +121,8 @@ public class WorkflowResource {
     @GetMapping(value = "/job/{workflowPid}/setErrorCategory", headers = "Accept=application/json")
     @ApiOperation(value = "set error_category")
     public void setErrorCategoryByJobId(@PathVariable String workflowPid,
-                                    @RequestParam(required = false) String customerSpace,
-                                    @RequestParam(required = false, defaultValue = "UNKNOWN") String errorCategory) {
+                                    @RequestParam String customerSpace,
+                                    @RequestParam String errorCategory) {
         try {
             workflowJobService.setErrorCategoryByJobPid(customerSpace, Long.valueOf(workflowPid),
                     URLDecoder.decode(errorCategory, "utf-8"));
