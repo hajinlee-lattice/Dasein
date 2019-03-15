@@ -39,4 +39,6 @@ public final class PathConstants {
     public static final String INVOKE_TIME = "InvokeTime";
 
     public static final String WORKSPACES = "Workspaces";
+
+    public static final String ERROR_CATEGORY_FILE = "error-category.json";
 }

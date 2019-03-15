@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.dao.WorkflowJobDao;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Component("workflowJobEntityMgr")
 public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> implements WorkflowJobEntityMgr {
@@ -28,6 +29,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Autowired
     private WorkflowJobDao workflowJobDao;
+
+    private static final String DEFAULT_ERROR_CATEGORY = "UNKNOWN";
 
     @Override
     public BaseDao<WorkflowJob> getDao() {
@@ -43,6 +46,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(WorkflowJob workflowJob) {
+        if (workflowJob.getErrorDetails() != null && workflowJob.getErrorCategory() == null)
+            workflowJob.setErrorCategory(WorkflowJobUtils.searchErrorCategory(workflowJob.getErrorDetails()));
         super.create(workflowJob);
     }
 
@@ -206,7 +211,10 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateErrorDetails(WorkflowJob workflowJob) {
+        if (workflowJob.getErrorCategory() == null || workflowJob.getErrorCategory().equals(DEFAULT_ERROR_CATEGORY))
+            workflowJob.setErrorCategory(WorkflowJobUtils.searchErrorCategory(workflowJob.getErrorDetails()));
         workflowJobDao.updateErrorDetails(workflowJob);
+        workflowJobDao.updateErrorCategory(workflowJob);
     }
 
     @Override
@@ -226,4 +234,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     public WorkflowJob deleteByApplicationId(String applicationId) {
         return workflowJobDao.deleteByApplicationId(applicationId);
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateErrorCategory(WorkflowJob workflowJob) {
+        workflowJobDao.updateErrorCategory(workflowJob);
+    }
+
+
 }

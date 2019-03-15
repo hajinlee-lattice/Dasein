@@ -44,6 +44,7 @@ public class Job implements HasId<Long>, HasName {
     private List<Job> subJobs;
     private Long tenantPid;
     private String tenantId;
+    private String errorCategory;
 
     @JsonProperty
     public Long getPid() {
@@ -289,5 +290,15 @@ public class Job implements HasId<Long>, HasName {
     @JsonIgnore
     public boolean isRunning() {
         return !TERMINAL_JOB_STATUS.contains(getJobStatus());
+    }
+
+    @JsonProperty
+    public String getErrorCategory() {
+        return errorCategory;
+    }
+
+    @JsonProperty
+    public void setErrorCategory(String errorCategory) {
+        this.errorCategory = errorCategory;
     }
 }

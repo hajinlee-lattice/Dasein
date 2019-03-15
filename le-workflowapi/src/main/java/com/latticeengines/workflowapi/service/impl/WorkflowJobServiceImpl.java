@@ -534,6 +534,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
+    public void setErrorCategoryByJobPid(String customerSpace, Long workflowPid, String errorCategory) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+        workflowJob.setErrorCategory(errorCategory);
+        workflowJobEntityMgr.updateErrorCategory(workflowJob);
+    }
+
+    @Override
+    @WithCustomerSpace
     public WorkflowJob deleteWorkflowJobByApplicationId(String customerSpace, String applicationId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.deleteByApplicationId(applicationId);
         if (workflowJob != null) {
