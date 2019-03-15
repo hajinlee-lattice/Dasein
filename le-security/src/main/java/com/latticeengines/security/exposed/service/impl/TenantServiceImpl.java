@@ -69,9 +69,7 @@ public class TenantServiceImpl implements TenantService {
         } else {
             oldTenant.setRegisteredTime(tenant.getRegisteredTime());
         }
-        if (TenantType.POC.equals(oldTenant.getTenantType())) {
-            oldTenant.setExpiredTime(tenant.getExpiredTime());
-        }
+        oldTenant.setExpiredTime(tenant.getExpiredTime());
         if (!globalTenantManagementService.tenantExists(tenant)) {
             globalTenantManagementService.registerTenant(tenant);
         }
