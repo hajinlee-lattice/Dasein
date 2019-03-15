@@ -123,6 +123,9 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
         } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue)
                 .equalsIgnoreCase(suffix.substring(1))) {
             secondaryDisplayName = "Weighted Revenue";
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.PredictedRevenue)
+                .equalsIgnoreCase(suffix.substring(1))) {
+            secondaryDisplayName = "Estimated Revenue";
         } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.Score)
                 .equalsIgnoreCase(suffix.substring(1))) {
             secondaryDisplayName = "Score";
@@ -135,6 +138,9 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
         if (StringUtils.isBlank(suffix)) {
             segmentable = true;
         } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue)
+                .equalsIgnoreCase(suffix.substring(1))) {
+            segmentable = true;
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.PredictedRevenue)
                 .equalsIgnoreCase(suffix.substring(1))) {
             segmentable = true;
         } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.Score)
