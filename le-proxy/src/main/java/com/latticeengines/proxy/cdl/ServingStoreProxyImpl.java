@@ -84,22 +84,27 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/new-modeling",
-                shortenCustomerSpace(customerSpace));
-        List<ColumnMetadata> list = getList("serving store new modeling", url, ColumnMetadata.class);
-        if (CollectionUtils.isNotEmpty(list)) {
-            return Flux.fromIterable(list);
-        } else {
-            return Flux.empty();
-        }
+        return getNewModelingAttrs(customerSpace, null);
     }
 
     @Override
     public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, Version version) {
+        return getNewModelingAttrs(customerSpace, null, null);
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity, Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/new-modeling",
                 shortenCustomerSpace(customerSpace));
+        List<String> params = new ArrayList<>();
         if (version != null) {
-            url += "?version=" + version.toString();
+            params.add("version=" + version.toString());
+        }
+        if (entity != null) {
+            params.add("entity=" + entity);
+        }
+        if (CollectionUtils.isNotEmpty(params)) {
+            url += "?" + StringUtils.join(params, "&");
         }
         List<ColumnMetadata> list = getList("serving store new modeling", url, ColumnMetadata.class);
         if (CollectionUtils.isNotEmpty(list)) {
@@ -111,18 +116,18 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/allow-modeling",
-                shortenCustomerSpace(customerSpace));
-        List<ColumnMetadata> list = getList("serving store allowed modeling", url, ColumnMetadata.class);
-        if (CollectionUtils.isNotEmpty(list)) {
-            return Flux.fromIterable(list);
-        } else {
-            return Flux.empty();
-        }
+        return getAllowedModelingAttrs(customerSpace, false, null);
     }
 
     @Override
-    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Boolean allCustomerAttrs, Version version) {
+    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Boolean allCustomerAttrs,
+            Version version) {
+        return getAllowedModelingAttrs(customerSpace, null, allCustomerAttrs, version);
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity,
+            Boolean allCustomerAttrs, Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/allow-modeling",
                 shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
@@ -131,6 +136,9 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         }
         if (Boolean.TRUE.equals(allCustomerAttrs)) {
             params.add("all-customer-attrs=1");
+        }
+        if (entity != null) {
+            params.add("entity=" + entity);
         }
         if (CollectionUtils.isNotEmpty(params)) {
             url += "?" + StringUtils.join(params, "&");
