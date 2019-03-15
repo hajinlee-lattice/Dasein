@@ -34,6 +34,7 @@ import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctional
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -76,7 +77,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     private static final String[] FIELDS = ArrayUtils.addAll(SYSTEM_ID_FIELDS, NON_SYSTEM_ID_FIELDS);
 
     /**
-     * Define 5 Account MatchKey groups: 
+     * Define 5 Account MatchKey groups:
      * ID_SFDC, ID_MKTO, DUNS, Domain, Name
      *
      * MatchKey Group -> Actual MatchKey mapping:
@@ -193,7 +194,75 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     // TODO (@Jonathan - DP-9332)
     @Test(groups = "functional")
     private void testMultiDomainKeys() {
+        String tenantId = createNewTenantId();
+        Tenant tenant = new Tenant(tenantId);
 
+        // Setup match entry with domain as lattice-engines.com.
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
+        List<Object> data = Arrays.asList(null, null, null, null, "www.lattice-engines.com", "USA", null, null);
+        MatchOutput output = matchAccount(data, true, tenant, null).getRight();
+        String regularDomainEntityId = verifyAndGetEntityId(output);
+        Assert.assertNotNull(regularDomainEntityId);
+
+
+        // See if match entry when using multiple domains matches basic match entry case.
+        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain1, Country, State, Email2, DUNS, Domain2, Email1
+        data = Arrays.asList(null, null, null, null, "private@gmail.com", "USA", null,
+                "private@lattice-engines.com", null, "", "public@yahoo.com");
+        //data = Arrays.asList(null, null, null, null, null, "USA", null,
+        //                "www.lattice-engines.com", null, null, null);
+        log.info("Data is:\n" + data.toString());
+        List<String> fields = new ArrayList<String>(Arrays.asList(FIELDS));
+        // Change standard fields to include 4 domain fields.
+        fields.set(4, "Domain1");
+        fields.add(7, "Email2");
+        //fields.add(fields.get(7));
+        //fields.set(7, "Email2");
+        fields.add("Domain2");
+        fields.add("Email1");
+        log.info("Multi Domain Fields are:\n" + fields.toString());
+
+        // Set up match request.
+        String entity = BusinessEntity.Account.name();
+        // Create a default EntityKeyMap as in other tests.
+        EntityKeyMap entityKeyMap = getEntityKeyMap();
+        // Fix the KeyMap for domain.
+        entityKeyMap.getKeyMap().put(MatchKey.Domain, Arrays.asList("Domain1", "Email1", "Domain2", "Email2"));
+        MatchInput input = prepareEntityMatchInput(tenant, entity, Collections.singletonMap(entity, entityKeyMap));
+        input.setAllocateId(true); // Not take effect in this test
+        entityMatchConfigurationService.setIsAllocateMode(true);
+        input.setFields(fields);
+        input.setData(Collections.singletonList(data));
+        output = realTimeMatchService.match(input);
+
+
+        /*
+        List<String> fields = new ArrayList<String>(Arrays.asList(FIELDS));
+        // Change standard fields to include 4 domain fields.
+        fields.set(4, "Domain1");
+        fields.add(7, "Email2");
+        //fields.add(fields.get(7));
+        //fields.set(7, "Email2");
+        fields.add("Domain2");
+        fields.add("Email1");
+        log.info("Multi Domain Fields are: " + fields.toString());
+
+        // Set up match request.
+        String entity = BusinessEntity.Account.name();
+        // Create a default EntityKeyMap as in other tests.
+        EntityKeyMap entityKeyMap = getEntityKeyMap();
+        // Fix the KeyMap for domain.
+        //entityKeyMap.getKeyMap().put(MatchKey.Domain, Arrays.asList("Domain1", "Email1", "Domain2", "Email2"));
+        MatchInput input = prepareEntityMatchInput(tenant, entity, Collections.singletonMap(entity, entityKeyMap));
+        input.setAllocateId(true); // Not take effect in this test
+        entityMatchConfigurationService.setIsAllocateMode(true);
+        input.setFields(fields);
+        input.setData(Collections.singletonList(data));
+        output = realTimeMatchService.match(input);
+        */
+        //output = matchAccount(data, true, tenant, null).getRight();
+        String multiDomainEntityId = verifyAndGetEntityId(output);
+        Assert.assertEquals(multiDomainEntityId, regularDomainEntityId);
     }
 
     /**
@@ -638,7 +707,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @return
      */
     private Pair<MatchInput, MatchOutput> matchAccount(List<Object> data, boolean isAllocateMode,
-            Tenant tenant, MatchInput.EntityKeyMap entityKeyMap) {
+            Tenant tenant, EntityKeyMap entityKeyMap) {
         String entity = BusinessEntity.Account.name();
         entityKeyMap = entityKeyMap == null ? getEntityKeyMap() : entityKeyMap;
         MatchInput input = prepareEntityMatchInput(tenant, entity, Collections.singletonMap(entity, entityKeyMap));
@@ -653,7 +722,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * helper to prepare basic MatchInput for entity match
      */
     private MatchInput prepareEntityMatchInput(@NotNull Tenant tenant, @NotNull String targetEntity,
-            @NotNull Map<String, MatchInput.EntityKeyMap> entityKeyMaps) {
+            @NotNull Map<String, EntityKeyMap> entityKeyMaps) {
         MatchInput input = new MatchInput();
 
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
@@ -671,8 +740,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         return input;
     }
 
-    private static MatchInput.EntityKeyMap getEntityKeyMap() {
-        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+    private static EntityKeyMap getEntityKeyMap() {
+        EntityKeyMap map = new EntityKeyMap();
         Map<MatchKey, List<String>> fieldMap = Arrays.stream(MATCH_KEY_FIELDS).collect(
                 Collectors.toMap(matchKey -> matchKey, matchKey -> Collections.singletonList(matchKey.name())));
         fieldMap.put(MatchKey.SystemId, Arrays.asList(SYSTEM_ID_FIELDS));
@@ -680,8 +749,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         return map;
     }
 
-    private static MatchInput.EntityKeyMap getEntityKeyMap(List<String> keys) {
-        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+    private static EntityKeyMap getEntityKeyMap(List<String> keys) {
+        EntityKeyMap map = new EntityKeyMap();
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(keys);
         map.setKeyMap(keyMap);
         keys.forEach(key -> {
@@ -714,7 +783,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * Step 3: Translate MatchKey groups to MatchKeys.
      * Step 4: Do all necessary dedup in MatchKeys pair because MatchKeys
      *         mapped to different groups are not disjoint
-     * 
+     *
      * @return {{CaseIdx, List<String>, List<String>},
      *          {CaseIdx, List<String>, List<String>},
      *          ...}

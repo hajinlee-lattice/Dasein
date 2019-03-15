@@ -65,7 +65,6 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
         return msg instanceof MatchTraveler;
     }
 
-    // TODO(@Jonathan): implement details
     @Override
     protected boolean accept(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
