@@ -54,29 +54,28 @@ public class ServingStoreResource {
         return getFlux(customerSpace, entity, version, groups);
     }
 
-    private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+    private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity, DataCollection.Version version,
+            List<ColumnSelection.Predefined> groups) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
         if (version == null) {
-            flux = servingStoreService.getFullyDecoratedMetadata(entity,
-                    dataCollectionService.getActiveVersion(customerSpace)).sequential();
+            flux = servingStoreService
+                    .getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace))
+                    .sequential();
         } else {
             flux = servingStoreService.getFullyDecoratedMetadata(entity, version).sequential();
         }
         flux = flux //
                 .doOnSubscribe(s -> {
                     timer.set(System.currentTimeMillis());
-                    log.info(
-                            "Start serving decorated metadata for " + customerSpace + ":" + entity);
+                    log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
                 }) //
                 .doOnNext(cm -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
                     long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving decorated metadata for " + counter.get()
-                            + " attributes from " + customerSpace + ":" + entity + " TimeElapsed="
-                            + duration + " msec");
+                    log.info("Finished serving decorated metadata for " + counter.get() + " attributes from "
+                            + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
                 });
         Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
         if (CollectionUtils.isNotEmpty(groups)) {
@@ -102,14 +101,18 @@ public class ServingStoreResource {
     @ResponseBody
     @ApiOperation(value = "Get attributes that are enabled for first iteration modeling")
     public Flux<ColumnMetadata> getNewModelingAttrs( //
-            @PathVariable String customerSpace,
+            @PathVariable String customerSpace, //
+            @RequestParam(name = "entity", required = false, defaultValue = "Account") BusinessEntity entity, //
             @RequestParam(name = "version", required = false) DataCollection.Version version) {
-        Flux<ColumnMetadata> flux = getFlux(customerSpace, BusinessEntity.Account, version,
+        log.info(String.format("Get new modeling attributes for %s with entity %s", customerSpace, entity));
+        if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
+            throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
+        }
+        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, version,
                 Collections.singletonList(ColumnSelection.Predefined.Model));
         flux = flux.map(cm -> {
             cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS));
-            if (cm.getTagList() == null
-                    || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
+            if (cm.getTagList() == null || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
                 cm.setTagList(Collections.singletonList(Tag.INTERNAL));
             }
             return cm;
@@ -121,15 +124,17 @@ public class ServingStoreResource {
     @ResponseBody
     @ApiOperation(value = "Get attributes that are allowed for modeling")
     public Flux<ColumnMetadata> getAllowedModelingAttrs( //
-            @PathVariable String customerSpace,
-            @RequestParam(name = "version", required = false) DataCollection.Version version,
+            @PathVariable String customerSpace, //
+            @RequestParam(name = "entity", required = false, defaultValue = "Account") BusinessEntity entity, //
+            @RequestParam(name = "version", required = false) DataCollection.Version version, //
             @RequestParam(name = "all-customer-attrs", required = false) Boolean allCustomerAttrs) {
-        log.info("Get allow modeling attributes for " + customerSpace);
-        Flux<ColumnMetadata> flux = getSystemMetadataAttrFlux(customerSpace, BusinessEntity.Account,
-                version);
+        log.info(String.format("Get allow modeling attributes for %s with entity %s", customerSpace, entity));
+        if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
+            throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
+        }
+        Flux<ColumnMetadata> flux = getSystemMetadataAttrFlux(customerSpace, entity, version);
         flux = flux.map(cm -> {
-            if (cm.getTagList() == null
-                    || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
+            if (cm.getTagList() == null || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
                 cm.setTagList(Collections.singletonList(Tag.INTERNAL));
             }
             return cm;
@@ -143,28 +148,23 @@ public class ServingStoreResource {
         return flux;
     }
 
-    private Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace,
-            BusinessEntity entity, DataCollection.Version version) {
+    private Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
+            DataCollection.Version version) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
-        flux = servingStoreService
-                .getSystemMetadata(entity,
-                        version != null ? version
-                                : dataCollectionService.getActiveVersion(customerSpace))
-                .sequential();
+        flux = servingStoreService.getSystemMetadata(entity,
+                version != null ? version : dataCollectionService.getActiveVersion(customerSpace)).sequential();
         flux = flux //
                 .doOnSubscribe(s -> {
                     timer.set(System.currentTimeMillis());
-                    log.info("Start serving system metadata for " + customerSpace + ":"
-                            + customerSpace);
+                    log.info("Start serving system metadata for " + customerSpace + ":" + customerSpace);
                 }) //
                 .doOnNext(cm -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
                     long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving system metadata for " + counter.get()
-                            + " attributes from " + customerSpace + " TimeElapsed=" + duration
-                            + " msec");
+                    log.info("Finished serving system metadata for " + counter.get() + " attributes from "
+                            + customerSpace + " TimeElapsed=" + duration + " msec");
                 });
         return flux;
     }
