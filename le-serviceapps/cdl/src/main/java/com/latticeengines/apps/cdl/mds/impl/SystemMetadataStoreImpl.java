@@ -26,19 +26,21 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("systemMetadataStore")
-public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
-        Namespace2<BusinessEntity, DataCollection.Version>, //
-        Namespace2<BusinessEntity, DataCollection.Version>, //
-        Namespace2<BusinessEntity, DataCollection.Version>> implements SystemMetadataStore {
+public class SystemMetadataStoreImpl extends
+        DecoratedMetadataStore<//
+                Namespace2<BusinessEntity, DataCollection.Version>, //
+                Namespace2<BusinessEntity, DataCollection.Version>, //
+                Namespace2<BusinessEntity, DataCollection.Version>>
+        implements SystemMetadataStore {
 
     @Inject
     public SystemMetadataStoreImpl( //
-                                    RawSystemMetadataStoreImpl rawSystemMetadataStore, //
-                                    AccountAttrsDecoratorFac accountAttrsDecorator, //
-                                    ActivityMetricsDecoratorFac activityMetricsDecorator, //
-                                    RatingDisplayMetadataStore ratingDisplayMetadataStore, //
-                                    ExternalSystemMetadataStore externalSystemMetadataStore, //
-                                    CuratedAttrsMetadataStore derivedAttrsMetadataStore) {
+            RawSystemMetadataStoreImpl rawSystemMetadataStore, //
+            AccountAttrsDecoratorFac accountAttrsDecorator, //
+            ActivityMetricsDecoratorFac activityMetricsDecorator, //
+            RatingDisplayMetadataStore ratingDisplayMetadataStore, //
+            ExternalSystemMetadataStore externalSystemMetadataStore, //
+            CuratedAttrsMetadataStore derivedAttrsMetadataStore) {
         super(rawSystemMetadataStore, //
                 getDecoratorChain(//
                         accountAttrsDecorator, //
@@ -62,6 +64,7 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
         DecoratorFactory<Namespace2<String, DataCollection.Version>> curatedAttrsDecorator = //
                 MdsDecoratorFactory.fromMds("CuratedAttrs", curatedAttrsMetadataStore);
         Decorator contactDecorator = new ContactAttrsDecorator();
+        Decorator apsAttrDecorator = new APSAttrsDecorator();
         Decorator postRenderDecorator = new SystemPostRenderDecorator();
         // order in sync with ChainedDecoratorFactory.project() below
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList(//
@@ -69,24 +72,22 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                 lookupIdDecorator, //
                 contactDecorator, //
                 activityMetricsDecorator, //
+                apsAttrDecorator, //
                 ratingDisplayDecorator, //
                 curatedAttrsDecorator, //
                 postRenderDecorator //
         );
 
-        return new ChainedDecoratorFactory<Namespace2<BusinessEntity, DataCollection.Version>>(
-                "ServingStoreChain", factories) {
+        return new ChainedDecoratorFactory<Namespace2<BusinessEntity, DataCollection.Version>>("ServingStoreChain",
+                factories) {
             @Override
-            protected List<Namespace> project(
-                    Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+            protected List<Namespace> project(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
                 String tenantId = MultiTenantContext.getShortTenantId();
-                Namespace accountNs = Namespace
-                        .as(BusinessEntity.Account.equals(entity) ? tenantId : "");
+                Namespace accountNs = Namespace.as(BusinessEntity.Account.equals(entity) ? tenantId : "");
                 Namespace activityMetricsNs = Namespace
                         .as(BusinessEntity.PurchaseHistory.equals(entity) ? tenantId : "");
-                Namespace ratingNs = Namespace
-                        .as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
+                Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
                 Namespace curatedNs = Namespace.as(//
                         BusinessEntity.CuratedAccount.equals(entity) ? tenantId : "", //
                         namespace.getCoord2());
@@ -97,6 +98,7 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                         lookupIdNs, //
                         Namespace0.NS, //
                         activityMetricsNs, //
+                        Namespace0.NS, //
                         ratingNs, //
                         curatedNs, //
                         Namespace0.NS //
