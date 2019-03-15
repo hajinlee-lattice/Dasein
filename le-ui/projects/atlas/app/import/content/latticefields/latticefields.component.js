@@ -3,12 +3,12 @@ angular.module('lp.import.wizard.latticefields', [])
     $state, $stateParams,$timeout, $scope, 
     ResourceUtility, ImportWizardService, 
     ImportWizardStore, FieldDocument, 
-    UnmappedFields, Type, MatchingFields, 
+    UnmappedFields, Type, MatchingFields, ImportUtils,
     AnalysisFields
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
-    // console.log(alreadySaved)
+    console.log('ALREADY SAVED ****> ',alreadySaved)
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
         // vm.updateAnalysisFields();
@@ -20,7 +20,8 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         return list;
     }
-
+    let masterRedux = this.redux = $state.get('home.import').data.redux;
+    console.log('STORE ',masterRedux);
     var matchingFieldsList = makeList(MatchingFields),
         analysisFieldsList = makeList(AnalysisFields),
         ignoredFieldLabel = '-- Unmapped Field --',
@@ -38,6 +39,7 @@ angular.module('lp.import.wizard.latticefields', [])
         csvFileName: ImportWizardStore.getCsvFileName(),
         ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
+        fieldMappingsMaster : masterRedux.store.fieldMappings.list,
         ignoredFieldLabel: ignoredFieldLabel,
         UnmappedFieldsMap: {},
         matchingFieldMappings: {},
@@ -93,7 +95,7 @@ angular.module('lp.import.wizard.latticefields', [])
                 vm.availableFields.push(fieldMapping);
             });
         }
-       
+        vm.initDateFields();
     };
     
     vm.noDate = () => {
@@ -126,7 +128,7 @@ angular.module('lp.import.wizard.latticefields', [])
         return (vm.unavailableFields.length >= vm.availableFields.length);
     }
 
-    vm.changeLatticeField = function(mapping, form) {
+    vm.changeLatticeField = function(mapping, form, field, updateFormats) {
         var _mapping = [];
         vm.unavailableFields = [];
         vm.ignoredFieldLabel = ignoredFieldLabel;
@@ -134,6 +136,7 @@ angular.module('lp.import.wizard.latticefields', [])
         for(var i in mapping) {
             var item = mapping[i],
                 map = makeObject(item.userField);
+            console.log('ITEM!!!!!!!! ', item);
 
             if(!map.userField) {
                 /**
@@ -156,14 +159,105 @@ angular.module('lp.import.wizard.latticefields', [])
             if(map.userField) {
                 _mapping.push(map);
             }
+
+            if(field){
+                console.log('THE FIELD',field, ' - Mapping ', map, ' - $$$$$$ ', item);
+                if(updateFormats !== false) {
+                    vm.updateDateFormat(field, map);
+                }
+                if(map.mappedField == field.name){
+                    map.dateFormatString =  field.dateFormatString;
+                    map.timeFormatString = field.timeFormatString;
+                    map.timezone = field.timezone;
+                }
+            // }else{
+                else if(updateFormats !== false){
+                    vm.setFormatFromAnalysis(map);
+                }
+                    
+                // }
+                // field.dateFormatString = '';
+            }
+           
         }
 
         if(vm.unavailableFields.length >= vm.availableFields.length) {
             vm.ignoredFieldLabel = noFieldLabel;
         }
+        
         ImportWizardStore.setSaveObjects(_mapping);
+        console.log('MAPPING &&&&&&&&&&&& ',_mapping);
         vm.checkValid(form);
     };
+    
+    vm.initDateFields = () => {
+        console.log('@@@@@@@@@@@@@@ INIT @@@@@@@@@@@@@@@@@@@@',vm.fieldMappings, vm.analysisFieldsList);
+    
+        vm.analysisFieldsList.forEach(field => {
+            // if(field.type == 'DATE'){
+                vm.fieldMappings.forEach(obj => {
+                    if(obj.mappedField == field.name){
+                        field.dateFormatString = obj.dateFormatString;
+                        field.timeFormatString = obj.timeFormatString;
+                        field.timezone = obj.timezone;
+                        return;
+                    }
+                });
+                // let _mapping = {mappedField : field.name, userField : field.name};
+                // vm.updateDateFormat(field, _mapping);
+            // }
+        });
+
+        console.log('@@@@@@@@@@@@@ >>>>>', vm.analysisFieldsList);
+    }
+
+    vm.setFormatFromAnalysis = (map) => {
+        console.log('~~~~~~~~%%%%%%%%% ', map, vm.analysisFieldsList);
+        Object.keys(vm.fieldMappings).forEach(key => {
+            // if(field.type == 'DATE'){
+            let field = vm.fieldMappings[key];
+            if(map.mappedField == field.mappedField){
+                map.dateFormatString = field.dateFormatString;
+                map.timeFormatString = field.timeFormatString;
+                map.timezone = field.timezone;
+                return;
+            }
+        });
+        console.log('~~~~~~~~%%%%%%%%% ', map);
+        console.log('%%%%%%%%%%%% ~~~~~~~~ %%%%%%%%%%%% ');
+    }
+    vm.updateDateFormat = (field, map) => {
+        let fieldName = field.name;
+        let fieldToName = '';
+        // _mapping.forEach(element => {
+            if(fieldName == map.mappedField){
+                fieldToName = map.userField;
+                // return;
+            }
+        // });
+            vm.fieldMappingsMaster.forEach(element => {
+                if(element.userField == fieldToName){
+                        field.dateFormatString = element.dateFormatString;
+                        field.timeFormatString = element.timeFormatString;
+                        field.timezone = element.timezone;
+                    // map.dateFormatString = field.dateFormatString;
+                    // map.timeFormatString = field.timeFormatString;
+                    // map.timezone = field.timezone;
+                    return;
+                }
+            });
+        
+    }
+
+    vm.updateFormats = (formats) => {
+        formats.field.dateFormatString = formats.dateformat;
+        formats.field.timeFormatString = formats.timeformat;
+        formats.field.timezone = formats.tz;
+        let toSave = ImportUtils.updateFormatSavedObj(ImportWizardStore.getSaveObjects($state.current.name), formats.field);
+        ImportWizardStore.setSaveObjects(toSave);
+        vm.checkValid(vm.form);
+        
+    }
 
     vm.checkFieldsDelay = function(form) {
         $timeout(function() {
@@ -189,18 +283,13 @@ angular.module('lp.import.wizard.latticefields', [])
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('latticefields', form.$valid);
+        ImportWizardStore.setValidation('latticefields', vm.form.$valid);
     }
 
     if (FieldDocument) {
         vm.init();
     }
 
-    vm.chageDateFormat = (fieldMapping) => {
-        // console.log('UPDATING ==> ',fieldMapping);
-        ImportWizardStore.updateSavedObjects(fieldMapping);
-        vm.updateAnalysisList();
-    }
     vm.updateDateFormats = (field) => {
         Object.keys(vm.fieldMappings).forEach(key =>{
             if(vm.fieldMappings[key].mappedField == field.name){
@@ -212,25 +301,4 @@ angular.module('lp.import.wizard.latticefields', [])
             }
         });
     }
-
-    vm.updateAnalysisList = () => {
-        vm.analysisFieldsList.forEach(field => {
-            vm.updateDateFormats(field);
-        });
-        // console.log('LIST UPDTAED ', vm.analysisFieldsList);
-    };
-
-    vm.getAnalysisField = (field) => {
-        if(field.type == 'DATE'){
-            // console.log('======================');
-            // console.log(field);
-            vm.updateDateFormats(field);
-            
-            // console.log(field);
-            // console.log('======================');
-        }
-        // console.log('FIELD ~~~> ',field);
-        return field;
-    }
-    
 });

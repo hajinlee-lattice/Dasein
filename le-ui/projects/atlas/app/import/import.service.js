@@ -583,6 +583,7 @@ angular.module('lp.import')
             copy = ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
             if(copy){
                 this.fieldDocumentSaved[state] = copy;
+                console.log('OBJECT SAVED ', copy);
             }
         }else{
             var period = state.lastIndexOf('.');
@@ -590,6 +591,7 @@ angular.module('lp.import')
             var copyDoc = this.getSavedDocumentCopy(formerState);
             if(copyDoc){
                 this.fieldDocumentSaved[state] = copyDoc;
+                console.log('OBJECT SAVED ', copyDoc);
             }
         }
     };
@@ -907,6 +909,7 @@ angular.module('lp.import')
                 function onSuccess(response) {
 
                     var result = response.data;
+                    console.log('RESULT ', result);
                     if (result != null && result !== "") {
                         result = response.data;
                         deferred.resolve(result);
