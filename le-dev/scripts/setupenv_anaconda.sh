@@ -46,7 +46,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     fi
 fi
 
-for CONDAENV in 'lattice|2.7' 'v01|2.7' 'p2|2.7' 'spark|3.5'
+for CONDAENV in 'lattice|2.7' 'v01|2.7' 'p2|2.7' 'spark|3.7'
     do
         envname=`echo $CONDAENV | cut -d \| -f 1`
         pythonversion=`echo $CONDAENV | cut -d \| -f 2`
@@ -183,6 +183,6 @@ ${ANACONDA_HOME}/bin/conda install -y \
 
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
 jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/sparkkernel
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pyspark3kernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pysparkkernel
 
 source ${ANACONDA_HOME}/bin/deactivate
