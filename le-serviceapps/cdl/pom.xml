@@ -74,7 +74,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-cdl</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
 
