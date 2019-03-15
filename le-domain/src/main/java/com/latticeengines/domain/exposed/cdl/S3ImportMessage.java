@@ -40,6 +40,9 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    /*
+     * This column is used to drop all messages if a dropbox has been delete.
+     */
     @JsonProperty("dropbox")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_DROP_BOX", nullable = false)

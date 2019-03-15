@@ -9,4 +9,6 @@ public interface S3ImportMessageService {
     S3ImportMessage createMessage(String bucket, String key);
 
     List<S3ImportMessage> getMessageGroupByDropBox();
+
+    void deleteMessage(S3ImportMessage message);
 }

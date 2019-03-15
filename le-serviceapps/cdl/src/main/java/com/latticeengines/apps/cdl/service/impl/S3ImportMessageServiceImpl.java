@@ -25,4 +25,9 @@ public class S3ImportMessageServiceImpl implements S3ImportMessageService {
     public List<S3ImportMessage> getMessageGroupByDropBox() {
         return s3ImportMessageEntityMgr.getS3ImportMessageGroupByDropBox();
     }
+
+    @Override
+    public void deleteMessage(S3ImportMessage message) {
+        s3ImportMessageEntityMgr.delete(message);
+    }
 }

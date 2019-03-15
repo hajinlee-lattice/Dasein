@@ -2,11 +2,14 @@ package com.latticeengines.apps.cdl.qbean;
 
 import java.util.concurrent.Callable;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
+import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
@@ -24,6 +27,9 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     @Autowired
     private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
 
+    @Inject
+    private S3ImportService s3ImportService;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         CDLQuartzJobCallable.Builder builder = new CDLQuartzJobCallable.Builder();
@@ -31,6 +37,7 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
                 .cdlJobService(cdlJobService)
                 .dataFeedExecutionCleanupService(dataFeedExecutionCleanupService)
                 .redshiftCleanupService(redShiftCleanupService)
+                .s3ImportService(s3ImportService)
                 .jobArguments(jobArguments);
         return new CDLQuartzJobCallable(builder);
     }
