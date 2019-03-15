@@ -327,7 +327,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         // If don't want to remove testing tenant for debug purpose, remove
         // comments on this line but don't check in
-        // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        //testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
@@ -775,8 +775,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 
-    void saveCheckpoint(String checkpoint) throws IOException {
-        checkpointService.saveCheckPoint(checkpoint, mainCustomerSpace);
+    void saveCheckpoint(String checkpointName) throws IOException {
+        checkpointService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
     }
 
     private List<Report> retrieveReport(String appId) {

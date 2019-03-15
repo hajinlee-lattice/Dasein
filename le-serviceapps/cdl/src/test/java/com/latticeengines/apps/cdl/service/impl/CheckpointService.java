@@ -36,6 +36,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -47,6 +48,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -125,6 +128,9 @@ public class CheckpointService {
     @Value("${common.le.stack}")
     private String leStack;
 
+    @Value("${common.test.matchapi.url}")
+    private String matchapiHostPort;
+
     private ObjectMapper om = new ObjectMapper();
 
     private Tenant mainTestTenant;
@@ -162,8 +168,7 @@ public class CheckpointService {
                 if (CollectionUtils.isNotEmpty(tables)) {
                     for (Table table : tables) {
                         if (table != null) {
-                            log.info(
-                                    "Creating table " + table.getName() + " for " + role + " in version " + version);
+                            log.info("Creating table " + table.getName() + " for " + role + " in version " + version);
                             if (!uploadedTables.contains(table.getName())) {
                                 metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                                 uploadedTables.add(table.getName());
@@ -207,7 +212,8 @@ public class CheckpointService {
             }
             DataCollectionStatus dataCollectionStatus = parseDataCollectionStatus(checkpoint, version);
             if (dataCollectionStatus != null) {
-                dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainTestTenant.getId(), dataCollectionStatus, version);
+                dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainTestTenant.getId(), dataCollectionStatus,
+                        version);
             }
         }
 
@@ -261,7 +267,8 @@ public class CheckpointService {
 
     private void unzipCheckpoint(String checkpoint, String version) throws IOException {
         checkpointDir = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
-        File downloadedFile = testArtifactService.downloadTestArtifact(S3_CHECKPOINTS_DIR, version, checkpoint + ".zip");
+        File downloadedFile = testArtifactService.downloadTestArtifact(S3_CHECKPOINTS_DIR, version,
+                checkpoint + ".zip");
         String zipFilePath = downloadedFile.getPath();
         try {
             ZipFile zipFile = new ZipFile(zipFilePath);
@@ -417,7 +424,8 @@ public class CheckpointService {
 
     private DataCollectionStatus parseDataCollectionStatus(String checkpoint, DataCollection.Version version)
             throws IOException {
-        String jsonFile = String.format("%s/%s/%s/data_collection_status.json", checkpointDir, checkpoint, version.name());
+        String jsonFile = String.format("%s/%s/%s/data_collection_status.json", checkpointDir, checkpoint,
+                version.name());
         if (!new File(jsonFile).exists()) {
             return null;
         }
@@ -502,58 +510,61 @@ public class CheckpointService {
                 currentDataCloudBuildNumber, mainTestTenant.getId(), initialVersion));
     }
 
-    public void saveCheckPoint(String checkpoint) throws IOException {
-        String rootDir = "checkpoints/" + checkpoint;
+    public void saveCheckpoint(String checkpointName, String checkpointVersion) throws IOException {
+        String rootDir = "checkpoints/" + checkpointName;
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
 
-        downloadHdfsData(checkpoint);
+        downloadHdfsData(checkpointName);
 
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
+            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                saveTableIfExists(role, version, checkpoint);
+                saveTableIfExists(role, version, checkpointName);
                 if (active.equals(version)) {
                     saveRedshiftTableIfExists(role, version);
-                    saveDynamoTableIfExists(checkpoint, role, version);
+                    saveDynamoTableIfExists(checkpointName, role, version);
                 }
             }
-            saveStatsIfExists(version, checkpoint);
-            saveDataCollectionStatus(version, checkpoint);
+            saveStatsIfExists(version, checkpointName);
+            saveDataCollectionStatus(version, checkpointName);
         }
 
-        printSaveRedshiftStatements(checkpoint);
-        saveCheckpointVersion(checkpoint);
+        printSaveRedshiftStatements(checkpointName, checkpointVersion);
+        saveCheckpointVersion(checkpointName);
+        printPublishEntityRequest(checkpointName, checkpointVersion);
     }
 
-    public void saveCheckPoint(String checkpoint, String customerSpace) throws IOException {
-        String rootDir = "checkpoints/" + checkpoint;
+    public void saveCheckpoint(String checkpointName, String checkpointVersion, String customerSpace)
+            throws IOException {
+        String rootDir = "checkpoints/" + checkpointName;
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
 
-        downloadHdfsData(checkpoint);
+        downloadHdfsData(checkpointName);
 
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
+            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                saveTableIfExists(role, version, checkpoint);
+                saveTableIfExists(role, version, checkpointName);
                 if (active.equals(version)) {
                     saveRedshiftTableIfExists(role, version);
-                    saveDynamoTableIfExists(checkpoint, role, version);
+                    saveDynamoTableIfExists(checkpointName, role, version);
                 }
             }
-            saveStatsIfExists(version, checkpoint);
-            saveDataCollectionStatus(version, checkpoint);
+            saveStatsIfExists(version, checkpointName);
+            saveDataCollectionStatus(version, checkpointName);
         }
 
-        printSaveRedshiftStatements(checkpoint);
+        printSaveRedshiftStatements(checkpointName, checkpointVersion);
+        saveCheckpointVersion(checkpointName);
         // Save Workflow Execution Context.
-        saveWorkflowExecutionContext(checkpoint, customerSpace);
-        saveCheckpointVersion(checkpoint);
+        saveWorkflowExecutionContext(checkpointName, customerSpace);
+        printPublishEntityRequest(checkpointName, checkpointVersion);
     }
 
     private void saveCheckpointVersion(String checkpoint) throws IOException {
@@ -639,21 +650,22 @@ public class CheckpointService {
     }
 
     private void saveDataCollectionStatus(DataCollection.Version version, String checkpoint) throws IOException {
-        DataCollectionStatus dataCollectionStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
+        DataCollectionStatus dataCollectionStatus = dataCollectionProxy
+                .getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
         String jsonFile = String.format("checkpoints/%s/%s/data_collection_status.json", checkpoint, version.name());
         om.writeValue(new File(jsonFile), dataCollectionStatus);
         log.info("Save DataCollection Status at version " + version + " to " + jsonFile);
     }
 
-    private void printSaveRedshiftStatements(String checkpoint) {
+    private void printSaveRedshiftStatements(String checkpointName, String checkpointVersion) {
         if (MapUtils.isNotEmpty(savedRedshiftTables)) {
-            String nextVersion = "99";
-            StringBuilder msg = new StringBuilder("If you are going to save the checkpoint to version " + nextVersion);
+            StringBuilder msg = new StringBuilder(
+                    "If you are going to save the checkpoint to version " + checkpointVersion);
             msg.append(", you can run following statements in redshift:\n\n");
             List<String> dropTables = new ArrayList<>();
             List<String> renameTables = new ArrayList<>();
             savedRedshiftTables.forEach((role, table) -> {
-                String tgtTable = checkpointRedshiftTableName(checkpoint, role, nextVersion);
+                String tgtTable = checkpointRedshiftTableName(checkpointName, role, checkpointVersion);
                 dropTables.add("drop table if exists " + tgtTable + ";");
                 renameTables.add(String.format("alter table %s rename to %s;", table, tgtTable));
             });
@@ -683,8 +695,8 @@ public class CheckpointService {
         if (executionContext == null) {
             log.error("Failed to get execution context");
         } else {
-            // Strip out keys we don't need to save.  For now, those are the keys that are not all capitals and end
-            // in "Configuration" or "Workflow".  These can be regenerated when the workflow is restarted from the
+            // Strip out keys we don't need to save. For now, those are the keys that are not all capitals and end
+            // in "Configuration" or "Workflow". These can be regenerated when the workflow is restarted from the
             // checkpoint.
             Set<Map.Entry<String, Object>> executionContextMap = executionContext.entrySet();
             for (Map.Entry<String, Object> mapEntry : executionContextMap) {
@@ -695,6 +707,28 @@ public class CheckpointService {
             String jsonFile = String.format("checkpoints/%s/workflow_execution_context.json", checkpoint);
             om.writeValue(new File(jsonFile), executionContextMap);
             log.info("Save Workflow Execution Context to " + jsonFile);
+        }
+    }
+
+    public void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
+        StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
+                + " you must run the following HTTP Request:\n");
+        msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
+        EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
+        entityPublishRequest.setEntity(BusinessEntity.Account.toString());
+        entityPublishRequest.setSrcTenant(mainTestTenant);
+        String destTenantId = "cdlend2end_" + checkpointName + "_" + checkpointVersion;
+        Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
+        entityPublishRequest.setDestTenant(destTenant);
+        entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
+        entityPublishRequest.setDestTTLEnabled(false);
+        msg.append("Body:\n");
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
+            log.info(msg.toString());
+        } catch (JsonProcessingException e) {
+            log.error("Failed to print EntityPublishRequest:\n" + e.getMessage(), e);
         }
     }
 
