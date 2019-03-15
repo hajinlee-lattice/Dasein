@@ -36,4 +36,6 @@ public interface WorkflowJobService {
 
     String generateCSVReport(String jobId);
 
+    void setErrorCategoryByJobPid(String jobPid, String errorCategory);
+
 }

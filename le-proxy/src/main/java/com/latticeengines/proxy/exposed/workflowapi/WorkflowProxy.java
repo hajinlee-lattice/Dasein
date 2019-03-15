@@ -191,6 +191,12 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return get("getJobFromWorkflowId", url, Job.class);
     }
 
+    public void setErrorCategoryByJobPid(String workflowPid, String errorCategory, String customerSpace) {
+        String baseUrl = "/job/{workflowPid}/setErrorCategory?customerSpace={customerSpace}&errorCategory={errorCategory}";
+        String url = constructUrl(baseUrl, workflowPid, customerSpace, errorCategory);
+        get("setErrorCategoryByJobPid", url, Void.class);
+    }
+
     public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String customerSpace) {
         checkCustomerSpace(customerSpace);
         if (CollectionUtils.isEmpty(jobIds)) {

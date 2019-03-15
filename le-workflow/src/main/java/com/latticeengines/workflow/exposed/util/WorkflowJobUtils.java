@@ -15,17 +15,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
@@ -36,8 +45,13 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 
 public class WorkflowJobUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobUtils.class);
+
     private static final String CUSTOMER_SPACE = "CustomerSpace";
+    private static final String DEFAULT_ERROR_CATEGORY = "UNKNOWN";
     private static final Date MIGRATE_THRESHOLD = getMigrateThreshold();
+    private static ObjectMapper om = new ObjectMapper();
 
     private static Date getMigrateThreshold() {
         Date threshold;
@@ -65,6 +79,7 @@ public class WorkflowJobUtils {
         job.setOutputs(getOutputs(workflowJob));
         job.setReports(getReports(reportService, workflowJob));
         job.setUser(workflowJob.getUserId());
+        job.setErrorCategory(workflowJob.getErrorCategory());
         if (workflowJob.getStatus() != null) {
             job.setJobStatus(JobStatus.fromString(workflowJob.getStatus()));
         }
@@ -225,5 +240,49 @@ public class WorkflowJobUtils {
             workflowJobStatuses.addAll(JobStatus.mappedWorkflowJobStatuses(jobStatus));
         });
         return new ArrayList<>(workflowJobStatuses);
+    }
+
+    public static String searchErrorCategory(ErrorDetails errorDetails) {
+        LedpCode ledpCode = errorDetails.getErrorCode();
+        JsonNode filterJson = getErrorCategoryJsonNode();
+        if (filterJson != null) {
+            String error_category = filterDetail(ledpCode.toString(), filterJson.findValues("ledp"));
+            if (!error_category.equals(DEFAULT_ERROR_CATEGORY)) {
+                log.info("compare with ledp, this job error_category is :" + error_category);
+                return error_category;
+            }
+            error_category = filterDetail(errorDetails.getErrorMsg(), filterJson.findValues("errorMessage"));
+            if (!error_category.equals(DEFAULT_ERROR_CATEGORY)) {
+                log.info("compare with errorMessage, this job error_category is :" + error_category);
+                return error_category;
+            }
+        } else {
+            log.warn("No error_category filter in zk.");
+        }
+        return DEFAULT_ERROR_CATEGORY;
+    }
+
+    private static String filterDetail(String detail, List<JsonNode> nodes) {
+        log.info("detail is :" + detail);
+        if (CollectionUtils.isNotEmpty(nodes) && !StringUtils.isEmpty(detail)) {
+            for (JsonNode subjectNode : nodes.get(0)) {
+                if (Pattern.matches(subjectNode.get("filter").asText(), detail)) {
+                    return subjectNode.get("errorType").asText();
+                }
+            }
+        }
+        return DEFAULT_ERROR_CATEGORY;
+    }
+
+    private static JsonNode getErrorCategoryJsonNode() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String content = c.get(PathBuilder.buildErrorCategoryPath(CamilleEnvironment.getPodId())).getData();
+
+            return om.readTree(content);
+        }catch (Exception e) {
+            log.error("Get json node from zk failed.");
+            return null;
+        }
     }
 }

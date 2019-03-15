@@ -76,6 +76,8 @@ public interface WorkflowJobService {
 
     void stopWorkflowJob(String customerSpace, Long workflowPid);
 
+    void setErrorCategoryByJobPid(String customerSpace, Long workflowPid, String errorCategory);
+
     WorkflowJob deleteWorkflowJobByApplicationId(String customerSpace, String applicationId);
 
     List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime);
