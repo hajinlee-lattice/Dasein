@@ -17,4 +17,72 @@
             }
         }
     }
+    .audience-selection {
+        margin-top: 40px;
+        color: #333;
+        p {
+            display: inline;
+            width: auto;
+            .label {
+                width: 30px;
+            }
+            &.red-asterisk {
+                color:red;
+                font-size:20px;
+                vertical-align:top;
+            }
+        }
+        input {
+            display: inline;
+            width: auto;
+            height: 30px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 3px;
+            display: inline-block;
+            vertical-align: middle;
+            overflow: hidden;
+
+        }
+        li {
+            max-width: 350px;
+            flex: 0 1 auto;
+        }
+        table {
+            width: auto;
+            thead {
+                border: none;
+            }
+            tbody {
+                border-top: none;
+                th {
+                    font-weight: normal;
+                    vertical-align: baseline;
+                    padding: 4px 0px;
+                }
+            }
+            tr {
+                background: none;
+                border-bottom: none;
+            }
+            .audience-dropdown {
+                width: auto;
+                min-width: 16em;
+                font-size: 12px;
+                margin-right: 20px;
+                color: #467dba;
+                border-color: #d8d8d8;
+                height: 30px;
+                border-width: 1px;
+                border-style: solid;
+                border-radius: 3px;
+                vertical-align: middle;
+
+                &.disabled {
+                    cursor: not-allowed;
+                    background: #d8d8d8;
+                }
+            }
+        }
+    }
 }

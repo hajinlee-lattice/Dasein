@@ -1062,7 +1062,43 @@ angular
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Campaign Playbook'
             },
-            resolve: {},
+            resolve: {
+                featureflags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                username: function($q, featureflags, PlaybookWizardStore, PlaybookWizardService) {
+                    var deferred = $q.defer();
+
+                    if (featureflags.EnableExternalIntegration && PlaybookWizardStore.isExternallyAuthenticatedOrg()) {
+                        PlaybookWizardService.getTenantDropboxId().then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    } else {
+                        deferred.resolve({});
+                    }
+
+                    return deferred.promise;
+                },
+                trayuser: function($q, featureflags, username, PlaybookWizardStore, PlaybookWizardService) {
+                    var deferred = $q.defer();
+                    
+                    if (featureflags.EnableExternalIntegration && PlaybookWizardStore.isExternallyAuthenticatedOrg()) {
+                        PlaybookWizardService.getTrayUser(username).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    } else {
+                        deferred.resolve({});
+                    }
+                    return deferred.promise;
+                }
+
+            },
             views: {
                 'wizard_content@home.playbook.launch': 'newlaunch'
             }
