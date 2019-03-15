@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow;
+package com.latticeengines.apps.cdl.workflow;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -21,6 +21,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -35,24 +36,16 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
-public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTestNGBase {
+public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchWorkflowDeploymentTestNG.class);
 
     @Inject
-    private PlayProxy playProxy;
-
-    @Inject
     private DropBoxProxy dropBoxProxy;
-
-    @Inject
-    RecommendationService recommendationService;
 
     @Inject
     protected Configuration yarnConfiguration;
@@ -75,15 +68,13 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
 
     DropBoxSummary dropboxSummary = null;
 
-    @Override
     public Tenant currentTestTenant() {
         return testPlayCreationHelper.getTenant();
     }
 
-    @Override
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = null;//"LETest1547165867101";
+        String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
         featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
         
@@ -101,9 +92,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
                 .build(); 
 
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
-        super.deploymentTestBed = testPlayCreationHelper.getDeploymentTestBed();
-
-        FeatureFlagValueMap ffVMap = super.deploymentTestBed.getFeatureFlags();
+        super.testBed = testPlayCreationHelper.getDeploymentTestBed();
+        setMainTestTenant(super.testBed.getMainTestTenant());
+        FeatureFlagValueMap ffVMap = super.testBed.getFeatureFlags();
         log.info("Feature Flags for Tenant: " + ffVMap);
         Assert.assertTrue(ffVMap.containsKey(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         Assert.assertTrue(ffVMap.get(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
@@ -116,7 +107,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(playLaunchConfig);
@@ -128,7 +119,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testPlayLaunchWorkflow")
+    @Test(groups = "deployment-app", dependsOnMethods = "testPlayLaunchWorkflow")
     public void testVerifyAndCleanupUploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
@@ -174,8 +165,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLWorkflowDeploymentTes
         }
     }
 
-    @Override
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment-app")
     public void tearDown() throws Exception {
     }
 
