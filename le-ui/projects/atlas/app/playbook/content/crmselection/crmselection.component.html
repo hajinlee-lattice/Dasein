@@ -82,13 +82,6 @@
                     </div>
 
                 </div>
-                <div
-                    class="audience-selection"
-                    ng-if="$ctrl.externalIntegrationEnabled && $ctrl.stored && $ctrl.stored.crm_selection && $ctrl.stored.crm_selection.externalAuthentication">
-                    <p> <p style="color:red;font-size:20px;vertical-align:top;"> * </p>Marketo Static List ID: </p>
-                    <input type="text" ng-model="$ctrl.audienceId" class="form-control" ng-change="$ctrl.updateAudienceId()">
-                    <div>  Use the ID of a Marketo static list. All the contacts from this segment will be sent to this list. </div>
-                </div>
 
             </form>
 

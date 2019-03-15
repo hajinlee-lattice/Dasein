@@ -12,7 +12,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
     ) {
         var vm = this;
         vm.showMAPSystems = vm.featureflags.EnableCdl;
-        vm.externalIntegrationEnabled = vm.featureflags.EnableExternalIntegration;
+
         this.showErrorApi = false;
         angular.extend(vm, {
             status: $stateParams.status
@@ -54,6 +54,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                         PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
                         PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                        PlaybookWizardStore.setExternalAuthentication(vm.stored.crm_selection.externalAuthentication)
                     }
 
                     if(crmselection) {
@@ -119,17 +120,10 @@ angular.module('lp.playbook.wizard.crmselection', [])
             });
         }
 
-        vm.updateAudienceId = function() {
-          console.log(vm.stored);
-          var audienceId = vm.externalIntegrationEnabled && vm.stored.crm_selection.externalAuthentication ? vm.audienceId : null;
-          PlaybookWizardStore.setAudienceId(audienceId);
-        }
-
         vm.checkValid = function(form, accountId, orgId, isRegistered) {
             vm.orgIsRegistered = isRegistered;
             vm.nullCount = null;
             vm.totalCount = null;
-            vm.audienceId = null;
 
             vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
             PlaybookWizardStore.setValidation('crmselection', false);
@@ -138,6 +132,8 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                 PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
                 PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                PlaybookWizardStore.setExternalAuthentication(vm.stored.crm_selection.externalAuthentication)
+
             }
 
             var accountId = accountId;

@@ -15,11 +15,14 @@ angular.module('lp.playbook')
     this.bucketsToLaunch = null;
     this.topNCount = null;
     this.selectedBucket = 'A';
+    this.externalSystemAuthentication = null;;
     this.destinationOrgId = null;
     this.destinationSysType = null;
     this.destinationAccountId = null;
-    this.audienceId = null;
     this.excludeItems = false;
+    this.marketoProgramName = "";
+    this.audienceId = "";
+    this.audienceName = "";
 
     this.getCoverageMap = (obj) => {
         var ret = {
@@ -321,7 +324,9 @@ angular.module('lp.playbook')
                 destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
+                audienceName: PlaybookWizardStore.getAudienceName(),
                 audienceId: PlaybookWizardStore.getAudienceId(),
+                folderName: PlaybookWizardStore.getMarketoProgramName(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
                 launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
                 excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems()
@@ -329,6 +334,7 @@ angular.module('lp.playbook')
             saveOnly = opts.saveOnly || false,
             lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
+
 
         if(play) {
             if(play.ratingEngine){
@@ -423,6 +429,8 @@ angular.module('lp.playbook')
                 destinationSysType: PlaybookWizardStore.getDestinationSysType(),
                 destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
                 audienceId: PlaybookWizardStore.getAudienceId(),
+                audienceName: PlaybookWizardStore.getAudienceName(),
+                folderName: PlaybookWizardStore.getMarketoProgramName(),
                 excludeItems: PlaybookWizardStore.getExcludeItems(),
                 launchUnscored: PlaybookWizardStore.getLaunchUnscored()
             }
@@ -562,6 +570,29 @@ angular.module('lp.playbook')
     }
     this.getAudienceId = function() {
         return this.audienceId;
+    }
+
+    this.setAudienceName = function(audienceName) {
+        this.audienceName = audienceName;
+    }
+    this.getAudienceName = function() {
+        return this.audienceName;
+    }
+
+    this.setMarketoProgramName = function(programName) {
+        this.marketoProgramName = programName;
+    }
+
+    this.getMarketoProgramName = function() {
+        return this.marketoProgramName;
+    }
+
+    this.setExternalAuthentication = function(extSysAuth) {
+        this.externalSystemAuthentication = extSysAuth;
+    }
+
+    this.getExternalAuthentication = function() {
+        this.externalSystemAuthentication;
     }
 
     this.setExcludeItems = function(excludeItems) {
@@ -803,6 +834,10 @@ angular.module('lp.playbook')
         this.accountsDataCount = count;
     }
 
+    this.isExternallyAuthenticatedOrg = function() {
+        return this.externalSystemAuthentication && this.externalSystemAuthentication.trayAuthenticationId;
+    }
+
 })
 .service('PlaybookWizardService', function($q, $http, $state, $timeout) {
     this.host = '/pls'; //default
@@ -989,6 +1024,8 @@ angular.module('lp.playbook')
             destinationSysType = opts.destinationSysType,
             destinationAccountId = opts.destinationAccountId,
             audienceId = opts.audienceId,
+            audienceName = opts.audienceName,
+            folderName = opts.programName,
             excludeItems = opts.excludeItems,
             launchUnscored = opts.launchUnscored;
         $http({
@@ -1003,7 +1040,9 @@ angular.module('lp.playbook')
                 destinationAccountId: destinationAccountId,
                 excludeItemsWithoutSalesforceId: excludeItems,
                 launchUnscored: launchUnscored,
-                audienceId: audienceId
+                audienceId: audienceId,
+                audienceName: audienceName,
+                folderName: folderName
             }
         }).then(
             function onSuccess(response) {
@@ -1214,6 +1253,122 @@ angular.module('lp.playbook')
             function onSuccess(response) {
                 var result = response.data;
                 deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.getTenantDropboxId = function() {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '/pls/dropbox/summary',
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result.DropBox);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.getTrayUser = function(userName) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '../tray/user?userName=' + userName
+        }).then(
+            function onSuccess(response) {
+                var result = response.data
+                deferred.resolve(result.id);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+
+    this.getTrayAuthorizationToken = function(userId) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: '../tray/authorize?userId=' + userId
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result.token);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+
+    this.getMarketoPrograms = function(trayAuthenticationId, useraccesstoken) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '../tray/marketo/programs?trayAuthenticationId=' + trayAuthenticationId,
+            headers: {
+                'useraccesstoken': useraccesstoken
+            }
+        }).then(
+            function onSuccess(response) {
+                deferred.resolve(response.data);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+
+    this.getMarketoStaticLists = function(trayAuthenticationId, useraccesstoken, programName) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '../tray/marketo/staticlists',
+            headers: {
+                useraccesstoken: useraccesstoken
+            },
+            params: {
+                trayAuthenticationId: trayAuthenticationId,
+                programName: programName
+            }
+        }).then(
+            function onSuccess(response) {
+                deferred.resolve(response.data);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

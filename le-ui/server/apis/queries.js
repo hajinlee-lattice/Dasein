@@ -123,6 +123,91 @@ const Queries = {
                 }
               }`;
       return { query: q };
+    },
+    /*
+        EPHEMERAL API QUERIES
+    */
+    listMarketoStaticLists(authenticationId, programName) {
+      if (!programName) { 
+        return {
+             auth_id: authenticationId,
+             message:"list_static_lists",
+             step_settings:{
+                client_id:{
+                   type:"jsonpath",
+                   value:"$.auth.client_id"
+                },
+                client_secret:{
+                   type:"jsonpath",
+                   value:"$.auth.client_secret"
+                },
+                endpoint:{
+                   type:"jsonpath",
+                   value:"$.auth.endpoint"
+                },
+                batch_size:{
+                   type:"integer",
+                   value:300
+                }
+             }
+          };
+      } else {
+          return {
+               auth_id: authenticationId,
+               message:"list_static_lists",
+               step_settings:{
+                  client_id:{
+                    type:"jsonpath",
+                    value:"$.auth.client_id"
+                  },
+                  client_secret:{
+                    type:"jsonpath",
+                    value:"$.auth.client_secret"
+                  },
+                  endpoint:{
+                    type:"jsonpath",
+                    value:"$.auth.endpoint"
+                  },
+                  batch_size:{
+                    type:"integer",
+                    value:300
+                  },
+                  program_names: {
+                    type: "array",
+                    value: [
+                      {
+                        type: "string",
+                        value: programName
+                      }
+                    ]
+                  }
+               }
+            };        
+      }
+    },
+    getMarketoPrograms(authenticationId){
+        return {
+              auth_id: authenticationId,
+              message: "list_programs",
+              step_settings: {
+                  client_id: {
+                      type: "jsonpath",
+                      value: "$.auth.client_id"
+                  },
+                  client_secret: {
+                      type: "jsonpath",
+                      value: "$.auth.client_secret"
+                  },
+                  endpoint: {
+                      type: "jsonpath",
+                      value: "$.auth.endpoint"
+                  },
+                  max_return: {
+                      type: "integer",
+                      value: 25
+                  }
+              }
+          };
     }
 
 
