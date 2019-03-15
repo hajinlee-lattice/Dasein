@@ -78,11 +78,13 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     public static final Map<ScoreType, String> SCORE_ATTR_SUFFIX = ImmutableMap.of( //
             ScoreType.Probability, "prob", //
             ScoreType.ExpectedRevenue, "ev", //
+            ScoreType.PredictedRevenue, "pv", //
             ScoreType.Score, "score" //
     );
     public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap.of( //
             ScoreType.Probability, Double.class, //
             ScoreType.ExpectedRevenue, Double.class, //
+            ScoreType.PredictedRevenue, Double.class, //
             ScoreType.Score, Integer.class //
     );
     private static final Logger log = LoggerFactory.getLogger(RatingEngine.class);
@@ -485,6 +487,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     public enum ScoreType {
-        Rating, Probability, Score, ExpectedRevenue
+        Rating, Probability, Score, ExpectedRevenue, PredictedRevenue
     }
 }

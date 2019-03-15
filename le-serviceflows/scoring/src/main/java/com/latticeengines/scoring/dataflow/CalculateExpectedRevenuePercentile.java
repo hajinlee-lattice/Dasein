@@ -39,6 +39,8 @@ public class CalculateExpectedRevenuePercentile
 
     private ParsedContext context;
 
+    private static final String EV_PERCENTILE_EXPRESSION = "%s != null ? %s : %s";
+
     @Inject
     public Configuration yarnConfiguration;
 
@@ -84,7 +86,6 @@ public class CalculateExpectedRevenuePercentile
             if (!context.standardScoreField.equals(context.percentileFieldName)) {
                 retainedFields = new FieldList(calculatePercentile.getFieldNames());
 
-                String EV_PERCENTILE_EXPRESSION = "%s != null ? %s : %s";
                 calculatePercentile = calculatePercentile //
                         .addFunction(
                                 String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
@@ -122,8 +123,7 @@ public class CalculateExpectedRevenuePercentile
 
                 calculatePercentile = calculateFittedExpectedRevenue(retainedFields, calculatePercentile);
 
-                calculatePercentile = calculateFinalPercentile(retainedFields, calculatePercentile,
-                        EV_PERCENTILE_EXPRESSION);
+                calculatePercentile = calculateFinalPercentile(retainedFields, calculatePercentile);
 
             }
             return calculatePercentile;
@@ -132,8 +132,7 @@ public class CalculateExpectedRevenuePercentile
     }
 
     @SuppressWarnings("deprecation")
-    private Node calculateFinalPercentile(FieldList retainedFields, Node calculatePercentile,
-            String EV_PERCENTILE_EXPRESSION) {
+    private Node calculateFinalPercentile(FieldList retainedFields, Node calculatePercentile) {
         Node mergedScoreCount;
         calculatePercentile = calculatePercentile.addColumnWithFixedValue(context.percentileFieldName, null,
                 Integer.class);
@@ -145,8 +144,8 @@ public class CalculateExpectedRevenuePercentile
 
         calculatePercentile = calculatePercentile //
                 .addFunction(
-                        String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
-                                context.percentileFieldName, context.standardScoreField), //
+                        String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName, context.percentileFieldName,
+                                context.standardScoreField), //
                         new FieldList(context.percentileFieldName, context.standardScoreField), //
                         new FieldMetadata(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField, Integer.class));
         calculatePercentile = calculatePercentile.discard(context.standardScoreField);
