@@ -226,7 +226,8 @@ UPDATE `DataCloudVersion`
 SET
   `AccountMasterHdfsVersion` = '2019-02-20_00-00-00_UTC',
   `AccountLookupHdfsVersion` = '2019-02-20_00-00-00_UTC',
-  `EnrichmentStatsVersion`   = '2018-12-06_00-00-00_UTC'
+  `EnrichmentStatsVersion`   = '2018-12-06_00-00-00_UTC',
+  `DynamoTableSignature_Lookup` = '20190310'
 WHERE `Version` = '2.0.17';
 
 SET SQL_SAFE_UPDATES = 1;
