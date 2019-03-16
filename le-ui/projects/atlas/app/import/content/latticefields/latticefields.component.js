@@ -21,7 +21,7 @@ angular.module('lp.import.wizard.latticefields', [])
         return list;
     }
     let masterRedux = this.redux = $state.get('home.import').data.redux;
-    console.log('STORE ',masterRedux);
+    // console.log('STORE ',masterRedux);
     var matchingFieldsList = makeList(MatchingFields),
         analysisFieldsList = makeList(AnalysisFields),
         ignoredFieldLabel = '-- Unmapped Field --',
@@ -96,6 +96,7 @@ angular.module('lp.import.wizard.latticefields', [])
             });
         }
         vm.initDateFields();
+            
     };
     
     vm.noDate = () => {
@@ -136,7 +137,7 @@ angular.module('lp.import.wizard.latticefields', [])
         for(var i in mapping) {
             var item = mapping[i],
                 map = makeObject(item.userField);
-            console.log('ITEM!!!!!!!! ', item);
+            // console.log('ITEM!!!!!!!! ', item);
 
             if(!map.userField) {
                 /**
@@ -191,10 +192,9 @@ angular.module('lp.import.wizard.latticefields', [])
     };
     
     vm.initDateFields = () => {
-        console.log('@@@@@@@@@@@@@@ INIT @@@@@@@@@@@@@@@@@@@@',vm.fieldMappings, vm.analysisFieldsList);
+        // console.log('@@@@@@@@@@@@@@ INIT @@@@@@@@@@@@@@@@@@@@',vm.fieldMappings, vm.analysisFieldsList);
     
         vm.analysisFieldsList.forEach(field => {
-            // if(field.type == 'DATE'){
                 vm.fieldMappings.forEach(obj => {
                     if(obj.mappedField == field.name){
                         field.dateFormatString = obj.dateFormatString;
@@ -203,18 +203,19 @@ angular.module('lp.import.wizard.latticefields', [])
                         return;
                     }
                 });
-                // let _mapping = {mappedField : field.name, userField : field.name};
-                // vm.updateDateFormat(field, _mapping);
-            // }
         });
+        setTimeout(() => {
+            vm.analysisFieldsList.forEach(field => {
+                vm.changeLatticeField(vm.fieldMapping, vm.form, field, true);
+            });
+        }, 0);
 
         console.log('@@@@@@@@@@@@@ >>>>>', vm.analysisFieldsList);
     }
 
     vm.setFormatFromAnalysis = (map) => {
-        console.log('~~~~~~~~%%%%%%%%% ', map, vm.analysisFieldsList);
+        // console.log('~~~~~~~~%%%%%%%%% ', map, vm.analysisFieldsList);
         Object.keys(vm.fieldMappings).forEach(key => {
-            // if(field.type == 'DATE'){
             let field = vm.fieldMappings[key];
             if(map.mappedField == field.mappedField){
                 map.dateFormatString = field.dateFormatString;
@@ -223,29 +224,23 @@ angular.module('lp.import.wizard.latticefields', [])
                 return;
             }
         });
-        console.log('~~~~~~~~%%%%%%%%% ', map);
-        console.log('%%%%%%%%%%%% ~~~~~~~~ %%%%%%%%%%%% ');
+        // console.log('~~~~~~~~%%%%%%%%% ', map);
+        // console.log('%%%%%%%%%%%% ~~~~~~~~ %%%%%%%%%%%% ');
     }
     vm.updateDateFormat = (field, map) => {
         let fieldName = field.name;
         let fieldToName = '';
-        // _mapping.forEach(element => {
-            if(fieldName == map.mappedField){
-                fieldToName = map.userField;
-                // return;
+        if(fieldName == map.mappedField){
+            fieldToName = map.userField;
+        }
+        vm.fieldMappingsMaster.forEach(element => {
+            if(element.userField == fieldToName){
+                    field.dateFormatString = element.dateFormatString;
+                    field.timeFormatString = element.timeFormatString;
+                    field.timezone = element.timezone;
+                return;
             }
-        // });
-            vm.fieldMappingsMaster.forEach(element => {
-                if(element.userField == fieldToName){
-                        field.dateFormatString = element.dateFormatString;
-                        field.timeFormatString = element.timeFormatString;
-                        field.timezone = element.timezone;
-                    // map.dateFormatString = field.dateFormatString;
-                    // map.timeFormatString = field.timeFormatString;
-                    // map.timezone = field.timezone;
-                    return;
-                }
-            });
+        });
         
     }
 
@@ -253,7 +248,16 @@ angular.module('lp.import.wizard.latticefields', [])
         formats.field.dateFormatString = formats.dateformat;
         formats.field.timeFormatString = formats.timeformat;
         formats.field.timezone = formats.tz;
-        let toSave = ImportUtils.updateFormatSavedObj(ImportWizardStore.getSaveObjects($state.current.name), formats.field);
+        let alreadySaved = ImportWizardStore.getSaveObjects($state.current.name);
+        let toSave;
+        if(alreadySaved){
+            toSave = ImportUtils.updateFormatSavedObj(alreadySaved, formats.field);
+        }else{
+            // mapping, form, field, updateFormats
+            vm.changeLatticeField(vm.fieldMapping,vm.form);
+            alreadySaved = ImportWizardStore.getSaveObjects($state.current.name);
+            toSave = ImportUtils.updateFormatSavedObj(alreadySaved, formats.field);
+        }
         ImportWizardStore.setSaveObjects(toSave);
         vm.checkValid(vm.form);
         
