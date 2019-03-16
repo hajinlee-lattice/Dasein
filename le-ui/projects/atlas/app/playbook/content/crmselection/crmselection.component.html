@@ -69,7 +69,7 @@
                         For the above selected System Org, this time we can not find recommendations that have blank Account ID.
                     </div>
 
-                    <div class="blank-ids" ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount && $ctrl.nullCount !== 0 && $ctrl.nullCount !== null">
+                    <div class="blank-ids" ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount && $ctrl.nullCount !== 0 && $ctrl.nullCount !== null && $ctrl.stored.crm_selection.externalSystemName != 'Marketo'">
                         <p>For the above selected System Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. <span  ng-if="$ctrl.nullCount != $ctrl.totalCount">It is advisable to remove these recommendations from the campaigns as they will fail to launch your {{$ctrl.stored.crm_selection.externalSystemType}} system.</span></p>
                         <p ng-if="$ctrl.nullCount != $ctrl.totalCount">Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
                         <label ng-if="$ctrl.nullCount != $ctrl.totalCount">
@@ -79,6 +79,10 @@
                                 ng-change="$ctrl.setExcludeItems($ctrl.excludeItemsWithoutSalesforceId)">
                                 Remove all recommendations with blank Account ID
                         </label>
+                    </div>
+
+                    <div class="blank-ids" ng-if="$ctrl.externalIntegrationEnabled && $ctrl.stored.crm_selection.externalSystemName == 'Marketo' && !$ctrl.loadingCoverageCounts && $ctrl.nullCount > 0">
+                        <p>For the above selected System Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> contacts do not have an email ID. These contacts won't included in the campaign as they will fail to launch in Marketo.
                     </div>
 
                 </div>
