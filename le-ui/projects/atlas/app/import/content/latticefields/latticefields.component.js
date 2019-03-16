@@ -8,7 +8,7 @@ angular.module('lp.import.wizard.latticefields', [])
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
-    console.log('ALREADY SAVED ****> ',alreadySaved)
+    //console.log('ALREADY SAVED ****> ',alreadySaved)
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
         // vm.updateAnalysisFields();
@@ -21,7 +21,7 @@ angular.module('lp.import.wizard.latticefields', [])
         return list;
     }
     let masterRedux = this.redux = $state.get('home.import').data.redux;
-    // console.log('STORE ',masterRedux);
+    // //console.log('STORE ',masterRedux);
     var matchingFieldsList = makeList(MatchingFields),
         analysisFieldsList = makeList(AnalysisFields),
         ignoredFieldLabel = '-- Unmapped Field --',
@@ -52,7 +52,7 @@ angular.module('lp.import.wizard.latticefields', [])
         fieldDateTooltip: ImportWizardStore.tooltipDateTxt
     });
     
-    // console.log('======>>>>>÷>>>>>> ', vm.fieldMappings);
+    // //console.log('======>>>>>÷>>>>>> ', vm.fieldMappings);
     vm.latticeFieldsDescription =  function(type) {
         switch (type) {
             case 'Account': return "Lattice uses several account fields that you should provide for each record, if possible. Please review the fields below to make sure everything is mapping correctly."; 
@@ -137,7 +137,7 @@ angular.module('lp.import.wizard.latticefields', [])
         for(var i in mapping) {
             var item = mapping[i],
                 map = makeObject(item.userField);
-            // console.log('ITEM!!!!!!!! ', item);
+            // //console.log('ITEM!!!!!!!! ', item);
 
             if(!map.userField) {
                 /**
@@ -162,7 +162,7 @@ angular.module('lp.import.wizard.latticefields', [])
             }
 
             if(field){
-                console.log('THE FIELD',field, ' - Mapping ', map, ' - $$$$$$ ', item);
+                // //console.log('THE FIELD',field, ' - Mapping ', map, ' - $$$$$$ ', item);
                 if(updateFormats !== false) {
                     vm.updateDateFormat(field, map);
                 }
@@ -187,12 +187,12 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         
         ImportWizardStore.setSaveObjects(_mapping);
-        console.log('MAPPING &&&&&&&&&&&& ',_mapping);
+        // ////console.log('MAPPING &&&&&&&&&&&& ',_mapping);
         vm.checkValid(form);
     };
     
     vm.initDateFields = () => {
-        // console.log('@@@@@@@@@@@@@@ INIT @@@@@@@@@@@@@@@@@@@@',vm.fieldMappings, vm.analysisFieldsList);
+        // ////console.log('@@@@@@@@@@@@@@ INIT @@@@@@@@@@@@@@@@@@@@',vm.fieldMappings, vm.analysisFieldsList);
     
         vm.analysisFieldsList.forEach(field => {
                 vm.fieldMappings.forEach(obj => {
@@ -210,11 +210,11 @@ angular.module('lp.import.wizard.latticefields', [])
             });
         }, 0);
 
-        console.log('@@@@@@@@@@@@@ >>>>>', vm.analysisFieldsList);
+        ////console.log('@@@@@@@@@@@@@ >>>>>', vm.analysisFieldsList);
     }
 
     vm.setFormatFromAnalysis = (map) => {
-        // console.log('~~~~~~~~%%%%%%%%% ', map, vm.analysisFieldsList);
+        // ////console.log('~~~~~~~~%%%%%%%%% ', map, vm.analysisFieldsList);
         Object.keys(vm.fieldMappings).forEach(key => {
             let field = vm.fieldMappings[key];
             if(map.mappedField == field.mappedField){
@@ -224,8 +224,8 @@ angular.module('lp.import.wizard.latticefields', [])
                 return;
             }
         });
-        // console.log('~~~~~~~~%%%%%%%%% ', map);
-        // console.log('%%%%%%%%%%%% ~~~~~~~~ %%%%%%%%%%%% ');
+        // //console.log('~~~~~~~~%%%%%%%%% ', map);
+        // //console.log('%%%%%%%%%%%% ~~~~~~~~ %%%%%%%%%%%% ');
     }
     vm.updateDateFormat = (field, map) => {
         let fieldName = field.name;
