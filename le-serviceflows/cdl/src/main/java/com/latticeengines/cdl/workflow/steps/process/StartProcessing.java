@@ -169,11 +169,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (MapUtils.isEmpty(dcStatus.getDateMap())) {
             dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
         }
+        dcStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
 
-        // update LDC builder number of inactive version with PA's
-        dcStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), dcStatus, inactiveVersion);
     }
 
     @SuppressWarnings("unused")

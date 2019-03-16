@@ -29,6 +29,7 @@ import com.amazonaws.util.IOUtils;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionArtifactEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusHistoryEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -66,6 +68,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
+
+    @Inject
+    private DataCollectionStatusHistoryEntityMgr dataCollectionStatusHistoryEntityMgr;
 
     @Inject
     private DataCollectionArtifactEntityMgr dataCollectionArtifactEntityMgr;
@@ -476,6 +481,40 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public void saveStatusHistory(String customerSpace, DataCollectionStatus status, Version version) {
+        DataCollectionStatus currentStatus = getOrCreateDataCollectionStatus(customerSpace, version);
+        DataCollectionStatusHistory statusHistory = new DataCollectionStatusHistory();
+        statusHistory.setDataCollection(currentStatus.getDataCollection());
+        statusHistory.setTenant(currentStatus.getTenant());
+        statusHistory.setVersion(currentStatus.getVersion());
+        populateStatusDetailHistory(status, statusHistory);
+        dataCollectionStatusHistoryEntityMgr.create(statusHistory);
+
+    }
+
+    @Override
+    public List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace, Version version) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return dataCollectionStatusHistoryEntityMgr.findByTenantAndVersionOrderByCreatedDesc(tenant, version);
+    }
+
+    private void populateStatusDetailHistory(DataCollectionStatus status, DataCollectionStatusHistory statusHistory) {
+        statusHistory.setAccountCount(status.getAccountCount());
+        statusHistory.setApsRollingPeriod(status.getApsRollingPeriod());
+        statusHistory.setContactCount(status.getContactCount());
+        statusHistory.setDataCloudBuildNumber(status.getDataCloudBuildNumber());
+        statusHistory.setDateMap(status.getDateMap());
+        statusHistory.setEvaluationDate(status.getEvaluationDate());
+        statusHistory.setMaxTxnDate(status.getMaxTxnDate());
+        statusHistory.setMinTxnDate(status.getMinTxnDate());
+        statusHistory.setOrphanContactCount(status.getOrphanContactCount());
+        statusHistory.setOrphanTransactionCount(status.getOrphanTransactionCount());
+        statusHistory.setProductCount(status.getProductCount());
+        statusHistory.setTransactionCount(status.getTransactionCount());
+        statusHistory.setUnmatchedAccountCount(status.getUnmatchedAccountCount());
+    }
+
+    @Override
     public DataCollection createDefaultCollection() {
         return dataCollectionEntityMgr.createDefaultCollection();
     }
@@ -741,4 +780,5 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         return others;
     }
+
 }

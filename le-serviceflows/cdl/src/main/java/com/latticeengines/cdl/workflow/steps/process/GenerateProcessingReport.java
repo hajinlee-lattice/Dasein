@@ -210,29 +210,25 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             entitiesSummaryNode.set(entity.name(), entityNode);
         }
 
-        updateCollectionStatus(currentCnts);
-        updateCollectionStatusWithOrphans(orphanCnts);
+        updateCollectionStatus(currentCnts, orphanCnts);
     }
 
-    private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts) {
+    private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts,
+            Map<OrphanRecordsType, Long> orphanCnts) {
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
         detail.setTransactionCount(currentCnts.get(BusinessEntity.Transaction));
         detail.setProductCount(currentCnts.get(BusinessEntity.Product));
-        putObjectInContext(CDL_COLLECTION_STATUS, detail);
-        log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
-    }
 
-    private void updateCollectionStatusWithOrphans(Map<OrphanRecordsType, Long> orphanCnts) {
-        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setOrphanContactCount(orphanCnts.get(OrphanRecordsType.CONTACT));
         detail.setUnmatchedAccountCount(orphanCnts.get(OrphanRecordsType.UNMATCHED_ACCOUNT));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
+        dataCollectionProxy.saveDataCollectionStatusHistory(customerSpace.toString(), detail, inactive);
     }
+
 
     private Map<BusinessEntity, Long> retrieveCurrentEntityCnts() {
         Map<BusinessEntity, Long> currentCnts = new HashMap<>();

@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -94,6 +95,27 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}/status",
                 shortenCustomerSpace(customerSpace), version);
         post("save Or Update Status", url, detail, Void.class);
+    }
+
+    public void saveDataCollectionStatusHistory(String customerSpace, DataCollectionStatus detail,
+            DataCollection.Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}/statushistory",
+                shortenCustomerSpace(customerSpace), version);
+        post("save status history", url, detail, Void.class);
+    }
+
+    public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(String customerSpace,
+            DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/statushistory";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        if (version != null) {
+            urlPattern += "?version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
+        List<?> list = get("get dataCollection status history", url, List.class);
+        return JsonUtils.convertList(list, DataCollectionStatusHistory.class);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, DataCollection.Version version) {
