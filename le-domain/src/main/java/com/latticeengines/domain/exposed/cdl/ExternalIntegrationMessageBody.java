@@ -18,6 +18,8 @@ public class ExternalIntegrationMessageBody {
 
     private String solutionInstanceId;
 
+    private String folderName;
+
     public String getTrayTenantId() {
         return trayTenantId;
     }
@@ -64,6 +66,14 @@ public class ExternalIntegrationMessageBody {
 
     public void setSolutionInstanceId(String solutionInstanceId) {
         this.solutionInstanceId = solutionInstanceId;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
+    }
+
+    public String getFolderName() {
+        return folderName;
     }
 
 }

@@ -15,6 +15,8 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     private String externalAudienceName;
 
+    private String externalFolderName;
+
     public String getPlayName() {
         return playName;
     }
@@ -53,6 +55,14 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     public void setExternalAudienceName(String externalAudienceName) {
         this.externalAudienceName = externalAudienceName;
+    }
+
+    public String getExternalFolderName() {
+        return externalFolderName;
+    }
+
+    public void setExternalFolderName(String externalFolderName) {
+        this.externalFolderName = externalFolderName;
     }
 
 }
