@@ -44,7 +44,8 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAccountDeploymentTestNG {
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountWithAdvancedMatchDeploymentTestNG.class);
 
-    private static final String ADVANCED_MATCH_AVRO_VERSION = "5";
+    static final String CHECK_POINT = "entitymatch_process1";
+
     private static final int REAL_TIME_MATCH_RECORD_LIMIT = 200;
 
     @Inject
@@ -89,7 +90,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected String getAvroFileVersion() {
         // advanced matching should use a different version
-        return ADVANCED_MATCH_AVRO_VERSION;
+        return S3_AVRO_VERSION_ADVANCED_MATCH;
     }
 
     @Override
@@ -228,5 +229,10 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         return null;
+    }
+
+    @Override
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
     }
 }

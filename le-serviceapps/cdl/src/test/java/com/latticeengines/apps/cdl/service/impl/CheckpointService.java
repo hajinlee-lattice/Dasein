@@ -40,6 +40,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.apps.core.util.FeatureFlagUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -48,8 +50,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -71,6 +75,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -119,6 +124,12 @@ public class CheckpointService {
     @Inject
     private WorkflowJobService workflowJobService;
 
+    @Inject
+    private MatchProxy matchProxy;
+
+    @Inject
+    private BatonService batonService;
+
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
@@ -143,17 +154,17 @@ public class CheckpointService {
         this.mainTestTenant = mainTestTenant;
     }
 
-    public void resumeCheckpoint(String checkpoint, int s3Version) throws IOException {
-        resumeCheckpoint(checkpoint, String.valueOf(s3Version));
+    public void resumeCheckpoint(String checkpoint, int checkpointVersion) throws IOException {
+        resumeCheckpoint(checkpoint, String.valueOf(checkpointVersion));
     }
 
-    public void resumeCheckpoint(String checkpoint, String s3Version) throws IOException {
-        unzipCheckpoint(checkpoint, s3Version);
-        cloneAnUploadTables(checkpoint, s3Version);
+    public void resumeCheckpoint(String checkpoint, String checkpointVersion) throws IOException {
+        unzipCheckpoint(checkpoint, checkpointVersion);
+        cloneAnUploadTables(checkpoint, checkpointVersion);
         updateDataCloudBuildNumber();
     }
 
-    private void cloneAnUploadTables(String checkpoint, String s3Version) throws IOException {
+    private void cloneAnUploadTables(String checkpoint, String checkpointVersion) throws IOException {
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
         String[] tenantNames = new String[1];
 
@@ -175,7 +186,7 @@ public class CheckpointService {
                             }
                             tableNames.add(table.getName());
                             if (activeVersion.equals(version)) {
-                                String redshiftTable = checkpointRedshiftTableName(checkpoint, role, s3Version);
+                                String redshiftTable = checkpointRedshiftTableName(checkpoint, role, checkpointVersion);
                                 if (redshiftService.hasTable(redshiftTable)) {
                                     redshiftTablesToClone.put(redshiftTable, table.getName());
                                 }
@@ -222,6 +233,8 @@ public class CheckpointService {
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
         resumeDbState();
+
+        copyEntitySeedTable(checkpoint, checkpointVersion);
 
         dataCollectionProxy.switchVersion(mainTestTenant.getId(), activeVersion);
         log.info("Switch active version to " + activeVersion);
@@ -711,13 +724,16 @@ public class CheckpointService {
     }
 
     public void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
+        if (!isEntityMatchEnabled()) {
+            return;
+        }
         StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
                 + " you must run the following HTTP Request:\n");
         msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
         EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
         entityPublishRequest.setEntity(BusinessEntity.Account.toString());
         entityPublishRequest.setSrcTenant(mainTestTenant);
-        String destTenantId = "cdlend2end_" + checkpointName + "_" + checkpointVersion;
+        String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion);
         Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
         entityPublishRequest.setDestTenant(destTenant);
         entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
@@ -732,4 +748,31 @@ public class CheckpointService {
         }
     }
 
+    private void copyEntitySeedTable(String checkpoint, String checkpointVersion) {
+        if (!isEntityMatchEnabled()) {
+            return;
+        }
+        EntityPublishRequest request = new EntityPublishRequest();
+        request.setEntity(BusinessEntity.Account.toString());
+        String srcTenantId = getCheckPointTenantId(checkpoint, checkpointVersion);
+        Tenant srcTenant = new Tenant(CustomerSpace.parse(srcTenantId).toString());
+        request.setSrcTenant(srcTenant);
+        request.setDestTenant(mainTestTenant);
+        request.setDestEnv(EntityMatchEnvironment.SERVING);
+        request.setDestTTLEnabled(true);
+        EntityPublishStatistics stats = matchProxy.publishEntity(request);
+        log.info("Copied {} Account seeds and {} Account lookup entries from tenant {} to tenant {}",
+                stats.getSeedCount(), stats.getLookupCount(), srcTenant.getId(), mainTestTenant.getId());
+        Assert.assertTrue(stats.getSeedCount() > 0);
+        Assert.assertTrue(stats.getLookupCount() > 0);
+    }
+
+    private String getCheckPointTenantId(String checkpoint, String checkpointVersion) {
+        return "cdlend2end_" + checkpoint + "_" + checkpointVersion;
+    }
+
+    private boolean isEntityMatchEnabled() {
+        FeatureFlagValueMap flags = batonService.getFeatureFlags(CustomerSpace.parse(mainTestTenant.getId()));
+        return FeatureFlagUtils.isEntityMatchEnabled(flags);
+    }
 }
