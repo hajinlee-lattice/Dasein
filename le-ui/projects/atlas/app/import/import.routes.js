@@ -409,7 +409,7 @@ angular
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
-                        console.log(result.Result);
+                        //console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -467,13 +467,19 @@ angular
             },
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
-                    return ImportWizardStore.getFieldDocument();
+                    let ret = ImportWizardStore.getFieldDocument();
+                    //console.log('Field Document ', ret);
+                    return ret;
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
-                    return ImportWizardStore.getUnmappedFields();
+                    let ret = ImportWizardStore.getUnmappedFields();
+                    //console.log('Unmapped fields ', ret);
+                    return ret;
                 },
                 mergedFieldDocument: function($q, ImportWizardStore) {
-                    return ImportWizardStore.mergeFieldDocument({segment: true, save: false});
+                    let ret = ImportWizardStore.mergeFieldDocument({segment: true, save: false});
+                    //console.log('Merged field ', ret);
+                    return ret;
                 },
                 Type: function(){
                     return "Contacts";
@@ -513,7 +519,7 @@ angular
                         { name: 'LeadStatus', displayName: 'Lead Status', type: 'TEXT'},
                         { name: 'LeadSource', displayName: 'Lead Source', type: 'TEXT'},
                         { name: 'LeadType', displayName: 'Lead Type', type: 'TEXT'},
-                        { name: 'CreatedDate', displayName: 'Created Date', type: createdDate.fieldType, fromExistingTemplate: createdDate.fromExistingTemplate },
+                        { name: 'CreatedDate', displayName: 'Created Date', type: createdDate.fieldType, fromExistingTemplate: createdDate.fromExistingTemplate},
                         { name: 'LastModifiedDate', displayName: 'Last Modified Date', type: lastModifiedDate.fieldType, fromExistingTemplate: lastModifiedDate.fromExistingTemplate},
                         { name: 'DoNotMail', displayName: 'Has Opted Out of Email',  type: 'TEXT' },
                         { name: 'DoNotCall', displayName: 'Has Opted Out of Phone Calls', type: 'TEXT' }
