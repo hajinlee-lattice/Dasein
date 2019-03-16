@@ -68,6 +68,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         config.setLookupIdMap(lookupIdMap);
         config.setExternalAudienceId(audienceId);
         config.setExternalAudienceName("externalAudienceName");
+        config.setExternalFolderName("folderName");
 
         exportStep.setConfiguration(config);
     }

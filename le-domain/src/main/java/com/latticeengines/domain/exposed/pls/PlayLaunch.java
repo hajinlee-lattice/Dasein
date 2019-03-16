@@ -184,6 +184,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "AUDIENCE_NAME", nullable = true)
     private String audienceName;
 
+    @JsonProperty("folderName")
+    @Column(name = "FOLDER_NAME", nullable = true)
+    private String folderName;
+
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
@@ -454,5 +458,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
+    }
+
+    public String getFolderName() {
+        return folderName;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
     }
 }
