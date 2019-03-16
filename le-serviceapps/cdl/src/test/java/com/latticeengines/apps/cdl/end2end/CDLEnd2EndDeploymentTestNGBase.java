@@ -1258,6 +1258,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
+        if (MapUtils.isEmpty(expectedEntityCount)) {
+            return;
+        }
         expectedEntityCount.forEach((key, value) -> {
             if (key != BusinessEntity.ProductHierarchy) {
                 Assert.assertEquals(Long.valueOf(countInRedshift(key)), value);
