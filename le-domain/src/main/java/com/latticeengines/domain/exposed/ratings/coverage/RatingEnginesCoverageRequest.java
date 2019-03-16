@@ -16,6 +16,8 @@ public class RatingEnginesCoverageRequest {
     private boolean loadContactsCount;
 
     private boolean loadContactsCountByBucket;
+    
+    private boolean loadContactsWithoutEmailCount;
 
     private String lookupId;
 
@@ -58,5 +60,14 @@ public class RatingEnginesCoverageRequest {
     public void setLookupId(String lookupId) {
         this.lookupId = lookupId;
     }
+    
+    public boolean isLoadContactsWithoutEmailCount() {
+        return loadContactsWithoutEmailCount;
+    }
+
+    public void setLoadContactsWithoutEmailCount(boolean loadContactsWithoutEmailCount) {
+        this.loadContactsWithoutEmailCount = loadContactsWithoutEmailCount;
+    }
+
 
 }
