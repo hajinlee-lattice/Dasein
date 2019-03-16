@@ -409,7 +409,7 @@ angular
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
-                        console.log(result.Result);
+                        //console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -468,17 +468,17 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
                     let ret = ImportWizardStore.getFieldDocument();
-                    console.log('Field Document ', ret);
+                    //console.log('Field Document ', ret);
                     return ret;
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     let ret = ImportWizardStore.getUnmappedFields();
-                    console.log('Unmapped fields ', ret);
+                    //console.log('Unmapped fields ', ret);
                     return ret;
                 },
                 mergedFieldDocument: function($q, ImportWizardStore) {
                     let ret = ImportWizardStore.mergeFieldDocument({segment: true, save: false});
-                    console.log('Merged field ', ret);
+                    //console.log('Merged field ', ret);
                     return ret;
                 },
                 Type: function(){
