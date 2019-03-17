@@ -22,7 +22,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(resumeFromCheckPoint());
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), 500);
 
         new Thread(this::createTestSegment1).start();
@@ -34,21 +34,34 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
-                saveCheckpoint(CHECK_POINT);
+                saveCheckpoint(saveToCheckPoint());
             }
         }
 
     }
 
-    private void importData() throws Exception {
+    protected void importData() throws Exception {
         mockCSVImport(BusinessEntity.Account, 3, "Account");
         Thread.sleep(2000);
     }
 
-    private void verifyProcess() {
+    protected void verifyProcess() {
         clearCache();
         runCommonPAVerifications();
 
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
+
+        createTestSegment3();
+        verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+
+        verifyBatchServingStoreCount();
+
+        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+        verifyTestSegment3Counts(segment3Counts);
+    }
+
+    protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, ACCOUNT_2);
@@ -84,28 +97,32 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         expectedReport.put(BusinessEntity.Transaction, transactionReport);
         expectedReport.put(BusinessEntity.PurchaseHistory, purchaseHistoryReport);
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
+        return expectedReport;
+    }
 
-        createTestSegment3();
-        verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-
+    protected void verifyBatchServingStoreCount() {
         long numAccounts = 1000;
         long numContacts = 500;
-//        long numProducts = 99;
-//        long numTransactions = ???;
-//
+        // long numProducts = 99;
+        // long numTransactions = ???;
+        //
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
         Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), numProducts);
-//        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction), numTransactions);
-//
+        // Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()),
+        // numProducts);
+        // Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction),
+        // numTransactions);
+        //
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
-//
-        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_3_ACCOUNT_1,
-                BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
-        verifyTestSegment3Counts(segment3Counts);
+    }
+
+    protected String resumeFromCheckPoint() {
+        return ProcessTransactionDeploymentTestNG.CHECK_POINT;
+    }
+
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
     }
 
 }

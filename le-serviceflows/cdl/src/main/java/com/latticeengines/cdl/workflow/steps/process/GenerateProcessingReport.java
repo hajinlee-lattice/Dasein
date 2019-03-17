@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,6 +188,23 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            }
+            // Populate entity match summary
+            ObjectNode entityMatchNode = JsonUtils.createObjectNode();
+            // entity name -> pair<publish #seed, publish #lookup>
+            @SuppressWarnings("rawtypes")
+            Map<String, Map> entityPublishStats = getMapObjectFromContext(ENTITY_PUBLISH_STATS, String.class,
+                    Map.class);
+            if (MapUtils.isNotEmpty(entityPublishStats) && entityPublishStats.containsKey(entity.name())) {
+                Map<String, Integer> cntMap = JsonUtils.convertMap(entityPublishStats.get(entity.name()), String.class,
+                        Integer.class);
+                cntMap.entrySet().forEach(ent -> {
+                    entityMatchNode.put(ent.getKey(), String.valueOf(ent.getValue()));
+                });
+            }
+            // TODO: @Jonathan Add something here for DP-9342
+            if (entityMatchNode.fieldNames().hasNext()) {
+                entityNode.set(ReportPurpose.ENTITY_MATCH_SUMMARY.getKey(), entityMatchNode);
             }
 
             entitiesSummaryNode.set(entity.name(), entityNode);
