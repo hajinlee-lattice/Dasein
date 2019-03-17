@@ -53,6 +53,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchJunctionActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
 import com.latticeengines.domain.exposed.actors.ActorType;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.utils.MatchActorUtils;
 
@@ -67,7 +68,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
     public static final String BATCH_MODE = "batch";
     public static final String REALTIME_MODE = "realtime";
 
-    private static final int MAX_ALLOWED_RECORD_COUNT_SYNC = 200;
+    private static final int MAX_ALLOWED_RECORD_COUNT_SYNC = DataCloudConstants.REAL_TIME_MATCH_RECORD_LIMIT;
     private static final int MAX_ALLOWED_RECORD_COUNT_ASYNC = 10000;
     private final AtomicInteger maxAllowedRecordCount = new AtomicInteger(MAX_ALLOWED_RECORD_COUNT_SYNC);
 

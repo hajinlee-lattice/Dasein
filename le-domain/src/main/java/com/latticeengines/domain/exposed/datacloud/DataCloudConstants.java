@@ -204,4 +204,9 @@ public final class DataCloudConstants {
     public static final String ATTR_VAL_0 = "0";
     public static final String ATTR_VAL_TRUE = "True";
     public static final String ATTR_VAL_FALSE = "False";
+
+    /***********************************
+     * Matcher Behavior
+     ***********************************/
+    public static final int REAL_TIME_MATCH_RECORD_LIMIT = 200;
 }
