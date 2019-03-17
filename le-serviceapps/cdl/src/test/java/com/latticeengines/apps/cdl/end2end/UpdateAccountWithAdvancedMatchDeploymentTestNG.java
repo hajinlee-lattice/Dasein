@@ -199,6 +199,9 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
      * @throws Exception
      */
     private Triple<List<String>, List<String>, List<String>> getAccountIds(int recordLimit) throws Exception {
+        // Currently there are totally 1000 accounts only. Reading all into
+        // memory is fine. If account test artifact is enlarged in future, might
+        // change to iterator
         List<GenericRecord> records1stPA = AvroUtils
                 .readFromInputStream(getTestAvroFile(BusinessEntity.Account, 1).getRight());
         records1stPA.addAll(AvroUtils.readFromInputStream(getTestAvroFile(BusinessEntity.Account, 2).getRight()));
