@@ -20,6 +20,11 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.seed.SeedDomainOnlyCleanupConfig;
 
+/**
+ * Remove domain-only entries from seed whose domain cannot match to any domain
+ * based sources. In AM rebuild pipelines, apply this dataflow to
+ * LatticeCacheSeed
+ */
 @Component(SeedDomainOnlyCleanup.DATAFLOW_BEAN_NAME)
 public class SeedDomainOnlyCleanup extends ConfigurableFlowBase<SeedDomainOnlyCleanupConfig> {
 
