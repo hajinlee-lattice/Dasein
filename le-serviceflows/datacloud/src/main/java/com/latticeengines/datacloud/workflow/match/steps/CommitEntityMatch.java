@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.workflow.match.steps;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -109,6 +111,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
      * AND have import
      */
     private Set<String> getEntityImportSet() {
+        @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
         if (MapUtils.isNotEmpty(entityImportsMap)) {
@@ -160,6 +163,19 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             scanSeeds.clear();
         } while (CollectionUtils.isNotEmpty(getSeedIds));
         log.info("Published {} seeds and {} lookup entries for entity = {}", nSeeds, nLookups, entity);
+        // Assume CommitEntityMatch step might run multiple times but same
+        // entity is only published once
+        // entity name -> {"PUBLISH_SEED":nSeeds, "PUBLISH_LOOKUP":nLookups}
+        @SuppressWarnings("rawtypes")
+        Map<String, Map> entityPublishStats = getMapObjectFromContext(ENTITY_PUBLISH_STATS, String.class, Map.class);
+        if (entityPublishStats == null) {
+            entityPublishStats = new HashMap<>();
+        }
+        Map<String, Integer> cntMap = new HashMap<>();
+        cntMap.put(ReportConstants.PUBLISH_SEED, nSeeds);
+        cntMap.put(ReportConstants.PUBLISH_LOOKUP, nLookups);
+        entityPublishStats.put(entity, cntMap);
+        putObjectInContext(ENTITY_PUBLISH_STATS, entityPublishStats);
     }
 
 }

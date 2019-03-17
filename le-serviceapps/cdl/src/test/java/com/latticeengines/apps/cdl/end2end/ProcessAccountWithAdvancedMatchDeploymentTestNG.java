@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.REAL_TIME_MATCH_RECORD_LIMIT;
+
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,8 +47,6 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountWithAdvancedMatchDeploymentTestNG.class);
 
     static final String CHECK_POINT = "entitymatch_process1";
-
-    private static final int REAL_TIME_MATCH_RECORD_LIMIT = 200;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;

@@ -140,7 +140,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    private static final int S3_CHECKPOINTS_VERSION = 23;
+    static final int S3_CHECKPOINTS_VERSION = 23;
     private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 23;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -874,7 +874,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                         } else if (reportValue instanceof String) {
                             Assert.assertFalse(consolidateSummaryNode.get(keySplits[1]).isNull());
                         }
-                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.name())) {
+                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.name())
+                            || keySplits[0].equals(ReportPurpose.ENTITY_MATCH_SUMMARY.name())) {
                         Assert.assertTrue(entityNumberNode.has(keySplits[1]));
                         Assert.assertEquals(entityNumberNode.get(keySplits[1]).asLong(), reportValue);
                     }

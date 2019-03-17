@@ -727,20 +727,23 @@ public class CheckpointService {
         if (!isEntityMatchEnabled()) {
             return;
         }
-        StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
-                + " you must run the following HTTP Request:\n");
-        msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
-        EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
-        entityPublishRequest.setEntity(BusinessEntity.Account.toString());
-        entityPublishRequest.setSrcTenant(mainTestTenant);
-        String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion);
-        Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
-        entityPublishRequest.setDestTenant(destTenant);
-        entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
-        entityPublishRequest.setDestTTLEnabled(false);
-        msg.append("Body:\n");
-        ObjectMapper mapper = new ObjectMapper();
         try {
+            StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
+                    + " you must run the following HTTP Requests:\n");
+            msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
+            EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
+            entityPublishRequest.setEntity(BusinessEntity.Account.toString());
+            entityPublishRequest.setSrcTenant(mainTestTenant);
+            String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion);
+            Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
+            entityPublishRequest.setDestTenant(destTenant);
+            entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
+            entityPublishRequest.setDestTTLEnabled(false);
+            msg.append("Body:\n");
+            ObjectMapper mapper = new ObjectMapper();
+            msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
+            msg.append("\nPOST " + matchapiHostPort + "/match/matches/entity/publish\n");
+            entityPublishRequest.setDestEnv(EntityMatchEnvironment.SERVING);
             msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
             log.info(msg.toString());
         } catch (JsonProcessingException e) {
@@ -767,7 +770,7 @@ public class CheckpointService {
         Assert.assertTrue(stats.getLookupCount() > 0);
     }
 
-    private String getCheckPointTenantId(String checkpoint, String checkpointVersion) {
+    public static String getCheckPointTenantId(String checkpoint, String checkpointVersion) {
         return "cdlend2end_" + checkpoint + "_" + checkpointVersion;
     }
 
