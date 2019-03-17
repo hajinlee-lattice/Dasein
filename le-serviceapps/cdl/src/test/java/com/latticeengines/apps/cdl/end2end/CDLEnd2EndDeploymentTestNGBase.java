@@ -867,17 +867,22 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
                 entityReport.forEach((reportKey, reportValue) -> {
                     String[] keySplits = reportKey.split("_");
-                    if (keySplits[0].equals(ReportPurpose.ENTITIES_SUMMARY.name())) {
+                    if (keySplits[0].equals(ReportPurpose.ENTITIES_SUMMARY.getKey())) {
                         Assert.assertTrue(consolidateSummaryNode.has(keySplits[1]));
                         if (reportValue instanceof Long) {
                             Assert.assertEquals(consolidateSummaryNode.get(keySplits[1]).asLong(), reportValue);
                         } else if (reportValue instanceof String) {
                             Assert.assertFalse(consolidateSummaryNode.get(keySplits[1]).isNull());
                         }
-                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.name())
-                            || keySplits[0].equals(ReportPurpose.ENTITY_MATCH_SUMMARY.name())) {
+                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.getKey())) {
                         Assert.assertTrue(entityNumberNode.has(keySplits[1]));
                         Assert.assertEquals(entityNumberNode.get(keySplits[1]).asLong(), reportValue);
+                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_MATCH_SUMMARY.getKey())) {
+                        ObjectNode entityMatchNode = (ObjectNode) entityNode
+                                .get(ReportPurpose.ENTITY_MATCH_SUMMARY.getKey());
+                        Assert.assertNotNull(entityMatchNode);
+                        Assert.assertTrue(entityMatchNode.has(keySplits[1]));
+                        Assert.assertEquals(entityMatchNode.get(keySplits[1]).asLong(), reportValue);
                     }
                 });
             });
