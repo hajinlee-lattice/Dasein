@@ -151,7 +151,7 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.validateNextStep = function () {
-        if (Object.keys(vm.productsSelected).length > 0 && vm.purchasedBeforePeriod >= 0) {
+        if (Object.keys(vm.productsSelected).length > 0 && (vm.purchasedBeforePeriod || vm.engineType === 'CROSS_SELL_FIRST_PURCHASE')) {
             vm.setValidation('products', true);
         } else {
             vm.setValidation('products', false);
