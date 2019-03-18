@@ -220,12 +220,12 @@ public class DataLakeServiceImpl implements DataLakeService {
                 try {
                     FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
                             Collections.singletonList(accountId), lookupIdColumn, attributes, null, true);
-                    dataPage = entityProxy.getData(customerSpace, query);
+                    dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
                 } catch (Exception ex) {
                     log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
                     FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
                             Collections.singletonList(accountId), lookupIdColumn, attributes, null, false);
-                    dataPage = entityProxy.getData(customerSpace, query);
+                    dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
                 }
             }
 
@@ -332,12 +332,12 @@ public class DataLakeServiceImpl implements DataLakeService {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
                     lookupIdColumn, null, true);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
-            entityData = entityProxy.getData(customerSpace, frontEndQuery);
+            entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         } catch (Exception e) {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
                     lookupIdColumn, null, false);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
-            entityData = entityProxy.getData(customerSpace, frontEndQuery);
+            entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         }
 
         return AccountExtensionUtil.extractAccountIds(entityData);

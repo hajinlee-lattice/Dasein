@@ -121,7 +121,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
-        DataPage cachedDataPage = entityProxy.getData( //
+        DataPage cachedDataPage = entityProxy.getDataFromObjectApi( //
                 tenant.getId(), //
                 entityFrontEndQuery);
         return cachedDataPage;

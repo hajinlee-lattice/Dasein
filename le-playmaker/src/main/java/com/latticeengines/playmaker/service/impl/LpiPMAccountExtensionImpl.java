@@ -263,13 +263,13 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                     lookupIdColumn, start, true);
             setPageFilter(frontEndQuery, offset, maximum);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
-            entityData = entityProxy.getData(customerSpace, frontEndQuery);
+            entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         } catch (Exception e) {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
                     lookupIdColumn, start, false);
             setPageFilter(frontEndQuery, offset, maximum);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
-            entityData = entityProxy.getData(customerSpace, frontEndQuery);
+            entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         }
 
         return AccountExtensionUtil.extractAccountIds(entityData);
@@ -352,9 +352,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                 .getDecoratedMetadata(customerSpace, entity, filterByPredefinedSelection).collectList().block();
         if (CollectionUtils.isNotEmpty(cms)) {
             if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                FrontEndQuery frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Product);
-                DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
+                DataPage dataPage = entityProxy.getProducts(customerSpace);
                 Map<String, String> productNameMap = new HashMap<>();
                 if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
                     dataPage.getData().forEach(map -> productNameMap.put( //

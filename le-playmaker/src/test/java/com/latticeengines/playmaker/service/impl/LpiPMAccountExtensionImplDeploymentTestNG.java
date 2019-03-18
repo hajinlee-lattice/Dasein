@@ -131,13 +131,13 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         PageFilter pageFilter = new PageFilter(0L, 5L);
         frontEndQuery.setPageFilter(pageFilter);
 
-        DataPage result = entityProxy.getData(testPlayCreationHelper.getTenant().getId(), frontEndQuery);
+        DataPage result = entityProxy.getDataFromObjectApi(testPlayCreationHelper.getTenant().getId(), frontEndQuery);
         Assert.assertNotNull(result);
         Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
         Assert.assertEquals(result.getData().size(), 5);
-        internalAccountIds = new ArrayList<String>();
-        sfdcAccountIds = new ArrayList<String>();
-        result.getData().stream().forEach(row -> {
+        internalAccountIds = new ArrayList<>();
+        sfdcAccountIds = new ArrayList<>();
+        result.getData().forEach(row -> {
             Assert.assertTrue(row.containsKey(InterfaceName.AccountId.name()));
             Assert.assertTrue(row.containsKey(InterfaceName.SalesforceAccountID.name()));
             String actualInternalAccountId = row.get(InterfaceName.AccountId.name()).toString();

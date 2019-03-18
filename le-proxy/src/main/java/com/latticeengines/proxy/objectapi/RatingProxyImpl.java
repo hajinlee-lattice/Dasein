@@ -6,20 +6,14 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -38,32 +32,12 @@ import reactor.core.publisher.Mono;
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingProxy {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(com.latticeengines.proxy.exposed.objectapi.RatingProxy.class);
-
-    private final CacheManager cacheManager;
-
     private final RatingProxyImpl _ratingProxy;
 
-    private LocalCacheManager<String, Map<String, Long>> coverageCache;
-
     @Inject
-    public RatingProxyImpl(CacheManager cacheManager, RatingProxyImpl ratingProxy) {
+    public RatingProxyImpl(RatingProxyImpl ratingProxy) {
         super("objectapi/customerspaces");
-        this.cacheManager = cacheManager;
         this._ratingProxy = ratingProxy;
-        coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, str -> {
-            String[] tokens = str.split("\\|");
-            return getCoverageFromApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
-        }, 2000); //
-    }
-
-    @PostConstruct
-    public void postConstruct() {
-        if (cacheManager instanceof CompositeCacheManager) {
-            log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singletonList(coverageCache));
-        }
     }
 
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
@@ -98,10 +72,10 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", #customerSpace, #frontEndQuery)")
-    public Map<String, Long> getCoverageFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|rating_coverage\", #tenantId, #frontEndQuery)")
+    public Map<String, Long> getCoverageFromCache(String tenantId, FrontEndQuery frontEndQuery) {
         return getCoverageFromApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+                String.format("%s|%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
 
     private RatingModel normalizeRatingModel(RatingModel ratingModel) {

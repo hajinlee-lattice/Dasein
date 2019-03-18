@@ -13,7 +13,7 @@ public class RevenueToPercentileMapperUnitTestNG {
     @Test(groups = "unit")
     public void testPredictedRevenueMapping() {
         ScoreDerivation scoreDerivation = loadScoreDerivationFromResource(
-            "/com/latticeengines/dataflow/runtime/cascading/cdl/evscorederivation.json").getRevenueScoreDerivation();
+            "com/latticeengines/dataflow/runtime/cascading/cdl/evscorederivation.json").getRevenueScoreDerivation();
 
         Assert.assertNotNull(scoreDerivation);
         RevenueToPercentileMapper mapper = new RevenueToPercentileMapper(scoreDerivation);
@@ -29,7 +29,7 @@ public class RevenueToPercentileMapperUnitTestNG {
     @Test(groups = "unit")
     public void testExpectedRevenueMapping() {
         ScoreDerivation scoreDerivation = loadScoreDerivationFromResource(
-            "/com/latticeengines/dataflow/runtime/cascading/cdl/evscorederivation.json").getEVScoreDerivation();
+            "com/latticeengines/dataflow/runtime/cascading/cdl/evscorederivation.json").getEVScoreDerivation();
 
         Assert.assertNotNull(scoreDerivation);
         RevenueToPercentileMapper mapper = new RevenueToPercentileMapper(scoreDerivation);
@@ -44,7 +44,7 @@ public class RevenueToPercentileMapperUnitTestNG {
 
     private EVScoreDerivation loadScoreDerivationFromResource(String resourceName) {
         try {
-            InputStream inputStream = ClassLoader.class.getResourceAsStream(resourceName);
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
             EVScoreDerivation sd = JsonUtils.deserialize(inputStream, EVScoreDerivation.class);
             return sd;
         } catch (Exception e) {

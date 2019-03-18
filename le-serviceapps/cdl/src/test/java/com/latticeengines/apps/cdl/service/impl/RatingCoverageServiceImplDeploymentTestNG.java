@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,9 +43,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
@@ -72,19 +72,19 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     private static final String DUMMY_ID = "DUMMY_ID";
 
-    @Autowired
+    @Inject
     private RatingCoverageProxy ratingCoverageProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
+    @Inject
     private EntityProxy entityProxy;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
     private Play play;
@@ -562,19 +562,13 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
             return new ArrayList<>();
         }
 
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setAccountRestriction(null);
-        frontEndQuery.setContactRestriction(null);
-        PageFilter pageFilter = new PageFilter(0, 5);
-        frontEndQuery.setPageFilter(pageFilter);
-        frontEndQuery.setMainEntity(BusinessEntity.Product);
-
-        DataPage data = entityProxy.getData(tenantId, frontEndQuery);
+        DataPage data = entityProxy.getProducts(tenantId);
         List<String> productIds;
         if (data != null && CollectionUtils.isNotEmpty(data.getData())) {
             log.info(JsonUtils.serialize(data.getData()));
             productIds = data.getData().stream()
                     .map(product -> (String) product.get(InterfaceName.ProductId.toString()))
+                    .limit(5)
                     .collect(Collectors.toList());
         } else {
             productIds = new ArrayList<>();
