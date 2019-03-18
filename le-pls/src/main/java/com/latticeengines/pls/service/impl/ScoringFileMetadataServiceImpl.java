@@ -336,7 +336,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         attribute.setDisplayName(scoringHeaderName);
         // need to populate possible csv name after renaming initial CSV name.
         // then mapper will retrieve it
-        attribute.setPossibleCSVNames(Collections.singletonList(initialCSVName));
+        if (!initialCSVName.equals(scoringHeaderName)) {
+            attribute.setPossibleCSVNames(Collections.singletonList(initialCSVName));
+        }
         attribute.setApprovedUsage(ApprovedUsage.NONE.name());
         attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         attribute.setFundamentalType(ModelingMetadata.FT_ALPHA);
