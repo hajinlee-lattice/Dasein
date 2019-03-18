@@ -8,6 +8,8 @@ public class S3ImportMessageUtils {
 
     private static Logger log = LoggerFactory.getLogger(S3ImportMessageUtils.class);
 
+    private static String FEED_TYPE_PATTERN = "%s#%s";
+
     public static String getFeedTypeFromKey(String key) {
         if (StringUtils.isEmpty(key)) {
             return StringUtils.EMPTY;
@@ -19,7 +21,7 @@ public class S3ImportMessageUtils {
         if (parts.length == 5) {
             return parts[3];
         } else if (parts.length == 6) {
-            return "";
+            return String.format(FEED_TYPE_PATTERN, parts[2], parts[4]);
         } else {
             throw new IllegalArgumentException(String.format("Cannot parse key %s", key));
         }

@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 
 public interface S3ImportMessageEntityMgr extends BaseEntityMgrRepository<S3ImportMessage, Long> {
 
-    S3ImportMessage createS3ImportMessage(String bucket, String key);
+    S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key);
 
     List<S3ImportMessage> getS3ImportMessageGroupByDropBox();
 }

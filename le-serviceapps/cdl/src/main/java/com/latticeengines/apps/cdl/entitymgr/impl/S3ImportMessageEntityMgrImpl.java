@@ -62,14 +62,25 @@ public class S3ImportMessageEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public S3ImportMessage createS3ImportMessage(String bucket, String key) {
-        String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
-        DropBox dropBox = dropBoxEntityMgr.findDropBox(dropBoxPrefix);
-        S3ImportMessage message = new S3ImportMessage();
-        message.setBucket(bucket);
-        message.setKey(key);
-        message.setDropBox(dropBox);
-        s3ImportMessageDao.create(message);
+    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key) {
+        S3ImportMessage message;
+        if (isReaderConnection()) {
+            message = readerRepository.findByKey(key);
+        } else {
+            message = writerRepository.findByKey(key);
+        }
+        if (message != null) {
+            s3ImportMessageDao.update(message);
+            return message;
+        } else {
+            String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
+            DropBox dropBox = dropBoxEntityMgr.findDropBox(dropBoxPrefix);
+            message = new S3ImportMessage();
+            message.setBucket(bucket);
+            message.setKey(key);
+            message.setDropBox(dropBox);
+            s3ImportMessageDao.create(message);
+        }
         return message;
     }
 

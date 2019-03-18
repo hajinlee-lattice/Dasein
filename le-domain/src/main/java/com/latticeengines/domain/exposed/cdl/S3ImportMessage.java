@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
 @Table(name = "ATLAS_S3_IMPORT_MESSAGE", uniqueConstraints = {
-        @UniqueConstraint(name = "UX_FILEPATH", columnNames = { "FILE_PATH" }) })
+        @UniqueConstraint(name = "UX_KEY", columnNames = { "KEY" }) })
 public class S3ImportMessage implements HasPid, HasAuditingFields {
 
     @JsonProperty("pid")
