@@ -73,4 +73,5 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     void updateApplicationIdAndEmrClusterId(WorkflowJob workflowJob);
 
+    void updateErrorCategory(WorkflowJob workflowJob);
 }

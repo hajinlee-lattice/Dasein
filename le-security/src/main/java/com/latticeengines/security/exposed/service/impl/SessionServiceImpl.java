@@ -41,7 +41,7 @@ public class SessionServiceImpl implements SessionService {
     private static final String AUTH_ROUTE_SSO = "SSO";
     private static final String AUTH_ROUTE_GA = "GA";
     private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
-    
+
     @Inject
     private GlobalSessionManagementService globalSessionManagementService;
 
@@ -76,9 +76,9 @@ public class SessionServiceImpl implements SessionService {
         //PLS-6543. Do not allow usernames with lattice-email id.
         if(samlLoginResp.getUserId().toUpperCase().endsWith(LATTICE_ENGINES_COM)) {
             throw new LedpException(LedpCode.LEDP_19004);
-        }    
+        }
     }
-    
+
     @Override
     public Session attachSamlUserToTenant(String userName, String tenantDeploymentId) {
         Ticket ticket = samlGlobalAuthenticationService.externallyAuthenticated(userName, tenantDeploymentId);

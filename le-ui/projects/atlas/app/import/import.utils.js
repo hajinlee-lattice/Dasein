@@ -168,8 +168,9 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 if(savedObj.cdlExternalSystemType){
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
+                updateFieldDate(fieldsMapped[mapped], savedObj);
             }
-            updateFieldDate(fieldsMapped[mapped], savedObj);
+            
         });
     }
     
@@ -199,7 +200,19 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
         return already;
     }
-
+    this.updateFormatSavedObj = (savedObj, field) => {
+        var keysSaved = Object.keys(savedObj);
+        keysSaved.forEach(function(keySaved){
+            let saved = savedObj[keySaved];
+            if(saved.mappedField == field.name){
+                saved.dateFormatString = field.dateFormatString;
+                saved.timeFormatString = field.timeFormatString;
+                saved.timezone = field.timezone;
+                return;
+            }
+        });
+        return savedObj;
+    }
     this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
             var keysSaved = Object.keys(savedObj);

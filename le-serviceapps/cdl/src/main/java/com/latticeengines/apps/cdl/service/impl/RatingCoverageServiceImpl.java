@@ -343,7 +343,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         stream.forEach(ratingEngineId -> {
             try {
                 CoverageInfo coverageInfo = processSingleRatingId(tenant, null, ratingEngineId,
-                        request.isRestrictNotNullSalesforceId(), null, true, false);
+                        request.isRestrictNotNullSalesforceId(), null, true, false, false);
                 result.getRatingEngineIdCoverageMap().put(ratingEngineId, coverageInfo);
             } catch (Exception ex) {
                 log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
@@ -534,7 +534,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private CoverageInfo processSingleRatingId(Tenant tenant, MetadataSegment targetSegment, String ratingEngineId,
             boolean isRestrictNullLookupId, String lookupId, boolean loadContactCount,
-            boolean loadContactsCountByBucket) {
+            boolean loadContactsCountByBucket, boolean loadContactsWithoutEmailCount) {
         try {
             MultiTenantContext.setTenant(tenant);
 
@@ -633,21 +633,25 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                         Long contactCount = getContactCount(tenant, contactFrontEndQuery);
                         coverageInfo.setContactCount(contactCount);
                     }
+                    if (loadContactsWithoutEmailCount) {
+                        // contacts without emails
+                        Restriction noEmailRestriction = Restriction.builder()
+                                .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNull().build();
+                        Restriction contactsWithoutEmailRest = Restriction.builder()
+                                .and(accountFrontEndQuery.getContactRestriction().getRestriction(), noEmailRestriction)
+                                .build();
+                        FrontEndQuery noEmailFrontEndQuery = new FrontEndQuery();
+                        noEmailFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+                        noEmailFrontEndQuery.setAccountRestriction(accountFrontEndQuery.getAccountRestriction());
+                        noEmailFrontEndQuery.setContactRestriction(new FrontEndRestriction(contactsWithoutEmailRest));
+                        coverageInfo.setContactCountWithoutEmail(
+                                entityProxy.getCount(tenant.getId(), noEmailFrontEndQuery));
+
+                    }
                     // unscored contacts
                     unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
                     Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
                     coverageInfo.setUnscoredContactCount(unscoredContactCount);
-
-                    // contacts without emails
-                    Restriction noEmailRestriction = Restriction.builder()
-                            .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNull().build();
-                    Restriction contactsWithoutEmailRest = Restriction.builder()
-                            .and(accountFrontEndQuery.getContactRestriction().getRestriction(), noEmailRestriction).build();
-                    FrontEndQuery noEmailFrontEndQuery = new FrontEndQuery();
-                    noEmailFrontEndQuery.setMainEntity(BusinessEntity.Contact);
-                    noEmailFrontEndQuery.setAccountRestriction(accountFrontEndQuery.getAccountRestriction());
-                    noEmailFrontEndQuery.setContactRestriction(new FrontEndRestriction(contactsWithoutEmailRest));
-                    coverageInfo.setContactCountWithoutEmail(entityProxy.getCount(tenant.getId(), noEmailFrontEndQuery));
                     
 
                 } catch (Exception ex) {
@@ -1005,7 +1009,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             try {
                 CoverageInfo coverageInfo = processSingleRatingId(tenant, targetSegment, ratingModelId,
                         request.isRestrictNullLookupId(), request.getLookupId(), request.isLoadContactsCount(),
-                        request.isLoadContactsCountByBucket());
+                        request.isLoadContactsCountByBucket(), request.isLoadContactsWithoutEmailCount());
                 response.getRatingModelsCoverageMap().put(ratingModelId, coverageInfo);
             } catch (Exception ex) {
                 log.info("Ignoring exception in getting coverage info for rating id: " + ratingModelId, ex);

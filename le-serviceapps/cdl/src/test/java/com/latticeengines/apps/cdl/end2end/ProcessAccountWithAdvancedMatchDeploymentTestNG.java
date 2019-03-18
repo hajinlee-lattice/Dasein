@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.REAL_TIME_MATCH_RECORD_LIMIT;
+
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -34,6 +37,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
@@ -41,8 +46,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAccountDeploymentTestNG {
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountWithAdvancedMatchDeploymentTestNG.class);
 
-    private static final String ADVANCED_MATCH_AVRO_VERSION = "5";
-    private static final int REAL_TIME_MATCH_RECORD_LIMIT = 200;
+    static final String CHECK_POINT = "entitymatch_process1";
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -56,15 +60,14 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @BeforeClass(groups = { "end2end" })
     @Override
     public void setup() throws Exception {
-        log.error("$JAW$ Running setup with ENABLE_ENTITY_MATCH enabled!");
+        log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
-        log.error("$JAW$ Setup Complete!");
+        log.info("Setup Complete!");
     }
 
-
-    @Test(groups = "end2end")
+    @Test(groups = "end2end", enabled = true)
     @Override
     public void runTest() throws Exception {
         super.runTest();
@@ -77,15 +80,9 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 4, "Contact_EntityMatch");
         Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
-        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Account, 2, "Account");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 5, "Contact_EntityMatch");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
@@ -93,7 +90,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected String getAvroFileVersion() {
         // advanced matching should use a different version
-        return ADVANCED_MATCH_AVRO_VERSION;
+        return S3_AVRO_VERSION_ADVANCED_MATCH;
     }
 
     @Override
@@ -197,5 +194,45 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         for (InterfaceName attr : attrsNotInTable) {
             Assert.assertFalse(attrNames.contains(attr.name()));
         }
+    }
+
+    @Override
+    protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
+        Map<String, Object> accountReport = new HashMap<>();
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
+                ACCOUNT_1);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 1L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_1);
+
+        Map<String, Object> contactReport = new HashMap<>();
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
+
+        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
+        expectedReport.put(BusinessEntity.Account, accountReport);
+        expectedReport.put(BusinessEntity.Contact, contactReport);
+
+        return expectedReport;
+    }
+
+    @Override
+    protected Map<BusinessEntity, Long> getExpectedbatchStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, ACCOUNT_1, //
+                BusinessEntity.Contact, CONTACT_1);
+    }
+
+    @Override
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        return null;
+    }
+
+    @Override
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
     }
 }

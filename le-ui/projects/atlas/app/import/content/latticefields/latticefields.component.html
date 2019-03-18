@@ -13,7 +13,7 @@
     <p ng-if="vm.importType == 'Account'">
         These fields are used to match to Lattice Data Cloud. Mapping as many as possible will allow for a better match.
     </p>
-    <form name="form">
+    <form name="vm.form">
         <ul ng-init="vm.fieldMapping = vm.fieldMapping || {}; vm.checkFieldsDelay(form)">
             <li ng-repeat="field in vm.matchingFieldsList">
                 <label>{{field.displayName || field.name}}</label>
@@ -71,7 +71,7 @@
                         </label>
                         <div class="date-field">
                             <select class="form-control" ng-model="vm.fieldMapping[field.name].userField"
-                                ng-change="vm.changeLatticeField(vm.fieldMapping, form)" ng-required="field.required"
+                                ng-change="vm.changeLatticeField(vm.fieldMapping, form, field)" ng-required="field.required"
                                 ng-class="{'required': field.required}">
 
                                 <option value="">{{vm.ignoredFieldLabel}}</option>
@@ -82,8 +82,8 @@
                                     {{availableField.userField}}
                                 </option>
                             </select>
-                            <date-field-component field="vm.getAnalysisField(field)" 
-                            update-type="vm.chageDateFormat(fieldMapping)"></date-field-component>
+                            <date-field-component field="field" dateformat="field.dateFormatString" timeformat="field.timeFormatString" time
+                            update-type="vm.updateFormats(fieldMapping)" update="vm.updateFormats(formats)"></date-field-component>
                         </div>
                     </li>
                 </ul>

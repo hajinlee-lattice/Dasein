@@ -8,10 +8,14 @@ export const solutionInstanceConfig = {
 export const openConfigWindow = () => {
     // Must open window from user interaction code otherwise it is likely
     // to be blocked by a popup blocker:
+    var w = 500;
+    var h = 600;
+    var left = (window.screen.width / 2) - ((w / 2) + 10);
+    var top = (window.screen.height / 2) - ((h / 2) + 50);
     const configWindow = window.open(
         undefined,
         '_blank',
-        'width=500,height=500,scrollbars=no'
+        'width='+w+',height='+h+',scrollbars=no,top='+top+', left='+left
     );
     
 

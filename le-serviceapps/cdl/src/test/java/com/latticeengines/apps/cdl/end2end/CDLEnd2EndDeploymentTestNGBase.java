@@ -140,7 +140,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    private static final int S3_CHECKPOINTS_VERSION = 23;
+    static final int S3_CHECKPOINTS_VERSION = 23;
     private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 23;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -152,6 +152,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "4";
+    static final String S3_AVRO_VERSION_ADVANCED_MATCH = "5";
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
@@ -775,8 +776,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 
-    void saveCheckpoint(String checkpoint) throws IOException {
-        checkpointService.saveCheckPoint(checkpoint, mainCustomerSpace);
+    void saveCheckpoint(String checkpointName) throws IOException {
+        checkpointService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
     }
 
     private List<Report> retrieveReport(String appId) {
@@ -866,16 +867,22 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
                 entityReport.forEach((reportKey, reportValue) -> {
                     String[] keySplits = reportKey.split("_");
-                    if (keySplits[0].equals(ReportPurpose.ENTITIES_SUMMARY.name())) {
+                    if (keySplits[0].equals(ReportPurpose.ENTITIES_SUMMARY.getKey())) {
                         Assert.assertTrue(consolidateSummaryNode.has(keySplits[1]));
                         if (reportValue instanceof Long) {
                             Assert.assertEquals(consolidateSummaryNode.get(keySplits[1]).asLong(), reportValue);
                         } else if (reportValue instanceof String) {
                             Assert.assertFalse(consolidateSummaryNode.get(keySplits[1]).isNull());
                         }
-                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.name())) {
+                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.getKey())) {
                         Assert.assertTrue(entityNumberNode.has(keySplits[1]));
                         Assert.assertEquals(entityNumberNode.get(keySplits[1]).asLong(), reportValue);
+                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_MATCH_SUMMARY.getKey())) {
+                        ObjectNode entityMatchNode = (ObjectNode) entityNode
+                                .get(ReportPurpose.ENTITY_MATCH_SUMMARY.getKey());
+                        Assert.assertNotNull(entityMatchNode);
+                        Assert.assertTrue(entityMatchNode.has(keySplits[1]));
+                        Assert.assertEquals(entityMatchNode.get(keySplits[1]).asLong(), reportValue);
                     }
                 });
             });
@@ -1258,6 +1265,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
+        if (MapUtils.isEmpty(expectedEntityCount)) {
+            return;
+        }
         expectedEntityCount.forEach((key, value) -> {
             if (key != BusinessEntity.ProductHierarchy) {
                 Assert.assertEquals(Long.valueOf(countInRedshift(key)), value);

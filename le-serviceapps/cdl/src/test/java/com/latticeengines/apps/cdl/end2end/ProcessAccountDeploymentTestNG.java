@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
  */
 public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     static final String CHECK_POINT = "process1";
-    private static final String UNDER_SCORE = "_";
+    static final String UNDER_SCORE = "_";
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -36,7 +36,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
-                saveCheckpoint(CHECK_POINT);
+                saveCheckpoint(saveToCheckPoint());
             }
         }
     }
@@ -70,32 +70,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
-        Map<String, Object> accountReport = new HashMap<>();
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW, ACCOUNT_1);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 1L);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_1);
-
-        Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
-
-        Map<String, Object> productReport = new HashMap<>();
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, PRODUCT_ID);
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY, PRODUCT_HIERARCHY);
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE, PRODUCT_BUNDLE);
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE, PRODUCT_WARN_MESSAGE);
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE, PRODUCT_ERROR_MESSAGE);
-
-        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
-        expectedReport.put(BusinessEntity.Account, accountReport);
-        expectedReport.put(BusinessEntity.Contact, contactReport);
-        expectedReport.put(BusinessEntity.Product, productReport);
-
-        verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
         verifyDataCollectionStatus(DataCollection.Version.Green);
         verifyNumAttrsInAccount();
         verifyAccountFeatures();
@@ -104,22 +79,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         // Check that stats cubes only exist for the entities specified below.
         verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact,
                 BusinessEntity.CuratedAccount);
-
-        Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of(//
-                BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1, //
-                BusinessEntity.Product, BATCH_STORE_PRODUCTS);
-        verifyBatchStore(batchStoreCounts);
-
-        Map<BusinessEntity, Long> redshiftCounts = ImmutableMap.of(//
-                BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1);
-        verifyRedshift(redshiftCounts);
-
-        Map<BusinessEntity, Long> servingStoreCounts = ImmutableMap.of(//
-                BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
-                BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
-        verifyServingStore(servingStoreCounts);
+        verifyBatchStore(getExpectedbatchStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
+        verifyServingStore(getExpectedServingStoreCounts());
 
         createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
@@ -146,6 +108,64 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());
         List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
         Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
+    }
+
+    protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
+        Map<String, Object> accountReport = new HashMap<>();
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
+                ACCOUNT_1);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 1L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_1);
+
+        Map<String, Object> contactReport = new HashMap<>();
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
+
+        Map<String, Object> productReport = new HashMap<>();
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID,
+                PRODUCT_ID);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY,
+                PRODUCT_HIERARCHY);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE,
+                PRODUCT_BUNDLE);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE,
+                PRODUCT_WARN_MESSAGE);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE,
+                PRODUCT_ERROR_MESSAGE);
+
+        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
+        expectedReport.put(BusinessEntity.Account, accountReport);
+        expectedReport.put(BusinessEntity.Contact, contactReport);
+        expectedReport.put(BusinessEntity.Product, productReport);
+
+        return expectedReport;
+    }
+
+    protected Map<BusinessEntity, Long> getExpectedbatchStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, ACCOUNT_1, //
+                BusinessEntity.Contact, CONTACT_1, //
+                BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+    }
+
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
+                BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+    }
+
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, ACCOUNT_1, //
+                BusinessEntity.Contact, CONTACT_1);
+    }
+
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
     }
 
 }

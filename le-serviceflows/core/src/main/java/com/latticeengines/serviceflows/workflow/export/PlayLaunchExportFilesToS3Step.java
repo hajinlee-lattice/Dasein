@@ -141,6 +141,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         if (lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null) {
             messageBody.setSolutionInstanceId(lookupIdMap.getExternalAuthentication().getSolutionInstanceId());
         }
+        messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());
 

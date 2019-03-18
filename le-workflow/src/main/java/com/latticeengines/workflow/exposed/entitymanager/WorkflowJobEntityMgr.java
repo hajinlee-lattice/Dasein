@@ -56,6 +56,8 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
     WorkflowJob deleteByApplicationId(String applicationId);
 
+    void updateErrorCategory(WorkflowJob workflowJob);
+
     /*
      * Tenant filter disabled methods, use these methods carefully. Intended to be
      * used for cross tenant features. E.g., get all running PA jobs.

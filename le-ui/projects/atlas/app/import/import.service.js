@@ -309,7 +309,7 @@ angular.module('lp.import')
             this.fieldDocumentSaved[nextState] = copyFormer;
             $state.go(nextState);
         }
-        // console.log(this.fieldDocumentSaved);
+        // //console.log(this.fieldDocumentSaved);
     }
 
     /**
@@ -476,7 +476,7 @@ angular.module('lp.import')
         this.importOnly = importOnly;
     }
     this.getImportOnly = function() {
-        // console.log(this.importOnly);
+        // //console.log(this.importOnly);
         return this.importOnly;
     }
 
@@ -562,7 +562,7 @@ angular.module('lp.import')
             }
         });
         this.setSaveObjects(saved);
-        // console.log(this.saveObjects);
+        // //console.log(this.saveObjects);
          
     }
 
@@ -577,12 +577,13 @@ angular.module('lp.import')
         return formerState;
     }
     this.saveDocumentFields = function(state){
-        // console.log('Saved OBJ ', this.saveObjects);
+        // //console.log('Saved OBJ ', this.saveObjects);
         if(this.saveObjects[state]){
             var copy = this.getSavedDocumentCopy(getFormerState(state));// this.getFieldDocument(true).fieldMappings;
             copy = ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
             if(copy){
                 this.fieldDocumentSaved[state] = copy;
+                ////console.log('OBJECT SAVED ', copy);
             }
         }else{
             var period = state.lastIndexOf('.');
@@ -590,6 +591,7 @@ angular.module('lp.import')
             var copyDoc = this.getSavedDocumentCopy(formerState);
             if(copyDoc){
                 this.fieldDocumentSaved[state] = copyDoc;
+                ////console.log('OBJECT SAVED ', copyDoc);
             }
         }
     };
@@ -783,7 +785,7 @@ angular.module('lp.import')
                     var result = response.data;
 
                     if (result != null && result !== "" && result.Success == true) {
-                        //console.log("!!!!!!!!!!!!!!!!!!!", result);
+                        //////console.log("!!!!!!!!!!!!!!!!!!!", result);
 
                         ImportUtils.setLatticeSchema(result.Result);
                         deferred.resolve(result.Result);
@@ -796,7 +798,7 @@ angular.module('lp.import')
                                 errorMsg: errors[0]
                             };
 
-                        // console.log("????????????????????", response);
+                        // ////console.log("????????????????????", response);
                         deferred.resolve(response.errorMsg);
                     }
 
@@ -831,9 +833,9 @@ angular.module('lp.import')
             }
             // var tmp = $state.get('home.import').data.redux;
             // tmp.fetch(FileName, entity, feedType, source);
-            // console.log(tmp);
+            // //console.log(tmp);
 
-            console.log(params);
+            //console.log(params);
 
 	        $http({
 	            method: 'POST',
@@ -907,6 +909,7 @@ angular.module('lp.import')
                 function onSuccess(response) {
 
                     var result = response.data;
+                    //console.log('RESULT ', result);
                     if (result != null && result !== "") {
                         result = response.data;
                         deferred.resolve(result);
@@ -947,7 +950,7 @@ angular.module('lp.import')
     	            // 'entity': entity
                 };
 
-            // console.log(fileName, importOnly, autoImportData, postBody);
+            // //console.log(fileName, importOnly, autoImportData, postBody);
             let headers = {'Content-Type': 'application/json'};
             if(autoImportData){
                 headers['ErrorDisplayOptions'] = '{"delay":5000}'; 

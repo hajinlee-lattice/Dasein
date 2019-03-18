@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -49,9 +48,9 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
 
     @Inject
     RawSystemMetadataStoreImpl(DataCollectionService dataCollectionService, //
-                               TableRoleTemplate tableRoleTemplate, //
-                               AMMetadataStore amMetadataStore, //
-                               CDLNamespaceService cdlNamespaceService) {
+            TableRoleTemplate tableRoleTemplate, //
+            AMMetadataStore amMetadataStore, //
+            CDLNamespaceService cdlNamespaceService) {
         this.dataCollectionService = dataCollectionService;
         this.tableRoleTemplate = tableRoleTemplate;
         this.amMetadataStore = amMetadataStore;
@@ -74,6 +73,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
             // only account uses batch store
             role = BusinessEntity.Account.getBatchStore();
         }
+
         DataCollection.Version version = namespace.getCoord2();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);

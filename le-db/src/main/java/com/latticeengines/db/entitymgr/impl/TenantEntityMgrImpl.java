@@ -85,7 +85,8 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
-        if (tenant.getExpiredTime() == null) {
+        // only POC tenant has expire time
+        if (TenantType.POC.equals(tenant.getTenantType()) && tenant.getExpiredTime() == null) {
             // expired date = registered + 90
             Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
             tenant.setExpiredTime(expiredTime);

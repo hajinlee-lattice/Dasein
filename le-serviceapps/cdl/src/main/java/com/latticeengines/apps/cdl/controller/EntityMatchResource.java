@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.controller;
 
 import javax.inject.Inject;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,11 +32,13 @@ public class EntityMatchResource {
     @PostMapping(value = "/bulk", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Submit a bulk match job for entity match")
-    public ResponseDocument<String> restart(@PathVariable String customerSpace,
+    public ResponseDocument<BulkEntityMatchWorkflowSubmitter.Response> startBulkEntityMatch(
+            @PathVariable String customerSpace,
             @RequestBody BulkEntityMatchRequest request) {
         try {
-            ApplicationId appId = bulkEntityMatchWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
-            return ResponseDocument.successResponse(appId.toString());
+            BulkEntityMatchWorkflowSubmitter.Response response = bulkEntityMatchWorkflowSubmitter.submit(customerSpace,
+                    request, new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(response);
         } catch (Exception e) {
             log.error("Failed to submit bulk entity match workflow", e);
             return ResponseDocument.failedResponse(e);

@@ -23,5 +23,42 @@
 
     <p>Click {{$ctrl.status}} for recommendation list to be generated and transferred to your Sales or marketing application.</p>
 
-    <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()" ng-disabled="$ctrl.launching">{{$ctrl.status}}</button>
+    
+    <div
+        class="audience-selection"
+        ng-if="$ctrl.externalIntegrationEnabled && $ctrl.destinationOrg && $ctrl.destinationOrg.externalAuthentication">
+        <p>  
+            Provide the folder name, static list ID, and static list name of an existing Marketo list. The contacts in this segment will be sent to that list. 
+        </p>
+
+        <table>
+            <tbody>
+                <tr>
+                    <th>
+                        <p> <p class="red-asterisk"> * </p>Marketo Program Name: </p>
+                    </th>
+                    <td >
+                        <select class="audience-dropdown" ng-model="$ctrl.programName" ng-options="program.name as program.name for program in $ctrl.programs | orderBy:'name'" ng-class="{'disabled': $ctrl.loadingFolders}" ng-value="program.name" ng-change="$ctrl.updateProgramName()">
+                        </select>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <th>
+                        <p> <p class="red-asterisk"> * </p>Marketo Static List Name: </p>
+                    </th>
+                    <td>
+                        <select class="audience-dropdown" ng-model="$ctrl.listSelection" ng-options="list.name for list in $ctrl.staticLists | orderBy:'name'" ng-change="$ctrl.updateListSelection()" ng-class="{'disabled': $ctrl.loadingLists || !$ctrl.programName}">
+                            <option value="" ng-selected="$ctrl.createNewList"> ------ Create new list ------ </option>
+                        </select>
+                        <input type="text" ng-if="$ctrl.createNewList" ng-model="$ctrl.audienceName" class="form-control" ng-change="$ctrl.updateAudienceName()">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+    </div>
+
+    <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()" ng-disabled="$ctrl.launching || $ctrl.isInvalidAudienceSelection()">{{$ctrl.status}}</button>
 </div>

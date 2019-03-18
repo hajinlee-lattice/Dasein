@@ -23,6 +23,8 @@ public class RatingAttributeNameParser {
             scoreType = ScoreType.Probability;
         } else if (type.equals(VertexType.RATING_EV_ATTRIBUTE)) {
             scoreType = ScoreType.ExpectedRevenue;
+        } else if (type.equals(VertexType.RATING_PREDICTED_REV_ATTRIBUTE)) {
+            scoreType = ScoreType.PredictedRevenue;
         }
 
         if (scoreType != ScoreType.Rating) {
@@ -53,6 +55,11 @@ public class RatingAttributeNameParser {
             modelId = ratingAttribute.substring(0, //
                     ratingAttribute.length() //
                             - (suffix(ScoreType.ExpectedRevenue)).length());
+        } else if (ratingAttribute.endsWith(suffix(ScoreType.PredictedRevenue))) {
+            ratingAttrType = VertexType.RATING_PREDICTED_REV_ATTRIBUTE;
+            modelId = ratingAttribute.substring(0, //
+                    ratingAttribute.length() //
+                            - (suffix(ScoreType.PredictedRevenue)).length());
         }
 
         return new ImmutablePair<>(ratingAttrType, modelId);

@@ -17,4 +17,6 @@ public class ReportConstants {
     public static final String TIME = "TIME";
     public static final String ACTION = "ACTION";
     public static final String USER = "USER";
+    public static final String PUBLISH_SEED = "PUBLISH_SEED";
+    public static final String PUBLISH_LOOKUP = "PUBLISH_LOOKUP";
 }

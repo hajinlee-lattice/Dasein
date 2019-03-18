@@ -13,6 +13,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
         var vm = this;
         vm.showMAPSystems = vm.featureflags.EnableCdl;
         vm.externalIntegrationEnabled = vm.featureflags.EnableExternalIntegration;
+
         this.showErrorApi = false;
         angular.extend(vm, {
             status: $stateParams.status
@@ -54,6 +55,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                         PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                         PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
                         PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                        PlaybookWizardStore.setExternalAuthentication(vm.stored.crm_selection.externalAuthentication)
                     }
 
                     if(crmselection) {
@@ -119,43 +121,30 @@ angular.module('lp.playbook.wizard.crmselection', [])
             });
         }
 
-        vm.updateAudienceId = function() {
-          console.log(vm.stored);
-          var audienceId = vm.externalIntegrationEnabled && vm.stored.crm_selection.externalAuthentication ? vm.audienceId : null;
-          PlaybookWizardStore.setAudienceId(audienceId);
-        }
-
         vm.checkValid = function(form, accountId, orgId, isRegistered) {
+            console.log("sdfsdfsfsdfsdf");
             vm.orgIsRegistered = isRegistered;
             vm.nullCount = null;
             vm.totalCount = null;
-            vm.audienceId = null;
 
             vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
             PlaybookWizardStore.setValidation('crmselection', false);
 
-            if(vm.stored && vm.stored.crm_selection) {
+            if (vm.stored && vm.stored.crm_selection) {
                 PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                 PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
                 PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                PlaybookWizardStore.setExternalAuthentication(vm.stored.crm_selection.externalAuthentication)
             }
 
-            var accountId = accountId;
-            if (accountId && isRegistered){
+            var engineId = (vm.ratingEngine && vm.ratingEngine.id ? vm.ratingEngine.id : ''),
+                segment = PlaybookWizardStore.getCurrentPlay().targetSegment,
+                segmentName = segment.name;
+
+            if (accountId && vm.orgIsRegistered){
 
                 vm.nullCount = null;
                 vm.loadingCoverageCounts = true;
-
-                var allCountsQuery = {
-                        freeFormTextSearch: vm.search || '',
-                        entityType: 'Account',
-                        selectedBuckets: PlaybookWizardStore.getBucketsToLaunch(),
-                    },
-                    engineId = (vm.ratingEngine && vm.ratingEngine.id ? vm.ratingEngine.id : '');
-
-
-                var segment = PlaybookWizardStore.getCurrentPlay().targetSegment,
-                    segmentName = segment.name;
 
                 vm.totalCount = segment.accounts;
                 if(engineId) {
@@ -180,6 +169,24 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 } else {
                     vm.calculateUnscoredCounts(form, segment, accountId);
                 }
+            } else if (vm.externalIntegrationEnabled && vm.stored.crm_selection.externalSystemName == 'Marketo' && engineId) {
+                // Find contacts without emails for play launches to Marketo
+                PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], {
+                    lookupId: accountId,
+                    restrictNullLookupId: false,
+                    loadContactsCount: true,
+                    loadContactsCountByBucket: false
+                }).then(function(result) {
+                    PlaybookWizardStore.setValidation('crmselection', form.$valid);
+                    vm.loadingCoverageCounts = false;
+                    if(vm.isEmpty(result.errorMap)){
+                        var coverageCounts = result.ratingModelsCoverageMap ? result.ratingModelsCoverageMap[engineId] : {};
+                        vm.nullCount = coverageCounts.contactCountWithoutEmail || 0;
+                        vm.totalCount = coverageCounts.contactCount || 0;
+                    }else{
+                        vm.showErrorApi = true;
+                    }
+                });
             } else {
                 PlaybookWizardStore.setValidation('crmselection', form.$valid);
             }

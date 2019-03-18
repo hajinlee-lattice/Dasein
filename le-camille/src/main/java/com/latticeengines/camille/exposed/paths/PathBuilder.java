@@ -224,4 +224,8 @@ public final class PathBuilder {
     public static Path buildRandomWorkspacePath(String podId, CustomerSpace customerSpace) {
         return buildWorkspacesPath(podId, customerSpace).append(UUID.randomUUID().toString().toLowerCase());
     }
+
+    public static Path buildErrorCategoryPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.ERROR_CATEGORY_FILE);
+    }
 }

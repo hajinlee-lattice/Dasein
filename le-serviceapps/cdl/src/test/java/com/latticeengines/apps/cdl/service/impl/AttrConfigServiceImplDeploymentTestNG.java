@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
@@ -59,6 +60,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Set<String> psSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory) //
+            .stream().map(InterfaceName::name).collect(Collectors.toSet());
+
+    private Set<String> apsSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.APSAttribute) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Set<String> caSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.CuratedAccount) //
@@ -183,38 +187,50 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             String partition = getProductSpentPartition(attrName);
             switch (partition) {
-                case Partition.HAS_PURCHASED:
-                    verifyFlags(config, cat, partition, //
-                            Active, false, //
-                            true, true, //
-                            false, false, //
-                            false, false, //
-                            false, false, //
-                            false, false);
-                    break;
-                case Partition.OTHERS:
-                    verifyFlags(config, cat, partition, //
-                            Active, false, //
-                            true, true, //
-                            false, true, //
-                            true, true, //
-                            false, true, //
-                            false, false);
+            case Partition.HAS_PURCHASED:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        false, false, //
+                        false, false, //
+                        false, false, //
+                        false, false);
+                break;
+            case Partition.OTHERS:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        false, true, //
+                        true, true, //
+                        false, true, //
+                        false, false);
+                break;
+            case Partition.APS:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        false, false, //
+                        false, false, //
+                        false, false, //
+                        false, false, //
+                        true, true);
+                break;
             }
             return true;
         });
     }
 
     private String getProductSpentPartition(String attrName) {
-        String partiion;
-        if (psSystemAttrs.contains(attrName)) {
-            partiion = Partition.SYSTEM;
+        String partition;
+        if (psSystemAttrs.contains(attrName) || apsSystemAttrs.contains(attrName)) {
+            partition = Partition.SYSTEM;
         } else if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
-            partiion = Partition.HAS_PURCHASED;
+            partition = Partition.HAS_PURCHASED;
+        } else if (ApsGeneratorUtils.isApsAttr(attrName)) {
+            partition = Partition.APS;
         } else {
-            partiion = Partition.OTHERS;
+            partition = Partition.OTHERS;
         }
-        return partiion;
+        return partition;
     }
 
     private void testCuratedAccountAttributes() {
@@ -491,8 +507,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     private void verifyUsage(String logPrefix, AttrConfig attrConfig, String property, boolean expectedValue,
             boolean expectedChg) {
         boolean enabled = Boolean.TRUE.equals(attrConfig.getPropertyFinalValue(property, Boolean.class));
-        Assert.assertEquals(enabled, expectedValue,
-                String.format("%s enabled for %s usage", logPrefix, property));
+        Assert.assertEquals(enabled, expectedValue, String.format("%s enabled for %s usage", logPrefix, property));
         boolean chg = attrConfig.getProperty(property).isAllowCustomization();
         Assert.assertEquals(chg, expectedChg, String.format("%s allow change %s usage", logPrefix, property));
     }
@@ -502,6 +517,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         static final String STD_ATTRS = "StdAttrs";
         static final String EXTERNAL_ID = "ExternalID";
         static final String HAS_PURCHASED = "HasPurchased";
+        static final String APS = "APS";
         static final String OTHERS = "Others";
 
         // skip verification on these attributes

@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -156,18 +155,10 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
                 destroy(customerSpace);
                 s3Service.cleanupPrefix(customersBucket, cs.getContractId());
 
-                log.info("Clean up DataCollection(DataFeed_xxx)");
+                log.info("Clean up DataCollection(DataFeed_xxx, MetadataSegment, RatingEngine, Play)");
                 DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();
                 if (dataCollection != null) {
                     dataCollectionEntityMgr.delete(dataCollection);
-                }
-
-                log.info("Clean up MetadataSegment(RatingEngine,Play)");
-                List<MetadataSegment> segments = segmentService.getSegments();
-                if (segments != null) {
-                    for (MetadataSegment segment : segments) {
-                        segmentService.deleteSegmentByName(segment.getName(), true, true);
-                    }
                 }
 
                 log.info("Clean up Action");
