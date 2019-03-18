@@ -283,6 +283,18 @@ attr-categories,
         }
     }
 
+    .select-all-toggle {
+        .button.link-button {
+            font-size: 16px;
+            &:first-of-type {
+                margin-right: 2px;
+            }
+            &:last-of-type {
+                margin-left: 2px;
+            }
+        }
+    }
+
     .enrichment-wizard-pagination {
         float: right;
         display: inline-block;

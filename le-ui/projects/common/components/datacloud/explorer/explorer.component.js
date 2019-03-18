@@ -98,6 +98,9 @@ export default function (
     }
 
     vm.init = function () {
+
+        console.log(vm.category);
+
         // leo();
         if (['segment.analysis'].indexOf(vm.section) != -1) { // only run on 'my data' page
             getDatacollectionPrecheck();

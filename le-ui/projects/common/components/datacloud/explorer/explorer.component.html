@@ -117,7 +117,20 @@
                     </pd-pagination-controls>
                 </div>
             </div>
-
+            <div
+                class="select-all-toggle" 
+                ng-if="vm.section == 're.model_iteration'">
+                <button 
+                    class="button link-button"
+                    ng-click="vm.select('all')">
+                    All
+                </button> | 
+                <button 
+                    class="button link-button"
+                    ng-click="vm.select('none')">
+                    None
+                </button>
+            </div>
             <ul class="enrichments {{vm.view}}">
                 <li explorer-attribute-tile
                     class="box enrichment"
