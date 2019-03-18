@@ -97,6 +97,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVENT_TO_MODELID = "EVENT_TO_MODELID";
     protected static final String DATA_RULES = "DATA_RULES";
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
+    protected static final String SOURCE_FILE_PATH = "SOURCE_FILE_PATH";
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
 

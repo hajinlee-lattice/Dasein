@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportA
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.export.ExportScoreToS3;
+import com.latticeengines.serviceflows.workflow.export.ExportSourceFileToS3;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -29,6 +30,9 @@ public class ImportAndRTSBulkScoreWorkflow extends AbstractWorkflow<ImportAndRTS
     private CreateTableImportReport createTableImportReport;
 
     @Inject
+    private ExportSourceFileToS3 exportSourceFileToS3;
+
+    @Inject
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Inject
@@ -41,6 +45,7 @@ public class ImportAndRTSBulkScoreWorkflow extends AbstractWorkflow<ImportAndRTS
     public Workflow defineWorkflow(ImportAndRTSBulkScoreWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(importData) //
+                .next(exportSourceFileToS3) //
                 .next(createTableImportReport) //
                 .next(rtsBulkScoreWorkflow) //
                 .next(exportScoreToS3) //
