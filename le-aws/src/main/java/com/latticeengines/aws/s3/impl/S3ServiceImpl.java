@@ -75,7 +75,8 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public boolean objectExist(String bucket, String object) {
-        return s3Client.doesObjectExist(bucket, object);
+        String key = sanitizePathToKey(object);
+        return s3Client.doesObjectExist(bucket, key);
     }
 
     @Override
