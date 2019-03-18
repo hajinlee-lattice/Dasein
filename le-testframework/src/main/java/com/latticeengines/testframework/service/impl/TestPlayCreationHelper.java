@@ -409,7 +409,7 @@ public class TestPlayCreationHelper {
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
-        
+
         if (!playLaunchConfig.isTestPlayCrud()) {
             return;
         }
@@ -554,7 +554,7 @@ public class TestPlayCreationHelper {
 
     public RatingProxy initRatingProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        RatingProxy ratingProxy = new RatingProxyImpl(null, null);
+        RatingProxy ratingProxy = new RatingProxyImpl(null);
 
         Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
@@ -573,7 +573,7 @@ public class TestPlayCreationHelper {
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        EntityProxy entityProxy = new EntityProxyImpl(null, this.entityProxy);
+        EntityProxy entityProxy = new EntityProxyImpl(this.entityProxy);
 
         Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);

@@ -99,7 +99,7 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
         PageFilter pageFilter = new PageFilter(0L, 1L);
         frontEndQuery.setPageFilter(pageFilter);
 
-        DataPage result = entityProxy.getData(mainTestTenant.getId(), frontEndQuery);
+        DataPage result = entityProxy.getDataFromObjectApi(mainTestTenant.getId(), frontEndQuery);
         Assert.assertNotNull(result);
         Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
         Assert.assertEquals(result.getData().size(), 1);

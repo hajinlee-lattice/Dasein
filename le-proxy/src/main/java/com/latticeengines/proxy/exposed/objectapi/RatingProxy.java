@@ -10,10 +10,11 @@ public interface RatingProxy {
 
     DataPage getData(String customerSpace, FrontEndQuery frontEndQuery);
 
-    Map<String, Long> getCoverage(String customerSpace, FrontEndQuery frontEndQuery);
-
     Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 
     DataPage getData(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
+
+    // cached
+    Map<String, Long> getCoverage(String customerSpace, FrontEndQuery frontEndQuery);
 
 }
