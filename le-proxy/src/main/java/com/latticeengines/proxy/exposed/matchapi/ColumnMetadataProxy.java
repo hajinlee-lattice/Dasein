@@ -103,6 +103,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return latestVersion("");
     }
 
+    @Override
     public DataCloudVersion latestVersion(String compatibleVersion) {
         if (StringUtils.isBlank(compatibleVersion)) {
             compatibleVersion = DEFAULT;
@@ -125,7 +126,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             dataCloudVersion = "";
         }
         initializeColumnMetadataCache();
-        return columnMetadataCache.getWatcherCache().get(KEY_PREFIX + "|" + dataCloudVersion);
+        List<ColumnMetadata> cms = columnMetadataCache.getWatcherCache().get(KEY_PREFIX + "|" + dataCloudVersion);
+        if (CollectionUtils.isEmpty(cms)) {
+            throw new RuntimeException(
+                    "Cannot find column metadata from cache for DataCloudVersion " + dataCloudVersion);
+        }
+        return cms;
     }
 
     private List<ColumnMetadata> requestAllColumnsWithRetry(String dataCloudVersion) {
