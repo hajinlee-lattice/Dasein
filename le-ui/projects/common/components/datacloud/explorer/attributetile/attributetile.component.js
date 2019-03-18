@@ -12,7 +12,7 @@ export default function () {
         controllerAs: 'vm',
         templateUrl: '/components/datacloud/explorer/attributetile/attributetile.component.html',
         controller: function (
-            $scope, $state, $document, $timeout, $interval,
+            $scope, $state, $document, $timeout, $interval, Notice,
             QueryStore, DataCloudStore, NumberUtility, QueryTreeService
         ) {
             'ngInject';
@@ -180,8 +180,7 @@ export default function () {
 
             vm.getQuerySnippet = function (enrichment, rule, type) {
                 var querySnippet = enrichment.DisplayName + ' ';
-                var Bkts = vm.getBkts(enrichment);
-                if (Bkts) { //bucketable attributes
+                if (vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId] && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts) { //bucketable attributes
                     querySnippet += 'is ';
                     querySnippet += (type == 'Enum' && rule.bucketRestriction.bkt.Vals && rule.bucketRestriction.bkt.Vals.length > 1) ? vm.generateBucketLabel(rule.bucketRestriction.bkt) : rule.bucketRestriction.bkt.Lbl;
                 } else { //non-bucketable attributes e.g. pure-string
@@ -201,29 +200,54 @@ export default function () {
             }
 
             vm.isBktEmpty = function (enrichment) {
-                var Bkts = vm.getBkts(enrichment);
-                
-                if (Bkts) {
-                    return Bkts == undefined || Bkts.List == undefined || !Bkts.List.length;
-                } else {
-                    return true;
-                }
-            }
-
-            vm.getBkts = function (enrichment) {
                 if (vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
-                    return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts || undefined;
-                } else {
-                    return false;
+                    return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined ||
+                        !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
                 }
             }
 
             vm.NumberUtility = NumberUtility;
 
             vm.getBktListRating = function (enrichment) {
-                return vm.getBkts(enrichment)
-                    ? vm.getBkts(enrichment).List
-                    : [];
+                return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List;
+            }
+
+            vm.getWarning = function (warning) {
+                let warnings = DataCloudStore.getWarnings();
+                return warnings[warning];
+            }
+
+            vm.select = function (quantity) {
+                let categoryAttributes = vm.getAttributes([vm.category]);
+                switch (quantity) {
+                    case 'all':
+                        Notice.success({ message: 'Enabled all attributes for remodeling' })
+                        categoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
+                        break;
+                    default:
+                        Notice.warning({ message: 'Disabled all attributes from remodeling' })
+                        categoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
+                }
+            }
+
+            vm.toggleApprovedUsage = function (item) {
+                switch (item.ApprovedUsage[0]) {
+                    case 'None':
+                        Notice.success({ message: 'Enabled attribute for remodeling' })
+                        item.ApprovedUsage[0] = 'ModelAndAllInsights';
+                        break;
+                    default:
+                        Notice.warning({ message: 'Disabled attribute from remodeling' })
+                        item.ApprovedUsage[0] = 'None';
+                }
+            }
+
+            vm.checkApprovedUsage = function (item) {
+                return item.ApprovedUsage[0] != 'None';
+            }
+
+            vm.checkImportance = function (item) {
+                return 'ImportanceOrdering' in item;
             }
         }
     };
