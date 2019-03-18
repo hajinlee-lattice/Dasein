@@ -53,6 +53,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     }
 
 
+    // parseRecordForDomain() depends on having parsed Name/Location and DUNS and thus must run after
+    // parseRecordForNameLocation() and parseRecordForDuns().
     @Override
     public void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                      Set<String> domainSet, boolean treatPublicDomainAsNormal,
