@@ -6,11 +6,7 @@ public enum CacheName {
     DataLakeCMCache(Constants.DataLakeCMCacheName), //
     DataLakeTopNTreeCache(Constants.DataLakeTopNTreeCache), //
     DataLakeStatsCubesCache(Constants.DataLakeStatsCubesCache), //
-    EntityCountCache(Constants.EntityCountCacheName), //
-    EntityDataCache(Constants.EntityDataCacheName), //
-    EntityRatingCountCache(Constants.EntityRatingCountCacheName), //
-    RatingDataCache(Constants.RatingDataCacheName), //
-    RatingCoverageCache(Constants.RatingCoverageCacheName), //
+    ObjectApiCache(Constants.ObjectApiCacheName), //
     AttrRepoCache(Constants.AttrRepoCacheName), //
     TimeTranslatorCache(Constants.TimeTranslatorCacheName), //
     JobsCache(Constants.JobsCacheName), //
@@ -42,10 +38,7 @@ public enum CacheName {
                 DataLakeStatsCubesCache, //
                 DataLakeTopNTreeCache, //
                 DataLakeCMCache, //
-                EntityCountCache, //
-                EntityDataCache, //
-                EntityRatingCountCache, //
-                RatingCoverageCache, //
+                ObjectApiCache, //
                 ServingMetadataCache, //
                 TableRoleMetadataCache };
     }
@@ -63,6 +56,7 @@ public enum CacheName {
         public static final String DataLakeTopNTreeCache = "DataLakeTopNTreeCache";
         public static final String DataLakeCMCacheName = "DataLakeCMCache";
         public static final String DataLakeStatsCubesCache = "DataLakeStatsCubesCache";
+        public static final String ObjectApiCacheName = "ObjectApiCache";
         public static final String EntityCountCacheName = "EntityCountCache";
         public static final String EntityDataCacheName = "EntityDataCache";
         public static final String EntityRatingCountCacheName = "EntityRatingCountCache";

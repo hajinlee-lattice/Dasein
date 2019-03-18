@@ -12,7 +12,7 @@ public class RawScoreToPercentileMapperUnitTestNG {
     @Test(groups = "unit")
     public void testMapping() {
         ScoreDerivation scoreDerivation = loadScoreDerivationFromResource(
-            "/com/latticeengines/dataflow/runtime/cascading/cdl/scorederivation.json");
+            "com/latticeengines/dataflow/runtime/cascading/cdl/scorederivation.json");
 
         Assert.assertNotNull(scoreDerivation);
         RawScoreToPercentileMapper mapper = new RawScoreToPercentileMapper(scoreDerivation);
@@ -28,7 +28,7 @@ public class RawScoreToPercentileMapperUnitTestNG {
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testEmptyScoreDerivation() {
         ScoreDerivation scoreDerivation = loadScoreDerivationFromResource(
-            "/com/latticeengines/dataflow/runtime/cascading/cdl/scorederivation1.json");
+            "com/latticeengines/dataflow/runtime/cascading/cdl/scorederivation1.json");
 
         Assert.assertNotNull(scoreDerivation);
         new RawScoreToPercentileMapper(scoreDerivation);
@@ -36,7 +36,7 @@ public class RawScoreToPercentileMapperUnitTestNG {
 
     private ScoreDerivation loadScoreDerivationFromResource(String resourceName) {
         try {
-            InputStream inputStream = ClassLoader.class.getResourceAsStream(resourceName);
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
             ScoreDerivation sd = JsonUtils.deserialize(inputStream, ScoreDerivation.class);
             return sd;
         } catch (Exception e) {

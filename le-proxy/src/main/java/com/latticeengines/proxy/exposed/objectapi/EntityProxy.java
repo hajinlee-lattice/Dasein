@@ -10,12 +10,14 @@ import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuer
 
 public interface EntityProxy {
 
+    // cached
     Long getCount(String customerSpace, FrontEndQuery frontEndQuery);
 
     Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery);
 
     Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 
+    // cached
     DataPage getData(String customerSpace, FrontEndQuery frontEndQuery);
 
     DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery);
@@ -25,6 +27,12 @@ public interface EntityProxy {
     DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, Version version,
             boolean enforceTranslation);
 
+    // cached
     Map<String, Long> getRatingCount(String customerSpace, RatingEngineFrontEndQuery frontEndQuery);
+
+    // cached
+    DataPage getProducts(String customerSpace);
+
+    DataPage getProductsFromObjectApi(String customerSpace, DataCollection.Version version);
 
 }

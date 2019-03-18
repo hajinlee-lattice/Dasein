@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -76,9 +75,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
             }
             List<ColumnMetadata> phAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.PurchaseHistory);
             if (CollectionUtils.isNotEmpty(phAttrs)) {
-                FrontEndQuery frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Product);
-                DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
+                DataPage dataPage = entityProxy.getProducts(customerSpace);
                 Map<String, String> productNameMap = new HashMap<>();
                 if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
                     dataPage.getData().forEach(map -> productNameMap.put( //

@@ -119,30 +119,12 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         // =========================
         // BEGIN: objectapi proxy
         // =========================
-        RedisCacheConfiguration entityCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+        RedisCacheConfiguration objectApiCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(1)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
-                .prefixKeysWith(getPrefix(CacheName.Constants.EntityCountCacheName));
-        RedisCacheConfiguration entityDataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(1)) //
-                .disableCachingNullValues() //
-                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
-                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
-                .prefixKeysWith(getPrefix(CacheName.Constants.EntityDataCacheName));
-        RedisCacheConfiguration entityRatingCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(1)) //
-                .disableCachingNullValues() //
-                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
-                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
-                .prefixKeysWith(getPrefix(CacheName.Constants.EntityRatingCountCacheName));
-        RedisCacheConfiguration ratingCoverageCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(1)) //
-                .disableCachingNullValues() //
-                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
-                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
-                .prefixKeysWith(getPrefix(CacheName.Constants.RatingCoverageCacheName));
+                .prefixKeysWith(getPrefix(CacheName.Constants.ObjectApiCacheName));
         // =====================
         // END: objectapi proxy
         // =====================
@@ -187,10 +169,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DataLakeTopNTreeCache, dataLakeTopNTreeCache);
         cacheConfigs.put(CacheName.Constants.DataLakeStatsCubesCache, dataLakeStatsCacheConfig);
 
-        cacheConfigs.put(CacheName.Constants.EntityCountCacheName, entityCountCacheConfig);
-        cacheConfigs.put(CacheName.Constants.EntityDataCacheName, entityDataCacheConfig);
-        cacheConfigs.put(CacheName.Constants.EntityRatingCountCacheName, entityRatingCountCacheConfig);
-        cacheConfigs.put(CacheName.Constants.RatingCoverageCacheName, ratingCoverageCacheConfig);
+        cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);
         cacheConfigs.put(CacheName.Constants.TableRoleMetadataCacheName, tableRoleMetadataCacheConfig);
         cacheConfigs.put(CacheName.Constants.DantePreviewTokenCacheName, dantePreviewTokenCacheConfig);

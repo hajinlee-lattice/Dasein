@@ -3,26 +3,21 @@ package com.latticeengines.proxy.objectapi;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -37,46 +32,12 @@ import reactor.core.publisher.Mono;
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityProxy {
 
-    private static final Logger log = LoggerFactory.getLogger(EntityProxyImpl.class);
-
-    private final CacheManager cacheManager;
-
     private final EntityProxyImpl _entityProxy;
 
-    private LocalCacheManager<String, Long> countCache;
-
-    private LocalCacheManager<String, DataPage> dataCache;
-
-    private LocalCacheManager<String, Map<String, Long>> ratingCache;
-
     @Inject
-    public EntityProxyImpl(CacheManager cacheManager, EntityProxyImpl entityProxy) {
+    public EntityProxyImpl(EntityProxyImpl entityProxy) {
         super("objectapi/customerspaces");
         this._entityProxy = entityProxy;
-        this.cacheManager = cacheManager;
-        countCache = new LocalCacheManager<>(CacheName.EntityCountCache, str -> {
-            String[] tokens = str.split("\\|");
-            return getCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
-        }, 2000); //
-
-        dataCache = new LocalCacheManager<>(CacheName.EntityDataCache, str -> {
-            String[] tokens = str.split("\\|");
-            return getDataBySerializedKeyFromObjectApi(
-                    String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
-        }, 200); //
-
-        ratingCache = new LocalCacheManager<>(CacheName.EntityRatingCountCache, str -> {
-            String[] tokens = str.split("\\|");
-            return getRatingCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
-        }, 2000); //
-    }
-
-    @PostConstruct
-    public void addCacheManager() {
-        if (cacheManager instanceof CompositeCacheManager) {
-            log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(countCache, dataCache, ratingCache));
-        }
     }
 
     @Override
@@ -90,10 +51,22 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
     @Override
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
-        return _entityProxy.getDataFromCache(customerSpace, frontEndQuery);
+        return _entityProxy.getDataFromCache(shortenCustomerSpace(customerSpace), frontEndQuery);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)")
+    @Override
+    public DataPage getProducts(String customerSpace) {
+        FrontEndQuery query = getProductsQuery();
+        return _entityProxy.getDataFromCache(shortenCustomerSpace(customerSpace), query);
+    }
+
+    @Override
+    public DataPage getProductsFromObjectApi(String customerSpace, DataCollection.Version version) {
+        FrontEndQuery query = getProductsQuery();
+        return getDataFromObjectApi(shortenCustomerSpace(customerSpace), query);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|entity_data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)")
     public DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         return getDataBySerializedKeyFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
@@ -107,25 +80,17 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 
-    /**
-     * Do not directly call this method, unless you are sure you have standardize the customerSpace
-     */
-    @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace, #frontEndQuery)")
-    public Map<String, Long> getRatingCountFromCache(String customerSpace, RatingEngineFrontEndQuery frontEndQuery) {
-        return getRatingCountFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|entity_ratingcount\", #tenantId, #frontEndQuery)")
+    public Map<String, Long> getRatingCountFromCache(String tenantId, RatingEngineFrontEndQuery frontEndQuery) {
+        return getRatingCountFromObjectApi(String.format("%s|%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
 
-    /**
-     * Do not directly call this method, unless you are sure you have standardize the customerSpace
-     */
-    @Cacheable(cacheNames = CacheName.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)")
-    public String getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|entity_count\", #tenantId, #frontEndQuery)")
+    public String getCountFromCache(String tenantId, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return String.valueOf(getCountFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString())));
+        return String.valueOf(getCountFromObjectApi(String.format("%s|%s", tenantId, frontEndQuery.toString())));
     }
 
     @Override
@@ -218,5 +183,15 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
                 frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
+    }
+
+    private FrontEndQuery getProductsQuery() {
+        FrontEndQuery query = new FrontEndQuery();
+        query.setAccountRestriction(null);
+        query.setContactRestriction(null);
+        query.addLookups(BusinessEntity.Product, InterfaceName.ProductId.name());
+        query.addLookups(BusinessEntity.Product, InterfaceName.ProductName.name());
+        query.setMainEntity(BusinessEntity.Product);
+        return query;
     }
 }

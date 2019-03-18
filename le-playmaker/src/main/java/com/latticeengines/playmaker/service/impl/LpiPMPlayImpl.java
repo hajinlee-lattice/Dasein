@@ -169,7 +169,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         query.addLookups(BusinessEntity.Product, InterfaceName.ProductName.name());
         query.setMainEntity(BusinessEntity.Product);
 
-        return entityProxy.getData(MultiTenantContext.getCustomerSpace().toString(), query).getData();
+        return entityProxy.getProducts(MultiTenantContext.getCustomerSpace().toString()).getData();
     }
 
     private List<Map<String, Object>> handlePagination(long start, int offset, int maximum, List<Play> plays) {
