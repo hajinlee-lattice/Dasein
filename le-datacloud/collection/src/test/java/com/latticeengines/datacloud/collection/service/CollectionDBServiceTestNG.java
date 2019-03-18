@@ -35,6 +35,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
@@ -53,6 +54,9 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     private String testDomains;
     private Timestamp start;
     private Timestamp end;
+
+    @Inject
+    S3Service s3Service;
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
@@ -168,6 +172,21 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             Thread.sleep(15000);
         }
 
+    }
+
+    @Test(groups = "testS3Exist")
+    public void testS3() throws Exception {
+        String bucket = "latticeengines-dev-datacloud";
+        String obj = "/Pods/Default/Ingestion/ALEXA_RAW/2019-03-03_00-00-00_UTC.avro";
+        if (s3Service.objectExist(bucket, obj))
+            log.info(obj + " exists, using objectExist");
+        else
+            log.info(obj + " does not exist, using objectExist" );
+
+        if (s3Service.listObjects(bucket, obj).size() > 0)
+            log.info(obj + " exists, using listObjects");
+        else
+            log.info(obj + " does not exist, using listObjects" );
     }
 
     @Test(groups = "testIngestion")
