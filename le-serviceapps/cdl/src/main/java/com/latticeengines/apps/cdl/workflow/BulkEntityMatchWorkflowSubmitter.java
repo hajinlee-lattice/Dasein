@@ -64,6 +64,9 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${datacloud.match.entity.test.input.s3.dir}")
     private String s3InputFileDir;
 
+    @Value("${datacloud.match.entity.test.result.s3.bucket}")
+    private String s3ResultBucket;
+
     @Value("${datacloud.match.entity.test.result.s3.dir}")
     private String s3ResultDir;
 
@@ -91,7 +94,9 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private Response getResponse(@NotNull ApplicationId applicationId, @NotNull String uid) {
-        String resultLocation = Paths.get(s3ResultDir, uid).toString();
+        String resultPath = Paths.get(s3ResultDir, uid).toString();
+        // NOTE location format = $bucket://$path
+        String resultLocation = String.format("%s://%s", s3ResultBucket, resultPath);
         return new Response(applicationId.toString(), resultLocation);
     }
 
