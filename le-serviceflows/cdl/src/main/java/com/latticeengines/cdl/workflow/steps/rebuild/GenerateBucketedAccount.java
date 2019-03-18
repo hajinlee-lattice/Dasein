@@ -98,14 +98,14 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         TransformationStepConfig profile = profile();
         TransformationStepConfig encode = bucketEncode();
 
-        TransformationStepConfig sortEncode = sortEncode(customerSpace);
+//        TransformationStepConfig sortEncode = sortEncode(customerSpace);
         TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(filter); //
         steps.add(profile); //
         steps.add(encode); //
-        steps.add(sortEncode); //
+//        steps.add(sortEncode); //
         steps.add(sortProfile); //
         // -----------
         request.setSteps(steps);
@@ -159,6 +159,13 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(filterStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        targetTable.setExpandBucketedAttrs(true);
+        step.setTargetTable(targetTable);
+
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }

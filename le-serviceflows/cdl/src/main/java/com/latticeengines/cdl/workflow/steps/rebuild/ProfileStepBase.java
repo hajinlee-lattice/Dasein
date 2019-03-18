@@ -120,20 +120,37 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return step;
     }
 
-    protected TransformationStepConfig bucket(int profileStep, String masterTableName) {
+//    protected TransformationStepConfig bucket(int profileStep, String masterTableName) {
+//        return bucket(profileStep, masterTableName, null);
+//    }
+
+    protected TransformationStepConfig bucket(int profileStep, String masterTableName, String outputTablePrefix) {
         TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
         step.setInputSteps(Collections.singletonList(profileStep));
-        return configureBucketStep(step);
+        return configureBucketStep(step, outputTablePrefix);
     }
 
-    protected TransformationStepConfig bucket(int profileStep, int inputStep) {
+//    protected TransformationStepConfig bucket(int profileStep, int inputStep) {
+//        return bucket(profileStep, inputStep, null);
+//    }
+
+    protected TransformationStepConfig bucket(int profileStep, int inputStep, String outputTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(profileStep, inputStep));
-        return configureBucketStep(step);
+        return configureBucketStep(step, outputTablePrefix);
     }
 
-    private TransformationStepConfig configureBucketStep(TransformationStepConfig step) {
+    private TransformationStepConfig configureBucketStep(TransformationStepConfig step, String outputTablePrefix) {
         step.setTransformer(TRANSFORMER_BUCKETER);
+
+        if (StringUtils.isNotBlank(outputTablePrefix)) {
+            TargetTable targetTable = new TargetTable();
+            targetTable.setCustomerSpace(customerSpace);
+            targetTable.setNamePrefix(outputTablePrefix);
+            targetTable.setExpandBucketedAttrs(true);
+            step.setTargetTable(targetTable);
+        }
+
         step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
