@@ -38,6 +38,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     private static final Logger log = LoggerFactory.getLogger(BaseSingleEntityMergeImports.class);
 
     private String inputMasterTableName;
+    protected String diffTableName;
     protected Table masterTable;
 
     private List<BusinessEntity> businessEntities = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
@@ -48,7 +49,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         registerBatchStore();
         generateDiffReport();
 
-        String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
+        diffTableName = getDiffTableName();
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
 
         if (hasSchemaChange()) {
@@ -63,8 +64,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
 
     private void registerBatchStore() {
-        Table table = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
+        Table table = metadataProxy.getTable(customerSpace.toString(), getBatchStoreName());
         if (entity.getBatchStore() != null) {
             if (table == null) {
                 throw new IllegalStateException("Did not generate new table for " + batchStore);
@@ -236,6 +236,14 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     protected void enrichTableSchema(Table table) {
+    }
+
+    protected String getBatchStoreName() {
+        return TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion);
+    }
+
+    protected String getDiffTableName() {
+        return TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
     }
 
 }

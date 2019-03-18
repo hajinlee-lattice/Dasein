@@ -126,7 +126,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
     protected static final String PA_TIMESTAMP = "PA_TIMESTAMP";
     public static final String PA_SKIP_ENTITIES = "PA_SKIP_ENTITIES";
-    protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String CLEANUP_TIMESTAMP = "CLEANUP_TIMESTAMP";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
@@ -141,6 +140,17 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
     protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
+
+    // intermediate results for skippable steps
+    protected static final String NEW_ENTITY_MATCH_VERSION = "NEW_ENTITY_MATCH_VERSION";
+    protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
+    protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
+    protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
+    protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
+    protected static final String ACCOUNT_SERVING_PROFILE_TABLE_NAME = "ACCOUNT_SERVING_PROFILE_TABLE_NAME";
+    protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
+    protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
+
     // store set of entities that are already published
     protected static final String PUBLISHED_ENTITIES = "PUBLISHED_ENTITIES";
     public static final String EXISTING_RECORDS = "EXISTING_RECORDS";

@@ -124,16 +124,48 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     protected TransformationStepConfig reportDiff(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
+
         step.setInputSteps(Collections.singletonList(inputStep));
+
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
         ConsolidateReportConfig config = new ConsolidateReportConfig();
         config.setEntity(entity);
         String configStr = appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(configStr);
+
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(diffReportTablePrefix);
         step.setTargetTable(targetTable);
+
+        return step;
+
+    }
+
+    protected TransformationStepConfig reportDiff(String diffTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+
+        String tableSourceName = "DiffTable";
+        SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
+
+        ConsolidateReportConfig config = new ConsolidateReportConfig();
+        config.setEntity(entity);
+        String configStr = appendEngineConf(config, lightEngineConfig());
+        step.setConfiguration(configStr);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(diffReportTablePrefix);
+        step.setTargetTable(targetTable);
+
         return step;
 
     }
@@ -174,8 +206,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected void generateDiffReport() {
-        Table diffReport = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(diffReportTablePrefix, pipelineVersion));
+        String diffReportTableName = TableUtils.getFullTableName(diffReportTablePrefix, pipelineVersion);
+        Table diffReport = metadataProxy.getTable(customerSpace.toString(), diffReportTableName);
         if (diffReport != null) {
             ObjectNode report = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
                     ObjectNode.class);

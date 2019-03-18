@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,8 +198,21 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         putObjectInContext(key, list);
     }
 
-    protected void clearExecutionContext() {
+    protected void clearExecutionContext(Set<String> retryableKeys) {
+        Map<String, Object> retryableContext = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(retryableKeys)) {
+            log.info(("There are " + executionContext.entrySet().size() + " keys in execution context."));
+            executionContext.entrySet().forEach(entry -> {
+                if (retryableKeys.contains(entry.getKey())) {
+                    log.info(String.format("Putting %s: %s", entry.getKey(), entry.getValue()));
+                    retryableContext.put(entry.getKey(), entry.getValue());
+                }
+            });
+        }
         executionContext.entrySet().clear();
+        if (MapUtils.isNotEmpty(retryableContext)) {
+            retryableContext.forEach(executionContext::put);
+        }
     }
 
     protected void removeObjectFromContext(String key) {

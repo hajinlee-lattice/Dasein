@@ -3,6 +3,7 @@ package com.latticeengines.workflow.exposed.build;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -18,8 +19,13 @@ public class WorkflowBuilder {
     public WorkflowBuilder(String root, WorkflowConfiguration workflowConfig) {
         this.root = root;
         this.workflowConfig = workflowConfig;
-        if (workflowConfig != null && workflowConfig.getFailingStep() != null) {
-            workflow.setFailingStep(workflowConfig.getFailingStep());
+        if (workflowConfig != null) {
+            if (workflowConfig.getFailingStep() != null) {
+                workflow.setFailingStep(workflowConfig.getFailingStep());
+            }
+            if (MapUtils.isNotEmpty(workflowConfig.getInitialContext())) {
+                workflow.setInitialContext(workflowConfig.getInitialContext());
+            }
         }
     }
 

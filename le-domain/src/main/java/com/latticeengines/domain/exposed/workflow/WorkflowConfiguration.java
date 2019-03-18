@@ -41,6 +41,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("subWorkflowConfigRegistry")
     private Map<String, WorkflowConfiguration> subWorkflowConfigRegistry = new HashMap<>();
 
+    @JsonProperty("initialContext")
+    private Map<String, String> initialContext;
+
     @JsonProperty("workflowName")
     private String workflowName;
 
@@ -100,6 +103,14 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         this.workflowName = workflowName;
         setCustomerSpace(customerSpace);
         setName(payloadName);
+    }
+
+    public Map<String, String> getInitialContext() {
+        return initialContext;
+    }
+
+    public void setInitialContext(Map<String, String> initialContext) {
+        this.initialContext = initialContext;
     }
 
     public String getWorkflowName() {

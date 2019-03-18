@@ -66,9 +66,18 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         customerSpace = configuration.getCustomerSpace();
-        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
+        String accountFeatureTableName = getStringValueFromContext(ACCOUNT_FEATURE_TABLE_NAME);
+        if (StringUtils.isNotBlank(accountFeatureTableName)) {
+            Table accountFeatureTable = metadataProxy.getTable(customerSpace.toString(), accountFeatureTableName);
+            if (accountFeatureTable != null) {
+                log.info("Found account feature table in context, going thru short-cut mode.");
+                dataCollectionProxy.upsertTable(customerSpace.toString(), accountFeatureTableName, //
+                        TableRoleInCollection.AccountFeatures, inactive);
+                return null;
+            }
+        }
 
         fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
         if (StringUtils.isBlank(fullAccountTableName)) {
@@ -105,6 +114,8 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
             throw new IllegalStateException(
                     "Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
         }
+
+        putStringValueInContext(ACCOUNT_FEATURE_TABLE_NAME, accountFeatureTableName);
     }
 
     private PipelineTransformationRequest getTransformRequest() {

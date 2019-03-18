@@ -70,7 +70,7 @@ public class CleanupByUploadWrapperTestNG extends WorkflowApiFunctionalTestNGBas
         cleanupByUploadStep.setWorkflowJobEntityMgr(workflowJobEntityMgr);
         cleanupByUploadStep.setNamespace("cdlOperationWorkflow.CleanupByUploadWrapperConfiguration");
         Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
-        JobExecution execution = runner.launchStep(workflowTranslator.step(cleanupByUploadStep, choreographer, 0, null),
+        JobExecution execution = runner.launchStep(workflowTranslator.step(cleanupByUploadStep, choreographer, 0, null, null),
                 params, executionContext);
         while (execution.isRunning()) {
             Thread.sleep(5000);

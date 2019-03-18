@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -59,6 +60,8 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private int filterStep;
     private int profileStep;
     private int encodeStep;
+
+    private boolean shortCutMode;
 
     private String fullAccountTableName;
 
@@ -76,40 +79,72 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        statsTablePrefix = null;
-        fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
-        setEvaluationDateStrAndTimestamp();
+
+        profileTableName = getStringValueFromContext(ACCOUNT_SERVING_PROFILE_TABLE_NAME);
+        servingStoreTableName = getStringValueFromContext(ACCOUNT_SERVING_TABLE_NAME);
+        if (StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(servingStoreTableName)) {
+            Table profileTable = metadataProxy.getTable(customerSpace.toString(), profileTableName);
+            Table servingStore = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
+            if (profileTable != null && servingStore != null) {
+                log.info("Found both profile and serving store tables in context, going thru short-cut mode.");
+                shortCutMode = true;
+
+                TableRoleInCollection profileRole = profileTableRole();
+                dataCollectionProxy.upsertTable(customerSpace.toString(), profileTableName, profileRole, inactive);
+
+                TableRoleInCollection servingStoreRole = BusinessEntity.Account.getServingStore();
+                exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
+                dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
+                        servingStoreRole, inactive);
+            }
+        }
+
+        if (!shortCutMode) {
+            statsTablePrefix = null;
+            fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
+            setEvaluationDateStrAndTimestamp();
+        }
     }
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
+        if (shortCutMode) {
+            return null;
+        }
+
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("ProfileAccountStep");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
+
         int step = 0;
         filterStep = step++;
         profileStep = step++;
         encodeStep = step;
+
         // -----------
-        // filter step
         TransformationStepConfig filter = filter();
         TransformationStepConfig profile = profile();
         TransformationStepConfig encode = bucketEncode();
-
-//        TransformationStepConfig sortEncode = sortEncode(customerSpace);
         TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
+
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(filter); //
-        steps.add(profile); //
-        steps.add(encode); //
-//        steps.add(sortEncode); //
-        steps.add(sortProfile); //
-        // -----------
+        steps.add(filter);
+        steps.add(profile);
+        steps.add(encode);
+        steps.add(sortProfile);
+
         request.setSteps(steps);
         return request;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        putStringValueInContext(ACCOUNT_SERVING_PROFILE_TABLE_NAME, profileTableName);
+        putStringValueInContext(ACCOUNT_SERVING_TABLE_NAME, servingStoreTableName);
     }
 
     private TransformationStepConfig filter() {
@@ -288,6 +323,14 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         } else {
             return str;
         }
+    }
+
+    protected String getProfileTableName() {
+        return TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
+    }
+
+    protected String getServingStoreTableName() {
+        return TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
     }
 
 }
