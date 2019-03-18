@@ -174,21 +174,6 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test(groups = "testS3Exist")
-    public void testS3() throws Exception {
-        String bucket = "latticeengines-dev-datacloud";
-        String obj = "/Pods/Default/Ingestion/ALEXA_RAW/2019-03-03_00-00-00_UTC.avro";
-        if (s3Service.objectExist(bucket, obj))
-            log.info(obj + " exists, using objectExist");
-        else
-            log.info(obj + " does not exist, using objectExist" );
-
-        if (s3Service.listObjects(bucket, obj).size() > 0)
-            log.info(obj + " exists, using listObjects");
-        else
-            log.info(obj + " does not exist, using listObjects" );
-    }
-
     @Test(groups = "testIngestion")
     public void testIngestion() throws Exception {
 
