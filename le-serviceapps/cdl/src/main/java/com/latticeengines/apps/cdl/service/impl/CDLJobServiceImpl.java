@@ -197,7 +197,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private void orchestrateJob() {
         String clusterId = getCurrentClusterID();
-        log.info(String.format("Current cluster id is : %s.", clusterId));
+        log.debug(String.format("Current cluster id is : %s.", clusterId));
         boolean clusterIdIsEmpty = StringUtils.isEmpty(clusterId);
 
         int runningPAJobsCount = 0;

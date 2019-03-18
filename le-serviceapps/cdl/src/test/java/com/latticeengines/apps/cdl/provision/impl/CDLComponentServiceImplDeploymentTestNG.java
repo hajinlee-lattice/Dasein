@@ -48,9 +48,9 @@ public class CDLComponentServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
         Assert.assertTrue(files.size() > 0);
 
-        componentProxy.reset(mainCustomerSpace, ComponentConstants.CDL);
-        componentProxy.reset(mainCustomerSpace, ComponentConstants.LP);
-        componentProxy.reset(mainCustomerSpace, ComponentConstants.METADATA);
+        Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.CDL));
+        Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.LP));
+        Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.METADATA));
 
         dataUnits = dataUnitProxy.getByStorageType(mainCustomerSpace, DataUnit.StorageType.Redshift);
         Assert.assertEquals(dataUnits.size(), 0);
