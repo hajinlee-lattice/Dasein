@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -306,13 +307,14 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             for (Attribute modelAttribute : modelAttributes) {
                 if (isScoringFieldMatchedWithModelAttribute(sb.toString(), modelAttribute)) {
                     log.warn(String.format(
-                            "Protential conflict between scoring header %s and model attribute displayname %s",
+                            "Potential conflict between scoring header %s and model attribute displayname %s",
                             sb.toString(), modelAttribute.getDisplayName()));
                     sb.setLength(len);
                     sb.append(String.format("_%d", ++version));
                 }
             }
-            modelAttributes.add(getAttributeFromFieldName(sb.toString(), fieldMapping.getMappedField()));
+            modelAttributes.add(
+                    getAttributeFromFieldName(unmappedScoringHeader, sb.toString(), fieldMapping.getMappedField()));
         }
 
         modelAttributes.stream().filter(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getDisplayName()))
@@ -325,13 +327,18 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         log.info(String.format("After resolving attributes, the model attributes are: %s", modelAttributes));
     }
 
-    private Attribute getAttributeFromFieldName(String scoringHeaderName, String fieldName) {
+    private Attribute getAttributeFromFieldName(String initialCSVName, String scoringHeaderName, String fieldName) {
         Attribute attribute = new Attribute();
 
         attribute.setName(fieldName == null
                 ? ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(scoringHeaderName) : fieldName);
         attribute.setPhysicalDataType(FieldType.STRING.toString().toLowerCase());
         attribute.setDisplayName(scoringHeaderName);
+        // need to populate possible csv name after renaming initial CSV name.
+        // then mapper will retrieve it
+        if (!initialCSVName.equals(scoringHeaderName)) {
+            attribute.setPossibleCSVNames(Collections.singletonList(initialCSVName));
+        }
         attribute.setApprovedUsage(ApprovedUsage.NONE.name());
         attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         attribute.setFundamentalType(ModelingMetadata.FT_ALPHA);
