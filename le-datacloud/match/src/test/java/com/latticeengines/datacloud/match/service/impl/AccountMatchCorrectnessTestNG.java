@@ -170,14 +170,14 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Tenant tenant = new Tenant(tenantId);
 
         // Baseline Normal Case
-        // public domain without duns/name, but in email format, treat as public domain
+        // public domain without DUNS/name, but in email format, treat as public domain
         List<Object> data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null);
         MatchOutput output = matchAccount(data, true, tenant, null).getRight();
         logMatchLogsAndErrors(Arrays.asList(FIELDS), data, output);
         Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
         // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
-        // public domain without duns/name, and not in email format, treat as normal domain
+        // public domain without DUNS/name, and not in email format, treat as normal domain
         data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, null);
         output = matchAccount(data, true, tenant, null).getRight();
         logMatchLogsAndErrors(Arrays.asList(FIELDS), data, output);
@@ -297,7 +297,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         // Test extreme case with two email and two website domain fields.
         // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain1, Country, State, Email2, DUNS, Domain2, Email1
         data = Arrays.asList(null, null, null, null, "www.aol.com", "USA", "CA",
-                "private@lattice-engines.com", 000000000, "", "somebody@outlook.com");
+                "private@lattice-engines.com", 000000000, "not_a_domain_or_email", "somebody@outlook.com");
         //data = Arrays.asList(null, null, null, null, null, "USA", null,
         //                "www.lattice-engines.com", null, null, null);
         log.info("Data is:\n" + data.toString());
