@@ -123,7 +123,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             return true;
         }
         List<String> allRedshiftTable = redshiftService.getTables("");
-        List<String> allTenantId = tenantEntityMgr.findAllTenantId();
+        List<String> allTenantId = tenantEntityMgr.getAllTenantId();
         Set<String> allMissTenant = new HashSet<>();
         Set<String> existingTenant = new HashSet<>();
         Set<String> allMissTable = new HashSet<>();
