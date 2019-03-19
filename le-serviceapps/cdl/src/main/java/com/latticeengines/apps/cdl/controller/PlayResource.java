@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -207,16 +206,20 @@ public class PlayResource {
         List<PlayLaunch> playLaunches =
                 playLaunchService.findByPlayId(play.getPid(), Collections.singletonList(LaunchState.UnLaunched));
 
-        if (CollectionUtils.isEmpty(playLaunches)) {
-            playLaunch.setTenant(MultiTenantContext.getTenant());
-            playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
-            playLaunch.setLaunchState(LaunchState.UnLaunched);
-            playLaunch.setPlay(play);
-            playLaunchService.create(playLaunch);
-            return playLaunch;
-        } else {
-            return playLaunches.get(0);
+        for (PlayLaunch launch : playLaunches) {
+            if (playLaunch.getDestinationOrgId() == launch.getDestinationOrgId()) {
+                throw new LedpException(LedpCode.LEDP_32000,
+                        new String[] {
+                                "Cannot create new playLaunch since a playLaunch already exists for this Org Id: "
+                                        + playLaunch.getDestinationOrgId() });
+            }
         }
+        playLaunch.setTenant(MultiTenantContext.getTenant());
+        playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
+        playLaunch.setLaunchState(LaunchState.UnLaunched);
+        playLaunch.setPlay(play);
+        playLaunchService.create(playLaunch);
+        return playLaunch;
     }
 
     @GetMapping(value = "/{playName}/launches/configurations")
