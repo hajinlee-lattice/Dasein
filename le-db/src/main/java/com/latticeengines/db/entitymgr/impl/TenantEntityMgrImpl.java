@@ -57,7 +57,8 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     }
 
     @Override
-    public List<String> findAllTenantId() {
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> getAllTenantId() {
         return tenantRepository.findAllTenantId();
     }
 
