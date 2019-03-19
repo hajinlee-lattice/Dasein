@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class EmailUtils {
+
+    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
 
     public static List<String> parseEmails(String emailsInJson) {
         List<String> adminEmails = new ArrayList<>();
@@ -30,6 +33,13 @@ public class EmailUtils {
         }
 
         return adminEmails;
+    }
+
+    public static boolean isInternalUser(String email) {
+        if (StringUtils.isBlank(email)) {
+            return false;
+        }
+        return email.trim().toUpperCase().endsWith(LATTICE_ENGINES_COM);
     }
 
 }
