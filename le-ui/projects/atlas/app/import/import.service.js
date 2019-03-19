@@ -46,7 +46,7 @@ angular.module('lp.import')
         this.postBody = null;
         this.autoImport = true;
         this.importOnly = false;
-        this.entityMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENTITY_MATCH_ENABLED);
+        this.entityMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_ENTITY_MATCH);
     }
 
     this.init();

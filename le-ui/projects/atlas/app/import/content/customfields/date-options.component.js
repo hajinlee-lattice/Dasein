@@ -6,15 +6,15 @@ angular.module('lp.import.wizard.customfields')
         bindings: {
             field: '=',
             disabeld: '=',
-            updateType: '&',
             update: '&',
             tooltiptxt: '@',
             dateformat: '=',
             timeformat: '=',
-            tz: '='
+            timezone: '='
         },
-        controller: function ($state, $scope, ImportUtils) {
+        controller: function ($state, $scope) {
             let self = this;
+            
             this.$onInit = function () {
 
                 this.redux = $state.get('home.import').data.redux;
@@ -22,18 +22,14 @@ angular.module('lp.import.wizard.customfields')
                 this.timeFormats = this.redux.store.timeFormats;
                 this.timeZones = this.redux.store.timezones;
                 this.formerTemplates = this.field.fromExistingTemplate;
+               
             };
             this.getTooltip = () => {
                 return this.tooltiptxt;
             }
-            this.setValues = (field, dateFormat, timeFormat, timezone) => {
-                field.dateFormatString = dateFormat;
-                field.timeFormatString = timeFormat;
-                field.timezone = timezone;
-
-            }
+          
             this.updateFormats = () => {
-                    self.update({ formats: { field: this.field, dateformat: this.dateformat, timeformat: this.timeformat, tz: this.tz } }); 
+                    self.update({ formats: { field: this.field, dateformat: this.dateformat, timeformat: this.timeformat, timezone: this.timezone } }); 
             };
         }
     });
