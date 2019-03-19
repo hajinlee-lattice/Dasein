@@ -44,7 +44,7 @@ public class RateLimitedResourceManager {
         synchronized (definitions) {
             RateLimitDefinition definition = definitions.get(resourceName);
             if (definition.isCrossDivision()) {
-                LockManager.registerCrossDivisionLock(toLockName(resourceName));
+                LockManager.deregisterCrossDivisionLock(toLockName(resourceName));
             } else {
                 LockManager.deregisterDivisionPrivateLock(toLockName(resourceName));
             }

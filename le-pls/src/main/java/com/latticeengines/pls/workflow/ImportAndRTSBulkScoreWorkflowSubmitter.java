@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -13,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.EmailUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -32,6 +38,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportA
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
+import com.latticeengines.pls.service.BulkScoringRateLimitingService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
@@ -61,6 +68,12 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${pls.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private BulkScoringRateLimitingService rateLimitingService;
+
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
 
@@ -80,6 +93,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (hasRunningWorkflow(sourceFile)) {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
+        checkBulkScoringRateLimit(sourceFile.getPath(), MultiTenantContext.getTenant().getName(),
+                MultiTenantContext.getEmailAddress());
 
         WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
                 enableLeadEnrichment, enableDebug);
@@ -97,8 +112,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
             String sourceDisplayName, boolean enableLeadEnrichment, boolean enableDebug) {
 
-        ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
-                modelId, false, true, false);
+        ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(), modelId,
+                false, true, false);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
@@ -158,5 +173,28 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .idColumnName(InterfaceName.InternalId.name()) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
+    }
+
+    void checkBulkScoringRateLimit(String filePath, String tenant, String email) {
+        if (!EmailUtils.isInternalUser(email)) {
+            log.info("Not an internal user=" + email);
+            return;
+        }
+        long numRows = 0;
+        try {
+            numRows = HdfsUtils.count(yarnConfiguration, filePath);
+            log.info(String.format("File=%s has rows of %s.", filePath, numRows));
+        } catch (Exception ex) {
+            log.warn("Could not count rows of file=" + filePath + " error=" + ex.getMessage());
+            return;
+        }
+        if (numRows == 0) {
+            log.info("There is 0 row in the file=" + filePath);
+            return;
+        }
+        RateLimitedAcquisition acquisition = rateLimitingService.acquireBulkRequest(tenant, numRows, false);
+        if (!acquisition.isAllowed()) {
+            throw new LedpException(LedpCode.LEDP_18214);
+        }
     }
 }
