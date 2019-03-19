@@ -8,7 +8,7 @@ angular.module('lp.import.wizard.latticefields', [])
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
-    //console.log('ALREADY SAVED ****> ',alreadySaved)
+    // console.log('ALREADY SAVED ****> ',alreadySaved)
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
         // vm.updateAnalysisFields();
@@ -39,7 +39,6 @@ angular.module('lp.import.wizard.latticefields', [])
         csvFileName: ImportWizardStore.getCsvFileName(),
         ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
-        fieldMappingsMaster : masterRedux.store.fieldMappings.list,
         ignoredFieldLabel: ignoredFieldLabel,
         UnmappedFieldsMap: {},
         matchingFieldMappings: {},
@@ -214,7 +213,7 @@ angular.module('lp.import.wizard.latticefields', [])
     }
 
     vm.setFormatFromAnalysis = (map) => {
-        // ////console.log('~~~~~~~~%%%%%%%%% ', map, vm.analysisFieldsList);
+        // console.log('~~~~~~~~%%%%%%%%% ', map, vm.fieldMappings);
         Object.keys(vm.fieldMappings).forEach(key => {
             let field = vm.fieldMappings[key];
             if(map.mappedField == field.mappedField){
@@ -224,8 +223,6 @@ angular.module('lp.import.wizard.latticefields', [])
                 return;
             }
         });
-        // //console.log('~~~~~~~~%%%%%%%%% ', map);
-        // //console.log('%%%%%%%%%%%% ~~~~~~~~ %%%%%%%%%%%% ');
     }
     vm.updateDateFormat = (field, map) => {
         let fieldName = field.name;
@@ -233,11 +230,13 @@ angular.module('lp.import.wizard.latticefields', [])
         if(fieldName == map.mappedField){
             fieldToName = map.userField;
         }
-        vm.fieldMappingsMaster.forEach(element => {
+        vm.fieldMappings.forEach(element => {
+            // console.log('UPDATED? ',element, map);
             if(element.userField == fieldToName){
                     field.dateFormatString = element.dateFormatString;
                     field.timeFormatString = element.timeFormatString;
                     field.timezone = element.timezone;
+                    // console.log('UPDATED ', field);
                 return;
             }
         });
@@ -247,7 +246,7 @@ angular.module('lp.import.wizard.latticefields', [])
     vm.updateFormats = (formats) => {
         formats.field.dateFormatString = formats.dateformat;
         formats.field.timeFormatString = formats.timeformat;
-        formats.field.timezone = formats.tz;
+        formats.field.timezone = formats.timezone;
         let alreadySaved = ImportWizardStore.getSaveObjects($state.current.name);
         let toSave;
         if(alreadySaved){

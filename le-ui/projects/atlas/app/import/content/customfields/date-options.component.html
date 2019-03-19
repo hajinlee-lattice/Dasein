@@ -20,9 +20,8 @@
         <option value="{{ list }}" class="default-value">(Time Format)</option>
         <option ng-repeat="list in $ctrl.timeFormats" value="{{ list }}">{{ list }}</option>
     </select>
-
     <div class="time-zones">
-        <select class="form-control" ng-disabled="{{$ctrl.formerTemplates}}" ng-model="$ctrl.tz" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.updateFormats()">
+        <select class="form-control" ng-disabled="{{$ctrl.formerTemplates}}" ng-model="$ctrl.timezone" ng-disabled="$ctrl.disabeld === true" ng-change="$ctrl.updateFormats()">
             <option value="{{ list }}" class="">(Time Zone)</option>
             <option ng-repeat="list in $ctrl.timeZones" value="{{ list }}">{{ list }}</option>
         </select>

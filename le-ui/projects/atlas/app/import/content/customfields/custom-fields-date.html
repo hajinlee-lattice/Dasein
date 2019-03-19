@@ -98,9 +98,9 @@
             </select>
             <date-field-component ng-if="fieldMapping[field.userField].fieldType == 'DATE'" 
                 field="field" 
-                dateformat="field.dateFormatString" timeformat="field.timeFormatString"
+                dateformat="field.dateFormatString" timeformat="field.timeFormatString" timezone="field.timezone"
                 disabeld="fieldMapping[field.userField].ignore"
-                update-type="vm.changeSingleType(fieldMapping)"
+                update="vm.changeSingleType(fieldMapping)"
                 tooltiptxt="{{vm.fieldDateTooltip}}"></date-field-component>
            
           </div>
