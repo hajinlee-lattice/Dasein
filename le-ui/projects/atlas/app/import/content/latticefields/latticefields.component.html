@@ -71,8 +71,8 @@
                         </label>
                         <div class="date-field">
                             <select class="form-control" ng-model="vm.fieldMapping[field.name].userField"
-                                ng-change="vm.changeLatticeField(vm.fieldMapping, form, field)" ng-required="field.required"
-                                ng-class="{'required': field.required}">
+                                ng-change="vm.changeLatticeField(vm.fieldMapping, form, field)"
+                                ng-required="field.required" ng-class="{'required': field.required}">
 
                                 <option value="">{{vm.ignoredFieldLabel}}</option>
                                 <option ng-repeat="availableField in vm.availableFields"
@@ -82,8 +82,9 @@
                                     {{availableField.userField}}
                                 </option>
                             </select>
-                            <date-field-component field="field" dateformat="field.dateFormatString" timeformat="field.timeFormatString" time
-                            update-type="vm.updateFormats(fieldMapping)" update="vm.updateFormats(formats)"></date-field-component>
+                            <date-field-component field="field" dateformat="field.dateFormatString"
+                                timeformat="field.timeFormatString" timezone="field.timezone"
+                                update="vm.updateFormats(formats)"></date-field-component>
                         </div>
                     </li>
                 </ul>
