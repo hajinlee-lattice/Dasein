@@ -15,16 +15,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
@@ -56,6 +53,10 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     @JsonProperty("key")
     @Column(name = "KEY", nullable = false)
     private String key;
+
+    @JsonProperty("host_url")
+    @Column(name = "HOST_URL", nullable = false)
+    private String hostUrl;
 
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
@@ -104,6 +105,14 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
         this.key = key;
     }
 
+    public String getHostUrl() {
+        return hostUrl;
+    }
+
+    public void setHostUrl(String hostUrl) {
+        this.hostUrl = hostUrl;
+    }
+
     @Override
     public Date getCreated() {
         return created;
@@ -122,18 +131,5 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
-    }
-
-    @Transient
-    @JsonIgnore
-    public String getTenantId() {
-        if (dropBox == null) {
-            return StringUtils.EMPTY;
-        } else {
-            if (dropBox.getTenant() == null) {
-                throw new RuntimeException(String.format("Cannot find dropbox %s owner tenant!", dropBox.getDropBox()));
-            }
-            return CustomerSpace.shortenCustomerSpace(dropBox.getTenant().getId());
-        }
     }
 }

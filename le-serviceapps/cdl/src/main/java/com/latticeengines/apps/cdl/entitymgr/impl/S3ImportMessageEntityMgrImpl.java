@@ -62,7 +62,7 @@ public class S3ImportMessageEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key) {
+    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key, String hostUrl) {
         S3ImportMessage message;
         if (isReaderConnection()) {
             message = readerRepository.findByKey(key);
@@ -74,10 +74,11 @@ public class S3ImportMessageEntityMgrImpl
             return message;
         } else {
             String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
-            DropBox dropBox = dropBoxEntityMgr.findDropBox(dropBoxPrefix);
+            DropBox dropBox = dropBoxEntityMgr.getDropBox(dropBoxPrefix);
             message = new S3ImportMessage();
             message.setBucket(bucket);
             message.setKey(key);
+            message.setHostUrl(hostUrl);
             message.setDropBox(dropBox);
             s3ImportMessageDao.create(message);
         }
@@ -87,10 +88,19 @@ public class S3ImportMessageEntityMgrImpl
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<S3ImportMessage> getS3ImportMessageGroupByDropBox() {
+        List<S3ImportMessage> messageList;
         if (isReaderConnection()) {
-            return readerRepository.getS3ImportMessageGroupByDropBox();
+            messageList = readerRepository.getS3ImportMessageGroupByDropBox();
+
         } else {
-            return writerRepository.getS3ImportMessageGroupByDropBox();
+            messageList = writerRepository.getS3ImportMessageGroupByDropBox();
         }
+//        if (CollectionUtils.isNotEmpty(messageList)) {
+//            for (S3ImportMessage message : messageList) {
+//                HibernateUtils.inflateDetails(message.getDropBox());
+//                HibernateUtils.inflateDetails(message.getDropBox().getTenant());
+//            }
+//        }
+        return messageList;
     }
 }

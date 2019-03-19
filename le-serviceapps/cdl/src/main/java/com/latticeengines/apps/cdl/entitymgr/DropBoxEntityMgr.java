@@ -16,6 +16,6 @@ public interface DropBoxEntityMgr extends BaseEntityMgrRepository<DropBox, Long>
 
     Tenant getDropBoxOwner(String dropBox);
 
-    DropBox findDropBox(String dropBox);
+    DropBox getDropBox(String dropBox);
 
 }

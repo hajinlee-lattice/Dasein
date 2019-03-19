@@ -130,7 +130,7 @@ public class DropBoxEntityMgrImpl //
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DropBox findDropBox(String dropBox) {
+    public DropBox getDropBox(String dropBox) {
         if (isReaderConnection()) {
             return readerRepository.findByDropBox(dropBox);
         } else {

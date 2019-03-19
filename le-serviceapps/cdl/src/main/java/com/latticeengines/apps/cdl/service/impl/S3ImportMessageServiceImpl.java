@@ -17,8 +17,8 @@ public class S3ImportMessageServiceImpl implements S3ImportMessageService {
     private S3ImportMessageEntityMgr s3ImportMessageEntityMgr;
 
     @Override
-    public S3ImportMessage createOrUpdateMessage(String bucket, String key) {
-        return s3ImportMessageEntityMgr.createOrUpdateS3ImportMessage(bucket, key);
+    public S3ImportMessage createOrUpdateMessage(String bucket, String key, String hostUrl) {
+        return s3ImportMessageEntityMgr.createOrUpdateS3ImportMessage(bucket, key, hostUrl);
     }
 
     @Override

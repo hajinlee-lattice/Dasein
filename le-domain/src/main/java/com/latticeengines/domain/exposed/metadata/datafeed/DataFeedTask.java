@@ -118,6 +118,11 @@ public class DataFeedTask implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private SubType subType;
 
+    @Column(name = "S3STATUS")
+    @JsonProperty("s3status")
+    @Enumerated(EnumType.STRING)
+    private S3ImportStatus s3ImportStatus = S3ImportStatus.Pause;
+
     @JsonIgnore
     @Transient
     private List<DataFeedTaskTable> tables = new ArrayList<>();
@@ -256,6 +261,13 @@ public class DataFeedTask implements HasPid, Serializable {
         }
     }
 
+    public S3ImportStatus getS3ImportStatus() {
+        return s3ImportStatus;
+    }
+
+    public void setS3ImportStatus(S3ImportStatus s3ImportStatus) {
+        this.s3ImportStatus = s3ImportStatus;
+    }
 
     public List<DataFeedTaskTable> getTables() {
         return tables;
@@ -282,5 +294,10 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public enum SubType {
         Bundle, Hierarchy
+    }
+
+    public enum S3ImportStatus {
+        Active,
+        Pause
     }
 }

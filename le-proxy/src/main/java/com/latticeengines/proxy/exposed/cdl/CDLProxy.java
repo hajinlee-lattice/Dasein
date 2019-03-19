@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -163,8 +165,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
         } else {
-            throw new RuntimeException(
-                    "Failed to submit s3 import job: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new LedpException(LedpCode.LEDP_40056,
+                    new String[] { StringUtils.join(responseDoc.getErrors(), ",") });
         }
     }
 
