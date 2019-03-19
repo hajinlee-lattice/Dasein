@@ -582,6 +582,35 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return workflowJobs;
     }
 
+    @Override
+    @WithCustomerSpace
+    public int clearJobCaches(String customerSpace) {
+        return jobCacheService.deepEvict(MultiTenantContext.getTenant());
+    }
+
+    @Override
+    @WithCustomerSpace
+    public int clearJobCachesByWorkflowIds(String customerSpace, List<Long> workflowIds) {
+        // do a lookup to make sure we only evict cache entries that belong to current
+        // customer space
+        List<Job> jobs = getJobsByWorkflowIdsFromCache(customerSpace, workflowIds, true);
+        if (CollectionUtils.isEmpty(jobs)) {
+            return 0;
+        }
+
+        workflowIds = jobs.stream() //
+                .filter(job -> job != null && job.getId() != null) //
+                .map(Job::getId) //
+                .collect(Collectors.toList());
+        jobCacheService.evictByWorkflowIds(workflowIds);
+        return workflowIds.size();
+    }
+
+    @Override
+    public int clearAllJobCaches() {
+        return jobCacheService.evictAll();
+    }
+
     private String getLpUrl() {
         if (StringUtils.isBlank(internalAppUrl)) {
             return microserviceUrl;

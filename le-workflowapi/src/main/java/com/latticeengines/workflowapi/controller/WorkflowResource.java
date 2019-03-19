@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -249,6 +250,26 @@ public class WorkflowResource {
     public WorkflowJob deleteWorkflowJobFromApplicationId(@PathVariable String applicationId,
                                                           @RequestParam(required = false) String customerSpace) {
         return workflowJobService.deleteWorkflowJobByApplicationId(customerSpace, applicationId);
+    }
+
+    @DeleteMapping(value = "/caches/jobs", headers = "Accept=application/json")
+    @ApiOperation(value = "Delete all job cache entries")
+    public int clearJobCaches() {
+        return workflowJobService.clearAllJobCaches();
+    }
+
+    @DeleteMapping(value = "/caches/jobs/{customerSpace}", headers = "Accept=application/json")
+    @ApiOperation(value = "Delete all job cache entries for specified tenant")
+    public int clearJobCachesForTenant(@PathVariable String customerSpace,
+            @RequestParam(required = false) List<Long> workflowIds) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(customerSpace), "Should specify a valid customerSpace");
+        if (workflowIds == null) {
+            log.info("Clearing all job cache entries for customerSpace = {}", customerSpace);
+            return workflowJobService.clearJobCaches(customerSpace);
+        } else {
+            log.info("Clearing job cache entries for customerSpace = {}, workflowIds = {}", customerSpace, workflowIds);
+            return workflowJobService.clearJobCachesByWorkflowIds(customerSpace, workflowIds);
+        }
     }
 
     @DeleteMapping(value = "/yarnapps/jobs", headers = "Accept=application/json")
