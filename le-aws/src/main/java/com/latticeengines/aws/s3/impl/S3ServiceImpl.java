@@ -75,7 +75,7 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public boolean objectExist(String bucket, String object) {
-        String key = sanitizePathToKey(object);
+        String key = sanitizePathToKey(object, false);
         return s3Client.doesObjectExist(bucket, key);
     }
 
@@ -398,12 +398,21 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private static String sanitizePathToKey(String path) {
+        return sanitizePathToKey(path, true);
+    }
+
+    private static String sanitizePathToKey(String path, boolean handleTail) {
         while (path.startsWith("/")) {
             path = path.substring(1);
         }
-        while (path.endsWith("/")) {
-            path = path.substring(0, path.lastIndexOf("/"));
+
+        if (handleTail)
+        {
+            while (path.endsWith("/")) {
+                path = path.substring(0, path.lastIndexOf("/"));
+            }
         }
+
         return path;
     }
 
