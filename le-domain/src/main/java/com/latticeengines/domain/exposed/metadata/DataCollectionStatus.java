@@ -75,11 +75,11 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     @Column(name = "Detail", columnDefinition = "'JSON'")
     private DataCollectionStatusDetail detail = new DataCollectionStatusDetail();
 
-    @Column(name = "CREATED", nullable = false)
-    private Date created;
+    @Column(name = "CREATION_TIME", nullable = false)
+    private Date creationTime;
 
-    @Column(name = "UPDATED", nullable = false)
-    private Date updated;
+    @Column(name = "UPDATE_TIME", nullable = false)
+    private Date updateTime;
 
     @Override
     @JsonIgnore
@@ -266,29 +266,29 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     }
 
     @Override
-    @JsonProperty("Created")
+    @JsonProperty("CreationTime")
     @Temporal(TemporalType.TIMESTAMP)
     public Date getCreated() {
-        return created;
+        return creationTime;
     }
 
     @Override
-    @JsonProperty("Created")
+    @JsonProperty("CreationTime")
     public void setCreated(Date created) {
-        this.created = created;
+        this.creationTime = created;
     }
 
     @Override
-    @JsonProperty("Updated")
+    @JsonProperty("UpdateTime")
     @Temporal(TemporalType.TIMESTAMP)
     public Date getUpdated() {
-        return updated;
+        return updateTime;
     }
 
     @Override
-    @JsonProperty("Updated")
+    @JsonProperty("UpdateTime")
     public void setUpdated(Date updated) {
-        this.updated = updated;
+        this.updateTime = updated;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

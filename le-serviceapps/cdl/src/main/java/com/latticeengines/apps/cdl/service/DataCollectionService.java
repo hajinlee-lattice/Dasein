@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
@@ -83,7 +82,7 @@ public interface DataCollectionService {
 
     byte[] downloadDataCollectionArtifact(String customerSpace, String exportId);
 
-    void saveStatusHistory(String customerSpace, DataCollectionStatus status, Version version);
+    void saveStatusHistory(String customerSpace, DataCollectionStatus status);
 
-    List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace, Version version);
+    List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace);
 }

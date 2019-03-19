@@ -97,25 +97,18 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("save Or Update Status", url, detail, Void.class);
     }
 
-    public void saveDataCollectionStatusHistory(String customerSpace, DataCollectionStatus detail,
-            DataCollection.Version version) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}/statushistory",
-                shortenCustomerSpace(customerSpace), version);
+    public void saveDataCollectionStatusHistory(String customerSpace, DataCollectionStatus detail) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/statushistory",
+                shortenCustomerSpace(customerSpace));
         post("save status history", url, detail, Void.class);
     }
 
-    public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(String customerSpace,
-            DataCollection.Version version) {
+    public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(String customerSpace) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/statushistory";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
-        if (version != null) {
-            urlPattern += "?version={version}";
-            args.add(version);
-        }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
-        List<?> list = get("get dataCollection status history", url, List.class);
-        return JsonUtils.convertList(list, DataCollectionStatusHistory.class);
+        return getList("get dataCollection status history", url, DataCollectionStatusHistory.class);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, DataCollection.Version version) {

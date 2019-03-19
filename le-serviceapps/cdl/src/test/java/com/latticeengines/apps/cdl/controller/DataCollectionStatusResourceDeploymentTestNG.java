@@ -9,6 +9,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
@@ -38,11 +39,10 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(status.getMaxTxnDate() == 0);
 
         // insert status history
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, emptyStatus,
-                DataCollection.Version.Blue);
-        Thread.sleep(500);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, emptyStatus);
+        Thread.sleep(1000);
         List<DataCollectionStatusHistory> statusHisList = dataCollectionProxy
-                .getDataCollectionStatusHistory(mainCustomerSpace, DataCollection.Version.Blue);
+                .getDataCollectionStatusHistory(mainCustomerSpace);
         Assert.assertEquals(statusHisList.size(), 1);
         DataCollectionStatusHistory statusHis = statusHisList.get(0);
         Assert.assertTrue(statusHis.getAccountCount() == 0L);
@@ -59,10 +59,9 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(blueStatus.getAccountCount() == 10L);
 
         // insert status history with version blue, verify first item in array
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status, DataCollection.Version.Blue);
-        Thread.sleep(500);
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace,
-                DataCollection.Version.Blue);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
+        Thread.sleep(1000);
+        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace);
         Assert.assertEquals(statusHisList.size(), 2);
         statusHis = statusHisList.get(0);
         Assert.assertTrue(statusHis.getAccountCount() == 10L);
@@ -77,18 +76,14 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(greenStatus.getAccountCount() == 20L);
 
         // insert status history with version green, verify first item
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status, DataCollection.Version.Green);
-        Thread.sleep(500);
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace,
-                DataCollection.Version.Green);
-        Assert.assertEquals(statusHisList.size(), 1);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
+        Thread.sleep(1000);
+        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace);
+        Assert.assertEquals(statusHisList.size(), 3);
         statusHis = statusHisList.get(0);
         Assert.assertTrue(statusHis.getAccountCount() == 20L);
         // verify status history with version blue, no change
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace,
-                DataCollection.Version.Blue);
-        Assert.assertEquals(statusHisList.size(), 2);
-        statusHis = statusHisList.get(0);
+        statusHis = statusHisList.get(1);
         Assert.assertTrue(statusHis.getAccountCount() == 10L);
 
         // update blue, verify green
@@ -100,8 +95,7 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(greenStatus.getAccountCount() == 20L);
 
         // insert history
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, blueStatus,
-                DataCollection.Version.Blue);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, blueStatus);
 
         // update green, verify blue
         greenStatus.setAccountCount(40L);
@@ -111,19 +105,16 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
                 DataCollection.Version.Blue);
         Assert.assertTrue(blueStatus.getAccountCount() == 30L);
 
+        Thread.sleep(1000);
         // insert history
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, greenStatus,
-                DataCollection.Version.Green);
-        Thread.sleep(500);
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace,
-                DataCollection.Version.Blue);
-        Assert.assertEquals(statusHisList.size(), 3);
-        statusHis = statusHisList.get(0);
-        Assert.assertTrue(statusHis.getAccountCount() == 30L);
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace,
-                DataCollection.Version.Green);
-        Assert.assertEquals(statusHisList.size(), 2);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, greenStatus);
+
+        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace);
+        System.out.println("info : " + JsonUtils.serialize(statusHisList));
+        Assert.assertEquals(statusHisList.size(), 5);
         statusHis = statusHisList.get(0);
         Assert.assertTrue(statusHis.getAccountCount() == 40L);
+        statusHis = statusHisList.get(1);
+        Assert.assertTrue(statusHis.getAccountCount() == 30L);
     }
 }

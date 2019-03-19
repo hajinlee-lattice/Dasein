@@ -481,21 +481,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public void saveStatusHistory(String customerSpace, DataCollectionStatus status, Version version) {
-        DataCollectionStatus currentStatus = getOrCreateDataCollectionStatus(customerSpace, version);
+    public void saveStatusHistory(String customerSpace, DataCollectionStatus status) {
         DataCollectionStatusHistory statusHistory = new DataCollectionStatusHistory();
-        statusHistory.setDataCollection(currentStatus.getDataCollection());
-        statusHistory.setTenant(currentStatus.getTenant());
-        statusHistory.setVersion(currentStatus.getVersion());
+        statusHistory.setDataCollection(getDefaultCollection(customerSpace));
+        statusHistory.setTenant(MultiTenantContext.getTenant());
         populateStatusDetailHistory(status, statusHistory);
         dataCollectionStatusHistoryEntityMgr.create(statusHistory);
 
     }
 
     @Override
-    public List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace, Version version) {
+    public List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return dataCollectionStatusHistoryEntityMgr.findByTenantAndVersionOrderByCreatedDesc(tenant, version);
+        return dataCollectionStatusHistoryEntityMgr.findByTenantOrderByCreationTimeDesc(tenant);
     }
 
     private void populateStatusDetailHistory(DataCollectionStatus status, DataCollectionStatusHistory statusHistory) {

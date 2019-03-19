@@ -226,7 +226,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
-        dataCollectionProxy.saveDataCollectionStatusHistory(customerSpace.toString(), detail, inactive);
+        dataCollectionProxy.saveDataCollectionStatusHistory(customerSpace.toString(), detail);
     }
 
 

@@ -14,7 +14,6 @@ import com.latticeengines.apps.cdl.repository.writer.DataCollectionStatusHistory
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
-import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -42,9 +41,8 @@ public class DataCollectionStatusHistoryEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<DataCollectionStatusHistory> findByTenantAndVersionOrderByCreatedDesc(Tenant tenant,
-            Version version) {
-        return dataCollectionStatusRepository.findByTenantAndVersionOrderByCreatedDesc(tenant, version);
+    public List<DataCollectionStatusHistory> findByTenantOrderByCreationTimeDesc(Tenant tenant) {
+        return dataCollectionStatusRepository.findByTenantOrderByCreationTimeDesc(tenant);
     }
 
 }

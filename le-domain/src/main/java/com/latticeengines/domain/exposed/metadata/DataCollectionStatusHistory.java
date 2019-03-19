@@ -8,8 +8,6 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -65,19 +63,15 @@ public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditi
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DataCollection dataCollection;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "VERSION", nullable = false)
-    private DataCollection.Version version;
-
     @Type(type = "json")
     @Column(name = "Detail", columnDefinition = "'JSON'")
     private DataCollectionStatusDetailHistory detail = new DataCollectionStatusDetailHistory();
 
-    @Column(name = "CREATED", nullable = false)
-    private Date created;
+    @Column(name = "CREATION_TIME", nullable = false)
+    private Date creationTime;
 
-    @Column(name = "UPDATED", nullable = false)
-    private Date updated;
+    @Column(name = "UPDATE_TIME", nullable = false)
+    private Date updateTime;
 
     @Override
     @JsonIgnore
@@ -111,16 +105,6 @@ public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditi
     @JsonIgnore
     public void setDataCollection(DataCollection dataCollection) {
         this.dataCollection = dataCollection;
-    }
-
-    @JsonIgnore
-    public DataCollection.Version getVersion() {
-        return version;
-    }
-
-    @JsonIgnore
-    public void setVersion(DataCollection.Version version) {
-        this.version = version;
     }
 
     @JsonIgnore
@@ -264,29 +248,29 @@ public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditi
     }
 
     @Override
-    @JsonProperty("Created")
+    @JsonProperty("CreationTime")
     @Temporal(TemporalType.TIMESTAMP)
     public Date getCreated() {
-        return created;
+        return creationTime;
     }
 
     @Override
-    @JsonProperty("Created")
+    @JsonProperty("CreationTime")
     public void setCreated(Date created) {
-        this.created = created;
+        this.creationTime = created;
     }
 
     @Override
-    @JsonProperty("Updated")
+    @JsonProperty("UpdateTime")
     @Temporal(TemporalType.TIMESTAMP)
     public Date getUpdated() {
-        return updated;
+        return updateTime;
     }
 
     @Override
-    @JsonProperty("Updated")
+    @JsonProperty("UpdateTime")
     public void setUpdated(Date updated) {
-        this.updated = updated;
+        this.updateTime = updated;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

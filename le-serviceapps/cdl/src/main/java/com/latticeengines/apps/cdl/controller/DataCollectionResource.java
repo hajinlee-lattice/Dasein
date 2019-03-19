@@ -93,22 +93,21 @@ public class DataCollectionResource {
         dataCollectionService.saveOrUpdateStatus(customerSpace, status, version);
     }
 
-    @PostMapping(value = "/version/{version}/statushistory")
+    @PostMapping(value = "/statushistory")
     @ResponseBody
     @ApiOperation(value = "Save data collection status history")
     public void saveDataCollectionStatusHistory(@PathVariable String customerSpace,
-            @PathVariable DataCollection.Version version, @RequestBody DataCollectionStatus status) {
+            @RequestBody DataCollectionStatus status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataCollectionService.saveStatusHistory(customerSpace, status, version);
+        dataCollectionService.saveStatusHistory(customerSpace, status);
     }
 
     @GetMapping(value = "/statushistory")
     @ResponseBody
     @ApiOperation(value = "Get or create data collection status")
-    public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(@PathVariable String customerSpace,
-            @RequestParam(value = "version", required = true) DataCollection.Version version) {
+    public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getCollectionStatusHistory(customerSpace, version);
+        return dataCollectionService.getCollectionStatusHistory(customerSpace);
     }
 
     @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber:.+}")
