@@ -12,7 +12,7 @@ public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
 
     Tenant findByTenantId(String tenantId);
 
-    List<String> findAllTenantId();
+    List<String> getAllTenantId();
 
     Tenant findByTenantName(String tenantName);
 
