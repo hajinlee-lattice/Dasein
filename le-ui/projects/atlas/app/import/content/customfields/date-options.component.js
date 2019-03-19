@@ -5,7 +5,7 @@ angular.module('lp.import.wizard.customfields')
         templateUrl: 'app/import/content/customfields/date-options.component.html',
         bindings: {
             field: '=',
-            disabeld: '=',
+            disabled: '=',
             update: '&',
             tooltiptxt: '@',
             dateformat: '=',

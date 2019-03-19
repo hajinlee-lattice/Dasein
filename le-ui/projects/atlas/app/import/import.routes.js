@@ -236,7 +236,7 @@ angular
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
 
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(result) {
                         deferred.resolve(result['Account']);
                     });
 
@@ -347,11 +347,11 @@ angular
                 'wizard_content@home.import.data': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/custom-fields-date.html'
+                    templateUrl: 'app/import/content/customfields/custom-fields.component.html'
                 }
             }
         })
-        //app/import/content/customfields/custom-fields-date.html
+        //app/import/content/customfields/custom-fields.component.html
         //app/import/content/customfields/customfields.component.html
         .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
             url: '/jobstatus',
@@ -419,7 +419,7 @@ angular
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
 
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(result) {
                         deferred.resolve(result['Account']);
                     });
 
@@ -595,7 +595,7 @@ angular
                 'wizard_content@home.import.data': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/custom-fields-date.html'
+                    templateUrl: 'app/import/content/customfields/custom-fields.component.html'
                 }
             }
         })
@@ -660,7 +660,7 @@ angular
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
 
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(result) {
                         deferred.resolve(result['Account']);
                     });
 
