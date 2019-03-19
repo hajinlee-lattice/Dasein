@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -52,7 +53,6 @@ public class CDLServiceImpl implements CDLService {
     private static final Logger log = LoggerFactory.getLogger(CDLServiceImpl.class);
 
     private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
-    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
     private static final String DELETE_FAIL_TITLE = "Validation Error";
@@ -373,7 +373,7 @@ public class CDLServiceImpl implements CDLService {
             return;
         }
         String userId = request.getUserId();
-        if (!isInternalUser(userId)) {
+        if (!EmailUtils.isInternalUser(userId)) {
             log.debug("User({}) is not internal, skip PA limit check", userId);
             return;
         }
@@ -398,11 +398,4 @@ public class CDLServiceImpl implements CDLService {
         return action;
     }
 
-    private boolean isInternalUser(String email) {
-        if (StringUtils.isBlank(email)) {
-            return false;
-        }
-
-        return email.trim().toUpperCase().endsWith(LATTICE_ENGINES_COM);
-    }
 }

@@ -1,10 +1,12 @@
 package com.latticeengines.common.exposed.util;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
@@ -644,6 +646,21 @@ public class HdfsUtils {
             FileStatus status = fs.getFileStatus(new Path(filePath));
             return status.getLen();
         }
+    }
+
+    public static Long count(Configuration configuration, String filePath) throws IOException {
+        long count = 0;
+        try (FileSystem fs = getFileSystem(configuration, filePath)) {
+            Path path = new Path(filePath);
+            try (InputStream is = fs.open(path)) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                    while (reader.readLine() != null) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 
     public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
