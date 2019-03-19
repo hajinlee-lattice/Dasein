@@ -136,6 +136,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         if (CollectionUtils.isNotEmpty(evEngineIds)) {
             rhs.add(pivotScoreField(rawRatings, evEngineIds,
                     RatingEngine.ScoreType.ExpectedRevenue));
+            rhs.add(pivotScoreField(rawRatings, evEngineIds,
+                    RatingEngine.ScoreType.PredictedRevenue));
         }
         FieldList joinKey = new FieldList(idCol);
         List<FieldList> joinKeys = rhs.stream().map(n -> joinKey).collect(Collectors.toList());

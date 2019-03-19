@@ -63,8 +63,24 @@ public class PivotRatingsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         Assert.assertFalse(attrs.contains("ai_score__AccountId"));
         Assert.assertFalse(attrs.contains("ai_ev__AccountId"));
         Assert.assertFalse(attrs.contains("ai_rating__ai_score__ai_ev__AccountId"));
+        Assert.assertTrue(attrs.contains("engine_rule1"));
+        Assert.assertFalse(attrs.contains("engine_rule1_ev"));
+        Assert.assertFalse(attrs.contains("engine_rule1_pv"));
+        Assert.assertFalse(attrs.contains("engine_rule1_score"));
+        Assert.assertTrue(attrs.contains("engine_rule2"));
+        Assert.assertFalse(attrs.contains("engine_rule2_ev"));
+        Assert.assertFalse(attrs.contains("engine_rule2_pv"));
+        Assert.assertFalse(attrs.contains("engine_rule2_score"));
+        Assert.assertTrue(attrs.contains("engine_ai3"));
+        Assert.assertTrue(attrs.contains("engine_ai3_ev"));
+        Assert.assertTrue(attrs.contains("engine_ai3_pv"));
+        Assert.assertTrue(attrs.contains("engine_ai3_score"));
+        Assert.assertTrue(attrs.contains("engine_ai4"));
+        Assert.assertFalse(attrs.contains("engine_ai4_ev"));
+        Assert.assertFalse(attrs.contains("engine_ai4_pv"));
+        Assert.assertTrue(attrs.contains("engine_ai4_score"));
         for (GenericRecord record : records) {
-            // System.out.println(record);
+//             System.out.println(record);
         }
     }
 
