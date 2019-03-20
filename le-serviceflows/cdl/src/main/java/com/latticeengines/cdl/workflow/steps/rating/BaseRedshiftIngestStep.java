@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
@@ -82,6 +84,12 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
+    @Value("${cdl.redshift.query.page.size}")
+    private int pageSize;
+
+    @Value("${cdl.redshift.query.rows.per.file}")
+    private int rowsPerFile;
+
     protected CustomerSpace customerSpace;
     protected Schema schema;
     protected DataCollection.Version version;
@@ -113,7 +121,8 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             log.info("Use the version specified in configuration: " + version);
         }
 
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
+                RatingModelContainer.class);
         containers = allContainers.stream() //
                 .filter(container -> getTargetEngineTypes().contains(container.getEngineSummary().getType())) //
                 .collect(Collectors.toList());
@@ -199,7 +208,8 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                 if (HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, targetFile);
                 }
-                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, Collections.singletonList(record), true);
+                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, Collections.singletonList(record),
+                        true);
                 return true;
             } catch (IOException e) {
                 throw new RuntimeException("Failed to cleanup target file " + targetFile);
@@ -226,6 +236,8 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             if (this.ratingModel instanceof AIModel) {
                 this.modelGuid = ((AIModel) this.ratingModel).getModelSummaryId();
             }
+            setPageSize(pageSize);
+            setRowspPerFile(rowsPerFile);
         }
 
         @Override
@@ -239,7 +251,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
         @Override
         protected DataPage fetchPage(long ingestedCount, long pageSize) {
             if (frontEndQuery == null) {
-                frontEndQuery = dataQuery();
+                frontEndQuery = dataQuery(ingestedCount, pageSize);
             }
             DataPage dataPage;
             if (RatingEngineType.CROSS_SELL.equals(engineType)) {
@@ -308,13 +320,13 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             }
         }
 
-        private FrontEndQuery dataQuery() {
+        private FrontEndQuery dataQuery(long rowNum, long pageSize) {
             if (RatingEngineType.RULE_BASED.equals(engineType)) {
                 return ruleBasedQuery();
             } else if (RatingEngineType.CUSTOM_EVENT.equals(engineType)) {
-                return customEventQuery();
+                return customEventQuery(rowNum, pageSize);
             } else if (RatingEngineType.CROSS_SELL.equals(engineType)) {
-                return crossSellQuery();
+                return crossSellQuery(rowNum, pageSize);
             } else {
                 throw new UnsupportedOperationException("Unknown rating engine type " + engineType);
             }
@@ -332,16 +344,24 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             return frontEndQuery;
         }
 
-        private EventFrontEndQuery crossSellQuery() {
-            return ratingEngineProxy.getModelingQueryByRatingId(customerSpace.toString(), engineSummary.getId(),
+        private EventFrontEndQuery crossSellQuery(long rowNum, long pageSize) {
+            EventFrontEndQuery frontEndQuery = ratingEngineProxy.getModelingQueryByRatingId(customerSpace.toString(),
+                    engineSummary.getId(),
                     ratingModel.getId(), ModelingQueryType.TARGET);
+            if (pageSize > 0) {
+                frontEndQuery.setPageFilter(new PageFilter(rowNum, pageSize));
+            }
+            return frontEndQuery;
         }
 
-        private FrontEndQuery customEventQuery() {
+        private FrontEndQuery customEventQuery(long rowNum, long pageSize) {
             AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
             FrontEndQuery frontEndQuery = segment.toFrontEndQuery(BusinessEntity.Account);
             frontEndQuery.setLookups(Collections.singletonList(accountId));
             frontEndQuery.setSort(new FrontEndSort(Collections.singletonList(accountId), false));
+            if (pageSize > 0) {
+                frontEndQuery.setPageFilter(new PageFilter(rowNum, pageSize));
+            }
             return frontEndQuery;
         }
 
