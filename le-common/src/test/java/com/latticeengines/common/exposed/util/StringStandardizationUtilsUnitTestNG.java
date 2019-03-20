@@ -33,11 +33,12 @@ public class StringStandardizationUtilsUnitTestNG {
                 { " # $ ", null }, //
                 { " % A % ", "A" }, //
                 { " ^ A <> A *+= ", "A A" }, //
+                { "A~@#$%^*+=<>A", "AA" }, //
                 // test characters replaced by space
                 { " _ ", null }, //
                 { " \\| \\ ", null }, //
                 { " / A \t ", "A" }, //
-                { " ?[A:A{(A)}\"A\"] ;", "A A A A" },//
+                { "A_A\\|A\\A/A\tA?A;A:A(A)A{A}A[A]A\rA\nA", "A A A A A A A A A A A A A A A A A" }, //
         };
     }
 
