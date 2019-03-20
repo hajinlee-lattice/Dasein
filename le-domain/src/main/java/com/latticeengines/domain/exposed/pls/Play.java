@@ -142,6 +142,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "PLAY_PLAY_GROUP", joinColumns = {@JoinColumn(name = "FK_PLAY_ID")},
             inverseJoinColumns = {@JoinColumn(name = "FK_PLAY_GROUP_ID")})
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<PlayGroup> playGroups;
     @JsonProperty("lastTalkingPointPublishTime")
     @Column(name = "LAST_TALKING_POINT_PUBLISH_TIME")
@@ -277,18 +278,22 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         this.playStatus = playStatus;
     }
 
+    @Override
     public Date getCreated() {
         return this.created;
     }
 
+    @Override
     public void setCreated(Date created) {
         this.created = created;
     }
 
+    @Override
     public Date getUpdated() {
         return this.updated;
     }
 
+    @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
     }
