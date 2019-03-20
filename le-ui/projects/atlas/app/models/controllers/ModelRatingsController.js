@@ -234,8 +234,8 @@ angular.module('lp.models.ratings', [
         }
 
         vm.iterationSupplementaryInfo = vm.predictionType === 'EXPECTED_VALUE' ? 
-            'Past Average Weighted Revenue: $' + (vm.ratingsSummary.total_expected_revenue / vm.ratingsSummary.total_num_leads).toFixed(2) : 
-            'Past Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
+            'Compare to your past average Revenue: $' + (vm.model.ModelDetails.AverageRevenue).toFixed(2) : 
+            'Compare to your past average Conversion Rate: ' + ((vm.model.ModelDetails.TestConversionCount / vm.model.ModelDetails.TestRowCount) * 100).toFixed(0) + '%';
 
 
         // loop through buckets in object and set their values
