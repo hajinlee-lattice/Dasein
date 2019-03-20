@@ -293,6 +293,10 @@ angular.module('lp.import.wizard.latticefields', [])
         vm.init();
     }
 
+    vm.ignoreFormats = (field) => {
+        return field.fromExistingTemplate;
+    }
+
     vm.updateDateFormats = (field) => {
         Object.keys(vm.fieldMappings).forEach(key =>{
             if(vm.fieldMappings[key].mappedField == field.name){
