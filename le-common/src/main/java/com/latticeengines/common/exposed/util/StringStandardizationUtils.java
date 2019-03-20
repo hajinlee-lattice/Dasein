@@ -117,36 +117,33 @@ public class StringStandardizationUtils {
             Set<Character> removedSet = new HashSet<>(getCharactersToRemove());
             Set<Character> replacedBySpaceSet = new HashSet<>(
                     getCharactersToReplaceWithWhiteSpace());
-            StringBuilder sb = new StringBuilder(str.toUpperCase()); // Always
-                                                                     // change
-                                                                     // to upper
-                                                                     // case
+            // Always change to upper case
+            StringBuilder sb = new StringBuilder(str.toUpperCase());
             for (int i = 0; i < sb.length(); i++) {
                 if (removedSet.contains(sb.charAt(i))) {
-                    sb.replace(i, i + 1, ""); // Remove specific characters
+                    // Remove specific characters
+                    sb.replace(i, i + 1, "");
                     i--;
                 } else if (replacedBySpaceSet.contains(sb.charAt(i))) {
-                    sb.replace(i, i + 1, " "); // Replace specific characters
-                                               // with whitespace
+                    // Replace specific characters with whitespace
+                    sb.replace(i, i + 1, " ");
                 }
             }
             String res = sb.toString();
+            // Replace specific characters with words
             Map<String, String> replaced = getCharactersToReplaceWithWord();
-            for (Map.Entry<String, String> entry : replaced.entrySet()) { // Replace
-                                                                          // specific
-                                                                          // characters
-                                                                          // with
-                                                                          // words
+            for (Map.Entry<String, String> entry : replaced.entrySet()) {
                 res = res.replaceAll(entry.getKey(), " " + entry.getValue() + " ");
             }
-            res = res.trim().replaceAll("( )+", " "); // Remove leading and
-                                                      // trailing spaces;
-                                                      // Replace multiple
-                                                      // connected spaces with
-                                                      // single space
+            // Remove leading and trailing spaces;
+            // Replace multiple connected spaces with single space
+            res = res.trim().replaceAll("( )+", " ");
+            if (cleanNullString(res) == null) {
+                return null;
+            }
             return res;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Fail to standardize string " + str, ex);
             return str; // If any exception is caught, return original string
         }
     }
