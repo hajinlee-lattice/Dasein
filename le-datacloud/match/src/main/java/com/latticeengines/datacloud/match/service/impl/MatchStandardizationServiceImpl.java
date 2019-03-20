@@ -76,9 +76,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                         continue;
                     }
                     if (publicDomainService.isPublicDomain(cleanDomain)) {
-                        // For match input with domain, but without name and duns,
-                        // and domain is not in email format, public domain is
-                        // treated as normal domain
+                        // For match input with domain, but without name and duns, and domain is not in email format,
+                        // public domain is treated as normal domain.
                         if (treatPublicDomainAsNormal
                                 || (relaxPublicDomainCheck && !DomainUtils.isEmail(record.getOrigDomain()))) {
                             record.setMatchEvenIsPublicDomain(true);
@@ -96,7 +95,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                             cleanDomain = null;
                             foundPublicDomain = true;
                         }
-                    } else if (StringUtils.isNotEmpty(cleanDomain)) {
+                    } else {
                         record.setPublicDomain(false);
                         record.setParsedDomain(cleanDomain);
                         if (domainSet != null) {
@@ -104,15 +103,14 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                         }
                         break;
                     }
-                    if (StringUtils.isEmpty(cleanDomain)) {
-                        record.setParsedDomain(null);
-                        record.addErrorMessages("Did not find a valid non-public domain");
-                        if (foundPublicDomain) {
-                            record.setPublicDomain(true);
-                        }
+                }
+                if (StringUtils.isEmpty(cleanDomain)) {
+                    record.setParsedDomain(null);
+                    record.addErrorMessages("Did not find a valid non-public domain");
+                    if (foundPublicDomain) {
+                        record.setPublicDomain(true);
                     }
                 }
-                // TODO(dzheng): Move catch inside loop so that we can skip unparsable domains rather than error out?
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessages("Error when cleanup domain field: " + e.getMessage());
