@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 public class StringStandardizationUtilsUnitTestNG {
 
+    // Input, Expected Output
     @DataProvider(name = "locationStringDataProvider")
     Object[][] locationStringDataProvider() {
         return new Object[][] { //
@@ -15,14 +16,32 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "nameStringDataProvider")
     Object[][] nameStringDataProvider() {
         return new Object[][] { //
+                // some general cases (small case -> capital case; multiple
+                // connected spaces; replace & with AND; etc)
                 { "\"CarMax,    Inc's-\"", "CARMAX, INC'S-" }, //
                 { "   CarMax, %@# & Inc.   ", "CARMAX, AND INC." }, //
+                // test blank string
+                { null, null }, //
+                { "  ", null }, //
+                { "\t \t", null }, //
+                // test removed characters
+                { " ~@ ", null }, //
+                { " # $ ", null }, //
+                { " % A % ", "A" }, //
+                { " ^ A <> A *+= ", "A A" }, //
+                // test characters replaced by space
+                { " _ ", null }, //
+                { " \\| \\ ", null }, //
+                { " / A \t ", "A" }, //
+                { " ?[A:A{(A)}\"A\"] ;", "A A A A" },//
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "commonStringDataProvider")
     Object[][] commonStringDataProvider() {
         return new Object[][] { //
@@ -30,6 +49,7 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "dunsStringDataProvider")
     Object[][] dunsStringDataProvider() {
         return new Object[][] { //
@@ -42,6 +62,7 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "inputLatticeIdStringDataProvider")
     Object[][] inputLatticeIdStringDataProvider() {
         return new Object[][] {
@@ -76,6 +97,7 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "systemIdStringDataProvider")
     Object[][] systemIdStringDataProvider() {
         return new Object[][] { //
@@ -86,6 +108,7 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "outputLatticeIdStringDataProvider")
     Object[][] outputLatticeIdStringDataProvider() {
         return new Object[][] {
@@ -108,6 +131,7 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    // Input, Expected Output
     @DataProvider(name = "nullStringDataProvider")
     Object[][] nullStringDataProvider() {
         return new Object[][] {
