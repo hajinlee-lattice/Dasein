@@ -1128,7 +1128,8 @@ angular.module('lp.playbook')
                 loadContactsCountByBucket: opts.loadContactsCountByBucket,
                 loadContactsCount: opts.loadContactsCount,
                 lookupId: opts.lookupId,
-                restrictNullLookupId: opts.restrictNullLookupId
+                restrictNullLookupId: opts.restrictNullLookupId,
+                loadContactsWithoutEmailCount: opts.loadContactsWithoutEmailCount || false
             }
         }).then(
             function onSuccess(response) {
