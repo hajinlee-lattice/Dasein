@@ -147,7 +147,7 @@
           <div class="le-cell le-col-span-5">
             <div class="field-type">
               <select ng-disabled="true" class="form-control select-type">
-                <option value="TEXT" selected>Text</option>
+                <option value="{{field.fieldType}}" selected>{{field.fieldType}}</option>
               </select>
             </div>
           </div>
@@ -186,7 +186,7 @@
           </div>
           <div class="le-cell le-col-span-5">
             <div class="field-type">
-              Text
+              {{field.fieldType}}
             </div>
           </div>
         </div>
