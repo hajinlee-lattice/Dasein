@@ -70,6 +70,42 @@ const Queries = {
                 }`;
         return { query: q };
     },
+    getSolutionInstanceByIdQuery(solutionInstanceId) {
+      let q = `query {
+          viewer {
+            solutionInstances (criteria: {id: "${solutionInstanceId}"}) {
+              edges {
+                node {
+                  id
+                  name
+                  enabled
+                  created
+                  authValues {
+                    externalId
+                    authId
+                  }
+                }
+              }
+            }
+          }
+        }`
+        return { query: q };
+    },
+    updateSolutionInstanceQuery(solutionInstanceId, solutionInstanceName) {
+      let q = `mutation {
+          updateSolutionInstance(input: {solutionInstanceId: "${solutionInstanceId}",
+              instanceName: "${solutionInstanceName}", enabled: true
+          }) {
+            solutionInstance {
+              id
+              name
+              enabled
+              created
+            }
+          }
+        }`
+        return { query: q };
+    },
     getCreateSolutionInstanceMutation(solutionId, instanceName, authValues){
       if (!authValues) {
         let q = ` mutation {

@@ -175,7 +175,8 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     lookupId: accountId,
                     restrictNullLookupId: false,
                     loadContactsCount: true,
-                    loadContactsCountByBucket: false
+                    loadContactsCountByBucket: false,
+                    loadContactsWithoutEmailCount: true
                 }).then(function(result) {
                     PlaybookWizardStore.setValidation('crmselection', form.$valid);
                     vm.loadingCoverageCounts = false;

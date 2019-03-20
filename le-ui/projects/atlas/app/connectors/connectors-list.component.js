@@ -148,6 +148,7 @@ export class ConnectorList extends Component {
             response => {
                 if (response.data) {
                     this.setState({accessToken: response.data.token});
+                    solutionInstanceConfig.accessToken = this.state.accessToken;
                     httpService.unsubscribeObservable(observer);
                 } else {
                     this.setState({accessToken: null});
