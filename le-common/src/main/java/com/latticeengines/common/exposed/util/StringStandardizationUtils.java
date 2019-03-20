@@ -143,7 +143,7 @@ public class StringStandardizationUtils {
             }
             return res;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Fail to standardize string " + str, ex);
             return str; // If any exception is caught, return original string
         }
     }
