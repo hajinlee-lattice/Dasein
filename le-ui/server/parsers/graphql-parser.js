@@ -33,6 +33,19 @@ const GraphQLParser = {
             return null;
         }
     },
+    getSolutionInstance(data){
+        if (data.viewer.solutionInstances && data.viewer.solutionInstances.edges[0] && data.viewer.solutionInstances.edges[0].node) {
+            var solutionInstance = data.viewer.solutionInstances.edges[0].node;
+            return solutionInstance;
+        }
+    },
+    getUpdateSolutionInstanceInfo(data) {
+        if (data.updateSolutionInstance && data.updateSolutionInstance.solutionInstance) {
+            return data.updateSolutionInstance.solutionInstance;
+        } else {
+            return null;
+        }
+    },
     getSolutionInstanceInfo(data, edges){
         if(data.createSolutionInstance && data.createSolutionInstance.solutionInstance){
             var solutionInstance = data.createSolutionInstance.solutionInstance;

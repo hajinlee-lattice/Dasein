@@ -890,7 +890,7 @@ angular.module('lp.import')
                 params.displayName = params.displayName || FileName,
                 params.source = params.source || 'File',
                 params.entity = params.entity || 'Account',
-                params.feedType = params.feedType || params.entity + 'Schema' || 'AccountSchema';
+                params.feedType = params.feedType || '';
             } else {
                 params.displayName = FileName;
                 params.excludeCustomFileAttributes = params.excludeCustomFileAttributes;

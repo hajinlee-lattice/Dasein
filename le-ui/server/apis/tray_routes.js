@@ -66,12 +66,6 @@ class TrayRouter {
                 }
             };
 
-            console.log("plsUrl: " + plsUrl);
-
-            console.log("options: " + options);
-
-            console.log('Time: ', Date.now(), req.headers, this.proxies);
-
             this.request(options, function (error, response, body) {
                 if (response.statusCode == 200) {
                     next();
@@ -274,15 +268,34 @@ class TrayRouter {
             });
         }.bind(this));
 
-        this.router.get('/solutionInstances', function(req, res){
-            var tagName = req.query.tagName;
-            let options = this.getApiOptions(req);
-            options.json = Queries.getSolutionsByTagQuery(tagName);
+        this.router.get('/solutionInstances/:id', function(req, res){
+            var solutionInstanceId = req.params.id;
+            let options = this.getApiOptions(req, true);
+            options.json = Queries.getSolutionInstanceByIdQuery(solutionInstanceId);
             this.request(options, function(error, response, body){
-
-                console.log('', body);
+                if (error || !body.data) {
+                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                    return;
+                }
+                res.send(GraphQLParser.getSolutionInstance(body.data));
+                
             });
-            res.send({iframeUrl: ""});
+        }.bind(this));
+
+
+        this.router.put('/solutionInstances/:id', function(req, res){
+            var solutionInstanceId = req.params.id;
+            var solutionInstanceName = req.body.solutionInstanceName;
+            let options = this.getApiOptions(req, true);
+            options.json = Queries.updateSolutionInstanceQuery(solutionInstanceId, solutionInstanceName);
+            this.request(options, function(error, response, body){
+                if (error || !body.data) {
+                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                    return;
+                }
+                res.send(GraphQLParser.getUpdateSolutionInstanceInfo(body.data))
+                
+            });
         }.bind(this));
 
 
