@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
@@ -21,6 +23,8 @@ import com.latticeengines.metadata.service.MetadataService;
 
 @Component("dataFeedTaskService")
 public class DataFeedTaskServiceImpl implements DataFeedTaskService {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskServiceImpl.class);
 
     @Inject
     private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
@@ -109,6 +113,39 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     @Override
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
+    }
+
+    @Override
+    public void updateS3ImportStatus(String customerSpace, String source, String dataFeedType, DataFeedTask.S3ImportStatus status) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (dataFeed == null) {
+            log.error(String.format("Cannot update import status for source: %s, feedType: %s (DataFeed null)",
+                    source, dataFeedType));
+            return;
+        }
+        DataFeedTask task = dataFeedTaskEntityMgr.getDataFeedTask(source, dataFeedType, dataFeed);
+        if (task == null) {
+            log.error(String.format("Cannot update import status for source: %s, feedType: %s (DataFeedTask null)",
+                    source, dataFeedType));
+            return;
+        }
+        if (!status.equals(task.getS3ImportStatus())) {
+            task.setS3ImportStatus(status);
+            dataFeedTaskEntityMgr.updateDataFeedTask(task);
+        }
+    }
+
+    @Override
+    public void updateS3ImportStatus(String customerSpace, String uniqueId, DataFeedTask.S3ImportStatus status) {
+        DataFeedTask task = dataFeedTaskEntityMgr.getDataFeedTask(uniqueId);
+        if (task == null) {
+            log.error(String.format("Cannot update import status for DataFeedTask: %s", uniqueId));
+            return;
+        }
+        if (!status.equals(task.getS3ImportStatus())) {
+            task.setS3ImportStatus(status);
+            dataFeedTaskEntityMgr.updateDataFeedTask(task);
+        }
     }
 
     @Override

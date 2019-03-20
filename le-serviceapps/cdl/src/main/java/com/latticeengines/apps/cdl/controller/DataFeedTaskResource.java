@@ -52,6 +52,16 @@ public class DataFeedTaskResource {
         dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
     }
 
+    @RequestMapping(value = "/s3status/{source}/{dataFeedType}/{status}", method = RequestMethod.PUT,
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update data feed task s3 import status")
+    public void updateS3ImportStatus(@PathVariable String customerSpace, @PathVariable String source,
+                                   @PathVariable String dataFeedType,
+                                   @PathVariable DataFeedTask.S3ImportStatus status) {
+        dataFeedTaskService.updateS3ImportStatus(customerSpace, source, dataFeedType, status);
+    }
+
     @RequestMapping(value = "/{source}/{dataFeedType}/{entity}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
