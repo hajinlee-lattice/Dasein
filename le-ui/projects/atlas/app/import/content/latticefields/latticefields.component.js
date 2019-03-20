@@ -161,22 +161,18 @@ angular.module('lp.import.wizard.latticefields', [])
             }
 
             if(field){
-                // //console.log('THE FIELD',field, ' - Mapping ', map, ' - $$$$$$ ', item);
-                if(updateFormats !== false) {
+                
+                if(updateFormats !== false && !field.fromExistingTemplate) {
                     vm.updateDateFormat(field, map);
                 }
-                if(map.mappedField == field.name){
+                if(map.mappedField == field.name && !field.fromExistingTemplate){
                     map.dateFormatString =  field.dateFormatString;
                     map.timeFormatString = field.timeFormatString;
                     map.timezone = field.timezone;
                 }
-            // }else{
-                else if(updateFormats !== false){
+                else if(updateFormats !== false && !field.fromExistingTemplate){
                     vm.setFormatFromAnalysis(map);
                 }
-                    
-                // }
-                // field.dateFormatString = '';
             }
            
         }
