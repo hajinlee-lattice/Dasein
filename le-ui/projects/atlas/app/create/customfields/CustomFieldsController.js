@@ -44,7 +44,10 @@ angular
     vm.init = function() {
         if (RatingsEngineStore.getCustomEventModelingType()) {
             RatingsEngineStore.setValidation("mapping", false);
-            vm.showAdditionalFieldsCDL = RatingsEngineStore.getDataStores().indexOf('CustomFileAttributes') >= 0;
+
+            var customEventModelingType = RatingsEngineStore.getCustomEventModelingType(),
+                dataStores = customEventModelingType == "LPI" ? ["CustomFileAttributes", "DataCloud"] : ["CDL", "DataCloud"];
+            vm.showAdditionalFieldsCDL = dataStores.indexOf('CustomFileAttributes') >= 0;
         }
         vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};

@@ -947,7 +947,11 @@ angular.module('lp.ratingsengine')
                 FieldDocument.ignoredFields.push(fieldMapping.userField);
                 delete fieldMapping.ignored;
             } else if (RatingsEngineStore.isUnmappedField(fieldMapping)) {
-                if (RatingsEngineStore.dataStores.indexOf('CustomFileAttributes') < 0) {
+
+                var customEventModelingType = RatingsEngineStore.getCustomEventModelingType(),
+                    dataStores = customEventModelingType == "LPI" ? ["CustomFileAttributes", "DataCloud"] : ["CDL", "DataCloud"];
+
+                if (dataStores.indexOf('CustomFileAttributes') < 0) {
                     fieldMapping.mappedToLatticeField = false;
                     fieldMapping.mappedField = fieldMapping.userField;
                     fieldMapping.ignored = true;

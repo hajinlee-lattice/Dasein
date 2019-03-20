@@ -22,12 +22,8 @@
             <div class="data" ng-if="(IsRatingEngine && !viewingIteration) || IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
-                    <h4 class="text-ellipsis">
-                        {{ segmentName }}
-                        <span ng-if="IsRuleBased == false || IsCustomEvent == false">
-                            {{ segmentAccountsString }}
-                        </span>
-                    </h4>
+                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
+                    <p>{{ segmentAccountsString }}</p>
                 </div>
                 <div class="stats stats-group">
                     <h3>Scorable Accounts</h3>
@@ -61,12 +57,8 @@
             <div class="data" ng-if="(IsRatingEngine && viewingIteration) && !IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
-                    <h4 class="text-ellipsis">
-                        {{ segmentName }}
-                        <span ng-if="IsRuleBased == false || IsCustomEvent == false">
-                            {{ segmentAccountsString }}
-                        </span>
-                    </h4>
+                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
+                    <p>{{ segmentAccountsString }}</p>
                 </div>
                 <div class="stats stats-group flex-content-half">
                     <div>
