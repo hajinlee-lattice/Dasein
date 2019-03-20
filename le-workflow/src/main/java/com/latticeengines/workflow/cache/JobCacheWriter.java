@@ -68,4 +68,12 @@ public interface JobCacheWriter {
      * @param includeDetails used to identify the cache entry
      */
     void clear(Job job, boolean includeDetails);
+
+    /**
+     * Clear all job cache entries. This operation can be slow if there are a lot of
+     * entries. Be caution when using this.
+     *
+     * @return number of cache entries deleted
+     */
+    int clearAll();
 }

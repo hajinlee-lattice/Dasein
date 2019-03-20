@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,9 +21,11 @@ import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -38,6 +41,7 @@ public class RedisJobCacheWriter implements JobCacheWriter {
     private static final String DELIMITER = ":";
     private static final String DETAIL_KEY = "detail";
     private static final String UPDATE_TIME_KEY = "update_time";
+    private static final int CLEAR_ALL_BATCH_SIZE = 50;
 
     static {
         RETRY_EXCEPTIONS.put(RedisConnectionFailureException.class, true);
@@ -150,6 +154,32 @@ public class RedisJobCacheWriter implements JobCacheWriter {
         Preconditions.checkNotNull(job);
         JobCacheKey key = getJobCacheKeyByWorkflowId(job.getId(), includeDetails);
         retryTemplate.execute((ctx) -> redisTemplate.delete(Arrays.asList(key.jobKey, key.updateTimeKey)));
+    }
+
+    @Override
+    public int clearAll() {
+        // get all keys start with cache prefix, this can be slow
+        String ptn = String.format("%s*", CACHE_KEY_PREFIX);
+        Set<String> keys = redisTemplate.keys(ptn);
+        if (CollectionUtils.isEmpty(keys)) {
+            return 0;
+        }
+
+        List<String> keyList = new ArrayList<>(keys);
+        int nKeys = keyList.size();
+        // delete items in batches to prevent sending to much bytes at once. DEL
+        // operation should be fast.
+        List<List<String>> keysInBatch = Lists.partition(keyList, CLEAR_ALL_BATCH_SIZE);
+        keysInBatch.forEach(this::deleteAll);
+        return nKeys;
+    }
+
+    private void deleteAll(List<String> keys) {
+        if (CollectionUtils.isEmpty(keys)) {
+            return;
+        }
+
+        retryTemplate.execute(ctx -> redisTemplate.delete(keys));
     }
 
     private void multiSet(Map<String, Object> reqParams) {

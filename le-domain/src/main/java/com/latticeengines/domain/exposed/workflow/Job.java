@@ -301,4 +301,32 @@ public class Job implements HasId<Long>, HasName {
     public void setErrorCategory(String errorCategory) {
         this.errorCategory = errorCategory;
     }
+
+    public Job shallowClone() {
+        Job job = new Job();
+        job.pid = this.pid;
+        job.id = this.id;
+        job.name = this.name;
+        job.parentId = this.parentId;
+        job.description = this.description;
+        job.applicationId = this.applicationId;
+        job.startTimestamp = this.startTimestamp;
+        job.endTimestamp = this.endTimestamp;
+        job.jobStatus = this.jobStatus;
+        job.jobType = this.jobType;
+        job.user = this.user;
+        job.steps = this.steps;
+        job.reports = this.reports;
+        job.inputs = this.inputs;
+        job.outputs = this.outputs;
+        job.errorCode = this.errorCode;
+        job.errorMsg = this.errorMsg;
+        job.numDisplayedSteps = this.numDisplayedSteps;
+        job.note = this.note;
+        job.subJobs = this.subJobs;
+        job.tenantPid = this.tenantPid;
+        job.tenantId = this.tenantId;
+        job.errorCategory = this.errorCategory;
+        return job;
+    }
 }
