@@ -25,8 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.service.ReportService;
@@ -51,6 +53,7 @@ public class JobCacheServiceImpl implements JobCacheService {
 
     private static final int NUM_THREADS = 8;
     private static final int LOG_NUM_IDS_LIMIT = 20;
+    private static final int CLEAR_TENANT_BATCH_SIZE = 50;
 
     @Value("${common.internal.app.url}")
     private String internalAppUrl;
@@ -157,6 +160,11 @@ public class JobCacheServiceImpl implements JobCacheService {
                 .filter(id -> !cacheJobMap.containsKey(id))
                 .collect(Collectors.toList());
         List<Job> missingJobs = getMissingJobs(missingJobIds, includeDetails);
+        // make a defensive clone to avoid the instance returned from being modified
+        List<Job> missingJobForPublish = missingJobs.stream() //
+                .filter(Objects::nonNull) //
+                .map(Job::shallowClone) //
+                .collect(Collectors.toList());
 
         // populate for cache misses
         service.execute(() -> {
@@ -164,10 +172,10 @@ public class JobCacheServiceImpl implements JobCacheService {
                 return;
             }
             log.info("Populating missed job caches, size={}, IDs={}, includeDetails={}",
-                    missingJobs.size(),
-                    getWorkflowIdsStr(missingJobs.stream().map(Job::getId).collect(Collectors.toList())),
+                    missingJobForPublish.size(),
+                    getWorkflowIdsStr(missingJobForPublish.stream().map(Job::getId).collect(Collectors.toList())),
                     includeDetails);
-            cacheWriter.put(missingJobs, includeDetails);
+            cacheWriter.put(missingJobForPublish, includeDetails);
         });
 
         // merge both lists
@@ -237,6 +245,42 @@ public class JobCacheServiceImpl implements JobCacheService {
                 log.error("Failed to evict job cache entry, workflowID = {}", workflowId);
             }
         });
+    }
+
+    @Override
+    public int deepEvict(Tenant tenant) {
+        if (tenant == null || tenant.getPid() == null) {
+            // noop for invalid tenant
+            return 0;
+        }
+
+        JobListCache list = jobIdListCacheWriter.get(tenant);
+        if (list == null) {
+            return 0;
+        }
+
+        List<Long> workflowIds = list.getJobs() //
+                .stream() //
+                .filter(job -> job != null && job.getId() != null) //
+                .map(Job::getId) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(workflowIds)) {
+            return 0;
+        }
+
+        int nJobs = workflowIds.size();
+        List<List<Long>> workflowIdsInBatch = Lists.partition(workflowIds, CLEAR_TENANT_BATCH_SIZE);
+        // delete individual jobs
+        workflowIdsInBatch.forEach(this::evictByWorkflowIds);
+        // delete ID list cache
+        jobIdListCacheWriter.clear(tenant);
+
+        return nJobs;
+    }
+
+    @Override
+    public int evictAll() {
+        return cacheWriter.clearAll();
     }
 
     /*

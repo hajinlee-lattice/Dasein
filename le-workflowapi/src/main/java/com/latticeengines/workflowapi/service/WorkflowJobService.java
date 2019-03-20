@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -82,6 +83,27 @@ public interface WorkflowJobService {
 
     List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime);
 
+    /**
+     * Clear all job cache entries for specified customer space.
+     *
+     * @param customerSpace
+     *            target customer space, must belong to a valid tenant
+     * @return number of job cache entries cleared
+     */
+    int clearJobCaches(@NotNull String customerSpace);
+
+    /**
+     * Clear all job cache entries that belong to specified workflow IDs and
+     * customer space.
+     *
+     * @param customerSpace
+     *            target customer space, must belong to a valid tenant
+     * @param workflowIds
+     *            list of workflowIds to clear
+     * @return number of job cache entries cleared
+     */
+    int clearJobCachesByWorkflowIds(@NotNull String customerSpace, List<Long> workflowIds);
+
     /*
      * cross-tenant methods
      */
@@ -100,4 +122,11 @@ public interface WorkflowJobService {
     int getNonTerminalJobCount(String customerSpace, List<String> types);
 
     List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes, List<String> statuses);
+
+    /**
+     * Clear all job cache entries.
+     *
+     * @return number of job cache entries cleared
+     */
+    int clearAllJobCaches();
 }

@@ -76,4 +76,24 @@ public interface JobCacheService {
      * @param workflowIds target list of workflow IDs
      */
     void evictByWorkflowIds(@NotNull List<Long> workflowIds);
+
+    /**
+     * Delete all job cache entries belong to specified tenant. This operation can
+     * be slow if there are a lot of jobs in the tenant. The input {@link Tenant}
+     * must not be {@literal null} and has non-null {@link Tenant#getPid()},
+     * otherwise this function will have no effect (noop)
+     *
+     * @param tenant
+     *            target tenant
+     * @return number of job cache entries evicted
+     */
+    int deepEvict(Tenant tenant);
+
+    /**
+     * Delete ALL job cache entries. This operation can be slow if there are a lot
+     * of jobs. Use this function carefully.
+     *
+     * @return number of cache entries evicted
+     */
+    int evictAll();
 }
