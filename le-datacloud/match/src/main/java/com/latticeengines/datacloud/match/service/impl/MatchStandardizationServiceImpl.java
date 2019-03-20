@@ -47,12 +47,14 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     // to avoid naming conflicts). But SystemId field names managed in
     // seed/lookup should use standard name, eg. AccountId. So need to do
     // standardization for SystemId field names too.
-    private final static Map<String, String> STANDARD_ATTR_DICT = new HashMap<>();
+    private static final Map<String, String> STANDARD_ATTR_DICT = new HashMap<>();
     static {
         STANDARD_ATTR_DICT.put(InterfaceName.CustomerAccountId.name().toLowerCase(), InterfaceName.AccountId.name());
     }
 
 
+    // parseRecordForDomain() depends on having parsed Name/Location and DUNS and thus must run after
+    // parseRecordForNameLocation() and parseRecordForDuns().
     @Override
     public void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                      Set<String> domainSet, boolean treatPublicDomainAsNormal,
@@ -62,41 +64,53 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     record.getParsedDuns());
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
+                // Iterate through all positions matching fields in the list of Domain MatchKeys finding the first
+                // valid non-public domain to use as the parsed domain.
                 String cleanDomain = null;
+                boolean foundPublicDomain = false;
                 for (Integer domainPos : domainPosList) {
                     String originalDomain = (String) inputRecord.get(domainPos);
                     record.setOrigDomain(originalDomain);
                     cleanDomain = DomainUtils.parseDomain(originalDomain);
-                    if (StringUtils.isNotEmpty(cleanDomain)) {
-                        break;
+                    if (StringUtils.isEmpty(cleanDomain)) {
+                        continue;
                     }
-                }
-                if (publicDomainService.isPublicDomain(cleanDomain)) {
-                    // For match input with domain, but without name and duns,
-                    // and domain is not in email format, public domain is
-                    // treated as normal domain
-                    if (treatPublicDomainAsNormal
-                            || (relaxPublicDomainCheck && !DomainUtils.isEmail(record.getOrigDomain()))) {
-                        record.setMatchEvenIsPublicDomain(true);
+                    if (publicDomainService.isPublicDomain(cleanDomain)) {
+                        // For match input with domain, but without name and duns, and domain is not in email format,
+                        // public domain is treated as normal domain.
+                        if (treatPublicDomainAsNormal
+                                || (relaxPublicDomainCheck && !DomainUtils.isEmail(record.getOrigDomain()))) {
+                            record.setMatchEvenIsPublicDomain(true);
+                            record.setPublicDomain(true);
+                            record.addErrorMessages("Parsed to a public domain: " + cleanDomain
+                                    + ", but treat it as normal domain in match");
+                            record.setParsedDomain(cleanDomain);
+                            if (domainSet != null) {
+                                domainSet.add(cleanDomain);
+                            }
+                            break;
+                        } else {
+                            record.addErrorMessages("Found a public domain: " + cleanDomain);
+                            // public domain is not used for match
+                            cleanDomain = null;
+                            foundPublicDomain = true;
+                        }
+                    } else {
+                        record.setPublicDomain(false);
+                        record.setParsedDomain(cleanDomain);
                         if (domainSet != null) {
                             domainSet.add(cleanDomain);
                         }
-                        record.addErrorMessages("Parsed to a public domain: " + cleanDomain
-                                + ", but treat it as normal domain in match");
-                    } else {
-                        record.addErrorMessages("Parsed to a public domain: " + cleanDomain);
-                        // public domain is not used for match
-                        cleanDomain = null;
-                    }
-                    record.setPublicDomain(true);
-                } else if (StringUtils.isNotEmpty(cleanDomain)) {
-                    // update domain set
-                    record.setPublicDomain(false);
-                    if (domainSet != null) {
-                        domainSet.add(cleanDomain);
+                        break;
                     }
                 }
-                record.setParsedDomain(cleanDomain);
+                if (StringUtils.isEmpty(cleanDomain)) {
+                    record.setParsedDomain(null);
+                    record.addErrorMessages("Did not find a valid non-public domain");
+                    if (foundPublicDomain) {
+                        record.setPublicDomain(true);
+                    }
+                }
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessages("Error when cleanup domain field: " + e.getMessage());
