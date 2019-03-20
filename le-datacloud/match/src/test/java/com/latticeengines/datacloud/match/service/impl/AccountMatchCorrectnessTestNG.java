@@ -861,13 +861,14 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         List<List<String>> allSubSets = getAllKeyGroupSubsets(keyGroups);
         allSubSets.add(new ArrayList<>());
         List<Pair<List<String>, List<String>>> allDisjointSubsetPairs = new ArrayList<>();
-        for (List<String> groups1 : allSubSets)
+        for (List<String> groups1 : allSubSets) {
             for (List<String> groups2 : allSubSets) {
                 if (Collections.disjoint(groups1, groups2)) {
                     allDisjointSubsetPairs.add(Pair.of(groups1, groups2));
 
                 }
             }
+        }
         return allDisjointSubsetPairs;
     }
 
