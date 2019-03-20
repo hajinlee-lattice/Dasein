@@ -182,7 +182,7 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         
         ImportWizardStore.setSaveObjects(_mapping);
-        // ////console.log('MAPPING &&&&&&&&&&&& ',_mapping);
+        // console.log('MAPPING &&&&&&&&&&&& ',_mapping);
         vm.checkValid(form);
     };
     
@@ -221,6 +221,12 @@ angular.module('lp.import.wizard.latticefields', [])
         });
     }
     vm.updateDateFormat = (field, map) => {
+        if(map.unmap == true && !field.fromExistingTemplate){
+            field.dateFormatString = null;
+            field.timeFormatString = null;
+            field.timezone = null;
+            return;
+        }
         let fieldName = field.name;
         let fieldToName = '';
         if(fieldName == map.mappedField){
