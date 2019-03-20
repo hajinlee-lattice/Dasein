@@ -5,7 +5,7 @@ angular.module('lp.import.wizard.customfields')
         templateUrl: 'app/import/content/customfields/date-options.component.html',
         bindings: {
             field: '=',
-            disabled: '=',
+            ignore: '=',
             update: '&',
             tooltiptxt: '@',
             dateformat: '=',
@@ -16,13 +16,11 @@ angular.module('lp.import.wizard.customfields')
             let self = this;
             
             this.$onInit = function () {
-
                 this.redux = $state.get('home.import').data.redux;
                 this.dateFormats = this.redux.store.dateFormats;
                 this.timeFormats = this.redux.store.timeFormats;
                 this.timeZones = this.redux.store.timezones;
                 this.formerTemplates = this.field.fromExistingTemplate;
-               
             };
             this.getTooltip = () => {
                 return this.tooltiptxt;
