@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -206,16 +205,14 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
             EntityKeyMap entityKeyMap = new EntityKeyMap();
             entityKeyMap.setKeyMap(getMatchKeys());
-            if (MapUtils.isNotEmpty(entityKeyMap.getKeyMap())) {
-                if (entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
-                    // This should not happen because nothing is setting SystemId.
-                    log.error("SystemId somehow set in KeyMap before MergeAccount!");
-                } else {
-                    // TODO(jwinter): Support other SystemIds in M28.
-                    // For now, we hard code the SystemID MatchKey and SystemId Priority List to contain only AccountId.
-                    List<String> systemIdList = Collections.singletonList(InterfaceName.AccountId.toString());
-                    entityKeyMap.getKeyMap().put(MatchKey.SystemId, systemIdList);
-                }
+            if (entityKeyMap.getKeyMap().containsKey(MatchKey.SystemId)) {
+                // This should not happen because nothing is setting SystemId.
+                log.error("SystemId somehow set in KeyMap before MergeAccount!");
+            } else {
+                // TODO(jwinter): Support other SystemIds in M28.
+                // For now, we hard code the SystemID MatchKey and SystemId Priority List to contain only AccountId.
+                List<String> systemIdList = Collections.singletonList(InterfaceName.AccountId.toString());
+                entityKeyMap.getKeyMap().put(MatchKey.SystemId, systemIdList);
             }
 
             Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
@@ -244,7 +241,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setAllocateId(false);
         matchInput.setFetchOnly(true);
 
-        // Prepare Entity Key Map for Fetch Oly Match.
+        // Prepare Entity Key Map for Fetch Only Match.
         Map<MatchKey, List<String>> keyMap = //
                 MatchKeyUtils.resolveKeyMap(Collections.singletonList(InterfaceName.EntityId.name()));
         keyMap.put(MatchKey.EntityId, Collections.singletonList(InterfaceName.EntityId.name()));
