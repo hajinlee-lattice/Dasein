@@ -82,19 +82,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
 
-    @Value("${cdl.account.dataquota.limit:5000000}")
+    @Value("${cdl.account.dataquota.limit}")
     private Long defaultAccountQuotaLimit;
 
-    @Value("${cdl.contact.dataquota.limit:10000000}")
+    @Value("${cdl.contact.dataquota.limit}")
     private Long defaultContactQuotaLimit;
 
-    @Value("${cdl.product.dataquota.limit:200}")
+    @Value("${cdl.product.dataquota.limit}")
     private Long defaultProductBundlesQuotaLimit;
 
-    @Value("${cdl.productsku.dataquota.limit:100000}")
+    @Value("${cdl.productsku.dataquota.limit}")
     private Long defaultProductSkuQuotaLimit;
 
-    @Value("${cdl.transaction.dataquota.limit:20000000}")
+    @Value("${cdl.transaction.dataquota.limit}")
     private Long defaultTransactionQuotaLimit;
 
     @Inject
