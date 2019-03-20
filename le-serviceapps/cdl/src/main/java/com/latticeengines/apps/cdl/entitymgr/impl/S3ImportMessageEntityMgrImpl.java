@@ -88,19 +88,10 @@ public class S3ImportMessageEntityMgrImpl
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<S3ImportMessage> getS3ImportMessageGroupByDropBox() {
-        List<S3ImportMessage> messageList;
         if (isReaderConnection()) {
-            messageList = readerRepository.getS3ImportMessageGroupByDropBox();
-
+            return readerRepository.getS3ImportMessageGroupByDropBox();
         } else {
-            messageList = writerRepository.getS3ImportMessageGroupByDropBox();
+            return writerRepository.getS3ImportMessageGroupByDropBox();
         }
-//        if (CollectionUtils.isNotEmpty(messageList)) {
-//            for (S3ImportMessage message : messageList) {
-//                HibernateUtils.inflateDetails(message.getDropBox());
-//                HibernateUtils.inflateDetails(message.getDropBox().getTenant());
-//            }
-//        }
-        return messageList;
     }
 }
