@@ -305,7 +305,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         if (mem == null) {
             mem = 2048;
         }
-        int cores = Math.max(1, mem / 1024 / 8);
+        int cores = Math.max(1, mem / 1024 / 4);
         log.info("Set container memory to " + mem + " mb, cpu to " + cores + " cores.");
         appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(cores));
         appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(mem));
