@@ -86,6 +86,8 @@ public class IngestInactiveRatings extends BaseWorkflowStep<GenerateRatingStepCo
                     .version(version) //
                     .tableName(targetTableName) //
                     .build();
+            callable.setPageSize(100_000);
+            callable.setRowspPerFile(1_000_000);
             String generatedTable = callable.call();
 
             if (StringUtils.isNotBlank(generatedTable)) {

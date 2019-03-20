@@ -21,14 +21,19 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
 
     private static final Logger log = LoggerFactory.getLogger(RedshiftIngestCallable.class);
 
-    private final int PAGE_SIZE = 100_000;
-    private final int ROWS_PER_FILE = 1_000_000;
+    private int pageSize;
+    private int rowspPerFile;
 
     protected abstract long getTotalCount();
+
     protected abstract DataPage fetchPage(long ingestedCount, long pageSize);
+
     protected abstract GenericRecord parseData(Map<String, Object> data);
+
     protected abstract Schema getAvroSchema();
+
     protected abstract void preIngest();
+
     protected abstract T postIngest();
 
     private final String hdfsPath;
@@ -56,7 +61,7 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
         String targetFile = prepareTargetFile(fileId);
         List<Map<String, Object>> data = new ArrayList<>();
         do {
-            DataPage dataPage = fetchPage(ingestedCount, PAGE_SIZE);
+            DataPage dataPage = fetchPage(ingestedCount, pageSize);
             if (dataPage != null) {
                 data = dataPage.getData();
             }
@@ -70,7 +75,7 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
                     } else {
                         log.info("Appending " + records.size() + " records to " + targetFile);
                         AvroUtils.appendToHdfsFile(yarnConfiguration, targetFile, records, true);
-                        if (recordsInCurrentFile >= ROWS_PER_FILE) {
+                        if (recordsInCurrentFile >= rowspPerFile) {
                             fileId++;
                             targetFile = prepareTargetFile(fileId);
                             recordsInCurrentFile = 0;
@@ -80,7 +85,8 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
                     throw new RuntimeException("Failed to write to avro file " + targetFile, e);
                 }
                 ingestedCount += records.size();
-                log.info(String.format("Ingested %d / %d records.", ingestedCount, totalCount));
+                log.info(String.format("Ingested %d / %d records with page size %d.", ingestedCount, totalCount,
+                        pageSize));
             }
         } while (ingestedCount < totalCount && CollectionUtils.isNotEmpty(data));
     }
@@ -116,6 +122,14 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
 
     protected long getIngestedCount() {
         return ingestedCount;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public void setRowspPerFile(int rowspPerFile) {
+        this.rowspPerFile = rowspPerFile;
     }
 
 }
