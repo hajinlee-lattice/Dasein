@@ -127,9 +127,6 @@ public class SchemaRepository {
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
-        if (!enableEntityMatch) {
-            table.addAttributes(matchingAttributes(entity));
-        }
         return table;
     }
 
@@ -632,6 +629,7 @@ public class SchemaRepository {
             eventAttr.setNullable(false);
         }
         table.addAttribute(eventAttr);
+        table.addAttributes(matchingAttributes(BusinessEntity.Account));
         return table;
     }
 
@@ -773,6 +771,8 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         if (enableEntityMatch) {
             table.addAttributes(getContactAttributesForEntityMatch());
+        } else {
+            table.addAttributes(matchingAttributes(BusinessEntity.Contact));
         }
         return table;
     }
@@ -1471,7 +1471,7 @@ public class SchemaRepository {
     private static class AttributeBuilder {
         private Attribute attribute = new Attribute();
 
-        public AttributeBuilder() {
+        AttributeBuilder() {
             attribute.setNullable(true);
             attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         }
