@@ -137,7 +137,7 @@ public class StringStandardizationUtils {
             }
             // Remove leading and trailing spaces;
             // Replace multiple connected spaces with single space
-            res = res.trim().replaceAll("( )+", " ");
+            res = res.trim().replaceAll("\\s+", " ");
             if (cleanNullString(res) == null) {
                 return null;
             }
