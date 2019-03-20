@@ -767,7 +767,7 @@ angular.module('lp.import')
 	        var params = { 
                 'entity':  entity,
                 'source': 'File',
-	            'feedType': feedType || entity + 'Schema' 
+	            'feedType': feedType || '' 
             };
             if (!entity) {
                 params = {};
@@ -824,7 +824,7 @@ angular.module('lp.import')
     	       params = {
                     'entity': entity,
                     'source': 'File',
-    	            'feedType': feedType || entity + 'Schema'
+    	            'feedType': feedType || ''
                 }
             } else {
                 params = {
