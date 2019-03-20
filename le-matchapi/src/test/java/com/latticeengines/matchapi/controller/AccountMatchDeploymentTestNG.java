@@ -14,6 +14,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -48,7 +49,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 /**
  * Mostly focus on entity bulk match end-to-end code path. Covers some but
  * limited correctness verification
- * 
+ *
  * Account match correctness verification is in EntityMatchCorrectnessTestNG &
  * AccountMatchCorrectnessDeploymentTestNG
  */
@@ -99,6 +100,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchKey.State.name(), //
             MatchKey.City.name(), //
             InterfaceName.CustomerAccountId.name(), //
+            MatchKey.Email.name(), //
     };
 
     private static final String[] FIELDS_LEAD_TO_ACCT_NOAID = { //
@@ -106,6 +108,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchKey.DUNS.name(), //
             MatchKey.Domain.name(), //
             MatchKey.Name.name(), //
+            MatchKey.Email.name(), //
     };
 
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
@@ -212,57 +215,81 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
      * (published to serving store)
      *************************************************************************/
     // Schema: TestId, Domain, DUNS, Name, Country, State, City,
-    // CustomerAccountId
+    // CustomerAccountId, Email
     private static final Object[][] DATA_LEAD_TO_ACCT = {
             // case 6: CustomerAccountId = AccountId in case C0_01 -- All
             // expected to return AccountId acc_id in case C0_01
 
             // keys besides AID all empty
-            { "C6_01", null, null, null, null, null, null, "acc_id" }, //
+            { "C6_01", null, null, null, null, null, null, "acc_id", null }, //
 
             // all keys match to case C0_01
-            { "C6_02", "google.com", null, null, null, null, null, "acc_id" }, //
-            { "C6_03", null, "060902413", null, null, null, null, "acc_id" }, //
-            { "C6_04", null, null, "google", "usa", null, null, "acc_id" }, //
+            { "C6_02", "google.com", null, null, null, null, null, "acc_id", null }, //
+            { "C6_03", null, "060902413", null, null, null, null, "acc_id", null }, //
+            { "C6_04", null, null, "google", "usa", null, null, "acc_id", null }, //
 
             // AID match to case C0_01, other match keys match to case C0_02 or
             // don't match to any (AID is highest priority key which
             // decides match result) -- All expected to return AccountId acc_id
             // in case C0_01
-            { "C6_05", "amazon.com", null, null, null, null, null, "acc_id" }, //
-            { "C6_06", null, "884745530", null, null, null, null, "acc_id" }, //
-            { "C6_07", null, null, "amazon", "usa", "washington", "seattle", "acc_id" }, //
-            { "C6_08", null, "uber.com", null, null, null, null, "acc_id" }, //
-            { "C6_09", null, null, "123456789", null, null, null, "acc_id" }, //
-            { "C6_10", null, null, null, "facebook", "usa", null, "acc_id" }, //
+            { "C6_05", "amazon.com", null, null, null, null, null, "acc_id", null }, //
+            { "C6_06", null, "884745530", null, null, null, null, "acc_id", null }, //
+            { "C6_07", null, null, "amazon", "usa", "washington", "seattle", "acc_id", null }, //
+            { "C6_08", null, "uber.com", null, null, null, null, "acc_id", null }, //
+            { "C6_09", null, null, "123456789", null, null, null, "acc_id", null }, //
+            { "C6_10", null, null, null, "facebook", "usa", null, "acc_id", null }, //
 
 
             // case 7: CustomerAccountId is empty with other match keys match
             // with case C0_01 -- All expected to return AccountId acc_id in
             // case C0_01
-            { "C7_01", "google.com", null, null, null, null, null, null }, //
-            { "C7_02", null, "060902413", null, null, null, null, "" }, //
-            { "C7_03", null, null, "google", "usa", null, null, "   " }, //
+            { "C7_01", "google.com", null, null, null, null, null, null, null }, //
+            { "C7_02", null, "060902413", null, null, null, null, "", null }, //
+            { "C7_03", null, null, "google", "usa", null, null, "   ", null }, //
 
 
             // case 8: CustomerAccountId != AccountId in case C0_01, but other
             // keys matched -- Expected to return anonymous AccountId, since
             // CustomerAccountId doesn't exist in Account universe
-            { "C8_01", "google.com", null, null, null, null, null, "acc_id_nonexist" }, //
-            { "C8_02", null, "060902413", null, null, null, null, "acc_id_nonexist" }, //
-            { "C8_03", null, null, "google", "usa", null, null, "acc_id_nonexist" }, //
+            { "C8_01", "google.com", null, null, null, null, null, "acc_id_nonexist", null }, //
+            { "C8_02", null, "060902413", null, null, null, null, "acc_id_nonexist", null }, //
+            { "C8_03", null, null, "google", "usa", null, null, "acc_id_nonexist", null }, //
 
 
             // case 9: CustomerAccountId != AccountId in case C0_01 with other
             // match keys don't match either -- Expected to return anonymous
             // AccountId, since CustomerAccountId doesn't exist in Account
             // universe
-            { "C9_01", null, "uber.com", null, null, null, null, "acc_id_nonexist" }, //
-            { "C9_02", null, "uber.com", null, null, null, null, null }, //
-            { "C9_03", null, null, "123456789", null, null, null, "acc_id_nonexist" }, //
-            { "C9_04", null, null, "123456789", null, null, null, "" }, //
-            { "C9_05", null, null, null, "facebook", "usa", null, "acc_id_nonexist" }, //
-            { "C9_06", null, null, null, "facebook", "usa", null, "   " }, //
+            { "C9_01", "uber.com", null, null, null, null, null, "acc_id_nonexist", null }, //
+            { "C9_02", "uber.com", null, null, null, null, null, null, null }, //
+            { "C9_03", null, "123456789", null, null, null, null, "acc_id_nonexist", null }, //
+            { "C9_04", null, "123456789", null, null, null, null, "", null }, //
+            { "C9_05", null, null, "facebook", "usa", null, null, "acc_id_nonexist", null }, //
+            { "C9_06", null, null, "facebook", "usa", null, null, "   ", null }, //
+
+
+            // case 10: Test multi-domain field matching.  For proper testing, AccountId cannot be specified.
+            // Otherwise, AccountId will match first, and domain matching will not be exercised.
+            // These tests should match the Google entry in the account universe with AccountId acc_id, ie. C0_01
+            // sub-case 1: Test that email field has preference over domain.
+            { "C10_01", "private@lattice-engines.com", null, null, null, null, null, null, "private@google.com" }, //
+            // sub-case 2: Test that public emails are skipped in domain matching order.
+            { "C10_02", "google.com", null, null, null, null, null, null, "public@hotmail.com" }, //
+            // sub-case 3: Test that null email is successfully skipped.
+            { "C10_03", "google.com", null, null, null, null, null, null, null }, //
+            // sub-case 4: Test that non-parseable email is skipped.
+            { "C10_04", "google.com", null, null, null, null, null, null, "blah blah blah not a domain" }, //
+            // sub-case 5: Test that public domain restriction is not relaxed when not an email if company name is
+            // provided.
+            { "C10_05", "yahoo.com", null, "Google", "United States of America", null, null, null, "outlook.com" }, //
+
+
+            // case 11: Test multi-domain field matching cases that result in no match to the account universe.
+            // sub-case 1: Test that public domain restriction is relaxed when not in email format and no duns or name
+            // is provided.  Here gmail.com will be used for match and not match Google's entry, C0_01.
+            { "C11_01", "google.com", null, null, null, null, null, null, "gmail.com" }, //
+            // sub-case 2: Test that no match is found if only public email domains are provided.
+            { "C11_02", "public@yahoo.com", null, null, null, null, null, null, "public@outlook.com" }, //
     };
 
     /****************************************************************************
@@ -270,44 +297,48 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
      * (published to serving store) without AID in schema and with other match
      * keys simplified
      ****************************************************************************/
-    // Schema: TestId, DUNS, Domain, Name
+    // Schema: TestId, DUNS, Domain, Name, Email
     // Priority in current default decision graph of Account: DUNS -> Domain ->
     // Name
     private static final Object[][] DATA_LEAD_TO_ACCT_NOAID = {
-            // case 10: keys match to case C0_01 -- All expected to return
+            // case 12: keys match to case C0_01 -- All expected to return
             // AccountId acc_id in case C0_01
 
             // all keys match to case C0_01
-            { "C10_01", "060902413", null, null }, //
-            { "C10_02", null, "google.com", null }, //
-            { "C10_03", null, null, "google" }, //
+            { "C12_01", "060902413", null, null, null }, //
+            { "C12_02", null, "google.com", null, null }, //
+            { "C12_03", null, null, "google", null }, //
+            { "C12_04", null, null, "google", "google@google.com" }, //
 
             // higher priority keys match to case C0_01, while lower priority
             // keys match to case C0_02
-            { "C10_04", "060902413", "amazon.com", null }, //
-            { "C10_05", "060902413", null, "amazon" }, //
-            { "C10_06", "060902413", "amazon.com", "amazon" }, //
-            { "C10_07", null, "google.com", "amazon" }, //
+            { "C12_05", "060902413", "amazon.com", null, "amazon@amazon.com" }, //
+            { "C12_06", "060902413", null, "amazon", null }, //
+            { "C12_07", "060902413", "amazon.com", "amazon", "amazon@amazon.com" }, //
+            { "C12_08", null, "amazon.com", "amazon", "google@google.com" }, //
+            { "C12_09", null, "google.com", "amazon", null }, //
 
             // higher priority keys match to case C0_01, while lower priority
             // keys match to nothing
-            { "C10_08", "060902413", null, null }, //
-            { "C10_09", "060902413", "domain_nonexist.com", null }, //
-            { "C10_10", "060902413", null, "company_nonexist" }, //
-            { "C10_11", "060902413", "domain_nonexist.com", "company_nonexist" }, //
-            { "C10_12", null, "google.com", "company_nonexist" }, //
+            { "C12_10", "060902413", null, null, null}, //
+            { "C12_11", "060902413", "domain_nonexist.com", null, null }, //
+            { "C12_12", "060902413", null, "company_nonexist", null }, //
+            { "C12_13", "060902413", "domain_nonexist.com", "company_nonexist", "name@domain_nonexist.com" }, //
+            { "C12_14", null, null, "company_nonexist", "google@google.com" }, //
 
 
-            // case 11: keys not match to any existing account -- All expected
+            // case 13: keys not match to any existing account -- All expected
             // to return anonymous AccountId
-            { "C11_01", null, null, null }, //
-            { "C11_02", "000000000", null, null }, //
-            { "C11_03", null, "domain_nonexist.com", null }, //
-            { "C11_04", null, null, "company_nonexist" }, //
-            { "C11_05", "000000000", "domain_nonexist.com", null }, //
-            { "C11_06", "000000000", null, "company_nonexist" }, //
-            { "C11_07", null, "domain_nonexist.com", "company_nonexist" }, //
-            { "C11_08", "000000000", "domain_nonexist.com", "company_nonexist" }, //
+            { "C13_01", null, null, null, null }, //
+            { "C13_02", "000000000", null, null, null }, //
+            { "C13_03", null, "domain_nonexist.com", null, "name@domain_nonexist.com" }, //
+            { "C13_04", null, null, "company_nonexist", null }, //
+            { "C13_05", "000000000", "domain_nonexist.com", null, null }, //
+            { "C13_06", "000000000", null, "company_nonexist", null }, //
+            { "C13_07", null, "domain_nonexist.com", "company_nonexist", "name@domain_nonexist.com" }, //
+            { "C13_08", "000000000", "domain_nonexist.com", "company_nonexist", "name@domain_nonexist.com" }, //
+            // public@aol.com should match before google.com (public domain treated as normal is true)
+            { "C13_09", null, "google.com", null, "public@aol.com" }, //
     };
 
 
@@ -366,7 +397,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     // Non-AllocateId mode for Account match and return AccountId
     @Test(groups = "deployment", priority = 4)
     public void testLeadToAcct() {
-        MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT, true);
+        MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT, true, MatchKey.Email.name(),
+                false);
         runAndVerify(input, CASE_LEAD_TO_ACCT);
     }
 
@@ -374,7 +406,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     // --- Non-AllocateId mode for Account match and return AccountId
     @Test(groups = "deployment", priority = 5)
     public void testLeadToAcctNoAID() {
-        MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT_NOAID, false);
+        MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT_NOAID, false,
+                MatchKey.Email.name(), true);
         runAndVerify(input, CASE_LEAD_TO_ACCT_NOAID);
     }
 
@@ -413,7 +446,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setTargetEntity(BusinessEntity.Account.name());
         input.setAllocateId(true);
-        input.setEntityKeyMaps(prepareKeyMaps(FIELDS, new String[] { InterfaceName.AccountId.name(), SFDC_ID }));
+        input.setEntityKeyMaps(prepareKeyMaps(FIELDS, new String[] { InterfaceName.AccountId.name(), SFDC_ID }, null));
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
@@ -437,7 +470,9 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return input;
     }
 
-    private MatchInput prepareBulkMatchInputLeadToAcct(String scenario, boolean mapSystemId) {
+    // Set emailField to the name of the email field, or to null/empty if no email field is needed.
+    private MatchInput prepareBulkMatchInputLeadToAcct(String scenario, boolean mapSystemId, String emailField,
+                                                       boolean publicDomainAsNormal) {
         String[] fields = null;
         if (CASE_LEAD_TO_ACCT.equals(scenario)) {
             fields = FIELDS_LEAD_TO_ACCT;
@@ -456,11 +491,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setTargetEntity(BusinessEntity.Account.name());
         input.setAllocateId(false);
+        if (publicDomainAsNormal) {
+            input.setPublicDomainAsNormalDomain(true);
+        }
         if (mapSystemId) {
             input.setEntityKeyMaps(
-                    prepareKeyMaps(fields, new String[] { InterfaceName.CustomerAccountId.name() }));
+                    prepareKeyMaps(fields, new String[] { InterfaceName.CustomerAccountId.name() }, emailField));
         } else {
-            input.setEntityKeyMaps(prepareKeyMaps(fields, new String[] {}));
+            input.setEntityKeyMaps(prepareKeyMaps(fields, new String[] {}, emailField));
         }
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
@@ -468,12 +506,18 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return input;
     }
 
-    private Map<String, MatchInput.EntityKeyMap> prepareKeyMaps(String[] fields, String[] systemIdFields) {
+    private Map<String, MatchInput.EntityKeyMap> prepareKeyMaps(String[] fields, String[] systemIdFields, String
+            emailField) {
         Map<String, MatchInput.EntityKeyMap> keyMaps = new HashMap<>();
         MatchInput.EntityKeyMap keyMap = new MatchInput.EntityKeyMap();
         Map<MatchKey, List<String>> map = MatchKeyUtils.resolveKeyMap(Arrays.asList(fields));
         if (systemIdFields.length > 0) {
             map.put(MatchKey.SystemId, Arrays.asList(systemIdFields));
+        }
+        if (StringUtils.isNotBlank(emailField)) {
+            List<String> domainMatchKeys = map.get(MatchKey.Domain);
+            // Add email field first in Domain MatchKey because it is highest priority for matching.
+            domainMatchKeys.add(0, emailField);
         }
         keyMap.setKeyMap(map);
         keyMaps.put(BusinessEntity.Account.name(), keyMap);
@@ -571,11 +615,11 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         Set<String> casesMatchedAID = null;
         Set<String> casesAnonymousAID = null;
         if (CASE_LEAD_TO_ACCT.equals(scenario)) {
-            casesMatchedAID = new HashSet<>(Arrays.asList("6", "7"));
-            casesAnonymousAID = new HashSet<>(Arrays.asList("8", "9"));
+            casesMatchedAID = new HashSet<>(Arrays.asList("6", "7", "10"));
+            casesAnonymousAID = new HashSet<>(Arrays.asList("8", "9", "11"));
         } else if (CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
-            casesMatchedAID = new HashSet<>(Arrays.asList("10"));
-            casesAnonymousAID = new HashSet<>(Arrays.asList("11"));
+            casesMatchedAID = new HashSet<>(Arrays.asList("12"));
+            casesAnonymousAID = new HashSet<>(Arrays.asList("13"));
         } else {
             throw new IllegalArgumentException("Unrecognized test scenario: " + scenario);
         }
