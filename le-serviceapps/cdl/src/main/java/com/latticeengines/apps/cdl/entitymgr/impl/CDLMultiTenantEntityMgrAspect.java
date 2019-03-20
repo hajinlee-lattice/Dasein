@@ -83,7 +83,8 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataCollectionEntityMgrImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataCollectionEntityMgrImpl.*(..)) &&"
+            + " !execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataCollectionEntityMgrImpl.getAllTableName(..))")
     public void allDataCollectionMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
@@ -104,9 +105,9 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({"rawtypes", "deprecation"})
     private void enableSoftDeleteFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
-            Collection<EntityManager> entityManagers) {
+                                        Collection<EntityManager> entityManagers) {
         Class entityClass = ((AbstractBaseDaoImpl) ((BaseEntityMgr) joinPoint.getTarget()).getDao())
                 .getEntityClassReference();
         if (SoftDeletable.class.isAssignableFrom(entityClass)) {
