@@ -242,7 +242,6 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $scope.tenantInfo = {
             properties: {
                 displayName: $scope.tenantId,
-                contract:  $scope.tenantId,
                 description: "A Lattice tenant under the contract " + $scope.contractId,
                 status: "ACTIVE",
                 tenantType: "CUSTOMER"
@@ -450,6 +449,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                  alert("At least one source feature flag for LP3.0 should be checked.");
                  return false;
              }
+         } else if (!$scope.tenantInfo.properties.contract) {
+        	 alert("Please populate contract.");
+             return false;
          }
          return true;
     }
