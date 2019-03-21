@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.mds.impl;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -30,9 +29,6 @@ public class SystemPostRenderDecorator implements Decorator {
             }
             // PLS-11145 set Export init value to false, for deprecated attr
             cm.disableGroup(ColumnSelection.Predefined.Enrichment);
-        }
-        if (cm.getAttrName().equals("BmbrSurge_DeutscheBorse_Intent")) {
-            System.out.println(JsonUtils.serialize(cm));
         }
         return cm;
     }

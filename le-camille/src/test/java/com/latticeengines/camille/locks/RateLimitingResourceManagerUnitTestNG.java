@@ -56,10 +56,6 @@ public class RateLimitingResourceManagerUnitTestNG {
             Assert.assertTrue(acquisition.isAllowed(), "Acquisition should be allowed.");
         }
 
-        // two dummy acquisition to burst the quota
-        RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10, TimeUnit.MICROSECONDS);
-        RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10, TimeUnit.MICROSECONDS);
-
         RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10,
                 TimeUnit.MICROSECONDS);
         Assert.assertFalse(acquisition.isAllowed(), "Acquisition should be rejected.");
@@ -87,10 +83,6 @@ public class RateLimitingResourceManagerUnitTestNG {
             Assert.assertTrue(acquisition.isAllowed(), "Acquisition should be allowed in zk.");
         }
 
-        // two dummy acquisition to burst the quota
-        RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10, TimeUnit.MICROSECONDS);
-        RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10, TimeUnit.MICROSECONDS);
-
         RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10,
                 TimeUnit.MICROSECONDS);
         Assert.assertFalse(acquisition.isAllowed(), "Acquisition should be rejected by zk.");
@@ -99,8 +91,7 @@ public class RateLimitingResourceManagerUnitTestNG {
         CamilleTestEnvironment.stop();
 
         for (int i = 0; i < 10; i++) {
-            acquisition = RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10,
-                    TimeUnit.MICROSECONDS);
+            acquisition = RateLimitedResourceManager.acquire(resource, inquiringQuantities, 10, TimeUnit.MICROSECONDS);
             Assert.assertTrue(acquisition.isAllowed(), "Acquisition should be allowed in local store.");
         }
 
@@ -181,7 +172,7 @@ public class RateLimitingResourceManagerUnitTestNG {
 
         double tolerant = localMode ? 2.0 : 1.3;
         verifyTimestamps(cntr1TimestampsSorted, 1, quota1, tolerant);
-        verifyTimestamps(cntr1TimestampsSorted, 3, quota2, tolerant);
+        verifyTimestamps(cntr2TimestampsSorted, 3, quota2, tolerant);
         verifyUniformity(distribution, numThreads);
 
         if (localMode) {
@@ -199,12 +190,13 @@ public class RateLimitingResourceManagerUnitTestNG {
             }
             if ((p2 - p1 + 1) * increment > max) {
                 log.warn(String.format("The quota limit %d was exceeded (%d) between %d and %d (%d:%d)", max,
-                        (p2 - p1 + 1) * increment, ts.get(p1), ts.get(p2), p2 - p1 + 1 ,ts.get(p2) - ts.get(p1)));
+                        (p2 - p1 + 1) * increment, ts.get(p1), ts.get(p2), p2 - p1 + 1, ts.get(p2) - ts.get(p1)));
             }
 
             Assert.assertTrue((p2 - p1 + 1) * increment <= tolerant * max,
-                    String.format("The quota limit %d was exceeded by more than 50 %% (%d) between %d and %d (%d:%d)", max,
-                            (p2 - p1 + 1) * increment, ts.get(p1), ts.get(p2), p2 - p1 + 1 ,ts.get(p2) - ts.get(p1)));
+                    String.format("The quota limit %d was exceeded by more than 50 %% (%d) between %d and %d (%d:%d)",
+                            max, (p2 - p1 + 1) * increment, ts.get(p1), ts.get(p2), p2 - p1 + 1,
+                            ts.get(p2) - ts.get(p1)));
             if (p2 == ts.size() - 1) {
                 break;
             }
@@ -215,7 +207,7 @@ public class RateLimitingResourceManagerUnitTestNG {
         Assert.assertEquals(distribution.size(), numThreads);
         double[] doubles = new double[distribution.size()];
         int i = 0;
-        for (Integer value: distribution.values()) {
+        for (Integer value : distribution.values()) {
             doubles[i] = value;
             i++;
         }
