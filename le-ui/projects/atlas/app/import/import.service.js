@@ -403,26 +403,28 @@ angular.module('lp.import')
                             var __newItem = angular.extend(_newItem, item);
 
                             append.push(__newItem);
-                        } else {
-                            /**
-                             * here we update fields instead of appending them.
-                             */
-                            var unMappedItem = tmpFieldMappings.find(function(field) {
-                                return (field.mappedField === item.mappedField);
-                            });
-                            mappedItem = tmpFieldMappings.find(function(field) {
-                                return (field.userField === item.userField);
-                            });
-                            if(unMappedItem) {
-                                unMappedItem.mappedField = null;
-                                unMappedItem.mappedToLatticeField = false;
-                            }
-                            if(mappedItem) {
-                                mappedItem.mappedField = item.mappedField;
-                                mappedItem.mappedToLatticeField = true;
-                            }
+                        } 
+                        // This part is done in this.saveDocumentFields that is called as soon as the next button is pressed in the wizard
+                        // else {
+                        //     /**
+                        //      * here we update fields instead of appending them.
+                        //      */
+                        //     var unMappedItem = tmpFieldMappings.find(function(field) {
+                        //         return (field.mappedField === item.mappedField);
+                        //     });
+                        //     mappedItem = tmpFieldMappings.find(function(field) {
+                        //         return (field.userField === item.userField);
+                        //     });
+                        //     if(unMappedItem & !unMappedItem.mappedToLatticeField) {
+                        //         unMappedItem.mappedField = null;
+                        //         unMappedItem.mappedToLatticeField = false;
+                        //     }
+                        //     if(mappedItem && !mappedItem.unmap) {
+                        //         mappedItem.mappedField = item.mappedField;
+                        //         mappedItem.mappedToLatticeField = true;
+                        //     }
 
-                        }
+                        // }
                     });
                 }
             }
