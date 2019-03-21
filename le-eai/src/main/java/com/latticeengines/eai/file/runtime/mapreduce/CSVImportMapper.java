@@ -108,6 +108,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private boolean failMapper = false;
 
+    private GenericRecord avroRecord;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         conf = context.getConfiguration();
@@ -139,6 +141,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         } else {
             avroFileName = table.getName() + ".avro";
         }
+
+        avroRecord = new GenericData.Record(schema);
     }
 
     @Override
@@ -177,9 +181,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                         LOG.debug("Start to processing line: " + lineNum);
                         beforeEachRecord();
-                        GenericRecord avroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
+                        GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
-                            dataFileWriter.append(avroRecord);
+                            dataFileWriter.append(currentAvroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
                         } else {
                             if (errorMap.size() > 0) {
@@ -214,6 +218,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         missingRequiredColValue = Boolean.FALSE;
         fieldMalFormed = Boolean.FALSE;
         rowError = Boolean.FALSE;
+        for (int i = 0; i < schema.getFields().size(); i ++) {
+            avroRecord.put(i, null);
+        }
     }
 
     private void handleError(Context context, long lineNumber) throws IOException {
@@ -253,7 +260,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private GenericRecord toGenericRecord(Set<String> headers, CSVRecord csvRecord) {
-        GenericRecord avroRecord = new GenericData.Record(schema);
         for (Attribute attr : table.getAttributes()) {
             Object avroFieldValue = null;
             String csvColumnName = attr.getDisplayName();
@@ -337,7 +343,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         avroRecord.put(InterfaceName.InternalId.name(), lineNum);
         return avroRecord;
-
     }
 
     private void validateAttribute(CSVRecord csvRecord, Attribute attr, String csvColumnName) {
