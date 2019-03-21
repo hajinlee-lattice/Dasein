@@ -36,7 +36,10 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.S3PathBuilder;
-import com.latticeengines.datacloud.dataflow.transformation.ConsolidateCollectionFlow;
+import com.latticeengines.datacloud.dataflow.transformation.ConsolidateCollectionAlexaFlow;
+import com.latticeengines.datacloud.dataflow.transformation.ConsolidateCollectionBWFlow;
+import com.latticeengines.datacloud.dataflow.transformation.ConsolidateCollectionOrbFlow;
+import com.latticeengines.datacloud.dataflow.transformation.ConsolidateCollectionSemrushFlow;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateCollectionConfig;
@@ -74,7 +77,20 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
 
     @Override
     public String getDataFlowBeanName() {
-        return ConsolidateCollectionFlow.BEAN_NAME;
+        String vendor = vendorConfig.getVendor();
+        switch (vendor){
+            case VendorConfig.VENDOR_ALEXA:
+                return ConsolidateCollectionAlexaFlow.BEAN_NAME;
+            case VendorConfig.VENDOR_BUILTWITH:
+                return ConsolidateCollectionBWFlow.BEAN_NAME;
+            case VendorConfig.VENDOR_ORBI_V2:
+                return ConsolidateCollectionOrbFlow.BEAN_NAME;
+            case VendorConfig.VENDOR_SEMRUSH:
+                return ConsolidateCollectionSemrushFlow.BEAN_NAME;
+        }
+
+        log.error("failure: no data-flow bean for " + vendor + " found");
+        return null;
     }
 
     @Override
@@ -102,7 +118,7 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         }).collect(Collectors.toList());
         if (vendors.size() == 0) {
 
-            log.info("unable to find VendorConfig for vendor " + vendor);
+            log.error("failure: unable to find VendorConfig for " + vendor);
 
         }
         vendorConfig = vendors.get(0);

@@ -12,7 +12,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 
 @Component(BEAN_NAME)
-public class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<ConsolidateCollectionParameters> {
+public abstract class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<ConsolidateCollectionParameters> {
 
     public static final String BEAN_NAME = "consolidateCollectionFlow";
 
@@ -20,10 +20,23 @@ public class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<Consolida
     public Node construct(ConsolidateCollectionParameters parameters) {
         // assume the first base source is always the input
         Node input = addSource(parameters.getBaseTables().get(0));
-        List<String> groupByKeys = parameters.getGroupBy();
-        String sortByKey = parameters.getSortBy();
-        return input.groupByAndLimit(new FieldList(groupByKeys), new FieldList(sortByKey), //
-                1, true, false);
+
+        Node src = preRecentTransform(input, parameters);
+
+        Node recent = findMostRecent(src, parameters);
+
+        return postRecentTransform(recent, parameters);
     }
 
+    protected abstract Node preRecentTransform(Node src, ConsolidateCollectionParameters parameters);
+
+    protected abstract Node postRecentTransform(Node src, ConsolidateCollectionParameters parameters);
+
+    private Node findMostRecent(Node src, ConsolidateCollectionParameters parameters)
+    {
+        List<String> groupByKeys = parameters.getGroupBy();
+        String sortByKey = parameters.getSortBy();
+        return src.groupByAndLimit(new FieldList(groupByKeys), new FieldList(sortByKey), //
+                1, true, false);
+    }
 }
