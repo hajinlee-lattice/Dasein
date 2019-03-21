@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.listener;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +48,25 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
             clearJobCache(executionId);
         } finally {
+            // NOTE this method is executed by Spring so there is a chance main thread has
+            // not set caller yet, wait for it to finish
+            try {
+                synchronized (this) {
+                    while (caller == null) {
+                        log.info("Waiting for LEJobCaller to be set");
+                        wait(TimeUnit.SECONDS.toMillis(3L));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error occurs when waiting for LEJobCaller to be set", e);
+            }
+
             if (caller != null) {
                 log.info("Workflow finished (workflowId={})", executionId);
                 caller.callDone();
                 callerThread.interrupt();
             } else {
-                log.error("Should not have a null LEJobCaller, cannot finish the job properly");
+                log.error("Got NULL LEJobCaller, workflow cannot finish properly");
             }
         }
     }

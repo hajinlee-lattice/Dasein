@@ -438,7 +438,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         long maxWaitTime = MAX_MILLIS_TO_WAIT;
         long checkInterval = 1000 * 120;
         JobWaitCaller caller = new JobWaitCaller(workflowId, maxWaitTime, checkInterval);
-        callerRegister.register(Thread.currentThread(), caller);
+        synchronized (callerRegister) {
+            callerRegister.register(Thread.currentThread(), caller);
+            callerRegister.notifyAll();
+        }
         caller.sleep();
         log.info(String.format("Finished waiting for the workflow id= %s", workflowId.getId()));
     }
