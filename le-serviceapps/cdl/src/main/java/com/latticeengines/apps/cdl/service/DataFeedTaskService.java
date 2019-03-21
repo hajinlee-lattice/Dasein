@@ -24,6 +24,10 @@ public interface DataFeedTaskService {
 
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
+    void updateS3ImportStatus(String customerSpace, String source, String dataFeedType, DataFeedTask.S3ImportStatus status);
+
+    void updateS3ImportStatus(String customerSpace, String uniqueId, DataFeedTask.S3ImportStatus status);
+
     List<String> registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract);
 
     List<String> registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);

@@ -17,4 +17,6 @@ public interface DropBoxRepository extends BaseJpaRepository<DropBox, Long> {
     @Query("SELECT tenant from DropBox where dropBox = ?1")
     Tenant findTenantByDropBox(String dropBox);
 
+    DropBox findByDropBox(String dropBox);
+
 }
