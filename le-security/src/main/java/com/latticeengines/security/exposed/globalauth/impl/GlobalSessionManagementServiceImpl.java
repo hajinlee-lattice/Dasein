@@ -74,7 +74,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             s.setTicket(ticket);
             return s;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18002, e, new String[] { ticket.getData() });
+            throw new LedpException(LedpCode.LEDP_19016, e, new String[] { ticket.getData(), e.getMessage() });
         }
     }
 
