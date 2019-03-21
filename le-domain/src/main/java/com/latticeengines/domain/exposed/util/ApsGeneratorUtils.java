@@ -64,34 +64,34 @@ public class ApsGeneratorUtils {
             Map<String, List<Product>> productMap) {
         if (name.matches(PRODUCT_SPEND_IN_LAST_PERIOD_PATTERN)) {
             Pattern pattern = Pattern.compile(PRODUCT_SPEND_IN_LAST_PERIOD_PATTERN);
-            setDisplayName(attribute, name, productMap, pattern, "Last Period Spend for ");
+            setDisplayNameAndSubcategory(attribute, name, productMap, pattern, "Last Period Spend for ");
             attribute.setDescription("Product spend in last period");
             attribute.setFundamentalType(FundamentalType.CURRENCY);
             return;
         }
         if (name.matches(PRODUCT_SPEND_IN_6_PRERIOD_PATTERN)) {
             Pattern pattern = Pattern.compile(PRODUCT_SPEND_IN_6_PRERIOD_PATTERN);
-            setDisplayName(attribute, name, productMap, pattern, "6-Period Spend for ");
+            setDisplayNameAndSubcategory(attribute, name, productMap, pattern, "6-Period Spend for ");
             attribute.setDescription("Product spend for last 6 periods");
             attribute.setFundamentalType(FundamentalType.CURRENCY);
             return;
         }
         if (name.matches(PRODUCT_SPEND_IN_3_PRERIOD_PATTERN)) {
             Pattern pattern = Pattern.compile(PRODUCT_SPEND_IN_3_PRERIOD_PATTERN);
-            setDisplayName(attribute, name, productMap, pattern, "Rate of Change of 3-Period Spend for ");
+            setDisplayNameAndSubcategory(attribute, name, productMap, pattern, "Rate of Change of 3-Period Spend for ");
             attribute.setDescription(
                     "Percent change in the 3 period spend, where values > 0 show increasing spend and < 0 indicate decreasing spend");
             return;
         }
         if (name.matches(UNITS_PURCHASED_PATTERN)) {
             Pattern pattern = Pattern.compile(UNITS_PURCHASED_PATTERN);
-            setDisplayName(attribute, name, productMap, pattern, "Last Period Units for ");
+            setDisplayNameAndSubcategory(attribute, name, productMap, pattern, "Last Period Units for ");
             attribute.setDescription("Units purchased in last period");
             return;
         }
         if (name.matches(PRODUCT_SPAN_PATTERN)) {
             Pattern pattern = Pattern.compile(PRODUCT_SPAN_PATTERN);
-            setDisplayName(attribute, name, productMap, pattern, "Purchase Recency for ");
+            setDisplayNameAndSubcategory(attribute, name, productMap, pattern, "Purchase Recency for ");
             attribute.setDescription(
                     "Indicator of how recently a customer purchased, where higher values indicate more recent purchase (e.g. 1 = Last Period  and 0 = Never)");
             return;
@@ -102,13 +102,14 @@ public class ApsGeneratorUtils {
         return ApsNamePatternSet.stream().anyMatch(p -> name.matches(p));
     }
 
-    private static void setDisplayName(Attribute attribute, String name, Map<String, List<Product>> productMap,
-            Pattern pattern, String descPrefix) {
+    private static void setDisplayNameAndSubcategory(Attribute attribute, String name,
+            Map<String, List<Product>> productMap, Pattern pattern, String descPrefix) {
         Matcher matcher = pattern.matcher(name);
         matcher.matches();
         String productId = matcher.group(1);
         if (productMap != null && CollectionUtils.isNotEmpty(productMap.get(productId))) {
             attribute.setDisplayName(descPrefix + productMap.get(productId).get(0).getProductName());
+            attribute.setSubcategory(productMap.get(productId).get(0).getProductBundle());
         } else {
             attribute.setDisplayName(descPrefix + productId);
         }
