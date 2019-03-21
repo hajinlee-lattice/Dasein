@@ -57,6 +57,14 @@ public class HashUtilsUnitTestNG {
                 .matches("[a-zA-Z0-9]*"));
     }
 
+    @Test(groups = "unit")
+    public void testSameHashValue() {
+        Assert.assertEquals(HashUtils.getShortHash(HashUtils.getCleanedString(LETTERS)),
+                HashUtils.getShortHash(HashUtils.getCleanedString(LETTERS)));
+        Assert.assertNotEquals(HashUtils.getShortHash(HashUtils.getCleanedString("abcd")),
+                HashUtils.getShortHash(HashUtils.getCleanedString("abcc")));
+    }
+
     private String getRandomString(int length) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
