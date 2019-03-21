@@ -30,41 +30,41 @@ public class ActivityMetricsUtils {
                                                 // to start with letter or "_"
 
     // Metrics enum -> display name
-    private static Map<InterfaceName, String> metricsDisplayNames = new HashMap<>();
+    private static final Map<InterfaceName, String> METRICS_DISPLAY_NAMES = new HashMap<>();
 
     // Metrics enum -> abbreviation name
-    private static Map<InterfaceName, String> metricsAbbr = new HashMap<>();
+    private static final Map<InterfaceName, String> METRICS_ABBR = new HashMap<>();
 
     // Metrics enum -> description
-    private static Map<InterfaceName, String> metricsDescription = new HashMap<>();
+    private static final Map<InterfaceName, String> METRICS_DESC = new HashMap<>();
 
     // Metrics abbreviation name -> enum
-    private static Map<String, InterfaceName> metricsAbbrRev = new HashMap<>();
+    private static final Map<String, InterfaceName> METRICS_ABBR_REV = new HashMap<>();
 
     // Period name -> period abbreviation
-    private static Map<String, String> periodAbbr = new HashMap<>();
+    private static final Map<String, String> PERIOD_ABBR = new HashMap<>();
 
     // Period abbreviation -> period template
-    private static Map<String, PeriodStrategy.Template> periodAbbrRev = new HashMap<>();
+    private static final Map<String, PeriodStrategy.Template> PERIOD_ABBR_REV = new HashMap<>();
 
     // Metrics enum -> null imputation strategy
-    private static Map<InterfaceName, NullMetricsImputation> nullImputation = new HashMap<>();
+    private static final Map<InterfaceName, NullMetricsImputation> NULL_IMPUTATION = new HashMap<>();
 
     // Metrics enum -> supported combinations of comparison types (one metrics
     // could have multiple supported combinations of comparison types -- eg. PM
     // updates period config for a metrics but we need to support old period
     // config to ensure backward compatibility, so value is a set; string in the
     // set is concatenated names of one combination of comparison types)
-    private static Map<InterfaceName, Set<String>> comparisonType = new HashMap<>();
+    private static final Map<InterfaceName, Set<String>> comparisonType = new HashMap<>();
 
     // Comparison type -> #period should be set to support this comparison type
-    private static Map<ComparisonType, Integer> comparisonTypePeriodCnt = new HashMap<>();
+    private static final Map<ComparisonType, Integer> comparisonTypePeriodCnt = new HashMap<>();
 
     // Metrics enum -> maximum allowed count
-    private static Map<InterfaceName, Integer> maxCnt = new HashMap<>();
+    private static final Map<InterfaceName, Integer> maxCnt = new HashMap<>();
 
     // Valid period names
-    private static Set<String> validPeriods = new HashSet<>(Arrays.asList( //
+    private static final Set<String> validPeriods = new HashSet<>(Arrays.asList( //
             PeriodStrategy.Template.Year.name(), //
             PeriodStrategy.Template.Quarter.name(), //
             PeriodStrategy.Template.Month.name(), //
@@ -73,70 +73,70 @@ public class ActivityMetricsUtils {
 
 
     static {
-        metricsDisplayNames.put(InterfaceName.Margin, "% Margin");
-        metricsDisplayNames.put(InterfaceName.SpendChange, "% Spend Change");
-        metricsDisplayNames.put(InterfaceName.ShareOfWallet, "% Share of Wallet");
-        metricsDisplayNames.put(InterfaceName.AvgSpendOvertime, "Average Spend");
-        metricsDisplayNames.put(InterfaceName.TotalSpendOvertime, "Total Spend");
-        metricsDisplayNames.put(InterfaceName.HasPurchased, "Has Purchased");
+        METRICS_DISPLAY_NAMES.put(InterfaceName.Margin, "% Margin");
+        METRICS_DISPLAY_NAMES.put(InterfaceName.SpendChange, "% Spend Change");
+        METRICS_DISPLAY_NAMES.put(InterfaceName.ShareOfWallet, "% Share of Wallet");
+        METRICS_DISPLAY_NAMES.put(InterfaceName.AvgSpendOvertime, "Average Spend");
+        METRICS_DISPLAY_NAMES.put(InterfaceName.TotalSpendOvertime, "Total Spend");
+        METRICS_DISPLAY_NAMES.put(InterfaceName.HasPurchased, "Has Purchased");
     }
 
     static {
-        metricsAbbr.put(InterfaceName.Margin, "MG");
-        metricsAbbr.put(InterfaceName.SpendChange, "SC");
-        metricsAbbr.put(InterfaceName.ShareOfWallet, "SW");
-        metricsAbbr.put(InterfaceName.AvgSpendOvertime, "AS");
-        metricsAbbr.put(InterfaceName.TotalSpendOvertime, "TS");
-        metricsAbbr.put(InterfaceName.HasPurchased, "HP");
+        METRICS_ABBR.put(InterfaceName.Margin, "MG");
+        METRICS_ABBR.put(InterfaceName.SpendChange, "SC");
+        METRICS_ABBR.put(InterfaceName.ShareOfWallet, "SW");
+        METRICS_ABBR.put(InterfaceName.AvgSpendOvertime, "AS");
+        METRICS_ABBR.put(InterfaceName.TotalSpendOvertime, "TS");
+        METRICS_ABBR.put(InterfaceName.HasPurchased, "HP");
     }
 
     static {
-        metricsDescription.put(InterfaceName.Margin,
+        METRICS_DESC.put(InterfaceName.Margin,
                 "This curated attribute is calculated by analyzing cost of sell & revenue for a given product of a given account in the specified time window. "
                         + "The insights are useful to drive sales & marketing campaigns for the accounts where the profit margins are below expected levels.");
-        metricsDescription.put(InterfaceName.SpendChange,
+        METRICS_DESC.put(InterfaceName.SpendChange,
                 "This curated attribute is calculated by comparing average spend for a given product of a given account in the specified time window with that of the range in prior time window.");
-        metricsDescription.put(InterfaceName.ShareOfWallet,
+        METRICS_DESC.put(InterfaceName.ShareOfWallet,
                 "This curated attribute is calculated by comparing spend ratio for a given product of a given account with that of other accounts in the same segment. "
                         + "This insights are useful to drive sales & marketing campaigns for the accounts where the share of wallet is below the desired range.");
-        metricsDescription.put(InterfaceName.AvgSpendOvertime,
+        METRICS_DESC.put(InterfaceName.AvgSpendOvertime,
                 "This curated attribute is calculated by aggregating average spend for a given product of a given account over a specified time window.");
-        metricsDescription.put(InterfaceName.TotalSpendOvertime,
+        METRICS_DESC.put(InterfaceName.TotalSpendOvertime,
                 "This curated attribute is calculated by aggregating total spend for a given product of a given account over a specified time window.");
-        metricsDescription.put(InterfaceName.HasPurchased,
+        METRICS_DESC.put(InterfaceName.HasPurchased,
                 "Indicates if this product ever was purchased by this account.");
     }
 
     static {
-        metricsAbbrRev.put("MG", InterfaceName.Margin);
-        metricsAbbrRev.put("SC", InterfaceName.SpendChange);
-        metricsAbbrRev.put("SW", InterfaceName.ShareOfWallet);
-        metricsAbbrRev.put("AS", InterfaceName.AvgSpendOvertime);
-        metricsAbbrRev.put("TS", InterfaceName.TotalSpendOvertime);
-        metricsAbbrRev.put("HP", InterfaceName.HasPurchased);
+        METRICS_ABBR_REV.put("MG", InterfaceName.Margin);
+        METRICS_ABBR_REV.put("SC", InterfaceName.SpendChange);
+        METRICS_ABBR_REV.put("SW", InterfaceName.ShareOfWallet);
+        METRICS_ABBR_REV.put("AS", InterfaceName.AvgSpendOvertime);
+        METRICS_ABBR_REV.put("TS", InterfaceName.TotalSpendOvertime);
+        METRICS_ABBR_REV.put("HP", InterfaceName.HasPurchased);
     }
 
     static {
-        periodAbbr.put(PeriodStrategy.Template.Year.name(), "Y");
-        periodAbbr.put(PeriodStrategy.Template.Quarter.name(), "Q");
-        periodAbbr.put(PeriodStrategy.Template.Month.name(), "M");
-        periodAbbr.put(PeriodStrategy.Template.Week.name(), "W");
+        PERIOD_ABBR.put(PeriodStrategy.Template.Year.name(), "Y");
+        PERIOD_ABBR.put(PeriodStrategy.Template.Quarter.name(), "Q");
+        PERIOD_ABBR.put(PeriodStrategy.Template.Month.name(), "M");
+        PERIOD_ABBR.put(PeriodStrategy.Template.Week.name(), "W");
     }
 
     static {
-        periodAbbrRev.put("Y", PeriodStrategy.Template.Year);
-        periodAbbrRev.put("Q", PeriodStrategy.Template.Quarter);
-        periodAbbrRev.put("M", PeriodStrategy.Template.Month);
-        periodAbbrRev.put("W", PeriodStrategy.Template.Week);
+        PERIOD_ABBR_REV.put("Y", PeriodStrategy.Template.Year);
+        PERIOD_ABBR_REV.put("Q", PeriodStrategy.Template.Quarter);
+        PERIOD_ABBR_REV.put("M", PeriodStrategy.Template.Month);
+        PERIOD_ABBR_REV.put("W", PeriodStrategy.Template.Week);
     }
 
     static {
-        nullImputation.put(InterfaceName.Margin, NullMetricsImputation.NULL);
-        nullImputation.put(InterfaceName.SpendChange, NullMetricsImputation.ZERO);
-        nullImputation.put(InterfaceName.ShareOfWallet, NullMetricsImputation.NULL);
-        nullImputation.put(InterfaceName.AvgSpendOvertime, NullMetricsImputation.ZERO);
-        nullImputation.put(InterfaceName.TotalSpendOvertime, NullMetricsImputation.ZERO);
-        nullImputation.put(InterfaceName.HasPurchased, NullMetricsImputation.FALSE);
+        NULL_IMPUTATION.put(InterfaceName.Margin, NullMetricsImputation.NULL);
+        NULL_IMPUTATION.put(InterfaceName.SpendChange, NullMetricsImputation.ZERO);
+        NULL_IMPUTATION.put(InterfaceName.ShareOfWallet, NullMetricsImputation.NULL);
+        NULL_IMPUTATION.put(InterfaceName.AvgSpendOvertime, NullMetricsImputation.ZERO);
+        NULL_IMPUTATION.put(InterfaceName.TotalSpendOvertime, NullMetricsImputation.ZERO);
+        NULL_IMPUTATION.put(InterfaceName.HasPurchased, NullMetricsImputation.FALSE);
     }
 
     static {
@@ -206,7 +206,7 @@ public class ActivityMetricsUtils {
             periodNames.add(getPeriodRangeName(config));
         });
         return String.join(SEPARATOR, periodNames) + SEPARATOR
-                + metricsAbbr.get(activityMetrics.getMetrics());
+                + METRICS_ABBR.get(activityMetrics.getMetrics());
     }
 
 
@@ -265,7 +265,7 @@ public class ActivityMetricsUtils {
             return null;
         }
         fullName = fullName.substring(HEADER.length()); // remove header
-        return metricsAbbrRev
+        return METRICS_ABBR_REV
                 .get(fullName.substring(fullName.lastIndexOf(SEPARATOR) + SEPARATOR.length()));
     }
 
@@ -276,7 +276,7 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static NullMetricsImputation getNullImputation(String fullName) {
-        return nullImputation.get(getMetricsFromFullName(fullName));
+        return NULL_IMPUTATION.get(getMetricsFromFullName(fullName));
     }
 
     /**
@@ -305,7 +305,7 @@ public class ActivityMetricsUtils {
             return null;
         }
         InterfaceName metrics = getMetricsFromFullName(fullName);
-        return metricsDescription.get(metrics);
+        return METRICS_DESC.get(metrics);
     }
 
     /**
@@ -332,7 +332,7 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static String getMetricsDisplayName(InterfaceName metrics) {
-        return metricsDisplayNames.get(metrics);
+        return METRICS_DISPLAY_NAMES.get(metrics);
     }
 
 
@@ -350,7 +350,7 @@ public class ActivityMetricsUtils {
             return null;
         }
         InterfaceName metrics = getMetricsFromFullName(fullName);
-        String displayName = metricsDisplayNames.get(metrics);
+        String displayName = METRICS_DISPLAY_NAMES.get(metrics);
         String period = getPeriodsFromFullName(fullName);
         displayName += periodStrToDisplayName(period, metrics);
         String secDisplayName = periodStrToSecondDisplayName(period, metrics, evaluationDate,
@@ -364,7 +364,7 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static String getHasPurchasedAbbr() {
-        return metricsAbbr.get(InterfaceName.HasPurchased);
+        return METRICS_ABBR.get(InterfaceName.HasPurchased);
     }
 
     /**
@@ -373,7 +373,7 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static String getSpendChangeAbbr() {
-        return metricsAbbr.get(InterfaceName.SpendChange);
+        return METRICS_ABBR.get(InterfaceName.SpendChange);
     }
 
     /**
@@ -412,9 +412,9 @@ public class ActivityMetricsUtils {
         if ((metrics == InterfaceName.TotalSpendOvertime || metrics == InterfaceName.AvgSpendOvertime)
                 && period.split(SUB_SEPARATOR).length == 3) {
             timeFilter = TimeFilter.between(Integer.valueOf(strs[1]), Integer.valueOf(strs[2]),
-                    periodAbbrRev.get(strs[0]).name());
+                    PERIOD_ABBR_REV.get(strs[0]).name());
         } else {
-            timeFilter = TimeFilter.within(Integer.valueOf(strs[1]), periodAbbrRev.get(strs[0]).name());
+            timeFilter = TimeFilter.within(Integer.valueOf(strs[1]), PERIOD_ABBR_REV.get(strs[0]).name());
         }
         List<Object> translatedTxnDateRange = timeFilterTranslator.translate(timeFilter)
                 .getValues();
@@ -462,7 +462,7 @@ public class ActivityMetricsUtils {
     private static String getDisplayNameForBetweenComp(String period) {
         String[] strs = period.split(SUB_SEPARATOR);
         return String.format(" in last %s to %s %ss", strs[1], strs[2],
-                periodAbbrRev.get(strs[0]).name().toLowerCase());
+                PERIOD_ABBR_REV.get(strs[0]).name().toLowerCase());
     }
 
     /**
@@ -474,7 +474,7 @@ public class ActivityMetricsUtils {
     private static String getDisplayNameForWithinComp(String period) {
         String[] strs = period.split(SUB_SEPARATOR);
         return String.format(" in last %s %s%s", strs[1],
-                periodAbbrRev.get(strs[0]).name().toLowerCase(),
+                PERIOD_ABBR_REV.get(strs[0]).name().toLowerCase(),
                 Integer.valueOf(strs[1]) > 1 ? "s" : "");
     }
 
@@ -483,7 +483,7 @@ public class ActivityMetricsUtils {
             return ComparisonType.EVER.name();
         }
         List<String> strs = new ArrayList<>();
-        strs.add(periodAbbr.get(timeFilter.getPeriod()));
+        strs.add(PERIOD_ABBR.get(timeFilter.getPeriod()));
         timeFilter.getValues().forEach(value -> {
             strs.add(String.valueOf(value));
         });
@@ -502,6 +502,7 @@ public class ActivityMetricsUtils {
         }
         Map<InterfaceName, Integer> cnts = new HashMap<>();
         Set<String> metricsIds = new HashSet<>();
+        Set<String> dupMetricsDisplayNames = new HashSet<>();
         for (ActivityMetrics m : metrics) {
             isValidMetrics(m);
             if (!m.isEOL()) {
@@ -510,7 +511,11 @@ public class ActivityMetricsUtils {
                 }
                 cnts.put(m.getMetrics(), cnts.get(m.getMetrics()) + 1);
             }
-            metricsIds.add(ActivityMetricsUtils.getNameWithPeriod(m));
+            if (metricsIds.contains(ActivityMetricsUtils.getNameWithPeriod(m))) {
+                dupMetricsDisplayNames.add(getMetricsDisplayName(m.getMetrics()));
+            } else {
+                metricsIds.add(ActivityMetricsUtils.getNameWithPeriod(m));
+            }
         }
         cnts.forEach((m, cnt) -> {
             if (cnt > maxCnt.get(m)) {
@@ -519,9 +524,12 @@ public class ActivityMetricsUtils {
                                 m, maxCnt.get(m), cnt) });
             }
         });
-        if (metricsIds.size() != metrics.size()) {
+        if (CollectionUtils.isNotEmpty(dupMetricsDisplayNames)) {
             throw new LedpException(LedpCode.LEDP_40032,
-                    new String[] { "Metrics cannot be duplicate" });
+                    new String[] { String.format(
+                            "%s %s duplicate configurations. Remove duplicate configurations to save and proceed.",
+                            String.join(",", dupMetricsDisplayNames)),
+                            dupMetricsDisplayNames.size() == 1 ? "has" : "have" });
         }
         return true;
     }
