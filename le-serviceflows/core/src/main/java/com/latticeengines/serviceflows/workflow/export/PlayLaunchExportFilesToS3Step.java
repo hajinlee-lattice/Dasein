@@ -47,6 +47,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     private List<String> s3ExportFilePaths = new ArrayList<>();
 
+    private String CSV = "csv";
 
     @Inject
     private SNSService snsService;
