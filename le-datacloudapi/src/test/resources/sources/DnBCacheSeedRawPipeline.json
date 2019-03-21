@@ -8,7 +8,7 @@
         "IngestionSource"
       ],
       "TargetSource": "DnBCacheSeedRaw",
-      "Configuration": {"IngestionName":"DnB_Ingestion",
+      "Configuration": {"IngestionName":"DnBIngestion_OrchestrationDeploymentTestNG",
                         "FileNameOrExtension":".OUT",
                         "CompressedFileNameOrExtension":".OUT.gz",
                         "CompressType":"GZ",

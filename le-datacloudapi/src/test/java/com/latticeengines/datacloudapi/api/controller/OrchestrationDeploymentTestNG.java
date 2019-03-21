@@ -43,8 +43,9 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     public final String POD_ID = this.getClass().getSimpleName();
 
-    private static final String DNB_ORCHESTRATION = "DnB_Orchestration";
-    private static final String DNB_INGESTION = "DnB_Ingestion";
+    private static final String DNB_ORCHESTRATION = "DnBOrchestration_"
+            + OrchestrationDeploymentTestNG.class.getSimpleName();
+    private static final String DNB_INGESTION = "DnBIngestion_" + OrchestrationDeploymentTestNG.class.getSimpleName();
     private static final String DNB_TRANSFORMATION = "DnBCacheSeedPipeline";
     private static final String DNBRAW_TRANSFORMATION = "DnBCacheSeedRawPipeline";
     private static final String DNB_VERSION = "2017-01-01_00-00-00_UTC";
@@ -96,7 +97,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         };
     }
 
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment", enabled = true)
     public void init() {
         prepareCleanPod(POD_ID);
         for (Object[] data : getOrchestrations()) {
@@ -121,7 +122,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @AfterClass(groups = "deployment", enabled = false)
+    @AfterClass(groups = "deployment", enabled = true)
     public void tearDown() {
         for (Orchestration orch : orchestrations) {
             orchestrationEntityMgr.delete(orch);
@@ -136,7 +137,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testOrchestration() {
         List<OrchestrationProgress> progresses = orchService.scan(POD_ID); // No job should be triggered
         Assert.assertEquals(progresses.size(), 0);
@@ -159,7 +160,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
                 stageToFail = progresses.get(0).getCurrentStage();
             }
             try {
-                Thread.sleep(10000);
+                Thread.sleep(20000);
             } catch (InterruptedException e) {
             }
         }
@@ -184,7 +185,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
             progresses = orchService.scan(POD_ID);
             progresses.forEach(progress -> log.info(progress.toString()));
             try {
-                Thread.sleep(10000);
+                Thread.sleep(20000);
             } catch (InterruptedException e) {
             }
         }
