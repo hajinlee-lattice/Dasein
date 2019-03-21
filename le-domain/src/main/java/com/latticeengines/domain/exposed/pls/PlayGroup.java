@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -13,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -65,10 +63,6 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("plays")
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "playGroups")
-    private Set<Play> plays;
-
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -106,18 +100,22 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
         return StringUtils.isNotEmpty(type) && type.equals("List") ? "ADefault" : type;
     }
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
@@ -155,26 +153,22 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
         this.tenantId = tenantId;
     }
 
-    public Set<Play> getPlays() {
-        return plays;
-    }
-
-    public void setPlays(Set<Play> plays) {
-        this.plays = plays;
-    }
-
+    @Override
     public Date getCreated() {
         return created;
     }
 
+    @Override
     public void setCreated(Date created) {
         this.created = created;
     }
 
+    @Override
     public Date getUpdated() {
         return updated;
     }
 
+    @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
     }
