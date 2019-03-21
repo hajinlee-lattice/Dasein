@@ -43,9 +43,8 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     public final String POD_ID = this.getClass().getSimpleName();
 
-    private static final String DNB_ORCHESTRATION = "DnBOrchestration_"
-            + OrchestrationDeploymentTestNG.class.getSimpleName();
-    private static final String DNB_INGESTION = "DnBIngestion_" + OrchestrationDeploymentTestNG.class.getSimpleName();;
+    private static final String DNB_ORCHESTRATION = "DnB_Orchestration";
+    private static final String DNB_INGESTION = "DnB_Ingestion";
     private static final String DNB_TRANSFORMATION = "DnBCacheSeedPipeline";
     private static final String DNBRAW_TRANSFORMATION = "DnBCacheSeedRawPipeline";
     private static final String DNB_VERSION = "2017-01-01_00-00-00_UTC";
@@ -97,7 +96,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         };
     }
 
-    @BeforeClass(groups = "deployment", enabled = true)
+    @BeforeClass(groups = "deployment", enabled = false)
     public void init() {
         prepareCleanPod(POD_ID);
         for (Object[] data : getOrchestrations()) {
@@ -122,7 +121,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @AfterClass(groups = "deployment", enabled = true)
+    @AfterClass(groups = "deployment", enabled = false)
     public void tearDown() {
         for (Orchestration orch : orchestrations) {
             orchestrationEntityMgr.delete(orch);
@@ -137,7 +136,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testOrchestration() {
         List<OrchestrationProgress> progresses = orchService.scan(POD_ID); // No job should be triggered
         Assert.assertEquals(progresses.size(), 0);
