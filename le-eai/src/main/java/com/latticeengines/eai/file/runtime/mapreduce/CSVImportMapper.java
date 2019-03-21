@@ -307,14 +307,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                     failMapper = true;
                 } catch (LedpException e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn(e.getMessage());
                     if (e.getCode().equals(LedpCode.LEDP_17017)) {
                         duplicateMap.put(attr.getDisplayName(), e.getMessage());
                     } else {
                         throw e;
                     }
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn(e.getMessage());
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
@@ -325,7 +325,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                     failMapper = true;
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn(e.getMessage());
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
                 if (attr.getRequired() || !attr.isNullable()) {
