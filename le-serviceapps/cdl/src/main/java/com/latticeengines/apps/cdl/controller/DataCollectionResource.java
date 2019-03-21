@@ -119,7 +119,7 @@ public class DataCollectionResource {
 
     @GetMapping(value = "/alltables")
     @ResponseBody
-    @ApiOperation(value = "Get the all tables based on table role")
+    @ApiOperation(value = "Get all tables based on table role")
     public List<Table> getTables(@PathVariable String customerSpace,
             @RequestParam(value = "role") TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
