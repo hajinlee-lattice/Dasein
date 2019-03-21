@@ -17,7 +17,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.annotations.VisibleForTesting;
@@ -29,7 +28,6 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ExportFileConfig;
-import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageAttribute;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
 import com.latticeengines.domain.exposed.cdl.MessageType;
@@ -49,7 +47,6 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     private List<String> s3ExportFilePaths = new ArrayList<>();
 
-    private String STRING = "String";
 
     @Inject
     private SNSService snsService;
@@ -104,7 +101,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         message.setEntityId(playLaunchId);
         message.setEntityName(PlayLaunch.class.getSimpleName());
         message.setExternalSystemId(lookupIdMap.getOrgId());
-        message.setSourceFile(s3ExportFilePaths.toString());
+        message.setSourceFile(
+                s3ExportFilePaths.stream().filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst()
+                        .get());
         message.setEventType(DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
         message.setEventTime(new Date());
         message.setMessageType(MessageType.EVENT.toString());
@@ -118,11 +117,6 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
     public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId) {
         PlayLaunchExportFilesToS3Configuration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
-
-        Map<String, MessageAttributeValue> messageAttributes = new HashMap<String, MessageAttributeValue>();
-        messageAttributes.put(ExternalIntegrationMessageAttribute.TARGET_SYSTEMS.getName(),
-                new MessageAttributeValue().withDataType(STRING)
-                        .withStringValue(config.getLookupIdMap().getExternalSystemName().name()));
 
         s3ExportFilePaths.stream().forEach(exportPath -> {
             List<ExportFileConfig> fileConfigs = sourceFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
@@ -150,8 +144,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
         try {
             PublishRequest publishRequest = new PublishRequest().withMessage(JsonUtils.serialize(jsonMessage))
-                    .withMessageStructure("json").withMessageAttributes(messageAttributes)
-                    .withMessageAttributes(messageAttributes);
+                    .withMessageStructure("json");
             log.info(String.format("Publishing play launch with workflow request id %s to Topic: %s", workflowRequestId, exportDataTopic));
             log.info("Publish Request: " + JsonUtils.serialize(publishRequest));
             return snsService.publishToTopic(exportDataTopic, publishRequest);
