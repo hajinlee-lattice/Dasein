@@ -1,14 +1,11 @@
 package com.latticeengines.apps.cdl.testframework;
 
-import static org.testng.Assert.assertNotNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -18,7 +15,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +41,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -66,7 +61,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -307,30 +301,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         }
         modelSummaryContent = modelSummaryContent.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
         return modelSummaryContent;
-    }
-
-    protected ModelSummary waitToDownloadModelSummaryWithUuid(ModelSummaryProxy modelSummaryProxy, String uuid)
-            throws InterruptedException {
-        ModelSummary found = null;
-        while (true) {
-            log.info(String.format("Getting the model whose id contains %s", uuid));
-            List<ModelSummary> summaries = modelSummaryProxy.getSummaries();
-            if (CollectionUtils.isNotEmpty(summaries)) {
-                for (ModelSummary summary : summaries) {
-                    if (summary.getId().contains(uuid)) {
-                        found = summary;
-                        break;
-                    }
-                }
-            }
-            if (found != null)
-                break;
-            Thread.sleep(10000);
-        }
-        assertNotNull(found);
-
-        // Look up the model summary with details
-        return modelSummaryProxy.getModelSummary(found.getId());
     }
 
     protected void createTable(String tableName) {
