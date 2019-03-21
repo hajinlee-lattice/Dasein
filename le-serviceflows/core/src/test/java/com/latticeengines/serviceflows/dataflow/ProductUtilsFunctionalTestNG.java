@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +110,37 @@ public class ProductUtilsFunctionalTestNG {
     }
 
     @Test(groups = "functional")
+    public void testGetCompositeId() {
+        String[] productIds = new String[] { "ABC1559C35BE7F1F45DD93669E6B252E", "ABF1560C79BA5B1F45AD97381D0E987C" };
+        String[] productNames = new String[] { "All Products", "All Product Bundles" };
+        String productLine = "Line 1";
+        String productFamily = "Family 1";
+        String productCategory = "Category 1";
+
+        Assert.assertEquals(ProductUtils.getCompositeId(ProductType.Bundle.name(), productIds[0], null,
+                productNames[0], null, null, null),
+                StringUtils.join(new String[] { "Bundle", productIds[0], productNames[0] }, "__"));
+        Assert.assertEquals(ProductUtils.getCompositeId(ProductType.Bundle.name(), productIds[1], null,
+                productNames[1], null, null, null),
+                StringUtils.join(new String[] { "Bundle", productIds[1], productNames[1] }, "__"));
+
+        Assert.assertEquals(ProductUtils.getCompositeId(ProductType.Hierarchy.name(), productIds[0], null,
+                null, null, null, null),
+                "Hierarchy__" + productIds[0]);
+
+        Assert.assertEquals(ProductUtils.getCompositeId(ProductType.Analytic.name(), productIds[0], productNames[0],
+                null, null, null, null),
+                "Analytic__" + productIds[0]);
+        Assert.assertEquals(ProductUtils.getCompositeId(ProductType.Analytic.name(), null, productNames[1],
+                null, null, null, null),
+                "Analytic__" + productNames[1]);
+
+        Assert.assertEquals(ProductUtils.getCompositeId(ProductType.Spending.name(), productIds[0], productNames[0],
+                null, productCategory, productFamily, productLine),
+                StringUtils.join(new String[] { "Spending", productNames[0], productCategory, productFamily, productLine }, "__"));
+    }
+
+    @Test(groups = "functional")
     public void testSaveProducts() throws IOException {
         ProductUtils.saveProducts(yarnConfiguration, PATH, productList);
         Assert.assertEquals(productList.size(), 7);
@@ -204,7 +236,7 @@ public class ProductUtilsFunctionalTestNG {
         Assert.assertTrue(productMap.keySet().contains("Bundle__bundle1__Bundle #1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku2"));
-        Assert.assertTrue(productMap.keySet().contains("Analytic__Bundle #1"));
+        Assert.assertTrue(productMap.keySet().contains("Analytic__" + HashUtils.getShortHash("Bundle #1")));
         Assert.assertTrue(productMap.keySet().contains("Spending__Detergent category #1__Detergent category #1____"));
         Assert.assertTrue(productMap.keySet()
                 .contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
@@ -221,7 +253,7 @@ public class ProductUtilsFunctionalTestNG {
         Assert.assertTrue(productMap.keySet().contains("Bundle__bundle1__Bundle #1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku1"));
         Assert.assertTrue(productMap.keySet().contains("Hierarchy__sku2"));
-        Assert.assertTrue(productMap.keySet().contains("Analytic__Bundle #1"));
+        Assert.assertTrue(productMap.keySet().contains("Analytic__" + HashUtils.getShortHash("Bundle #1")));
         Assert.assertTrue(productMap.keySet()
                 .contains("Spending__Appliance category #2__Appliance category #2__Appliance family #2__"));
         Assert.assertTrue(productMap.keySet()

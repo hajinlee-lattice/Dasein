@@ -290,13 +290,15 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             productId = createProductId(compositeId, currentProductMap);
         }
 
+        compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name(), productId, name, bundleName,
+                null, null, null);
         Product product = inputProductMap.get(compositeId);
         if (product != null) {
             log.info(String.format("Found product [productId=%s, compositeId=%s] in inputProductMap.",
                     product.getProductId(), compositeId));
 
             if (!product.getProductType().equals(ProductType.Analytic.name())) {
-                String errMsg = String.format("Found inconsistant product type with bundle %s", bundleName);
+                String errMsg = String.format("Found inconsistent product type with bundle %s", bundleName);
                 mergeReport.putIfAbsent("Merged_ErrorMessage", errMsg);
                 throw new RuntimeException(String.format("Failed to merge analytic product. Id=%s, name=%s", id, name));
             }
