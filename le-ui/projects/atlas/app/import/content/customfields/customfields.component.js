@@ -36,9 +36,8 @@ angular.module('lp.import.wizard.customfields', [])
     }
     vm.init = function() {
         vm.size = vm.AvailableFields.length;
-        if(vm.mergedFields) {
-
-            vm.mergedFields.forEach(function(item) {
+        if(vm.fieldMappings) { //vm.mergedFields This was the original code
+            vm.fieldMappings.forEach(function(item) {
                 var appended = null;
                 if(!item.mappedToLatticeField) {
                     if(mergedFieldDocument.appended) {
