@@ -145,9 +145,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Override
     public boolean submitJob(CDLJobType cdlJobType, String jobArguments) {
-        if (cdlJobType == CDLJobType.IMPORT) {
-            submitImportJob(jobArguments);
-        } else if (cdlJobType == CDLJobType.PROCESSANALYZE) {
+        if (cdlJobType == CDLJobType.PROCESSANALYZE) {
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
                 orchestrateJob();

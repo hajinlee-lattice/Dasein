@@ -15,7 +15,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,14 +29,13 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @Component("s3ImportJmsConsumer")
@@ -68,7 +66,7 @@ public class S3ImportJmsConsumer {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Inject
-    private CDLProxy cdlProxy;
+    private S3ImportService s3ImportService;
 
     @Inject
     private BatonService batonService;
@@ -81,6 +79,9 @@ public class S3ImportJmsConsumer {
 
     @Value("${common.le.stack}")
     private String currentStack;
+
+    @Value("${common.microservice.url}")
+    private String hostUrl;
 
     @Value("${cdl.sqs.buffer.message.count:30000}")
     private int bufferedMessageIdCount;
@@ -164,24 +165,11 @@ public class S3ImportJmsConsumer {
                             redisTemplate.opsForValue().set(REDIS_PREFIX + key, System.currentTimeMillis(),
                                     idleFrame, TimeUnit.SECONDS);
                             log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
-                            submitApplication(tenantId, bucket, feedType, key);
+                            s3ImportService.saveImportMessage(bucket, key, hostUrl);
                         }
                     }
                 }
             }
-        }
-    }
-
-    private void submitApplication(String tenantId, String bucket, String feedType, String key) {
-        S3FileToHdfsConfiguration config = new S3FileToHdfsConfiguration();
-        config.setFeedType(feedType);
-        config.setS3Bucket(bucket);
-        config.setS3FilePath(key);
-        try {
-            ApplicationId applicationId =  cdlProxy.submitS3ImportJob(tenantId, config);
-            log.info("Start S3 file import by applicationId : " + applicationId.toString());
-        } catch (Exception e) {
-            log.error("Failed to submit s3 import job.", e);
         }
     }
 
