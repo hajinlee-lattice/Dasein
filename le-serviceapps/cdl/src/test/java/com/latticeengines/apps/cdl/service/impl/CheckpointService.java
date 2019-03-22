@@ -40,6 +40,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -99,6 +100,9 @@ public class CheckpointService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private DataFeedService dataFeedService;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -699,7 +703,7 @@ public class CheckpointService {
 
     private void saveWorkflowExecutionContext(String checkpoint, String customerSpace) throws IOException {
         // Get the workflow ID from the customer space using DataFeed.
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
         DataFeedExecution dataFeedExecution = dataFeed.getActiveExecution();
         Long workflowId = dataFeedExecution.getWorkflowId();
         ExecutionContext executionContext = workflowJobService.getExecutionContextByWorkflowId(customerSpace,

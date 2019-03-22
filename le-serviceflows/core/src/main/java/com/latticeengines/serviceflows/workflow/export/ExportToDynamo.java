@@ -17,11 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -106,7 +108,13 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             try (PerformanceTimer timer = new PerformanceTimer("Upload table " + config + " to dynamo.")) {
                 log.info("Uploading table " + config.getTableName() + " to dynamo.");
                 HdfsToDynamoConfiguration eaiConfig = generateEaiConfig(config);
-                AppSubmission appSubmission = eaiProxy.submitEaiJob(eaiConfig);
+                RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 5000, 2.0, null);
+                AppSubmission appSubmission = retry.execute(context -> {
+                    if (context.getRetryCount() > 0) {
+                        log.info("(Attempt=" + (context.getRetryCount() + 1) + ") submitting eai job.");
+                    }
+                    return eaiProxy.submitEaiJob(eaiConfig);
+                });
                 String appId = appSubmission.getApplicationIds().get(0);
                 JobStatus jobStatus = jobService.waitFinalJobStatus(appId, ONE_DAY.intValue());
                 if (!FinalApplicationStatus.SUCCEEDED.equals(jobStatus.getStatus())) {

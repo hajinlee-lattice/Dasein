@@ -70,7 +70,13 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         //TODO: remove accountmasterseed__hgdatapivoted__featurepivoted__builtwithtechindicators__bomborasurgepivoted__hpanewpivoted__hgdatatechindica
         List<String> longFields = result.getFieldNames().stream().filter(f -> f.length() > 64).collect(Collectors.toList());
         log.warn("Removing fields due to long column name: " + StringUtils.join(longFields, ","));
-        return result.discard(new FieldList(longFields));
+        result = result.discard(new FieldList(longFields));
+
+        if (StringUtils.isNotBlank(parameters.rowId)) {
+            result = result.filter(String.format("%s != null", parameters.rowId), new FieldList(parameters.rowId));
+        }
+
+        return result;
     }
 
     private Node processEncodedFields(Node am, List<DCEncodedAttr> encAttrs) {

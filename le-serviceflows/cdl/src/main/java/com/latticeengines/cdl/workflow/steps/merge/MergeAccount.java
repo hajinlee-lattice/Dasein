@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPIER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -26,7 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -49,107 +47,86 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     static final String BEAN_NAME = "mergeAccount";
 
     private int mergeStep;
-    //private int slimInputStep;
     private int matchStep;
     private int fetchOnlyMatchStep;
-    //private int slimDiffStep;
-    //private int mergeMatchStep;
     private int upsertMasterStep;
-    //private int slimMasterStep;
     private int diffStep;
+
+    private String diffTableNameInContext;
+    private String batchStoreNameInContext;
+
+    private boolean shortCutMode;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
-        try {
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+        request.setName("MergeAccount");
 
-            PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("MergeAccount");
-
-            mergeStep = 0;
-            // slimInputStep = 1;
-            matchStep = 1;
-            if (configuration.isEntityMatchEnabled()) {
-                fetchOnlyMatchStep = 2;
-                // slimDiffStep = 3;
-                upsertMasterStep = 3;
-                // slimMasterStep = 6;
-                diffStep = 4;
-            } else {
-                // slimDiffStep = 3;
-                upsertMasterStep = 2;
-                // slimMasterStep = 6;
-                diffStep = 3;
-            }
-
-            TransformationStepConfig merge = mergeInputs(false, true, false);
-            //TransformationStepConfig slimInputs = createSlimInputs(Collections.singletonList(mergeStep));
-            TransformationStepConfig match = match(Collections.singletonList(mergeStep));
-
-            TransformationStepConfig fetchOnlyMatch = null;
-            //TransformationStepConfig slimDiff = null;
-            //TransformationStepConfig mergeMatch = null;
-            TransformationStepConfig upsertMaster;
-
-            if (configuration.isEntityMatchEnabled()) {
-                fetchOnlyMatch = fetchOnlyMatch(Collections.singletonList(matchStep));
-                //slimDiff = createSlimTable(Collections.singletonList(fetchOnlyMatchStep), diffTablePrefix);
-                //mergeMatch = mergeMatch(Arrays.asList(mergeStep, fetchOnlyMatchStep));
-                upsertMaster = mergeMaster(Collections.singletonList(fetchOnlyMatchStep));
-            } else {
-                //slimDiff = createSlimTable(Collections.singletonList(matchStep), diffTablePrefix);
-                //mergeMatch = mergeMatch(Arrays.asList(mergeStep, matchStep));
-                upsertMaster = mergeMaster(Collections.singletonList(matchStep));
-            }
-            //TransformationStepConfig slimMaster = createSlimTable(
-            //        Collections.singletonList(upsertMasterStep), batchStoreTablePrefix);
-            TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
-            TransformationStepConfig report = reportDiff(diffStep);
-
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            steps.add(merge);
-            //steps.add(slimInputs);
-            steps.add(match);
-            if (configuration.isEntityMatchEnabled()) {
-                steps.add(fetchOnlyMatch);
-            }
-            //steps.add(slimDiff);
-            //steps.add(mergeMatch);
-            steps.add(upsertMaster);
-            //steps.add(slimMaster);
-            steps.add(diff);
-            steps.add(report);
-            request.setSteps(steps);
-            return request;
-
-        } catch (Exception e) {
-            log.error("Failed to run consolidate data pipeline!", e);
-            throw new RuntimeException(e);
+        diffTableNameInContext = getStringValueFromContext(ACCOUNT_DIFF_TABLE_NAME);
+        batchStoreNameInContext = getStringValueFromContext(ACCOUNT_MASTER_TABLE_NAME);
+        Table diffTableInContext = StringUtils.isNotBlank(diffTableNameInContext) ? //
+                metadataProxy.getTable(customerSpace.toString(), diffTableNameInContext) : null;
+        Table batchStoreInContext = StringUtils.isNotBlank(batchStoreNameInContext) ? //
+                metadataProxy.getTable(customerSpace.toString(), batchStoreNameInContext) : null;
+        if (diffTableInContext != null && batchStoreInContext != null) {
+            log.info("Found diff table and batch store in context, using short-cut pipeline");
+            shortCutMode = true;
+            diffTableName = diffTableNameInContext;
+            request.setSteps(shortCutSteps());
+        } else {
+            log.info("diffTableInContext is null: " + (diffTableInContext == null));
+            log.info("batchStoreInContext is null: " + (batchStoreInContext == null));
+            request.setSteps(regularSteps());
         }
+
+        return request;
     }
 
-    private TransformationStepConfig createSlimInputs(List<Integer> inputSteps) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(inputSteps);
-        step.setTransformer(TRANSFORMER_COPIER);
+    private List<TransformationStepConfig> regularSteps() {
+        mergeStep = 0;
+        matchStep = 1;
+        if (configuration.isEntityMatchEnabled()) {
+            fetchOnlyMatchStep = 2;
+            upsertMasterStep = 3;
+            diffStep = 4;
+        } else {
+            upsertMasterStep = 2;
+            diffStep = 3;
+        }
 
-        CopierConfig conf = new CopierConfig();
-        Map<MatchKey, List<String>> matchKeys = getMatchKeys();
-        List<String> retainFields = getRetainFields(matchKeys);
-        conf.setRetainAttrs(retainFields);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
-        return step;
+        TransformationStepConfig merge = mergeInputs(false, true, false);
+        TransformationStepConfig match = match(Collections.singletonList(mergeStep));
+
+        TransformationStepConfig fetchOnlyMatch = null;
+        TransformationStepConfig upsertMaster;
+
+        if (configuration.isEntityMatchEnabled()) {
+            fetchOnlyMatch = fetchOnlyMatch(Collections.singletonList(matchStep));
+            upsertMaster = mergeMaster(Collections.singletonList(fetchOnlyMatchStep));
+        } else {
+            upsertMaster = mergeMaster(Collections.singletonList(matchStep));
+        }
+        TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
+        TransformationStepConfig report = reportDiff(diffStep);
+
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(merge);
+        steps.add(match);
+        if (configuration.isEntityMatchEnabled()) {
+            steps.add(fetchOnlyMatch);
+        }
+        steps.add(upsertMaster);
+        steps.add(diff);
+        steps.add(report);
+
+        return steps;
     }
 
-    private List<String> getRetainFields(Map<MatchKey, List<String>> matchKeys) {
-        List<String> fields = new ArrayList<>();
-        fields.add(batchStorePrimaryKey);
-        for (List<String> values : matchKeys.values()) {
-            if (CollectionUtils.isNotEmpty(values)) {
-                fields.addAll(values);
-            }
-        }
-        return fields;
+    private List<TransformationStepConfig> shortCutSteps() {
+        TransformationStepConfig report = reportDiff(diffTableName);
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(report);
+        return steps;
     }
 
     private TransformationStepConfig match(List<Integer> inputSteps) {
@@ -277,30 +254,26 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
-        // registerDiffSlim();
-        // registerMasterSlim();
-
+        putStringValueInContext(ACCOUNT_DIFF_TABLE_NAME, diffTableName);
+        String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        putStringValueInContext(ACCOUNT_MASTER_TABLE_NAME, batchStoreTableName);
     }
 
-    private void registerMasterSlim() {
-        Table table = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(batchStoreTablePrefix + "_Slim", pipelineVersion));
-        if (table == null) {
-            throw new IllegalStateException("Did not generate new table as master Slim.");
+    @Override
+    protected String getBatchStoreName() {
+        if (shortCutMode) {
+            return batchStoreNameInContext;
+        } else {
+            return TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion);
         }
-        dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(),
-                TableRoleInCollection.AccountBatchSlim, inactive);
     }
 
-    private void registerDiffSlim() {
-        Table table = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(diffTablePrefix + "_Slim", pipelineVersion));
-        if (table == null) {
-            throw new IllegalStateException("Did not generate new table as diff Slim.");
+    protected String getDiffTableName() {
+        if (shortCutMode) {
+            return diffTableNameInContext;
+        } else {
+            return TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
         }
-        dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(),
-                TableRoleInCollection.AccountDiffSlim, inactive);
-
     }
 
 }

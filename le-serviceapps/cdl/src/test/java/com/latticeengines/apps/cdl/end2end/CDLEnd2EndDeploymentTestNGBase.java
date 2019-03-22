@@ -294,7 +294,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     protected RatingEngine ratingEngine;
 
-    @BeforeClass(groups = { "end2end", "precheckin", "deployment", "end2end_with_import" })
+    @BeforeClass(groups = { "end2end", "manual", "precheckin", "deployment", "end2end_with_import" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
     }
@@ -360,18 +360,32 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 
+    void retryProcessAnalyze() {
+        log.info("Start retrying PA ...");
+        ApplicationId appId = cdlProxy.restartProcessAnalyze(mainTestTenant.getId());
+        processAnalyzeAppId = appId.toString();
+        log.info("processAnalyzeAppId=" + processAnalyzeAppId);
+        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
+                false);
+        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
+    }
+
     void processAnalyze() {
         processAnalyze(null);
     }
 
     void processAnalyze(ProcessAnalyzeRequest request) {
+        processAnalyze(request, JobStatus.COMPLETED);
+    }
+
+    void processAnalyze(ProcessAnalyzeRequest request, JobStatus expectedResult) {
         log.info("Start processing and analyzing ...");
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
         processAnalyzeAppId = appId.toString();
         log.info("processAnalyzeAppId=" + processAnalyzeAppId);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
                 false);
-        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
+        assertEquals(completedStatus, expectedResult);
     }
 
     SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,

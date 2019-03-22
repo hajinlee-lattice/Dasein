@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -87,6 +88,9 @@ public class WorkflowTranslator {
         choreographer.linkStepNamespaces(workflow.getStepNamespaces());
         FailingStep failingStep = workflow.getFailingStep();
         log.info("Need to inject failing step " + JsonUtils.serialize(failingStep));
+
+        Map<String, String> initialContext = workflow.getInitialContext();
+
         Map<String, Integer> stepOccurrences = new HashMap<>();
         if (CollectionUtils.isNotEmpty(workflow.getSteps())) {
             SimpleJobBuilder simpleJobBuilder = null;
@@ -108,7 +112,7 @@ public class WorkflowTranslator {
                         log.info(String.format("Inject %s to [%02d] %s", failure, i, stepName));
                     }
                 }
-                Step step = step(abstractStep, choreographer, i, failure);
+                Step step = step(abstractStep, choreographer, i, failure, initialContext);
                 if (simpleJobBuilder == null) {
                     simpleJobBuilder = jobBuilderFactory.get(name).start(step);
                 } else {
@@ -125,15 +129,16 @@ public class WorkflowTranslator {
     }
 
     public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq,
-            InjectableFailure injectableFailure) {
+            InjectableFailure injectableFailure, Map<String, String> initialContext) {
         return stepBuilderFactory.get(step.name()) //
-                .tasklet(tasklet(step, choreographer, seq, injectableFailure)) //
+                .tasklet(tasklet(step, choreographer, seq, injectableFailure, initialContext)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //
                 .build();
     }
 
     private Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step, //
-            Choreographer choreographer, int seq, InjectableFailure injectableFailure) {
+            Choreographer choreographer, int seq, InjectableFailure injectableFailure, //
+            Map<String, String> initialContext) {
         return new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
@@ -143,6 +148,10 @@ public class WorkflowTranslator {
                 step.setJobParameters(jobParameters);
 
                 ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
+                if (seq == 0 && MapUtils.isNotEmpty(initialContext)) {
+                    log.info("Initializing context: " + JsonUtils.serialize(initialContext));
+                    initialContext.forEach(executionContext::putString);
+                }
                 step.setExecutionContext(executionContext);
 
                 step.setSeq(seq);

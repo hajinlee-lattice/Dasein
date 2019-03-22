@@ -56,6 +56,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     private DataCollection.Version active;
     private DataCollection.Version inactive;
 
+    private String statsTableName;
+
     @Override
     protected BusinessEntity getEntity() {
         return BusinessEntity.Account;
@@ -66,12 +68,22 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-
         TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
         masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
                 inactive);
         if (StringUtils.isBlank(masterTableName)) {
             throw new IllegalStateException("Cannot find the master table in default collection");
+        }
+
+        String statsTableNameInContext = getStringValueFromContext(ACCOUNT_STATS_TABLE_NAME);
+        if (StringUtils.isNotBlank(statsTableNameInContext)) {
+            Table statsTable = metadataProxy.getTable(customerSpace.toString(), statsTableNameInContext);
+            if (statsTable != null) {
+                log.info("Found stats table in context, going thru short-cut mode.");
+                statsTableName = statsTable.getName();
+                finishing();
+                return null;
+            }
         }
 
         fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
@@ -97,10 +109,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     @Override
     protected void onPostTransformationCompleted() {
-        String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
-        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
         enrichMasterTableSchema(masterTableName);
-        registerDynamoExport();
+        statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+        putStringValueInContext(ACCOUNT_STATS_TABLE_NAME, statsTableName);
+        finishing();
     }
 
     private PipelineTransformationRequest getTransformRequest() {
@@ -210,6 +222,11 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private void registerDynamoExport() {
         exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
+    }
+
+    private void finishing() {
+        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        registerDynamoExport();
     }
 
 }
