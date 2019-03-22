@@ -38,6 +38,30 @@ public class ActivityMetricsTestUtils {
         return Arrays.asList(margin, shareOfWallet, spendChange, avgSpendOvertime);
     }
 
+    public static ActivityMetrics createPurchaseMetrics(Tenant tenant, InterfaceName metrics,
+            PeriodStrategy.Template periodTemplate, List<Integer> periods) {
+        ActivityMetrics am = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
+        am.setMetrics(metrics);
+        switch (metrics) {
+        case HasPurchased:
+            am.setPeriodsConfig(Arrays.asList(TimeFilter.ever()));
+            break;
+        case Margin:
+        case ShareOfWallet:
+        case TotalSpendOvertime:
+        case AvgSpendOvertime:
+            am.setPeriodsConfig(Arrays.asList(TimeFilter.within(periods.get(0), periodTemplate.name())));
+            break;
+        case SpendChange:
+            am.setPeriodsConfig(Arrays.asList(TimeFilter.within(periods.get(0), periodTemplate.name()),
+                    TimeFilter.between(periods.get(1), periods.get(2), periodTemplate.name())));
+            break;
+        default:
+            throw new IllegalArgumentException("Unrecognized purchase metrics " + metrics);
+        }
+        return am;
+    }
+
     public static List<ActivityMetrics> fakeUpdatedPurchaseMetrics(Tenant tenant) {
         ActivityMetrics totalSpendOvertime = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
