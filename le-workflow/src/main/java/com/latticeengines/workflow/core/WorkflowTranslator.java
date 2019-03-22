@@ -172,6 +172,7 @@ public class WorkflowTranslator {
                         step.throwFailureIfInjected(InjectableFailure.BeforeExecute);
                         step.execute();
                         step.onExecutionCompleted();
+                        step.throwFailureIfInjected(InjectableFailure.AfterExecute);
                     }
                 }
 
