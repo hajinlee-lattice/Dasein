@@ -136,6 +136,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         List<String> getSeedIds = new ArrayList<>();
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         int nSeeds = 0, nLookups = 0;
+        int nNotInStaging = 0;
         do {
             Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(SOURCE_ENV, tenant, entity, getSeedIds,
                     1000);
@@ -149,6 +150,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                 for (EntityRawSeed seed : scanSeeds) {
                     List<String> seedIds = entityLookupEntryService.get(SOURCE_ENV, tenant, seed.getLookupEntries());
                     for(int i = 0; i < seedIds.size(); i++) {
+                        if (seedIds.get(i) == null) {
+                            nNotInStaging++;
+                            continue;
+                        }
                         if (seedIds.get(i).equals(seed.getId())) {
                             pairs.add(Pair.of(seed.getLookupEntries().get(i), seedIds.get(i)));
                         }
@@ -162,7 +167,8 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             }
             scanSeeds.clear();
         } while (CollectionUtils.isNotEmpty(getSeedIds));
-        log.info("Published {} seeds and {} lookup entries for entity = {}", nSeeds, nLookups, entity);
+        log.info("Published {} seeds and {} lookup entries for entity = {}. {} lookup entries are not in staging.",
+                nSeeds, nLookups, entity, nNotInStaging);
         // Assume CommitEntityMatch step might run multiple times but same
         // entity is only published once
         // entity name -> {"PUBLISH_SEED":nSeeds, "PUBLISH_LOOKUP":nLookups}
