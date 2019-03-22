@@ -11,7 +11,7 @@ class LeFlexRow extends Component {
 
     getColumns() {
         return (
-            <div class="le-layout-flex-col">
+            <div className="le-layout-flex-col">
 
             </div>
         );
@@ -19,7 +19,7 @@ class LeFlexRow extends Component {
 
     getRow() {
         return (
-            <div class="le-layout-flex-grid">
+            <div className="le-layout-flex-grid">
                 {this.getColumns()}
             </div>);
     }
@@ -37,8 +37,8 @@ class LeFlexRow extends Component {
 
         return (
             <Aux>
-                <div class="le-layout-flex-grid">
-                    <div class="le-layout-flex-col">
+                <div className="le-layout-flex-grid">
+                    <div className="le-layout-flex-col">
 
                     </div>
                 </div>
