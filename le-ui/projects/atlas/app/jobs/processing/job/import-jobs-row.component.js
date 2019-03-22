@@ -121,7 +121,7 @@ angular.module('lp.jobs.import.row', [
             var oneCompleted = false;
             if (subJobs && subJobs.length > 0) {
                 subJobs.forEach(function (job) {
-                    if (job.jobStatus === 'Completed') {
+                    if (job.jobStatus !== 'Running' || job.jobStatus !== 'Pending') {
                         oneCompleted = true;
                         return oneCompleted;
                     }
@@ -129,28 +129,11 @@ angular.module('lp.jobs.import.row', [
             }else{
                 oneCompleted = true;
             }
-            let allFailed = $scope.areAllFailed(job);
-            if(job.jobStatus === 'Ready' && oneCompleted === false && !allFailed){
+            if(job.jobStatus === 'Ready' && oneCompleted === false){
                 job.jobStatus = 'Waiting';
             }
             return oneCompleted;
         };
-
-        $scope.areAllFailed = function(job){
-            var subJobs = job.subJobs;
-            let allFailed = true;
-            if (subJobs && subJobs.length > 0) {
-                subJobs.forEach(function (job) {
-                    if (job.jobStatus !== 'Failed') {
-                        allFailed = false
-                        return allFailed;
-                    }
-                });
-            }else{
-                allFailed = false;
-            }
-            return allFailed;
-        }
 
         $scope.expandRow = function () {
             $scope.loading = false;
@@ -227,9 +210,8 @@ angular.module('lp.jobs.import.row', [
         $scope.disableRunButton = function (job) {
             var oneCompleted = $scope.isOneActionCompleted(job);
             var canRun = $scope.vm.canLastJobRun();
-            var allFailed = $scope.areAllFailed(job);
             var disable = false;
-            if ($scope.disableButton || !canRun || (!oneCompleted && !allFailed)) {
+            if ($scope.disableButton || !canRun || !oneCompleted) {
                 disable = true;
             }
             return disable;
