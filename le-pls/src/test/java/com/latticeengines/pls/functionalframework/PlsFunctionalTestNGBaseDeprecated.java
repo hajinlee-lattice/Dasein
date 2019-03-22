@@ -15,10 +15,10 @@ import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
@@ -36,8 +36,7 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
     @Autowired
     private InternalTestUserService internalTestUserService;
 
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
+    private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();;
 
     @Autowired
     private TenantService tenantService;
