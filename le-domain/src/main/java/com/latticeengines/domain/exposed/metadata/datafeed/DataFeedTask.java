@@ -121,7 +121,7 @@ public class DataFeedTask implements HasPid, Serializable {
     @Column(name = "S3_IMPORT_STATUS", length = 30)
     @JsonProperty("s3_import_status")
     @Enumerated(EnumType.STRING)
-    private S3ImportStatus s3ImportStatus = S3ImportStatus.Pause;
+    private S3ImportStatus s3ImportStatus = S3ImportStatus.Active;
 
     @JsonIgnore
     @Transient
