@@ -67,6 +67,8 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         dataUnitProxy = Mockito.mock(DataUnitProxy.class);
         Mockito.doNothing().when(redshiftService).renameTable(anyString(), anyString());
         Mockito.doNothing().when(redshiftService).dropTable(anyString());
+        Mockito.when(dataUnitProxy.delete(anyString(), Mockito.any(DataUnit.class))).thenReturn(true);
+        Mockito.when(dataUnitProxy.renameTableName(anyString(), Mockito.any(DataUnit.class), anyString())).thenReturn(true);
         Mockito.when(redshiftService.getTables(anyString())).thenReturn(redshiftTables);
         Mockito.when(tenantEntityMgr.getAllTenantId()).thenReturn(tenantNames);
         Mockito.when(dataCollectionService.getAllTableNames()).thenReturn(metadataTables);
@@ -141,8 +143,9 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private DataUnit getDataUnit(String tenantName, String name) {
+        log.info("tenantName is " + tenantName + ", name is :" + name);
         for (DataUnit dataUnit: dataUnits) {
-            if (dataUnit.getTenant() == tenantName && dataUnit.getName() == name)
+            if (dataUnit.getTenant().toLowerCase() == tenantName && dataUnit.getName().toLowerCase() == name)
                 return dataUnit;
         }
         return null;
