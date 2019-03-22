@@ -1,20 +1,14 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
-import static com.latticeengines.datacloud.dataflow.transformation.ConsolidateCollectionFlow.BEAN_NAME;
 
 import java.util.List;
-
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 
-@Component(BEAN_NAME)
 public abstract class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<ConsolidateCollectionParameters> {
-
-    public static final String BEAN_NAME = "consolidateCollectionFlow";
 
     @Override
     public Node construct(ConsolidateCollectionParameters parameters) {

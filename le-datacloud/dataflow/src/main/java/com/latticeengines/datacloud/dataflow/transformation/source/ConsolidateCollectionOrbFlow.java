@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectio
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("consolidateCollectionOrbFlow")
+@Component(ConsolidateCollectionOrbFlow.BEAN_NAME)
 public class ConsolidateCollectionOrbFlow extends ConsolidateCollectionFlow {
     public static final String BEAN_NAME = "consolidateCollectionOrbFlow";
 

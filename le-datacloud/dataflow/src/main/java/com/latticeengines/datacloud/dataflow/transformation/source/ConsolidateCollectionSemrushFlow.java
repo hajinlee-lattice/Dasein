@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import org.springframework.stereotype.Component;
 
@@ -7,7 +7,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("consolidateCollectionSemrushFlow")
+@Component(ConsolidateCollectionSemrushFlow.BEAN_NAME)
 public class ConsolidateCollectionSemrushFlow extends ConsolidateCollectionFlow {
     public static final String BEAN_NAME = "consolidateCollectionSemrushFlow";
     private static final String FIELD_RANK = "Rank";

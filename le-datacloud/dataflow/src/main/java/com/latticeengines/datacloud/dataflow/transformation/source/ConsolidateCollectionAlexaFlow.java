@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Buffer;
 
-@Component("consolidateCollectionAlexaFlow")
+@Component(ConsolidateCollectionAlexaFlow.BEAN_NAME)
 public class ConsolidateCollectionAlexaFlow extends ConsolidateCollectionFlow {
     public static final String BEAN_NAME = "consolidateCollectionAlexaFlow";
     private static final String FIELD_DOMAIN = "URL";
