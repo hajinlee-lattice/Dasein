@@ -167,8 +167,7 @@ public class SessionServiceImpl implements SessionService {
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.warn("Failed to retrieve session " + token + " from GA - retried " + retries + " out of "
-                        + MAX_RETRY + " times");
+                LOGGER.warn("Failed to retrieve session {} from GA - retried {} out of {} times. Cause: {}", token, retries, MAX_RETRY, e.getMessage());
             }
             try {
                 retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();

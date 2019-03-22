@@ -464,8 +464,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 return;
             }
 
-            RatingEngine ratingEngine =
-                    ratingEngineService.getRatingEngineById(ratingIdLookupColumnPair.getRatingEngineId(), true, true);
+            RatingEngine ratingEngine = ratingEngineService
+                    .getRatingEngineById(ratingIdLookupColumnPair.getRatingEngineId(), true, true);
 
             if (ratingEngine == null || ratingEngine.getSegment() == null) {
                 logInErrorMap(errorMap, ratingIdLookupColumnPair.getResponseKeyId(), "Invalid rating engine");
@@ -481,8 +481,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     createEntityFrontEndQuery(BusinessEntity.Contact, //
                             isRestrictNotNullSalesforceId, segment, ratingIdLookupColumnPair.getLookupColumn());
 
-            RatingEngineFrontEndQuery accountFrontEndQuery =
-                    RatingEngineFrontEndQuery.fromFrontEndQuery(accountFrontEndQuery0);
+            RatingEngineFrontEndQuery accountFrontEndQuery = RatingEngineFrontEndQuery
+                    .fromFrontEndQuery(accountFrontEndQuery0);
             accountFrontEndQuery.setRatingEngineId(ratingIdLookupColumnPair.getRatingEngineId());
 
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
@@ -490,8 +490,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     tenant.getId(), //
                     accountFrontEndQuery);
 
-            Optional<Long> accountCountOption =
-                    countInfo.entrySet().stream().map(Map.Entry::getValue).reduce((x, y) -> x + y);
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(Map.Entry::getValue)
+                    .reduce((x, y) -> x + y);
 
             CoverageInfo coverageInfo = new CoverageInfo();
 
@@ -534,7 +534,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private CoverageInfo processSingleRatingId(Tenant tenant, MetadataSegment targetSegment, String ratingEngineId,
             boolean isRestrictNullLookupId, String lookupId, boolean loadContactCount,
-            boolean loadContactsCountByBucket, boolean loadContactsWithoutEmailCount) {
+            boolean loadContactsCountByBucket, boolean applyEmailFilter) {
         try {
             MultiTenantContext.setTenant(tenant);
 
@@ -550,8 +550,14 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     createEntityFrontEndQuery(BusinessEntity.Account, //
                             isRestrictNullLookupId, querySegment, lookupId);
 
-            RatingEngineFrontEndQuery ratingEngineAccountFrontEndQuery =
-                    RatingEngineFrontEndQuery.fromFrontEndQuery(accountFrontEndQuery);
+            if (applyEmailFilter) {
+                Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+                        accountFrontEndQuery.getContactRestriction().getRestriction());
+                accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
+            }
+
+            RatingEngineFrontEndQuery ratingEngineAccountFrontEndQuery = RatingEngineFrontEndQuery
+                    .fromFrontEndQuery(accountFrontEndQuery);
             ratingEngineAccountFrontEndQuery.setRatingEngineId(ratingEngineId);
 
             log.info("Front end query for Account: " + JsonUtils.serialize(ratingEngineAccountFrontEndQuery));
@@ -559,8 +565,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     tenant.getId(), //
                     ratingEngineAccountFrontEndQuery);
 
-            Optional<Long> accountCountOption =
-                    countInfo.entrySet().stream().map(Map.Entry::getValue).reduce((x, y) -> x + y);
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(Map.Entry::getValue)
+                    .reduce((x, y) -> x + y);
 
             CoverageInfo coverageInfo = new CoverageInfo();
 
@@ -588,8 +594,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // Populate Unscored counts
             // unscored accounts
             String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
-            Restriction unscoredRestriction =
-                    Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull().build();
+            Restriction unscoredRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull()
+                    .build();
             Restriction unscoredAccountsInSegmentRest = Restriction.builder()
                     .and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
             FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
@@ -614,9 +620,17 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                         coverageInfo.setContactCount(0L);
                         coverageInfo.getBucketCoverageCounts().stream().forEach(bucketCoverage -> {
                             try {
-                                FrontEndQuery contactFrontEndQuery =
-                                        createEntityFrontEndQuery(BusinessEntity.Contact, isRestrictNullLookupId,
-                                                querySegment, lookupId, ratingEngineId, bucketCoverage.getBucket());
+                                FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
+                                        isRestrictNullLookupId, querySegment, lookupId, ratingEngineId,
+                                        bucketCoverage.getBucket());
+
+                                if (applyEmailFilter) {
+                                    Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+                                            contactFrontEndQuery.getContactRestriction().getRestriction());
+                                    contactFrontEndQuery
+                                            .setContactRestriction(new FrontEndRestriction(newContactRestriction));
+                                }
+
                                 Long bucketCount = getContactCount(tenant, contactFrontEndQuery);
                                 bucketCoverage.setContactCount(bucketCount);
                                 coverageInfo.setContactCount(bucketCount + coverageInfo.getContactCount());
@@ -630,29 +644,21 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     } else {
                         FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
                                 isRestrictNullLookupId, querySegment, lookupId, ratingEngineId, null);
+
+                        if (applyEmailFilter) {
+                            Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+                                    contactFrontEndQuery.getContactRestriction().getRestriction());
+                            contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
+                        }
+
                         Long contactCount = getContactCount(tenant, contactFrontEndQuery);
                         coverageInfo.setContactCount(contactCount);
                     }
-                    if (loadContactsWithoutEmailCount) {
-                        // contacts without emails
-                        Restriction noEmailRestriction = Restriction.builder()
-                                .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNull().build();
-                        Restriction contactsWithoutEmailRest = Restriction.builder()
-                                .and(accountFrontEndQuery.getContactRestriction().getRestriction(), noEmailRestriction)
-                                .build();
-                        FrontEndQuery noEmailFrontEndQuery = new FrontEndQuery();
-                        noEmailFrontEndQuery.setMainEntity(BusinessEntity.Contact);
-                        noEmailFrontEndQuery.setAccountRestriction(accountFrontEndQuery.getAccountRestriction());
-                        noEmailFrontEndQuery.setContactRestriction(new FrontEndRestriction(contactsWithoutEmailRest));
-                        coverageInfo.setContactCountWithoutEmail(
-                                entityProxy.getCount(tenant.getId(), noEmailFrontEndQuery));
 
-                    }
                     // unscored contacts
                     unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
                     Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
                     coverageInfo.setUnscoredContactCount(unscoredContactCount);
-                    
 
                 } catch (Exception ex) {
                     log.info("Got error in fetching contact count", ex);
@@ -663,6 +669,13 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             throw ex;
         }
 
+    }
+
+    private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
+        Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
+                .isNotNull().build();
+        Restriction newContactRestriction = Restriction.builder().and(contactRestriction, emailFilter).build();
+        return newContactRestriction;
     }
 
     private void processSingleSegmentIdModelRulesPair(Tenant tenant,
@@ -693,8 +706,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     tenant.getId(), //
                     accountFrontEndQuery);
 
-            Optional<Long> accountCountOption =
-                    countInfo.entrySet().stream().map(Map.Entry::getValue).reduce((x, y) -> x + y);
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(Map.Entry::getValue)
+                    .reduce((x, y) -> x + y);
 
             CoverageInfo coverageInfo = new CoverageInfo();
 
@@ -848,12 +861,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         entityFrontEndQuery.setMainEntity(entityType);
 
-        FrontEndRestriction accountRestriction =
-                prepareFrontEndRestriction(prepareRestrictionList(segment.getAccountRestriction(),
-                        segmentIdSingleRulePair.getAccountRestriction()));
-        FrontEndRestriction contactRestriction =
-                prepareFrontEndRestriction(prepareRestrictionList(segment.getContactRestriction(),
-                        segmentIdSingleRulePair.getContacttRestriction()));
+        FrontEndRestriction accountRestriction = prepareFrontEndRestriction(prepareRestrictionList(
+                segment.getAccountRestriction(), segmentIdSingleRulePair.getAccountRestriction()));
+        FrontEndRestriction contactRestriction = prepareFrontEndRestriction(prepareRestrictionList(
+                segment.getContactRestriction(), segmentIdSingleRulePair.getContacttRestriction()));
 
         entityFrontEndQuery.setAccountRestriction(accountRestriction);
         entityFrontEndQuery.setContactRestriction(contactRestriction);
@@ -975,12 +986,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         MetadataSegment targetSegment = segmentService.findByName(segmentName);
         if (targetSegment == null) {
-            throw new LedpException(LedpCode.LEDP_40045, new String[] {segmentName});
+            throw new LedpException(LedpCode.LEDP_40045, new String[] { segmentName });
         }
 
         if (request.isRestrictNullLookupId() && StringUtils.isBlank(request.getLookupId())) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] {"Cannot restrict nulls if no lookupId is provided"});
+                    new String[] { "Cannot restrict nulls if no lookupId is provided" });
         }
 
         if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {
@@ -1009,7 +1020,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             try {
                 CoverageInfo coverageInfo = processSingleRatingId(tenant, targetSegment, ratingModelId,
                         request.isRestrictNullLookupId(), request.getLookupId(), request.isLoadContactsCount(),
-                        request.isLoadContactsCountByBucket(), request.isLoadContactsWithoutEmailCount());
+                        request.isLoadContactsCountByBucket(), request.isApplyEmailFilter());
                 response.getRatingModelsCoverageMap().put(ratingModelId, coverageInfo);
             } catch (Exception ex) {
                 log.info("Ignoring exception in getting coverage info for rating id: " + ratingModelId, ex);
@@ -1020,6 +1031,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return response;
     }
 
+    @Override
     public RatingEnginesCoverageResponse getProductCoveragesForSegment(String customerSpace,
             ProductsCoverageRequest productsCoverageRequest, Integer purchasedBeforePeriod) {
         RatingEnginesCoverageResponse response = null;
@@ -1027,8 +1039,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Tenant tenant = MultiTenantContext.getTenant();
 
         RatingEngine ratingEngine = productsCoverageRequest.getRatingEngine();
-        ModelingStrategy strategy =
-                ((CrossSellRatingConfig) ratingEngine.getAdvancedRatingConfig()).getModelingStrategy();
+        ModelingStrategy strategy = ((CrossSellRatingConfig) ratingEngine.getAdvancedRatingConfig())
+                .getModelingStrategy();
 
         RatingModel ratingModel = ratingEngine.getLatestIteration();
         List<String> productIds = productsCoverageRequest.getProductIds();
@@ -1037,7 +1049,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         AIModel aiModel = (AIModel) ratingModel;
 
         if (targetSegment == null) {
-            throw new LedpException(LedpCode.LEDP_40045, new String[] {""});
+            throw new LedpException(LedpCode.LEDP_40045, new String[] { "" });
         }
 
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {

@@ -243,6 +243,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
         int seedCount = 0;
         int lookupCount = 0;
+        int nNotInStaging = 0;
         List<String> getSeedIds = new ArrayList<>();
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         do {
@@ -259,6 +260,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     List<String> seedIds = entityLookupEntryService.get(sourceEnv, sourceTenant,
                             seed.getLookupEntries());
                     for (int i = 0; i < seedIds.size(); i++) {
+                        if (seedIds.get(i) == null) {
+                            nNotInStaging++;
+                            continue;
+                        }
                         if (seedIds.get(i).equals(seed.getId())) {
                             pairs.add(Pair.of(seed.getLookupEntries().get(i), seedIds.get(i)));
                         }
@@ -272,7 +277,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             }
             scanSeeds.clear();
         } while (CollectionUtils.isNotEmpty(getSeedIds));
-        return new EntityPublishStatistics(seedCount, lookupCount);
+        return new EntityPublishStatistics(seedCount, lookupCount, nNotInStaging);
     }
 
     @VisibleForTesting
@@ -806,6 +811,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     if (!shouldTerminate) {
                         log.warn("Staging lookup entry publisher (in background) is interrupted");
                     }
+                    int numUnpublished = batches.values() //
+                            .stream() //
+                            .filter(Objects::nonNull) //
+                            .mapToInt(List::size) //
+                            .sum();
+                    log.info("There are {} lookup entries not published yet", numUnpublished);
                 } catch (Exception e) {
                     log.error("Encounter an error (in background) in staging lookup entry publisher", e);
                 }

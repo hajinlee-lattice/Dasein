@@ -44,6 +44,7 @@ public class APSAttrsDecorator implements Decorator {
         if (BusinessEntity.APSAttribute.equals(cm.getEntity())) {
             cm.setAttrState(AttrState.Active);
             if (systemAttributes.contains(cm.getAttrName())) {
+                cm.setCanModel(false);
                 return cm;
             }
             cm.disableGroup(Segment);

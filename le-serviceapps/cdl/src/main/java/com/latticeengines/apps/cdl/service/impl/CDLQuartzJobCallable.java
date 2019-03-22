@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
+import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
 public class CDLQuartzJobCallable implements Callable<Boolean> {
@@ -18,6 +19,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private CDLJobService cdlJobService;
     private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
     private RedShiftCleanupService redShiftCleanupService;
+    private S3ImportService s3ImportService;
     private String jobArguments;
 
     public CDLQuartzJobCallable(Builder builder) {
@@ -25,6 +27,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.cdlJobService = builder.cdlJobService;
         this.dataFeedExecutionCleanupService = builder.dataFeedExecutionCleanupService;
         this.redShiftCleanupService = builder.redShiftCleanupService;
+        this.s3ImportService = builder.s3ImportService;
         this.jobArguments = builder.jobArguments;
     }
 
@@ -35,6 +38,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
             return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
         } else if (CDLJobType.REDSHIFTCLEANUP.equals(cdlJobType)){
             return redShiftCleanupService.removeUnusedTables();
+        } else if (CDLJobType.IMPORT.equals(cdlJobType)) {
+            return s3ImportService.submitImportJob();
         } else {
             return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
@@ -46,6 +51,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private CDLJobService cdlJobService;
         private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
         private RedShiftCleanupService redShiftCleanupService;
+        private S3ImportService s3ImportService;
         private String jobArguments;
 
         public Builder() {
@@ -69,6 +75,11 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
 
         public Builder redshiftCleanupService(RedShiftCleanupService redShiftCleanupService) {
             this.redShiftCleanupService = redShiftCleanupService;
+            return this;
+        }
+
+        public Builder s3ImportService(S3ImportService s3ImportService) {
+            this.s3ImportService = s3ImportService;
             return this;
         }
 

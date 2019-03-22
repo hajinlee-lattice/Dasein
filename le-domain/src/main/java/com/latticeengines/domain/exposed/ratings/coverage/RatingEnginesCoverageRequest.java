@@ -17,7 +17,7 @@ public class RatingEnginesCoverageRequest {
 
     private boolean loadContactsCountByBucket;
     
-    private boolean loadContactsWithoutEmailCount;
+    private boolean applyEmailFilter;
 
     private String lookupId;
 
@@ -61,12 +61,12 @@ public class RatingEnginesCoverageRequest {
         this.lookupId = lookupId;
     }
     
-    public boolean isLoadContactsWithoutEmailCount() {
-        return loadContactsWithoutEmailCount;
+    public boolean isApplyEmailFilter() {
+        return applyEmailFilter;
     }
 
-    public void setLoadContactsWithoutEmailCount(boolean loadContactsWithoutEmailCount) {
-        this.loadContactsWithoutEmailCount = loadContactsWithoutEmailCount;
+    public void setApplyEmailFilter(boolean applyEmailFilter) {
+        this.applyEmailFilter = applyEmailFilter;
     }
 
 

@@ -128,6 +128,16 @@ public class DropBoxEntityMgrImpl //
         return tenant;
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DropBox getDropBox(String dropBox) {
+        if (isReaderConnection()) {
+            return readerRepository.findByDropBox(dropBox);
+        } else {
+            return writerRepository.findByDropBox(dropBox);
+        }
+    }
+
     @Transactional(transactionManager = "transactionManagerReader", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DropBox getDropBoxFromReader(Tenant tenant) {
         return readerRepository.findByTenant(tenant);

@@ -323,8 +323,9 @@ class TrayRouter {
             let options = this.getEphemeralApiOptions(req, true);
             options.json = Queries.getMarketoPrograms(authenticationId);
             this.request(options, function(error, response, body){
-                if (error) {
-                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                if (body.response && body.response.body && body.response.body.errors.length > 0) {
+                    var errorMessage = body.response.body.errors[0].message;
+                    res.send(UIActionsFactory.getUIActionsObject(errorMessage, 'Banner', 'Error'));
                     return;
                 }
                 res.send(body);
