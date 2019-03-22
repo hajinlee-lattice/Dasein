@@ -11,8 +11,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -28,8 +26,6 @@ import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(RedShiftCleanupServiceImplTestNG.class);
 
     @Inject
     private RedshiftService redshiftService;
@@ -90,6 +86,10 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCleanup() {
         redshiftCleanupService.removeUnusedTables();
+        Mockito.verify(dataUnitProxy, Mockito.times(1)).delete(anyString(), Mockito.any(DataUnit.class));
+        Mockito.verify(dataUnitProxy, Mockito.times(1)).renameTableName(anyString(), Mockito.any(DataUnit.class), anyString());
+        Mockito.verify(redshiftService, Mockito.times(1)).dropTable(anyString());
+        Mockito.verify(redshiftService, Mockito.times(2)).renameTable(anyString(), anyString());
     }
 
     private List<String> redshiftTablesProvider() {
@@ -122,6 +122,7 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         dataUnit.setTenant("Bw_1113_AutoImport");
         dataUnits.add(dataUnit);
         tableName = "Auto_RulebaseModel_0307_Transaction_2018_03_07_11_37_21_UTC";
+        dataUnit = new RedshiftDataUnit();
         dataUnit.setTenant("Auto_RulebaseModel_0307");
         dataUnit.setName(tableName);
         dataUnit.setRedshiftTable(tableName.toLowerCase());
@@ -143,10 +144,12 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private DataUnit getDataUnit(String tenantName, String name) {
-        log.info("tenantName is " + tenantName + ", name is :" + name);
         for (DataUnit dataUnit: dataUnits) {
-            if (dataUnit.getTenant().toLowerCase() == tenantName && dataUnit.getName().toLowerCase() == name)
+            String dTenantName = dataUnit.getTenant();
+            String dName = dataUnit.getName();
+            if (dTenantName.equalsIgnoreCase(tenantName) && dName.equalsIgnoreCase(name)) {
                 return dataUnit;
+            }
         }
         return null;
     }
