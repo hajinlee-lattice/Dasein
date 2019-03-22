@@ -48,7 +48,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     @Value("${cdl.redshift.cleanup.table.remain.day:7L}")
     private Long retentionInDays;
 
-    private final static String TABLE_PREFIX = "ToBeDeletedOn_";
+    private static final String TABLE_PREFIX = "ToBeDeletedOn_";
 
     public boolean removeUnusedTables() {
         if (!cleanupFlag) {
