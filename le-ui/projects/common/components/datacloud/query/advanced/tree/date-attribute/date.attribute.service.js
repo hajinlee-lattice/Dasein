@@ -26,7 +26,7 @@ angular
           value: undefined,
           position: 0,
           type: "Time",
-          min: "1",
+          min: "0",
           max: "",
           pattern: "\\d*",
           step: 1
@@ -36,7 +36,7 @@ angular
           value: undefined,
           position: 1,
           type: "Time",
-          min: "1",
+          min: "0",
           max: "",
           pattern: "\\d*",
           step: 1
