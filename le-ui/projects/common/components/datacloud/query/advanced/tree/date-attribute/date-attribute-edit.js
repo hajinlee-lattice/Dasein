@@ -78,7 +78,7 @@ angular
             ),
             position: 0,
             type: "Numerical",
-            min: "1",
+            min: "0",
             max: "",
             pattern: "\\d*",
             step: 1
@@ -93,7 +93,7 @@ angular
             ),
             position: 1,
             type: "Numerical",
-            min: "1",
+            min: "0",
             max: "",
             pattern: "\\d*",
             step: 1

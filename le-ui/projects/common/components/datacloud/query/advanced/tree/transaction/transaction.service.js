@@ -18,8 +18,8 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         this.getPeriodNumericalConfig = function () {
             return {
-                from: { name: 'from-period', value: undefined, position: 0, type: 'Time', min: '1', max: '', step: 1, pattern: "\\d*" },
-                to: { name: 'to-period', value: undefined, position: 1, type: 'Time', min: '1', max: '', step: 1, pattern: "\\d*" }
+                from: { name: 'from-period', value: undefined, position: 0, type: 'Time', min: '0', max: '', step: 1, pattern: "\\d*" },
+                to: { name: 'to-period', value: undefined, position: 1, type: 'Time', min: '0', max: '', step: 1, pattern: "\\d*" }
             };
         }
 
