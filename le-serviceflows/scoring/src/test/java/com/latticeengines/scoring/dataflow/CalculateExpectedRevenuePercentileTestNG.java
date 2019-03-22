@@ -111,6 +111,10 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
         parameters.setModelGuidField(modelGuidField);
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
+        
+        Map<String, Double> normalizationRatioMap = new HashMap<>();
+        normalizationRatioMap.put(evModelGuid, 1.23456D);
+        parameters.setNormalizationRatioMap(normalizationRatioMap );
 
         setDummyScoreDerivationMap(parameters, evModelGuid);
 

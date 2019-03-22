@@ -15,7 +15,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,10 +31,10 @@ import org.testng.annotations.Listeners;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -58,8 +57,7 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String modelAppId = "application_1547946911827_0123";
     protected static final String modelJobId = ApplicationIdUtils.stripJobId(modelAppId);
 
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
+    private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();
 
     protected void setTestBed(GlobalAuthTestBed testBed) {
         this.testBed = testBed;

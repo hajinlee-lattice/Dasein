@@ -20,12 +20,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
@@ -53,7 +53,6 @@ public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
     private ModelSummaryParser modelSummaryParser;
 
     @Autowired
@@ -84,6 +83,7 @@ public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
         setTestingTenants();
         loginTestingUsersToMainTenant();
         switchToSuperAdmin();
+        modelSummaryParser = new ModelSummaryParser();
     }
 
     protected void resetTenantsViaTenantConsole(String productPrefix, Boolean forceInstallation) throws IOException {

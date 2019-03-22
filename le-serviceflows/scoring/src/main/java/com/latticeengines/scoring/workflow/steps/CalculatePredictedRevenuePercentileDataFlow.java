@@ -31,8 +31,14 @@ public class CalculatePredictedRevenuePercentileDataFlow
     }
 
     @Override
+    boolean shouldLoadNormalizationRatio() {
+        return false;
+    }
+
+    @Override
     void initAndSetDataFlowParam(String inputTableName, String modelGuidField, int percentileLowerBound,
-            int percentileUpperBound, Map<String, String> originalScoreFieldMap) {
+            int percentileUpperBound, Map<String, String> originalScoreFieldMap,
+            Map<String, Double> normalizationRatioMap) {
         CalculatePredictedRevenuePercentileParameters params = new CalculatePredictedRevenuePercentileParameters();
         params.setCustomerSpace(configuration.getCustomerSpace());
         params.setInputTableName(inputTableName);
