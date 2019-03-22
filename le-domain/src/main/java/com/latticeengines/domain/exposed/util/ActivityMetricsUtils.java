@@ -55,22 +55,21 @@ public class ActivityMetricsUtils {
     // updates period config for a metrics but we need to support old period
     // config to ensure backward compatibility, so value is a set; string in the
     // set is concatenated names of one combination of comparison types)
-    private static final Map<InterfaceName, Set<String>> comparisonType = new HashMap<>();
+    private static final Map<InterfaceName, Set<String>> COMPARISON_TYPE = new HashMap<>();
 
     // Comparison type -> #period should be set to support this comparison type
-    private static final Map<ComparisonType, Integer> comparisonTypePeriodCnt = new HashMap<>();
+    private static final Map<ComparisonType, Integer> COMPARISON_TYPE_PERIOD_CNTS = new HashMap<>();
 
     // Metrics enum -> maximum allowed count
-    private static final Map<InterfaceName, Integer> maxCnt = new HashMap<>();
+    static final Map<InterfaceName, Integer> MAX_CNTS = new HashMap<>();
 
     // Valid period names
-    private static final Set<String> validPeriods = new HashSet<>(Arrays.asList( //
+    private static final Set<String> VALID_PERIODS = new HashSet<>(Arrays.asList( //
             PeriodStrategy.Template.Year.name(), //
             PeriodStrategy.Template.Quarter.name(), //
             PeriodStrategy.Template.Month.name(), //
             PeriodStrategy.Template.Week.name() //
     ));
-
 
     static {
         METRICS_DISPLAY_NAMES.put(InterfaceName.Margin, "% Margin");
@@ -140,35 +139,35 @@ public class ActivityMetricsUtils {
     }
 
     static {
-        comparisonType.put(InterfaceName.Margin,
+        COMPARISON_TYPE.put(InterfaceName.Margin,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.WITHIN))));
-        comparisonType.put(InterfaceName.SpendChange,
+        COMPARISON_TYPE.put(InterfaceName.SpendChange,
                 new HashSet<>(
                         Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.WITHIN, ComparisonType.BETWEEN))));
-        comparisonType.put(InterfaceName.ShareOfWallet,
+        COMPARISON_TYPE.put(InterfaceName.ShareOfWallet,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.WITHIN))));
-        comparisonType.put(InterfaceName.AvgSpendOvertime,
+        COMPARISON_TYPE.put(InterfaceName.AvgSpendOvertime,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.WITHIN),
                         buildComparisonTypeLookupKey(ComparisonType.BETWEEN))));
-        comparisonType.put(InterfaceName.TotalSpendOvertime,
+        COMPARISON_TYPE.put(InterfaceName.TotalSpendOvertime,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.WITHIN),
                         buildComparisonTypeLookupKey(ComparisonType.BETWEEN))));
-        comparisonType.put(InterfaceName.HasPurchased,
+        COMPARISON_TYPE.put(InterfaceName.HasPurchased,
                 new HashSet<>(Arrays.asList(buildComparisonTypeLookupKey(ComparisonType.EVER))));
     }
 
     static {
-        comparisonTypePeriodCnt.put(ComparisonType.WITHIN, 1);
-        comparisonTypePeriodCnt.put(ComparisonType.BETWEEN, 2);
+        COMPARISON_TYPE_PERIOD_CNTS.put(ComparisonType.WITHIN, 1);
+        COMPARISON_TYPE_PERIOD_CNTS.put(ComparisonType.BETWEEN, 2);
     }
 
     static {
-        maxCnt.put(InterfaceName.Margin, 1);
-        maxCnt.put(InterfaceName.SpendChange, 1);
-        maxCnt.put(InterfaceName.ShareOfWallet, 1);
-        maxCnt.put(InterfaceName.AvgSpendOvertime, 5);
-        maxCnt.put(InterfaceName.TotalSpendOvertime, 5);
-        maxCnt.put(InterfaceName.HasPurchased, 1);
+        MAX_CNTS.put(InterfaceName.Margin, 1);
+        MAX_CNTS.put(InterfaceName.SpendChange, 1);
+        MAX_CNTS.put(InterfaceName.ShareOfWallet, 1);
+        MAX_CNTS.put(InterfaceName.AvgSpendOvertime, 5);
+        MAX_CNTS.put(InterfaceName.TotalSpendOvertime, 5);
+        MAX_CNTS.put(InterfaceName.HasPurchased, 1);
     }
 
     private ActivityMetricsUtils() {
@@ -518,10 +517,10 @@ public class ActivityMetricsUtils {
             }
         }
         cnts.forEach((m, cnt) -> {
-            if (cnt > maxCnt.get(m)) {
+            if (cnt > MAX_CNTS.get(m)) {
                 throw new LedpException(LedpCode.LEDP_40032,
                         new String[] { String.format("Maximum for metrics %s is %d, but found %d",
-                                m, maxCnt.get(m), cnt) });
+                                m, MAX_CNTS.get(m), cnt) });
             }
         });
         if (CollectionUtils.isNotEmpty(dupMetricsDisplayNames)) {
@@ -589,7 +588,7 @@ public class ActivityMetricsUtils {
         }
         Set<String> periods = new HashSet<>();
         for (TimeFilter timeFilter : timeFilters) {
-            if (!validPeriods.contains(timeFilter.getPeriod())) {
+            if (!VALID_PERIODS.contains(timeFilter.getPeriod())) {
                 throw new LedpException(LedpCode.LEDP_40032,
                         new String[] { "Unknown period: " + timeFilter.getPeriod() });
             }
@@ -611,10 +610,10 @@ public class ActivityMetricsUtils {
      */
     private static boolean isValidPeriodValue(InterfaceName metricsName, TimeFilter timeFilter) {
         if (CollectionUtils.isEmpty(timeFilter.getValues())
-                || timeFilter.getValues().size() != comparisonTypePeriodCnt.get(timeFilter.getRelation())) {
+                || timeFilter.getValues().size() != COMPARISON_TYPE_PERIOD_CNTS.get(timeFilter.getRelation())) {
             throw new LedpException(LedpCode.LEDP_40032,
                     new String[] { metricsName + " metrics should have "
-                            + comparisonTypePeriodCnt.get(timeFilter.getRelation()) + " period values" });
+                            + COMPARISON_TYPE_PERIOD_CNTS.get(timeFilter.getRelation()) + " period values" });
         }
         for (Object val : timeFilter.getValues()) {
             try {
@@ -652,9 +651,9 @@ public class ActivityMetricsUtils {
      * @return
      */
     private static boolean isValidComparisonType(InterfaceName metricsName, ComparisonType type) {
-        if (type == null || !comparisonType.get(metricsName).contains(buildComparisonTypeLookupKey(type))) {
+        if (type == null || !COMPARISON_TYPE.get(metricsName).contains(buildComparisonTypeLookupKey(type))) {
             List<String> expectedTypes = new ArrayList<>();
-            comparisonType.get(metricsName).forEach(ct -> {
+            COMPARISON_TYPE.get(metricsName).forEach(ct -> {
                 expectedTypes.add(ct);
             });
             throw new LedpException(LedpCode.LEDP_40032,
@@ -677,9 +676,9 @@ public class ActivityMetricsUtils {
             List<TimeFilter> timeFilters) {
         String ctLookupKey = buildComparisonTypeLookupKey(
                 timeFilters.stream().map(tf -> tf.getRelation()).collect(Collectors.toList()));
-        if (ctLookupKey == null || !comparisonType.get(metricsName).contains(ctLookupKey)) {
+        if (ctLookupKey == null || !COMPARISON_TYPE.get(metricsName).contains(ctLookupKey)) {
             List<String> expectedTypes = new ArrayList<>();
-            comparisonType.get(metricsName).forEach(ct -> {
+            COMPARISON_TYPE.get(metricsName).forEach(ct -> {
                 expectedTypes.add(ct);
             });
             throw new LedpException(LedpCode.LEDP_40032,
