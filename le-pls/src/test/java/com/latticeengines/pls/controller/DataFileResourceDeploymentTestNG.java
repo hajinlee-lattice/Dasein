@@ -48,13 +48,13 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
     private ModelSummaryParser modelSummaryParser;
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
         switchToSuperAdmin();
+        modelSummaryParser = new ModelSummaryParser();
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId());
         String dir = modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId() + "/models/ANY_TABLE/" + UUID

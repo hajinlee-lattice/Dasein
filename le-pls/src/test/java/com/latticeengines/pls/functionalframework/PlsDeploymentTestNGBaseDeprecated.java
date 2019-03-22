@@ -53,7 +53,6 @@ public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
     private ModelSummaryParser modelSummaryParser;
 
     @Autowired
@@ -84,6 +83,7 @@ public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
         setTestingTenants();
         loginTestingUsersToMainTenant();
         switchToSuperAdmin();
+        modelSummaryParser = new ModelSummaryParser();
     }
 
     protected void resetTenantsViaTenantConsole(String productPrefix, Boolean forceInstallation) throws IOException {

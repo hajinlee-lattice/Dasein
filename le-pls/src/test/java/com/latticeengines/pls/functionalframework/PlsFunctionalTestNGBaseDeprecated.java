@@ -36,8 +36,7 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
     @Autowired
     private InternalTestUserService internalTestUserService;
 
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
+    private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();;
 
     @Autowired
     private TenantService tenantService;
