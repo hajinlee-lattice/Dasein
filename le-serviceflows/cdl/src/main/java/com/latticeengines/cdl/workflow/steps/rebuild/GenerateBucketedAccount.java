@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.cache.CacheName.TableRoleMetadataCache;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPIER;
@@ -24,6 +25,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -153,6 +156,13 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         setBaseTables(fullAccountTableName, step);
         step.setTransformer(TRANSFORMER_COPIER);
 
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(customerSpace.getTenantId(), TableRoleMetadataCache);
+        try {
+            Thread.sleep(10000L);
+        } catch (InterruptedException e) {
+            log.warn("10 second sleep is interrupted.", e);
+        }
         List<String> retainAttrNames = servingStoreProxy
                 .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
                         tableFromActiveVersion ? active : inactive) //
