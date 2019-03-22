@@ -2,6 +2,8 @@ import React, { Component, react2angular } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
+import GridLayout from 'common/widgets/container/grid-layout.component';
+
 import SystemComponent from './system.component';
 
 import SystemsService from './systems.service';
@@ -15,6 +17,7 @@ export default class SystemsComponent extends Component {
         console.log('Systems ', props.systems);
         this.state = { connectors: [] };
     }
+
     componentDidMount() {
         httpService.get(
             "/pls/lookup-id-mapping",
@@ -24,60 +27,23 @@ export default class SystemsComponent extends Component {
                 let connectors = CRMs.concat(MAPs);
                 SystemsService.cleanupLookupId(connectors);
                 this.setState({ loading: false, connectors: connectors });
-                // console.log("BACK HERE ", response);
             })
         );
     }
-    getColumns(rowNum, numColumns) {
-        let ui = [];
-        let columns = [];
-        if((rowNum * numColumns + numColumns) >= this.state.connectors.length){
-            columns = this.state.connectors.slice(rowNum * numColumns);
-        }else{
-            columns = this.state.connectors.slice(rowNum * numColumns, numColumns);
+    
+    getSystems() {
+        let ret = [];
+        if(this.state.connectors && this.state.connectors.length > 0){
+            this.state.connectors.forEach(system => {
+                ret.push((<SystemComponent system={system} img={ConnectorService.getImgByConnector(system.externalSystemName)}/>));
+            });
         }
-        columns.forEach(element => {
-            console.log('ELEMENT ===>',element);
-            if(element){
-                let columnsUi = (
-                    <div class='le-layout-flex-col'>
-                        <SystemComponent system={element} img={ConnectorService.getImgByConnector(element.externalSystemName)}/>
-                    </div>
-                );
-                ui.push(columnsUi);
-            }
-        });
-        return ui;
-
+        return ret;
     }
-    getSystemsRows() {
-        if (this.state.connectors.length == 0) {
-            return (<h5>No systems created</h5>);
-        } else {
-            let rows = this.state.connectors.length / 3;
-            if (this.state.connectors.length % 3 > 0) {
-                rows = rows + 1;
-            }
-            console.log('ROWS', rows);
-            let ui = [];
-            for (let i = 0; i < rows; i++) {
-                let rowUI = (
-                    <div class='le-layout-flex-grid'>
-                        {this.getColumns(i, 3)}
-                    </div>
-                );
-                ui.push(rowUI);
-            }
-            return ui;
-        }
-    }
-
     render() {
         return (
             <div className="systems-main">
-                {/* <div class='some-page-wrapper'> */}
-                    {this.getSystemsRows()}
-                {/* </div> */}
+            <GridLayout>{this.getSystems()}</GridLayout>
             </div>
         );
     }
