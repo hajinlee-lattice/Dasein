@@ -1,4 +1,16 @@
 .container-test{
     min-width: 180px;
     border: 1px solid gray;
+
+    
+}
+
+.grid-layout {
+    background-color: rgb(239, 237, 237);
+    height: 90vh;
+    width: 90%;
+    span{
+        border: 1px solid green;
+        min-width: 10px;
+    }
 }
