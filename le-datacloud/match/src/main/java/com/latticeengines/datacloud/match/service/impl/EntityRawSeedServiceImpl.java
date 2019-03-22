@@ -46,7 +46,6 @@ import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
-import com.amazonaws.services.dynamodbv2.xspec.QueryExpressionSpec;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -86,8 +85,6 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     private final EntityMatchVersionService entityMatchVersionService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
 
-    private final int numStagingShards;
-
     private static final Scheduler scheduler = Schedulers.newParallel("entity-rawseed");
 
     @Inject
@@ -97,8 +94,6 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         this.dynamoItemService = dynamoItemService;
         this.entityMatchVersionService = entityMatchVersionService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
-        // NOTE this will not be changed at runtime
-        numStagingShards = entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
     }
 
     @Override
@@ -172,6 +167,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             throw new UnsupportedOperationException(String.format("Scanning for %s is not supported.", env.name()));
         }
         Map<Integer, String> seedMap = new HashMap<>();
+        int numStagingShards = numStagingShards();
         if (CollectionUtils.isEmpty(seedIds)) {
             for (int i = 0; i < numStagingShards; i++) {
                 seedMap.put(i, "");
@@ -200,10 +196,6 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         shardIds = seedMap.keySet().toArray(shardIds);
         return Flux.just(shardIds).parallel().runOn(scheduler)
                 .map(k -> {
-                    QueryExpressionSpec xspec = new ExpressionSpecBuilder() //
-                            .withCondition(S(ATTR_PARTITION_KEY)
-                                    .eq(getShardPartitionKey(tenant, getMatchVersion(env, tenant), entity, k))) //
-                            .buildForQuery();
                     PrimaryKey primaryKey = StringUtils.isEmpty(seedMap.get(k)) ? null : buildKey(env, tenant,
                             getMatchVersion(env, tenant), entity, seedMap.get(k));
                     QuerySpec querySpec = new QuerySpec() //
@@ -658,10 +650,14 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         }
     }
 
+    private int numStagingShards() {
+        return entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
+    }
+
     private int getShardId(String seedId) {
         // use calculated suffix because we need lookup
         // & 0x7fffffff to make it positive and mod nShards
-        return (seedId.hashCode() & 0x7fffffff) % numStagingShards;
+        return (seedId.hashCode() & 0x7fffffff) % numStagingShards();
     }
 
     private String getShardPartitionKey(Tenant tenant, int version, String entity, int shardId) {

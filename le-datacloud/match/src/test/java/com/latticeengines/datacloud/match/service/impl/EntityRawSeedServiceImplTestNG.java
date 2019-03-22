@@ -30,6 +30,8 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.Seed.EMPTY;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,18 +43,20 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -67,8 +71,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     private static final Logger log = LoggerFactory.getLogger(EntityRawSeedServiceImplTestNG.class);
 
-    private static final String TEST_SERVING_TABLE = "CDLMatchServingDev_20181126";
-    private static final String TEST_STAGING_TABLE = "CDLMatchDev_20181126";
+    private static final int TEST_NUM_STAGING_SHARDS = 2;
     private static final Tenant TEST_TENANT = new Tenant("raw_seed_service_test_tenant_1");
     // prevent scan tenant from being affected by other tests
     private static final Tenant TEST_SCAN_TENANT = new Tenant("raw_seed_service_test_tenant_for_scan_1");
@@ -80,18 +83,25 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     private static final String CLR_SEED_ID = "testClear";
 
     @Inject
-    @InjectMocks
     private EntityRawSeedServiceImpl entityRawSeedService;
 
-    @Mock
-    private EntityMatchConfigurationServiceImpl entityConfigurationService;
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
+    @Value("${datacloud.match.entity.staging.table}")
+    private String stagingTableName;
+
+    @Value("${datacloud.match.entity.serving.table}")
+    private String servingTableName;
 
     @BeforeClass(groups = "functional")
-    private void setup() {
-        MockitoAnnotations.initMocks(this);
-        entityConfigurationService.setStagingTableName(TEST_STAGING_TABLE);
-        entityConfigurationService.setServingTableName(TEST_SERVING_TABLE);
-        Mockito.when(entityConfigurationService.getRetryTemplate(Mockito.any())).thenCallRealMethod();
+    private void setup() throws Exception {
+        EntityMatchConfigurationService configService = Mockito.mock(EntityMatchConfigurationService.class);
+        Mockito.when(configService.getNumShards(STAGING)).thenReturn(TEST_NUM_STAGING_SHARDS);
+        Mockito.when(configService.getRetryTemplate(Mockito.any())).thenReturn(RetryUtils.getRetryTemplate(3));
+        Mockito.when(configService.getTableName(STAGING)).thenReturn(stagingTableName);
+        Mockito.when(configService.getTableName(SERVING)).thenReturn(servingTableName);
+        FieldUtils.writeField(entityRawSeedService, "entityMatchConfigurationService", configService, true);
     }
 
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
@@ -121,8 +131,10 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         List<String> seedIds = Arrays.asList("testScan1", "testScan2", "testScan3", "testScan4", "testScan5",
                 "testScan6", "testScan7");
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
-        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
-        EntityMatchEnvironment destEnv = EntityMatchEnvironment.SERVING;
+        EntityMatchEnvironment env = STAGING;
+        EntityMatchEnvironment destEnv = SERVING;
+        entityMatchVersionService.bumpVersion(STAGING, TEST_SCAN_TENANT);
+        entityMatchVersionService.bumpVersion(SERVING, TEST_SCAN_TENANT);
 
         // make sure we don't have this seed
         for(String seedId : seedIds) {
@@ -399,8 +411,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     @DataProvider(name = "entityMatchEnvironment")
     private Object[][] provideEntityMatchEnv() {
         return new Object[][] {
-                { EntityMatchEnvironment.STAGING },
-                { EntityMatchEnvironment.SERVING },
+                { STAGING }, { SERVING },
         };
     }
 
