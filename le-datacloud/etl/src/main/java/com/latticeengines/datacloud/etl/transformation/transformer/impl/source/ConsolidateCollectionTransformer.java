@@ -1,6 +1,6 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.source;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.ConsolidateCollectionTransformer.TRANSFORMER_NAME;
+import static com.latticeengines.datacloud.etl.transformation.transformer.impl.source.ConsolidateCollectionTransformer.TRANSFORMER_NAME;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +41,7 @@ import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCo
 import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCollectionOrbFlow;
 import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCollectionSemrushFlow;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateCollectionConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
