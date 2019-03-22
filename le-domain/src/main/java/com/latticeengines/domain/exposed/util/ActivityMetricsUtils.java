@@ -528,8 +528,8 @@ public class ActivityMetricsUtils {
             throw new LedpException(LedpCode.LEDP_40032,
                     new String[] { String.format(
                             "%s %s duplicate configurations. Remove duplicate configurations to save and proceed.",
-                            String.join(",", dupMetricsDisplayNames)),
-                            dupMetricsDisplayNames.size() == 1 ? "has" : "have" });
+                            String.join(",", dupMetricsDisplayNames),
+                            dupMetricsDisplayNames.size() == 1 ? "has" : "have") });
         }
         return true;
     }
