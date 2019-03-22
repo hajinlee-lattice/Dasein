@@ -18,7 +18,7 @@
       Field(s) dropped by default: {{ vm.getNumberDroppedFields() }}
     </p>
   </div>
-  <form name="form">
+  <form name="vm.form">
     <div class="le-grid custom-fields-grid" ng-init="fieldMapping = fieldMapping || {}">
       <div class="le-header le-row">
         <div class="le-cell le-col-span-5">
@@ -101,7 +101,8 @@
                 dateformat="field.dateFormatString" timeformat="field.timeFormatString" timezone="field.timezone"
                 ignore="fieldMapping[field.userField].ignore === true"
                 update="vm.changeSingleType(fieldMapping)"
-                tooltiptxt="{{vm.fieldDateTooltip}}"></date-field-component>
+                tooltiptxt="{{vm.fieldDateTooltip}}"
+                validate="true"></date-field-component>
            
           </div>
         </div>
