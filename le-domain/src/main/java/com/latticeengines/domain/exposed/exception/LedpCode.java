@@ -339,7 +339,7 @@ public enum LedpCode {
     LEDP_18212("No buckets nor launch unscored is set for play {0}, Nothing to Launch."),
     LEDP_18213("Failed while generating playlaunch export file: {0}."),
     LEDP_18214("Bulk scoring request exceeds the maximum number of requests or rows per hour, please try later."),
-
+    
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
     LEDP_19001("Unauthorized."), //
@@ -347,12 +347,17 @@ public enum LedpCode {
     LEDP_19003("Resource not found."), //
     LEDP_19004("External User is not allowed with Lattice Email ID."), //
     LEDP_19005("Could not validate current user as the required information is missing from Identity Provider."), //
-    LEDP_19006("Sign jwt token fail."), LEDP_19007("No such jwt handler {0}."), LEDP_19008(
-            "URL encode fail."), LEDP_19009("No User Name key/value"), LEDP_19010(
-                    "No User Email key/value"), LEDP_19011("No return_to key/value"), LEDP_19012(
-                            "No source_ref key/value "), LEDP_19013("Service not found."), //
+    LEDP_19006("Sign jwt token fail."), 
+    LEDP_19007("No such jwt handler {0}."), 
+    LEDP_19008("URL encode fail."), 
+    LEDP_19009("No User Name key/value"), 
+    LEDP_19010("No User Email key/value"), 
+    LEDP_19011("No return_to key/value"), 
+    LEDP_19012("No source_ref key/value "), 
+    LEDP_19013("Service not found."), //
     LEDP_19014("Unsupport error."), //
     LEDP_19015("Your account has been locked, please reset password."), //
+    LEDP_19016("Could not authenticate ticket {0}. Reason: {1}"), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //
@@ -803,6 +808,7 @@ public enum LedpCode {
     LEDP_40054(
             "We are currently experiencing heavy data loads. We will run your Data Processing and Analysis as a scheduled job for the day. You will get a notification when your data is refreshed."),
     LEDP_40055("CSV file has duplicate headers! (case insensitive)"),
+    LEDP_40056("Failed to submit S3 import job, error: {0}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

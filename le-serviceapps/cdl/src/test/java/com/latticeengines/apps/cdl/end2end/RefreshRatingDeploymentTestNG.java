@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,6 +88,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private String uuid2;
     private String uuid3;
 
+    private ModelSummary modelSummary1;
+    private ModelSummary modelSummary2;
+    private ModelSummary modelSummary3;
+
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
         setup(USE_EXISTING_TENANT, ENABLE_AI_RATINGS);
@@ -109,8 +114,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         } else {
             setupEnd2EndTestEnvironment();
             setupBusinessCalendar();
+            Thread setupAIModelsThread = null;
             if (enableAIRatings) {
-                new Thread(this::setupAIModels).start();
+                setupAIModelsThread = new Thread(this::setupAIModels);
+                setupAIModelsThread.start();
             }
             resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
             verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
@@ -130,26 +137,46 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                         SEGMENT_NAME_MODELING);
                 Assert.assertNotNull(segment);
 
+                if(setupAIModelsThread != null) {
+                    setupAIModelsThread.join();
+                }
+
                 modelSummaryProxy.downloadModelSummary(mainCustomerSpace);
-                ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(plsModelSummaryProxy, uuid1);
-                ai1 = createCrossSellEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
+                initModelSummaries();
+                ai1 = createCrossSellEngine(segment, modelSummary1, PredictionType.EXPECTED_VALUE);
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                         ai1.getId(), ai1.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
                 activateRatingEngine(ai1.getId());
 
-                modelSummary = waitToDownloadModelSummaryWithUuid(plsModelSummaryProxy, uuid2);
-                ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
+                ai2 = createCrossSellEngine(segment, modelSummary2, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
                         ai2.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
                 activateRatingEngine(ai2.getId());
 
-                modelSummary = waitToDownloadModelSummaryWithUuid(plsModelSummaryProxy, uuid3);
-                ai3 = createCustomEventEngine(segment, modelSummary);
+                ai3 = createCustomEventEngine(segment, modelSummary3);
                 activateRatingEngine(ai3.getId());
             }
         }
+    }
+
+    private void initModelSummaries() {
+        List<ModelSummary> summaries = plsModelSummaryProxy.getSummaries();
+        if (CollectionUtils.isNotEmpty(summaries)) {
+            for (ModelSummary summary : summaries) {
+                if (summary.getId().contains(uuid1)) {
+                    modelSummary1 = summary;
+                } else if (summary.getId().contains(uuid2)) {
+                    modelSummary2 = summary;
+                } else if (summary.getId().contains(uuid3)) {
+                    modelSummary3 = summary;
+                }
+            }
+        }
+        Assert.assertNotNull(modelSummary1);
+        Assert.assertNotNull(modelSummary2);
+        Assert.assertNotNull(modelSummary3);
     }
 
     private void setupAIModels() {

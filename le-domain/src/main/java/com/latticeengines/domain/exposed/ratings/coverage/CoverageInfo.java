@@ -24,9 +24,6 @@ public class CoverageInfo {
     @JsonProperty("contactCount")
     private Long contactCount;
 
-    @JsonProperty("contactCountWithoutEmail")
-    private Long contactCountWithoutEmail;
-
     @JsonProperty("unscoredAccountCount")
     private Long unscoredAccountCount;
 
@@ -92,14 +89,6 @@ public class CoverageInfo {
 
     public void setContactCount(Long contactCount) {
         this.contactCount = contactCount;
-    }
-
-    public Long getContactCountWithoutEmail() {
-        return contactCountWithoutEmail;
-    }
-
-    public void setContactCountWithoutEmail(Long contactCountWithoutEmail) {
-        this.contactCountWithoutEmail = contactCountWithoutEmail;
     }
 
     public Long getUnscoredAccountCount() {

@@ -46,7 +46,11 @@ public class ProductUtils {
                 case Hierarchy:
                     return StringUtils.join(new String[] { type, id }, "__");
                 case Analytic:
-                    return StringUtils.join(new String[] { type, name }, "__");
+                    if (StringUtils.isNotEmpty(id)) {
+                        return StringUtils.join(new String[] { type, id }, "__");
+                    } else {
+                        return StringUtils.join(new String[]{ type, name }, "__");
+                    }
                 case Spending:
                     return StringUtils.join(new String[] { type, name, category, family, line }, "__");
                 case Raw:

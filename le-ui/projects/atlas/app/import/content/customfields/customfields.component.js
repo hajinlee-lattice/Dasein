@@ -36,9 +36,8 @@ angular.module('lp.import.wizard.customfields', [])
     }
     vm.init = function() {
         vm.size = vm.AvailableFields.length;
-        if(vm.mergedFields) {
-
-            vm.mergedFields.forEach(function(item) {
+        if(vm.fieldMappings) { //vm.mergedFields This was the original code
+            vm.fieldMappings.forEach(function(item) {
                 var appended = null;
                 if(!item.mappedToLatticeField) {
                     if(mergedFieldDocument.appended) {
@@ -117,6 +116,7 @@ angular.module('lp.import.wizard.customfields', [])
         let userField = fieldMapping.userField;
         ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone});
         ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
+        vm.validate();
     }
 
     vm.getNumberDroppedFields = function(){
@@ -134,5 +134,16 @@ angular.module('lp.import.wizard.customfields', [])
         }
         return true;
     };
+
+    vm.validate = function() {
+        // console.log(vm.form.$valid);
+        if(vm.form){
+            setTimeout(() => {
+                ImportWizardStore.setValidation('customfields', vm.form.$valid);
+                $scope.$apply();
+            }, 100);
+            
+        }
+    }
     vm.init();
 });

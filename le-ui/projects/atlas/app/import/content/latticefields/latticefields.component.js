@@ -183,7 +183,7 @@ angular.module('lp.import.wizard.latticefields', [])
         
         ImportWizardStore.setSaveObjects(_mapping);
         // console.log('MAPPING &&&&&&&&&&&& ',_mapping);
-        vm.checkValid(form);
+        vm.checkValidDelay(form);
     };
     
     vm.initDateFields = () => {
@@ -260,7 +260,7 @@ angular.module('lp.import.wizard.latticefields', [])
             toSave = ImportUtils.updateFormatSavedObj(alreadySaved, formats.field);
         }
         ImportWizardStore.setSaveObjects(toSave);
-        vm.checkValid(vm.form);
+        vm.checkValidDelay(vm.form);
         
     }
 
@@ -284,11 +284,14 @@ angular.module('lp.import.wizard.latticefields', [])
     vm.checkValidDelay = function(form) {
         $timeout(function() {
             vm.checkValid(form);
-        }, 1);
+        }, 1000);
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('latticefields', vm.form.$valid);
+        // console.log(vm.form.$valid);
+        if(vm.form){
+            ImportWizardStore.setValidation('latticefields', vm.form.$valid);
+        }
     }
 
     if (FieldDocument) {

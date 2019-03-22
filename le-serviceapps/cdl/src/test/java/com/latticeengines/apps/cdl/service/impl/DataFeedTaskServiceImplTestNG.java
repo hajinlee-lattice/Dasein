@@ -101,5 +101,14 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
         datafeedTaskService.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
         dataFeedTask = datafeedTaskService.getDataFeedTask(customerSpace.toString(), dataFeedTask.getUniqueId());
         Assert.assertEquals(dataFeedTask.getTemplateDisplayName(), "DisplayB");
+        datafeedTaskService.updateS3ImportStatus(customerSpace.toString(), dataFeedTask.getUniqueId(),
+                DataFeedTask.S3ImportStatus.Active);
+        dataFeedTask = datafeedTaskService.getDataFeedTask(customerSpace.toString(), dataFeedTask.getUniqueId());
+        Assert.assertEquals(dataFeedTask.getS3ImportStatus(), DataFeedTask.S3ImportStatus.Active);
+
+        datafeedTaskService.updateS3ImportStatus(customerSpace.toString(), dataFeedTask.getSource(),
+                dataFeedTask.getFeedType(), DataFeedTask.S3ImportStatus.Pause);
+        dataFeedTask = datafeedTaskService.getDataFeedTask(customerSpace.toString(), dataFeedTask.getUniqueId());
+        Assert.assertEquals(dataFeedTask.getS3ImportStatus(), DataFeedTask.S3ImportStatus.Pause);
     }
 }

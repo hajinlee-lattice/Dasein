@@ -151,13 +151,13 @@
 
     <bean name="cdlImportJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="cdlImportJob" />
-        <property name="cronTrigger" value="${quartz.cdl.import.job.cron:0 0/20 * * * ?}" />
-        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
-        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}" />
+        <property name="cronTrigger" value="${quartz.cdl.import.job.cron}" />
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url}" />
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url}" />
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api}" />
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlImportJob&quot;}" />
-        <property name="jobTimeout" value="${quartz.cdl.import.job.timeout:3600}" />
+        <property name="jobTimeout" value="${quartz.cdl.import.job.timeout}" />
     </bean>
 
     <bean name="cdlOrchestrationJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
