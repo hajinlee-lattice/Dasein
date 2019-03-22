@@ -127,6 +127,15 @@ public class SchemaRepository {
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
+
+        // For M27 Lead-to-Account Match, only Contact Entity has special schema behavior and requires a special
+        // function to setup the match keys.
+        if (enableEntityMatch && entity == BusinessEntity.Contact) {
+            table.addAttributes(getContactAttributesForEntityMatch());
+        } else {
+            table.addAttributes(matchingAttributes(entity));
+        }
+
         return table;
     }
 
@@ -197,7 +206,12 @@ public class SchemaRepository {
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
-        if (!enableEntityMatch) {
+
+        // For M27 Lead-to-Account Match, only Contact Entity has special schema behavior and requires a special
+        // function to setup the match keys.
+        if (enableEntityMatch && schema == SchemaInterpretation.Contact) {
+            table.addAttributes(getContactAttributesForEntityMatch());
+        } else {
             table.addAttributes(getMatchingAttributes(schema));
         }
         return table;
@@ -629,7 +643,6 @@ public class SchemaRepository {
             eventAttr.setNullable(false);
         }
         table.addAttribute(eventAttr);
-        table.addAttributes(matchingAttributes(BusinessEntity.Account));
         return table;
     }
 
@@ -769,11 +782,6 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .fundamentalType(FundamentalType.DATE.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
-        if (enableEntityMatch) {
-            table.addAttributes(getContactAttributesForEntityMatch());
-        } else {
-            table.addAttributes(matchingAttributes(BusinessEntity.Contact));
-        }
         return table;
     }
 
