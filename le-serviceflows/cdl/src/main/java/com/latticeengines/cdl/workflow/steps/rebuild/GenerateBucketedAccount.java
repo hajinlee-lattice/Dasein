@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -201,7 +202,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         targetTable.setExpandBucketedAttrs(true);
         step.setTargetTable(targetTable);
 
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        config.setRowId(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
         return step;
     }
 

@@ -167,7 +167,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         TransformationStepConfig pivot = pivot();
 //        TransformationStepConfig sort = sort(pivotStep, ratingTablePrefix, InterfaceName.AccountId.name(), 200);
         TransformationStepConfig profile = profile(pivotStep);
-        TransformationStepConfig bucket = bucket(profileStep, pivotStep, ratingTablePrefix);
+        TransformationStepConfig bucket = bucket(profileStep, pivotStep, ratingTablePrefix, //
+                InterfaceName.AccountId.name());
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, null);
 
         steps.add(pivot);

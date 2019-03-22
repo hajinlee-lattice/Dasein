@@ -49,14 +49,14 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     private int profileStep;
     private int bucketStep;
 
-    private boolean shortCutMode;
-
     private String fullAccountTableName;
     private String masterTableName;
     private String statsTablePrefix = "Stats";
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
+
+    private String statsTableName;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -80,8 +80,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             Table statsTable = metadataProxy.getTable(customerSpace.toString(), statsTableNameInContext);
             if (statsTable != null) {
                 log.info("Found stats table in context, going thru short-cut mode.");
-                updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTable.getName(), String.class);
-                registerDynamoExport();
+                statsTableName = statsTable.getName();
+                finishing();
                 return null;
             }
         }
@@ -110,10 +110,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     @Override
     protected void onPostTransformationCompleted() {
         enrichMasterTableSchema(masterTableName);
-        String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
-        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
-        registerDynamoExport();
+        statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         putStringValueInContext(ACCOUNT_STATS_TABLE_NAME, statsTableName);
+        finishing();
     }
 
     private PipelineTransformationRequest getTransformRequest() {
@@ -223,6 +222,11 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private void registerDynamoExport() {
         exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
+    }
+
+    private void finishing() {
+        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        registerDynamoExport();
     }
 
 }
