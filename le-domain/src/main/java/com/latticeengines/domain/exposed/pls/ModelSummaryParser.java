@@ -29,11 +29,12 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 public class ModelSummaryParser {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryParser.class);
+
     public static final String NAME = "Name";
     public static final String MODEL_SUMMARY_PREDICTORS = "Predictors";
     public static final String MODEL_SUMMARY_SEGMENTATIONS = "Segmentations";
     public static final String DEFAULT_PREDICTOR_NAME = "DefaultPredictorName";
-    private static final Logger log = LoggerFactory.getLogger(ModelSummaryParser.class);
     private static final String PREDICTOR_DISPLAY_NAME = "DisplayName";
 
     private static final String DEFAULT_PREDICTOR_DISPLAY_NAME = "DefaultDisplayName";
@@ -134,6 +135,18 @@ public class ModelSummaryParser {
 
         if (details.has("AverageRevenue")) {
             summary.setAverageRevenue(JsonUtils.getOrDefault(details.get("AverageRevenue"), Double.class, null));
+        }
+
+        if (details.has("AverageRevenueTestDataset")) {
+            Double avgActualRevenueTestDataset = JsonUtils.getOrDefault(details.get("AverageRevenueTestDataset"),
+                    Double.class, null);
+            summary.setAverageRevenueTestDataset(avgActualRevenueTestDataset);
+            if (avgActualRevenueTestDataset != null && avgActualRevenueTestDataset > 0D) {
+                double avgExpectedRevenueTestDataset = calculateAvgExpectedRevenueTestDataset(
+                        summary.getDetails().getPayload());
+                double normalizationRatio = avgExpectedRevenueTestDataset / avgActualRevenueTestDataset;
+                summary.setNormalizationRatio(normalizationRatio);
+            }
         }
 
         JsonNode eventTableProvenance = json.get("EventTableProvenance");
@@ -332,6 +345,39 @@ public class ModelSummaryParser {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(milliSeconds);
         return formatter.format(calendar.getTime());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private double calculateAvgExpectedRevenueTestDataset(String modelDetailsPayload) {
+        Map<String, Object> details = JsonUtils.deserialize(modelDetailsPayload, Map.class);
+        List<Map> segmentations = JsonUtils.convertList(((List<?>) details.get("Segmentations")), Map.class);
+        List<Map<String, Object>> segments = (List) segmentations.get(0).get("Segments");
+
+        double totalExpectedRevenueTestDataset = segments.stream() //
+                .map(m -> {
+                    Object val = m.get("Converted");
+                    double dVal = 0D;
+                    if (val instanceof Integer) {
+                        dVal = ((Integer) val).doubleValue();
+                    } else {
+                        dVal = (double) val;
+                    }
+                    return dVal;
+                }) //
+                .reduce(0D, (x, y) -> x + y);
+        int rowCountTestDataset = segments.stream() //
+                .map(m -> {
+                    Object val = m.get("Count");
+                    int iVal = 0;
+                    if (val instanceof Integer) {
+                        iVal = (int) val;
+                    } else {
+                        iVal = ((Double) val).intValue();
+                    }
+                    return iVal;
+                }) //
+                .reduce(0, (x, y) -> x + y);
+        return totalExpectedRevenueTestDataset / rowCountTestDataset;
     }
 
     public String parseOriginalName(String nameDatetime) {

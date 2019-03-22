@@ -163,8 +163,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertNotNull(modelSummary.getId());
         if (predictionType == PredictionType.EXPECTED_VALUE) {
             Assert.assertNotNull(modelSummary.getAverageRevenue());
+            Assert.assertNotNull(modelSummary.getAverageRevenueTestDataset());
+            Assert.assertNotNull(modelSummary.getNormalizationRatio());
         } else {
             Assert.assertNull(modelSummary.getAverageRevenue());
+            Assert.assertNull(modelSummary.getAverageRevenueTestDataset());
+            Assert.assertNull(modelSummary.getNormalizationRatio());
         }
     }
 

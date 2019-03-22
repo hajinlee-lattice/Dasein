@@ -27,6 +27,7 @@ public class CalculateFittedExpectedRevenueHelper {
         for (Map.Entry<String, Node> entry : nodes.entrySet()) {
             String modelGuid = entry.getKey();
             String evFitFunctionParamsStr = context.fitFunctionParametersMap.get(modelGuid);
+            Double normalizationRatio = context.normalizationRatioMap.get(modelGuid);
 
             Node node = entry.getValue();
 
@@ -39,6 +40,7 @@ public class CalculateFittedExpectedRevenueHelper {
                                 context.probabilityField, //
                                 context.predictedRevenueField, //
                                 context.backupPredictedRevFieldName, //
+                                normalizationRatio, //
                                 evFitFunctionParamsStr),
                         new FieldList(node.getFieldNamesArray()), node.getSchema(), null, Fields.REPLACE);
             }
