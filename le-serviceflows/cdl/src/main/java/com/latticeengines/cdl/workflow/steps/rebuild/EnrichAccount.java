@@ -120,12 +120,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     @Override
     protected void onPostTransformationCompleted() {
         String fullAccountTableName = TableUtils.getFullTableName(fullAccountTablePrefix, pipelineVersion);
-        Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
-        if (fullAccountTable == null) {
-            throw new RuntimeException("Cannot find generated full account table " + fullAccountTableName);
-        } else {
-            putStringValueInContext(FULL_ACCOUNT_TABLE_NAME, fullAccountTableName);
-        }
+        exportToS3AndAddToContext(fullAccountTableName, FULL_ACCOUNT_TABLE_NAME);
     }
 
     private PipelineTransformationRequest getTransformRequest() {

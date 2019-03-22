@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportDataFeedImportToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

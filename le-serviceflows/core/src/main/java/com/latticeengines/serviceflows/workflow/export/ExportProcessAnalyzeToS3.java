@@ -6,21 +6,19 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportProcessAnalyzeToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -50,7 +48,7 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
         addMatchError(requests);
     }
 
-    private void addMatchError(List<BaseImportExportS3<ImportExportS3StepConfiguration>.ImportExportRequest> requests) {
+    private void addMatchError(List<ImportExportRequest> requests) {
         String errorFile = getStringValueFromContext(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH);
         if (StringUtils.isNotBlank(errorFile)) {
             String tgtPath = pathBuilder.exploreS3FilePath(errorFile, s3Bucket);
@@ -67,23 +65,19 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
             log.warn("Can not find the table=" + tableName + " for tenant=" + customer);
             return;
         }
-        List<Extract> extracts = table.getExtracts();
-        if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
-            log.warn("Can not find extracts of the table=" + tableName + " for tenant=" + customer);
-            return;
-        }
-        try {
-            String srcDir = pathBuilder.getFullPath(extracts.get(0).getPath());
-            FileStatus fileStatus = HdfsUtils.getFileStatus(yarnConfiguration, srcDir);
-            log.info("Export PA, PA start time=" + paTs + " file modification time=" + fileStatus.getModificationTime()
-                    + " file=" + srcDir + " tenantId=" + customer);
-            if (fileStatus.getModificationTime() > paTs) {
-                String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                requests.add(new ImportExportRequest(srcDir, tgtDir, tableName, true, true));
-            }
-        } catch (Exception ex) {
-            log.warn("Can not get time stamp of table=" + tableName + " for tenant=" + customer + " error="
-                    + ex.getMessage());
+        ImportExportRequest request = ImportExportRequest.exportAtlasTable( //
+                customer, table, //
+                pathBuilder, s3Bucket, podId, //
+                yarnConfiguration, //
+                fileStatus -> {
+                    long modifiedTime = fileStatus.getModificationTime();
+                    String path = fileStatus.getPath().toString();
+                    log.info("Export PA, PA start time=" + paTs + " file modification time=" + modifiedTime
+                            + " file=" + path + " tenantId=" + customer);
+                    return fileStatus.getModificationTime() > paTs;
+                });
+        if (request != null) {
+            requests.add(request);
         }
     }
 

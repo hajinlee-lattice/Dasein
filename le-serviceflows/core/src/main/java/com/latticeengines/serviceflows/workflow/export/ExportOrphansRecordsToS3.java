@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportOrphansToS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportOrphanRecordsToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

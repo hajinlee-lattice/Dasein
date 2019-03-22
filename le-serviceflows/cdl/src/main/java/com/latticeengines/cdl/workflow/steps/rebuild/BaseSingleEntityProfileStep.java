@@ -62,8 +62,8 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     @Override
     protected void onPostTransformationCompleted() {
-        profileTableName = getProfileTableName();
-        servingStoreTableName = getServingStoreTableName();
+        profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
+        servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
 
         if (profileTableRole() != null) {
             upsertProfileTable(profileTableName, profileTableRole());
@@ -81,7 +81,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
                 getEntity().getServingStore(), inactive);
 
         if (StringUtils.isNotBlank(statsTablePrefix)) {
-            statsTableName = getStatsTableName();
+            statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
             updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
         }
     }
@@ -189,17 +189,5 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected abstract TableRoleInCollection profileTableRole();
 
     protected abstract PipelineTransformationRequest getTransformRequest();
-
-    protected String getProfileTableName() {
-        return TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
-    }
-
-    protected String getServingStoreTableName() {
-        return TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
-    }
-
-    protected String getStatsTableName() {
-        return TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
-    }
 
 }

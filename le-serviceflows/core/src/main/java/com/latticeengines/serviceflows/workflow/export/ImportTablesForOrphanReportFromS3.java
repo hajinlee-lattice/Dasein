@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("importTablesForOrphanReportFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

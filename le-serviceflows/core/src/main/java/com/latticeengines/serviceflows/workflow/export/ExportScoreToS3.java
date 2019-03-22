@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportScoreToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
