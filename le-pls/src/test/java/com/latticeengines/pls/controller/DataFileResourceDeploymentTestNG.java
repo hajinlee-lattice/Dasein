@@ -33,8 +33,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
