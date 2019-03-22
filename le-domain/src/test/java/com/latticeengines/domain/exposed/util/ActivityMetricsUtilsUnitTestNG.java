@@ -1,12 +1,16 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -85,6 +89,42 @@ public class ActivityMetricsUtilsUnitTestNG {
                 Assert.assertFalse(ActivityMetricsUtils.isDeprecated(fullName, metrics));
             }
         }
+    }
+
+    @Test(groups = "unit")
+    public void testIsValidCrossMetrics() {
+        Tenant tenant = new Tenant("dummy");
+        tenant.setPid(-1L);
+        List<ActivityMetrics> ams = new ArrayList<>();
+        Assert.assertTrue(ActivityMetricsUtils.isValidMetrics(ams));
+
+        // Verify allowed maximum counts for each type of metrics
+        ActivityMetricsUtils.MAX_CNTS.forEach((metrics, cnt) -> {
+            ams.clear();
+            // within maximum limit
+            IntStream.range(0, cnt).forEach(i -> ams.add(ActivityMetricsTestUtils.createPurchaseMetrics(tenant,
+                    metrics,
+                    PeriodStrategy.Template.Week, Arrays.asList(i + 1, i + 1, i + 1))));
+            Assert.assertTrue(ActivityMetricsUtils.isValidMetrics(ams));
+
+            ams.clear();
+            // exceed maximum limit
+            IntStream.range(0, cnt + 1).forEach(i -> ams.add(ActivityMetricsTestUtils.createPurchaseMetrics(tenant,
+                    metrics, PeriodStrategy.Template.Week, Arrays.asList(i + 1, i + 1, i + 1))));
+            Assert.assertThrows(LedpException.class, () -> ActivityMetricsUtils.isValidMetrics(ams));
+        });
+
+        // Verify duplicate config of metrics
+        ActivityMetricsUtils.MAX_CNTS.forEach((metrics, cnt) -> {
+            if (cnt <= 1) {
+                return;
+            }
+            ams.clear();
+            // within maximum limit but period is same
+            IntStream.range(0, cnt).forEach(i -> ams.add(ActivityMetricsTestUtils.createPurchaseMetrics(tenant, metrics,
+                    PeriodStrategy.Template.Week, Arrays.asList(1, 2, 3))));
+            Assert.assertThrows(LedpException.class, () -> ActivityMetricsUtils.isValidMetrics(ams));
+        });
     }
 
 }
