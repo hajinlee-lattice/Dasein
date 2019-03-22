@@ -24,6 +24,7 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
     private volatile LEJobCaller caller;
     private volatile Thread callerThread;
+    private volatile boolean waitForCaller;
 
     @Autowired
     private WorkflowService workflowService;
@@ -48,17 +49,19 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
             clearJobCache(executionId);
         } finally {
-            // NOTE this method is executed by Spring so there is a chance main thread has
-            // not set caller yet, wait for it to finish
-            try {
-                synchronized (this) {
-                    while (caller == null) {
-                        log.info("Waiting for LEJobCaller to be set");
-                        wait(TimeUnit.SECONDS.toMillis(3L));
+            if (waitForCaller) {
+                // NOTE this method is executed by Spring so there is a chance main thread has
+                // not set caller yet, wait for it to finish
+                try {
+                    synchronized (this) {
+                        while (caller == null) {
+                            log.info("Waiting for LEJobCaller to be set");
+                            wait(TimeUnit.SECONDS.toMillis(3L));
+                        }
                     }
+                } catch (Exception e) {
+                    log.error("Error occurs when waiting for LEJobCaller to be set", e);
                 }
-            } catch (Exception e) {
-                log.error("Error occurs when waiting for LEJobCaller to be set", e);
             }
 
             if (caller != null) {
@@ -66,7 +69,7 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
                 caller.callDone();
                 callerThread.interrupt();
             } else {
-                log.error("Got NULL LEJobCaller, workflow cannot finish properly");
+                log.warn("Got NULL LEJobCaller, workflow might not be able to finish properly");
             }
         }
     }
@@ -98,5 +101,11 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         log.info("Thread {} register LEJobCaller {}", callerThread, caller);
         this.callerThread = callerThread;
         this.caller = caller;
+    }
+
+    @Override
+    public void enableWaitForCaller() {
+        log.info("Listener will wait for LEJobCaller to be set");
+        waitForCaller = true;
     }
 }

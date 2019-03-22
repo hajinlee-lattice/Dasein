@@ -88,6 +88,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         }
 
         try {
+            workflowService.prepareToSleepForCompletion();
             if (workflowConfig.isRestart()) {
                 @SuppressWarnings("unchecked")
                 AbstractWorkflow<? extends WorkflowConfiguration> workflow = appContext
