@@ -17,7 +17,8 @@ systems-component{
             .system-title{
                 justify-content: flex-start;
                 align-items: center;
-                height: 50px;
+                // height: 60px;
+                flex:0.2;
                 .system-image-container{
                     
                     .systemImage{
@@ -32,7 +33,7 @@ systems-component{
 
             }
             .system-body{
-                flex: 1;
+                flex: 0.8;
                 .lable{
                     flex: 0.5;
                 }
@@ -52,7 +53,8 @@ systems-component{
                 }
             }
             .system-footer{
-                height: 50px;
+                // height: 60px;
+                flex: 0.2;
                 align-items: center;
                 &.right-controlls{
                     justify-content: flex-end;
