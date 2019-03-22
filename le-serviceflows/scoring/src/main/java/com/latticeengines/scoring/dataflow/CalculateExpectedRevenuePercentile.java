@@ -144,8 +144,8 @@ public class CalculateExpectedRevenuePercentile
 
         calculatePercentile = calculatePercentile //
                 .addFunction(
-                        String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName, context.percentileFieldName,
-                                context.standardScoreField), //
+                        String.format(EV_PERCENTILE_EXPRESSION, context.percentileFieldName,
+                                context.percentileFieldName, context.standardScoreField), //
                         new FieldList(context.percentileFieldName, context.standardScoreField), //
                         new FieldMetadata(ParsedContext.PREFIX_TEMP_COL + context.standardScoreField, Integer.class));
         calculatePercentile = calculatePercentile.discard(context.standardScoreField);
@@ -209,6 +209,7 @@ public class CalculateExpectedRevenuePercentile
         public String outputExpRevFieldName;
         public String backupPredictedRevFieldName;
         public String scoreCountFieldName;
+        public Map<String, Double> normalizationRatioMap;
         public Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
         ParsedContext(CalculateExpectedRevenuePercentileParameters parameters) {
@@ -219,11 +220,12 @@ public class CalculateExpectedRevenuePercentile
             originalScoreFieldMap = parameters.getOriginalScoreFieldMap();
             minPct = parameters.getPercentileLowerBound();
             maxPct = parameters.getPercentileUpperBound();
+            normalizationRatioMap = parameters.getNormalizationRatioMap();
+            scoreDerivationMaps = parameters.getScoreDerivationMaps();
             long timestamp = System.currentTimeMillis();
             outputPercentileFieldName = String.format("%sper_%d", PREFIX_TEMP_COL, timestamp);
             outputExpRevFieldName = String.format("%sev_%d", PREFIX_TEMP_COL, timestamp);
             scoreCountFieldName = String.format("%scount_%d", PREFIX_TEMP_COL, timestamp);
-            scoreDerivationMaps = parameters.getScoreDerivationMaps();
             backupPredictedRevFieldName = String.format("__%s_%s", predictedRevenueField, "raw");
         }
     }

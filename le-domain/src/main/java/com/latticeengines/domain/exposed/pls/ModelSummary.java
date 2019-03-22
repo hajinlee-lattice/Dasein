@@ -94,6 +94,8 @@ public class ModelSummary
     private String targetTableName;
     private Boolean trainingFileExist = false;
     private Double averageRevenue;
+    private Double averageRevenueTestDataset;
+    private Double normalizationRatio;
     private String transformationGroupName;
     private String predefinedSelectionName;
     private String predefinedSelectionVersion;
@@ -512,6 +514,26 @@ public class ModelSummary
 
     public void setAverageRevenue(Double averageRevenue) {
         this.averageRevenue = averageRevenue;
+    }
+
+    @JsonProperty("AverageRevenueTestDataset")
+    @Column(name = "AVERAGE_REVENUE_TEST_DATASET", nullable = true)
+    public Double getAverageRevenueTestDataset() {
+        return averageRevenueTestDataset;
+    }
+
+    public void setAverageRevenueTestDataset(Double averageRevenueTestDataset) {
+        this.averageRevenueTestDataset = averageRevenueTestDataset;
+    }
+
+    @JsonProperty("NormalizationRatio")
+    @Column(name = "NORMALIZATION_RATIO", nullable = true)
+    public Double getNormalizationRatio() {
+        return normalizationRatio;
+    }
+
+    public void setNormalizationRatio(Double normalizationRatio) {
+        this.normalizationRatio = normalizationRatio;
     }
 
     @JsonProperty("TransformationGroupName")

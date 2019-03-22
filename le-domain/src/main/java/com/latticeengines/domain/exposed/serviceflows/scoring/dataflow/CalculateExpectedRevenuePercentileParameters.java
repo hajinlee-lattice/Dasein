@@ -35,6 +35,9 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
     @JsonProperty("fit_function_parameters_map")
     private Map<String, String> fitFunctionParametersMap;
 
+    @JsonProperty("normalization_ratio_map")
+    private Map<String, Double> normalizationRatioMap;
+
     @JsonProperty("score_derivation_maps")
     private Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
@@ -100,6 +103,14 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
 
     public void setFitFunctionParametersMap(Map<String, String> fitFunctionParametersMap) {
         this.fitFunctionParametersMap = fitFunctionParametersMap;
+    }
+
+    public Map<String, Double> getNormalizationRatioMap() {
+        return normalizationRatioMap;
+    }
+
+    public void setNormalizationRatioMap(Map<String, Double> normalizationRatioMap) {
+        this.normalizationRatioMap = normalizationRatioMap;
     }
 
     public Map<String, Map<ScoreDerivationType, ScoreDerivation>> getScoreDerivationMaps() {
