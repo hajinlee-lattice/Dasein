@@ -18,12 +18,16 @@ public class EntityPublishStatistics {
     @JsonProperty("LookupCount")
     private int lookupCount;
 
+    @JsonProperty("NotInStagingLookupCount")
+    private int notInStagingLookupCount;
+
     public EntityPublishStatistics() {
     }
 
-    public EntityPublishStatistics(int seedCount, int lookupCount) {
+    public EntityPublishStatistics(int seedCount, int lookupCount, int notInStagingLookupCount) {
         this.seedCount = seedCount;
         this.lookupCount = lookupCount;
+        this.notInStagingLookupCount = notInStagingLookupCount;
     }
 
     public EntityPublishRequest getRequest() {
@@ -50,4 +54,11 @@ public class EntityPublishStatistics {
         this.lookupCount = lookupCount;
     }
 
+    public int getNotInStagingLookupCount() {
+        return notInStagingLookupCount;
+    }
+
+    public void setNotInStagingLookupCount(int notInStagingLookupCount) {
+        this.notInStagingLookupCount = notInStagingLookupCount;
+    }
 }
