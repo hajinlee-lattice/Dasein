@@ -483,8 +483,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public void saveStatusHistory(String customerSpace, DataCollectionStatus status) {
         DataCollectionStatusHistory statusHistory = new DataCollectionStatusHistory();
-        statusHistory.setDataCollection(getDefaultCollection(customerSpace));
-        statusHistory.setTenant(MultiTenantContext.getTenant());
+        statusHistory.setTenantName(MultiTenantContext.getTenant().getName());
         populateStatusDetailHistory(status, statusHistory);
         dataCollectionStatusHistoryEntityMgr.create(statusHistory);
 
@@ -493,7 +492,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return dataCollectionStatusHistoryEntityMgr.findByTenantOrderByCreationTimeDesc(tenant);
+        return dataCollectionStatusHistoryEntityMgr.findByTenantNameOrderByCreationTimeDesc(tenant.getName());
     }
 
     private void populateStatusDetailHistory(DataCollectionStatus status, DataCollectionStatusHistory statusHistory) {

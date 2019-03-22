@@ -1,15 +1,18 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
@@ -28,93 +31,90 @@ public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentT
     @Test(groups = "deployment-app")
     public void testCrud() throws Exception {
         // post empty node, verify insert default node
-        DataCollectionStatus emptyStatus = new DataCollectionStatus();
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, emptyStatus,
+        DataCollectionStatus status = new DataCollectionStatus();
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status,
                 DataCollection.Version.Blue);
-        Thread.sleep(500);
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
-                DataCollection.Version.Blue);
-        // verify default value
-        Assert.assertTrue(status.getAccountCount() == 0L);
-        Assert.assertTrue(status.getMaxTxnDate() == 0);
+        verfyStatusWithRetries(DataCollection.Version.Blue, 0L);
 
         // insert status history
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, emptyStatus);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
+        // make sure the following two entries have different creation time,
+        // time value in DB are accurate to second
         Thread.sleep(1000);
-        List<DataCollectionStatusHistory> statusHisList = dataCollectionProxy
-                .getDataCollectionStatusHistory(mainCustomerSpace);
-        Assert.assertEquals(statusHisList.size(), 1);
-        DataCollectionStatusHistory statusHis = statusHisList.get(0);
-        Assert.assertTrue(statusHis.getAccountCount() == 0L);
-        Assert.assertTrue(statusHis.getContactCount() == 0L);
+        verifyStatusHistoryWithRetries(1, 0L, false, 0L);
 
         // insert blue
         status.setAccountCount(10L);
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status,
                 DataCollection.Version.Blue);
-        Thread.sleep(500);
-        DataCollectionStatus blueStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(
-                mainCustomerSpace,
-                DataCollection.Version.Blue);
-        Assert.assertTrue(blueStatus.getAccountCount() == 10L);
+        verfyStatusWithRetries(DataCollection.Version.Blue, 10L);
 
         // insert status history with version blue, verify first item in array
         dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
         Thread.sleep(1000);
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace);
-        Assert.assertEquals(statusHisList.size(), 2);
-        statusHis = statusHisList.get(0);
-        Assert.assertTrue(statusHis.getAccountCount() == 10L);
+        verifyStatusHistoryWithRetries(2, 10L, false, 0L);
 
         // insert green
         status.setAccountCount(20L);
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status,
                 DataCollection.Version.Green);
-        Thread.sleep(500);
-        DataCollectionStatus greenStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
-                DataCollection.Version.Green);
-        Assert.assertTrue(greenStatus.getAccountCount() == 20L);
+        verfyStatusWithRetries(DataCollection.Version.Green, 20L);
 
         // insert status history with version green, verify first item
         dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
         Thread.sleep(1000);
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace);
-        Assert.assertEquals(statusHisList.size(), 3);
-        statusHis = statusHisList.get(0);
-        Assert.assertTrue(statusHis.getAccountCount() == 20L);
-        // verify status history with version blue, no change
-        statusHis = statusHisList.get(1);
-        Assert.assertTrue(statusHis.getAccountCount() == 10L);
+        verifyStatusHistoryWithRetries(3, 20L, true, 10L);
 
         // update blue, verify green
-        blueStatus.setAccountCount(30L);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, blueStatus,
+        status.setAccountCount(30L);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status,
                 DataCollection.Version.Blue);
-        greenStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
-                DataCollection.Version.Green);
-        Assert.assertTrue(greenStatus.getAccountCount() == 20L);
+        verfyStatusWithRetries(DataCollection.Version.Green, 20L);
+
 
         // insert history
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, blueStatus);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
 
         // update green, verify blue
-        greenStatus.setAccountCount(40L);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, greenStatus,
+        status.setAccountCount(40L);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status,
                 DataCollection.Version.Green);
-        blueStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
-                DataCollection.Version.Blue);
-        Assert.assertTrue(blueStatus.getAccountCount() == 30L);
+        verfyStatusWithRetries(DataCollection.Version.Blue, 30L);
 
         Thread.sleep(1000);
         // insert history
-        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, greenStatus);
+        dataCollectionProxy.saveDataCollectionStatusHistory(mainCustomerSpace, status);
 
-        statusHisList = dataCollectionProxy.getDataCollectionStatusHistory(mainCustomerSpace);
-        System.out.println("info : " + JsonUtils.serialize(statusHisList));
-        Assert.assertEquals(statusHisList.size(), 5);
-        statusHis = statusHisList.get(0);
-        Assert.assertTrue(statusHis.getAccountCount() == 40L);
-        statusHis = statusHisList.get(1);
-        Assert.assertTrue(statusHis.getAccountCount() == 30L);
+        verifyStatusHistoryWithRetries(5, 40L, true, 30L);
+    }
+
+    private void verifyStatusHistoryWithRetries(int size, long accountNumber1, boolean verifySecond,
+            long accountNumber2) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2, Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            List<DataCollectionStatusHistory> statusHisList = dataCollectionProxy
+                    .getDataCollectionStatusHistory(mainCustomerSpace);
+            Assert.assertEquals(statusHisList.size(), size);
+            DataCollectionStatusHistory statusHis = statusHisList.get(0);
+            Assert.assertTrue(statusHis.getAccountCount() == accountNumber1);
+            Assert.assertTrue(statusHis.getContactCount() == 0L);
+            if (verifySecond) {
+                statusHis = statusHisList.get(1);
+                Assert.assertTrue(statusHis.getAccountCount() == accountNumber2);
+            }
+            return true;
+        });
+    }
+
+    private void verfyStatusWithRetries(DataCollection.Version version, long accountNumber) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2,
+                Arrays.asList(AssertionError.class, NullPointerException.class), null);
+        retry.execute(context -> {
+            DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
+                    version);
+            Assert.assertTrue(status.getAccountCount() == accountNumber);
+            Assert.assertTrue(status.getMaxTxnDate() == 0);
+            return true;
+        });
     }
 }

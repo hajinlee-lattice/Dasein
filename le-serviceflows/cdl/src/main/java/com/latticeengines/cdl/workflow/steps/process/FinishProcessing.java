@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -67,6 +68,10 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
+
+        // save data collection status history
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        dataCollectionProxy.saveDataCollectionStatusHistory(customerSpace.toString(), detail);
 
         // TODO: @kliu dataCloudBuildNumber has already been saved to DB in
         // GenerateProcessingReport step.
