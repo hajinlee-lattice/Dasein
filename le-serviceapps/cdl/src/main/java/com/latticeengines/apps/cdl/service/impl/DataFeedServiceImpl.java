@@ -303,7 +303,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private DataFeedExecution failExecution(DataFeed datafeed, String initialDataFeedStatus) {
-        DataFeedExecution execution = datafeed.getActiveExecution();
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(datafeed.getActiveExecutionId());
         execution.setStatus(DataFeedExecution.Status.Failed);
         datafeedExecutionEntityMgr.update(execution);
 

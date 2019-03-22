@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -63,7 +64,6 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
 
@@ -109,8 +109,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     @VisibleForTesting
-    StartProcessing(DataCollectionProxy dataCollectionProxy, InternalResourceRestApiProxy internalResourceProxy,
-            ActionProxy actionProxy, CustomerSpace customerSpace) {
+    StartProcessing(DataCollectionProxy dataCollectionProxy, ActionProxy actionProxy, CustomerSpace customerSpace) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.actionProxy = actionProxy;
         this.customerSpace = customerSpace;
@@ -119,7 +118,17 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Override
     public void execute() {
-        clearExecutionContext();
+        Set<String> renewableKeys = Sets.newHashSet( //
+                NEW_ENTITY_MATCH_VERSION, //
+                ACCOUNT_DIFF_TABLE_NAME, //
+                ACCOUNT_MASTER_TABLE_NAME, //
+                FULL_ACCOUNT_TABLE_NAME, //
+                ACCOUNT_FEATURE_TABLE_NAME, //
+                ACCOUNT_SERVING_PROFILE_TABLE_NAME, //
+                ACCOUNT_SERVING_TABLE_NAME, //
+                ACCOUNT_STATS_TABLE_NAME
+        );
+        clearExecutionContext(renewableKeys);
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();
@@ -442,6 +451,19 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setupInactiveVersion() {
+        Set<String> tableKeysForRetry = Sets.newHashSet( //
+                ACCOUNT_DIFF_TABLE_NAME, //
+                ACCOUNT_MASTER_TABLE_NAME, //
+                FULL_ACCOUNT_TABLE_NAME, //
+                ACCOUNT_FEATURE_TABLE_NAME, //
+                ACCOUNT_SERVING_PROFILE_TABLE_NAME, //
+                ACCOUNT_SERVING_TABLE_NAME, //
+                ACCOUNT_STATS_TABLE_NAME
+        );
+        Set<String> tableNamesForRetry = tableKeysForRetry.stream() //
+                .map(this::getStringValueFromContext) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toSet());
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             List<String> tableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role,
                     inactiveVersion);
@@ -453,7 +475,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     activeTableNameSet.add(t.toLowerCase());
                 });
                 for (String tableName : tableNames) {
-                    if (activeTableNameSet.contains(tableName.toLowerCase())) {
+                    if (activeTableNameSet.contains(tableName.toLowerCase()) || tableNamesForRetry.contains(tableName)) {
                         log.info("Unlink table " + tableName + " as " + role + " in " + inactiveVersion);
                         dataCollectionProxy.unlinkTable(customerSpace.toString(), tableName, role, inactiveVersion);
                     } else {
@@ -471,11 +493,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
      * bump up entity match version
      */
     private void bumpEntityMatchVersion() {
+        Boolean alreadyBumpedUp = getObjectFromContext(NEW_ENTITY_MATCH_VERSION, Boolean.class);
+        if (Boolean.TRUE.equals(alreadyBumpedUp)) {
+            log.info("Already handled entity match version bumping up in previous PA.");
+            return;
+        }
+
         if (!configuration.isEntityMatchEnabled()) {
             log.debug("Entity match is not enabled, not bumping up version");
             return;
         }
-
         List<EntityMatchEnvironment> environments = getEnvironmentsToBumpVersion();
         if (CollectionUtils.isNotEmpty(environments)) {
             BumpVersionRequest request = new BumpVersionRequest();
@@ -487,6 +514,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         } else {
             log.debug("No entity match environment requires bump up version");
         }
+        putObjectInContext(NEW_ENTITY_MATCH_VERSION, Boolean.TRUE);
     }
 
     /*

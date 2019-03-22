@@ -72,6 +72,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         assertEquals(status, BatchStatus.COMPLETED);
         assertEquals(workflowJobEntityMgr.findByApplicationId(appid).getWorkflowId().longValue(),
                 restartedWorkflowId.getId());
+        assertTrue(FailableStep.hasFlagInContext.get());
     }
 
 }

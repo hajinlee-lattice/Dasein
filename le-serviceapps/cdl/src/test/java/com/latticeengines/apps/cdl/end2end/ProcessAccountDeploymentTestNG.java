@@ -12,13 +12,17 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.workflow.FailingStep;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 /**
@@ -30,9 +34,22 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
+        importData();
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        FailingStep failingStep = new FailingStep();
+        failingStep.setName("mergeContact");
+        request.setFailingStep(failingStep);
+        long start = System.currentTimeMillis();
+        processAnalyze(request, JobStatus.FAILED);
+        long duration1 = System.currentTimeMillis() - start;
+
         try {
-            importData();
-            processAnalyze();
+            start = System.currentTimeMillis();
+            retryProcessAnalyze();
+            long duration2 = System.currentTimeMillis() - start;
+            // retry should be faster than the first attempt
+            Assert.assertTrue(duration2 < duration1, //
+                    "Duration of first and second PA are: " + duration1 + " and " + duration2);
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
@@ -74,6 +91,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyDataCollectionStatus(DataCollection.Version.Green);
         verifyNumAttrsInAccount();
         verifyAccountFeatures();
+        verifyAccountProfile();
         verifyDateAttrs();
 
         // Check that stats cubes only exist for the entities specified below.
@@ -94,6 +112,11 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         createTestSegmentCuratedAttr();
         verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_1));
         verifyUpdateActions();
+    }
+
+    private void verifyAccountProfile() {
+        Table table = dataCollectionProxy.getTable(mainCustomerSpace, TableRoleInCollection.Profile);
+        Assert.assertNotNull(table);
     }
 
     private void verifyDateAttrs() {

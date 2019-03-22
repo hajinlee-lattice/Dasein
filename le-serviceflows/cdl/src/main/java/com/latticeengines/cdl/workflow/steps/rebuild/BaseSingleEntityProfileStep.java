@@ -44,6 +44,10 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected Table masterTable;
     protected boolean publishToRedshift = true;
 
+    protected String profileTableName;
+    protected String servingStoreTableName;
+    protected String statsTableName;
+
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
@@ -58,8 +62,8 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     @Override
     protected void onPostTransformationCompleted() {
-        String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
-        String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+        profileTableName = getProfileTableName();
+        servingStoreTableName = getServingStoreTableName();
 
         if (profileTableRole() != null) {
             upsertProfileTable(profileTableName, profileTableRole());
@@ -68,7 +72,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
         enrichTableSchema(servingStoreTable);
         metadataProxy.updateTable(customerSpace.toString(), servingStoreTableName, servingStoreTable);
-
         servingStoreTableName = renameServingStoreTable(servingStoreTable);
 
         if (publishToRedshift) {
@@ -78,7 +81,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
                 getEntity().getServingStore(), inactive);
 
         if (StringUtils.isNotBlank(statsTablePrefix)) {
-            String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+            statsTableName = getStatsTableName();
             updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
         }
     }
@@ -123,7 +126,11 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     protected TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        if (request == null) {
+            return null;
+        } else {
+            return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        }
     }
 
     private void upsertProfileTable(String profileTableName, TableRoleInCollection profileRole) {
@@ -182,5 +189,17 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected abstract TableRoleInCollection profileTableRole();
 
     protected abstract PipelineTransformationRequest getTransformRequest();
+
+    protected String getProfileTableName() {
+        return TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
+    }
+
+    protected String getServingStoreTableName() {
+        return TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+    }
+
+    protected String getStatsTableName() {
+        return TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+    }
 
 }

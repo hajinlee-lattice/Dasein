@@ -19,4 +19,7 @@ public class BucketEncodeParameters extends TransformationFlowParameters {
     @JsonProperty("src_idx")
     public int srcIdx = 0;
 
+    @JsonProperty("row_id")
+    public String rowId;
+
 }

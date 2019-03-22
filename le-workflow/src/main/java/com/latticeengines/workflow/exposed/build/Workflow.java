@@ -1,7 +1,9 @@
 package com.latticeengines.workflow.exposed.build;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
@@ -15,8 +17,7 @@ public class Workflow {
     private List<LEJobListener> listeners = new ArrayList<>();
     private Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
     private FailingStep failingStep;
-
-    // private List<Workflow> subWorkflows = new ArrayList<>();
+    private Map<String, String> initialContext = new HashMap<>();
 
     public List<AbstractStep<? extends BaseStepConfiguration>> getSteps() {
         return steps;
@@ -71,15 +72,12 @@ public class Workflow {
         this.failingStep = failingStep;
     }
 
-    // public List<Workflow> getSubWorkflows() {
-    // return subWorkflows;
-    // }
-    //
-    // public void setSubWorkflows(List<Workflow> subWorkflows) {
-    // this.subWorkflows = subWorkflows;
-    // }
-    //
-    // public void subWorkflow(Workflow subWorkflow) {
-    // subWorkflows.add(subWorkflow);
-    // }
+    public Map<String, String> getInitialContext() {
+        return initialContext;
+    }
+
+    public void setInitialContext(Map<String, String> initialContext) {
+        this.initialContext = initialContext;
+    }
+
 }

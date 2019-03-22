@@ -64,7 +64,7 @@ public class StartProcessingUnitTestNG {
         ActionProxy actionProxy = mock(ActionProxy.class);
         when(actionProxy.createAction(anyString(), any())).thenReturn(mockAction);
 
-        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null, actionProxy,
+        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         List<Long> actionIds = startProcessing.getListObjectFromContext(BaseWorkflowStep.SYSTEM_ACTION_IDS, Long.class);
@@ -124,7 +124,7 @@ public class StartProcessingUnitTestNG {
         ActionProxy actionProxy = mock(ActionProxy.class);
         when(actionProxy.getActionsByPids(any(), any())).thenReturn(actions);
 
-        StartProcessing startProcessing = new StartProcessing(null, internalResourceProxy, actionProxy,
+        StartProcessing startProcessing = new StartProcessing(null, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
@@ -154,7 +154,7 @@ public class StartProcessingUnitTestNG {
         actionProxy = mock(ActionProxy.class);
         when(actionProxy.getActionsByPids(any(), any())).thenReturn(actions);
 
-        startProcessing = new StartProcessing(null, internalResourceProxy, actionProxy,
+        startProcessing = new StartProcessing(null, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
 

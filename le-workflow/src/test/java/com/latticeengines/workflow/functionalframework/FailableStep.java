@@ -1,5 +1,7 @@
 package com.latticeengines.workflow.functionalframework;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,8 @@ public class FailableStep extends AbstractStep<BaseStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(FailableStep.class);
 
+    static final AtomicBoolean hasFlagInContext = new AtomicBoolean(false);
+
     private boolean fail = true;
     private boolean useRuntimeException = false;
 
@@ -24,7 +28,13 @@ public class FailableStep extends AbstractStep<BaseStepConfiguration> {
             if (useRuntimeException) {
                 throw new RuntimeException("Simulated failure!");
             }
+            putObjectInContext("FAILED_ONCE", true);
             throw new LedpException(LedpCode.LEDP_28001, new String[] { "Simulated failure!" });
+        } else {
+            Boolean failed = getObjectFromContext("FAILED_ONCE", Boolean.class);
+            if (Boolean.TRUE.equals(failed)) {
+                hasFlagInContext.set(true);
+            }
         }
     }
 

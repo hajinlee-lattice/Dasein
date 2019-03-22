@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -15,8 +13,6 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(UpdateAccountDeploymentTestNG.class);
 
     static final String CHECK_POINT = "update1";
 
