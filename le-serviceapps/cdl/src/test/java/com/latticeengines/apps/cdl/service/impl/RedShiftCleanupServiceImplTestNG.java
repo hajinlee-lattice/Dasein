@@ -42,8 +42,8 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private DataUnitProxy dataUnitProxy;
 
-    @Value("${cdl.redshift.cleanup.table.remain.day}")
-    private Long remainDay;
+    @Value("${cdl.redshift.cleanup.table.remain.day:7L}")
+    private Long retentionInDays;
 
     private List<String> redshiftTables;
     private List<DataUnit> dataUnits;
@@ -80,7 +80,7 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         ReflectionTestUtils.setField(redshiftCleanupService, "dataCollectionService", dataCollectionService);
         ReflectionTestUtils.setField(redshiftCleanupService, "dataUnitProxy", dataUnitProxy);
         ReflectionTestUtils.setField(redshiftCleanupService, "cleanupFlag", true);
-        ReflectionTestUtils.setField(redshiftCleanupService, "remainDay", remainDay);
+        ReflectionTestUtils.setField(redshiftCleanupService, "retentionInDays", retentionInDays);
     }
 
     @Test(groups = "functional")
@@ -102,7 +102,7 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         tableList.add(tableName);
         df = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
         Calendar cal= Calendar.getInstance();
-        cal.add(Calendar.DATE,(int)(1-remainDay));
+        cal.add(Calendar.DATE,(int)(1-retentionInDays));
         tableName = "atlas_qa_performance_dd_contact_" + df.format(cal.getTime()) + "_utc";
         tableList.add(tableName);
         tableList.add("tobedeletedon_20190121_bw_1113_autoimport_periodtransaction_2018_11_13_16_03_41_utc");

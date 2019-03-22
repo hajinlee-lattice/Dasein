@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -44,8 +45,8 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     @Value("${cdl.redshift.cleanup.start:false}")
     private boolean cleanupFlag;
 
-    @Value("${cdl.redshift.cleanup.table.remain.day}")
-    private Long remainDay;
+    @Value("${cdl.redshift.cleanup.table.remain.day:7L}")
+    private Long retentionInDays;
 
     private final static String TABLE_PREFIX = "ToBeDeletedOn_";
 
@@ -62,17 +63,17 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         for (String tenantId : allTenantId) {
             existingTenant.add(CustomerSpace.parse(tenantId).getTenantId().toLowerCase());
         }
-        List<String> metadataTable = dataCollectionService.getAllTableNames();
-        log.info("metadataTable is " + metadataTable.toString());
-        List<String> unUsedRedshiftTable = getUnusedTable(allRedshiftTable, metadataTable);
+        List<String> metadataTables = dataCollectionService.getAllTableNames();
+        log.info("metadataTable is " + metadataTables.toString());
+        List<String> unUsedRedshiftTable = getUnusedTable(allRedshiftTable, metadataTables);
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         for (String tableName : unUsedRedshiftTable) {
             if (tableName.startsWith(TABLE_PREFIX.toLowerCase(), 0)) {//delete prefix=ToBeDelete redshift tablename
-                String formatstr = tableName.replace(TABLE_PREFIX.toLowerCase(), "");
-                String timestamp = formatstr.substring(0, formatstr.indexOf('_'));
+                String formatStr = tableName.replace(TABLE_PREFIX.toLowerCase(), "");
+                String timestamp = formatStr.substring(0, formatStr.indexOf('_'));
                 String regx = "_([a-z]+)_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_utc$";
-                formatstr = formatstr.replace(timestamp+'_', "");
-                String tenantName = formatstr.replaceAll(regx, "");
+                formatStr = formatStr.replace(timestamp + '_', "");
+                String tenantName = formatStr.replaceAll(regx, "");
                 log.info("to be deleted redshift table timestamp is " + timestamp);
                 boolean del = false;
                 try {
@@ -112,7 +113,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                         Date oDate = df.parse(createTime);
                         long days = ChronoUnit.DAYS.between(oDate.toInstant(), fDate.toInstant());
                         log.info("time distance is " + days);
-                        if (days > remainDay)//avoid to delete the table belongs to local test tenant
+                        if (days > retentionInDays)//avoid to delete the table belongs to local test tenant
                             del = true;
                     } catch (Exception e) {
                         log.error(e.getMessage());
@@ -154,13 +155,16 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
     private List<String> getUnusedTable(List<String> redshiftTables, List<String> metadataTables) {
         log.info("all redshiftTable number is " + redshiftTables.size() + " , all metadataTables number is " + metadataTables.size());
+        Set<String> unMappingTables = new HashSet<>();
         for (String metadataTable : metadataTables) {
-            if (redshiftTables.contains(metadataTable.toLowerCase())) {
-                redshiftTables.remove(metadataTable.toLowerCase());
+            metadataTable = metadataTable.toLowerCase();
+            if (redshiftTables.contains(metadataTable)) {
+                redshiftTables.remove(metadataTable);
             } else {
-                log.info("this metadataTable : " + metadataTable + " can not find in redshiftTable");
+                unMappingTables.add(metadataTable);
             }
         }
+        log.info("those metadataTable cannot find in Redshift:" + JsonUtils.serialize(unMappingTables));
         log.info(" unUsed redshiftTable number is " + redshiftTables.size());
         return redshiftTables;
     }
