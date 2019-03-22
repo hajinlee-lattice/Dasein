@@ -428,6 +428,11 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    public void prepareToSleepForCompletion() {
+        callerRegister.enableWaitForCaller();
+    }
+
+    @Override
     public JobStatus sleepForCompletionWithStatus(WorkflowExecutionId workflowId) {
         sleepForCompletion(workflowId);
         return getJobStatus(workflowId);

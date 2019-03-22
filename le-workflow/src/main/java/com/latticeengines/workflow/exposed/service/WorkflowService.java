@@ -36,7 +36,17 @@ public interface WorkflowService {
 
     WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception;
 
+    /**
+     * Prepare to sleep until the next workflow finishes. Call this before starting
+     * the workflow if you want to call
+     * {@link this#sleepForCompletion(WorkflowExecutionId)} or
+     * {@link this#sleepForCompletionWithStatus(WorkflowExecutionId)}
+     */
+    void prepareToSleepForCompletion();
+
     void sleepForCompletion(WorkflowExecutionId workflowId);
+
+    JobStatus sleepForCompletionWithStatus(WorkflowExecutionId workflowId);
 
     WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval)
             throws Exception;
@@ -52,7 +62,5 @@ public interface WorkflowService {
     <T extends WorkflowConfiguration> void registerJob(T workflowConfig, ApplicationContext context);
 
     void unRegisterJob(String workflowName);
-
-    JobStatus sleepForCompletionWithStatus(WorkflowExecutionId workflowId);
 
 }
