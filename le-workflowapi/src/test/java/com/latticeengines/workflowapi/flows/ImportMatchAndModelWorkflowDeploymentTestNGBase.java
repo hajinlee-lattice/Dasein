@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
@@ -47,8 +47,7 @@ public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends Wo
     @Autowired
     private MetadataProxy metadataProxy;
 
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
+    private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();
 
     @Autowired
     private ModelSummaryProxy modelSummaryProxy;
