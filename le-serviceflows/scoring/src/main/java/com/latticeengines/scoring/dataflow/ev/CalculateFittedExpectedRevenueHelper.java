@@ -4,12 +4,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.cdl.CalculateFittedExpectedRevenueFunction;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 import com.latticeengines.scoring.dataflow.CalculateExpectedRevenuePercentile.ParsedContext;
 
 import cascading.tuple.Fields;
@@ -28,6 +30,7 @@ public class CalculateFittedExpectedRevenueHelper {
             String modelGuid = entry.getKey();
             String evFitFunctionParamsStr = context.fitFunctionParametersMap.get(modelGuid);
             Double normalizationRatio = context.normalizationRatioMap.get(modelGuid);
+            Double avgProbabilityTestDataset = getAvgProbabilityTestDataset(context, modelGuid);
 
             Node node = entry.getValue();
 
@@ -38,9 +41,11 @@ public class CalculateFittedExpectedRevenueHelper {
                                 context.expectedRevenueField, //
                                 context.outputPercentileFieldName, //
                                 context.probabilityField, //
+                                context.backupProbabilityFieldName, //
                                 context.predictedRevenueField, //
                                 context.backupPredictedRevFieldName, //
                                 normalizationRatio, //
+                                avgProbabilityTestDataset, //
                                 evFitFunctionParamsStr),
                         new FieldList(node.getFieldNamesArray()), node.getSchema(), null, Fields.REPLACE);
             }
@@ -56,5 +61,16 @@ public class CalculateFittedExpectedRevenueHelper {
                 .rename(new FieldList(context.outputPercentileFieldName), //
                         new FieldList(context.standardScoreField)) //
                 .retain(retainedFields);
+    }
+
+    private Double getAvgProbabilityTestDataset(ParsedContext context, String modelGuid) {
+        Double avgProbabilityTestDataset = null;
+        if (MapUtils.isNotEmpty(context.scoreDerivationMaps)
+                && MapUtils.isNotEmpty(context.scoreDerivationMaps.get(modelGuid))
+                && context.scoreDerivationMaps.get(modelGuid).get(ScoreDerivationType.PROBABILITY) != null) {
+            avgProbabilityTestDataset = context.scoreDerivationMaps.get(modelGuid)
+                    .get(ScoreDerivationType.PROBABILITY).averageProbability;
+        }
+        return avgProbabilityTestDataset;
     }
 }
