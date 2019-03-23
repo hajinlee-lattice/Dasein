@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -80,4 +81,8 @@ public interface DataCollectionService {
                                           boolean deleteLatest);
 
     byte[] downloadDataCollectionArtifact(String customerSpace, String exportId);
+
+    void saveStatusHistory(String customerSpace, DataCollectionStatus status);
+
+    List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace);
 }
