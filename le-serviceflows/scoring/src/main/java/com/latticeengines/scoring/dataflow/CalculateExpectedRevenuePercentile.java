@@ -65,8 +65,10 @@ public class CalculateExpectedRevenuePercentile
         Node inputTable = addSource(context.inputTableName);
         Node addBackupPredictedRevColumn = inputTable.addColumnWithFixedValue(context.backupPredictedRevFieldName, null,
                 Double.class);
-        Node addPercentileColumn = addBackupPredictedRevColumn.addColumnWithFixedValue(context.percentileFieldName,
-                null, Integer.class);
+        Node addBackupProbabilityColumn = addBackupPredictedRevColumn
+                .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
+        Node addPercentileColumn = addBackupProbabilityColumn.addColumnWithFixedValue(context.percentileFieldName, null,
+                Integer.class);
 
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());
 
@@ -208,6 +210,7 @@ public class CalculateExpectedRevenuePercentile
         public String outputPercentileFieldName;
         public String outputExpRevFieldName;
         public String backupPredictedRevFieldName;
+        public String backupProbabilityFieldName;
         public String scoreCountFieldName;
         public Map<String, Double> normalizationRatioMap;
         public Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
@@ -227,6 +230,7 @@ public class CalculateExpectedRevenuePercentile
             outputExpRevFieldName = String.format("%sev_%d", PREFIX_TEMP_COL, timestamp);
             scoreCountFieldName = String.format("%scount_%d", PREFIX_TEMP_COL, timestamp);
             backupPredictedRevFieldName = String.format("__%s_%s", predictedRevenueField, "raw");
+            backupProbabilityFieldName = String.format("__%s_%s", probabilityField, "raw");
         }
     }
 }
