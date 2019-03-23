@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -38,28 +38,28 @@ public class OrchestrationServiceImpl implements OrchestrationService {
 
     private static Logger log = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
 
-    @Autowired
+    @Inject
     private OrchestrationEntityMgr orchestrationEntityMgr;
 
-    @Autowired
+    @Inject
     private OrchestrationProgressEntityMgr orchestrationProgressEntityMgr;
 
-    @Autowired
+    @Inject
     private OrchestrationProgressService orchestrationProgressService;
 
-    @Autowired
+    @Inject
     private OrchestrationValidator orchestrationValidator;
 
-    @Autowired
+    @Inject
     private IngestionService ingestionService;
 
-    @Autowired
+    @Inject
     private SourceTransformationService sourceTransformationService;
 
-    @Autowired
+    @Inject
     private PublicationService publicationService;
 
-    @Autowired
+    @Inject
     private List<DataCloudEngineService> engineServices;
 
     private Map<DataCloudEngine, DataCloudEngineService> serviceMap;

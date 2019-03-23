@@ -8,10 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -51,27 +52,27 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private static final String DNB_VERSION = "2017-01-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2017_01_052.OUT.gz";
 
-    @Autowired
+    @Inject
     private OrchestrationEntityMgr orchestrationEntityMgr;
-    @Autowired
+    @Inject
     private OrchestrationProgressEntityMgr orchestrationProgressEntityMgr;
-    @Autowired
+    @Inject
     private IngestionEntityMgr ingestionEntityMgr;
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
-    @Autowired
+    @Inject
     private IngestionVersionService ingestionVersionService;
-    @Autowired
+    @Inject
     private PipelineSource pipelineSource;
-    @Autowired
+    @Inject
     private OrchestrationService orchService;
-    @Autowired
+    @Inject
     private OrchestrationProgressService orchProgressService;
-    @Autowired
+    @Inject
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
     private List<Ingestion> ingestions = new ArrayList<>();
