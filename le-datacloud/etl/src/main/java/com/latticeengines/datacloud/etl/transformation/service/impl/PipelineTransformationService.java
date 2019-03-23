@@ -13,11 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,22 +69,22 @@ public class PipelineTransformationService extends AbstractTransformationService
     private static final Logger log = LoggerFactory.getLogger(PipelineTransformationService.class);
     private static final String SLACK_BOT = "PipelineTransformer";
 
-    @Autowired
+    @Inject
     private PipelineSource pipelineSource;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
 
-    @Autowired
+    @Inject
     private TransformerService transformerService;
 
-    @Autowired
+    @Inject
     private PipelineTransformationReportEntityMgr reportEntityMgr;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private DataCloudNotificationService notificationService;
 
     private final String PIPELINE = DataCloudConstants.PIPELINE_TEMPSRC_PREFIX;
