@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -23,10 +25,11 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("importProcessAnalyzeFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
+public class    ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ImportProcessAnalyzeFromS3.class);
 
@@ -35,9 +38,9 @@ public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
-
         buildImportedRequests(requests);
         buildBusinessEntityRequests(requests);
+        buildTablesForRetryRequests(requests);
     }
 
     @SuppressWarnings("rawtypes")
@@ -77,6 +80,26 @@ public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS
                 log.info("Start to add active tables for tenant=" + customer + " role=" + role.name());
                 activeTableNames.forEach(t -> addTableDir(t, requests));
             }
+        }
+    }
+
+    private void buildTablesForRetryRequests(List<ImportExportRequest> requests) {
+        Set<String> tableKeysForRetry = Sets.newHashSet( //
+                ACCOUNT_DIFF_TABLE_NAME, //
+                ACCOUNT_MASTER_TABLE_NAME, //
+                FULL_ACCOUNT_TABLE_NAME, //
+                ACCOUNT_FEATURE_TABLE_NAME, //
+                ACCOUNT_PROFILE_TABLE_NAME, //
+                ACCOUNT_SERVING_TABLE_NAME, //
+                ACCOUNT_STATS_TABLE_NAME
+        );
+        Set<String> tableNamesForRetry = tableKeysForRetry.stream() //
+                .map(this::getStringValueFromContext) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toSet());
+        if (CollectionUtils.isNotEmpty(tableNamesForRetry)) {
+            log.info("Start to add " + CollectionUtils.size(tableNamesForRetry) + " tables for retry for tenant=" + customer);
+            tableNamesForRetry.forEach(t -> addTableDir(t, requests));
         }
     }
 

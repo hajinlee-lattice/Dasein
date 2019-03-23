@@ -173,8 +173,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long TRANSACTION_3 = 68268L;
     static final Long PURCHASE_HISTORY_1 = 5L;
 
-    static final Long BATCH_STORE_PRODUCTS = 99L;
-    static final Long SERVING_STORE_PRODUCTS = 30L;
+    static final Long BATCH_STORE_PRODUCTS = 103L;
+    static final Long SERVING_STORE_PRODUCTS = 34L;
     static final Long SERVING_STORE_PRODUCT_HIERARCHIES = 20L;
 
     static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");

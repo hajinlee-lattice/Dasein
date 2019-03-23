@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportSourceFileToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

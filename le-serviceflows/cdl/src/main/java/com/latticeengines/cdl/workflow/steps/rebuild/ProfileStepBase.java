@@ -19,12 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -40,12 +43,18 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
+import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
 
@@ -70,6 +79,24 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     protected TransformationProxy transformationProxy;
+
+    @Inject
+    private EMREnvService emrEnvService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
+    @Resource(name = "distCpConfiguration")
+    protected Configuration distCpConfiguration;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
+
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
 
     protected CustomerSpace customerSpace;
 
@@ -313,6 +340,25 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
             }
         }
         return evaluationDate;
+    }
+
+    protected void exportToS3AndAddToContext(String tableName, String contextKey) {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
+        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+        ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
+                customerSpace.toString(), table, //
+                pathBuilder, s3Bucket, podId, //
+                yarnConfiguration, //
+                fileStatus -> true);
+        if (batchStoreRequest == null) {
+            throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
+        }
+        HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
+                customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
+        exporter.run();
+        putStringValueInContext(contextKey, tableName);
     }
 
 }

@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConf
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
 import com.latticeengines.proxy.exposed.cdl.DataIntegrationMonitoringProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("playLaunchExportFilesToS3Step")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -74,7 +75,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
             return;
         }
         log.info("Uploading all HDFS files to S3. {}", exportFiles);
-        exportFiles.stream().forEach(hdfsFilePath -> {
+        exportFiles.forEach(hdfsFilePath -> {
             ImportExportRequest request = new ImportExportRequest();
             request.srcPath = hdfsFilePath;
             request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, dropBoxSummary,

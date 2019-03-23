@@ -81,8 +81,9 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         int step = 0;
         int matchStep = step++;
         int mergeMatchStep = -1;
-        if (diffSlimTableName != null)
+        if (diffSlimTableName != null) {
             mergeMatchStep = step++;
+        }
         int bucketStep = step++;
         int retainStep = step++;
         int sortStep = step++;
@@ -101,8 +102,9 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(matchDiff);
-        if (mergeMatch != null)
+        if (mergeMatch != null) {
             steps.add(mergeMatch);
+        }
         steps.add(bucket);
         steps.add(retainFields);
         steps.add(sort);

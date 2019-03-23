@@ -124,7 +124,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_MASTER_TABLE_NAME, //
                 FULL_ACCOUNT_TABLE_NAME, //
                 ACCOUNT_FEATURE_TABLE_NAME, //
-                ACCOUNT_SERVING_PROFILE_TABLE_NAME, //
+                ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //
                 ACCOUNT_STATS_TABLE_NAME
         );
@@ -454,7 +454,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_MASTER_TABLE_NAME, //
                 FULL_ACCOUNT_TABLE_NAME, //
                 ACCOUNT_FEATURE_TABLE_NAME, //
-                ACCOUNT_SERVING_PROFILE_TABLE_NAME, //
+                ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //
                 ACCOUNT_STATS_TABLE_NAME
         );

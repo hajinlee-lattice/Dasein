@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -84,7 +83,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     protected void initializeConfiguration() {
         super.initializeConfiguration();
 
-        profileTableName = getStringValueFromContext(ACCOUNT_SERVING_PROFILE_TABLE_NAME);
+        profileTableName = getStringValueFromContext(ACCOUNT_PROFILE_TABLE_NAME);
         servingStoreTableName = getStringValueFromContext(ACCOUNT_SERVING_TABLE_NAME);
         if (StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(servingStoreTableName)) {
             Table profileTable = metadataProxy.getTable(customerSpace.toString(), profileTableName);
@@ -147,8 +146,8 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
-        putStringValueInContext(ACCOUNT_SERVING_PROFILE_TABLE_NAME, profileTableName);
-        putStringValueInContext(ACCOUNT_SERVING_TABLE_NAME, servingStoreTableName);
+        exportToS3AndAddToContext(profileTableName, ACCOUNT_PROFILE_TABLE_NAME);
+        exportToS3AndAddToContext(servingStoreTableName, ACCOUNT_SERVING_TABLE_NAME);
     }
 
     private TransformationStepConfig filter() {
@@ -215,29 +214,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         BucketEncodeConfig config = new BucketEncodeConfig();
         config.setRowId(InterfaceName.AccountId.name());
         step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig sortEncode(CustomerSpace customerSpace) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(encodeStep);
-        step.setInputSteps(inputSteps);
-        step.setTransformer(TRANSFORMER_SORTER);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        targetTable.setExpandBucketedAttrs(true);
-        step.setTargetTable(targetTable);
-
-        SorterConfig conf = new SorterConfig();
-        conf.setPartitions(100);
-        conf.setSplittingThreads(maxSplitThreads);
-        conf.setSplittingChunkSize(5000L);
-        conf.setCompressResult(true);
-        conf.setSortingField(servingStoreSortKey);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
         return step;
     }
 
@@ -336,14 +312,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         } else {
             return str;
         }
-    }
-
-    protected String getProfileTableName() {
-        return TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
-    }
-
-    protected String getServingStoreTableName() {
-        return TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
     }
 
 }
