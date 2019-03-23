@@ -122,7 +122,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
         }
 
         vm.checkValid = function(form, accountId, orgId, isRegistered) {
-            console.log("sdfsdfsfsdfsdf");
             vm.orgIsRegistered = isRegistered;
             vm.nullCount = null;
             vm.totalCount = null;
@@ -176,14 +175,14 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     restrictNullLookupId: false,
                     loadContactsCount: true,
                     loadContactsCountByBucket: false,
-                    loadContactsWithoutEmailCount: true
+                    applyEmailFilter: true
                 }).then(function(result) {
                     PlaybookWizardStore.setValidation('crmselection', form.$valid);
                     vm.loadingCoverageCounts = false;
                     if(vm.isEmpty(result.errorMap)){
                         var coverageCounts = result.ratingModelsCoverageMap ? result.ratingModelsCoverageMap[engineId] : {};
-                        vm.nullCount = coverageCounts.contactCountWithoutEmail || 0;
-                        vm.totalCount = coverageCounts.contactCount || 0;
+                        vm.totalCount = vm.play.targetSegment && vm.play.targetSegment.contacts ? vm.play.targetSegment.contacts : 0;
+                        vm.nullCount = Math.max(vm.totalCount - coverageCounts.contactCount, 0);
                     }else{
                         vm.showErrorApi = true;
                     }
