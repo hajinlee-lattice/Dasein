@@ -89,6 +89,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
         PublicationProgress progress = publicationProgressService.publishVersion(publication, request.getDestination(),
                 request.getSourceVersion(), request.getSubmitter());
         ApplicationId appId = submitWorkflow(progress);
+        publicationProgressService.update(progress).applicationId(appId).commit();
         return new AppSubmission(appId);
     }
 
