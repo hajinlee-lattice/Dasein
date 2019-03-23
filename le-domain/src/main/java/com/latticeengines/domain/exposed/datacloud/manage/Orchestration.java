@@ -125,6 +125,7 @@ public class Orchestration implements HasPid, Serializable {
     @JsonIgnore
     public void setConfig(OrchestrationConfig config) {
         this.config = config;
+        this.configStr = JsonUtils.serialize(config);
     }
 
     @JsonIgnore
