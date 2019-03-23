@@ -101,7 +101,6 @@ export class ConnectorList extends Component {
         let observer = new Observer(
             response => {
                 // httpService.printObservables();
-                console.log("getUserName response: ", response);
                 if (response.data && response.data.DropBox) {
                     let userName = response.data.DropBox;
                     this.setState({ userName: userName });
@@ -139,7 +138,6 @@ export class ConnectorList extends Component {
             }
         );
         let userAccessToken = this.state.accessToken;
-        console.log("USER_ACCESS_TOKEN: " + userAccessToken);
         httpService.get('/tray/solutionconfiguration?tag=' + tag + '&userId=' + userId + '&instanceName=' + instanceName, observer, {UserAccessToken: userAccessToken});
     }
 
@@ -171,39 +169,6 @@ export class ConnectorList extends Component {
                 this.setState({ openModal: false, saving: true });
                 break;
         }
-    }
-
-    registerLookupIdMapping() {
-        let observer = new Observer(
-            response => {
-                // httpService.printObservables();
-                if (response.data && response.data.name) {
-                    console.log("HELLO");
-                    console.log(response);
-                    httpService.unsubscribeObservable(observer);
-                } else {
-                    console.log("response", response);
-                }
-            },
-            error => {
-                console.error('ERROR ', error);
-            }
-        );
-
-        var lookupIdMap = {
-            orgId: (new Date()).getTime(),
-            orgName: "test",
-            externalSystemType: "MAP",
-            externalSystemName: "Marketo",
-            externalAuthentication: {
-                solutionInstanceId: this.state.solutionInstanceId,
-                trayWorkflowEnabled: false
-            }
-        };
-
-        console.log("lookupIdMap register: " + lookupIdMap);
-
-        // httpService.post('/pls/lookup-id-mapping/register', lookupIdMap, observer);
     }
 
     getIFrame() {
