@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -277,12 +276,9 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             String hdfsPath = table.getExtracts().get(0).getPath();
             if (tableRole == TableRoleInCollection.ConsolidatedProduct) {
                 log.info("Count products in HDFS " + hdfsPath);
-                Set<String> skus = new HashSet<>();
-                ProductUtils
-                        .loadProducts(yarnConfiguration, hdfsPath,
-                                Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()), null)
-                        .stream().forEach(product -> skus.add(product.getProductId()));
-                result = (long) skus.size();
+                result = ProductUtils
+                        .countProducts(yarnConfiguration, hdfsPath,
+                                Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()));
             } else {
                 if (!hdfsPath.endsWith("*.avro")) {
                     if (hdfsPath.endsWith("/")) {

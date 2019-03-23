@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -49,7 +48,7 @@ public class ProductUtils {
                     if (StringUtils.isNotEmpty(id)) {
                         return StringUtils.join(new String[] { type, id }, "__");
                     } else {
-                        return StringUtils.join(new String[]{ type, name }, "__");
+                        return StringUtils.join(new String[] { type, name }, "__");
                     }
                 case Spending:
                     return StringUtils.join(new String[] { type, name, category, family, line }, "__");
@@ -100,10 +99,28 @@ public class ProductUtils {
             }
             productList.add(product);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Loaded products " + JsonUtils.serialize(productList));
-        }
         return productList;
+    }
+
+    public static long countProducts(Configuration yarnConfiguration, String filePath,
+            List<String> productTypes) {
+        Set<String> productIds = new HashSet<>();
+        filePath = getPath(filePath);
+        log.info("Load products from " + filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        while (iter.hasNext()) {
+            GenericRecord record = iter.next();
+            String productId = getString(record, InterfaceName.Id.name());
+            if (productId == null) {
+                productId = getString(record, InterfaceName.ProductId.name());
+            }
+            String productType = getString(record, InterfaceName.ProductType.name());
+            if (productTypes != null && !productTypes.contains(productType)) {
+                continue;
+            }
+            productIds.add(productId);
+        }
+        return productIds.size();
     }
 
     public static void saveProducts(Configuration yarnConfiguration, String filePath, List<Product> productList)
@@ -181,7 +198,6 @@ public class ProductUtils {
             data.add(builder.build());
         }
 
-        // log.info("Saving products " + JsonUtils.serialize(data));
         AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data, true);
     }
 
