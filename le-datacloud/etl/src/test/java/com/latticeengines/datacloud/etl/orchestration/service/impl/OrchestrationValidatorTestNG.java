@@ -30,8 +30,6 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTrigger
 import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedScheduleConfig;
 
 public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBase {
-    // private static final Logger log =
-    // LoggerFactory.getLogger(OrchestrationValidatorTestNG.class);
     private static final String POD_ID = OrchestrationValidatorTestNG.class.getSimpleName();
 
     private static final String ORCHESTRATION_NAME = "Orchestration_" + OrchestrationValidatorTestNG.class.getSimpleName();
