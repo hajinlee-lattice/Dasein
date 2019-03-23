@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -90,6 +91,23 @@ public class DataCollectionResource {
             @PathVariable DataCollection.Version version, @RequestBody DataCollectionStatus status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.saveOrUpdateStatus(customerSpace, status, version);
+    }
+
+    @PostMapping(value = "/statushistory")
+    @ResponseBody
+    @ApiOperation(value = "Save data collection status history")
+    public void saveDataCollectionStatusHistory(@PathVariable String customerSpace,
+            @RequestBody DataCollectionStatus status) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.saveStatusHistory(customerSpace, status);
+    }
+
+    @GetMapping(value = "/statushistory")
+    @ResponseBody
+    @ApiOperation(value = "Get or create data collection status")
+    public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.getCollectionStatusHistory(customerSpace);
     }
 
     @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber:.+}")

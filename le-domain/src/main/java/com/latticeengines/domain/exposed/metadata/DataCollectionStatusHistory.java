@@ -5,24 +5,14 @@ import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -33,23 +23,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.security.HasTenant;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_DATA_COLLECTION_STATUS")
-@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+@javax.persistence.Table(name = "METADATA_DATA_COLLECTION_STATUS_HISTORY")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
-public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingFields, Serializable {
-
+public class DataCollectionStatusHistory implements HasPid, HasAuditingFields, Serializable {
+    private static final long serialVersionUID = 1531666744740489629L;
     public static final String NOT_SET = "not set";
-
-    private static final long serialVersionUID = 3180682380551859839L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,23 +42,12 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Tenant tenant;
-
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private DataCollection dataCollection;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "VERSION", nullable = false)
-    private DataCollection.Version version;
+    @Column(name = "TENANT_NAME", nullable = false)
+    private String tenantName;
 
     @Type(type = "json")
     @Column(name = "Detail", columnDefinition = "'JSON'")
-    private DataCollectionStatusDetail detail = new DataCollectionStatusDetail();
+    private DataCollectionStatusDetailHistory detail = new DataCollectionStatusDetailHistory();
 
     @Column(name = "CREATION_TIME", nullable = false)
     private Date creationTime;
@@ -93,45 +67,23 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.pid = pid;
     }
 
-    @Override
     @JsonIgnore
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    @Override
-    @JsonIgnore
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    public String getTenantName() {
+        return tenantName;
     }
 
     @JsonIgnore
-    public DataCollection getDataCollection() {
-        return dataCollection;
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 
     @JsonIgnore
-    public void setDataCollection(DataCollection dataCollection) {
-        this.dataCollection = dataCollection;
-    }
-
-    @JsonIgnore
-    public DataCollection.Version getVersion() {
-        return version;
-    }
-
-    @JsonIgnore
-    public void setVersion(DataCollection.Version version) {
-        this.version = version;
-    }
-
-    @JsonIgnore
-    public DataCollectionStatusDetail getDetail() {
+    public DataCollectionStatusDetailHistory getDetail() {
         return detail;
     }
 
     @JsonIgnore
-    public void setDetail(DataCollectionStatusDetail detail) {
+    public void setDetail(DataCollectionStatusDetailHistory detail) {
         this.detail = detail;
     }
 
@@ -293,8 +245,9 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class DataCollectionStatusDetail implements Serializable {
-        private static final long serialVersionUID = -6030795342397598056L;
+    private static class DataCollectionStatusDetailHistory implements Serializable {
+        private static final long serialVersionUID = -6509860646479703874L;
+
         @JsonProperty("DateMap")
         Map<String, Long> dateMap;
 
