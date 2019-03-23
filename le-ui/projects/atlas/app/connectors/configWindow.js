@@ -31,6 +31,7 @@ export const openConfigWindow = () => {
             configWindow.close();
         }
         if (e.data.type === 'tray.configPopup.finish') {
+            console.log("configFinished: " + configFinished);
             // Handle popup finish message
             if (solutionInstanceConfig.id) {
                 // get Tray auth values
