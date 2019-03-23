@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportModelToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

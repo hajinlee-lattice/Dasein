@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportSegmentExportToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

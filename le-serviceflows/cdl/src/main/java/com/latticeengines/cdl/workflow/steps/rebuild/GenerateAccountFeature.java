@@ -114,8 +114,7 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
             throw new IllegalStateException(
                     "Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
         }
-
-        putStringValueInContext(ACCOUNT_FEATURE_TABLE_NAME, accountFeatureTableName);
+        exportToS3AndAddToContext(accountFeatureTableName, ACCOUNT_FEATURE_TABLE_NAME);
     }
 
     private PipelineTransformationRequest getTransformRequest() {

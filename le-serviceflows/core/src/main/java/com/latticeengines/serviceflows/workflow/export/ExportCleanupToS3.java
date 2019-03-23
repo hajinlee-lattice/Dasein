@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportCleanupToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

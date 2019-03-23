@@ -51,12 +51,11 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private String fullAccountTableName;
     private String masterTableName;
+    private String statsTableName;
     private String statsTablePrefix = "Stats";
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
-
-    private String statsTableName;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -75,16 +74,18 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             throw new IllegalStateException("Cannot find the master table in default collection");
         }
 
-        String statsTableNameInContext = getStringValueFromContext(ACCOUNT_STATS_TABLE_NAME);
-        if (StringUtils.isNotBlank(statsTableNameInContext)) {
-            Table statsTable = metadataProxy.getTable(customerSpace.toString(), statsTableNameInContext);
+        statsTableName = getStringValueFromContext(ACCOUNT_STATS_TABLE_NAME);
+        if (StringUtils.isNotBlank(statsTableName)) {
+            Table statsTable = metadataProxy.getTable(customerSpace.toString(), statsTableName);
             if (statsTable != null) {
                 log.info("Found stats table in context, going thru short-cut mode.");
-                statsTableName = statsTable.getName();
                 finishing();
                 return null;
             }
         }
+
+        // reset result table names
+        statsTableName = null;
 
         fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
         if (StringUtils.isBlank(fullAccountTableName)) {
@@ -111,7 +112,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     protected void onPostTransformationCompleted() {
         enrichMasterTableSchema(masterTableName);
         statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
-        putStringValueInContext(ACCOUNT_STATS_TABLE_NAME, statsTableName);
+        exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
         finishing();
     }
 
@@ -143,6 +144,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         TransformationStepConfig step = new TransformationStepConfig();
         setBaseTables(fullAccountTableName, step);
         step.setTransformer(TRANSFORMER_PROFILER);
+
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
         // Pass current timestamp as a configuration parameter to the profile step.

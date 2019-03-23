@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -32,6 +37,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     static final String CHECK_POINT = "process1";
     static final String UNDER_SCORE = "_";
 
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
@@ -42,6 +50,8 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         long start = System.currentTimeMillis();
         processAnalyze(request, JobStatus.FAILED);
         long duration1 = System.currentTimeMillis() - start;
+
+        wipeOutContractDirInHdfs();
 
         try {
             start = System.currentTimeMillis();
@@ -80,6 +90,27 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
+    }
+
+    private void wipeOutContractDirInHdfs() {
+        String contractPath = PathBuilder //
+                .buildContractPath(podId, CustomerSpace.parse(mainCustomerSpace).getContractId()).toString();
+        String tablesPath = PathBuilder //
+                .buildDataTablePath(podId, CustomerSpace.parse(mainCustomerSpace)).toString();
+        try {
+            String filePath = tablesPath + "/File";
+            String fileBkPath = contractPath + "/FileBackup";
+            System.out.println("Backing up " + filePath);
+            HdfsUtils.copyFiles(yarnConfiguration, filePath, fileBkPath);
+            System.out.println("Wiping out " + tablesPath);
+            HdfsUtils.rmdir(yarnConfiguration, tablesPath);
+            System.out.println("Resuming " + filePath);
+            HdfsUtils.copyFiles(yarnConfiguration, fileBkPath, filePath);
+            Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, filePath));
+            HdfsUtils.rmdir(yarnConfiguration, fileBkPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to wipe out hdfs dir.", e);
+        }
     }
 
     protected void verifyProcess() {
