@@ -138,7 +138,7 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null,
                 entityMatchKeyRecord);
         matchStandardizationService.parseRecordForDuns(inputRecord, keyPositionMap, entityMatchKeyRecord);
-        matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap, null,
+        matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap,
                 matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createMatchKeyTuple(entityMatchKeyRecord);
