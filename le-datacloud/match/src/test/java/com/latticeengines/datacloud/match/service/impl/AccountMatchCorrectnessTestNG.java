@@ -362,17 +362,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 Assert.assertEquals(entityId, expectedEntityId);
             }
         }
-        /*
-        data = Arrays.asList(null, null, null, null, null, null, null, "060902413");
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
-        String entityId1 = verifyAndGetEntityId(output);
-        Assert.assertNotNull(entityId1);
-        data = Arrays.asList(null, null, null, "google", null, "usa", "ca", "000000000");
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
-        String entityId2 = verifyAndGetEntityId(output);
-        Assert.assertNotNull(entityId2);
-        Assert.assertEquals(entityId1, entityId2);
-        */
     }
 
     /**
