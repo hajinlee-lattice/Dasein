@@ -433,9 +433,13 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (String majVer : distinctMajorVer) {
             String currApprVerForMajVer = dataCloudVersionService
                     .latestApprovedForMajorVersion(majVer).getVersion();
-            // returning current and previous datacloud version
+            // returning current datacloud version
+            // TODO: 2.0.17 introduced new schema in AccountMasterLookup table,
+            // which is not compatible with 2.0.16 versions. So removed previous
+            // version from test. Add previous version back after we release
+            // 2.0.18
             prevAndCurrentApprovedVer
-                    .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 2));
+                    .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 1));
         }
         Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };

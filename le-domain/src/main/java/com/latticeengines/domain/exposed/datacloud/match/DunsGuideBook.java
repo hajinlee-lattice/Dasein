@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
@@ -145,12 +144,6 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook>
             // NOTE: this can be null
             return (String) avroValue;
         }
-    }
-
-    private String replaceSpacialChars(@NotNull String recordType) {
-        // we need to replace special char '.' from recordType otherwise avro
-        // schema parser will run into exception
-        return recordType.replace('.', '_');
     }
 
     /*

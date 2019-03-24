@@ -26,6 +26,7 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
             propDataEntityMgr.delete(alreadyExists);
         propData = new PropData();
         propData.setName(propDataName);
+        // Doesn't require DataCloud 2.0.14 dynamo table really exists
         propData.setDataCloudVersion("2.0.1470268608");
     }
 

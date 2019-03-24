@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datafabric;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+
 public abstract class BaseFabricEntity<T> implements FabricEntity<T> {
 
     private final Map<String, Object> tags = new HashMap<>();
@@ -28,6 +30,12 @@ public abstract class BaseFabricEntity<T> implements FabricEntity<T> {
     @Override
     public Map<String, Object> getTags() {
         return tags;
+    }
+
+    protected String replaceSpacialChars(@NotNull String recordType) {
+        // we need to replace special char '.' from recordType otherwise avro
+        // schema parser will run into exception
+        return recordType.replace('.', '_');
     }
 
 }

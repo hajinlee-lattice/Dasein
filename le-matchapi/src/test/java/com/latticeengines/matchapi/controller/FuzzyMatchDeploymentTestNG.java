@@ -51,9 +51,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String invalidDomain = "abcdefghijklmn.com";
     private static final String podId = "FuzzyMatchDeploymentTestNG";
     private static final String avroDir = "/tmp/FuzzyMatchDeploymentTestNG";
-    private static final String DUNS_GUIDE_BOOK_DATACLOUD_VERSION = "2.0.14";
-    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Gingerbread";
-    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Honeycomb";
+    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "IceCreamSandwich";
+    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "JellyBean";
     private static final String DUNS_GUIDE_BOOK_DIR = "DunsGuideBook";
     private static final String DUNS_GUIDE_BOOK_TEST_FILE = "dunsguidebookdata.avro";
 
@@ -204,7 +203,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         prepareDunsGuideBookData(fullAvroDir);
         AvroInputBuffer buf = new AvroInputBuffer();
         buf.setAvroDir(fullAvroDir);
-        MatchInput input = TestDunsGuideBookUtils.newBulkMatchInput(DUNS_GUIDE_BOOK_DATACLOUD_VERSION,
+        MatchInput input = TestDunsGuideBookUtils.newBulkMatchInput(versionEntityMgr.currentApprovedVersionAsString(),
                 DECISION_GRAPH_WITHOUT_GUIDE_BOOK, true, true, buf, prepareColumnSelection());
         MatchCommand command = runAndVerifyBulkMatch(input, podId);
         Iterator<GenericRecord> records =
@@ -212,7 +211,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         // should get srcDuns using the old decision graph
         validateMatchedDuns(records, expectedResult, 1); // expected source DUNS
 
-        input = TestDunsGuideBookUtils.newBulkMatchInput(DUNS_GUIDE_BOOK_DATACLOUD_VERSION,
+        input = TestDunsGuideBookUtils.newBulkMatchInput(versionEntityMgr.currentApprovedVersionAsString(),
                 DECISION_GRAPH_WITH_GUIDE_BOOK, true, true, buf, prepareColumnSelection());
         command = runAndVerifyBulkMatch(input, podId);
         records = AvroUtils.iterator(yarnConfiguration, command.getResultLocation() + "/*.avro");
