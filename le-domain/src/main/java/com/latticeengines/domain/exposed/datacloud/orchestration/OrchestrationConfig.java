@@ -3,19 +3,22 @@ package com.latticeengines.domain.exposed.datacloud.orchestration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.latticeengines.common.exposed.util.JsonUtils;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ClassName")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PredefinedScheduleConfig.class, name = "PredefinedScheduleConfig"),
         @JsonSubTypes.Type(value = ExternalTriggerConfig.class, name = "ExternalTriggerConfig") })
 public abstract class OrchestrationConfig {
+    @JsonProperty("ClassName")
     private String className;
-    private String pipelineConfig;
+
+    @JsonProperty("PipelineConfig")
     private List<DataCloudEngineStage> pipeline;
 
     public OrchestrationConfig() {
@@ -24,16 +27,16 @@ public abstract class OrchestrationConfig {
 
     @JsonIgnore
     public DataCloudEngineStage firstStage() {
-        if (pipeline == null) {
-            initEnginePipeline();
+        if (CollectionUtils.isEmpty(pipeline)) {
+            throw new RuntimeException("PipelinConfig is empty");
         }
         return pipeline.get(0);
     }
 
     @JsonIgnore
     public DataCloudEngineStage nextStage(DataCloudEngineStage cur) {
-        if (pipeline == null) {
-            initEnginePipeline();
+        if (CollectionUtils.isEmpty(pipeline)) {
+            throw new RuntimeException("PipelinConfig is empty");
         }
         Iterator<DataCloudEngineStage> iter = pipeline.iterator();
         while (iter.hasNext()) {
@@ -45,39 +48,16 @@ public abstract class OrchestrationConfig {
         return null;
     }
 
-    @JsonIgnore
-    public List<DataCloudEngineStage> getEnginePipeline() {
-        if (pipeline == null) {
-            initEnginePipeline();
-        }
-        return pipeline;
-    }
-
-    @SuppressWarnings("rawtypes")
-    @JsonIgnore
-    private void initEnginePipeline() {
-        List list = JsonUtils.deserialize(pipelineConfig, List.class);
-        pipeline = JsonUtils.convertList(list, DataCloudEngineStage.class);
-    }
-
-    @JsonProperty("ClassName")
-    private String getClassName() {
-        return className;
-    }
-
-    @JsonProperty("ClassName")
     private void setClassName(String className) {
         this.className = className;
     }
 
-    @JsonProperty("PipelineConfig")
-    public String getPipelineConfig() {
-        return pipelineConfig;
+    public List<DataCloudEngineStage> getPipeline() {
+        return pipeline;
     }
 
-    @JsonProperty("PipelineConfig")
-    private void setPipelineConfig(String pipelineConfig) {
-        this.pipelineConfig = pipelineConfig;
+    public void setPipeline(List<DataCloudEngineStage> pipeline) {
+        this.pipeline = pipeline;
     }
 
 }

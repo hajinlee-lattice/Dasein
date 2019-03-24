@@ -36,11 +36,11 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
     private static Object[][] getOrchestrations() {
         return new Object[][] { //
                 { "TestOrchestration1",
-                        "{\"ClassName\":\"PredefinedScheduleConfig\",\"PipelineConfig\":\"[{\\\"Engine\\\":\\\"INGESTION\\\",\\\"EngineName\\\":\\\"DnBCacheSeed\\\",\\\"Timeout\\\":0}]\"}",
+                        "{\"ClassName\":\"PredefinedScheduleConfig\",\"PipelineConfig\":[{\"Engine\":\"INGESTION\",\"EngineName\":\"DnBCacheSeed\",\"Timeout\":0}]}",
                         PredefinedScheduleConfig.class, 1,
                         new DataCloudEngineStage(DataCloudEngine.INGESTION, "DnBCacheSeed", 0), null }, //
                 { "TestOrchestration2",
-                        "{\"ClassName\":\"ExternalTriggerConfig\",\"PipelineConfig\":\"[{\\\"Engine\\\":\\\"INGESTION\\\",\\\"EngineName\\\":\\\"DnBCacheSeed\\\",\\\"Timeout\\\":0},{\\\"Engine\\\":\\\"TRANSFORMATION\\\",\\\"EngineName\\\":\\\"DnBCacheSeed\\\",\\\"Timeout\\\":0}]\",\"Engine\":\"INGESTION\",\"EngineName\":\"DnBCacheSeed\",\"TriggerStrategy\":\"LATEST_VERSION\"}",
+                        "{\"ClassName\":\"ExternalTriggerConfig\",\"PipelineConfig\":[{\"Engine\":\"INGESTION\",\"EngineName\":\"DnBCacheSeed\",\"Timeout\":0},{\"Engine\":\"TRANSFORMATION\",\"EngineName\":\"DnBCacheSeed\",\"Timeout\":0}],\"Engine\":\"INGESTION\",\"EngineName\":\"DnBCacheSeed\",\"TriggerStrategy\":\"LATEST_VERSION\"}",
                         ExternalTriggerConfig.class, 2,
                         new DataCloudEngineStage(DataCloudEngine.INGESTION, "DnBCacheSeed", 0),
                         new DataCloudEngineStage(DataCloudEngine.TRANSFORMATION, "DnBCacheSeed", 0) }, //
@@ -74,7 +74,7 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
             Assert.assertNotNull(((ExternalTriggerConfig) config).getEngineName());
             Assert.assertNotNull(((ExternalTriggerConfig) config).getStrategy());
         }
-        List<DataCloudEngineStage> enginePipeline = config.getEnginePipeline();
+        List<DataCloudEngineStage> enginePipeline = config.getPipeline();
         Assert.assertEquals(enginePipeline.size(), pipelineLen);
         Assert.assertEquals(config.firstStage(), firstStep);
         Assert.assertEquals(config.nextStage(config.firstStage()), nextStep);
