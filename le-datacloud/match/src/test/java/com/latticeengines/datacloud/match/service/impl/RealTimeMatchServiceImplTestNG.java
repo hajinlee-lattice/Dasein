@@ -57,9 +57,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     private String podId;
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
-    private static final String DUNS_GUIDE_BOOK_DATACLOUD_VERSION = "2.0.14";
-    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "Gingerbread";
-    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "Honeycomb";
+    private static final String DECISION_GRAPH_WITHOUT_GUIDE_BOOK = "IceCreamSandwich";
+    private static final String DECISION_GRAPH_WITH_GUIDE_BOOK = "JellyBean";
 
     @Value("${common.le.stack}")
     private String leStack;
@@ -502,13 +501,13 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public void testDunsGuideBook(
             MatchKeyTuple tuple, String expectedSrcDuns, String expectedTargetDuns, String expectedBookSource) {
         MatchInput input = TestDunsGuideBookUtils.newRealtimeMatchInput(
-                DUNS_GUIDE_BOOK_DATACLOUD_VERSION, DECISION_GRAPH_WITHOUT_GUIDE_BOOK, tuple);
+                versionEntityMgr.currentApprovedVersionAsString(), DECISION_GRAPH_WITHOUT_GUIDE_BOOK, tuple);
         MatchOutput output = realTimeMatchService.match(input);
         // should get srcDuns using the old decision graph
         verifyMatchedDuns(output, expectedSrcDuns);
 
         input = TestDunsGuideBookUtils.newRealtimeMatchInput(
-                DUNS_GUIDE_BOOK_DATACLOUD_VERSION, DECISION_GRAPH_WITH_GUIDE_BOOK, tuple);
+                versionEntityMgr.currentApprovedVersionAsString(), DECISION_GRAPH_WITH_GUIDE_BOOK, tuple);
         output = realTimeMatchService.match(input);
         // redirect to the target DUNS
         verifyMatchedDuns(output, expectedTargetDuns);

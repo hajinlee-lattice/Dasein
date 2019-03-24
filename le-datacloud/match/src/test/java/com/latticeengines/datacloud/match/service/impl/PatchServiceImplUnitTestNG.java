@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchStatus;
 
 public class PatchServiceImplUnitTestNG {
+    // Doesn't require DataCloud 2.0.14 dynamo table really exists
     private static final String TEST_DATA_CLOUD_VERSION = "2.0.14";
     // used to fake DUNS (resulting DUNS will be invalid but does not matter in this test)
     private static final String TEST_TARGET_DUNS = "placeholder";

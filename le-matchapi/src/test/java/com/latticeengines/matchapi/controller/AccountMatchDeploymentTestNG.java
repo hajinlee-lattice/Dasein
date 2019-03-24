@@ -286,8 +286,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
             // case 11: Test multi-domain field matching cases that result in no match to the account universe.
             // sub-case 1: Test that public domain restriction is relaxed when not in email format and no duns or name
-            // is provided.  Here gmail.com will be used for match and not match Google's entry, C0_01.
-            { "C11_01", "google.com", null, null, null, null, null, null, "gmail.com" }, //
+            // is provided. Here yahoo.com will be used for match and not match Google's entry, C0_01.
+            { "C11_01", "google.com", null, null, null, null, null, null, "yahoo.com" }, //
             // sub-case 2: Test that no match is found if only public email domains are provided.
             { "C11_02", "public@yahoo.com", null, null, null, null, null, null, "public@outlook.com" }, //
     };

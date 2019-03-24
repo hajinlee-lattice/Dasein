@@ -69,6 +69,7 @@ import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidati
 @ContextConfiguration(locations = { "classpath:test-datacloud-match-context.xml" })
 public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTests {
 
+    // Doesn't require DataCloud 2.0.14 dynamo table really exists
     private static final String TEST_DATA_CLOUD_VERSION = "2.0.14";
 
     // partial error messages used for matching validation errors

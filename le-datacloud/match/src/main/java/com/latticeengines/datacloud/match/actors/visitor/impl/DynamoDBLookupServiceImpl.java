@@ -96,7 +96,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
 
     @Override
     protected String lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
-        String result = null;
+        String latticeAccountId = null;
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
 
         if (matchKeyTuple.getDuns() != null || matchKeyTuple.getDomain() != null) {
@@ -115,19 +115,25 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
                 accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
             }
             Long startTime = System.currentTimeMillis();
-            result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
+            AccountLookupEntry lookupEntry = accountLookupService.batchLookup(accountLookupRequest).get(0);
+            latticeAccountId = (lookupEntry == null) ? null : lookupEntry.getLatticeAccountId();
             log.info(String.format(
                     "Fetched result from Dynamo for 1 sync requests (DataCloudVersion=%s) Duration=%d Result is %sempty",
                     request.getMatchTravelerContext().getDataCloudVersion(), System.currentTimeMillis() - startTime,
-                    result == null ? "" : "not "));
-            if (StringUtils.isNotEmpty(result)) {
+                    latticeAccountId == null ? "" : "not "));
+            if (StringUtils.isNotEmpty(latticeAccountId)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
-                            + " Lattice Account Id=" + result);
+                            + " Lattice Account Id=" + latticeAccountId);
                 }
+                // Put duns for matched ldc account into traveler for entity
+                // match
+                request.getMatchTravelerContext().setDunsOriginMapIfAbsent(new HashMap<>());
+                request.getMatchTravelerContext().getDunsOriginMap().put(DataCloudConstants.ACCOUNT_MASTER,
+                        lookupEntry.getLdcDuns());
             } else {
                 // may not be able to handle empty string
-                result = null;
+                latticeAccountId = null;
                 if (log.isDebugEnabled()) {
                     log.debug("Didn't get anything from dynamodb for " + lookupRequestId);
                 }
@@ -138,15 +144,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
             }
         }
 
-        // Put duns for matched ldc account into traveler for entity match
-        // TODO: If it's domain-only match, not able to get duns
-        if (result != null) {
-            request.getMatchTravelerContext().setDunsOriginMapIfAbsent(new HashMap<>());
-            request.getMatchTravelerContext().getDunsOriginMap().put(DataCloudConstants.ACCOUNT_MASTER,
-                    matchKeyTuple.getDuns());
-        }
-
-        return result;
+        return latticeAccountId;
     }
 
     @Override
@@ -224,43 +222,41 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
                 }
                 for (String dataCloudVersion : lookupReqWithVersion.keySet()) {
                     try {
-                        List<AccountLookupEntry> results = accountLookupService
+                        List<AccountLookupEntry> lookupEntries = accountLookupService
                                 .batchLookup(lookupReqWithVersion.get(dataCloudVersion));
                         List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
-                        if (results == null) {
+                        if (lookupEntries == null) {
                             throw new RuntimeException(String.format(
                                     "Dynamo lookup got null matching results: submitted %d requests", reqIds.size()));
                         }
-                        if (results.size() != reqIds.size()) {
+                        if (lookupEntries.size() != reqIds.size()) {
                             throw new RuntimeException(String.format(
                                     "Dynamo lookup failed to return complete matching results: submitted %d requests but only got %d results back",
-                                    reqIds.size(), results.size()));
+                                    reqIds.size(), lookupEntries.size()));
                         }
-                        for (int i = 0; i < results.size(); i++) {
-                            AccountLookupEntry result = results.get(i);
-                            if (result != null && StringUtils.isNotEmpty(result.getLatticeAccountId())) {
+                        for (int i = 0; i < lookupEntries.size(); i++) {
+                            AccountLookupEntry lookupEntry = lookupEntries.get(i);
+                            if (lookupEntry != null && StringUtils.isNotEmpty(lookupEntry.getLatticeAccountId())) {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Got result from lookup for Lookup key=" + reqIds.get(i)
-                                            + " Lattice Account Id=" + result);
+                                            + " Lattice Account Id=" + lookupEntry);
                                 }
                                 // Put duns for matched ldc account into
                                 // traveler for entity match
-                                // TODO: If it's domain-only match, not able to
-                                // get duns
                                 DataSourceLookupRequest req = getReq(reqIds.get(i));
                                 req.getMatchTravelerContext().setDunsOriginMapIfAbsent(new HashMap<>());
                                 req.getMatchTravelerContext().getDunsOriginMap().put(DataCloudConstants.ACCOUNT_MASTER,
-                                        ((MatchKeyTuple) req.getInputData()).getDuns());
+                                        lookupEntry.getLdcDuns());
                             } else {
                                 // may not be able to handle empty string
-                                result = null;
+                                lookupEntry = null;
                                 if (log.isDebugEnabled()) {
                                     log.debug("Didn't get anything from dynamodb for " + reqIds.get(i));
                                 }
                             }
                             String returnAddr = getReqReturnAddr(reqIds.get(i));
                             removeReq(reqIds.get(i));
-                            sendResponse(reqIds.get(i), result, returnAddr);
+                            sendResponse(reqIds.get(i), lookupEntry, returnAddr);
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
