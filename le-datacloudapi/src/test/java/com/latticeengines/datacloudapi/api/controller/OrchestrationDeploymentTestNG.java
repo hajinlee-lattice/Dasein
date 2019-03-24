@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 
+// dpltc deploy -a datacloudapi,workflowapi
 public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(OrchestrationDeploymentTestNG.class);
 
@@ -84,7 +85,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         return new Object[][] { //
                 { DNB_ORCHESTRATION,
                         String.format(
-                                "{\"ClassName\":\"ExternalTriggerConfig\",\"PipelineConfig\":\"[{\\\"Engine\\\":\\\"TRANSFORMATION\\\",\\\"EngineName\\\":\\\"%s\\\",\\\"Timeout\\\":20},{\\\"Engine\\\":\\\"TRANSFORMATION\\\",\\\"EngineName\\\":\\\"%s\\\",\\\"Timeout\\\":20}]\",\"Engine\":\"INGESTION\",\"EngineName\":\"%s\",\"TriggerStrategy\":\"LATEST_VERSION\"}",
+                                "{\"ClassName\":\"ExternalTriggerConfig\",\"PipelineConfig\":[{\"Engine\":\"TRANSFORMATION\",\"EngineName\":\"%s\",\"Timeout\":20},{\"Engine\":\"TRANSFORMATION\",\"EngineName\":\"%s\",\"Timeout\":20}],\"Engine\":\"INGESTION\",\"EngineName\":\"%s\",\"TriggerStrategy\":\"LATEST_VERSION\"}",
                                 DNBRAW_TRANSFORMATION, DNB_TRANSFORMATION, DNB_INGESTION),
                         "DnBCacheSeed", "2017-01-01_00-00-00_UTC" }, //
         };
