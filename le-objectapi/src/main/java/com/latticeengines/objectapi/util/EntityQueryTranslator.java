@@ -1,7 +1,9 @@
 package com.latticeengines.objectapi.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -67,6 +70,18 @@ public class EntityQueryTranslator extends QueryTranslator {
         configurePagination(frontEndQuery);
 
         return queryBuilder.build();
+    }
+
+    public Map<AttributeLookup, ComparisonType> needPreprocess(FrontEndQuery frontEndQuery,
+            TimeFilterTranslator timeTranslator) {
+        Map<AttributeLookup, ComparisonType> results = new HashMap<>();
+        BusinessEntity mainEntity = frontEndQuery.getMainEntity();
+
+        if (BusinessEntity.Product.equals(mainEntity)) {
+            return results;
+        }
+        needPreprocess(frontEndQuery, timeTranslator, results);
+        return results;
     }
 
 }

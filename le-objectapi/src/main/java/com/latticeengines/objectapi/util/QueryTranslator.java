@@ -2,6 +2,7 @@ package com.latticeengines.objectapi.util;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,8 +16,10 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationType;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DateRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
@@ -64,6 +67,14 @@ abstract class QueryTranslator {
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
         restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
         return restriction;
+    }
+
+    void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
+            Map<AttributeLookup, ComparisonType> map) {
+        BusinessEntity mainEntity = frontEndQuery.getMainEntity();
+        log.info("mainentity is " + mainEntity);
+        inspectFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, map);
+        inspectInnerRestriction(frontEndQuery, mainEntity, timeTranslator, map);
     }
 
     Query translateProductQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
@@ -121,6 +132,35 @@ abstract class QueryTranslator {
         return RestrictionOptimizer.optimize(translated);
     }
 
+    void inspectFrontEndRestriction(FrontEndRestriction frontEndRestriction, TimeFilterTranslator timeTranslator,
+            Map<AttributeLookup, ComparisonType> map) {
+        if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
+            return;
+        }
+        inspectBucketRestriction(frontEndRestriction.getRestriction(), map);
+    }
+
+    void inspectBucketRestriction(Restriction restriction, Map<AttributeLookup, ComparisonType> map) {
+        if (restriction instanceof LogicalRestriction) {
+            BreadthFirstSearch search = new BreadthFirstSearch();
+            search.run(restriction, (object, ctx) -> {
+                if (object instanceof BucketRestriction) {
+                    BucketRestriction bucket = (BucketRestriction) object;
+                    if (!Boolean.TRUE.equals(bucket.getIgnored())) {
+                        RestrictionUtils.inspectBucketRestriction(bucket, map);
+                    }
+                }
+            });
+        } else if (restriction instanceof BucketRestriction) {
+            BucketRestriction bucket = (BucketRestriction) restriction;
+            if (!Boolean.TRUE.equals(bucket.getIgnored())) {
+                RestrictionUtils.inspectBucketRestriction(bucket, map);
+            }
+        } else {
+            return;
+        }
+    }
+
     Restriction translateSalesforceIdRestriction(FrontEndQuery frontEndQuery, BusinessEntity entity,
             Restriction restriction) {
         // only add salesforce id restriction for account entity now
@@ -154,6 +194,23 @@ abstract class QueryTranslator {
         Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser,
                 true);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
+    }
+
+    void inspectInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+            TimeFilterTranslator timeTranslator, Map<AttributeLookup, ComparisonType> map) {
+        BusinessEntity innerEntity = null;
+        switch (outerEntity) {
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            break;
+        default:
+            break;
+        }
+        FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
+        inspectFrontEndRestriction(innerFrontEndRestriction, timeTranslator, map);
     }
 
     Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,

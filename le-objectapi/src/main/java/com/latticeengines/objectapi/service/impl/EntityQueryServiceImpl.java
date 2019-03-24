@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.GroupBy;
@@ -71,6 +72,20 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                     frontEndQuery);
+            // check whether need to preprocess FrontEndQuery?
+            // 1. wether any restriction has the new operator?
+            // return Map<attr: operator>
+            // LASTED_DATE
+            Map<AttributeLookup, ComparisonType> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+            // Preprocess front end query by saving the max value in cache
+            // map
+            // 1) query max date
+            // 2) round
+            // augment timetranslator
+            if (MapUtils.isNotEmpty(map)) {
+                preprocess(map, frontEndQuery, timeTranslator);
+            }
+            // replace frontend query in place
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
@@ -123,7 +138,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         if (CollectionUtils.isEmpty(query.getLookups())) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
-        preProcess(frontEndQuery.getMainEntity(), query);
+        updateLookups(frontEndQuery.getMainEntity(), query);
         return query;
     }
 
@@ -238,7 +253,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return query;
     }
 
-    private void preProcess(BusinessEntity entity, Query query) {
+    private void updateLookups(BusinessEntity entity, Query query) {
         if (BusinessEntity.Contact == entity) {
             List<Lookup> lookups = query.getLookups();
             if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {

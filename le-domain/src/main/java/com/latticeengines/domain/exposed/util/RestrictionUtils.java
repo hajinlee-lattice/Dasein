@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -33,6 +34,20 @@ public class RestrictionUtils {
 
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
+
+    public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
+            Map<AttributeLookup, ComparisonType> map) {
+        Bucket bkt = bucketRestriction.getBkt();
+        if (bkt == null) {
+            throw new IllegalArgumentException("cannot inspect null bucket restriction");
+        }
+
+        if (bkt.getDateFilter() != null) {
+            if (ComparisonType.LASTEST_DAY.equals(bkt.getDateFilter().getRelation())) {
+                map.put(bucketRestriction.getAttr(), ComparisonType.LASTEST_DAY);
+            }
+        }
+    }
 
     public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction,
             boolean translatePriorOnly) {

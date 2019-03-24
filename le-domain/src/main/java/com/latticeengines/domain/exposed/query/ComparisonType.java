@@ -21,7 +21,8 @@ public enum ComparisonType {
     GT_AND_LT, //
     EVER, //
     IS_EMPTY, //
-    LAST, //
+    LAST, // only for Date Attribute
+    LASTEST_DAY, // only for Date Attribute
     IN_CURRENT_PERIOD, //
     BETWEEN, //
     PRIOR_ONLY, //
