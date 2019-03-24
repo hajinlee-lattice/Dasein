@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,8 +58,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     // parseRecordForNameLocation() and parseRecordForDuns().
     @Override
     public void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                     Set<String> domainSet, boolean treatPublicDomainAsNormal,
-                                     EntityMatchKeyRecord record) {
+            boolean treatPublicDomainAsNormal, EntityMatchKeyRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
             boolean relaxPublicDomainCheck = isPublicDomainCheckRelaxed(record.getParsedNameLocation().getName(),
                     record.getParsedDuns());
@@ -68,6 +68,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                 // valid non-public domain to use as the parsed domain.
                 String cleanDomain = null;
                 boolean foundPublicDomain = false;
+                Set<String> publicDomains = new HashSet<>();
                 for (Integer domainPos : domainPosList) {
                     String originalDomain = (String) inputRecord.get(domainPos);
                     record.setOrigDomain(originalDomain);
@@ -80,35 +81,32 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                         // public domain is treated as normal domain.
                         if (treatPublicDomainAsNormal
                                 || (relaxPublicDomainCheck && !DomainUtils.isEmail(record.getOrigDomain()))) {
+                            // Domain is detected to be public domain, but
+                            // treated as normal domain, still mark
+                            // IsPublicDomain flag in the result/response to be
+                            // true
                             record.setMatchEvenIsPublicDomain(true);
                             record.setPublicDomain(true);
-                            record.addErrorMessages("Parsed to a public domain: " + cleanDomain
-                                    + ", but treat it as normal domain in match");
                             record.setParsedDomain(cleanDomain);
-                            if (domainSet != null) {
-                                domainSet.add(cleanDomain);
-                            }
                             break;
                         } else {
-                            record.addErrorMessages("Found a public domain: " + cleanDomain);
                             // public domain is not used for match
+                            publicDomains.add(cleanDomain);
                             cleanDomain = null;
                             foundPublicDomain = true;
                         }
                     } else {
                         record.setPublicDomain(false);
                         record.setParsedDomain(cleanDomain);
-                        if (domainSet != null) {
-                            domainSet.add(cleanDomain);
-                        }
                         break;
                     }
                 }
                 if (StringUtils.isEmpty(cleanDomain)) {
                     record.setParsedDomain(null);
-                    record.addErrorMessages("Did not find a valid non-public domain");
                     if (foundPublicDomain) {
                         record.setPublicDomain(true);
+                        record.addErrorMessages(
+                                "All the domains are public domain: " + String.join(",", publicDomains));
                     }
                 }
             } catch (Exception e) {
