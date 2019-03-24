@@ -39,6 +39,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
         TEST_PATCH_BOOK.setCreatedBy("bot");
         TEST_PATCH_BOOK.setCreatedDate(
                 new GregorianCalendar(2018, Calendar.OCTOBER, 10).getTime());
+        // Doesn't require DataCloud 2.0.14 dynamo table really exists
         TEST_PATCH_BOOK.setEffectiveSinceVersion("2.0.14");
     }
 
@@ -170,6 +171,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
         testBook.setEndOfLife(!testBook.isEndOfLife());
         testBook.setHotFix(!testBook.isHotFix());
         testBook.setEffectiveSinceVersion(null);
+        // Doesn't require DataCloud 2.0.14 dynamo table really exists
         testBook.setExpireAfterVersion("2.0.14");
         patchBookEntityMgr.setEndOfLife(pIds, testBook.isEndOfLife());
         patchBookEntityMgr.setHotFix(pIds, testBook.isHotFix());
