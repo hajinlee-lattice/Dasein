@@ -7,7 +7,6 @@ https://confluence.lattice-engines.com/display/ENG/M26+Account+Match+Tests
 
 from random import sample
 from collections import defaultdict
-from typing import List
 import lib.generators as generators
 import lib.constants as constants
 import testgroup.noconflict as noconflict
@@ -25,7 +24,7 @@ def get_n_incr():
     return idx
 
 
-def generate_controlled_group_1() -> List[noconflict.Group]:
+def generate_controlled_group_1():
     """
     Generate test data for controlled group 1.\n
     Scenarios are:
@@ -97,7 +96,7 @@ num_values = [2, 5, 10, 20]
 record_ratios = [2, 5, 10]
 
 
-def _next_value(field_name: str, group_index: int, record_index: int) -> str:
+def _next_value(field_name, group_index, record_index):
     if field_name == constants.ACCOUNT_ID:
         value = 'ACCT{}'.format(group_index)
     elif field_name == constants.SFDC_ID:
@@ -118,7 +117,7 @@ def _next_value(field_name: str, group_index: int, record_index: int) -> str:
     return value
 
 
-def generate_controlled_group_2() -> List[conflict.Group]:
+def generate_controlled_group_2():
     """
     Generate test data for controlled group 2.\n
     Different values for lower priority match keys.
@@ -140,7 +139,7 @@ def generate_controlled_group_2() -> List[conflict.Group]:
     return result
 
 
-def generate_controlled_group_3() -> List[conflict.Group]:
+def generate_controlled_group_3():
     """
     Generate test data for controlled group 3.\n
     Different values for high priority match keys.
@@ -162,7 +161,7 @@ def generate_controlled_group_3() -> List[conflict.Group]:
     return result
 
 
-def generate_random_group_1() -> List[randomvalue.Group]:
+def generate_random_group_1():
     scenarios = [
         constants.MATCH_KEY_COLS,
         constants.SYS_ID_COLS,
@@ -185,7 +184,7 @@ def generate_random_group_1() -> List[randomvalue.Group]:
     return result
 
 
-def generate_random_group_2() -> List[randomvalue.Group]:
+def generate_random_group_2():
     scenario = constants.MATCH_KEY_COLS
     num_values = [10, 50, 100]
     record_ratios = [2, 5, 10]
@@ -202,9 +201,9 @@ def generate_random_group_2() -> List[randomvalue.Group]:
     return result
 
 
-def _get_dominant_values(dominant_field: str, num_values: int, group_index: int) -> List[str]:
+def _get_dominant_values(dominant_field, num_values, group_index):
     if dominant_field == constants.DOMAIN:
-        result = ['netflix.com', 'yahoo.com'] + ['domain{}.com'.format(i) for i in range(num_values)]
+        result = ['netflix.com', 'linkedin.com'] + ['domain{}.com'.format(i) for i in range(num_values)]
     elif dominant_field == constants.COUNTRY:
         result = ['usa', 'china', 'japan'] + ['country{}'.format(i) for i in range(num_values)]
     elif dominant_field == constants.DUNS:
@@ -228,7 +227,7 @@ def _get_dominant_values(dominant_field: str, num_values: int, group_index: int)
     return result
 
 
-def generate_random_group_3() -> List[randomvalue.Group]:
+def generate_random_group_3():
     dominant_fields = [
         {constants.DOMAIN, constants.COUNTRY},
         constants.DUNS,
