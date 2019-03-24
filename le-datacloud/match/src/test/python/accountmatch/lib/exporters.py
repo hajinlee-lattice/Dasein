@@ -15,7 +15,7 @@ class AvroExporter(object):
         """
         self._path = output_file_path
         # build avro schema for test data
-        self._schema = avro.schema.Parse(
+        self._schema = avro.schema.parse(
             json.dumps(constants.TEST_AVRO_SCHEMA))
 
     def __enter__(self):

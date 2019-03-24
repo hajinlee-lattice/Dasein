@@ -83,7 +83,7 @@ def group7():
     # use fake data as an example, can also provide pre-defined records
     value_map = generators.value_map_from_group(grp_idx, constants.MATCH_KEY_COLS, 10)
     # can override values for domain to use real values (BE CAREFUL not to use domain from other groups)
-    value_map[constants.DOMAIN] = [ 'netflix.com', 'yahoo.com' ] + [ 'domain{}.com'.format(i) for i in range(0, 8) ]
+    value_map[constants.DOMAIN] = [ 'netflix.com', 'linkedin.com' ] + [ 'domain{}.com'.format(i) for i in range(0, 8) ]
     # first domain (netflix.com) will have 50% of being chosen, the others will share the remaining 50% probability
     # weights will be [ 0.5, ~0.55, 0.55, ... ]
     weight_map = generators.dominant_weight_map_from_value_map(value_map, constants.DOMAIN, 0.5)
