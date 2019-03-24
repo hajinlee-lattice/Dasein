@@ -308,7 +308,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *
      * 2. For any MatchKeys supported in LDC match, as long as it can match to
      * LatticeAccountId, it should be able to return DUNS of that
-     * LatticeAccountId to Account match (TODO together with DP-9300)
+     * LatticeAccountId to Account match
      */
     @Test(groups = "functional")
     private void testDunsKey() {
@@ -327,6 +327,42 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         // Account match. If using other match keys in LDC could find DUNS, use
         // matched LDC_DUNS in Account match instead
         testEntityMatchService.bumpVersion(tenantId);
+        List<List<Object>> dataList = Arrays.asList( //
+                // google duns
+                Arrays.asList(null, null, null, null, null, null, null, "060902413"), //
+                // google name + location
+                Arrays.asList(null, null, null, "google", null, "usa", "ca", null), //
+                // google name + location + customer's non-existing duns
+                Arrays.asList(null, null, null, "google", null, "usa", "ca", "000000000"), //
+                // for domain based match, ldc match has these combinations of
+                // lookup: domain only, domain + country + zipcode (not tested
+                // here), domain + country + state, domain + country
+                // google domain + country + state
+                Arrays.asList(null, null, null, null, "google.com", "usa", "ca", null), //
+                // google domain + country + state + customer's non-existing
+                // duns
+                Arrays.asList(null, null, null, null, "google.com", "usa", "ca", "000000000"), //
+                // google domain + country
+                Arrays.asList(null, null, null, null, "google.com", "usa", null, null), //
+                // google domain + country + customer's non-existing duns
+                Arrays.asList(null, null, null, null, "google.com", "usa", null, "000000000"), //
+                // google domain
+                Arrays.asList(null, null, null, null, "google.com", null, null, null), //
+                // google domain + customer's non-existing duns
+                Arrays.asList(null, null, null, null, "google.com", null, null, "000000000") //
+        );
+        String expectedEntityId = null;
+        for (List<Object> dataItem : dataList) {
+            output = matchAccount(dataItem, true, tenant, null, FIELDS).getRight();
+            String entityId = verifyAndGetEntityId(output);
+            Assert.assertNotNull(entityId);
+            if (expectedEntityId == null) {
+                expectedEntityId = entityId;
+            } else {
+                Assert.assertEquals(entityId, expectedEntityId);
+            }
+        }
+        /*
         data = Arrays.asList(null, null, null, null, null, null, null, "060902413");
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         String entityId1 = verifyAndGetEntityId(output);
@@ -336,6 +372,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String entityId2 = verifyAndGetEntityId(output);
         Assert.assertNotNull(entityId2);
         Assert.assertEquals(entityId1, entityId2);
+        */
     }
 
     /**
@@ -658,9 +695,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * they do overlapped MatchKeys in Account match
      *
      * NOTE: This test takes 3.5 mins and totally 916 test cases
-     * Disable this test for now due to some cases are failing which need fix in DP-9300
      */
-    @Test(groups = "functional", priority = 13, dataProvider = "exhaustiveKeysPairWithOverlap", enabled = false)
+    @Test(groups = "functional", dataProvider = "exhaustiveKeysPairWithOverlap")
     private void testMatchedPairs(Integer caseIdx, List<String> keys1, List<String> keys2) {
         log.info("CaseIdx: {} (Out of 916)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
                 String.join(",", keys2));
