@@ -620,7 +620,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Account Attribute 'Test Date' field mapping.");
+                    log.info("Setting Account Custom Field Date Attribute 'Test Date' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 2")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("YYYY-MM-DD");
@@ -629,7 +629,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Account Attribute 'Test Date 2' field mapping.");
+                    log.info("Setting Account Custom Field Date Attribute 'Test Date 2' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 3")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("DD.MM.YY");
@@ -638,7 +638,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Account Attribute 'Test Date 3' field mapping.");
+                    log.info("Setting Account Custom Field Date Attribute 'Test Date 3' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Test Date 4")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("MM/DD/YYYY");
@@ -647,7 +647,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Account Attribute 'Test Date 4' field mapping.");
+                    log.info("Setting Account Custom Field Date Attribute 'Test Date 4' field mapping.");
                 }
             }
         }
@@ -668,7 +668,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Contact Attribute 'Last_Communication_Date' field mapping.");
+                    log.info("Setting Contact Custom Field Date Attribute 'Last_Communication_Date' field mapping.");
                 } else if (fieldMapping.getUserField().equalsIgnoreCase("Renewal_Date")) {
                     fieldMapping.setFieldType(UserDefinedType.DATE);
                     fieldMapping.setDateFormatString("YYYY.MMM.DD");
@@ -677,7 +677,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     fieldMapping.setMappedField(fieldMapping.getUserField());
                     fieldMapping.setMappedToLatticeField(false);
 
-                    log.info("Setting Contact Attribute 'Renewal_Date' field mapping.");
+                    log.info("Setting Contact Custom Field Date Attribute 'Renewal_Date' field mapping.");
+                } else if (fieldMapping.getUserField().equalsIgnoreCase("Last Modified Date")) {
+                    fieldMapping.setFieldType(UserDefinedType.DATE);
+                    fieldMapping.setDateFormatString("DD/MM/YYYY");
+                    fieldMapping.setTimeFormatString("00:00:00 12H");
+                    fieldMapping.setTimezone("America/New_York");
+                    if (StringUtils.isBlank(fieldMapping.getMappedField())) {
+                        fieldMapping.setMappedField("LastModifiedDate");
+                    }
+                    fieldMapping.setMappedToLatticeField(true);
+
+                    log.info("Setting Contact Lattice Field Date Attribute 'Last Modified Date' field mapping.");
                 }
             }
         }
