@@ -195,8 +195,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
      * Test the DUNS redirect functionality. Without redirect, we should match to given src DUNS.
      * With redirect, we should get the target DUNS instead.
      */
-    // FIXME re-enable this test after publication finishes
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testDunsGuideBookBulkMatch() throws Exception {
         Object[][] expectedResult = TestDunsGuideBookUtils.getDunsGuideBookTestData();
         String fullAvroDir = new Path(avroDir, DUNS_GUIDE_BOOK_DIR).toString();

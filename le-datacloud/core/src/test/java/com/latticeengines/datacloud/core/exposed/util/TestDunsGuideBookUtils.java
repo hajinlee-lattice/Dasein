@@ -128,55 +128,90 @@ public class TestDunsGuideBookUtils {
      * represent the columns in each test case.
      */
     public static Object[][] getDunsGuideBookTestData() {
-        return new Object[][] {
+        return new Object[][] { //
+
                 /* ManualMatch redirect book */
-                { newTuple("Posco", null, null, null),
-                        "156920258", "687741991", "ManualMatch" },
-                { newTuple("Mypayrollhr", "USA", null, null),
-                        "085944640", "049716614", "ManualMatch" },
-                { newTuple("Roaming Hunger", "USA", "CA", null),
-                        "030518175", "079963409", "ManualMatch" },
-                { newTuple("Mat Logo Company", "USA", null, "North Fort Myers"),
-                        "966219669", "933972742", "ManualMatch" },
+                { //
+                        newTuple("The Daisy Group LLC", null, null, null), //
+                        "038169883", "220348575", //
+                        "ManualMatch" //
+                }, //
+                { //
+                        newTuple("Body Central", "USA", null, null), //
+                        "052267488", "151962479", //
+                        "ManualMatch" //
+                }, //
+                { //
+                        newTuple("Valmont Newmark, Inc.", "USA", "NEBRASKA", null), //
+                        "828616990", "007267214", //
+                        "ManualMatch" //
+                }, //
+                { //
+                        newTuple("Nazareth College", "USA", null, "Rochester"), //
+                        "051455062", "073670143", //
+                        "ManualMatch" //
+                }, //
 
                 /* Domain DUNS Map redirect book */
-                { newTuple("H&R Block Enterprises LLC", "USA", "Texas", null),
-                        "018628337", "167155829", "DomDunsMap" },
-                { newTuple("H&R Block Enterprises LLC", "USA", null, null),
-                        "005491814", "043951235", "DomDunsMap" },
-                { newTuple("H&R Block Enterprises LLC", null, null, null),
-                        "005491814", "043951235", "DomDunsMap" },
+                // { newTuple("H&R Block Enterprises LLC", "USA", "Texas", null),
+                // "018628337", "167155829", "DomDunsMap" },
+                // { newTuple("H&R Block Enterprises LLC", "USA", null, null),
+                // "005491814", "043951235", "DomDunsMap" },
+                // { newTuple("H&R Block Enterprises LLC", null, null, null),
+                // "005491814", "043951235", "DomDunsMap" },
 
                 /* DUNS Tree redirect book */
-                { newTuple("High Voltage Power Systems", null, null, null),
-                        "093518918", "690536743", "DunsTree" },
+                { //
+                        newTuple("Bio-Medical Applications of California, Inc.", null, null, null), //
+                        "831572776", "324661834", //
+                        "DunsTree" //
+                },
 
                 /* No redirect (no target DUNS for given KeyPartition) */
 
                 // empty DunsGuideBook.Items
-                { newTuple("Vox Mobile", null, null, null),
-                        "805888638", "805888638", null },
-                { newTuple("Vox Mobile", "USA", null, null),
-                        "805888638", "805888638", null },
-                { newTuple("Vox Mobile", "USA", "Ohio", null),
-                        "805888638", "805888638", null },
-                { newTuple("Vox Mobile", "USA", null, "Independence"),
-                        "805888638", "805888638", null },
+                { //
+                        newTuple("Vox Mobile", null, null, null), //
+                        "805888638", "805888638", null //
+                }, //
+                { //
+                        newTuple("Vox Mobile", "USA", null, null), //
+                        "805888638", "805888638", null //
+                }, //
+                { //
+                        newTuple("Vox Mobile", "USA", "Ohio", null), //
+                        "805888638", "805888638", null //
+                }, //
+                { //
+                        newTuple("Vox Mobile", "USA", null, "Independence"), //
+                        "805888638", "805888638", null //
+                }, //
 
                 // only one entry (KeyPartition=Name) in DunsGuideBook.Items
-                { newTuple("Posco", "USA", null, null),
-                        "156920258", "156920258", null },
-                { newTuple("Posco", "USA", "Georgia", null),
-                        "156920258", "156920258", null },
-                { newTuple("Posco", "USA", null, "Johns Creek"),
-                        "156920258", "156920258", null },
-                { newTuple("Posco", "USA", "Georgia", "Johns Creek"),
-                        "156920258", "156920258", null },
+                { //
+                        newTuple("Posco", "USA", null, null), //
+                        "156920258", "156920258", null //
+                }, //
+                { //
+                        newTuple("Posco", "USA", "Georgia", null), //
+                        "156920258", "156920258", null //
+                }, //
+                { //
+                        newTuple("Posco", "USA", null, "Johns Creek"), //
+                        "156920258", "156920258", null //
+                }, //
+                { //
+                        newTuple("Posco", "USA", "Georgia", "Johns Creek"), //
+                        "156920258", "156920258", null //
+                }, //
 
-                // DUNS does not exist in AM (should get 010418671 in traveler log, just in case)
-                { newTuple("South Florida Insulation Co", "USA", null, null),
-                        null, null, null },
-        };
+                // DUNS does not exist in AM (should get 010418671 in traveler log, just in
+                // case)
+                { //
+                        newTuple("South Florida Insulation Co", "USA", null, null), //
+                        null, null, null //
+                }, //
+        }; //
     }
 
     private static MatchInput getBaseMatchInput(@NotNull String dataCloudVersion, @NotNull String decisionGraph) {
