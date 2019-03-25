@@ -145,7 +145,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         return attrRepo;
     }
 
-    protected AttributeRepository getCustomerAttributeRepo(int version) {
+    private AttributeRepository getCustomerAttributeRepo(int version) {
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         AttributeRepository attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
@@ -154,6 +154,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
                 attrRepo.changeServingStoreTableName(role, getServingStoreName(role, version));
             }
         }
+        accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
+        contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+        transactionTableName = attrRepo.getTableName(TableRoleInCollection.AggregatedTransaction);
         return attrRepo;
     }
 
