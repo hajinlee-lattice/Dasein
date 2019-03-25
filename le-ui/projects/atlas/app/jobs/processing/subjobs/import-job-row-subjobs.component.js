@@ -261,7 +261,7 @@ angular.module('lp.jobs.row.subjobs', [])
             }
             $scope.getErrorMessage = function(subjob){
                 if(subjob.errorMsg != null){ 
-                     subjob.errorMsg
+                     return subjob.errorMsg
                 } else{
                     return "Please click on the number of Record Failed to check the error messages";
                 }   
