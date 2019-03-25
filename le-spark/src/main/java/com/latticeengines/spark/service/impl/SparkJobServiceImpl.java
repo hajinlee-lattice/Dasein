@@ -191,11 +191,7 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     private String submitLines(SparkScriptClient client, List<String> lines) {
         String statement = StringUtils.join(lines, "\n");
-        String output = client.runStatement(statement);
-        if (StringUtils.isNotBlank(output)) {
-            log.info("Statement output: " + output);
-        }
-        return output;
+        return client.runStatement(statement);
     }
 
     private SparkScriptClient getClient(LivySession session, SparkScript script) {
