@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -28,7 +29,7 @@ public class QueryEvaluator {
 
     private static Scheduler scheduler = null;
 
-    @Autowired
+    @Inject
     private QueryProcessor processor;
 
     public SQLQuery<?> evaluate(AttributeRepository repository, Query query, String sqlUser) {

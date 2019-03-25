@@ -2,9 +2,10 @@ package com.latticeengines.query.functionalframework;
 
 import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_DIR;
 import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_FILENAME;
-import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_VERSION;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -108,18 +109,40 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         if (attrRepo == null) {
             synchronized (this) {
                 if (attrRepo == null) {
-                    InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
-                            ATTR_REPO_S3_VERSION, ATTR_REPO_S3_FILENAME);
-                    attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
-                    synchronized (QueryFunctionalTestNGBase.class) {
-                        accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
-                        contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                        transactionTableName = attrRepo.getTableName(TableRoleInCollection.AggregatedTransaction);
-                    }
+                    attrRepo = getCustomerAttributeRepo(1);
                 }
             }
         }
         return attrRepo;
+    }
+
+    protected AttributeRepository getCustomerAttributeRepo(int version) {
+        InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
+                String.valueOf(version), ATTR_REPO_S3_FILENAME);
+        AttributeRepository attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
+        if (version >= 3) {
+            for (TableRoleInCollection role: getEntitiesInAttrRepo()) {
+                attrRepo.changeServingStoreTableName(role, getServingStoreName(role, version));
+            }
+        }
+        return attrRepo;
+    }
+
+    private Collection<TableRoleInCollection> getEntitiesInAttrRepo() {
+        return Arrays.asList( //
+                TableRoleInCollection.BucketedAccount,
+                TableRoleInCollection.SortedContact,
+                TableRoleInCollection.AggregatedTransaction,
+                TableRoleInCollection.AggregatedPeriodTransaction,
+                TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
+                TableRoleInCollection.PivotedRating,
+                TableRoleInCollection.CalculatedCuratedAccountAttribute,
+                TableRoleInCollection.SortedProduct
+        );
+    }
+
+    private String getServingStoreName(TableRoleInCollection role, int version) {
+        return String.format("Query_Test_%s_%d", role, version);
     }
 
     protected void sqlContains(SQLQuery<?> query, String content) {
