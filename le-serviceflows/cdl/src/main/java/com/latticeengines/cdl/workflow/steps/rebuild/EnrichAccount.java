@@ -79,6 +79,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
             Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
             if (fullAccountTable != null) {
                 log.info("Found full account table in context, go thru short-cut mode.");
+                addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
                 return null;
             }
         }
@@ -121,6 +122,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     protected void onPostTransformationCompleted() {
         String fullAccountTableName = TableUtils.getFullTableName(fullAccountTablePrefix, pipelineVersion);
         exportToS3AndAddToContext(fullAccountTableName, FULL_ACCOUNT_TABLE_NAME);
+        addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
     }
 
     private PipelineTransformationRequest getTransformRequest() {

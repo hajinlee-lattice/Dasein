@@ -146,7 +146,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
     public void onExecutionCompleted() {
         statsTableMap.forEach((entity, table) -> {
             log.info("Drop stats table " + table.getName() + " for entity " + entity);
-            metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), table.getName());
+            addToListInContext(TEMPORARY_CDL_TABLES, table.getName(), String.class);
         });
     }
 
