@@ -51,6 +51,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
         diffTableName = getDiffTableName();
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
+        addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
 
         if (hasSchemaChange()) {
             List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE, BusinessEntity.class);
