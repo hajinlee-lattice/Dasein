@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -17,15 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
@@ -36,9 +32,6 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
     @Inject
     private RedshiftService redshiftService;
-
-    @Inject
-    private DataFeedEntityMgr dataFeedEntityMgr;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -52,70 +45,10 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     @Value("${cdl.redshift.cleanup.start:false}")
     private boolean cleanupFlag;
 
-    private final static String TABLE_PREFIX = "ToBeDeletedOn_";
+    @Value("${cdl.redshift.cleanup.table.remain.day:7L}")
+    private Long retentionInDays;
 
-    public boolean removeUnusedTableByTenant(String customerSpace) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
-        log.info("tenant is :" + tenant.getName());
-        this.dropTableByTenant(tenant);
-        return true;
-    }
-
-    private void dropTableByTenant(Tenant tenant) {
-        try {
-            MultiTenantContext.setTenant(tenant);
-            log.info("tenant name is : " + tenant.getName());
-            String customerspace = MultiTenantContext.getCustomerSpace().toString();
-            DataCollection dataCollection = dataCollectionService.getDefaultCollection(customerspace);
-            DataCollection.Version activeVersion = dataCollection.getVersion();
-            DataCollection.Version inactiveVersion = activeVersion.complement();
-            // 1. get all inused tablename in this tenant_id
-            Set<String> tableNames = new HashSet<>();
-            tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, activeVersion));
-            tableNames.addAll(dataCollectionService.getTableNames(customerspace, dataCollection.getName(), null, inactiveVersion));
-            log.info("inuse tableNames:" + tableNames.toString());
-            // 2.drop table
-            cleanupTable(tenant, new ArrayList<>(tableNames));
-        } catch (Exception e) {
-            log.error(e.toString());
-        }
-    }
-
-    private void cleanupTable(Tenant tenant, List<String> inuseTableName) {
-        List<DataUnit> dataUnits = dataUnitProxy.getByStorageType(tenant.getId(), DataUnit.StorageType.Redshift);
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-        for (DataUnit dataUnit : dataUnits) {
-            log.info("dataUnit = " + dataUnit.getName());
-            String tableName = dataUnit.getName();
-            if (!inuseTableName.contains(tableName)) {
-                if (tableName.startsWith(TABLE_PREFIX, 0)) {//delete prefix=ToBeDelete redshift tablename
-                    String timestamp = tableName.replace(TABLE_PREFIX, "");
-                    timestamp = timestamp.substring(0, timestamp.indexOf('_'));
-                    log.info("to be deleted redshift table timestamp is " + timestamp);
-                    boolean del = false;
-                    try {
-                        Date fDate = df.parse(df.format(new Date()));
-                        Date oDate = df.parse(timestamp);
-                        long days = ChronoUnit.DAYS.between(oDate.toInstant(), fDate.toInstant());
-                        log.info("redshift table " + dataUnit.getName() + " distance is " + days + " days");
-                        if (days > 9)
-                            del = true;
-                    } catch (Exception e) {
-                        log.error(e.getMessage());
-                    }
-                    if (del) {
-                        log.info("need delete redshift tablename under tenant is :" + dataUnit.getName());
-                        dataUnitProxy.delete(tenant.getId(), dataUnit);
-                    }
-                } else {//rename redshiftname wait delete
-                    String new_tableName = TABLE_PREFIX + df.format(new Date()) + "_" + tableName;
-                    log.info("new table name is " + new_tableName);
-                    dataUnitProxy.renameTableName(tenant.getId(), dataUnit,
-                            new_tableName);
-                }
-            }
-        }
-    }
+    private static final String TABLE_PREFIX = "ToBeDeletedOn_";
 
     public boolean removeUnusedTables() {
         if (!cleanupFlag) {
@@ -130,16 +63,17 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         for (String tenantId : allTenantId) {
             existingTenant.add(CustomerSpace.parse(tenantId).getTenantId().toLowerCase());
         }
-        List<String> metadataTable = dataCollectionService.getAllTableNames();
-        log.info("metadataTable is " + metadataTable.toString());
-        allRedshiftTable.removeAll(metadataTable);
+        List<String> metadataTables = dataCollectionService.getAllTableNames();
+        log.info("metadataTable is " + metadataTables.toString());
+        List<String> unUsedRedshiftTable = getUnusedTable(allRedshiftTable, metadataTables);
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-        for (String tableName : allRedshiftTable) {
+        for (String tableName : unUsedRedshiftTable) {
             if (tableName.startsWith(TABLE_PREFIX.toLowerCase(), 0)) {//delete prefix=ToBeDelete redshift tablename
-                String formatstr = tableName.replace(TABLE_PREFIX.toLowerCase(), "");
-                String timestamp = formatstr.substring(0, formatstr.indexOf('_'));
+                String formatStr = tableName.replace(TABLE_PREFIX.toLowerCase(), "");
+                String timestamp = formatStr.substring(0, formatStr.indexOf('_'));
                 String regx = "_([a-z]+)_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_utc$";
-                String tenantName = formatstr.replaceAll(regx, "");
+                formatStr = formatStr.replace(timestamp + '_', "");
+                String tenantName = formatStr.replaceAll(regx, "");
                 log.info("to be deleted redshift table timestamp is " + timestamp);
                 boolean del = false;
                 try {
@@ -179,7 +113,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                         Date oDate = df.parse(createTime);
                         long days = ChronoUnit.DAYS.between(oDate.toInstant(), fDate.toInstant());
                         log.info("time distance is " + days);
-                        if (days > 7)//avoid to delete the table belongs to local test tenant
+                        if (days > retentionInDays)//avoid to delete the table belongs to local test tenant
                             del = true;
                     } catch (Exception e) {
                         log.error(e.getMessage());
@@ -198,11 +132,15 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
                                     DataUnit.StorageType.Redshift);
                         }
 
-                        String new_tableName = TABLE_PREFIX + df.format(new Date()) + "_" + tableName;
-                        log.info("new table name is " + new_tableName);
+                        String tablePrefix = TABLE_PREFIX + df.format(new Date()) + "_";
+                        log.info("new table prefix is " + tablePrefix);
                         if (dataUnit != null) {
+                            String new_tableName = tablePrefix + dataUnit.getName();
+                            log.info("new table name is " + new_tableName);
                             dataUnitProxy.renameTableName(tenantName, dataUnit, new_tableName);
                         } else {
+                            String new_tableName = tablePrefix + tableName;
+                            log.info("new table name is " + new_tableName);
                             redshiftService.renameTable(tableName, new_tableName);
                         }
                     }
@@ -213,5 +151,21 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         log.info("all need deleted table is " + allMissTable.toString());
 
         return true;
+    }
+
+    private List<String> getUnusedTable(List<String> redshiftTables, List<String> metadataTables) {
+        log.info("all redshiftTable number is " + redshiftTables.size() + " , all metadataTables number is " + metadataTables.size());
+        Set<String> unMappingTables = new HashSet<>();
+        for (String metadataTable : metadataTables) {
+            metadataTable = metadataTable.toLowerCase();
+            if (redshiftTables.contains(metadataTable)) {
+                redshiftTables.remove(metadataTable);
+            } else {
+                unMappingTables.add(metadataTable);
+            }
+        }
+        log.info("those metadataTable cannot find in Redshift:" + JsonUtils.serialize(unMappingTables));
+        log.info(" unUsed redshiftTable number is " + redshiftTables.size());
+        return redshiftTables;
     }
 }
