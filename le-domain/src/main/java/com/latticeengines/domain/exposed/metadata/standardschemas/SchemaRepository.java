@@ -49,7 +49,7 @@ public class SchemaRepository {
         if (BusinessEntity.LatticeAccount.equals(entity)) {
             sysAttrs.add(InterfaceName.LatticeAccountId);
             sysAttrs.add(InterfaceName.IsMatched);
-        } else if (BusinessEntity.APSAttribute.equals(entity)) {
+        } else if (BusinessEntity.AnalyticPurchaseState.equals(entity)) {
             sysAttrs.add(InterfaceName.LEAccount_ID);
             sysAttrs.add(InterfaceName.Period_ID);
             sysAttrs.add(InterfaceName.AnalyticPurchaseState_ID);

@@ -193,7 +193,7 @@ public class AttrConfigServiceImplUnitTestNG {
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigService.updateAttrConfigsForUsage(Category.PRODUCT_SPEND, attrConfigs,
                 "Product_02622F2BC93FF8CBE5BAF4A29239C543_Revenue", ColumnSelection.Predefined.Model.getName(), true);
-        Assert.assertEquals(attrConfigs.get(0).getEntity(), BusinessEntity.APSAttribute);
+        Assert.assertEquals(attrConfigs.get(0).getEntity(), BusinessEntity.AnalyticPurchaseState);
         attrConfigService.updateAttrConfigsForUsage(Category.PRODUCT_SPEND, attrConfigs, "Product_Puchase",
                 ColumnSelection.Predefined.Enrichment.getName(), true);
         Assert.assertEquals(attrConfigs.get(1).getEntity(), BusinessEntity.PurchaseHistory);
