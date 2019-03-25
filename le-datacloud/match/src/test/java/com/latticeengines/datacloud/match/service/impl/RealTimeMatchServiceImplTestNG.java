@@ -496,8 +496,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
      * Test the DUNS redirect functionality. Without redirect, we should match to given src DUNS.
      * With redirect, we should get the target DUNS instead.
      */
-    // FIXME re-enable this test after publication finishes
-    @Test(groups = "functional", dataProvider = "provideDunsGuideBookTestData", enabled = false)
+    @Test(groups = "functional", dataProvider = "provideDunsGuideBookTestData")
     public void testDunsGuideBook(
             MatchKeyTuple tuple, String expectedSrcDuns, String expectedTargetDuns, String expectedBookSource) {
         MatchInput input = TestDunsGuideBookUtils.newRealtimeMatchInput(
