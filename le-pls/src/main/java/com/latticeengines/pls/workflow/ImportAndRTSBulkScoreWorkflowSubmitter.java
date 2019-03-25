@@ -93,8 +93,9 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (hasRunningWorkflow(sourceFile)) {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
-        checkBulkScoringRateLimit(sourceFile.getPath(), MultiTenantContext.getTenant().getName(),
-                MultiTenantContext.getEmailAddress());
+        // checkBulkScoringRateLimit(sourceFile.getPath(),
+        // MultiTenantContext.getTenant().getName(),
+        // MultiTenantContext.getEmailAddress());
 
         WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
                 enableLeadEnrichment, enableDebug);
