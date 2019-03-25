@@ -158,4 +158,8 @@ public class AttributeRepository {
         tableNameMap.put(entity.getServingStore(), table.getName());
     }
 
+    public void changeServingStoreTableName(TableRoleInCollection role, String tableName) {
+        tableNameMap.put(role, tableName);
+    }
+
 }

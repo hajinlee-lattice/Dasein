@@ -8,8 +8,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
@@ -48,7 +49,7 @@ import com.querydsl.sql.SQLQuery;
 @Component("queryProcessor")
 public class QueryProcessor {
 
-    @Autowired
+    @Inject
     private QueryFactory queryFactory;
 
     public QueryFactory getQueryFactory() {
