@@ -88,6 +88,19 @@ angular.module('lp.jobs.row.subjobs', [])
                     }
                 }
             };
+            
+            $scope.getInputsValue = (subjob, key) => {
+                // console.log(subjob.inputs, '  -- THE KEY ',key);
+                let val = '';
+                if(subjob.inputs){
+                    val = subjob.inputs[key] ? subjob.inputs[key] : '';
+                }
+                return val;
+            }
+            $scope.getPrefixS3ActionType = (subjob) => {
+                let ret =  $scope.getInputsValue(subjob, 'S3_IMPORT_EMAIL_FLAG') == 'true' ? 'S3 ' : '';
+                return ret;
+            }
 
             $scope.getActionType = function (subjob) {
 
@@ -95,7 +108,9 @@ angular.module('lp.jobs.row.subjobs', [])
                 switch (type) {
                     case 'cdlDataFeedImportWorkflow':
                         {
-                            return 'Import: ';
+                            // console.log(subjob);
+                            let prefixS3 = $scope.getPrefixS3ActionType(subjob);
+                            return `${prefixS3}${'Import: '}`;
                         };
                     case 'cdlOperationWorkflow':
                         {
@@ -121,6 +136,8 @@ angular.module('lp.jobs.row.subjobs', [])
                     return ret;
                 }
             }
+
+          
 
             $scope.getDownloadLink = function (subjob) {
                 var path = '/files/datafiles/sourcefile?fileName=';
