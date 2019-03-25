@@ -57,7 +57,7 @@ public interface DataFeedService {
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
 
-    List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status);
+    List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String version);
 
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
