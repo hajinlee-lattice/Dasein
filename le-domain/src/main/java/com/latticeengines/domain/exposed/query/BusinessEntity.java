@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.query;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AnalyticPurchaseState;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedDepivotedPurchaseHistory;
@@ -92,7 +91,7 @@ public enum BusinessEntity implements GraphNode {
 
         CuratedAccount.setServingStore(CalculatedCuratedAccountAttribute);
 
-        AnalyticPurchaseState.setServingStore(AnalyticPurchaseState);
+        AnalyticPurchaseState.setServingStore(TableRoleInCollection.AnalyticPurchaseState);
 
         Rating.setServingStore(PivotedRating);
 
