@@ -8,7 +8,7 @@
 
         .le-grid-layout { 
             display: grid;
-            grid-template-columns: repeat( auto-fill, minmax(260px, 1fr) );
+            grid-template-columns: repeat( auto-fill, minmax(260px, 1fr) );//override this 260px to change column width
             row-gap: 10px;
             column-gap: 10px;
             justify-content: center;

@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
@@ -343,6 +346,13 @@ public class Query implements GraphNode {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    public Query getDeepCopy() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        KryoUtils.write(bos, this);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return KryoUtils.read(bis, Query.class);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

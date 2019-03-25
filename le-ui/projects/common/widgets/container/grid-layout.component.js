@@ -7,6 +7,9 @@ class GridLayout extends Component {
 
     constructor(props) {
         super(props);
+        if(props.min){
+            gridStyle.gridTemplateColumns = `${'repeat( auto-fill, minmax('}${props.min}${'px, 1fr) )'}`;
+        }
         // let columnsGap = this.props.columnsGap ? this.props.columnsGap : 20;
         // let rowsGap = this.props.rowsGap ? this.props.rowsGap : 20;
         // let maxWidth = this.props.maxWidth ? this.props.maxWidth : 1200;

@@ -4,7 +4,7 @@ import { action } from "@storybook/addon-actions";
 import { withKnobs, boolean, radios } from "@storybook/addon-knobs";
 import "common/assets/css/font-awesome.min.css";
 import "./panel.scss";
-
+import GridLayout from 'common/widgets/container/grid-layout.component';
 import LeVPanel from "common/widgets/container/le-v-panel";
 import LeHPanel from "common/widgets/container/le-h-panel";
 import LeButton from "common/widgets/buttons/le-button";
@@ -102,5 +102,16 @@ stories.add("Vertical Panel", () => (
       <span>1.3</span>
       <span>1.4</span>
     </LeVPanel>
+  </div>
+));
+
+stories.add("Grid Panel", () => (
+  <div className="grid-layout">
+    <GridLayout min={'200'}>
+      <span>1.1</span>
+      <span>1.2</span>
+      <span>1.3</span>
+      <span>1.4</span>
+    </GridLayout>
   </div>
 ));

@@ -12,6 +12,8 @@ public class QueryTestUtils {
 
     public static final String ATTR_REPO_S3_DIR = "le-query/attrrepo";
     public static final String ATTR_REPO_S3_FILENAME = "attrrepo.json.gz";
+    public static final String TABLES_S3_FILENAME = "Tables.zip";
+    public static final String TABLEJSONS_S3_FILENAME = "TableJsons.zip";
 
     public static AttributeRepository getCustomerAttributeRepo(InputStream is) {
         if (attrRepo == null) {

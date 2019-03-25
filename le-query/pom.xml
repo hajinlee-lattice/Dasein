@@ -68,6 +68,30 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-hadoop</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-hadoop</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-spark</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-spark</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
             <version>${querydsl.version}</version>
@@ -111,8 +135,15 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-redshiftdb</artifactId>
             <version>${project.version}</version>
-            <scope>tests</scope>
+            <scope>test</scope>
             <classifier>tests</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>${lingala.zip4j.version}</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
