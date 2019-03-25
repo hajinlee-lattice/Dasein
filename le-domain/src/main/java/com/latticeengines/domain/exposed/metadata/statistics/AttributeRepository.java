@@ -128,10 +128,6 @@ public class AttributeRepository {
         return statsMap;
     }
 
-    public Map<TableRoleInCollection, String> getTableNameMap() {
-        return tableNameMap;
-    }
-
     public ColumnMetadata getColumnMetadata(AttributeLookup attributeLookup) {
         return cmMap.get(attributeLookup);
     }
