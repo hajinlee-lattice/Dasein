@@ -22,7 +22,7 @@ import reactor.core.publisher.ParallelFlux;
 public class APSAttrsDecorator implements Decorator {
 
     private static final Set<String> systemAttributes = SchemaRepository
-            .getSystemAttributes(BusinessEntity.APSAttribute).stream().map(InterfaceName::name)
+            .getSystemAttributes(BusinessEntity.AnalyticPurchaseState).stream().map(InterfaceName::name)
             .collect(Collectors.toSet());
 
     @Override
@@ -41,7 +41,7 @@ public class APSAttrsDecorator implements Decorator {
     }
 
     static ColumnMetadata staticFilter(ColumnMetadata cm) {
-        if (BusinessEntity.APSAttribute.equals(cm.getEntity())) {
+        if (BusinessEntity.AnalyticPurchaseState.equals(cm.getEntity())) {
             cm.setAttrState(AttrState.Active);
             if (systemAttributes.contains(cm.getAttrName())) {
                 cm.setCanModel(false);

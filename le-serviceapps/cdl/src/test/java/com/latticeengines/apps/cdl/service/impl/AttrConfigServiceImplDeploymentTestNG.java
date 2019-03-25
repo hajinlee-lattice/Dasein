@@ -62,7 +62,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     private Set<String> psSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
-    private Set<String> apsSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.APSAttribute) //
+    private Set<String> apsSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.AnalyticPurchaseState) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Set<String> caSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.CuratedAccount) //
