@@ -387,7 +387,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<Table> productTables = getTables(customerSpace, collectionName, entity.getServingStore(), version);
         if (productTables != null && !productTables.isEmpty()) {
             Table productTable = productTables.get(0);
-            attrRepo.appendServingStore(entity, productTable);
+            attrRepo.setServingStore(entity, productTable);
         }
     }
 
