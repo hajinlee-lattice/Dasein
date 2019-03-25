@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.validation.constraints.NotNull;
 
@@ -13,20 +11,18 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.spark.exposed.service.LivySessionService;
-
-import reactor.core.publisher.Mono;
 
 @Service("livySessionService")
 public class LivySessionServiceImpl implements LivySessionService {
@@ -35,7 +31,7 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private static final String URI_SESSIONS = "/sessions";
 
-    private ConcurrentMap<String, WebClient> webClients = new ConcurrentHashMap<>();
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
 
     @Override
@@ -55,9 +51,8 @@ public class LivySessionServiceImpl implements LivySessionService {
         if (MapUtils.isNotEmpty(livyConf)) {
             payLoad.putAll(livyConf);
         }
-        WebClient webClient = getWebClient(host);
-        String resp = webClient.method(HttpMethod.POST).uri(URI_SESSIONS).syncBody(payLoad) //
-                .retrieve().bodyToMono(String.class).block();
+        String url = host + URI_SESSIONS;
+        String resp = restTemplate.postForObject(url, payLoad, String.class);
         log.info("Starting new livy session on " + host + ": " + resp);
         int sessionId = parseSessionId(resp);
         LivySession session = new LivySession(host, sessionId);
@@ -76,11 +71,9 @@ public class LivySessionServiceImpl implements LivySessionService {
     public void stopSession(LivySession session) {
         Integer sessionId = session.getSessionId();
         if (sessionId != null && sessionExists(session)) {
-            WebClient webClient = getWebClient(session);
-            String uri = URI_SESSIONS + "/" + sessionId;
-            String resp = webClient.method(HttpMethod.DELETE).uri(uri).retrieve()
-                    .bodyToMono(String.class).block();
-            log.info("Stopped livy session: " + resp);
+            String url = session.getSessionUrl();
+            restTemplate.delete(url);
+            log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
     }
 
@@ -88,19 +81,15 @@ public class LivySessionServiceImpl implements LivySessionService {
         Integer sessionId = session.getSessionId();
         String info = "";
         if (sessionId != null) {
-            WebClient webClient = getWebClient(session);
-            String uri = URI_SESSIONS + "/" + sessionId;
-            info = webClient.method(HttpMethod.GET).uri(uri) //
-                    .retrieve().bodyToMono(String.class).onErrorResume(t -> {
-                        Mono<String> resumed = Mono.error(t);
-                        if (t instanceof WebClientResponseException) {
-                            WebClientResponseException webException = (WebClientResponseException) t;
-                            if (webException.getStatusCode().value() == 404) {
-                                resumed = Mono.just("");
-                            }
-                        }
-                        return resumed;
-                    }).block();
+            String url = session.getSessionUrl();
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            info = retry.execute(ctx -> {
+                try {
+                    return restTemplate.getForObject(url, String.class);
+                } catch (HttpClientErrorException.NotFound e) {
+                    return "";
+                }
+            });
         }
         return info;
     }
@@ -159,26 +148,6 @@ public class LivySessionServiceImpl implements LivySessionService {
             throw new RuntimeException(
                     "Session state ends up to be " + current.getState() + " instead of " + state);
         }
-    }
-
-    private WebClient getWebClient(LivySession session) {
-        String host = session.getHost();
-        return getWebClient(host);
-    }
-
-    private WebClient getWebClient(String host) {
-        if (StringUtils.isBlank(host)) {
-            throw new IllegalArgumentException("Must provide the livy host.");
-        }
-        if (!webClients.containsKey(host)) {
-            log.info("Create a web client for livy host " + host);
-            WebClient webClient = WebClient.builder() //
-                    .baseUrl(host) //
-                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) //
-                    .build();
-            webClients.putIfAbsent(host, webClient);
-        }
-        return webClients.get(host);
     }
 
     private String getSparkPackages() {
