@@ -36,7 +36,7 @@ public class RestrictionUtils {
             "HasPurchased");
 
     public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
-            Map<AttributeLookup, ComparisonType> map) {
+            Map<ComparisonType, Set<AttributeLookup>> map) {
         Bucket bkt = bucketRestriction.getBkt();
         if (bkt == null) {
             throw new IllegalArgumentException("cannot inspect null bucket restriction");
@@ -44,7 +44,13 @@ public class RestrictionUtils {
 
         if (bkt.getDateFilter() != null) {
             if (ComparisonType.LASTEST_DAY.equals(bkt.getDateFilter().getRelation())) {
-                map.put(bucketRestriction.getAttr(), ComparisonType.LASTEST_DAY);
+                if (map.containsKey(ComparisonType.LASTEST_DAY)) {
+                    map.get(ComparisonType.LASTEST_DAY).add(bucketRestriction.getAttr());
+                } else {
+                    Set<AttributeLookup> set = new HashSet<>();
+                    set.add(bucketRestriction.getAttr());
+                    map.put(ComparisonType.LASTEST_DAY, set);
+                }
             }
         }
     }

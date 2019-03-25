@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -72,9 +73,9 @@ public class EntityQueryTranslator extends QueryTranslator {
         return queryBuilder.build();
     }
 
-    public Map<AttributeLookup, ComparisonType> needPreprocess(FrontEndQuery frontEndQuery,
+    public Map<ComparisonType, Set<AttributeLookup>> needPreprocess(FrontEndQuery frontEndQuery,
             TimeFilterTranslator timeTranslator) {
-        Map<AttributeLookup, ComparisonType> results = new HashMap<>();
+        Map<ComparisonType, Set<AttributeLookup>> results = new HashMap<>();
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
         if (BusinessEntity.Product.equals(mainEntity)) {

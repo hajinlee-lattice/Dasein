@@ -74,6 +74,11 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         NumberExpression numberExpression = null;
         if (lookup.getLookup() instanceof AttributeLookup) {
             AttributeLookup innerLookup = (AttributeLookup) lookup.getLookup();
+            // System.out.println(JsonUtils.serialize(repository));
+            System.out.println("iinnerLookup " + innerLookup);
+            if (!repository.hasAttribute(innerLookup)) {
+                throw new RuntimeException(innerLookup + " does not exist");
+            }
             ColumnMetadata cm = getColumnMetadata(innerLookup);
             numberPath = QueryUtils.getAttributeNumberPath(innerLookup.getEntity(), cm.getAttrName());
         } else if (lookup.getLookup() instanceof SubQueryAttrLookup) {

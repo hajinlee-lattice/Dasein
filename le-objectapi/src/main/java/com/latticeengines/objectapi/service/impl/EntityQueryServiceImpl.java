@@ -1,10 +1,12 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,7 @@ import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 import reactor.core.publisher.Flux;
 
@@ -76,15 +79,15 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             // 1. wether any restriction has the new operator?
             // return Map<attr: operator>
             // LASTED_DATE
-            Map<AttributeLookup, ComparisonType> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
+                    timeTranslator);
             // Preprocess front end query by saving the max value in cache
             // map
             // 1) query max date
             // 2) round
             // augment timetranslator
-            if (MapUtils.isNotEmpty(map)) {
-                preprocess(map, frontEndQuery, timeTranslator);
-            }
+            preprocess(map, frontEndQuery, timeTranslator);
+
             // replace frontend query in place
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
@@ -280,6 +283,21 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return false;
     }
 
+    void preprocess(Map<ComparisonType, Set<AttributeLookup>> map, FrontEndQuery frontEndQuery,
+            TimeFilterTranslator timeTranslator) {
+        if (MapUtils.isNotEmpty(map)) {
+            for (ComparisonType type : map.keySet()) {
+                switch (type) {
+                case LASTEST_DAY:
+                    break;
+                default:
+                    throw new UnsupportedOperationException(
+                            String.format("ComparisonType %s is not supported for pre-processing.", type));
+                }
+            }
+        }
+    }
+
     private Map<String, Object> postProcess(Map<String, Object> result, boolean enforceTranslation,
             Map<String, Map<Long, String>> translationMapping) {
         if (enforceTranslation //
@@ -304,6 +322,54 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                     });
         }
         return result;
+    }
+
+    void getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        // System.out.println(JsonUtils.serialize(attrRepo));
+        // Currently, only account and contact entity can have date attributes
+        List<AggregateLookup> accountMaxLookups = new ArrayList<>();
+        List<AggregateLookup> contactMaxLookups = new ArrayList<>();
+        for (AttributeLookup lookup : lookups) {
+            if (BusinessEntity.Account.equals(lookup.getEntity())) {
+                accountMaxLookups.add(AggregateLookup.max(lookup).as(lookup.getAttribute().toLowerCase()));
+            } else if (BusinessEntity.Contact.equals(lookup.getEntity())) {
+                contactMaxLookups.add(AggregateLookup.max(lookup).as(lookup.getAttribute().toLowerCase()));
+            } else {
+                throw new UnsupportedOperationException(
+                        String.format("Entity %s should not have Date Attribute.", lookup.getEntity().name()));
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
+            Query accountQuery = Query.builder() //
+                    .select(accountMaxLookups.toArray(new Lookup[accountMaxLookups.size()])) //
+                    .from(BusinessEntity.Account) //
+                    .build();
+            DataPage dataPage = queryEvaluatorService.getData(attrRepo, accountQuery,
+                    RedshiftQueryProvider.USER_SEGMENT);
+            Map<String, Object> map = dataPage.getData().get(0);
+            System.out.println("Account");
+            for (String key : map.keySet()) {
+                System.out.println(key + ": " + map.get(key).toString());
+            }
+        }
+        if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
+            Query contactQuery = Query.builder() //
+                    .select(contactMaxLookups.toArray(new Lookup[contactMaxLookups.size()])) //
+                    .from(BusinessEntity.Contact) //
+                    .build();
+            DataPage dataPage = queryEvaluatorService.getData(attrRepo, contactQuery,
+                    RedshiftQueryProvider.USER_SEGMENT);
+            Map<String, Object> map = dataPage.getData().get(0);
+            System.out.println("Contact");
+            for (String key : map.keySet()) {
+                System.out.println(key + ": " + map.get(key).toString());
+            }
+        }
+
     }
 
 }

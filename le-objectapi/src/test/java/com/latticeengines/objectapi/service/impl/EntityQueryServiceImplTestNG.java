@@ -4,8 +4,11 @@ import static com.latticeengines.domain.exposed.util.RestrictionUtils.TRANSACTIO
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,11 +21,15 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -39,8 +46,8 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
-import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.EventQueryService;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
 public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
@@ -48,14 +55,47 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     private static final String ATTR_CONTACT_TITLE = "Occupation";
 
     @Inject
-    private EntityQueryService entityQueryService;
+    private EntityQueryServiceImpl entityQueryService;
 
     @Inject
     private EventQueryService eventQueryService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("2");
+        super.setup("4");
+    }
+
+    @Test(groups = "functional", enabled = false)
+    public void testRandom() {
+        Map<AttributeLookup, ColumnMetadata> cmMap = new HashMap<>();
+        Map<TableRoleInCollection, String> tableNameMap = new HashMap<>();
+        AttributeRepository ap = new AttributeRepository(CustomerSpace.parse("tenant"), "collection", cmMap,
+                tableNameMap);
+        ColumnMetadata cm = new ColumnMetadata();
+        cm.setAttrName("attr1");
+        cmMap.put(new AttributeLookup(BusinessEntity.Account, "attr"), cm);
+
+        AttributeLookup attributeLookup = new AttributeLookup(BusinessEntity.Account, "attr");
+        ColumnMetadata c = attrRepo.getColumnMetadata(attributeLookup);
+        if (cm == null) {
+            throw new QueryEvaluationException("Cannot find attribute " + attributeLookup + " in the repository.");
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testMax() {
+        Set<AttributeLookup> set = new HashSet<>();
+        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, "user_createddate");
+        AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, "user_testdate_dd_mmm_yyyy__8h");
+        AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account,
+                "user_testdate_column_dd_mmm_yyyy_withoutdate");
+        AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact,
+                "user_testdate_column_dd_mmm_yyyy_withoutdate");
+        AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact,
+                "user_created_date_mm_dd_yyyy_hh_mm_ss_12h");
+        set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
+        // entityQueryService.getMaxDates(set, DataCollection.Version.Blue);
+        entityQueryService.getMaxDates(set, DataCollection.Version.Green);
     }
 
     @Test(groups = "functional")
@@ -110,10 +150,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Test(groups = "functional")
     public void testContactCount() {
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize("{\n" +
-                "  \"main_entity\": \"Contact\",\n" +
-                "  \"distinct\": false\n" +
-                "}", FrontEndQuery.class);
+        FrontEndQuery frontEndQuery = JsonUtils.deserialize(
+                "{\n" + "  \"main_entity\": \"Contact\",\n" + "  \"distinct\": false\n" + "}", FrontEndQuery.class);
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
@@ -255,8 +293,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Restriction txnRestriction = getTxnRestriction(txn);
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
                 .build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE)
-                .eq("Analyst").build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).eq("Analyst")
+                .build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -283,7 +321,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private void testAccountDataWithTranslation(boolean enforceTranslation) {
         FrontEndQuery frontEndQuery = getAccountDataQuery();
-        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, enforceTranslation);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER,
+                enforceTranslation);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
@@ -301,7 +340,6 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
             }
         });
     }
-
 
     @Test(groups = "functional")
     public void testAccountSql() {
@@ -339,8 +377,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
                 .build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE)
-                .eq("Analyst").build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).eq("Analyst")
+                .build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -634,7 +672,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
-//            System.out.println(score + ":" + count);
+            // System.out.println(score + ":" + count);
             if (RatingBucketName.A.getName().equals(score)) {
                 Assert.assertEquals(count, Long.valueOf(78));
             } else if (RatingBucketName.B.getName().equals(score)) {

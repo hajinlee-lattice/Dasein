@@ -58,7 +58,8 @@ public class QueryProcessor {
 
     public SQLQuery<?> process(AttributeRepository repository, Query query, String sqlUser) {
         query.analyze();
-
+        System.out.println("in process");
+        // System.out.println(JsonUtils.serialize(repository));
         LookupResolverFactory resolverFactory = new LookupResolverFactory(repository, this, sqlUser);
         RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(resolverFactory, query.getExistsJoins(),
                 queryFactory, this);
@@ -114,16 +115,16 @@ public class QueryProcessor {
                     .toArray(StringPath[]::new);
             if (projectedColumns.length != 0) {
                 sqlQuery = sqlQuery.with(aliasTable, projectedColumns)
-                        .as(processSubueryExpression(repository, sq, sqlUser,false));
+                        .as(processSubueryExpression(repository, sq, sqlUser, false));
             } else {
-                sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, sqlUser,false));
+                sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, sqlUser, false));
             }
         }
         if (query.hasPreprocessed()) {
             return sqlQuery;
         }
         if (subQuery != null) {
-            Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, sqlUser,true);
+            Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, sqlUser, true);
             sqlQuery = sqlQuery.from(subQueryExpression);
         } else {
             BusinessEntity mainEntity = query.getMainEntity();
@@ -233,7 +234,9 @@ public class QueryProcessor {
     private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups) {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
+            System.out.println(lookup.getClass());
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
+            System.out.println(resolver.getClass());
             Expression<?> expression = resolver.resolveForSelect(lookup, true);
             expressions.add(expression);
         }

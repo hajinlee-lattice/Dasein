@@ -3,6 +3,7 @@ package com.latticeengines.objectapi.util;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -70,7 +71,7 @@ abstract class QueryTranslator {
     }
 
     void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
-            Map<AttributeLookup, ComparisonType> map) {
+            Map<ComparisonType, Set<AttributeLookup>> map) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
         log.info("mainentity is " + mainEntity);
         inspectFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, map);
@@ -133,14 +134,14 @@ abstract class QueryTranslator {
     }
 
     void inspectFrontEndRestriction(FrontEndRestriction frontEndRestriction, TimeFilterTranslator timeTranslator,
-            Map<AttributeLookup, ComparisonType> map) {
+            Map<ComparisonType, Set<AttributeLookup>> map) {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return;
         }
         inspectBucketRestriction(frontEndRestriction.getRestriction(), map);
     }
 
-    void inspectBucketRestriction(Restriction restriction, Map<AttributeLookup, ComparisonType> map) {
+    void inspectBucketRestriction(Restriction restriction, Map<ComparisonType, Set<AttributeLookup>> map) {
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
             search.run(restriction, (object, ctx) -> {
@@ -197,7 +198,7 @@ abstract class QueryTranslator {
     }
 
     void inspectInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            TimeFilterTranslator timeTranslator, Map<AttributeLookup, ComparisonType> map) {
+            TimeFilterTranslator timeTranslator, Map<ComparisonType, Set<AttributeLookup>> map) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:
