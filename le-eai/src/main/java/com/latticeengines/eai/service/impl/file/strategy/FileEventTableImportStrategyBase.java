@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.elasticache.ElasticCacheService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -58,6 +61,15 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
+
+    @Value("${cache.redis.command.timeout.min}")
+    private int redisTimeout;
+
+    @Value("${cache.local.redis}")
+    private boolean localRedis;
+
+    @Inject
+    private ElasticCacheService elastiCacheService;
 
     // @Autowired
     // private SparkImport sparkImport;
@@ -115,6 +127,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         } else {
             props.put("eai.dedup.enable", "true");
         }
+        props.put("eai.redis.timeout", String.valueOf(redisTimeout));
+        props.put("eai.redis.endpoint", elastiCacheService.getPrimaryEndpointAddress());
+        props.put("eai.redis.local", String.valueOf(localRedis));
         List<String> cacheFiles = new ArrayList<>();
         try {
             cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
