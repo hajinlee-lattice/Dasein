@@ -203,7 +203,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis);
 
-        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE);
+        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds(TenantStatus.ACTIVE, "4.0");
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
 
         List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<>();
@@ -259,6 +259,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && autoScheduledPAJobsCount < maximumScheduledJobCount) ||
                 runningPAJobsCount >= concurrentProcessAnalyzeJobs && autoScheduledPAJobsCount < minimumScheduledJobCount) {
+            log.info("Need to schedule a PA job.");
             list.sort(Comparator.comparing(Map.Entry::getKey));
             for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
                 SimpleDataFeed dataFeed = entry.getValue().getKey();
@@ -269,6 +270,8 @@ public class CDLJobServiceImpl implements CDLJobService {
                     break;
                 }
             }
+        } else {
+            log.info("No need to schedule a PA job.");
         }
     }
 

@@ -56,8 +56,8 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
-    public List<SimpleDataFeed> getAllSimpleDataFeedsByTenantStatus(TenantStatus status) {
-        String url = constructUrl(String.format("/datafeed/internal/simpledatafeedlist?status=%s", status.name()));
+    public List<SimpleDataFeed> getAllSimpleDataFeeds(TenantStatus status, String version) {
+        String url = constructUrl(String.format("/datafeed/internal/simpledatafeedlist?status=%s&version=%s", status.name(), version));
         List<?> list = get("get all simple data feeds", url, List.class);
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }

@@ -16,6 +16,6 @@ public interface DataFeedRepository extends BaseJpaRepository<DataFeed, Long> {
 
     DataFeed findByDataCollection(DataCollection dataCollection);
 
-    @Query("select df from DataFeed df where df.tenant.status = :status")
-    List<DataFeed> getDataFeedsByTenantStatus(@Param("status") TenantStatus status);
+    @Query("select df from DataFeed df where df.tenant.status = :status and df.tenant.uiVersion = :version")
+    List<DataFeed> getDataFeedsByTenantStatus(@Param("status") TenantStatus status, @Param("version") String version);
 }

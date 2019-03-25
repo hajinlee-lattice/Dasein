@@ -78,7 +78,7 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.*(..)) && "
             + "!execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.getAllDataFeeds(..)) && "
             + "!execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.getAllSimpleDataFeeds(..)) &&"
-            + "!execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.getSimpleDataFeedsByTenantStatus(..))")
+            + "!execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.getSimpleDataFeeds(..))")
     public void allDataFeedMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }

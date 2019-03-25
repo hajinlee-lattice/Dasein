@@ -41,12 +41,12 @@ public class DataFeedInternalResource {
     @NoCustomerSpace
     @ApiOperation(value = "get all simple data feeds.")
     public List<SimpleDataFeed> getAllSimpleDataFeeds(
-            @RequestParam(value = "status", required = false, defaultValue = "")String tenantStatus) {
-        if (StringUtils.isEmpty((tenantStatus))) {
+            @RequestParam(value = "status", required = false, defaultValue = "")String tenantStatus,
+            @RequestParam(value = "version", required = false, defaultValue = "")String version) {
+        if (StringUtils.isEmpty(tenantStatus) && StringUtils.isEmpty(version)) {
             return dataFeedService.getAllSimpleDataFeeds();
         } else {
-            return dataFeedService.getSimpleDataFeedsByTenantStatus(TenantStatus.valueOf(tenantStatus));
+            return dataFeedService.getSimpleDataFeeds(TenantStatus.valueOf(tenantStatus), version);
         }
-
     }
 }
