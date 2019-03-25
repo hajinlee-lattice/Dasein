@@ -1,11 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +82,7 @@ public class CDLJobServiceImplUnitTestNG {
         List<SimpleDataFeed> simpleDataFeeds = new ArrayList<>();
         simpleDataFeeds.add(simpleDataFeed1);
         simpleDataFeeds.add(simpleDataFeed2);
-        when(dataFeedProxy.getAllSimpleDataFeedsByTenantStatus(TenantStatus.ACTIVE)).thenReturn(simpleDataFeeds);
+        when(dataFeedProxy.getAllSimpleDataFeeds(TenantStatus.ACTIVE, "4.0")).thenReturn(simpleDataFeeds);
 
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis - 1000);

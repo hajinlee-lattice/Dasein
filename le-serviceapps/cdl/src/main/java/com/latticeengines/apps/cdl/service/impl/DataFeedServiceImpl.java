@@ -416,8 +416,8 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status) {
-        return datafeedEntityMgr.getSimpleDataFeedsByTenantStatus(status);
+    public List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String version) {
+        return datafeedEntityMgr.getSimpleDataFeeds(status, version);
     }
 
     @Override

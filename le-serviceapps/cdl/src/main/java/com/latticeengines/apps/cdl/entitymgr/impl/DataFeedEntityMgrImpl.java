@@ -262,8 +262,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<SimpleDataFeed> getSimpleDataFeedsByTenantStatus(TenantStatus status) {
-        List<DataFeed> dataFeeds = datafeedRepository.getDataFeedsByTenantStatus(status);
+    public List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String version) {
+        List<DataFeed> dataFeeds = datafeedRepository.getDataFeedsByTenantStatus(status, version);
         return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
                 .collect(Collectors.toList());
     }
