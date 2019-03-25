@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.spark;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -59,15 +60,19 @@ public abstract class SparkJobConfig {
 
     @JsonIgnore
     public List<HdfsDataUnit> getTargets() {
-        String root;
-        if (workspace.endsWith("/")) {
-            root = workspace.substring(0, workspace.lastIndexOf("/"));
+        if (getNumTargets() > 0) {
+            String root;
+            if (workspace.endsWith("/")) {
+                root = workspace.substring(0, workspace.lastIndexOf("/"));
+            } else {
+                root = workspace;
+            }
+            return Flux.range(1, getNumTargets()).map(idx -> //
+                    HdfsDataUnit.fromPath(root + "/Output" + idx) //
+            ).collectList().block();
         } else {
-            root = workspace;
+            return Collections.emptyList();
         }
-        return Flux.range(1, getNumTargets()).map(idx -> //
-        HdfsDataUnit.fromPath(root + "/Output" + idx) //
-        ).collectList().block();
     }
 
 }

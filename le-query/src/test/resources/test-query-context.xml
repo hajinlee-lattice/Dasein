@@ -8,5 +8,6 @@
     <import resource="classpath:testframework-context.xml"/>
     <import resource="classpath:test-redshiftdb-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:spark-context.xml"/>
 
 </beans>
