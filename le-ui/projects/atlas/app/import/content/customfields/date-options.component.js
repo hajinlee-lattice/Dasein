@@ -19,6 +19,11 @@ angular.module('lp.import.wizard.customfields')
             this.daterequired = false;
             this.timezonerequired = false;
             this.$doCheck = function(){
+                if(this.ignore == true){
+                    this.timezonerequired = false;
+                    this.daterequired = false;
+                    return;
+                }
                 if((this.mapping && this.mapping != null && this.mapping != "" && !this.dateformat) || (this.validate && !this.dateformat)){
                     this.daterequired = true;
                 }else {
