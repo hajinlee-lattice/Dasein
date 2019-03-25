@@ -14,7 +14,7 @@ public final class CategoryUtils {
         case CONTACT_ATTRIBUTES:
             return Collections.singletonList(BusinessEntity.Contact);
         case PRODUCT_SPEND:
-            return Arrays.asList(BusinessEntity.PurchaseHistory, BusinessEntity.APSAttribute);
+            return Arrays.asList(BusinessEntity.PurchaseHistory, BusinessEntity.AnalyticPurchaseState);
         case RATING:
             return Collections.singletonList(BusinessEntity.Rating);
         case CURATED_ACCOUNT_ATTRIBUTES:
@@ -34,7 +34,7 @@ public final class CategoryUtils {
             category = Category.CONTACT_ATTRIBUTES;
             break;
         case PurchaseHistory:
-        case APSAttribute:
+        case AnalyticPurchaseState:
             category = Category.PRODUCT_SPEND;
             break;
         case Rating:

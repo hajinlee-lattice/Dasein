@@ -409,7 +409,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         // on the attribute internal name pattern.
         if (Category.PRODUCT_SPEND.equals(category)) {
             if (ApsGeneratorUtils.isApsAttr(attrName)) {
-                config.setEntity(BusinessEntity.APSAttribute);
+                config.setEntity(BusinessEntity.AnalyticPurchaseState);
             } else {
                 config.setEntity(BusinessEntity.PurchaseHistory);
             }

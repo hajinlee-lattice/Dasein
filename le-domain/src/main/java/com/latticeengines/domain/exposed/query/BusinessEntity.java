@@ -54,7 +54,7 @@ public enum BusinessEntity implements GraphNode {
     // attributes based on Contact, Product, etc.
     CuratedAccount, //
 
-    APSAttribute,
+    AnalyticPurchaseState,
 
     Rating, //
 
@@ -67,7 +67,7 @@ public enum BusinessEntity implements GraphNode {
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
     public static final Set<BusinessEntity> COMPANY_PROFILE_ENTITIES = ImmutableSet.of(Account, PurchaseHistory, Rating,
             CuratedAccount);
-    public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, APSAttribute);
+    public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
 
     static {
         // Storage
@@ -92,7 +92,7 @@ public enum BusinessEntity implements GraphNode {
 
         CuratedAccount.setServingStore(CalculatedCuratedAccountAttribute);
 
-        APSAttribute.setServingStore(AnalyticPurchaseState);
+        AnalyticPurchaseState.setServingStore(AnalyticPurchaseState);
 
         Rating.setServingStore(PivotedRating);
 

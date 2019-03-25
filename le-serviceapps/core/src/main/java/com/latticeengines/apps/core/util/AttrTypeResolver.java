@@ -42,7 +42,7 @@ public class AttrTypeResolver {
                 && !Category.ACCOUNT_ATTRIBUTES.equals(metadata.getCategory())) {
             type = AttrType.DataCloud;
         } else if (BusinessEntity.PurchaseHistory.equals(entity) || BusinessEntity.Rating.equals(entity)
-                || BusinessEntity.CuratedAccount.equals(entity) || BusinessEntity.APSAttribute.equals(entity)) {
+                || BusinessEntity.CuratedAccount.equals(entity) || BusinessEntity.AnalyticPurchaseState.equals(entity)) {
             type = AttrType.Curated;
         } else {
             type = AttrType.Custom;
@@ -76,7 +76,7 @@ public class AttrTypeResolver {
                 } else {
                     subType = AttrSubType.ProductBundle;
                 }
-            } else if (BusinessEntity.APSAttribute.equals(entity)) {
+            } else if (BusinessEntity.AnalyticPurchaseState.equals(entity)) {
                 subType = AttrSubType.APS;
             } else if (BusinessEntity.CuratedAccount.equals(entity)) {
                 subType = AttrSubType.CuratedAccount;
