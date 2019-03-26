@@ -7,6 +7,14 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}</span>
         </a>
     </li>
+    <li role="presentation" ng-class="{active: vm.state.current.name == 'home.playbook.overview'}" ng-disabled="vm.menuDisabled || vm.dashboardDisabled">
+        <a ui-sref="home.playbook.overview({play_name: vm.play_name})">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW')}}">
+                <span class="ico ico-insights ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW')}}</span>
+        </a>
+    </li>
     <li role="presentation" ng-class="{active: vm.state.current.name == 'home.playbook.dashboard'}" ng-disabled="vm.menuDisabled || vm.dashboardDisabled">
         <a ui-sref="home.playbook.dashboard({play_name: vm.play_name})">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW')}}">
