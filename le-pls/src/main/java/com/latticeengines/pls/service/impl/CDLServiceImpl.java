@@ -329,7 +329,7 @@ public class CDLServiceImpl implements CDLService {
                 display.setExist(Boolean.FALSE);
                 EntityType entityType =
                         EntityType.fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
-                display.setTemplateName(entityType.getDefaultFeedTypeName());
+                display.setTemplateName(entityType.getDisplayName());
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(folderName);
                 templates.add(display);
