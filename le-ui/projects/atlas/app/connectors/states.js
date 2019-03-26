@@ -1,15 +1,15 @@
 import ProfilesComponent from './profiles.component';
 
-let $state;
-export const setAngularState = state => {
-  console.log('The state is set NOW', state);
-  $state = state;
-};
+// let $state;
+// export const setAngularState = state => {
+//   console.log('The state is set NOW', state);
+//   $state = state;
+// };
 
-export const getAngularState = () => {
+// export const getAngularState = () => {
 
-  return $state;
-};
+//   return $state;
+// };
 
 export const profiles = {
 
