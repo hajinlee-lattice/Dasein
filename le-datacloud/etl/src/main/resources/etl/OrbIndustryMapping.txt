@@ -7,7 +7,7 @@ Apparel & Fashion|Manufacturing - Consumer
 Architecture & Planning|Engineering, Design, Architecture & Planning
 Arts and Crafts|Retail
 Automotive|Manufacturing - Automotive
-Aviation & Aerospace|Defense, Aviation & Aeorospace
+Aviation & Aerospace|Defense, Aviation & Aerospace
 Banking|Financial Services
 Biotechnology|Biotechnology
 Broadcast Media|Media
@@ -30,7 +30,7 @@ Consumer Services|Consumer Services
 Cosmetics|Retail
 Credit Unions|Financial Services
 Dairy|Food Production
-Defense & Space|Defense, Aviation & Aeorospace
+Defense & Space|Defense, Aviation & Aerospace
 Design|Engineering, Design, Architecture & Planning
 Education Management|Education
 E-Learning|Education

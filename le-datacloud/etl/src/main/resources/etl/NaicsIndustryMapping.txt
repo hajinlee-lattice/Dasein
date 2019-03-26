@@ -52,7 +52,7 @@
 3254|Pharmaceuticals
 3351|Manufacturing - Consumer
 3352|Manufacturing - Consumer
-3364|Defense, Aviation & Aeorospace
+3364|Defense, Aviation & Aerospace
 3371|Manufacturing - Consumer
 3391|Pharmaceuticals & Biotech
 5112|Computer Software and Services
