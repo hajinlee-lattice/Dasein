@@ -36,9 +36,9 @@ Cosmetics|Consumer
 Consumer Goods|Consumer
 Consumer Services|Consumer
 Luxury Goods & Jewelry|Consumer
-Aviation & Aerospace|Defense, Aviation & Aeorospace
-Airlines/Aviation|Defense, Aviation & Aeorospace
-Defense & Space|Defense, Aviation & Aeorospace
+Aviation & Aerospace|Defense, Aviation & Aerospace
+Airlines/Aviation|Defense, Aviation & Aerospace
+Defense & Space|Defense, Aviation & Aerospace
 Architecture & Planning|Design, Architecture & Planning
 Design|Design, Architecture & Planning
 Graphic Design|Design, Architecture & Planning
