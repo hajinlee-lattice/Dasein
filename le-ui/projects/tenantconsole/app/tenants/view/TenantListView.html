@@ -30,13 +30,6 @@
                            ng-change="validateTenantInfo()" required/>
                     <p ng-if="showTenantIdError" class="help-block"><span class="text-danger">{{ tenantIdErrorMsg }}</span></p>
                 </div>
-                <div class="control-group">
-                    <label class="control-label">Contract ID</label>
-                    <!-- hide Contract ID input, until we can support ContractID != TenantId -->
-                    <label class="control-label">{{ tenantInfo.tenantId }}</label>
-                    <input type="hidden" name="contracId" class="form-control" ng-model="tenantInfo.contractId"
-                            placeholder="Leave it blank if it is the same as Tenant ID."/>
-                </div>
             </form>
         </div>
         <div class="modal-footer">
