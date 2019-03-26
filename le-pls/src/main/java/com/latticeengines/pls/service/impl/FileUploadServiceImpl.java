@@ -111,6 +111,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                 double rows = (double) fileRows / 1000000;
                 throw new LedpException(LedpCode.LEDP_18148, new String[] { String.format("%.2f", rows) });
             }
+            file.setFileRows(fileRows);
             sourceFileService.create(file);
             return getSourceFilewithRetry(file.getName());
         } catch (IOException e) {
