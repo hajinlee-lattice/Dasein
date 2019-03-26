@@ -1,80 +1,84 @@
 package com.latticeengines.pls.workflow;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
+import java.util.Arrays;
 
-import javax.inject.Inject;
-
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.locks.RateLimitedResourceManager;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.BulkScoringRateLimitingService;
-import com.latticeengines.pls.service.impl.BulkScoringRateLimitingServiceImpl;
+import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class BulkScoringRateLimitDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private SourceFileService sourceFileService;
 
-    @Inject
-    private BulkScoringRateLimitingService rateLimitingService;
+    private String file1 = "file1.csv";
+    private String file2 = "file2.csv";
+    private String file3 = "file3.csv";
 
-    private String folder = "/tmp/BulkScoringRateLimitDeploymentTestNG";
-    private String file1 = folder + "/file1.csv";
-    private String file2 = folder + "/file2.csv";
-    private String file3 = folder + "/file3.csv";
-
+    private SourceFile sourceFile1;
+    private SourceFile sourceFile2;
+    private SourceFile sourceFile3;
     private String internalUser = "user1@lattice-engines.com";
+    private String externalUser = "user1@dummy.com";
 
-    @BeforeClass(groups = "deployment.lp")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         super.setup();
-        if (!HdfsUtils.fileExists(yarnConfiguration, folder)) {
-            HdfsUtils.mkdir(yarnConfiguration, folder);
-        }
+        MultiTenantContext.setTenant(mainTestTenant);
     }
 
-    @AfterClass(groups = "deployment.lp")
-    public void afterClass() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, folder);
-    }
-
-    @AfterMethod(groups = "deployment.lp")
+    @AfterMethod(groups = "functional")
     public void afterMethod() {
-        ReflectionTestUtils.setField(rateLimitingService, "bulkRequestRegulatorRegistered", false);
-        RateLimitedResourceManager.deregisterResource(
-                BulkScoringRateLimitingServiceImpl.BULK_SCORING_REQUEST_REGULATOR + "_" + mainTestTenant.getName());
+        sourceFileService.delete(sourceFile1);
+        sourceFileService.delete(sourceFile2);
+        sourceFileService.delete(sourceFile3);
     }
 
-    @Test(groups = "deployment.lp", dataProvider = "dataProvider")
-    public void checkBulkScoringRateLimit(int fileQuata, int rowQuata, int fileRows1, int fileRows2, int fileRows3,
+    @Test(groups = "functional", dataProvider = "dataProvider")
+    public void checkBulkScoringRateLimi(int rowQuata, int fileRows1, int fileRows2, int fileRows3, String email,
             boolean success) throws Exception {
-        writeFile(file1, "a", fileRows1);
-        writeFile(file2, "b", fileRows2);
-        writeFile(file3, "c", fileRows3);
-        ReflectionTestUtils.setField(rateLimitingService, "bulkRequestsPerHour", fileQuata);
-        ReflectionTestUtils.setField(rateLimitingService, "bulkRowsPerHour", rowQuata);
+        sourceFile1 = createSourceFile("application_1553048841184_0001", file1, mainTestTenant, fileRows1);
+        sourceFile2 = createSourceFile("application_1553048841184_0002", file2, mainTestTenant, fileRows2);
+        sourceFile3 = createSourceFile("application_1553048841184_0003", file3, mainTestTenant, fileRows3);
 
         ImportAndRTSBulkScoreWorkflowSubmitter submitter = new ImportAndRTSBulkScoreWorkflowSubmitter();
-        ReflectionTestUtils.setField(submitter, "yarnConfiguration", yarnConfiguration);
-        ReflectionTestUtils.setField(submitter, "rateLimitingService", rateLimitingService);
 
-        submitter.checkBulkScoringRateLimit(file1, mainTestTenant.getName(), internalUser);
-        submitter.checkBulkScoringRateLimit(file2, mainTestTenant.getName(), internalUser);
+        WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
+        Job job1 = new Job();
+        job1.setApplicationId("application_1553048841184_0001");
+        Job job2 = new Job();
+        job2.setApplicationId("application_1553048841184_0002");
+        Job job3 = new Job();
+        job3.setApplicationId("application_1553048841184_0003");
+        when(workflowProxy.getJobs(null, Arrays.asList("importAndRTSBulkScoreWorkflow"),
+                Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName(), JobStatus.READY.getName()),
+                false, mainTestTenant.getId())).thenReturn(Arrays.asList(job1, job2, job3));
+        ReflectionTestUtils.setField(submitter, "workflowProxy", workflowProxy);
+        ReflectionTestUtils.setField(submitter, "sourceFileService", sourceFileService);
+        ReflectionTestUtils.setField(submitter, "bulkRowsQuota", rowQuata);
+
         LedpException e = null;
         try {
-            submitter.checkBulkScoringRateLimit(file3, mainTestTenant.getName(), internalUser);
+            submitter.checkBulkScoringRateLimit(mainTestTenant.getId(), email);
         } catch (LedpException ex) {
             e = ex;
         }
@@ -90,22 +94,24 @@ public class BulkScoringRateLimitDeploymentTestNG extends PlsDeploymentTestNGBas
     @DataProvider(name = "dataProvider")
     public Object[][] getDataProvider() {
         return new Object[][] { //
-                { 3, 30, 10, 10, 2, true }, //
-                { 3, 30, 10, 10, 10, true }, //
-                { 3, 30, 10, 10, 11, false }, //
-                { 4, 30, 10, 10, 11, false }, //
-                { 2, 30, 10, 10, 2, false }, //
-                { 2, 30, 10, 10, 10, false }, //
-                { 4, 40, 10, 10, 10, true }, //
+                { 30, 10, 10, 2, internalUser, true }, //
+                { 30, 10, 10, 10, internalUser, true }, //
+                { 30, 10, 10, 11, internalUser, false }, //
+                { 30, 10, 10, 11, externalUser, true }, //
+                { 40, 10, 10, 11, internalUser, true }, //
         };
     }
 
-    private void writeFile(String filePath, String prefix, int count) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            builder.append(prefix + i + "first,last\n");
-        }
-        HdfsUtils.writeToFile(yarnConfiguration, filePath, builder.toString());
+    private SourceFile createSourceFile(String appId, String fileName, Tenant tenant, long count) throws IOException {
+        SourceFile sourceFile = new SourceFile();
+        sourceFile.setName(fileName);
+        sourceFile.setPath(fileName);
+        sourceFile.setTenant(tenant);
+        sourceFile.setTenantId(tenant.getPid());
+        sourceFile.setFileRows(count);
+        sourceFile.setApplicationId(appId);
+        sourceFileService.create(sourceFile);
+        return sourceFile;
     }
 
 }
