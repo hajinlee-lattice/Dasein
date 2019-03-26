@@ -86,7 +86,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             configuration.setVersion(targetVersion);
             // -----------
             TransformationStepConfig profile = profile();
-            TransformationStepConfig bucket = bucket();
+            TransformationStepConfig bucket = bucket(null);
             TransformationStepConfig hqduns = hqduns();
             TransformationStepConfig calcStats = calcStats();
             TransformationStepConfig report = report();
@@ -125,8 +125,8 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     }
 
     @Override
-    protected TransformationStepConfig bucket() {
-        TransformationStepConfig step = super.bucket();
+    protected TransformationStepConfig bucket(String rowIdField) {
+        TransformationStepConfig step = super.bucket(rowIdField);
         step.setInputSteps(Collections.singletonList(0));
         return step;
     }

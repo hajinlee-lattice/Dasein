@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBu
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -83,7 +85,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             // -----------
             TransformationStepConfig profile = profile();
             TransformationStepConfig sortProfile = sortProfile();
-            TransformationStepConfig bucket = bucket();
+            TransformationStepConfig bucket = bucket(null);
             TransformationStepConfig calcStats = calcStats();
             TransformationStepConfig sortBucket = sortBucket();
             // -----------
@@ -152,12 +154,16 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         return step;
     }
 
-    protected TransformationStepConfig bucket() {
+    protected TransformationStepConfig bucket(String rowIdField) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setBaseSources(Collections.singletonList(accountMaster.getSourceName()));
         step.setInputSteps(Collections.singletonList(1));
         step.setTransformer(SourceBucketer.TRANSFORMER_NAME);
-        step.setConfiguration("{}");
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        if (StringUtils.isNotBlank(rowIdField)) {
+            config.setRowId(rowIdField);
+        }
+        step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
 
