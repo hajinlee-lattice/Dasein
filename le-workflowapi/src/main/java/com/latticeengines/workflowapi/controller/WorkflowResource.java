@@ -252,6 +252,12 @@ public class WorkflowResource {
         return workflowJobService.deleteWorkflowJobByApplicationId(customerSpace, applicationId);
     }
 
+    @DeleteMapping(value = "/yarnapps/job/deletebytenant/{tenantId}", headers = "Accept=application/json")
+    @ApiOperation(value = "Delete a workflow from YARN applicationId")
+    public void deleteByTenantId(@PathVariable Long tenantId, @RequestParam(required = false) String customerSpace) {
+        workflowJobService.deleteByTenantId(customerSpace, tenantId);
+    }
+
     @DeleteMapping(value = "/caches/jobs", headers = "Accept=application/json")
     @ApiOperation(value = "Delete all job cache entries")
     public int clearJobCaches() {

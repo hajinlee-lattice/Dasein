@@ -56,6 +56,8 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
     WorkflowJob deleteByApplicationId(String applicationId);
 
+    void deleteByTenantId(Long tenantId);
+
     void updateErrorCategory(WorkflowJob workflowJob);
 
     /*
