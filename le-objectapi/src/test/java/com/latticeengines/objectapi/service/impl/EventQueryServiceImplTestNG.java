@@ -147,7 +147,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Test(groups = "functional")
     public void testDP6881() {
-        EventFrontEndQuery frontEndQuery = loadFrontEndQueryFromResource("/dp6881.json");
+        EventFrontEndQuery frontEndQuery = loadFrontEndQueryFromResource("dp6881.json");
         long count = eventQueryService.getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertEquals(count, 8501);
     }
