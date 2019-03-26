@@ -41,16 +41,30 @@ public class AMStatsHQDuns extends ConfigurableFlowBase<TransformerConfig> {
             am = addSource(parameters.getBaseTables().get(0));
             amBkt = am;
         }
-        String amId = am.getFieldNames().contains(latticeAccountId)? latticeAccountId : DataCloudConstants.LATTICE_ID;
-        am = am.retain(new FieldList(amId, //
+
+        // If run AMCleaner, AccountMaster has both LatticeAccountId (string)
+        // and LatticeID (long) with same value. Use LatticeAccountId and ignore
+        // LatticeID
+        // If don't run AMCleaner, AccountMaster only has LatticeID. Rename
+        // LatticeID to LatticeAccountId
+        if (am.getFieldNames().contains(latticeAccountId)
+                && am.getFieldNames().contains(DataCloudConstants.LATTICE_ID)) {
+            am = am.discard(new FieldList(DataCloudConstants.LATTICE_ID));
+        } else if (am.getFieldNames().contains(DataCloudConstants.LATTICE_ID)) {
+            am = am.rename(new FieldList(DataCloudConstants.LATTICE_ID), new FieldList(latticeAccountId));
+        }
+        if (!am.getFieldNames().contains(latticeAccountId)) {
+            throw new RuntimeException("Cannot find LatticeAccountId or LatticeID in AccountMaster");
+        }
+        am = am.retain(new FieldList(latticeAccountId, //
                 DOMAIN, //
                 STATUS_CODE, //
                 SUBSIDIARY_INDICATOR, //
                 DUNS, //
                 DDUNS, //
                 GDUNS //
-        )).rename(new FieldList(DataCloudConstants.LATTICE_ID), //
-                new FieldList(InterfaceName.LatticeAccountId.name()));
+        ));
+
         Node nodeWithProperCodes = am
                 .filter(DOMAIN + " != null && " + STATUS_CODE + " != null && " + SUBSIDIARY_INDICATOR + " != null && "
                         + DUNS + " != null", new FieldList(DOMAIN, STATUS_CODE, SUBSIDIARY_INDICATOR, DUNS))

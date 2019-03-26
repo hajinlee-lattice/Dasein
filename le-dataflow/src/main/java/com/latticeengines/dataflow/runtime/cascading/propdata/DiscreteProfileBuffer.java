@@ -70,7 +70,7 @@ public class DiscreteProfileBuffer extends BaseOperation implements Buffer {
     }
 
     private void insertIntDict(String attr, Object val, Set<Integer> intDict) {
-        if (intDict.contains(null)) {
+        if (intDict.contains(null) || val == null) {
             return;
         }
         intDict.add((Integer) val);
@@ -81,7 +81,7 @@ public class DiscreteProfileBuffer extends BaseOperation implements Buffer {
     }
 
     private void insertLongDict(String attr, Object val, Set<Long> longDict) {
-        if (longDict.contains(null)) {
+        if (longDict.contains(null) || val == null) {
             return;
         }
         longDict.add((Long) val);

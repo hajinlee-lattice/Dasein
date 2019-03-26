@@ -495,7 +495,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         for (GenericRecord record : records) {
             String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
             boolean readyForNext;
-            readyForNext = AttrClassifier.isNoBucketAttr(attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
+            readyForNext = AttrClassifier.isEncodeDisabledAttr(attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
                     paras, getAttrsToRetain(), numericAttrsMap, catAttrsMap);
             if (!readyForNext) {
                 readyForNext = AttrClassifier.isIntervalBucketAttr(attrName,
@@ -767,10 +767,26 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         private static boolean isIdAttr(Field field, ProfileParameters paras) {
             if (field.name().equals(DataCloudConstants.LATTICE_ID)
                     || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
-                if (paras.getIdAttr() != null) {
-                    throw new RuntimeException("Only allow one ID field (LatticeAccountId or LatticeID)");
+                // If profiled source is AccountMaster, it has both LatticeID
+                // (long type) & LatticeAccountId (string type) with same value
+                // (Reason: LatticeID is from AMSeed. LatticeAccountId is
+                // generated in AMCleaner transformer to copy value from
+                // LatticeID and convert to string type).
+                // If profiled source is match result, it should only have
+                // LatticeAccountId.
+                // We always prefer LatticeAccountId as ID attr
+                if (DataCloudConstants.LATTICE_ACCOUNT_ID.equals(paras.getIdAttr())) {
+                    log.info("Found ID attr {} and discard extra ID {}", DataCloudConstants.LATTICE_ACCOUNT_ID,
+                            field.name());
+                    // extra ID attr will be discarded in isAttrToDiscard
+                    return false;
                 }
-                log.debug(String.format("ID attr: %s (unencode)", field.name()));
+                if (DataCloudConstants.LATTICE_ACCOUNT_ID.equals(field.name()) && paras.getIdAttr() != null) {
+                    log.info("Found ID attr {} and discard extra ID {}", DataCloudConstants.LATTICE_ACCOUNT_ID,
+                            paras.getIdAttr());
+                } else {
+                    log.info(String.format("ID attr: %s (unencode)", field.name()));
+                }
                 paras.setIdAttr(field.name());
                 return true;
             } else {
@@ -965,16 +981,17 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
         }
 
-        private static boolean isNoBucketAttr(String attrName, Object bucketAlgo, ProfileParameters paras,
+        private static boolean isEncodeDisabledAttr(String attrName, Object bucketAlgo, ProfileParameters paras,
                                               List<Attribute> attrsToRetain, Map<String, Attribute> numericAttrsMap,
                                               Map<String, Attribute> catAttrsMap) {
             Set<String> catAttrsNotEnc = paras.getCatAttrsNotEnc() != null
                     ? new HashSet<>(Arrays.asList(paras.getCatAttrsNotEnc()))
                     : new HashSet<>();
-            if (bucketAlgo != null && !catAttrsNotEnc.contains(attrName)) {
-                return false;
-            }
             if (numericAttrsMap.containsKey(attrName)) {
+                IntervalBucket algo = deserializeIntervalBucket(bucketAlgo);
+                if (algo != null && CollectionUtils.isNotEmpty(algo.getBoundaries())) {
+                    return false;
+                }
                 numericAttrsMap.get(attrName).setAlgo(null);
                 attrsToRetain.add(numericAttrsMap.get(attrName));
                 paras.getNumericAttrs().remove(numericAttrsMap.get(attrName));
@@ -984,6 +1001,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return true;
             }
             if (catAttrsMap.containsKey(attrName)) {
+                if (bucketAlgo != null && !catAttrsNotEnc.contains(attrName)) {
+                    return false;
+                }
                 catAttrsMap.get(attrName).setAlgo(null);
                 attrsToRetain.add(catAttrsMap.get(attrName));
                 paras.getCatAttrs().remove(catAttrsMap.get(attrName));
@@ -1051,6 +1071,22 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return true;
             } catch (Exception e) {
                 return false;
+            }
+        }
+
+        /**
+         * @param bucketAlgo
+         *            (String / org.apache.avro.util.Utf8)
+         * @return
+         */
+        private static IntervalBucket deserializeIntervalBucket(Object bucketAlgo) {
+            if (bucketAlgo == null) {
+                return null;
+            }
+            try {
+                return JsonUtils.deserialize(bucketAlgo.toString(), IntervalBucket.class);
+            } catch (Exception e) {
+                return null;
             }
         }
     }
