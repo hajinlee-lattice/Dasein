@@ -19,6 +19,7 @@ import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -44,7 +45,7 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
     private static final Logger log = LoggerFactory.getLogger(HdfsToS3ExportService.class);
 
     private static final Long MIN_SPLIT_SIZE = 10L * 1024L * 1024L; // 10 MB
-    private static final String LOCAL_CACHE = "tmp/camel";
+    private static final String LOCAL_CACHE = "tmp";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -54,9 +55,11 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
 
     @Override
     public void invoke(HdfsToS3Configuration configuration) {
-        downloadToLocal(configuration);
+        int numFiles = downloadToLocal(configuration);
         setProgress(0.30f);
-        upload(configuration);
+        if (numFiles > 0) {
+            upload(configuration);
+        }
         setProgress(0.99f);
     }
 
@@ -83,7 +86,7 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
         return originalName.replace(withoutExt, newWithOutExt);
     }
 
-    public void downloadToLocal(HdfsToS3Configuration config) {
+    public int downloadToLocal(HdfsToS3Configuration config) {
         Long splitSize = config.getSplitSize();
         String hdfsPath = config.getExportInputPath();
         String fileName = config.getTargetFilename();
@@ -133,10 +136,13 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
                 log.error("Failed to download the file " + hdfsPath + " from hdfs to local", e);
             }
         }
-        log.info("Downloading finished.");
+        int numAvroFiles = CollectionUtils.size( //
+                FileUtils.listFiles(new File(LOCAL_CACHE), new String[]{ "avro" }, false));
+        log.info("Downloading " + numAvroFiles + " non-empty avro files finished.");
+        return numAvroFiles;
     }
 
-    public void parallelDownloadToLocal(HdfsToS3Configuration config) {
+    public int parallelDownloadToLocal(HdfsToS3Configuration config) {
         final boolean needToSplit = shouldSplit(config);
 
         String hdfsPath = config.getExportInputPath();
@@ -169,7 +175,7 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
                 Long splitSize;
 
                 @Override
-                public Long call() throws Exception {
+                public Long call() {
                     if (needToSplit) {
                         splitSize = config.getSplitSize();
                         return splitToLocal(filePath);
@@ -182,19 +188,24 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
                     log.info("Downloading original file " + filePath + " to local as a whole.");
                     String fileName = new Path(filePath).getName();
                     try {
-                        File avroFile = new File(LOCAL_CACHE + "/" + fileName);
-                        HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, avroFile.getAbsolutePath());
-                        FileUtils.deleteQuietly(new File(LOCAL_CACHE + "/." + fileName + ".crc"));
-                        Long fileSize = FileUtils.sizeOf(avroFile);
-                        log.info("Downloaded filePath to " + fileName
-                                + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
+                        boolean hasRecords = AvroUtils.hasRecords(yarnConfiguration, filePath);
+                        if (hasRecords) {
+                            File avroFile = new File(LOCAL_CACHE + "/" + fileName);
+                            HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, avroFile.getAbsolutePath());
+                            FileUtils.deleteQuietly(new File(LOCAL_CACHE + "/." + fileName + ".crc"));
+                            Long fileSize = FileUtils.sizeOf(avroFile);
+                            log.info("Downloaded filePath to " + fileName
+                                    + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
+                        } else {
+                            log.warn("Avro file " + filePath + " has 0 rows, skip download to local.");
+                        }
                         return 1L;
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to download to split file " + fileName, e);
                     }
                 }
 
-                private Long splitToLocal(String filePath) throws IllegalArgumentException, IOException {
+                private Long splitToLocal(String filePath) throws IllegalArgumentException {
                     log.info("Downloading original file " + filePath + " to local, and split into chunks of "
                             + splitSize / 1024.0 / 1024.0 + " MB.");
                     Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
@@ -203,7 +214,7 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
                         String fileName = new Path(filePath).getName().replace(".avro", "-" + splitIdx + ".avro");
                         File avroFile = new File(LOCAL_CACHE + "/" + fileName);
                         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                                new GenericDatumWriter<GenericRecord>())) {
+                                new GenericDatumWriter<>())) {
                             writer.setCodec(CodecFactory.snappyCodec());
                             FileUtils.touch(avroFile);
                             Long fileSize = FileUtils.sizeOf(avroFile);
@@ -260,16 +271,19 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
                 throw new RuntimeException("Failed to count file " + file, e);
             }
             if (needToSplit) {
-                Double downloadProgress = count.doubleValue() / totalRecords.doubleValue();
+                double downloadProgress = count.doubleValue() / totalRecords.doubleValue();
                 log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
             } else {
-                Double downloadProgress = count.doubleValue() / filePaths.size();
+                double downloadProgress = count.doubleValue() / filePaths.size();
                 log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
             }
         }
         executorService.shutdown();
 
-        log.info("Downloading finished.");
+        int numAvroFiles = CollectionUtils.size( //
+                FileUtils.listFiles(new File(LOCAL_CACHE), new String[]{ "avro" }, false));
+        log.info("Downloading " + numAvroFiles + " non-empty avro files finished.");
+        return numAvroFiles;
     }
 
 }
