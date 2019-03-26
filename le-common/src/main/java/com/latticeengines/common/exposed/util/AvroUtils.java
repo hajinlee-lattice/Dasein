@@ -1038,6 +1038,12 @@ public class AvroUtils {
         return records;
     }
 
+    public static boolean hasRecords(Configuration configuration, String path) {
+        try (AvroFilesIterator iterator = avroFileIterator(configuration, path)) {
+            return iterator.hasNext();
+        }
+    }
+
     @Deprecated
     public static Iterator<GenericRecord> iterator(Configuration configuration, String path) {
         try {
