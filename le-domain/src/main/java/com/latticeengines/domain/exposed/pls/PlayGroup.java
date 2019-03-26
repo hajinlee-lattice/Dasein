@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -12,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,8 +37,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @javax.persistence.Table(name = "PLAY_GROUP")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId",
-        parameters = {@ParamDef(name = "tenantFilterId", type = "java.lang.Long")})
+@FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
+        @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
     @Id
@@ -54,7 +56,7 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
     @Column(name = "DISPLAY_NAME", nullable = false)
     private String displayName;
 
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -81,7 +83,12 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
     @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
 
-    public PlayGroup() {}
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "playGroups")
+    private Set<Play> plays;
+
+    public PlayGroup() {
+    }
 
     public PlayGroup(Tenant tenant, String displayName, String createdBy, String updatedBy) {
         this.tenant = tenant;
@@ -151,6 +158,14 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
     @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public Set<Play> getPlays() {
+        return plays;
+    }
+
+    public void setPlays(Set<Play> plays) {
+        this.plays = plays;
     }
 
     @Override

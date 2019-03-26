@@ -102,15 +102,9 @@ public class PlayGroupResource {
     public void deletePlayGroup(@PathVariable String customerSpace, @PathVariable String playGroupId) {
         PlayGroup toDelete = playGroupEntityMgr.findById(playGroupId);
         if (toDelete == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"No PlayGroup found with Id: " + playGroupId});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No PlayGroup found with Id: " + playGroupId });
         }
-        // Long playsUsingPlayGroup = playEntityMgr.countByPlayGroupPid(toDelete.getPid());
-        // if (playsUsingPlayGroup > 0) {
-        // throw new LedpException(LedpCode.LEDP_32000, new String[] {
-        // "Unable to delete play Group: " + toDelete.getDisplayName() + " since plays of this Group
-        // exist"});
-        // }
-        playGroupEntityMgr.delete(toDelete);
+        playGroupService.deletePlayGroupsFromPlays(customerSpace, toDelete);
     }
 
     private List<String> validatePlayGroupForUpdate(PlayGroup playGroup) {
