@@ -63,10 +63,8 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         int bucketStep = 1;
 
         TransformationStepConfig profile = profile(masterTableName);
-        TransformationStepConfig bucket = bucket(profileStep, masterTableName, servingStoreTablePrefix, //
-                InterfaceName.ContactId.name());
+        TransformationStepConfig bucket = bucket(profileStep, masterTableName, servingStoreTablePrefix);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, dedupFields);
-//        TransformationStepConfig sort = sort(bucketStep, servingStoreTablePrefix, servingStoreSortKey, 100);
         TransformationStepConfig sortProfile = sort(profileStep, profileTablePrefix,
                 DataCloudConstants.PROFILE_ATTR_ATTRNAME, 1);
         // -----------
@@ -74,7 +72,6 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
                 profile, //
                 bucket, //
                 calc, //
-//                sort, //
                 sortProfile //
         );
         // -----------

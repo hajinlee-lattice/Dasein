@@ -41,6 +41,7 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     private RebuildContactWorkflow rebuildContactWorkflow;
 
     private boolean hasAttrLifeCycleChange = false;
+    private boolean hasAccounts = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -81,6 +82,7 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
         super.doInitialize(step);
         checkAttrLifeCycleChange(step);
+        hasAccounts = checkHasAccounts(step);
     }
 
     private void checkAttrLifeCycleChange(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -92,9 +94,25 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     protected boolean shouldRebuild() {
-        boolean commonRebuild = super.shouldRebuild();
-        return commonRebuild || (hasAttrLifeCycleChange && !reset);
+        if (!hasAccounts) {
+            log.info("Should not rebuild, since no accounts.");
+            return false;
+        } else {
+            boolean commonRebuild = super.shouldRebuild();
+            return commonRebuild || (hasAttrLifeCycleChange && !reset);
+        }
     }
+
+    @Override
+    protected boolean shouldUpdate() {
+        if (!hasAccounts) {
+            log.info("Should not update, since no accounts.");
+            return false;
+        } else {
+            return super.shouldUpdate();
+        }
+    }
+
 
     @Override
     protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {

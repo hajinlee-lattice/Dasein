@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -148,30 +147,19 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return step;
     }
 
-//    protected TransformationStepConfig bucket(int profileStep, String masterTableName) {
-//        return bucket(profileStep, masterTableName, null);
-//    }
-
-    protected TransformationStepConfig bucket(int profileStep, String masterTableName, String outputTablePrefix, //
-                                              String rowIdField) {
+    protected TransformationStepConfig bucket(int profileStep, String masterTableName, String outputTablePrefix) {
         TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
         step.setInputSteps(Collections.singletonList(profileStep));
-        return configureBucketStep(step, outputTablePrefix, rowIdField);
+        return configureBucketStep(step, outputTablePrefix);
     }
 
-//    protected TransformationStepConfig bucket(int profileStep, int inputStep) {
-//        return bucket(profileStep, inputStep, null);
-//    }
-
-    protected TransformationStepConfig bucket(int profileStep, int inputStep, String outputTablePrefix, //
-                                              String rowIdField) {
+    protected TransformationStepConfig bucket(int profileStep, int inputStep, String outputTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(profileStep, inputStep));
-        return configureBucketStep(step, outputTablePrefix, rowIdField);
+        return configureBucketStep(step, outputTablePrefix);
     }
 
-    private TransformationStepConfig configureBucketStep(TransformationStepConfig step, String outputTablePrefix,
-                                                         String rowIdField) {
+    private TransformationStepConfig configureBucketStep(TransformationStepConfig step, String outputTablePrefix) {
         step.setTransformer(TRANSFORMER_BUCKETER);
 
         if (StringUtils.isNotBlank(outputTablePrefix)) {
@@ -182,9 +170,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
             step.setTargetTable(targetTable);
         }
 
-        BucketEncodeConfig config = new BucketEncodeConfig();
-        config.setRowId(rowIdField);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
 
