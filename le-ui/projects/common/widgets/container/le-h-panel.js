@@ -23,7 +23,6 @@ class LeHPanel extends Component {
     }
   }
   getHAlignment() {
-    console.log(this.props.halignment);
     if (this.props.halignment) {
       switch (this.props.halignment) {
         case LEFT:
@@ -66,7 +65,6 @@ class LeHPanel extends Component {
   }
 
   getWrap() {
-    console.log("WRAP ", this.props.wrap);
     if (this.props.wrap == true) {
       return "le-wrap";
     } else {

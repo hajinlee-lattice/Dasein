@@ -1,5 +1,6 @@
 import './content/name/name.component';
 import './content/crmselection/crmselection.component';
+import './content/overview/overview.component';
 import './content/dashboard/dashboard.index';
 import './content/insights/insights.component';
 import './content/launch/launch.component';
