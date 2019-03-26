@@ -74,5 +74,6 @@ public enum CacheName {
         public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
         public static final String DantePreviewTokenCacheName = "DantePreviewTokenCache";
         public static final String EMRClusterCacheName = "EMRClusterCache";
+        public static final String CSVImportMapperCacheName = "CSVImportMapperCache";
     }
 }

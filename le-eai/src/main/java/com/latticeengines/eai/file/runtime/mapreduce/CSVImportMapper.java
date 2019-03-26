@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -45,14 +47,29 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.format.number.NumberStyleFormatter;
+import org.springframework.retry.support.RetryTemplate;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.CriticalImportException;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -65,6 +82,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
+import io.lettuce.core.RedisURI;
+
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVImportMapper.class);
@@ -75,6 +94,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String SCIENTIFIC_REGEX = "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$";
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
+
+    private static final int MAX_ID_SET_SIZE = 3000000;
+    private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
 
     private Schema schema;
 
@@ -110,6 +132,20 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private GenericRecord avroRecord;
 
+    private String cacheKey;
+
+    private int cacheIdx;
+
+    private int redisTimeout;
+
+    private String redisEndpoint;
+
+    private boolean localRedis;
+
+    private RetryTemplate retryTemplate;
+
+    private RedisTemplate<String, Object> redisTemplate;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         conf = context.getConfiguration();
@@ -142,7 +178,19 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             avroFileName = table.getName() + ".avro";
         }
 
-        avroRecord = new GenericData.Record(schema);
+        if (deduplicate) {
+            redisEndpoint = conf.get("eai.redis.endpoint");
+            redisTimeout = Integer.parseInt(conf.get("eai.redis.timeout"));
+            localRedis = Boolean.parseBoolean(conf.get("eai.redis.local"));
+            LOG.info(String.format("Redis endpoint: %s, timeout: %d, localRedis: %b", redisEndpoint, redisTimeout, localRedis));
+
+            avroRecord = new GenericData.Record(schema);
+
+            cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
+            cacheIdx = 0;
+            retryTemplate = RetryUtils.getRetryTemplate(3);
+            redisTemplate = getRedisTemplate();
+        }
     }
 
     @Override
@@ -299,10 +347,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 throw new RuntimeException(String.format("The %s value is equals to string null", attr.getDisplayName()));
                             }
                             if (deduplicate) {
-                                if (uniqueIds.contains(id)) {
+                                if (containsId(id)) {
                                     throw new LedpException(LedpCode.LEDP_17017, new String[]{id});
                                 } else {
-                                    uniqueIds.add(id);
+                                    addId(id);
                                 }
                             }
                         }
@@ -484,5 +532,105 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         if (context.getCounter(RecordImportCounter.ROW_ERROR).getValue() == 0) {
             context.getCounter(RecordImportCounter.ROW_ERROR).setValue(0);
         }
+        if (deduplicate) {
+            clearCache();
+        }
     }
+
+    private boolean containsId(String id) {
+        if (uniqueIds.contains(id)) {
+            return true;
+        } else {
+            for (int i = 0; i < cacheIdx; i++) {
+                Set<String> cachedIds = getCachedSet(i);
+                if (cachedIds.contains(id)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private void addId(String id) {
+        if (uniqueIds.size() >= MAX_ID_SET_SIZE) {
+            addCache(uniqueIds);
+            uniqueIds.clear();
+        } else {
+            uniqueIds.add(id);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<String> getCachedSet(int idx) {
+        LOG.info("Search redis cache block: " + idx);
+        final String key = cacheKey + idx;
+        return retryTemplate.execute(ctx -> {
+            Object obj = redisTemplate.opsForValue().get(key);
+            return ((HashSet<String>)obj);
+        });
+    }
+
+    private void addCache(Set<String> ids) {
+        LOG.info("Start create new redis cache block");
+        final String key = cacheKey + cacheIdx;
+        retryTemplate.execute(ctx -> {
+            redisTemplate.opsForValue().set(key, ids, 1, TimeUnit.DAYS);
+            return null;
+        });
+        cacheIdx++;
+    }
+
+    private void clearCache() {
+        for (int i = 0; i < cacheIdx; i++) {
+            final String key = cacheKey + i;
+            retryTemplate.execute(ctx -> redisTemplate.delete(key));
+        }
+    }
+
+    private RedisConnectionFactory lettuceConnectionFactory() {
+        RedisConnectionFactory factory;
+
+        if (localRedis) {
+            LOG.info("Using local redis server");
+            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
+            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
+                    .shutdownTimeout(Duration.ZERO) //
+                    .build();
+            factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
+        } else {
+            RedisURI redisURI = RedisURI.create(redisEndpoint);
+            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
+            standaloneConfiguration.setHostName(redisURI.getHost());
+            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
+                    .shutdownTimeout(Duration.ZERO) //
+                    .useSsl() //
+                    .build();
+            factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
+        }
+        ((LettuceConnectionFactory) factory).afterPropertiesSet();
+        return factory;
+    }
+
+
+    private RedisTemplate<String, Object> getRedisTemplate() {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(getValueSerializer());
+        redisTemplate.setConnectionFactory(lettuceConnectionFactory());
+        redisTemplate.setEnableTransactionSupport(true);
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
+
+    private static RedisSerializer<?> getValueSerializer() {
+        Jackson2JsonRedisSerializer<?> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        ObjectMapper om = new ObjectMapper();
+        om.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY);
+        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        jackson2JsonRedisSerializer.setObjectMapper(om);
+        return jackson2JsonRedisSerializer;
+    }
+
 }

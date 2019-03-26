@@ -11,6 +11,7 @@
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:eai-mapreduce-context.xml"/>
+    <import resource="classpath:redis-context.xml"/>
 
     <import resource="classpath:aws-context.xml" />
     <import resource="classpath:redshiftdb-context.xml" />
