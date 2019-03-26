@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.ExpirePeriod;
 
 public interface GlobalUserManagementService {
 
@@ -17,7 +18,7 @@ public interface GlobalUserManagementService {
 
     Boolean grantRight(String right, String tenant, String username);
 
-    Boolean grantRight(String right, String tenant, String username, String createdByUser);
+    Boolean grantRight(String right, String tenant, String username, String createdByUser, ExpirePeriod expirePeriod);
 
     Boolean revokeRight(String right, String tenant, String username);
 

@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.ExpirePeriod;
 
 public interface UserService {
 
@@ -29,7 +30,8 @@ public interface UserService {
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 
-    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser);
+    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
+            ExpirePeriod expirePeriod);
 
     boolean resignAccessLevel(String tenantId, String username);
 

@@ -2,6 +2,7 @@ package com.latticeengines.admin.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +16,14 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
-    private static final long InAcessPeriod = TimeUnit.DAYS.toMillis(120);
+    private static final long inAcessPeriod = TimeUnit.DAYS.toMillis(120);
     private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
+    private static final List<String> userLevels = Arrays.asList(AccessLevel.INTERNAL_ADMIN.toString(),
+            AccessLevel.INTERNAL_USER.toString(), AccessLevel.SUPER_ADMIN.toString());
     @SuppressWarnings("unused")
     private String jobArguments;
 
@@ -47,27 +51,31 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                 List<User> users = userService.getUsers(tenant.getId());
                 users.forEach(user -> {
-                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
-                    log.info(String.format("send POC tenant %s inactive notification to user %s.", tenant.getName(),
-                            user.getUsername()));
+                    if (userLevels.contains(user.getAccessLevel())) {
+                        emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                        log.info(String.format("send POC tenant %s inactive notification to user %s.", tenant.getName(),
+                                user.getUsername()));
+                    }
                 });
             } else if (currentTime > expiredTime && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
                 tenant.setStatus(TenantStatus.INACTIVE);
                 tenantService.updateTenant(tenant);
                 log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
-            } else if (expiredTime + InAcessPeriod - emailPeriod < currentTime
-                    && currentTime < expiredTime + InAcessPeriod) {
+            } else if (expiredTime + inAcessPeriod - emailPeriod < currentTime
+                    && currentTime < expiredTime + inAcessPeriod) {
                 // send email to user who can visit tenant two weeks before
                 // delete tenant
-                int days = (int) Math.ceil((expiredTime + InAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
+                int days = (int) Math.ceil((expiredTime + inAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
                 List<User> users = userService.getUsers(tenant.getId());
                 users.forEach(user -> {
-                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
-                    log.info(String.format("send POC tenant %s inaccessible notification to user %s.", tenant.getName(),
-                            user.getUsername()));
+                    if (userLevels.contains(user.getAccessLevel())) {
+                        emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
+                        log.info(String.format("send POC tenant %s inaccessible notification to user %s.",
+                                tenant.getName(), user.getUsername()));
+                    }
                 });
 
-            } else if (currentTime > expiredTime + InAcessPeriod) {
+            } else if (currentTime > expiredTime + inAcessPeriod) {
                 CustomerSpace space = CustomerSpace.parse(tenant.getId());
                 adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
                 log.info(String.format("POC tenant %s has been deleted", tenant.getName()));

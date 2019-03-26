@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.ExpirePeriod;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
@@ -136,7 +138,12 @@ public class AdminResource extends InternalResourceBase {
         LOGGER.info(String.format("Updating user %s in the tenant %s using the internal API", username, tenantId));
 
         if (accessLevel != null) {
-            userService.assignAccessLevel(accessLevel, tenantId, username, MultiTenantContext.getEmailAddress());
+            ExpirePeriod expirePeriod = ExpirePeriod.NEVER;
+            if (StringUtils.isNotBlank(userUpdateData.getExpirePeriod())) {
+                ExpirePeriod.valueOf(userUpdateData.getExpirePeriod());
+            }
+            userService.assignAccessLevel(accessLevel, tenantId, username, MultiTenantContext.getEmailAddress(),
+                    expirePeriod);
             LOGGER.info(String.format("User %s has been updated to %s for the tenant %s through the internal API",
                     username, accessLevel.name(), tenantId));
         }

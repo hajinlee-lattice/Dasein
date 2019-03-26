@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.ExpirePeriod;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
@@ -192,6 +193,7 @@ public class UserResource {
         String loginUsername = loginUser.getUsername();
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
 
+
         // update access level
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
@@ -201,9 +203,12 @@ public class UserResource {
                 return SimpleBooleanResponse.failedResponse(
                         Collections.singletonList("Cannot update to a level higher than that of the login user."));
             }
-
+            ExpirePeriod expirePeriod = ExpirePeriod.NEVER;
+            if (StringUtils.isNotBlank(data.getExpirePeriod())) {
+                expirePeriod = ExpirePeriod.valueOf(data.getExpirePeriod());
+            }
             boolean newUser = !userService.inTenant(tenantId, username);
-            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername);
+            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, expirePeriod);
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);

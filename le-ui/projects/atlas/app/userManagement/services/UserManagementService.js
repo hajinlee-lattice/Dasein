@@ -8,7 +8,7 @@ var app = angular.module('mainApp.userManagement.services.UserManagementService'
 
 app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, SessionService) {
 
-    this.AssignAccessLevel = function (username, accessLevel) {
+    this.AssignAccessLevel = function (username, accessLevel, expirePeriod) {
         var deferred = $q.defer();
         var result = {
             Success: false,
@@ -19,12 +19,13 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             method: 'PUT',
             url: '/pls/users/' + JSON.stringify(username) + '/',
             data: {
-                AccessLevel: accessLevel
+                AccessLevel: accessLevel,
+                ExpirePeriod: expirePeriod
             },
             headers: {"Content-Type": "application/json"}
         }).success(function (data) {
             result.Success = data.Success;
-            result.ResultObj = {Username: username, AccessLevel: accessLevel};
+            result.ResultObj = {Username: username, AccessLevel: accessLevel, ExpirePeriod: expirePeriod};
             deferred.resolve(result);
         }).error(function (data, status) {
             SessionService.HandleResponseErrors(data, status);
@@ -78,7 +79,8 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             FirstName: newUser.FirstName,
             LastName: newUser.LastName,
             Email: newUser.Email,
-            AccessLevel: newUser.AccessLevel
+            AccessLevel: newUser.AccessLevel,
+            ExpirePeriod: newUser.ExpirePeriod
         };
 
         var creds = {

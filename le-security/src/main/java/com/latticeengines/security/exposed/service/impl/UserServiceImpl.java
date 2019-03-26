@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.ExpirePeriod;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
@@ -125,7 +126,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String username = userRegistration.getUser().getUsername();
-        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser);
+        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser, ExpirePeriod.NEVER);
 
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
@@ -217,13 +218,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser) {
+    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
+            ExpirePeriod expirePeriod) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
-        if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
+        // remove comparing user with same access level to tenant in different
+        // update times as user with same access level can be expiration date
+        if (resignAccessLevel(tenantId, username)) {
             try {
-                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser);
+                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser,
+                        expirePeriod);
             } catch (Exception e) {
                 LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
@@ -366,6 +371,10 @@ public class UserServiceImpl implements UserService {
         userRegistration.toLowerCase();
         User user = userRegistration.getUser();
         String tenantId = userRegistrationWithTenant.getTenant();
+        ExpirePeriod expirePeriod = ExpirePeriod.NEVER;
+        if (StringUtils.isNotBlank(user.getExpirePeriod())) {
+            expirePeriod = ExpirePeriod.valueOf(user.getExpirePeriod());
+        }
 
         RegistrationResult result = validateNewUser(user, tenantId);
         if (!result.isValid()) {
@@ -378,7 +387,8 @@ public class UserServiceImpl implements UserService {
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
-            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName);
+            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
+                    expirePeriod);
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());

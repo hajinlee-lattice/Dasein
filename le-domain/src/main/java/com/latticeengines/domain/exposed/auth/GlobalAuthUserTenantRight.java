@@ -53,6 +53,10 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     @Column(name = "Created_By_User", nullable = true)
     private String createdByUser;
 
+    @JsonProperty("expiration_date")
+    @Column(name = "Expiration_Date", nullable = true)
+    private Long expirationDate;
+
     @Override
     public Long getPid() {
         return userTenantRightId;
@@ -85,6 +89,14 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
 
     public void setOperationName(String operationName) {
         this.operationName = operationName;
+    }
+
+    public Long getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Long expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public String getCreatedByUser() { return createdByUser; }

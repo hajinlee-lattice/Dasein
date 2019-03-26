@@ -13,6 +13,8 @@ public class User {
     private boolean active;
     private String title;
     private String accessLevel;
+    private Long expirationDate;
+    private String expirePeriod;
 
     @JsonProperty("Email")
     public String getEmail() {
@@ -92,6 +94,26 @@ public class User {
     @JsonProperty("AccessLevel")
     public void setAccessLevel(String accessLevel) {
         this.accessLevel = accessLevel;
+    }
+
+    @JsonProperty("ExpirationDate")
+    public Long getExpirationDate() {
+        return expirationDate;
+    }
+
+    @JsonProperty("ExpirationDate")
+    public void setExpirationDate(Long expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    @JsonProperty("ExpirePeriod")
+    public String getExpirePeriod() {
+        return expirePeriod;
+    }
+
+    @JsonProperty("ExpirePeriod")
+    public void setExpirePeriod(String expirePeriod) {
+        this.expirePeriod = expirePeriod;
     }
 
     @Override
