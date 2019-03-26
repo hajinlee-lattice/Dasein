@@ -152,7 +152,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         return contactTableName;
     }
 
-    protected void resetCuratedAttributesContext() {
+    private void resetCuratedAttributesContext() {
         Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         if (entitySet == null) {
             entitySet = new HashSet<>();
