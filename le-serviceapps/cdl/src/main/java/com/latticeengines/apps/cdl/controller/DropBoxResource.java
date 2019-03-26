@@ -77,17 +77,26 @@ public class DropBoxResource {
     @PostMapping(value = "/folder/{objectName}")
     @ApiOperation(value = "Create template folder")
     public boolean createFolder(@PathVariable String customerSpace, @PathVariable String objectName,
-                                @RequestParam(required = false) String path) {
-        dropBoxService.createFolder(customerSpace, objectName, path);
+                                @RequestParam(required = false) String path,
+                                @RequestParam(required = false) String systemName) {
+        dropBoxService.createFolder(customerSpace, systemName, objectName, path);
+        return true;
+    }
+
+    @GetMapping(value = "/folder/{systemName}")
+    @ApiOperation(value = "Create template folder")
+    public boolean createFolder(@PathVariable String customerSpace, @PathVariable String systemName) {
+        dropBoxService.createFolder(customerSpace, systemName, null, null);
         return true;
     }
 
     @GetMapping(value = "/folder")
     @ApiOperation(value = "Get all sub folders")
     public List<String> getAllSubFolders(@PathVariable String customerSpace,
+                                         @RequestParam(required = false) String systemName,
                                          @RequestParam(required = false) String objectName,
                                          @RequestParam(required = false) String path) {
-        return dropBoxService.getDropFolders(customerSpace, objectName, path);
+        return dropBoxService.getDropFolders(customerSpace, systemName, objectName, path);
     }
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)

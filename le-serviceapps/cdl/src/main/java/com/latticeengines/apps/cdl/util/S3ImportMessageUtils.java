@@ -1,14 +1,10 @@
 package com.latticeengines.apps.cdl.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class S3ImportMessageUtils {
 
-    private static Logger log = LoggerFactory.getLogger(S3ImportMessageUtils.class);
-
-    private static String FEED_TYPE_PATTERN = "%s#%s";
+    private static String FEED_TYPE_PATTERN = "%s_%s";
 
     public static String getFeedTypeFromKey(String key) {
         if (StringUtils.isEmpty(key)) {
@@ -48,4 +44,28 @@ public class S3ImportMessageUtils {
         }
         return parts[1];
     }
+
+    public static String getSystemNameFromKey(String key) {
+        if (StringUtils.isEmpty(key)) {
+            return StringUtils.EMPTY;
+        }
+        String[] parts = key.split("/");
+        if (parts.length < 5) {
+            throw new IllegalArgumentException(String.format("Cannot parse key %s", key));
+        }
+        if (parts.length == 5) {
+            return StringUtils.EMPTY;
+        } else if (parts.length == 6) {
+            return parts[2];
+        } else {
+            throw new IllegalArgumentException(String.format("Cannot parse key %s", key));
+        }
+    }
+
+    public static String formatFeedType(String systemName, String folderName) {
+        if (StringUtils.isNotEmpty(systemName))
+            return String.format(FEED_TYPE_PATTERN, systemName, folderName);
+        return folderName;
+    }
+
 }

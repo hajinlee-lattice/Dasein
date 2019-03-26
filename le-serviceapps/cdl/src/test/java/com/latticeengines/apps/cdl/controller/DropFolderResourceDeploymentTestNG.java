@@ -24,28 +24,21 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment-app")
     public void test() {
-        List<String> subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null);
+        List<String> subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null, null);
         int defaultSize = subFolders.size();
-        Assert.assertTrue(defaultSize > 0);
+        Assert.assertEquals(defaultSize, 5);
 
-        dropBoxProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
-        dropBoxProxy.createTemplateFolder(mainTestTenant.getName(), BusinessEntity.Account.name(), "template2");
-        dropBoxProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template3");
-        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), null);
-        Assert.assertEquals(subFolders.size(), 3);
-
-        dropBoxProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1/test2");
-        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
-        Assert.assertEquals(subFolders.size(), 1);
-
-        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1");
-        Assert.assertEquals(subFolders.size(), 1);
-
-        dropBoxProxy.createTemplateFolder(mainCustomerSpace, "Account123", "template1");
-        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null);
-        Assert.assertEquals(subFolders.size(), defaultSize + 2);
-
-        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, "Account123", null);
-        Assert.assertEquals(subFolders.size(), 1);
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, "FirstSystem", null, null);
+        subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null, null);
+        defaultSize = subFolders.size();
+        Assert.assertEquals(defaultSize, 10);
+        String msg = "";
+        try {
+            dropBoxProxy.createTemplateFolder(mainCustomerSpace, null,
+                    BusinessEntity.Account.name(), null);
+        } catch (Exception e) {
+            msg = e.getMessage();
+        }
+        Assert.assertTrue(msg.contains("can not create template without systemName"));
     }
 }

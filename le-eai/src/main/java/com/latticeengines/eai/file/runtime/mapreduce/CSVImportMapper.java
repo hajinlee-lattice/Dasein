@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,20 +46,10 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.format.number.NumberStyleFormatter;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -81,8 +70,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
-
-import io.lettuce.core.RedisURI;
+import com.latticeengines.redis.util.RedisTemplateUtils;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
@@ -189,7 +177,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
             cacheIdx = 0;
             retryTemplate = RetryUtils.getRetryTemplate(3);
-            redisTemplate = getRedisTemplate();
+            redisTemplate = RedisTemplateUtils.createRedisTemplate(localRedis, redisTimeout, redisEndpoint);
         }
     }
 
@@ -585,52 +573,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             final String key = cacheKey + i;
             retryTemplate.execute(ctx -> redisTemplate.delete(key));
         }
-    }
-
-    private RedisConnectionFactory lettuceConnectionFactory() {
-        RedisConnectionFactory factory;
-
-        if (localRedis) {
-            LOG.info("Using local redis server");
-            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
-            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
-                    .shutdownTimeout(Duration.ZERO) //
-                    .build();
-            factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
-        } else {
-            RedisURI redisURI = RedisURI.create(redisEndpoint);
-            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
-            standaloneConfiguration.setHostName(redisURI.getHost());
-            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
-                    .shutdownTimeout(Duration.ZERO) //
-                    .useSsl() //
-                    .build();
-            factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
-        }
-        ((LettuceConnectionFactory) factory).afterPropertiesSet();
-        return factory;
-    }
-
-
-    private RedisTemplate<String, Object> getRedisTemplate() {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(getValueSerializer());
-        redisTemplate.setConnectionFactory(lettuceConnectionFactory());
-        redisTemplate.setEnableTransactionSupport(true);
-        redisTemplate.afterPropertiesSet();
-        return redisTemplate;
-    }
-
-    private static RedisSerializer<?> getValueSerializer() {
-        Jackson2JsonRedisSerializer<?> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        ObjectMapper om = new ObjectMapper();
-        om.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
-        return jackson2JsonRedisSerializer;
     }
 
 }

@@ -42,10 +42,20 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
     }
 
     @Override
-    public boolean createTemplateFolder(String customerSpace, String objectName, String path) {
+    public boolean createTemplateFolder(String customerSpace, String systemName, String objectName, String path) {
+        if (StringUtils.isEmpty(objectName)) {//create default folder under system
+            String url = "/customerspaces/{customerSpace}/dropbox/folder/{systemName}";
+            url = constructUrl(url, customerSpace, formatFolder(systemName));
+            return get("create template folder", url, Boolean.class);
+        }
         String url = "/customerspaces/{customerSpace}/dropbox/folder/{objectName}";
         if (StringUtils.isNotEmpty(path)) {
             url = String.format("%s?path=%s", url, formatFolder(path));
+            if (StringUtils.isNotEmpty(systemName))
+                url = String.format("%s&systemName=%s", url, systemName);
+        } else {
+            if (StringUtils.isNotEmpty(systemName))
+                url = String.format("%s?systemName=%s", url, systemName);
         }
         url = constructUrl(url, customerSpace, formatFolder(objectName));
 
@@ -53,7 +63,7 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
     }
 
     @Override
-    public List<String> getAllSubFolders(String customerSpace, String objectName, String path) {
+    public List<String> getAllSubFolders(String customerSpace, String systemName, String objectName, String path) {
         String url = "/customerspaces/{customerSpace}/dropbox/folder";
         if (StringUtils.isNotEmpty(objectName)) {
             if (StringUtils.isEmpty(path)) {
@@ -61,6 +71,11 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
             } else {
                 url = String.format("%s?objectName=%s&path=%s", url, formatFolder(objectName), formatFolder(path));
             }
+            if (StringUtils.isNotEmpty(systemName))
+                url = String.format("%s&systemName=%s", url, systemName);
+        } else {
+            if (StringUtils.isNotEmpty(systemName))
+                url = String.format("%s?systemName=%s", url, systemName);
         }
         url = constructUrl(url, customerSpace);
 

@@ -216,7 +216,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.setTemplateDisplayName(feedType);
             }
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-            dropBoxProxy.createTemplateFolder(customerSpace.toString(), feedType, "");
+            if (StringUtils.isEmpty(S3PathBuilder.getSystemNameFromFeedType(feedType))) {
+                dropBoxProxy.createTemplateFolder(customerSpace.toString(), null,
+                        S3PathBuilder.getFolderNameFromFeedType(feedType), "");
+            }
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
                 DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
