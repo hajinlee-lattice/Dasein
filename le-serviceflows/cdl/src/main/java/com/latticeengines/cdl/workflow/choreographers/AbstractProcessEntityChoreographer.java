@@ -306,4 +306,22 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     // used to skip subworkflow in pa
     protected abstract boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq);
+
+    protected boolean checkHasAccounts(AbstractStep<? extends BaseStepConfiguration> step) {
+        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
+        String rawTableName = dataCollectionProxy.getTableName(customerSpace, //
+                TableRoleInCollection.ConsolidatedAccount, active.complement());
+        if (StringUtils.isBlank(rawTableName)) {
+            rawTableName = dataCollectionProxy.getTableName(customerSpace, //
+                    TableRoleInCollection.ConsolidatedAccount, active);
+        }
+        boolean hasAccounts = StringUtils.isNotBlank(rawTableName);
+        if (hasAccounts) {
+            log.info("Found account batch store.");
+        } else {
+            log.info("No account batch store.");
+        }
+        return hasAccounts;
+    }
 }

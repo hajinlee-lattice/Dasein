@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
@@ -55,9 +54,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-/**
- * $ dpltc deploy -a metadata,matchapi,datacloudapi,workflowapi
- */
 public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SourceProfileSegmentStageDeploymentTestNG.class);
 
@@ -91,16 +87,6 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
     @Override
     protected String getTargetSourceName() {
         return source.getSourceName();
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
@@ -222,7 +208,7 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
         disBucket.setValues(Arrays.asList(intValues));
         map.put("BusinessTechnologiesSeoMeta", disBucket);
         CategoricalBucket catBucket = new CategoricalBucket();
-        String[] catValues = { "684", "777", "425", "636", "716" };
+        String[] catValues = { "684", "425", "636", "716" };
         catBucket.setCategories(Arrays.asList(catValues));
         map.put("GLOBAL_ULTIMATE_DnB_COUNTY_CODE", catBucket);
         // map.put("LAST_UPDATE_DATE", null);

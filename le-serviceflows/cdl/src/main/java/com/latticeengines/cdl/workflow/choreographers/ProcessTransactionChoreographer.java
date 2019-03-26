@@ -110,7 +110,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
         checkActiveRawStores(step);
         checkHasProducts(step);
-        checkHasAccounts(step);
+        hasAccounts = checkHasAccounts(step);
         hasActiveServingStore = hasActiveServingStore && hasRawStore && hasProducts;
     }
 
@@ -141,23 +141,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             log.info("Found product batch store.");
         } else {
             log.info("No product batch store.");
-        }
-    }
-
-    private void checkHasAccounts(AbstractStep<? extends BaseStepConfiguration> step) {
-        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
-        String rawTableName = dataCollectionProxy.getTableName(customerSpace, //
-                TableRoleInCollection.ConsolidatedAccount, active.complement());
-        if (StringUtils.isBlank(rawTableName)) {
-            rawTableName = dataCollectionProxy.getTableName(customerSpace, //
-                    TableRoleInCollection.ConsolidatedAccount, active);
-        }
-        hasAccounts = StringUtils.isNotBlank(rawTableName);
-        if (hasAccounts) {
-            log.info("Found account batch store.");
-        } else {
-            log.info("Noaccount batch store.");
         }
     }
 

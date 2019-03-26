@@ -1,9 +1,6 @@
 {
   "ConfigDirectories": [
     {
-      "RootPath": "/Dante"
-    },
-    {
       "RootPath": "/Modeling",
       "Nodes": [
         {

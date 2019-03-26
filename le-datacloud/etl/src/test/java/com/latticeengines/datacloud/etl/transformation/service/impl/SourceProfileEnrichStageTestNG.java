@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -44,11 +43,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-/**
- * $ dpltc deploy -a metadata,matchapi,datacloudapi,workflowapi
- */
-public class SourceProfileEnrichStageDeploymentTestNG extends PipelineTransformationTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(SourceProfileEnrichStageDeploymentTestNG.class);
+public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(SourceProfileEnrichStageTestNG.class);
 
     private static final long RAND_SEED = 0L;
     private static final String ENRICH_PROFILE = "EnrichProfile";
@@ -65,7 +61,7 @@ public class SourceProfileEnrichStageDeploymentTestNG extends PipelineTransforma
 
     private ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         dataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
         prepareAM();
@@ -79,17 +75,7 @@ public class SourceProfileEnrichStageDeploymentTestNG extends PipelineTransforma
 
     @Override
     protected String getTargetSourceName() {
-        return source.getSourceName();
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        return am.getSourceName();
     }
 
     @Override
@@ -279,7 +265,7 @@ public class SourceProfileEnrichStageDeploymentTestNG extends PipelineTransforma
             JsonNode arg = om.readTree(srcAttr.getArguments());
             if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
                 String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
-                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
+                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize(decStr, BitDecodeStrategy.class);
                 Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
                 if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
                     continue;
@@ -329,7 +315,7 @@ public class SourceProfileEnrichStageDeploymentTestNG extends PipelineTransforma
                     Assert.assertNotNull(catAlgo);
                     Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
                     Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
-                            "null,Very Low,Low,Medium,High,Very High");
+                            "null,Normal,Moderate,High");
                     Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
                     Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
                     Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
@@ -344,14 +330,14 @@ public class SourceProfileEnrichStageDeploymentTestNG extends PipelineTransforma
                         Assert.assertNotNull(intAlgo);
                         pass = true;
                     } catch (Exception ex) {
-                        log.warn("Error parsing interval bucket: " + bktAlgo);
+                        // ignore
                     }
                     try {
                         DiscreteBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, DiscreteBucket.class);
                         Assert.assertNotNull(intAlgo);
                         pass = true;
                     } catch (Exception ex) {
-                        log.warn("Error parsing discrete bucket: " + bktAlgo);
+                        // ignore
                     }
                     Assert.assertTrue(pass);
                     break;
