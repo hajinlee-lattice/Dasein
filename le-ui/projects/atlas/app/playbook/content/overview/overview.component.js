@@ -23,24 +23,27 @@ import {
 export class OverviewComponent extends Component {
     constructor(props) {
         super(props);
-        console.log(this.props, this.state);
+        this.state = {play: null};
     }
 
     componentDidMount() {
-        this.unsubscribe = store.subscribe(this.handleChange);
+        let play = this.props.OverviewService.getPlay();
+        console.log('The play', play);
+        this.setState({play: play});
+        // this.unsubscribe = store.subscribe(this.handleChange);
     }
 
     componentWillUnmount() {
-        this.unsubscribe();
+        // this.unsubscribe();
     }
 
     handleChange = () => {
-        const state = store.getState()['playbook'];
-        this.setState(state);
+        // const state = store.getState()['playbook'];
+        // this.setState({});
     }
 
     render() {
-        console.log(this.state);
+        console.log('======> RENDERING');
         return (
             <div className="main-panel">
                 <LeHPanel halignment={SPACEAROUND}>
@@ -55,7 +58,17 @@ export class OverviewComponent extends Component {
 
 angular
     .module("lp.playbook.overview", [])
+    .service('OverviewService', function () {
+        this.Play;
+        this.getPlay = () => {
+            return this.Play;
+        }
+        this.setPlay = (Play) =>{
+            this.Play = Play;
+        }
+
+    })
     .component(
         "playbookOverview",
-        react2angular(OverviewComponent, ['Play'], ['$state','$stateParams'])
+        react2angular(OverviewComponent, ['Play'], ['$state','$stateParams', 'OverviewService'])
     );
