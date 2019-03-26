@@ -1,8 +1,12 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LatticeSchemaField {
 
     @JsonProperty
@@ -19,6 +23,15 @@ public class LatticeSchemaField {
 
     @JsonProperty
     private Boolean fromExistingTemplate = false;
+
+    @JsonProperty
+    private String dateFormatString;
+
+    @JsonProperty
+    private String timeFormatString;
+
+    @JsonProperty
+    private String timezone;
 
     public String getName() {
         return this.name;
@@ -58,5 +71,29 @@ public class LatticeSchemaField {
 
     public void setFromExistingTemplate(Boolean fromExistingTemplate) {
         this.fromExistingTemplate = fromExistingTemplate;
+    }
+
+    public String getDateFormatString() {
+        return dateFormatString;
+    }
+
+    public void setDateFormatString(String dateFormatString) {
+        this.dateFormatString = dateFormatString;
+    }
+
+    public String getTimeFormatString() {
+        return timeFormatString;
+    }
+
+    public void setTimeFormatString(String timeFormatString) {
+        this.timeFormatString = timeFormatString;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
     }
 }
