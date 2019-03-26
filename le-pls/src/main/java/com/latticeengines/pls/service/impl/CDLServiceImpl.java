@@ -308,7 +308,8 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
-        List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null);
+        List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
+        log.info("folderNames is : " + folderNames.toString());
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
         if (dropBoxSummary == null) {
             throw new RuntimeException("Tenant " + customerSpace //
@@ -323,8 +324,15 @@ public class CDLServiceImpl implements CDLService {
             display = new S3ImportTemplateDisplay();
             DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
             if (task == null) {
-                log.warn(String.format("Empty data feed task for tenant %s with feedtype %s", customerSpace,
+                display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         folderName));
+                display.setExist(true);
+                EntityType entityType =
+                        EntityType.fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
+                display.setTemplateName(entityType.getDefaultFeedTypeName());
+                display.setObject(entityType.getDisplayName());
+                display.setFeedType(folderName);
+                templates.add(display);
             } else {
                 display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         folderName));

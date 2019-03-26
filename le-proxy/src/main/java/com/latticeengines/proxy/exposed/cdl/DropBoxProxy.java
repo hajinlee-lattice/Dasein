@@ -14,9 +14,9 @@ public interface DropBoxProxy {
 
     GrantDropBoxAccessResponse refreshAccessKey(String customerSpace);
 
-    boolean createTemplateFolder(String customerSpace, String objectName, String path);
+    boolean createTemplateFolder(String customerSpace, String systemName, String objectName, String path);
 
-    List<String> getAllSubFolders(String customerSpace, String objectName, String path);
+    List<String> getAllSubFolders(String customerSpace, String systemName, String objectName, String path);
 
     boolean importS3file(String customerSpace, String s3Path, String hdfsPath, String filename);
 
