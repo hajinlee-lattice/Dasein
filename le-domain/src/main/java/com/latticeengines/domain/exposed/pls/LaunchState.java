@@ -12,7 +12,10 @@ public enum LaunchState {
     Launched, //
     Failed, //
     Canceled, //
-    Deleted;
+    Deleted, //
+
+    Syncing, //
+    Synced;
 
     private static Map<LaunchState, Collection<LaunchState>> transitionMap = new HashMap<>();
 
@@ -27,6 +30,17 @@ public enum LaunchState {
         statesAfterLaunching.add(Failed);
         statesAfterLaunching.add(Deleted);
         transitionMap.put(Launching, statesAfterLaunching);
+
+        Set<LaunchState> statesAfterLaunched = new HashSet<>();
+        statesAfterLaunched.add(Syncing);
+        statesAfterLaunched.add(Synced);
+        statesAfterLaunched.add(Failed);
+        transitionMap.put(Launched, statesAfterLaunched);
+
+        Set<LaunchState> statesAfterSyncing = new HashSet<>();
+        statesAfterSyncing.add(Synced);
+        statesAfterSyncing.add(Failed);
+        transitionMap.put(Syncing, statesAfterSyncing);
     }
 
     public static boolean canTransit(LaunchState srcState, LaunchState dstState) {

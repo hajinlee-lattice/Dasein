@@ -4,12 +4,15 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataIntegrationStatusMonitorMessage {
 
-    @JsonProperty("tenantId")
-    private String tenantId;
+    @JsonProperty("tenantName")
+    private String tenantName;
 
     @JsonProperty("workflowRequestId")
     private String workflowRequestId;
@@ -29,9 +32,6 @@ public class DataIntegrationStatusMonitorMessage {
     @JsonProperty("sourceFile")
     private String sourceFile;
 
-    @JsonProperty("errorFile")
-    private String errorFile;
-
     @JsonProperty("messageType")
     private String messageType;
 
@@ -44,12 +44,23 @@ public class DataIntegrationStatusMonitorMessage {
     @JsonProperty("eventTime")
     private Date eventTime;
 
-    public String getTenantId() {
-        return tenantId;
+    @JsonProperty("eventDetail")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "eventType")
+    @JsonSubTypes({ //
+            @Type(value = ProgressEventDetail.class, name = "Progress"), //
+            @Type(value = ProgressEventDetail.class, name = "Completed"),
+            @Type(value = AudienceCreationEventDetail.class, name = "AudienceCreation"),
+            @Type(value = FailedEventDetail.class, name = "Failed"),
+            @Type(value = InitiatedEventDetail.class, name = "Initiated") })
+    private EventDetail eventDetail;
+
+    public String getTenantName() {
+        return tenantName;
     }
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 
     public String getOperation() {
@@ -100,14 +111,6 @@ public class DataIntegrationStatusMonitorMessage {
         this.sourceFile = sourceFile;
     }
 
-    public String getErrorFile() {
-        return errorFile;
-    }
-
-    public void setErrorFile(String errorFile) {
-        this.errorFile = errorFile;
-    }
-
     public String getMessageType() {
         return messageType;
     }
@@ -138,5 +141,13 @@ public class DataIntegrationStatusMonitorMessage {
 
     public void setEventTime(Date eventTime) {
         this.eventTime = eventTime;
+    }
+
+    public EventDetail getEventDetail() {
+        return eventDetail;
+    }
+
+    public void setEventDetail(EventDetail eventDetail) {
+        this.eventDetail = eventDetail;
     }
 }
