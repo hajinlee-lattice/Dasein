@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 
@@ -80,6 +82,14 @@ public enum EntityType {
 
     public String getDefaultFeedTypeName() {
         return this.subType == null ? entity.name() + "Data" : entity.name() + subType.name();
+    }
+
+    public static List<String> getDefaultFolders() {
+        Set<String> defaultFolders = new HashSet<>();
+        for (EntityType entry : values()) {
+            defaultFolders.add(entry.getDefaultFeedTypeName());
+        }
+        return new ArrayList<>(defaultFolders);
     }
 
 }

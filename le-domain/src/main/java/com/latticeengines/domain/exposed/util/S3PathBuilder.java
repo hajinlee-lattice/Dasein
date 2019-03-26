@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
+
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public final class S3PathBuilder {
 
@@ -27,22 +31,28 @@ public final class S3PathBuilder {
         if (StringUtils.isEmpty(feedType)) {
             return StringUtils.EMPTY;
         }
-        if (!feedType.contains(SPLIT_CHART))
-            return StringUtils.EMPTY;
-        String systemName = feedType.substring(0, feedType.lastIndexOf(SPLIT_CHART));
-        return systemName;
+        List<String> defaultFolders = EntityType.getDefaultFolders();
+        for (String folderName : defaultFolders) {
+            String suffix = SPLIT_CHART + folderName;
+            if (feedType.endsWith(suffix)) {
+                return feedType.substring(0, feedType.lastIndexOf(suffix));
+            }
+        }
+        return StringUtils.EMPTY;
     }
 
     public static String getFolderNameFromFeedType(String feedType) {
         if (StringUtils.isEmpty(feedType)) {
             return StringUtils.EMPTY;
         }
-        if (!feedType.contains(SPLIT_CHART))
-            return feedType;
-        String folderName = feedType.substring(feedType.lastIndexOf(SPLIT_CHART)+1);
-        if (StringUtils.isEmpty(folderName))
-            throw new IllegalArgumentException(String.format("Cannot parse feedType %s", feedType));
-        return folderName;
+        List<String> defaultFolders = EntityType.getDefaultFolders();
+        for (String folderName : defaultFolders) {
+            String suffix = SPLIT_CHART + folderName;
+            if (feedType.endsWith(suffix)) {
+                return folderName;
+            }
+        }
+        return feedType;
     }
 
 }

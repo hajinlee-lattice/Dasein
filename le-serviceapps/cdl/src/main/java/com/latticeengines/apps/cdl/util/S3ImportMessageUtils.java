@@ -67,23 +67,6 @@ public class S3ImportMessageUtils {
         }
     }
 
-    public static String getFullPath(String dropBoxPrefix, String systemName, String objectName, String path) {
-        String fullPath = dropBoxPrefix + "/";
-        if (!StringUtils.isEmpty(systemName)) {
-            fullPath += systemName + "/";
-        }
-        fullPath += TEMPLATES;
-        if (StringUtils.isNotEmpty(objectName)) {
-            fullPath += "/" + objectName;
-
-            if (StringUtils.isNotEmpty(path)) {
-                fullPath += "/" + path;
-            }
-        }
-
-        return fullPath;
-    }
-
     public static String formatFeedType(String systemName, String folderName) {
         if (StringUtils.isNotEmpty(systemName))
             return String.format(FEED_TYPE_PATTERN, systemName, folderName);
