@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
@@ -509,6 +510,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         latticeSchemaField.setName(attribute.getName());
         // latticeSchemaField.setFieldType(attribute.getPhysicalDataType());
         latticeSchemaField.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+        if (UserDefinedType.DATE.equals(latticeSchemaField.getFieldType())) {
+            latticeSchemaField.setDateFormatString(attribute.getDateFormatString());
+            latticeSchemaField.setTimeFormatString(attribute.getTimeFormatString());
+            latticeSchemaField.setTimezone(attribute.getTimezone());
+        }
         if (attribute.getRequired()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
 
