@@ -1,15 +1,10 @@
 package com.latticeengines.apps.cdl.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class S3ImportMessageUtils {
 
-    private static Logger log = LoggerFactory.getLogger(S3ImportMessageUtils.class);
-
     private static String FEED_TYPE_PATTERN = "%s_%s";
-    private static final String TEMPLATES = "Templates";
 
     public static String getFeedTypeFromKey(String key) {
         if (StringUtils.isEmpty(key)) {

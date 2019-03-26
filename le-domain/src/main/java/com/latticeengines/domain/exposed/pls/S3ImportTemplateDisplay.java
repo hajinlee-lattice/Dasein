@@ -22,6 +22,8 @@ public class S3ImportTemplateDisplay {
     private Boolean exist;
     @JsonProperty("FeedType")
     private String feedType;
+    @JsonProperty("SystemName")
+    private String systemName;
 
     public String getObject() {
         return object;
@@ -76,4 +78,11 @@ public class S3ImportTemplateDisplay {
         return JsonUtils.serialize(this);
     }
 
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
 }

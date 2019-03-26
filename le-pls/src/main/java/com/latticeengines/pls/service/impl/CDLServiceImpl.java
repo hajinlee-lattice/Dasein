@@ -332,6 +332,7 @@ public class CDLServiceImpl implements CDLService {
                 display.setTemplateName(entityType.getDefaultFeedTypeName());
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(folderName);
+                display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
                 templates.add(display);
             } else {
                 display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
@@ -344,6 +345,7 @@ public class CDLServiceImpl implements CDLService {
                         task.getSubType());
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
+                display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
                 templates.add(display);
             }
         }
