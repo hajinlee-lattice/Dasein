@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Service("dropBoxService")
@@ -51,11 +54,12 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String ARN_PREFIX = "arn:aws:s3:::";
     // naming convention for S3 bucket policy statement
     private static final String PUT_POLICY_ID = "RequirementsOnPut";
-    // Share folder for PS team
+    //Default Share folder
     private static final String PS_SHARE = "PS_SHARE";
     private static final String PS_SHARE_INBOX = "INBOX";
     private static final String PS_SHARE_OUTBOX = "OUTBOX";
     // Template prefix
+    private static final String DEFAULTSYSTEM = "DefaultSystem";
     private static final String TEMPLATES = "Templates";
 
     @Inject
@@ -136,40 +140,78 @@ public class DropBoxServiceImpl implements DropBoxService {
     public void createTenantDefaultFolder(String customerSpace) {
         String dropBoxBucket = getDropBoxBucket();
         String dropBoxPrefix = getDropBoxPrefix();
-
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null, null));
-
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, null));
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, PS_SHARE_INBOX));
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, PS_SHARE, PS_SHARE_OUTBOX));
+        String path = dropBoxPrefix + "/" + PS_SHARE;
+        s3Service.createFolder(dropBoxBucket, path);
+        String subPath = path + "/" + PS_SHARE_INBOX;
+        s3Service.createFolder(dropBoxBucket, subPath);
+        subPath = path + "/" + PS_SHARE_OUTBOX;
+        s3Service.createFolder(dropBoxBucket, subPath);
+        createFolderWithSystemName(dropBoxBucket, dropBoxPrefix, DEFAULTSYSTEM);
     }
 
     @Override
-    public void createFolder(String customerSpace, String objectName, String path) {
+    public void createFolder(String customerSpace, String systemName, String objectName, String path) {
         String dropBoxBucket = getDropBoxBucket();
         String dropBoxPrefix = getDropBoxPrefix();
 
-        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, formatPath(objectName), null));
-        if (StringUtils.isNotEmpty(path)) {
-            String[] folderList = path.split("/");
-            String needCreateFolder = "";
-            for (String folder : folderList) {
-                if (StringUtils.isNotEmpty(folder)) {
-                    needCreateFolder += "/" + folder;
-                    s3Service.createFolder(dropBoxBucket,
-                            getFullPath(dropBoxPrefix, formatPath(objectName), formatPath(needCreateFolder)));
+        if (StringUtils.isNotEmpty(systemName)) {//new logic that every system all have five folder, can not be edit.
+            if (isOldTenant(dropBoxBucket, dropBoxPrefix)) {
+                throw new IllegalStateException("can not create system in old tenant");
+            }
+            createFolderWithSystemName(dropBoxBucket, dropBoxPrefix, systemName);
+        } else {//the old logic without systemName
+            if (!isOldTenant(dropBoxBucket, dropBoxPrefix)) {
+                throw new IllegalStateException("can not create template without systemName");
+            }
+            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null,
+                    formatPath(objectName),
+                    null));
+
+            if (StringUtils.isNotEmpty(path)) {
+                String[] folderList = path.split("/");
+                String needCreateFolder = "";
+                for (String folder : folderList) {
+                    if (StringUtils.isNotEmpty(folder)) {
+                        needCreateFolder += "/" + folder;
+                        s3Service.createFolder(dropBoxBucket,
+                                getFullPath(dropBoxPrefix, systemName, formatPath(objectName),
+                                        formatPath(needCreateFolder)));
+                    }
                 }
             }
         }
     }
 
     @Override
-    public List<String> getDropFolders(String customerSpace, String objectName, String path) {
+    public List<String> getDropFolders(String customerSpace, String systemName, String objectName, String path) {
         String dropBoxBucket = getDropBoxBucket();
         String dropBoxPrefix = getDropBoxPrefix();
-
+        if (StringUtils.isEmpty(objectName) && StringUtils.isEmpty(path) && StringUtils.isEmpty(systemName)) {
+            //there has two situation: 1. this is old path: dropfolder/%s/Templates;
+            //2.this is new path need list all dropFolders under systemName
+            Set<String> allSubFolders = new HashSet<>();
+            List<String> rootSubFolders = s3Service.listSubFolders(dropBoxBucket, dropBoxPrefix);
+            log.info("rootSubFolders is " + rootSubFolders.toString());
+            rootSubFolders.remove(PS_SHARE);
+            if (CollectionUtils.isNotEmpty(rootSubFolders)) {
+                for (String folderName : rootSubFolders) {
+                    if (folderName.equals(TEMPLATES)) {
+                        List<String> subFolders = s3Service.listSubFolders(dropBoxBucket,
+                                getFullPath(dropBoxPrefix, null, null,
+                                        null));
+                        subFolders.remove(PS_SHARE);
+                        allSubFolders.addAll(subFolders);
+                    } else {
+                        allSubFolders.addAll(formatFolderName(folderName, s3Service.listSubFolders(dropBoxBucket,
+                                getFullPath(dropBoxPrefix, folderName, null,
+                                        null))));
+                    }
+                }
+                return new ArrayList<>(allSubFolders);
+            }
+        }
         return s3Service.listSubFolders(dropBoxBucket,
-                getFullPath(dropBoxPrefix, formatPath(objectName), formatPath(path)));
+                getFullPath(dropBoxPrefix, systemName, formatPath(objectName), formatPath(path)));
     }
 
     @Override
@@ -212,20 +254,6 @@ public class DropBoxServiceImpl implements DropBoxService {
             }
         }
         return path;
-    }
-
-    private String getFullPath(String dropBoxPrefix, String objectName, String path) {
-        String fullPath = dropBoxPrefix + "/" + TEMPLATES;
-
-        if (StringUtils.isNotEmpty(objectName)) {
-            fullPath += "/" + objectName;
-
-            if (StringUtils.isNotEmpty(path)) {
-                fullPath += "/" + path;
-            }
-        }
-
-        return fullPath;
     }
 
     private String formatPath(String path) {
@@ -279,16 +307,16 @@ public class DropBoxServiceImpl implements DropBoxService {
         dropbox.setAccessMode(request.getAccessMode());
         GrantDropBoxAccessResponse response;
         switch (request.getAccessMode()) {
-        case LatticeUser:
-            response = grantAccessToLatticeUser(request.getExistingUser());
-            dropbox.setLatticeUser(response.getLatticeUser());
-            break;
-        case ExternalAccount:
-            response = grantAccessToExternalAccount(request.getExternalAccountId());
-            dropbox.setExternalAccount(response.getExternalAccountId());
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
+            case LatticeUser:
+                response = grantAccessToLatticeUser(request.getExistingUser());
+                dropbox.setLatticeUser(response.getLatticeUser());
+                break;
+            case ExternalAccount:
+                response = grantAccessToExternalAccount(request.getExternalAccountId());
+                dropbox.setExternalAccount(response.getExternalAccountId());
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
         }
         entityMgr.update(dropbox);
         return response;
@@ -322,14 +350,14 @@ public class DropBoxServiceImpl implements DropBoxService {
         DropBox dropbox = entityMgr.getDropBox();
         if (dropbox != null && dropbox.getAccessMode() != null) {
             switch (dropbox.getAccessMode()) {
-            case LatticeUser:
-                revokeAccessToLatticeUser(dropbox.getLatticeUser());
-                break;
-            case ExternalAccount:
-                revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
+                case LatticeUser:
+                    revokeAccessToLatticeUser(dropbox.getLatticeUser());
+                    break;
+                case ExternalAccount:
+                    revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
             }
             dropbox.setExternalAccount(null);
             dropbox.setLatticeUser(null);
@@ -434,7 +462,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
-        ));
+                ));
     }
 
     private String listDropBoxStmtId(String dropBoxId) {
@@ -543,7 +571,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
-        ));
+                ));
     }
 
     private void revokeAccountFromDropBox(Policy policy, String dropBoxId, String accountId) {
@@ -643,5 +671,57 @@ public class DropBoxServiceImpl implements DropBoxService {
     // for tests
     void setCustomersBucket(String customersBucket) {
         this.customersBucket = customersBucket;
+    }
+
+    private List<String> formatFolderName(String systemName, List<String> folders) {
+        if (StringUtils.isEmpty(systemName)) {
+            return folders;
+        }
+        Set<String> formatedFolders = new HashSet<>();
+        for (String folderName : folders) {
+            formatedFolders.add(S3ImportMessageUtils.formatFeedType(systemName, folderName));
+        }
+        return new ArrayList<>(formatedFolders);
+    }
+
+    private void createFolderWithSystemName(String dropBoxBucket, String dropBoxPrefix, String systemName) {
+        if (StringUtils.isEmpty(systemName)) {
+            throw new IllegalArgumentException("systemName can not be null.");
+        }
+        String rootFolder = dropBoxPrefix + "/" + systemName;
+        s3Service.createFolder(dropBoxBucket, rootFolder);
+        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName, null,
+                null));
+        List<String> defaultFolders = EntityType.getDefaultFolders();
+        for (String folderName : defaultFolders) {
+            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName,
+                    folderName, null));
+        }
+    }
+
+    private boolean isOldTenant(String dropBoxBucket, String dropBoxPrefix) {
+        List<String> subFolders = s3Service.listSubFolders(dropBoxBucket,
+                getFullPath(dropBoxPrefix, null, null,
+                        null));//if dropfolder/%s/template/ has subFolder. this is olde tenant.
+        if (CollectionUtils.isNotEmpty(subFolders)) {
+            return true;
+        }
+        return false;
+    }
+
+    private String getFullPath(String dropBoxPrefix, String systemName, String objectName, String path) {
+        String fullPath = dropBoxPrefix + "/";
+        if (!StringUtils.isEmpty(systemName)) {
+            fullPath += systemName + "/";
+        }
+        fullPath += TEMPLATES;
+        if (StringUtils.isNotEmpty(objectName)) {
+            fullPath += "/" + objectName;
+
+            if (StringUtils.isNotEmpty(path)) {
+                fullPath += "/" + path;
+            }
+        }
+        return fullPath;
     }
 }
