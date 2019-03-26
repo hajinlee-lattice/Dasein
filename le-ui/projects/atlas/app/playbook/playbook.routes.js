@@ -199,7 +199,7 @@ angular
 
             }],
             resolve: {
-                Play: ($q, $state, $stateParams, $ngRedux) => {
+                Play: ($q, $state, $stateParams, $ngRedux, OverviewService) => {
                     let redux = $state.get('home.playbook').data.redux;
 
                     var deferred = $q.defer();
@@ -208,9 +208,12 @@ angular
                         redux.fetchPlay($stateParams.play_name);
 
                         $ngRedux.subscribe(state => {
+                            OverviewService.setPlay(redux.store.play);
                             deferred.resolve(redux.store.play);
+
                         });
                     } else {
+                        OverviewService.setPlay(redux.store.play);
                         deferred.resolve(redux.store.play);
                     }
 
