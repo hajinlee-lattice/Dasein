@@ -166,14 +166,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             avroFileName = table.getName() + ".avro";
         }
 
+        avroRecord = new GenericData.Record(schema);
         if (deduplicate) {
             redisEndpoint = conf.get("eai.redis.endpoint");
             redisTimeout = Integer.parseInt(conf.get("eai.redis.timeout"));
             localRedis = Boolean.parseBoolean(conf.get("eai.redis.local"));
             LOG.info(String.format("Redis endpoint: %s, timeout: %d, localRedis: %b", redisEndpoint, redisTimeout, localRedis));
-
-            avroRecord = new GenericData.Record(schema);
-
             cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
             cacheIdx = 0;
             retryTemplate = RetryUtils.getRetryTemplate(3);
@@ -198,7 +196,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         try (CSVParser parser = new CSVParser(
                 new InputStreamReader((new FileInputStream(csvFileName)), StandardCharsets.UTF_8),
                 LECSVFormat.format)) {
-            headers = new ArrayList<String>(parser.getHeaderMap().keySet()).toArray(new String[] {});
+            headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[] {});
         }
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
@@ -254,7 +252,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         missingRequiredColValue = Boolean.FALSE;
         fieldMalFormed = Boolean.FALSE;
         rowError = Boolean.FALSE;
-        for (int i = 0; i < schema.getFields().size(); i ++) {
+        for (int i = 0; i < schema.getFields().size(); i++) {
             avroRecord.put(i, null);
         }
     }
