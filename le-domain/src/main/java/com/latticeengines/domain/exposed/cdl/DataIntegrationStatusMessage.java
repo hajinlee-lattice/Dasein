@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,17 +20,20 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Table(name = "DATA_INTEG_STATUS_MESSAGE")
 @Entity
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
+@JsonIgnoreProperties(value = { "eventDetail" }, allowGetters = true, ignoreUnknown = true)
+public class DataIntegrationStatusMessage implements HasPid, HasTenant, HasAuditingFields {
 
     @Id
     @JsonProperty("pid")
@@ -43,6 +47,12 @@ public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private DataIntegrationStatusMonitor statusMonitor;
+
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private Tenant tenant;
 
     @JsonProperty("workflowRequestId")
     @Column(name = "WORKFLOW_REQ_ID", nullable = true)
@@ -62,6 +72,11 @@ public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date eventTime;
 
+    @Column(name = "EVENT_DETAIL", columnDefinition = "'JSON'", nullable = true)
+    @Type(type = "json")
+    @JsonProperty("eventDetail")
+    private EventDetail eventDetail;
+
     @JsonProperty("message")
     @Column(name = "MESSAGE", nullable = true)
     private String message;
@@ -76,10 +91,12 @@ public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -93,6 +110,16 @@ public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
         if (this.statusMonitor != null) {
             this.setWorkflowRequestId(this.statusMonitor.getWorkflowRequestId());
         }
+    }
+
+    @Override
+    public Tenant getTenant() {
+        return this.tenant;
+    }
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public String getWorkflowRequestId() {
@@ -127,6 +154,20 @@ public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
         this.eventTime = eventTime;
     }
 
+    public EventDetail getEventDetail() {
+        return eventDetail;
+    }
+
+//    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "eventType")
+//    @JsonSubTypes({ //
+//            @JsonSubTypes.Type(value = ProgressEventDetail.class, name = "Progress"), //
+//            @JsonSubTypes.Type(value = AudienceCreationEventDetail.class, name = "AudienceCreation"),
+//            @JsonSubTypes.Type(value = FailedEventDetail.class, name = "Failed"),
+//            @JsonSubTypes.Type(value = InitiatedEventDetail.class, name = "Initiated") })
+    public void setEventDetail(EventDetail eventDetail) {
+        this.eventDetail = eventDetail;
+    }
+
     public String getMessage() {
         return message;
     }
@@ -135,18 +176,22 @@ public class DataIntegrationStatusMessage implements HasPid, HasAuditingFields {
         this.message = message;
     }
 
+    @Override
     public Date getCreated() {
         return createdDate;
     }
 
+    @Override
     public void setCreated(Date created) {
         this.createdDate = created;
     }
 
+    @Override
     public Date getUpdated() {
         return updatedDate;
     }
 
+    @Override
     public void setUpdated(Date updated) {
         this.updatedDate = updated;
     }

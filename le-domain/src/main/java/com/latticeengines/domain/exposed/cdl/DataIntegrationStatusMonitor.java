@@ -54,7 +54,6 @@ public class DataIntegrationStatusMonitor
         this.entityId = statusMessage.getEntityId();
         this.externalSystemId = statusMessage.getExternalSystemId();
         this.sourceFile = statusMessage.getSourceFile();
-        this.errorFile = statusMessage.getErrorFile();
         this.status = statusMessage.getEventType();
     }
 
@@ -65,7 +64,7 @@ public class DataIntegrationStatusMonitor
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
