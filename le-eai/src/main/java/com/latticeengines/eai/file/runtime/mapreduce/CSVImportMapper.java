@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -573,7 +574,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         LOG.info("Start create new redis cache block");
         final String key = cacheKey + cacheIdx;
         retryTemplate.execute(ctx -> {
-            redisTemplate.opsForValue().set(key, ids);
+            redisTemplate.opsForValue().set(key, ids, 1, TimeUnit.DAYS);
             return null;
         });
         cacheIdx++;
