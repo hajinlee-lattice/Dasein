@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
 
@@ -58,7 +57,7 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig profile = profile();
-            TransformationStepConfig bucket = bucket(InterfaceName.ContactId.name());
+            TransformationStepConfig bucket = bucket();
             TransformationStepConfig calc = calcStats();
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
@@ -92,8 +91,8 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
     }
 
     @Override
-    protected TransformationStepConfig bucket(String rowIdField) {
-        TransformationStepConfig step = super.bucket(rowIdField);
+    protected TransformationStepConfig bucket() {
+        TransformationStepConfig step = super.bucket();
         step.setBaseSources(Collections.singletonList(contact.getSourceName()));
         step.setInputSteps(Collections.singletonList(profileStep));
         step.setTargetSource(contactBucket.getSourceName());
