@@ -298,8 +298,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 + " eventCount=" + eventCount;
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
             Assert.assertEquals(targetCount, 22, errorMsg);
-            Assert.assertEquals(trainingCount, 296, errorMsg);
-            Assert.assertEquals(eventCount, 249, errorMsg);
+            Assert.assertEquals(trainingCount, 232, errorMsg);
+            Assert.assertEquals(eventCount, 193, errorMsg);
         } else {
             Assert.assertEquals(targetCount, 554, errorMsg);
             Assert.assertEquals(trainingCount, 2618, errorMsg);
