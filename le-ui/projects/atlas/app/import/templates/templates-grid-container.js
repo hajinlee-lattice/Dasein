@@ -1,5 +1,5 @@
 import React, { Component } from "../../../../common/react-vendor";
-import { getAngularState } from "./states";
+import NgState from "../../ng-state";
 
 import httpService from "../../../../common/app/http/http-service";
 import { SUCCESS } from "../../../../common/app/http/response";
@@ -60,7 +60,7 @@ export default class GridContainer extends Component {
         }
         let goTo = `home.import.entry.${entity}`;
 
-        getAngularState().go(goTo, response);
+        NgState.getAngularState().go(goTo, response);
     }
 
     actionCallbackHandler(response) {

@@ -111,7 +111,7 @@
                     </div>
 
                     <div class="column data records" ng-if="!vm.lookupMode">
-                        <strong ng-if="vm.section != 'segment.analysis'">{{ attribute.Count | number }}</strong>
+                        <strong ng-if="vm.section != 'segment.analysis'">{{ vm.getCount(attribute) | number }}</strong>
                         <strong ng-if="vm.section == 'segment.analysis'">{{ vm.formatAttributeRecords(Value, (attribute.TopBkt.Cnt|number)) }}</strong>
                     </div>
 
