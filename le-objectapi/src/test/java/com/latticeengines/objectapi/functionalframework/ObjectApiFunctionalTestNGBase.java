@@ -43,7 +43,7 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
 
     protected EventFrontEndQuery loadFrontEndQueryFromResource(String resourceName) {
         try {
-            InputStream inputStream = ClassLoader.class.getResourceAsStream(resourceName);
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
             return JsonUtils.deserialize(inputStream, EventFrontEndQuery.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load json resource" + resourceName, e);
