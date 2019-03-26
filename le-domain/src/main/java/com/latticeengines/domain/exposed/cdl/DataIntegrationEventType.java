@@ -7,21 +7,44 @@ import java.util.Map;
 import java.util.Set;
 
 public enum DataIntegrationEventType {
-    WORKFLOW_SUBMITTED, WORKFLOW_STARTED, WORKFLOW_COMPLETED, WORKFLOW_FAILED;
+    WorkflowSubmitted, Initiated, InProgress, Completed, Failed, Progress, AudienceCreation;
 
     private static Map<DataIntegrationEventType, Collection<DataIntegrationEventType>> transitionMap = new HashMap<>();
 
     static {
         Set<DataIntegrationEventType> statesAfterSubmitted = new HashSet<>();
-        statesAfterSubmitted.add(WORKFLOW_STARTED);
-        statesAfterSubmitted.add(WORKFLOW_COMPLETED);
-        statesAfterSubmitted.add(WORKFLOW_FAILED);
-        transitionMap.put(WORKFLOW_SUBMITTED, statesAfterSubmitted);
+        statesAfterSubmitted.add(Initiated);
+        statesAfterSubmitted.add(InProgress);
+        statesAfterSubmitted.add(Failed);
+        statesAfterSubmitted.add(Completed);
+        statesAfterSubmitted.add(Progress);
+        statesAfterSubmitted.add(AudienceCreation);
+        transitionMap.put(WorkflowSubmitted, statesAfterSubmitted);
 
-        Set<DataIntegrationEventType> statesAfterStarted = new HashSet<>();
-        statesAfterStarted.add(WORKFLOW_COMPLETED);
-        statesAfterStarted.add(WORKFLOW_FAILED);
-        transitionMap.put(WORKFLOW_STARTED, statesAfterStarted);
+        Set<DataIntegrationEventType> statesAfterInitiated = new HashSet<>();
+        statesAfterInitiated.add(InProgress);
+        statesAfterInitiated.add(Failed);
+        statesAfterInitiated.add(Completed);
+        statesAfterInitiated.add(Progress);
+        statesAfterInitiated.add(AudienceCreation);
+        transitionMap.put(Initiated, statesAfterInitiated);
+
+        Set<DataIntegrationEventType> statesAfterAudienceCreation = new HashSet<>();
+        statesAfterAudienceCreation.add(InProgress);
+        statesAfterAudienceCreation.add(Failed);
+        statesAfterAudienceCreation.add(Completed);
+        statesAfterAudienceCreation.add(Progress);
+        transitionMap.put(AudienceCreation, statesAfterAudienceCreation);
+
+        Set<DataIntegrationEventType> statesAfterInProgress = new HashSet<>();
+        statesAfterInProgress.add(Failed);
+        statesAfterInProgress.add(Completed);
+        transitionMap.put(InProgress, statesAfterInProgress);
+
+        Set<DataIntegrationEventType> statesAfterProgress = new HashSet<>();
+        statesAfterProgress.add(Failed);
+        statesAfterProgress.add(Completed);
+        transitionMap.put(Progress, statesAfterProgress);
     }
 
     public static boolean canTransit(DataIntegrationEventType srcState,

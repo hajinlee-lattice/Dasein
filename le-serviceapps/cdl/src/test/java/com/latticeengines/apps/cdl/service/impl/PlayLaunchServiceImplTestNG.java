@@ -172,13 +172,13 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private DataIntegrationStatusMonitorMessage constructDefaultStatusMessage(String workflowRequestId,
             DataIntegrationEventType eventType, PlayLaunch pl) {
         DataIntegrationStatusMonitorMessage statusMessage = new DataIntegrationStatusMonitorMessage();
-        statusMessage.setTenantId(mainTestTenant.getName());
+        statusMessage.setTenantName(mainTestTenant.getName());
         statusMessage.setWorkflowRequestId(workflowRequestId);
         statusMessage.setEntityId(pl.getLaunchId());
         statusMessage.setEntityName("PlayLaunch");
         statusMessage.setExternalSystemId(UUID.randomUUID().toString());
         statusMessage.setOperation("export");
-        statusMessage.setMessageType(MessageType.EVENT.toString());
+        statusMessage.setMessageType(MessageType.Event.toString());
         statusMessage.setMessage("This workflow has been submitted");
         statusMessage.setEventType(eventType.toString());
         statusMessage.setEventTime(new Date());
@@ -351,10 +351,10 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     public void testCreateExportIntegrationStatusMonitor() throws InterruptedException {
         // Simulate workflow Launch and external integration with Tray Export Flow
         DataIntegrationStatusMonitorMessage statusMessage1 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
-                DataIntegrationEventType.WORKFLOW_SUBMITTED, playLaunch1);
+                DataIntegrationEventType.WorkflowSubmitted, playLaunch1);
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage1);
         DataIntegrationStatusMonitorMessage statusMessage2 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
-                DataIntegrationEventType.WORKFLOW_SUBMITTED, playLaunch2);
+                DataIntegrationEventType.WorkflowSubmitted, playLaunch2);
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
 
         Thread.sleep(2000L);
@@ -363,7 +363,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(statusMonitorList);
         assertEquals(statusMonitorList.size(), 2);
 
-        statusMessage2.setEventType(DataIntegrationEventType.WORKFLOW_COMPLETED.toString());
+        statusMessage2.setEventType(DataIntegrationEventType.Completed.toString());
         statusMessage2.setMessage("Workflow marked as Complete");
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
         Thread.sleep(1000L);
