@@ -10,7 +10,7 @@ import {
 import "./templates.scss";
 import { clean, getRouter } from "./react-routing";
 import { UIRouter, UIView } from "../../../../common/react-vendor";
-import { setAngularState } from "./states";
+import NgState from "../../ng-state";
 import httpService from "../../../../common/app/http/http-service";
 import Observer from "../../../../common/app/http/observer";
 
@@ -21,7 +21,12 @@ class TemplatesComponent extends Component {
       label: "Setup Automation",
       classNames: "gray-button"
     };
-    setAngularState(this.props.$state);
+    NgState.setAngularState(this.props.$state);
+    
+    // let stateStore = this.props.$state.get('home.importtemplates');
+    // this.redux = stateStore.data.redux;
+    // console.log('FORMATS ', this.redux.store);
+  
   }
 
   componentDidMount() {
