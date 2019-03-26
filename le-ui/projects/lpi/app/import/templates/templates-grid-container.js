@@ -162,7 +162,7 @@ export default class GridContainer extends Component {
         },
         {
           name: "LastEditedDate",
-          displayName: "Edited",
+          displayName: "Last Modified",
           sortable: false
         },
         {
