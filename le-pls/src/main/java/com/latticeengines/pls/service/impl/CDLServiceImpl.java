@@ -326,7 +326,7 @@ public class CDLServiceImpl implements CDLService {
             if (task == null) {
                 display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         folderName));
-                display.setExist(true);
+                display.setExist(Boolean.FALSE);
                 EntityType entityType =
                         EntityType.fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
                 display.setTemplateName(entityType.getDefaultFeedTypeName());
