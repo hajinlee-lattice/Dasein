@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 public class BatonServiceImpl implements BatonService {
 
@@ -92,8 +93,9 @@ public class BatonServiceImpl implements BatonService {
             tenantInfo.properties.created = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
                     .toEpochMilli();
             tenantInfo.properties.lastModified = tenantInfo.properties.created;
-            tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(90);
-
+            if (TenantType.POC.name().equals(tenantInfo.properties.tenantType)) {
+                tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(90);
+            }
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);
 
             // Setup a dummy space configuration.
