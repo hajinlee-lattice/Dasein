@@ -372,8 +372,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCreateExportIntegrationStatusMonitor" })
     public void testEntriesDashboard() {
         Long badPlayId = System.currentTimeMillis();
-        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
-        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching);
+        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching, LaunchState.Synced,
+                LaunchState.Syncing);
+        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching, LaunchState.Syncing);
 
         checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L);
 
