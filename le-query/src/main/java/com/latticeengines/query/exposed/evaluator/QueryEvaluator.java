@@ -25,7 +25,7 @@ import reactor.core.scheduler.Schedulers;
 public class QueryEvaluator {
 
     public static final String SCORE = "Score";
-    private static final int MAX_CARDINALITY = 1_000_000;
+    private static final int MAX_CARDINALITY = 10_000_000;
 
     private static Scheduler scheduler = null;
 
