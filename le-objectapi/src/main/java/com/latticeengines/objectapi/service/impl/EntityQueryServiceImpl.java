@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,11 +11,15 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -54,9 +59,14 @@ import reactor.core.publisher.Flux;
 @Service("entityQueryService")
 public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements EntityQueryService {
 
+    private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImpl.class);
+
     private final QueryEvaluatorService queryEvaluatorService;
 
     private final TransactionService transactionService;
+
+    @Resource(name = "redshiftJdbcTemplate")
+    private JdbcTemplate redshiftJdbcTemplate;
 
     @Inject
     public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
@@ -86,7 +96,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             // 1) query max date
             // 2) round
             // augment timetranslator
-            preprocess(map, frontEndQuery, timeTranslator);
+            preprocess(map, version, frontEndQuery, timeTranslator);
 
             // replace frontend query in place
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
@@ -283,12 +293,13 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return false;
     }
 
-    void preprocess(Map<ComparisonType, Set<AttributeLookup>> map, FrontEndQuery frontEndQuery,
-            TimeFilterTranslator timeTranslator) {
+    void preprocess(Map<ComparisonType, Set<AttributeLookup>> map, DataCollection.Version version,
+            FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator) {
         if (MapUtils.isNotEmpty(map)) {
             for (ComparisonType type : map.keySet()) {
                 switch (type) {
                 case LASTEST_DAY:
+                    getMaxDates(map.get(type), version, timeTranslator);
                     break;
                 default:
                     throw new UnsupportedOperationException(
@@ -324,7 +335,59 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return result;
     }
 
-    void getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version) {
+    void getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version,
+            TimeFilterTranslator timeTranslator) {
+        String tenantId = MultiTenantContext.getTenant().getId();
+        // Currently, only account and contact entity can have date attributes
+        List<AttributeLookup> accountMaxLookups = new ArrayList<>();
+        List<AttributeLookup> contactMaxLookups = new ArrayList<>();
+        for (AttributeLookup lookup : lookups) {
+            if (BusinessEntity.Account.equals(lookup.getEntity())) {
+                accountMaxLookups.add(lookup);
+            } else if (BusinessEntity.Contact.equals(lookup.getEntity())) {
+                contactMaxLookups.add(lookup);
+            } else {
+                throw new UnsupportedOperationException(
+                        String.format("Entity %s should not have Date Attribute.", lookup.getEntity().name()));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
+            String accountTableName = queryEvaluatorService.getAndValidateServingStoreTableName(
+                    MultiTenantContext.getTenant().getId(), BusinessEntity.Account, version);
+            log.info(String.format("Get accountTableName %s for %s", accountTableName, tenantId));
+
+            String selections = String.join(",", accountMaxLookups.stream().map(lookup -> {
+                return MessageFormat.format("max({0}) as {0}", lookup.getAttribute());
+            }).collect(Collectors.toList()));
+
+            String query = MessageFormat.format("SELECT {0} FROM {1}", selections, accountTableName);
+            log.info("query for accountTableName " + query);
+            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+            // for (Map.Entry<String, Object> map : retList.get(0).entrySet()) {
+            // log.info(map.getKey() + ": " + map.getValue());
+            // }
+        }
+
+        if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
+            String contactTableName = queryEvaluatorService.getAndValidateServingStoreTableName(
+                    MultiTenantContext.getTenant().getId(), BusinessEntity.Contact, version);
+            log.info(String.format("Get contactTableName %s for %s", contactTableName, tenantId));
+
+            String selections = String.join(",", contactMaxLookups.stream().map(lookup -> {
+                return MessageFormat.format("max({0}) as {0}", lookup.getAttribute());
+            }).collect(Collectors.toList()));
+
+            String query = MessageFormat.format("SELECT {0} FROM {1}", selections, contactTableName);
+            log.info("query for contactTableName " + query);
+            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+            // for (Map.Entry<String, Object> map : retList.get(0).entrySet()) {
+            // log.info(map.getKey() + ": " + map.getValue());
+            // }
+        }
+
+    }
+
+    void getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -369,7 +432,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 System.out.println(key + ": " + map.get(key).toString());
             }
         }
-
     }
 
 }

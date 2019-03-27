@@ -36,21 +36,27 @@ public class RestrictionUtils {
             "HasPurchased");
 
     public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
-            Map<ComparisonType, Set<AttributeLookup>> map) {
+            Map<ComparisonType, Set<AttributeLookup>> map, TimeFilterTranslator timeTranslator) {
         Bucket bkt = bucketRestriction.getBkt();
         if (bkt == null) {
             throw new IllegalArgumentException("cannot inspect null bucket restriction");
         }
 
         if (bkt.getDateFilter() != null) {
-            if (ComparisonType.LASTEST_DAY.equals(bkt.getDateFilter().getRelation())) {
-                if (map.containsKey(ComparisonType.LASTEST_DAY)) {
-                    map.get(ComparisonType.LASTEST_DAY).add(bucketRestriction.getAttr());
+            ComparisonType cmp = bkt.getDateFilter().getRelation();
+            AttributeLookup lookup = bucketRestriction.getAttr();
+            // If the current operator needs further specification
+            // and the TimeFilterTranslator does not have its specs
+            if (ComparisonType.VAGUE_TYPES.contains(cmp)
+                    && !timeTranslator.getSpecialValues().get(cmp).containsKey(lookup)) {
+                if (map.containsKey(cmp)) {
+                    map.get(cmp).add(lookup);
                 } else {
                     Set<AttributeLookup> set = new HashSet<>();
-                    set.add(bucketRestriction.getAttr());
-                    map.put(ComparisonType.LASTEST_DAY, set);
+                    set.add(lookup);
+                    map.put(cmp, set);
                 }
+
             }
         }
     }

@@ -29,7 +29,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
     private TransactionService transactionService;
 
     @Inject
-    private QueryEvaluatorService queryEvaluatorService;
+    QueryEvaluatorService queryEvaluatorService;
 
     protected Tenant tenant;
     protected String maxTransactionDate;

@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+
 public enum ComparisonType {
     IS_NULL, //
     IS_NOT_NULL, //
@@ -34,6 +38,10 @@ public enum ComparisonType {
 
     PRIOR, // only for internal use, do not expose to UI
     WITHIN_INCLUDE; // only for internal use, do not expose to UI
+
+    // this set needs preprocessing to specify parameters
+    public static final Set<ComparisonType> VAGUE_TYPES = //
+            ImmutableSet.of(LASTEST_DAY);
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;

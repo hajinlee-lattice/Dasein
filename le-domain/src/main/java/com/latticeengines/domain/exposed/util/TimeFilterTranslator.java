@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
@@ -24,6 +26,7 @@ public class TimeFilterTranslator {
     private final ImmutableMap<String, PeriodBuilder> periodBuilders;
     private final ImmutableMap<String, Integer> currentPeriodIds;
     private final String evaluationDate;
+    private ConcurrentHashMap<ComparisonType, Map<AttributeLookup, List<Object>>> specialValues;
 
     public TimeFilterTranslator(List<PeriodStrategy> strategyList, String evaluationDate) {
         Map<String, Integer> currentPeriodMap = new HashMap<>();
@@ -40,6 +43,14 @@ public class TimeFilterTranslator {
         }
         this.currentPeriodIds = ImmutableMap.copyOf(currentPeriodMap);
         this.evaluationDate = evaluationDate;
+        this.specialValues = new ConcurrentHashMap<>();
+        for (ComparisonType type : ComparisonType.VAGUE_TYPES) {
+            specialValues.put(type, new HashMap<>());
+        }
+    }
+
+    public ConcurrentHashMap<ComparisonType, Map<AttributeLookup, List<Object>>> getSpecialValues() {
+        return this.specialValues;
     }
 
     public TimeFilter translate(TimeFilter timeFilter) {

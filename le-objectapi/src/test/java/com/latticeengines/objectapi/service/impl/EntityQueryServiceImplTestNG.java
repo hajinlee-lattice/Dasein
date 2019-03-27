@@ -1,10 +1,10 @@
 package com.latticeengines.objectapi.service.impl;
 
 import static com.latticeengines.domain.exposed.util.RestrictionUtils.TRANSACTION_LOOKUP;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -21,15 +22,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -47,7 +44,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.objectapi.service.EventQueryService;
-import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
@@ -65,25 +62,14 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         super.setup("4");
     }
 
-    @Test(groups = "functional", enabled = false)
-    public void testRandom() {
-        Map<AttributeLookup, ColumnMetadata> cmMap = new HashMap<>();
-        Map<TableRoleInCollection, String> tableNameMap = new HashMap<>();
-        AttributeRepository ap = new AttributeRepository(CustomerSpace.parse("tenant"), "collection", cmMap,
-                tableNameMap);
-        ColumnMetadata cm = new ColumnMetadata();
-        cm.setAttrName("attr1");
-        cmMap.put(new AttributeLookup(BusinessEntity.Account, "attr"), cm);
-
-        AttributeLookup attributeLookup = new AttributeLookup(BusinessEntity.Account, "attr");
-        ColumnMetadata c = attrRepo.getColumnMetadata(attributeLookup);
-        if (cm == null) {
-            throw new QueryEvaluationException("Cannot find attribute " + attributeLookup + " in the repository.");
-        }
-    }
-
-    @Test(groups = "functional")
+    @Test(groups = "manual")
     public void testMax() {
+        DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
+        Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
+        Mockito.when(proxy.getTableName(any(), any(), any()))
+                .thenReturn("qa_juan_dataattribute_test_0212_02_account_2019_02_26_06_59_15_utc");
+        queryEvaluatorService.setDataCollectionProxy(proxy);
+
         Set<AttributeLookup> set = new HashSet<>();
         AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, "user_createddate");
         AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, "user_testdate_dd_mmm_yyyy__8h");
@@ -93,9 +79,10 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 "user_testdate_column_dd_mmm_yyyy_withoutdate");
         AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact,
                 "user_created_date_mm_dd_yyyy_hh_mm_ss_12h");
-        set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
-        // entityQueryService.getMaxDates(set, DataCollection.Version.Blue);
-        entityQueryService.getMaxDates(set, DataCollection.Version.Green);
+        // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
+        set.addAll(Arrays.asList(accout_2, accout_3));
+        // set.addAll(Arrays.asList(contact_1, contact_2));
+        entityQueryService.getMaxDates(set, DataCollection.Version.Blue, null);
     }
 
     @Test(groups = "functional")

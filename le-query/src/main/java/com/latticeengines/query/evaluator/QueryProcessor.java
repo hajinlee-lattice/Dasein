@@ -58,8 +58,6 @@ public class QueryProcessor {
 
     public SQLQuery<?> process(AttributeRepository repository, Query query, String sqlUser) {
         query.analyze();
-        System.out.println("in process");
-        // System.out.println(JsonUtils.serialize(repository));
         LookupResolverFactory resolverFactory = new LookupResolverFactory(repository, this, sqlUser);
         RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(resolverFactory, query.getExistsJoins(),
                 queryFactory, this);
@@ -234,9 +232,7 @@ public class QueryProcessor {
     private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups) {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
-            System.out.println(lookup.getClass());
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
-            System.out.println(resolver.getClass());
             Expression<?> expression = resolver.resolveForSelect(lookup, true);
             expressions.add(expression);
         }

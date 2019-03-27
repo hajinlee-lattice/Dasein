@@ -138,24 +138,25 @@ abstract class QueryTranslator {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return;
         }
-        inspectBucketRestriction(frontEndRestriction.getRestriction(), map);
+        inspectBucketRestriction(frontEndRestriction.getRestriction(), map, timeTranslator);
     }
 
-    void inspectBucketRestriction(Restriction restriction, Map<ComparisonType, Set<AttributeLookup>> map) {
+    void inspectBucketRestriction(Restriction restriction, Map<ComparisonType, Set<AttributeLookup>> map,
+            TimeFilterTranslator timeTranslator) {
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) object;
                     if (!Boolean.TRUE.equals(bucket.getIgnored())) {
-                        RestrictionUtils.inspectBucketRestriction(bucket, map);
+                        RestrictionUtils.inspectBucketRestriction(bucket, map, timeTranslator);
                     }
                 }
             });
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
             if (!Boolean.TRUE.equals(bucket.getIgnored())) {
-                RestrictionUtils.inspectBucketRestriction(bucket, map);
+                RestrictionUtils.inspectBucketRestriction(bucket, map, timeTranslator);
             }
         } else {
             return;
