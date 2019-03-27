@@ -338,7 +338,7 @@ public enum LedpCode {
     LEDP_18211("Unable to cancel this action: {0}"),//
     LEDP_18212("No buckets nor launch unscored is set for play {0}, Nothing to Launch."),
     LEDP_18213("Failed while generating playlaunch export file: {0}."),
-    LEDP_18214("Bulk scoring request exceeds the maximum number of requests or rows per hour, please try later."),
+    LEDP_18214("Bulk scoring request exceeds the maximum number of rows on runtime, please try later."),
     
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
