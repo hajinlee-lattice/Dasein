@@ -82,7 +82,10 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
         set.addAll(Arrays.asList(accout_2, accout_3));
         // set.addAll(Arrays.asList(contact_1, contact_2));
-        entityQueryService.getMaxDates(set, DataCollection.Version.Blue, null);
+        Map<AttributeLookup, Object> results = entityQueryService.getMaxDates(set, DataCollection.Version.Blue, null);
+        results.forEach((k, v) -> {
+            System.out.println(k + ": " + v);
+        });
     }
 
     @Test(groups = "functional")
