@@ -422,4 +422,14 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.executeUpdate();
     }
 
+    @Override
+    public void deleteByTenantPid(Long tenantPid) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "delete from  %s workflowjob where workflowjob.tenantId=:tenantId", entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("tenantId", tenantPid);
+        query.executeUpdate();
+    }
 }
