@@ -16,6 +16,8 @@ angular.module('common.datacloud')
     .service('DataCloudStore', function ($q, DataCloudService) {
         var DataCloudStore = this;
 
+        this.cube = null;
+
         this.init = function () {
             this.enrichments = null;
             this.enrichmentsMap = {};
@@ -25,7 +27,6 @@ angular.module('common.datacloud')
             this.selectedCount = null;
             this.premiumSelectMaximum = null;
             this.topAttributes = null;
-            this.cube = null;
             this.ratingsEngineAttributes = [];
             this.metadata = {
                 current: 1,

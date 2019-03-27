@@ -279,6 +279,9 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
         })
         .state('home.model.datacloud', {
             url: '/datacloud/:aiModel',
+            onExit: function(DataCloudStore) {
+                DataCloudStore.clear();
+            },
             params: {
                 section: 're.model_iteration',
                 pageIcon: 'ico-attributes',

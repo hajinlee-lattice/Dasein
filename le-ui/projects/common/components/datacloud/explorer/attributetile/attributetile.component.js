@@ -40,6 +40,7 @@ export default function () {
                     item: enrichment
                     //restriction: bucket 
                 });
+                
 
                 var entity = enrichment.Entity;
                 var fieldname = enrichment.ColumnId;

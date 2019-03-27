@@ -1,11 +1,15 @@
 export default function (
-    $scope, $filter, $timeout, $interval, $q, $state, $stateParams, LookupStore,
-    Enrichments, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService,
+    $scope, $filter, $timeout, $interval, $q, $state, $stateParams, $injector,
+    LookupStore, Enrichments, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum,
     QueryRestriction, CurrentConfiguration, LookupResponse, QueryStore, ConfigureAttributesStore,
     RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, Notice
 ) {
     'ngInject';
+
+    let ReviewData = $injector.has('ReviewData')
+            ? $injector.get('ReviewData')
+            : { success: false };
 
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -129,7 +133,17 @@ export default function (
             $state.go('home.datacloud.explorer');
         }
 
-        DataCloudStore.getCube().then(function (result) {
+        // this is for when the datacloud is inside a rating engine model
+        if (typeof $stateParams['aiModel'] != "undefined") {
+            var ratingId = $stateParams['rating_id'],
+                aiModel = $stateParams['aiModel'],
+                nocache = true,
+                opts = {
+                    url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/cube`
+                };
+        }
+
+        DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
             vm.cube = result;
         });
 
@@ -1415,78 +1429,112 @@ export default function (
         return true;
     }
 
-    vm.subcategoryCount = function (category, subcategory) {
-        var filtered = vm.enrichmentsObj[category];
+     vm.subcategoryCount = function (category, subcategory) {
+            var filtered = vm.enrichmentsObj[category];
 
-        vm.hasCategoryCount = 0;
+            vm.hasCategoryCount = 0;
 
-        if (!filtered || filtered.length <= 0) {
-            return 0;
-        }
-
-        for (var i = 0, result = []; i < filtered.length; i++) {
-            var item = filtered[i];
-            if (item && vm.searchFields(item)) {
-                if ((item.Category != category)
-                    || (item.Subcategory != subcategory)
-                    || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                    || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                    || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                    || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                    || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                    || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                    || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                    || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                    || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                    || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
-                    || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
-                    continue;
-                }
-                result.push(item);
+            if (!filtered || filtered.length <= 0) {
+                return 0;
             }
-        }
 
-        return result.length;
-    }
+            for (var i = 0, result = []; i < filtered.length; i++) {
+                var item = filtered[i];
+                if (item && vm.searchFields(item)) {
+                    if (
+                        item.Category != category ||
+                        item.Subcategory != subcategory ||
+                        (vm.lookupMode &&
+                            !vm.metadata.toggle.show.nulls &&
+                            item.AttributeValue == 'No' &&
+                            vm.isYesNoCategory(category)) ||
+                        (vm.metadata.toggle.show.selected &&
+                            !item.IsSelected) ||
+                        (vm.metadata.toggle.hide.selected && item.IsSelected) ||
+                        (vm.metadata.toggle.show.premium && !item.IsPremium) ||
+                        (vm.metadata.toggle.hide.premium && item.IsPremium) ||
+                        (!vm.metadata.toggle.show.internal &&
+                            item.IsInternal) ||
+                        (vm.metadata.toggle.show.enabled &&
+                            item.HighlightHidden) ||
+                        (vm.metadata.toggle.hide.enabled &&
+                            !item.HighlightHidden) ||
+                        (vm.metadata.toggle.show.highlighted &&
+                            !item.HighlightHighlighted) ||
+                        (vm.metadata.toggle.hide.highlighted &&
+                            item.HighlightHighlighted) ||
+                        (vm.metadata.toggle.show
+                            .selected_ratingsengine_attributes &&
+                            !item.IsRatingsEngineAttribute)
+                    ) {
+                        continue;
+                    }
+                    result.push(item);
+                }
+            }
+
+            return result.length;
+        };
+    
 
     vm.categoryCount = function (category) {
-        var filtered = vm.enrichmentsObj[category];
-        if (!filtered) {
-            return 0;
-        }
-
-        for (var i = 0, result = []; i < filtered.length; i++) {
-            var item = filtered[i];
-            if (item && vm.searchFields(item)) {
-                if ((item.Category != category)
-                    || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                    || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                    || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                    || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                    || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                    || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                    || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                    || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                    || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                    || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
-                    || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
-                    continue;
-                }
-                result.push(item);
+            var filtered = vm.enrichmentsObj[category];
+            if (!filtered) {
+                return 0;
             }
-        }
-        vm.categoryCounts[item.Category] = result.length;
 
-        if ($stateParams.gotoNonemptyCategory) {
-            gotoNonemptyCategory();
-        }
+            for (var i = 0, result = []; i < filtered.length; i++) {
+                var item = filtered[i];
 
-        vm.hasCategoryCount = result.length;
-        if (vm.lookupMode) {
-            lookupSyncNewTotal();
-        }
-        return result.length;
-    }
+                if (item && vm.searchFields(item)) {
+                    if (
+                        item.Category != category ||
+                        (vm.lookupMode &&
+                            !vm.metadata.toggle.show.nulls &&
+                            item.AttributeValue == 'No' &&
+                            vm.isYesNoCategory(category)) ||
+                        (vm.metadata.toggle.show.selected &&
+                            !item.IsSelected) ||
+                        (vm.metadata.toggle.hide.selected && item.IsSelected) ||
+                        (vm.metadata.toggle.show.premium && !item.IsPremium) ||
+                        (vm.metadata.toggle.hide.premium && item.IsPremium) ||
+                        (!vm.metadata.toggle.show.internal &&
+                            item.IsInternal) ||
+                        (vm.metadata.toggle.show.enabled &&
+                            item.HighlightHidden) ||
+                        (vm.metadata.toggle.hide.enabled &&
+                            !item.HighlightHidden) ||
+                        (vm.metadata.toggle.show.highlighted &&
+                            !item.HighlightHighlighted) ||
+                        (vm.metadata.toggle.hide.highlighted &&
+                            item.HighlightHighlighted) ||
+                        (vm.metadata.toggle.show
+                            .selected_ratingsengine_attributes &&
+                            !item.IsRatingsEngineAttribute) ||
+                        (DataCloudStore.ratingIterationFilter == 'used' &&
+                            !('ImportanceOrdering' in item)) ||
+                        (DataCloudStore.ratingIterationFilter == 'warnings' &&
+                            !item.HasWarnings) ||
+                        (DataCloudStore.ratingIterationFilter == 'disabled' &&
+                            item.ApprovedUsage[0] != 'None')
+                    ) {
+                        continue;
+                    }
+                    result.push(item);
+                }
+            }
+            vm.categoryCounts[item.Category] = result.length;
+
+            if ($stateParams.gotoNonemptyCategory) {
+                gotoNonemptyCategory();
+            }
+
+            vm.hasCategoryCount = result.length;
+            if (vm.lookupMode) {
+                lookupSyncNewTotal();
+            }
+            return result.length;
+        };
 
     var lookupSyncNewTotal = function () {
 
@@ -1764,6 +1812,7 @@ export default function (
             cubeLabels.push(Lbl);
             return Lbl == label;
         });
+
 
         if (cube.Bkt) {
             matches = cube.Bkts.List.filter(function (item) {
