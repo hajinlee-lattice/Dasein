@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.DataUnitCrossTenantService;
 import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cdlComponentService")
@@ -70,6 +71,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Inject
     private S3Service s3Service;
@@ -176,6 +180,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
                         modelSummaryProxy.deleteByModelId(cs.toString(), modelSummary.getId());
                     }
                 }
+
+                log.info("Clean up WorkflowJob");
+                workflowProxy.deleteByTenantPid(customerSpace, tenant.getPid());
 
                 Thread.sleep(1000);
                 install(customerSpace, null);

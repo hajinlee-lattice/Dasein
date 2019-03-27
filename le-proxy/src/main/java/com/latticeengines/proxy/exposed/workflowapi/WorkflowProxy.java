@@ -342,6 +342,15 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(get("jobsByCluster", url, List.class), WorkflowJob.class);
     }
 
+    public void deleteByTenantPid(String customerSpace, Long tenantPid) {
+        checkCustomerSpace(customerSpace);
+
+        String baseUrl = "/yarnapps/job/deletebytenant/{tenantPid}";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
+        url = constructUrl(url, tenantPid);
+        delete("deleteByTenantPid", url);
+    }
+
     private void checkCustomerSpace(String customerSpace) {
         if (StringUtils.isBlank(customerSpace)) {
             throw new RuntimeException(CUSTOMER_SPACE_ERROR);
