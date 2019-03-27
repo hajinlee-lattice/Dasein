@@ -66,30 +66,31 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
         if (importingEntity.equals(BusinessEntity.Account)) {
-            importData(BusinessEntity.Account, "Account_0_350.csv", "Account");
-            importData(BusinessEntity.Account, "Account_350_500.csv", "Account");
-            importData(BusinessEntity.Account, "Account_400_1000.csv", "Account");
+            importData(BusinessEntity.Account, "Account_0_350.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "Account_350_500.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "Account_400_1000.csv", "DefaultSystem_AccountData");
         }
 
         if (importingEntity.equals(BusinessEntity.Contact)) {
-            importData(BusinessEntity.Contact, "Contact_0_350.csv", "Contact");
-            importData(BusinessEntity.Contact, "Contact_350_500.csv", "Contact");
-            importData(BusinessEntity.Contact, "Contact_400_1000.csv", "Contact");
+            importData(BusinessEntity.Contact, "Contact_0_350.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "Contact_350_500.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "Contact_400_1000.csv", "DefaultSystem_ContactData");
         }
 
         if (importingEntity.equals(BusinessEntity.Product)) {
-            importData(BusinessEntity.Product, "ProductBundles.csv", "ProductBundle");
-            importData(BusinessEntity.Product, "ProductHierarchies.csv", "ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductBundles.csv", "DefaultSystem_ProductBundle");
+            importData(BusinessEntity.Product, "ProductHierarchies.csv", "DefaultSystem_ProductHierarchy");
+            // may need to update feed type for VDB import.
             importData(BusinessEntity.Product, "ProductVDB.csv", "ProductVDB");
-            importData(BusinessEntity.Product, "ProductBundle_MissingProductBundle.csv", "ProductBundle");
-            importData(BusinessEntity.Product, "ProductHierarchies_MissingCategory.csv", "ProductHierarchy");
-            importData(BusinessEntity.Product, "ProductHierarchies_MissingFamily.csv", "ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductBundle_MissingProductBundle.csv", "DefaultSystem_ProductBundle");
+            importData(BusinessEntity.Product, "ProductHierarchies_MissingCategory.csv", "DefaultSystem_ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductHierarchies_MissingFamily.csv", "DefaultSystem_ProductHierarchy");
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {
-            importData(BusinessEntity.Transaction, "Transaction_0_15K.csv", "Transaction");
-            importData(BusinessEntity.Transaction, "Transaction_15K_30K.csv", "Transaction");
-            importData(BusinessEntity.Transaction, "Transaction_20K_60K.csv", "Transaction");
+            importData(BusinessEntity.Transaction, "Transaction_0_15K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_15K_30K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_20K_60K.csv", "DefaultSystem_TransactionData");
         }
     }
 
@@ -130,8 +131,8 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 
     private void saveImportTemplate(BusinessEntity entity) throws IOException {
         if (BusinessEntity.Product.equals(entity)) {
-            saveImportTemplate(entity, "ProductBundle");
-            saveImportTemplate(entity, "ProductHierarchy");
+            saveImportTemplate(entity, "DefaultSystem_ProductBundle");
+            saveImportTemplate(entity, "DefaultSystem_ProductHierarchy");
             saveImportTemplate(entity, "ProductVDB");
         } else {
             saveImportTemplate(entity, entity.name());
