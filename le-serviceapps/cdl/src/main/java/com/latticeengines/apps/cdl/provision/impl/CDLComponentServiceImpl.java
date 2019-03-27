@@ -182,7 +182,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
                 }
 
                 log.info("Clean up WorkflowJob");
-                workflowProxy.deleteByTenant(customerSpace, tenant.getPid());
+                workflowProxy.deleteByTenantPid(customerSpace, tenant.getPid());
 
                 Thread.sleep(1000);
                 install(customerSpace, null);

@@ -75,5 +75,5 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     void updateErrorCategory(WorkflowJob workflowJob);
 
-    void deleteByTenantID(Long tenantId);
+    void deleteByTenantPid(Long tenantPid);
 }

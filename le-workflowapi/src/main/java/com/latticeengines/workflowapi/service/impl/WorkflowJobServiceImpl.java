@@ -584,12 +584,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
-    public void deleteByTenantId(String customerSpace, Long tenantId) {
+    public void deleteByTenantPid(String customerSpace, Long tenantPid) {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         workflowJobs.removeIf(Objects::isNull);
         List<Long> workflowIds = workflowJobs.stream().map(WorkflowJob::getWorkflowId).collect(Collectors.toList());
 
-        workflowJobEntityMgr.deleteByTenantId(tenantId);
+        workflowJobEntityMgr.deleteByTenantPid(tenantPid);
 
         jobCacheService.evict(MultiTenantContext.getTenant());
         jobCacheService.evictByWorkflowIds(workflowIds);

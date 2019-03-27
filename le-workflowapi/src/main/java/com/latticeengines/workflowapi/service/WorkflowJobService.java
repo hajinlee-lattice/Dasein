@@ -83,7 +83,7 @@ public interface WorkflowJobService {
 
     List<WorkflowJob> deleteWorkflowJobs(String customerSpace, String type, Long startTime, Long endTime);
 
-    void deleteByTenantId(String customerSpace, Long tenantId);
+    void deleteByTenantPid(String customerSpace, Long tenantPid);
 
     /**
      * Clear all job cache entries for specified customer space.

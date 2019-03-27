@@ -237,8 +237,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void deleteByTenantId(Long tenantId) {
-        workflowJobDao.deleteByTenantID(tenantId);
+    public void deleteByTenantPid(Long tenantPid) {
+        workflowJobDao.deleteByTenantPid(tenantPid);
     }
 
     @Override
