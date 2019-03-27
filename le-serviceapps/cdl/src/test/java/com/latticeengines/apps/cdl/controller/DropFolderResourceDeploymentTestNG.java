@@ -31,14 +31,7 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
         dropBoxProxy.createTemplateFolder(mainCustomerSpace, "FirstSystem", null, null);
         subFolders = dropBoxProxy.getAllSubFolders(mainCustomerSpace, null, null, null);
         defaultSize = subFolders.size();
-        Assert.assertEquals(defaultSize, 10);
-        String msg = "";
-        try {
-            dropBoxProxy.createTemplateFolder(mainCustomerSpace, null,
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, null,
                     BusinessEntity.Account.name(), null);
-        } catch (Exception e) {
-            msg = e.getMessage();
-        }
-        Assert.assertTrue(msg.contains("can not create template without systemName"));
     }
 }
