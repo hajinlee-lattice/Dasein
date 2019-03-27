@@ -35,7 +35,7 @@
             </span>
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}</span>
         </a>
-    </li>
+    </li>  
     <li ng-if="
         (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
         (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
@@ -46,6 +46,16 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</span>
         </a>
     </li>
+    <li ng-if="
+        (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
+        (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
+        <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DONUT')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DONUT')}}">
+                <span class="ico ico-insights ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DONUT')}}</span>
+        </a>
+    </li>  
     <li ng-if="
         (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
         (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
