@@ -203,7 +203,7 @@ public class RestrictionUtils {
         case GREATER_OR_EQUAL:
         case LESS_THAN:
         case LESS_OR_EQUAL:
-            validateSingleValue(values);
+            validateSingleValue(comparisonType, values);
             restriction = convertUnitaryValueComparison(attr, comparisonType, values.get(0));
             break;
         case GTE_AND_LTE:
@@ -302,9 +302,9 @@ public class RestrictionUtils {
         return restriction;
     }
 
-    private static void validateSingleValue(List<Object> values) {
+    private static void validateSingleValue(ComparisonType comparisonType, List<Object> values) {
         if (values == null || values.size() != 1) {
-            throw new IllegalArgumentException("collection should have one value");
+            throw new IllegalArgumentException(comparisonType + " should have exactly one value");
         }
     }
 

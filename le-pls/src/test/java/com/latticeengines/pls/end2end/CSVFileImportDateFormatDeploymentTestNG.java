@@ -33,7 +33,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_DATE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_DATE_FILE));
-        String feedType = ENTITY_CONTACT + FEED_TYPE_SUFFIX;
+        String feedType = getFeedTypeByEntity(ENTITY_CONTACT);
         List<LatticeSchemaField> latticeSchema =
                 modelingFileMetadataService.getSchemaToLatticeSchemaFields(ENTITY_CONTACT, SOURCE, feedType);
 
@@ -68,7 +68,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         baseContactFile = sourceFileService.findByName(baseContactFile.getName());
 
         String dfIdExtra = cdlService.createS3Template(customerSpace, baseContactFile.getName(),
-                SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX, null, ENTITY_CONTACT + "Data");
+                SOURCE, ENTITY_CONTACT, feedType, null, ENTITY_CONTACT + "Data");
         Assert.assertNotNull(baseContactFile);
         Assert.assertNotNull(dfIdExtra);
 
@@ -123,13 +123,13 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         Assert.assertNotNull(baseAccountFile);
 
         String dfId = cdlService.createS3Template(customerSpace, baseAccountFile.getName(),
-                SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, null, ENTITY_ACCOUNT + "Data");
+                SOURCE, ENTITY_ACCOUNT, getFeedTypeByEntity(ENTITY_ACCOUNT), null, ENTITY_ACCOUNT + "Data");
 
         SourceFile accountDateSF = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE_FROMATDATE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE_FROMATDATE));
 
-        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX;
+        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountDateSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -161,7 +161,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         accountDateSF = sourceFileService.findByName(accountDateSF.getName());
 
         String dfIdExtra = cdlService.createS3Template(customerSpace, accountDateSF.getName(),
-                SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, null, ENTITY_ACCOUNT + "Data");
+                SOURCE, ENTITY_ACCOUNT, feedType, null, ENTITY_ACCOUNT + "Data");
 
         fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountDateSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);

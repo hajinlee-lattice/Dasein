@@ -57,7 +57,7 @@ public class CSVFileImportContactEntityMatchSchemaDeploymentTestNG extends CSVFi
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_ENTITY_MATCH_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_ENTITY_MATCH_FILE));
 
-        String feedType = ENTITY_CONTACT + FEED_TYPE_SUFFIX;
+        String feedType = getFeedTypeByEntity(ENTITY_CONTACT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -79,7 +79,7 @@ public class CSVFileImportContactEntityMatchSchemaDeploymentTestNG extends CSVFi
         sourceFile = sourceFileService.findByName(sourceFile.getName());
 
         String dfIdExtra = cdlService.createS3Template(customerSpace, sourceFile.getName(),
-                SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX, null, ENTITY_CONTACT + "Data");
+                SOURCE, ENTITY_CONTACT, feedType, null, ENTITY_CONTACT + "Data");
 
         Assert.assertNotNull(dfIdExtra);
     }

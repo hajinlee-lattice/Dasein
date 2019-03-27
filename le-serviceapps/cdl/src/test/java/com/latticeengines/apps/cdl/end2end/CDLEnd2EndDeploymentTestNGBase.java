@@ -110,6 +110,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -500,9 +501,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
-        if (StringUtils.isBlank(feedType)) {
-            feedType = entity.name() + "Schema";
-        }
+        feedType = getFeedTypeByEntity(entity.name());
         if (s3FileName.endsWith(".gz"))
             outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
         SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
@@ -1369,6 +1368,24 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertEquals((double) verifyRecord.get(InterfaceName.TotalAmount.name()), amount);
         Assert.assertEquals((double) verifyRecord.get(InterfaceName.TotalQuantity.name()), quantity);
         Assert.assertEquals((double) verifyRecord.get(InterfaceName.TotalCost.name()), cost);
+    }
+
+    public String getFeedTypeByEntity(String entity) {
+        String feedType = entity + "Schema";
+        String systemName = "DefaultSystem";
+        String splitChart = "_";
+        switch (entity) {
+            case "Account": feedType =
+                    systemName + splitChart + EntityType.Accounts.getDefaultFeedTypeName();break;
+            case "Contact": feedType =
+                    systemName + splitChart + EntityType.Contacts.getDefaultFeedTypeName();break;
+            case "Transaction": feedType =
+                    systemName + splitChart + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
+            case "Product": feedType =
+                    systemName + splitChart + EntityType.ProductBundles.getDefaultFeedTypeName();break;
+            default:break;
+        }
+        return feedType;
     }
 
 }

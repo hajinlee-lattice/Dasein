@@ -156,12 +156,14 @@ public class DropBoxServiceImpl implements DropBoxService {
 
         if (StringUtils.isNotEmpty(systemName)) {//new logic that every system all have five folder, can not be edit.
             if (isOldTenant(dropBoxBucket, dropBoxPrefix)) {
-                throw new IllegalStateException("can not create system in old tenant");
+                log.warn("can not create system in old tenant");
+                return;
             }
             createFolderWithSystemName(dropBoxBucket, dropBoxPrefix, systemName);
         } else {//the old logic without systemName
             if (!isOldTenant(dropBoxBucket, dropBoxPrefix)) {
-                throw new IllegalStateException("can not create template without systemName");
+                log.warn(customerSpace + " can not create template without systemName because this is new tenant");
+                return;
             }
             s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null,
                     formatPath(objectName),
