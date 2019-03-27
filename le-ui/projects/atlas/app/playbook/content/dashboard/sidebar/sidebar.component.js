@@ -12,7 +12,8 @@ angular
         state: $state,
         stateParams: $stateParams,
         StateHistory: StateHistory,
-        play: Play
+        play: Play,
+        dashboardType: ''
     });
 
     vm.init = function() {
