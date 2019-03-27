@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -83,7 +82,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private static final String SCIENTIFIC_REGEX = "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$";
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
 
-    private static final int MAX_ID_SET_SIZE = 3000000;
     private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
 
     private Schema schema;
@@ -104,8 +102,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private Map<String, String> duplicateMap = new HashMap<>();
 
-    private Set<String> uniqueIds = new HashSet<>();
-
     private CSVPrinter csvFilePrinter;
 
     private String idColumnName;
@@ -122,7 +118,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private String cacheKey;
 
-    private int cacheIdx;
+    private boolean setExpire;
 
     private int redisTimeout;
 
@@ -173,7 +169,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             localRedis = Boolean.parseBoolean(conf.get("eai.redis.local"));
             LOG.info(String.format("Redis endpoint: %s, timeout: %d, localRedis: %b", redisEndpoint, redisTimeout, localRedis));
             cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
-            cacheIdx = 0;
+            setExpire = false;
             retryTemplate = RetryUtils.getRetryTemplate(3);
             redisTemplate = RedisTemplateUtils.createRedisTemplate(localRedis, redisTimeout, redisEndpoint);
         }
@@ -524,53 +520,25 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private boolean containsId(String id) {
-        if (uniqueIds.contains(id)) {
-            return true;
-        } else {
-            for (int i = 0; i < cacheIdx; i++) {
-                Set<String> cachedIds = getCachedSet(i);
-                if (cachedIds.contains(id)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return retryTemplate.execute(ctx -> redisTemplate.opsForSet().isMember(cacheKey, id));
+
     }
 
     private void addId(String id) {
-        if (uniqueIds.size() >= MAX_ID_SET_SIZE) {
-            addCache(uniqueIds);
-            uniqueIds.clear();
-        } else {
-            uniqueIds.add(id);
+        retryTemplate.execute(ctx -> redisTemplate.opsForSet().add(cacheKey, id));
+        if (!setExpire) {
+            setExpire();
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Set<String> getCachedSet(int idx) {
-        LOG.info("Search redis cache block: " + idx);
-        final String key = cacheKey + idx;
-        return retryTemplate.execute(ctx -> {
-            Object obj = redisTemplate.opsForValue().get(key);
-            return ((HashSet<String>)obj);
-        });
-    }
-
-    private void addCache(Set<String> ids) {
-        LOG.info("Start create new redis cache block");
-        final String key = cacheKey + cacheIdx;
-        retryTemplate.execute(ctx -> {
-            redisTemplate.opsForValue().set(key, ids, 1, TimeUnit.DAYS);
-            return null;
-        });
-        cacheIdx++;
+    private void setExpire() {
+        retryTemplate.execute(ctx -> redisTemplate.expire(cacheKey, 1, TimeUnit.DAYS));
+        setExpire = true;
     }
 
     private void clearCache() {
-        for (int i = 0; i < cacheIdx; i++) {
-            final String key = cacheKey + i;
-            retryTemplate.execute(ctx -> redisTemplate.delete(key));
-        }
+        LOG.info("Redis template expire for key: " + cacheKey + " is: " + redisTemplate.getExpire(cacheKey));
+        retryTemplate.execute(ctx -> redisTemplate.delete(cacheKey));
     }
 
 }
