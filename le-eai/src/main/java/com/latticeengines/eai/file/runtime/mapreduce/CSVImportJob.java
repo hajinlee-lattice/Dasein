@@ -64,6 +64,10 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
             config.set("eai.id.column.name", properties.getProperty("eai.id.column.name"));
 
+            config.set("eai.redis.local", properties.getProperty("eai.redis.local"));
+            config.set("eai.redis.endpoint", properties.getProperty("eai.redis.endpoint"));
+            config.set("eai.redis.timeout", properties.getProperty("eai.redis.timeout"));
+
             // get schema
             Table table = JsonUtils.deserialize(tableSchema, Table.class);
             Schema schema = TableUtils.createSchema(table.getName(), table);

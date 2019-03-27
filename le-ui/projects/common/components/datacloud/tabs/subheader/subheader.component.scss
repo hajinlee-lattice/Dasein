@@ -4,7 +4,7 @@ div.explorer-subheader-tabs {
 
     ul.subheader-tabs-links {
         display: inline-block;
-
+        font-weight: bold; // test for PLS-12129 (BEN)
         li {
             display: inline-block;
             font-size: 18px;
@@ -81,4 +81,8 @@ div.explorer-subheader-tabs {
 
 div.subheader-success-message {
     margin: 20px 10px;
+}
+
+.dl-attributes {
+    padding-left: 10px;
 }

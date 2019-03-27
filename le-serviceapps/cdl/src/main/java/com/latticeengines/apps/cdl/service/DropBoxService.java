@@ -30,9 +30,9 @@ public interface DropBoxService {
 
     void createTenantDefaultFolder(String customerSpace);
 
-    void createFolder(String customerSpace, String objectName, String path);
+    void createFolder(String customerSpace, String systemName, String objectName, String path);
 
-    List<String> getDropFolders(String customerSpace, String objectName, String path);
+    List<String> getDropFolders(String customerSpace, String systemName, String objectName, String path);
 
     boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath);
 

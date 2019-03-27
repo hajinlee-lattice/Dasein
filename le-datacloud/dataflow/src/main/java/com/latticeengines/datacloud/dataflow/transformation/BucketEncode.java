@@ -72,10 +72,6 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         log.warn("Removing fields due to long column name: " + StringUtils.join(longFields, ","));
         result = result.discard(new FieldList(longFields));
 
-        if (StringUtils.isNotBlank(parameters.rowId)) {
-            result = result.filter(String.format("%s != null", parameters.rowId), new FieldList(parameters.rowId));
-        }
-
         return result;
     }
 

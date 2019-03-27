@@ -29,15 +29,14 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
 
         Assert.assertNotNull(baseAccountFile);
-
+        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
         String dfId = cdlService.createS3Template(customerSpace, baseAccountFile.getName(),
-                SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, null, ENTITY_ACCOUNT + "Data");
+                SOURCE, ENTITY_ACCOUNT, feedType, null, ENTITY_ACCOUNT + "Data");
 
         SourceFile extraInfoSF = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_EXTRAINFO_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_EXTRAINFO_FILE));
 
-        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX;
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(extraInfoSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         ExtraFieldMappingInfo extraInfo = fieldMappingDocument.getExtraFieldMappingInfo();
@@ -50,7 +49,7 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
         extraInfoSF = sourceFileService.findByName(extraInfoSF.getName());
 
         String dfIdExtra = cdlService.createS3Template(customerSpace, extraInfoSF.getName(),
-                SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, null, ENTITY_ACCOUNT + "Data");
+                SOURCE, ENTITY_ACCOUNT, feedType, null, ENTITY_ACCOUNT + "Data");
 
         Assert.assertEquals(dfId, dfIdExtra);
     }

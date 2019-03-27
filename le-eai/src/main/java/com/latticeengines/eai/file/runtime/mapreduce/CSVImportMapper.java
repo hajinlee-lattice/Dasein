@@ -11,13 +11,13 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -45,14 +45,19 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.format.number.NumberStyleFormatter;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.CriticalImportException;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -64,6 +69,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
+import com.latticeengines.redis.util.RedisTemplateUtils;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
@@ -75,6 +81,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String SCIENTIFIC_REGEX = "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$";
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
+
+    private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
 
     private Schema schema;
 
@@ -94,8 +102,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private Map<String, String> duplicateMap = new HashMap<>();
 
-    private Set<String> uniqueIds = new HashSet<>();
-
     private CSVPrinter csvFilePrinter;
 
     private String idColumnName;
@@ -109,6 +115,20 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private boolean failMapper = false;
 
     private GenericRecord avroRecord;
+
+    private String cacheKey;
+
+    private boolean setExpire;
+
+    private int redisTimeout;
+
+    private String redisEndpoint;
+
+    private boolean localRedis;
+
+    private RetryTemplate retryTemplate;
+
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -143,6 +163,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         avroRecord = new GenericData.Record(schema);
+        if (deduplicate) {
+            redisEndpoint = conf.get("eai.redis.endpoint");
+            redisTimeout = Integer.parseInt(conf.get("eai.redis.timeout"));
+            localRedis = Boolean.parseBoolean(conf.get("eai.redis.local"));
+            LOG.info(String.format("Redis endpoint: %s, timeout: %d, localRedis: %b", redisEndpoint, redisTimeout, localRedis));
+            cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
+            setExpire = false;
+            retryTemplate = RetryUtils.getRetryTemplate(3);
+            redisTemplate = RedisTemplateUtils.createRedisTemplate(localRedis, redisTimeout, redisEndpoint);
+        }
     }
 
     @Override
@@ -162,7 +192,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         try (CSVParser parser = new CSVParser(
                 new InputStreamReader((new FileInputStream(csvFileName)), StandardCharsets.UTF_8),
                 LECSVFormat.format)) {
-            headers = new ArrayList<String>(parser.getHeaderMap().keySet()).toArray(new String[] {});
+            headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[] {});
         }
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
@@ -218,7 +248,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         missingRequiredColValue = Boolean.FALSE;
         fieldMalFormed = Boolean.FALSE;
         rowError = Boolean.FALSE;
-        for (int i = 0; i < schema.getFields().size(); i ++) {
+        for (int i = 0; i < schema.getFields().size(); i++) {
             avroRecord.put(i, null);
         }
     }
@@ -299,10 +329,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 throw new RuntimeException(String.format("The %s value is equals to string null", attr.getDisplayName()));
                             }
                             if (deduplicate) {
-                                if (uniqueIds.contains(id)) {
+                                if (containsId(id)) {
                                     throw new LedpException(LedpCode.LEDP_17017, new String[]{id});
                                 } else {
-                                    uniqueIds.add(id);
+                                    addId(id);
                                 }
                             }
                         }
@@ -484,5 +514,31 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         if (context.getCounter(RecordImportCounter.ROW_ERROR).getValue() == 0) {
             context.getCounter(RecordImportCounter.ROW_ERROR).setValue(0);
         }
+        if (deduplicate) {
+            clearCache();
+        }
     }
+
+    private boolean containsId(String id) {
+        return retryTemplate.execute(ctx -> redisTemplate.opsForSet().isMember(cacheKey, id));
+
+    }
+
+    private void addId(String id) {
+        retryTemplate.execute(ctx -> redisTemplate.opsForSet().add(cacheKey, id));
+        if (!setExpire) {
+            setExpire();
+        }
+    }
+
+    private void setExpire() {
+        retryTemplate.execute(ctx -> redisTemplate.expire(cacheKey, 1, TimeUnit.DAYS));
+        setExpire = true;
+    }
+
+    private void clearCache() {
+        LOG.info("Redis template expire for key: " + cacheKey + " is: " + redisTemplate.getExpire(cacheKey));
+        retryTemplate.execute(ctx -> redisTemplate.delete(cacheKey));
+    }
+
 }

@@ -39,7 +39,7 @@ let configSimple = {
     },
     {
       name: "LastEditedDate",
-      displayName: "Edited"
+      displayName: "Last Modified"
     },
     {
       name: "actions"
@@ -137,7 +137,7 @@ let configSorting = {
     },
     {
       name: "LastEditedDate",
-      displayName: "Edited",
+      displayName: "Last Modified",
       sortable: true
     }
   ],
@@ -212,7 +212,7 @@ let configEdit = {
     },
     {
       name: "LastEditedDate",
-      displayName: "Edited"
+      displayName: "Last Modified"
     }
   ],
   columns: [
@@ -320,7 +320,7 @@ let configPagination = {
     },
     {
       name: "LastEditedDate",
-      displayName: "Edited"
+      displayName: "EdiLast Modifiedted"
     }
   ],
   columns: [

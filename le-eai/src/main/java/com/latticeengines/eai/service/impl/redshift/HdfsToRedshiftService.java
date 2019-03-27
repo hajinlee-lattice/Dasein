@@ -42,25 +42,30 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
 
     @Override
     public void invoke(HdfsToRedshiftConfiguration configuration) {
+        int numFiles = 1;
         if (!configuration.isSkipS3Upload()) {
             cleanupS3(configuration);
             setProgress(0.1f);
             uploadJsonPathSchema(configuration);
             setProgress(0.2f);
-            uploadDataObjectToS3(configuration);
+            numFiles = uploadDataObjectToS3(configuration);
             setProgress(0.6f);
         }
         setProgress(0.65f);
-        if (configuration.isAppend()) {
-            copyToRedshift(configuration);
-        } else {
+        if (!configuration.isAppend()) {
             createRedshiftTableIfNotExist(configuration);
-            updateExistingRows(configuration);
+        }
+        if (numFiles > 0) {
+            if (configuration.isAppend()) {
+                copyToRedshift(configuration);
+            } else {
+                updateExistingRows(configuration);
+            }
         }
         setProgress(0.95f);
     }
 
-    public void uploadDataObjectToS3(HdfsToRedshiftConfiguration configuration) {
+    private int uploadDataObjectToS3(HdfsToRedshiftConfiguration configuration) {
 
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
@@ -74,11 +79,14 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         s3Configuration.setExportInputPath(configuration.getExportInputPath());
         s3Configuration.setTargetFilename(s3FileName(redshiftTableConfig));
 
-        hdfsToS3ExportService.parallelDownloadToLocal(s3Configuration);
-        hdfsToS3ExportService.upload(s3Configuration);
+        int numFiles = hdfsToS3ExportService.parallelDownloadToLocal(s3Configuration);
+        if (numFiles > 0) {
+            hdfsToS3ExportService.upload(s3Configuration);
+        }
+        return numFiles;
     }
 
-    public void uploadJsonPathSchema(HdfsToRedshiftConfiguration configuration) {
+    private void uploadJsonPathSchema(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
@@ -93,18 +101,18 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         }
     }
 
-    public void createRedshiftTableIfNotExist(HdfsToRedshiftConfiguration configuration) {
+    private void createRedshiftTableIfNotExist(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
         redshiftService.createTable(redshiftTableConfig, schema);
     }
 
-    public void dropRedshiftTable(HdfsToRedshiftConfiguration configuration) {
+    private void dropRedshiftTable(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         redshiftService.dropTable(redshiftTableConfig.getTableName());
     }
 
-    public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
+    private void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String tableName = redshiftTableConfig.getTableName();
         if (configuration.isCreateNew()) {
@@ -126,7 +134,7 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         }
     }
 
-    public void updateExistingRows(HdfsToRedshiftConfiguration configuration) {
+    private void updateExistingRows(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String tableName = redshiftTableConfig.getTableName();
         String stagingTableName = tableName + "_staging";
@@ -147,7 +155,7 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         redshiftService.dropTable(stagingTableName);
     }
 
-    public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
+    void cleanupS3(HdfsToRedshiftConfiguration configuration) {
         if (!configuration.isCleanupS3()) {
             return;
         }

@@ -22,7 +22,7 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
     private static final Logger log = LoggerFactory.getLogger(RedshiftIngestCallable.class);
 
     private int pageSize;
-    private int rowspPerFile;
+    private int rowsPerFile;
 
     protected abstract long getTotalCount();
 
@@ -75,7 +75,7 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
                     } else {
                         log.info("Appending " + records.size() + " records to " + targetFile);
                         AvroUtils.appendToHdfsFile(yarnConfiguration, targetFile, records, true);
-                        if (recordsInCurrentFile >= rowspPerFile) {
+                        if (recordsInCurrentFile >= rowsPerFile) {
                             fileId++;
                             targetFile = prepareTargetFile(fileId);
                             recordsInCurrentFile = 0;
@@ -85,6 +85,10 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
                     throw new RuntimeException("Failed to write to avro file " + targetFile, e);
                 }
                 ingestedCount += records.size();
+                if (pageSize != records.size()) {
+                    log.info("Change page size from " + pageSize + " to " + records.size());
+                    pageSize = records.size();
+                }
                 log.info(String.format("Ingested %d / %d records with page size %d.", ingestedCount, totalCount,
                         pageSize));
             }
@@ -128,8 +132,8 @@ public abstract class RedshiftIngestCallable<T> implements Callable<T> {
         this.pageSize = pageSize;
     }
 
-    public void setRowspPerFile(int rowspPerFile) {
-        this.rowspPerFile = rowspPerFile;
+    public void setRowsPerFile(int rowsPerFile) {
+        this.rowsPerFile = rowsPerFile;
     }
 
 }

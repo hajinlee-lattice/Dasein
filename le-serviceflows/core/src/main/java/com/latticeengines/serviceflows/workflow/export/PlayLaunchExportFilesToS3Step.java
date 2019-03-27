@@ -98,7 +98,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         DataIntegrationStatusMonitorMessage message = new DataIntegrationStatusMonitorMessage();
         String workflowRequestId = UUID.randomUUID().toString();
         message.setWorkflowRequestId(workflowRequestId);
-        message.setTenantId(tenant.getName());
+        message.setTenantName(tenant.getName());
         message.setOperation(ExternalIntegrationWorkflowType.EXPORT.toString());
         message.setEntityId(playLaunchId);
         message.setEntityName(PlayLaunch.class.getSimpleName());
@@ -106,11 +106,12 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         message.setSourceFile(
                 s3ExportFilePaths.stream().filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst()
                         .get());
-        message.setEventType(DataIntegrationEventType.WORKFLOW_SUBMITTED.toString());
+        message.setEventType(DataIntegrationEventType.WorkflowSubmitted.toString());
         message.setEventTime(new Date());
-        message.setMessageType(MessageType.EVENT.toString());
+        message.setMessageType(MessageType.Event.toString());
         message.setMessage(String.format("Workflow Request Id has been launched to %s", workflowRequestId,
                 lookupIdMap.getOrgId()));
+        message.setEventDetail(null);
         dataIntegrationMonitoringProxy.createOrUpdateStatus(message);
         log.info(JsonUtils.serialize(message));
         publishToSnsTopic(customerSpace.toString(), workflowRequestId);

@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
@@ -27,6 +28,8 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
     protected static final String SOURCE = "File";
     protected static final String FEED_TYPE_SUFFIX = "Schema";
+    protected static final String DEFAULT_SYSTEM = "DefaultSystem";
+    protected static final String SPLIT_CHART = "_";
 
     protected static final String ENTITY_ACCOUNT = "Account";
     protected static final String ENTITY_CONTACT = "Contact";
@@ -99,15 +102,15 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
         switch (entity) {
             case ENTITY_ACCOUNT:
                 accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+                        DEFAULT_SYSTEM + SPLIT_CHART + EntityType.Accounts.getDefaultFeedTypeName(), ENTITY_ACCOUNT);
                 break;
             case ENTITY_CONTACT:
                 contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        ENTITY_CONTACT + FEED_TYPE_SUFFIX, ENTITY_CONTACT);
+                        DEFAULT_SYSTEM + SPLIT_CHART + EntityType.Contacts.getDefaultFeedTypeName(), ENTITY_CONTACT);
                 break;
             case ENTITY_TRANSACTION:
                 transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        ENTITY_TRANSACTION + FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
+                        DEFAULT_SYSTEM + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName(), ENTITY_TRANSACTION);
                 break;
         }
     }
@@ -117,7 +120,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
 
-        String feedType = entity + FEED_TYPE_SUFFIX;
+        String feedType = getFeedTypeByEntity(entity);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), entity, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -135,9 +138,23 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
 
     protected void startCDLImport(SourceFile sourceFile, String entity) {
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
-                sourceFile.getName(), SOURCE, entity, entity + FEED_TYPE_SUFFIX);
+                sourceFile.getName(), SOURCE, entity, getFeedTypeByEntity(entity));
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    public String getFeedTypeByEntity(String entity) {
+        String feedType = entity + FEED_TYPE_SUFFIX;
+        switch (entity) {
+            case ENTITY_ACCOUNT: feedType =
+                    DEFAULT_SYSTEM + SPLIT_CHART + EntityType.Accounts.getDefaultFeedTypeName();break;
+            case ENTITY_CONTACT: feedType =
+                    DEFAULT_SYSTEM + SPLIT_CHART + EntityType.Contacts.getDefaultFeedTypeName();break;
+            case ENTITY_TRANSACTION: feedType =
+                    DEFAULT_SYSTEM + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
+            default:break;
+        }
+        return feedType;
     }
 }

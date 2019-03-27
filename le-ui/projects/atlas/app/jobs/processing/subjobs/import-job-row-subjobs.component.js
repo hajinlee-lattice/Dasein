@@ -269,8 +269,9 @@ angular.module('lp.jobs.row.subjobs', [])
             $scope.confirmCancelAction = function (subjob) {
                 console.log(subjob);
                 let name = $scope.getActionName(subjob);
+                let type = $scope.getActionType(subjob);
                 let p = '<span>Are you sure you want to cancel the action</span><br>';
-                let n = `${'<p><strong>'}${name}${'</strong>?</p>'}`;
+                let n = `${'<p><strong>'}${type}${name}${'</strong>?</p>'}`;
                 let msg = new Message(
                     'Test',
                     MODAL,

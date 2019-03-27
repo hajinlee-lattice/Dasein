@@ -77,6 +77,10 @@ public class SourceFile
     @Column(name = "PATH", nullable = false, length = 2048)
     private String path;
 
+    @JsonProperty("file_rows")
+    @Column(name = "FILE_ROWS", nullable = true)
+    private Long fileRows;
+
     @JsonProperty("created")
     @Column(name = "CREATED")
     private Date created;
@@ -165,6 +169,14 @@ public class SourceFile
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Long getFileRows() {
+        return fileRows;
+    }
+
+    public void setFileRows(Long fileRows) {
+        this.fileRows = fileRows;
     }
 
     @Override

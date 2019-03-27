@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataIntegrationStatusMonitoringService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 
@@ -37,11 +38,19 @@ public class DataIntegrationMonitoringResource {
         return true;
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/{workflowRequestId}")
     @ApiOperation(value = "Get status of data integration workflow.")
     @NoCustomerSpace
-    public DataIntegrationStatusMonitor getDataIntegrationStatus(@PathVariable String eventId) {
-        return dataIntegrationMonitoringService.getStatus(eventId);
+    public DataIntegrationStatusMonitor getDataIntegrationStatus(@PathVariable String workflowRequestId) {
+        return dataIntegrationMonitoringService.getStatus(workflowRequestId);
+
+    }
+
+    @GetMapping("{workflowRequestId}/messages")
+    @ApiOperation(value = "Get status of data integration workflow.")
+    @NoCustomerSpace
+    public List<DataIntegrationStatusMessage> getDataIntegrationStatusMessages(@PathVariable String workflowRequestId) {
+        return dataIntegrationMonitoringService.getAllStatusMessages(workflowRequestId);
 
     }
 

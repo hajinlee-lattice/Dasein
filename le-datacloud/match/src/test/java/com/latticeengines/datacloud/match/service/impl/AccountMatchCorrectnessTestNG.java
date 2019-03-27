@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -46,6 +47,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 
 /**
@@ -53,6 +56,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
  *
  * dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
  */
+@Listeners({ SimpleRetryListener.class })
 public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AccountMatchCorrectnessTestNG.class);
@@ -154,7 +158,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     @Inject
     private EntityMatchConfigurationService entityMatchConfigurationService;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testAllocateAndLookup() {
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
@@ -177,7 +181,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Assert.assertEquals(lookupAccount(tenant, null, null, null, "GOOGLE", null, "USA", null, null), entityId);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPublicDomain() {
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
@@ -228,7 +232,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Assert.assertEquals(entityId, publicAsNormalDomainEntityId);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testMultiDomainKeys() {
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
@@ -310,7 +314,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * LatticeAccountId, it should be able to return DUNS of that
      * LatticeAccountId to Account match
      */
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testDunsKey() {
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
@@ -368,7 +372,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * Use USA as default country if Country is not mapped as MatchKey or
      * Country is not provided with value
      */
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testDefaultCountry() {
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
@@ -452,7 +456,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @param partialKeys:
      *            Guaranteed to be prioritized
      */
-    @Test(groups = "functional", dataProvider = "allKeysComboPrioritized")
+    @Test(groups = "functional", dataProvider = "allKeysComboPrioritized", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPairsWithHighPriKeyMatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         log.info("CaseIdx: {} (Out of 31)   Full Keys: {}   Partial Keys: {}", caseIdx, String.join(",", fullKeys),
@@ -570,7 +574,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @param partialKeys:
      *            Guaranteed to be prioritized
      */
-    @Test(groups = "functional", dataProvider = "allKeysComboPrioritized")
+    @Test(groups = "functional", dataProvider = "allKeysComboPrioritized", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPairsWithHighPriKeyMismatch(Integer caseIdx, List<String> partialKeys) {
         List<String> fullKeys = Arrays.asList(ACCOUNT_KEYS_PRIORITIZED);
         log.info("CaseIdx: {} (Out of 31)   Full Keys: {}   Partial Keys: {}", caseIdx, String.join(",", fullKeys),
@@ -630,7 +634,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * @param keys1
      * @param keys2
      */
-    @Test(groups = "functional", dataProvider = "allReducedKeysPairs")
+    @Test(groups = "functional", dataProvider = "allReducedKeysPairs", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPairAllMismatch(Integer caseIdx, List<String> keys1, List<String> keys2) {
         log.info("CaseIdx: {} (Out of 225)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
                 String.join(",", keys2));
@@ -685,7 +689,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      *
      * NOTE: This test takes 3.5 mins and totally 916 test cases
      */
-    @Test(groups = "functional", dataProvider = "exhaustiveKeysPairWithOverlap")
+    @Test(groups = "functional", dataProvider = "exhaustiveKeysPairWithOverlap", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testMatchedPairs(Integer caseIdx, List<String> keys1, List<String> keys2) {
         log.info("CaseIdx: {} (Out of 916)   Keys1: {}   Keys2: {}", caseIdx, String.join(",", keys1),
                 String.join(",", keys2));

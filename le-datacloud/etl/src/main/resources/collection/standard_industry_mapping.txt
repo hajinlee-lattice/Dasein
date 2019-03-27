@@ -1,5 +1,5 @@
 Accounting & Financial Services|Accounting|Accounting|Accounting| |
-Defense, Aviation & Aeorospace|Airlines/Aviation|Airlines/Aviation|Airlines/Aviation| |
+Defense, Aviation & Aerospace|Airlines/Aviation|Airlines/Aviation|Airlines/Aviation| |
 Other|Alternative Dispute Resolution|Alternative Dispute Resolution|Alternative Dispute Resolution| |
 Health, Wellness and Fitness|Alternative Medicine|Alternative Medicine|Alternative Medicine| |
 Other|Animation|Animation|Animation| |
@@ -15,7 +15,7 @@ Transportation|Automotive| | |Automotive/Parts and Supplies|
 Transportation|Automotive| | |Parts and Accessories/Trucks, Vans, and Sport Utility|
 Transportation|Automotive| | |Business and Economy/Automotive|
 Transportation|Automotive|Automotive|Automotive| |
-Defense, Aviation & Aeorospace|Aviation & Aerospace|Aviation & Aerospace|Aviation & Aerospace| |
+Defense, Aviation & Aerospace|Aviation & Aerospace|Aviation & Aerospace|Aviation & Aerospace| |
 Accounting & Financial Services|Banking|Banking|Banking| |
 Pharmaceuticals & Biotech|Biotechnology|Biotechnology|Biotechnology| |
 Media|Broadcast Media|Broadcast Media|Broadcast Media| |
@@ -43,7 +43,7 @@ Consumer|Consumer Services|Consumer Services|Consumer Services| |
 Consumer|Cosmetics|Cosmetics|Cosmetics| |
 Accounting & Financial Services|Credit Unions|Credit Unions| | |
 Food Services|Dairy|Dairy|Dairy| |
-Defense, Aviation & Aeorospace|Defense & Space|Defense & Space|Defense & Space| |
+Defense, Aviation & Aerospace|Defense & Space|Defense & Space|Defense & Space| |
 Design, Architecture & Planning|Design|Design|Design|Designers/Full Service|
 Design, Architecture & Planning|Design| | | |
 Education|Education Management|Education Management|Education Management| |

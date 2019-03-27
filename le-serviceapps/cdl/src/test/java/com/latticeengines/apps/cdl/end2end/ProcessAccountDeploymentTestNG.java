@@ -57,9 +57,11 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
             start = System.currentTimeMillis();
             retryProcessAnalyze();
             long duration2 = System.currentTimeMillis() - start;
-            // retry should be faster than the first attempt
-            Assert.assertTrue(duration2 < duration1, //
-                    "Duration of first and second PA are: " + duration1 + " and " + duration2);
+            if (isLocalEnvironment()) {
+                // retry should be faster than the first attempt
+                Assert.assertTrue(duration2 < duration1, //
+                        "Duration of first and second PA are: " + duration1 + " and " + duration2);
+            }
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {

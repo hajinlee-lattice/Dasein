@@ -1,9 +1,11 @@
+import { actions, reducer } from './playbook.redux';
 angular
 .module('lp.playbook', [
     'common.wizard',
     'lp.cg.talkingpoint',
     'lp.playbook.playlisttabs',
     'lp.playbook.plays',
+    'lp.playbook.overview',
     'lp.playbook.dashboard',
     'lp.playbook.dashboard.launchhistory',
     'lp.playbook.dashboard.sidebar',
@@ -17,14 +19,24 @@ angular
     'lp.playbook.wizard.preview',
     'lp.playbook.wizard.launch',
     'lp.playbook.wizard.newlaunch',
+    'mainApp.core.redux'
 ])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
-            onExit: function(FilterService) {
+            onExit: function($state, FilterService) {
                 FilterService.clear();
+                $state.get('home.playbook').data.redux.unsubscribe();
             },
+            onEnter: ['$state', 'ReduxService', function($state, ReduxService) {
+                ReduxService.connect(
+                    'playbook',
+                    actions,
+                    reducer,
+                    $state.get('home.playbook')
+                );
+            }],
             resolve: {
                 Model: function(){
                     return null;
@@ -173,6 +185,56 @@ angular
                 }
             }
         })
+        .state('home.playbook.overview', {
+            url: '/overview/:play_name',
+            params: {
+                pageIcon: 'ico-insights',
+                pageTitle: 'Campaign Overview',
+                play_name: ''
+            },
+            onEnter: ['Play', 'BackStore', function(Play, BackStore) {
+                BackStore.setBackLabel(Play.displayName);
+                BackStore.setBackState('home.playbook');
+                BackStore.setHidden(false);
+
+            }],
+            resolve: {
+                Play: ($q, $state, $stateParams, $ngRedux, OverviewService) => {
+                    let redux = $state.get('home.playbook').data.redux;
+
+                    var deferred = $q.defer();
+
+                    if(!redux.store.play) {
+                        redux.fetchPlay($stateParams.play_name);
+
+                        $ngRedux.subscribe(state => {
+                            OverviewService.setPlay(redux.store.play);
+                            deferred.resolve(redux.store.play);
+
+                        });
+                    } else {
+                        OverviewService.setPlay(redux.store.play);
+                        deferred.resolve(redux.store.play);
+                    }
+
+                    return deferred.promise;
+                },
+                CampaignTypes: () => {
+                    return false;
+                }
+            },
+            views: {
+                "navigation@home": { 
+                    controller: 'SidebarPlaybookController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
+                },
+                'main@': {
+                    component: 'playbookOverview'
+                },
+                'header.back@': 'backNav'
+            }
+        })
         .state('home.playbook.dashboard', {
             url: '/dashboard/:play_name',
             params: {
@@ -184,31 +246,6 @@ angular
                 BackStore.setBackLabel(Play.displayName);
                 BackStore.setBackState('home.playbook');
                 BackStore.setHidden(false);
-
-                // var strings = ResourceStringsUtility.getString;
-                // var play_name = $stateParams.play_name || '';
-                // var segment = Play.segment;
-                // var targetsDisabled = Play.ratingEngine ? false : true;
-
-                // console.log('enter playbook.dashboard');
-                // SidebarStore.set([{
-                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW'),
-                //         sref: "home.attributes.activate",
-                //         icon: "ico-analysis ico-light-gray"
-                //     },{
-                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS'),
-                //         sref: "home.attributes.enable",
-                //         icon: "ico-analysis ico-light-gray"
-                //     },{
-                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_INSIGHTS'),
-                //         sref: "home.attributes.enable",
-                //         icon: "ico-analysis ico-light-gray"
-                //     },{
-                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY'),
-                //         sref: "home.attributes.enable",
-                //         icon: "ico-analysis ico-light-gray"
-                //     }
-                // ]);
             }],
             resolve: {
                 Play: function($q, $stateParams, PlaybookWizardStore) {

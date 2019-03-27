@@ -140,6 +140,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "create")
     public void getAllSimpleDataFeedsForActiveTenant() {
         mainTestTenant.setStatus(TenantStatus.INACTIVE);
+        mainTestTenant.setUiVersion("4.0");
         tenantService.updateTenant(mainTestTenant);
 
         List<SimpleDataFeed> simpleDataFeeds = datafeedEntityMgr.getSimpleDataFeeds(TenantStatus.ACTIVE, "4.0");
@@ -153,6 +154,9 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             int size_2 = simpleDataFeeds != null ? simpleDataFeeds.size() : 0;
             assertTrue(size_2 > size_1);
         }
+
+        mainTestTenant.setUiVersion("2.0");
+        tenantService.updateTenant(mainTestTenant);
     }
 
     @Test(groups = "functional", dependsOnMethods = "getAllSimpleDataFeedsForActiveTenant")

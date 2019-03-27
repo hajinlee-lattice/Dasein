@@ -103,7 +103,6 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
         parameters.encAttrs = BucketEncodeUtils.encodedAttrs(records);
         parameters.retainAttrs = BucketEncodeUtils.retainFields(records);
         parameters.renameFields = BucketEncodeUtils.renameFields(records);
-        parameters.rowId = configuration.getRowId();
     }
 
     private boolean isProfileSource(Source source, String version) {

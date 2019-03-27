@@ -90,12 +90,6 @@
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Prioritize by:</dt>
                         <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.prioritizeBy }}</dd>
 
-                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Available Attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT' && vm.getCustomEventAvailableAttributes(vm.model)">{{vm.getCustomEventAvailableAttributes(vm.model)}}</dd>
-
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT' && !vm.getCustomEventAvailableAttributes(vm.model)">No
-                            Attributes Selected</dd>
-
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Score External File:</dt>
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.customEventModelingType
                             == 'LPI' ? 'Yes' : 'No'}}</dd>

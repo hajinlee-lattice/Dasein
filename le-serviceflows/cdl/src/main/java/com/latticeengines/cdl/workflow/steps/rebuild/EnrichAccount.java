@@ -74,16 +74,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
-        if (StringUtils.isNotBlank(fullAccountTableName)) {
-            Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
-            if (fullAccountTable != null) {
-                log.info("Found full account table in context, go thru short-cut mode.");
-                addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
-                return null;
-            }
-        }
-
         TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
         masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
                 inactive);
@@ -98,6 +88,16 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
             }
         } else {
             log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);
+        }
+
+        String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
+        if (StringUtils.isNotBlank(fullAccountTableName)) {
+            Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
+            if (fullAccountTable != null) {
+                log.info("Found full account table in context, go thru short-cut mode.");
+                addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
+                return null;
+            }
         }
 
         if (StringUtils.isBlank(masterTableName)) {

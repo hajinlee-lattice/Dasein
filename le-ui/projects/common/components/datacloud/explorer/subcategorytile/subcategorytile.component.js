@@ -15,6 +15,9 @@ export default function () {
 
             angular.extend(vm, {});
 
+            vm.getCount = (attribute) => {
+                return attribute.Count ? attribute.Count : 0;
+            }
 
             vm.inSubcategory = function (enrichment) {
                 var category = vm.selected_categories[enrichment.Category],

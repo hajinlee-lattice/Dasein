@@ -32,7 +32,6 @@ class LeVPanel extends Component {
     }
   }
   getHAlignment() {
-    console.log(this.props.halignment);
     if (this.props.halignment) {
       switch (this.props.halignment) {
         case LEFT:
@@ -47,7 +46,6 @@ class LeVPanel extends Component {
     }
   }
   getVAlignment() {
-    console.log(this.props.valignment);
     if (this.props.valignment) {
       switch (this.props.valignment) {
         case TOP:

@@ -139,7 +139,7 @@ public class IndustryConsolidationServiceTestNG
         Map<String, String> expectedIndustryMap = new HashMap<String, String>() {
             {
                 put("Accounting", "Accounting");
-                put("Aviation & Aerospace", "Defense, Aviation & Aeorospace");
+                put("Aviation & Aerospace", "Defense, Aviation & Aerospace");
                 put("Business Supplies and Equipment", "Financial Services");
                 put("Electrical/Electronic Manufacturing", "Manufacturing - Computer and Electronic");
                 put("null", "null");
