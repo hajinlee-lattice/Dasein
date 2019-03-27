@@ -37,8 +37,10 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private Play play;
     private Tenant tenant;
-    private PlayGroup playGroup;
-    private String playGroupName = "playGroupTest";
+    private PlayGroup playGroup1;
+    private PlayGroup playGroup2;
+    private String playGroupName1 = "playGroup1";
+    private String playGroupName2 = "playGroup2";
 
     @Override
     @BeforeClass(groups = "deployment")
@@ -54,26 +56,34 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testCreate() {
         // Test creating a new playGroup
-        playGroup = new PlayGroup(tenant, playGroupName, "admin.le.com", "admin.le.com");
-        playGroup.setId(null);
-        playGroup = playProxy.createPlayGroup(tenant.getId(), playGroup);
-        Assert.assertNotNull(playGroup.getId());
-        Assert.assertNotEquals(playGroup.getPid(), 0);
-        List<PlayGroup> Groups = playProxy.getPlayGroups(tenant.getId()).stream()
-                .filter(pl -> pl.getDisplayName().equals(playGroupName)).collect(Collectors.toList());
+        playGroup1 = new PlayGroup(tenant, playGroupName1, "admin.le.com", "admin.le.com");
+        playGroup1.setId(null);
+        playGroup1 = playProxy.createPlayGroup(tenant.getId(), playGroup1);
+        Assert.assertNotNull(playGroup1.getId());
+        Assert.assertNotEquals(playGroup1.getPid(), 0);
+
+        playGroup2 = new PlayGroup(tenant, playGroupName2, "admin.le.com", "admin.le.com");
+        playGroup2.setId(null);
+        playGroup2 = playProxy.createPlayGroup(tenant.getId(), playGroup2);
+        Assert.assertNotNull(playGroup2.getId());
+        Assert.assertNotEquals(playGroup2.getPid(), 0);
+        List<PlayGroup> Groups = playProxy.getPlayGroups(tenant.getId());
         Assert.assertNotNull(Groups);
-        Assert.assertEquals(Groups.size(), 1);
-        playGroup = Groups.get(0);
+        Assert.assertEquals(Groups.size(), 2);
+        playGroup1 = Groups.get(0);
+        playGroup2 = Groups.get(1);
+        Assert.assertEquals(playGroup1.getDisplayName(), playGroupName1);
+        Assert.assertEquals(playGroup2.getDisplayName(), playGroupName2);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreate")
     public void testGetById() {
         sleepToAllowDbWriterReaderSync();
         // Test getting the newly made playGroup by Id
-        String playGroupId = playGroup.getId();
+        String playGroupId = playGroup1.getId();
         PlayGroup getPlayGroup = playProxy.getPlayGroupById(tenant.getId(), playGroupId);
         Assert.assertNotNull(getPlayGroup);
-        Assert.assertEquals(getPlayGroup.getDisplayName(), playGroup.getDisplayName());
+        Assert.assertEquals(getPlayGroup.getDisplayName(), playGroup1.getDisplayName());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testGetById")
@@ -81,7 +91,8 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         // Test attaching a play to playgroup
         play = testPlayCreationHelper.getPlay();
         Set<PlayGroup> set = new HashSet<PlayGroup>();
-        set.add(playGroup);
+        set.add(playGroup1);
+        set.add(playGroup2);
         play.setPlayGroups(set);
         Play updatedPlay = playProxy.createOrUpdatePlay(tenant.getId(), play);
 
@@ -90,13 +101,23 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(updatedPlay);
         Assert.assertNotNull(updatedPlay.getPlayGroups());
         List<PlayGroup> playGroupListFromPlay = new ArrayList<PlayGroup>(updatedPlay.getPlayGroups());
-        Assert.assertEquals(playGroupListFromPlay.get(0).getDisplayName(), playGroupName);
 
-        // assert the play in playgroup equals play created
+        List<PlayGroup> playGroup1List = playGroupListFromPlay.stream()
+                .filter(pl -> pl.getDisplayName().equals(playGroupName1)).collect(Collectors.toList());
+        Assert.assertEquals(playGroup1List.size(), 1);
+        List<PlayGroup> playGroup2List = playGroupListFromPlay.stream()
+                .filter(pl -> pl.getDisplayName().equals(playGroupName1)).collect(Collectors.toList());
+        Assert.assertEquals(playGroup2List.size(), 1);
+
+        // test get all plays
         sleepToAllowDbWriterReaderSync();
-        String playGroupId = playGroup.getId();
+        String playGroupId = playGroup1.getId();
         PlayGroup getPlayGroup = playProxy.getPlayGroupById(tenant.getId(), playGroupId);
         Assert.assertNotNull(getPlayGroup);
+        List<Play> getAllPlays = playProxy.getPlays(tenant.getId(), false, null);
+        Assert.assertNotNull(getAllPlays);
+        play = getAllPlays.get(0);
+        Assert.assertEquals(play.getPlayGroups().size(), 2);
 
     }
 
@@ -104,10 +125,10 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testUpdate() {
         // Test updating the newly made playGroup
         String updatedPlayGroupName = "playGroupTestPostUpdate";
-        playGroup.setDisplayName(updatedPlayGroupName);
-        playProxy.updatePlayGroup(tenant.getId(), playGroup.getId(), playGroup);
+        playGroup1.setDisplayName(updatedPlayGroupName);
+        playProxy.updatePlayGroup(tenant.getId(), playGroup1.getId(), playGroup1);
         sleepToAllowDbWriterReaderSync();
-        PlayGroup updatedPlayGroup = playProxy.getPlayGroupById(tenant.getId(), playGroup.getId());
+        PlayGroup updatedPlayGroup = playProxy.getPlayGroupById(tenant.getId(), playGroup1.getId());
         Assert.assertNotNull(updatedPlayGroup);
         Assert.assertEquals(updatedPlayGroup.getDisplayName(), updatedPlayGroupName);
     }
@@ -115,17 +136,17 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = "testUpdate")
     public void testDelete() {
         // Test deleting playGroup
-        playProxy.deletePlayGroupById(tenant.getId(), playGroup.getId());
+        playProxy.deletePlayGroupById(tenant.getId(), playGroup1.getId());
         sleepToAllowDbWriterReaderSync();
         List<PlayGroup> playGroupList = playProxy.getPlayGroups(tenant.getId());
         Assert.assertNotNull(playGroupList);
-        List<PlayGroup> playGroups = playGroupList.stream().filter(pt -> pt.getId().equals(playGroup.getId()))
+        List<PlayGroup> playGroups = playGroupList.stream().filter(pt -> pt.getId().equals(playGroup1.getId()))
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEmpty(playGroups));
 
         // Test if also deleted on play side
         Play getPlay = playProxy.getPlay(tenant.getId(), play.getName());
-        Assert.assertTrue(CollectionUtils.isEmpty(getPlay.getPlayGroups()));
+        Assert.assertEquals(getPlay.getPlayGroups().size(), 1);
     }
 
     @AfterClass(groups = { "deployment" })
