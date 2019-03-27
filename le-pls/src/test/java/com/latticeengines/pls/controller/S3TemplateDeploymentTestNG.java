@@ -5,7 +5,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
@@ -64,12 +64,6 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         SourceFile file = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String templateName = file.getName();
         templateDisplay.setTemplateName(templateName);
-        templateDisplay.setExist(false);
-        templateDisplay.setObject("Accounts");
-        templateDisplay.setPath("N/A");
-        if (!StringUtils.isBlank(templateDisplay.getFeedType())) {
-            templateDisplay.setFeedType("");
-        }
         String url = String.format(BASE_URL_PREFIX + "/s3/template?templateFileName=%s", templateName);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
@@ -141,8 +135,12 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
                 });
         assertNotNull(templateDisplays);
         if (templateDisplay == null) {
-            templateDisplay = templateDisplays.get(0);
-            flag = true;
+            for (S3ImportTemplateDisplay template : templateDisplays) {
+                if (template.getObject().equals(EntityType.Accounts.getDisplayName())) {
+                    templateDisplay = template;
+                    flag = true;
+                }
+            }
         } else {
             for (S3ImportTemplateDisplay template : templateDisplays) {
                 if (template.getObject().equals(templateDisplay.getObject())
