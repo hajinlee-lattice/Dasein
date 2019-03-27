@@ -28,9 +28,6 @@
 
                     <!-- Custom-event Modeling Settings -->
 
-                    <dt ng-if="$ctrl.showSetting('availableAttributes')">Available Attributes: </dt>
-                    <dd ng-if="$ctrl.showSetting('availableAttributes')"> {{$ctrl.availableAttributes}}</dd>
-
                     <dt ng-if="$ctrl.showSetting('scoreExternalFile')">Score External File:</dt>
                     <dd ng-if="$ctrl.showSetting('scoreExternalFile')"> {{$ctrl.ratingEngine.latest_iteration.AI.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
 
