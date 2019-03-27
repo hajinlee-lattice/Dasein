@@ -30,7 +30,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
 
     private Map<LatticeFeatureFlag, FeatureFlagDefinition> flagDefinitionMap = new HashMap<>();
 
-
     @Autowired
     private BatonService batonService;
 
@@ -153,7 +152,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_MODELING, cg).setDefaultValue(false);
-
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg).setDefaultValue(false);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
