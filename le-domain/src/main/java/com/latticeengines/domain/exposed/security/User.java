@@ -13,8 +13,8 @@ public class User {
     private boolean active;
     private String title;
     private String accessLevel;
+    // tenant level property will be set during getting tenant right
     private Long expirationDate;
-    private String expirePeriod;
 
     @JsonProperty("Email")
     public String getEmail() {
@@ -104,16 +104,6 @@ public class User {
     @JsonProperty("ExpirationDate")
     public void setExpirationDate(Long expirationDate) {
         this.expirationDate = expirationDate;
-    }
-
-    @JsonProperty("ExpirePeriod")
-    public String getExpirePeriod() {
-        return expirePeriod;
-    }
-
-    @JsonProperty("ExpirePeriod")
-    public void setExpirePeriod(String expirePeriod) {
-        this.expirePeriod = expirePeriod;
     }
 
     @Override

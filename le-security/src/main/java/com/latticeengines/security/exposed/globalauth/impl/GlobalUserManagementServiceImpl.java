@@ -1,7 +1,5 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -43,7 +40,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.ExpirePeriod;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
@@ -178,7 +174,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
                     tenant));
-            return globalAuthGrantRight(right, tenant, username, null, ExpirePeriod.NEVER);
+            return globalAuthGrantRight(right, tenant, username, null, null);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[] { right, username, tenant });
@@ -187,11 +183,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser,
-            ExpirePeriod expirePeriod) {
+            Long expirationDate) {
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s with expiration period %s.", right,
-                    username, tenant, expirePeriod));
-            return globalAuthGrantRight(right, tenant, username, createdByUser, expirePeriod);
+                    username, tenant, expirationDate));
+            return globalAuthGrantRight(right, tenant, username, createdByUser, expirationDate);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[] { right, username, tenant });
@@ -199,7 +195,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser,
-            ExpirePeriod expirePeriod)
+            Long expirationDate)
             throws Exception {
 
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
@@ -215,19 +211,10 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                         tenantData.getPid(), right);
         if (rightData != null) {
             // update expiration date of tenant for user
-            Long expirationDate = rightData.getExpirationDate();
-            if (ExpirePeriod.SEVEN_DAYS.equals(expirePeriod)) {
-                rightData
-                        .setExpirationDate(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                                + TimeUnit.DAYS.toMillis(7));
-            } else if (ExpirePeriod.THIRTY_DAYS.equals(expirePeriod)) {
-                rightData
-                        .setExpirationDate(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                                + TimeUnit.DAYS.toMillis(30));
-            }
             // if expiration date changes, update tenant right
             if (expirationDate != rightData.getExpirationDate()
                     || (expirationDate != null && !expirationDate.equals(rightData.getExpirationDate()))) {
+                rightData.setExpirationDate(expirationDate);
                 gaUserTenantRightEntityMgr.update(rightData);
             }
             return true;
@@ -238,13 +225,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         rightData.setGlobalAuthTenant(tenantData);
         rightData.setOperationName(right);
         rightData.setCreatedByUser(createdByUser);
-        if (ExpirePeriod.SEVEN_DAYS.equals(expirePeriod)) {
-            rightData.setExpirationDate(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    + TimeUnit.DAYS.toMillis(7));
-        } else if (ExpirePeriod.THIRTY_DAYS.equals(expirePeriod)) {
-            rightData.setExpirationDate(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    + TimeUnit.DAYS.toMillis(30));
-        }
+        rightData.setExpirationDate(expirationDate);
         gaUserTenantRightEntityMgr.create(rightData);
 
         if (isZendeskEnabled(globalAuthUser.getEmail())) {

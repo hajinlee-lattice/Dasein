@@ -8,18 +8,28 @@ var app = angular.module('mainApp.userManagement.services.UserManagementService'
 
 app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, SessionService) {
 
-    this.AssignAccessLevel = function (username, accessLevel) {
+    this.AssignAccessLevel = function (username, accessLevel, expirePeriod) {
         var deferred = $q.defer();
         var result = {
             Success: false,
             ResultObj: null,
             ResultErrors: null
         };
+        var expirationDate = null;
+        var now = new Date();
+        if (expirePeriod === "SEVEN_DAYS") {
+        	now.setDate(now.getDate() + 7);
+        	expirationDate = now.getTime();
+        } else if (expirePeriod === "THIRTY_DAYS") {
+        	now.setDate(now.getDate() + 30);
+        	expirationDate = now.getTime();
+        }
         $http({
             method: 'PUT',
             url: '/pls/users/' + JSON.stringify(username) + '/',
             data: {
-                AccessLevel: accessLevel
+                AccessLevel: accessLevel,
+                ExpirationDate: expirationDate
             },
             headers: {"Content-Type": "application/json"}
         }).success(function (data) {
@@ -73,12 +83,22 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
     this.AddUser = function (newUser) {
         var deferred = $q.defer();
 
+        var expirationDate = null;
+        var now = new Date();
+        if (newUser.ExpirePeriod === "SEVEN_DAYS") {
+        	now.setDate(now.getDate() + 7);
+        	expirationDate = now.getTime();
+        } else if (newUser.ExpirePeriod === "THIRTY_DAYS") {
+        	now.setDate(now.getDate() + 30);
+        	expirationDate = now.getTime();
+        }
         var user = {
             Username: newUser.Email,
             FirstName: newUser.FirstName,
             LastName: newUser.LastName,
             Email: newUser.Email,
-            AccessLevel: newUser.AccessLevel
+            AccessLevel: newUser.AccessLevel,
+            ExpirationDate: expirationDate
         };
 
         var creds = {

@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.ExpirePeriod;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -231,7 +230,7 @@ public class PLSComponentManager {
                 updatePasswordBasedOnUsername(user);
             }
             try {
-                userService.assignAccessLevel(accessLevel, tenantId, email, userName, ExpirePeriod.NEVER);
+                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);

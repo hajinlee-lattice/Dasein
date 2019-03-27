@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.ExpirePeriod;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -173,7 +172,7 @@ public class LPComponentManagerImpl implements LPComponentManager {
                 updatePasswordBasedOnUsername(user);
             }
             try {
-                userService.assignAccessLevel(accessLevel, tenantId, email, userName, ExpirePeriod.NEVER);
+                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);

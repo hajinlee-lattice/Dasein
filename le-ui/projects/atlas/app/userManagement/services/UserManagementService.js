@@ -15,12 +15,21 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             ResultObj: null,
             ResultErrors: null
         };
+        var expirationDate = null;
+        var now = new Date();
+        if (expirePeriod === "SEVEN_DAYS") {
+        	now.setDate(now.getDate() + 7);
+        	expirationDate = now.getTime();
+        } else if (expirePeriod === "THIRTY_DAYS") {
+        	now.setDate(now.getDate() + 30);
+        	expirationDate = now.getTime();
+        }
         $http({
             method: 'PUT',
             url: '/pls/users/' + JSON.stringify(username) + '/',
             data: {
                 AccessLevel: accessLevel,
-                ExpirePeriod: expirePeriod
+                ExpirationDate: expirationDate
             },
             headers: {"Content-Type": "application/json"}
         }).success(function (data) {
@@ -74,13 +83,22 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
     this.AddUser = function (newUser) {
         var deferred = $q.defer();
 
+        var expirationDate = null;
+        var now = new Date();
+        if (newUser.ExpirePeriod === "SEVEN_DAYS") {
+        	now.setDate(now.getDate() + 7);
+        	expirationDate = now.getTime();
+        } else if (newUser.ExpirePeriod === "THIRTY_DAYS") {
+        	now.setDate(now.getDate() + 30);
+        	expirationDate = now.getTime();
+        }
         var user = {
             Username: newUser.Email,
             FirstName: newUser.FirstName,
             LastName: newUser.LastName,
             Email: newUser.Email,
             AccessLevel: newUser.AccessLevel,
-            ExpirePeriod: newUser.ExpirePeriod
+            ExpirationDate: expirationDate
         };
 
         var creds = {
