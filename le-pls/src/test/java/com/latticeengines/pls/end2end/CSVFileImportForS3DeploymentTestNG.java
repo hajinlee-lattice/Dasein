@@ -93,24 +93,14 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         // verify that the tenant has 5 template display by default
         Assert.assertNotNull(templates);
         Assert.assertEquals(templates.size(), 5);
-        // S3ImportTemplateDisplay display = templates.get(0);
-        // Assert.assertEquals(display.getPath(), "N/A");
-        for (S3ImportTemplateDisplay display : templates) {
-            Assert.assertEquals(display.getPath(), "N/A");
-            Assert.assertEquals(display.getExist(), Boolean.FALSE);
-        }
-        templates = cdlService.getS3ImportTemplate(customerSpace);
-        Assert.assertNotNull(templates);
         List<String> feedTypes = Arrays.asList(getFeedTypeByEntity(ENTITY_ACCOUNT), getFeedTypeByEntity(ENTITY_CONTACT),
                 getFeedTypeByEntity(ENTITY_TRANSACTION));
-        List<S3ImportTemplateDisplay> renderedTemplats = templates.stream()
-                .filter(template -> feedTypes.contains(template.getFeedType())).collect(Collectors.toList());
-        for (S3ImportTemplateDisplay display : renderedTemplats) {
-            DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
-            Assert.assertNotNull(dropBoxSummary);
+        // S3ImportTemplateDisplay display = templates.get(0);
+        // Assert.assertEquals(display.getPath(), "N/A");
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        for (S3ImportTemplateDisplay display : templates) {
             Assert.assertEquals(display.getPath(), S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
                     dropBoxSummary.getDropBox(), display.getFeedType()));
-            Assert.assertEquals(display.getExist(), Boolean.TRUE);
         }
     }
 
