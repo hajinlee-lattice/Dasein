@@ -6,7 +6,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -22,16 +21,9 @@ public class DayRangeTranslatorUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(DayRangeTranslatorUnitTestNG.class);
 
-    private DayRangeTranslator translator;
-
-    @BeforeClass(groups = "unit")
-    public void setup() {
-        translator = new DayRangeTranslator();
-    }
-
     @Test(groups = "unit", dataProvider = "dateRestrictionProvider")
     public void testConvert(DateRestriction dateRestriction) {
-        Restriction restriction = translator.convert(dateRestriction);
+        Restriction restriction = DayRangeTranslator.convert(dateRestriction);
         Assert.assertNotNull(restriction);
         log.info(restriction.toString());
     }
@@ -62,8 +54,8 @@ public class DayRangeTranslatorUnitTestNG {
 
     @Test(groups = "unit")
     public void testToMilliSecond() {
-        Long startOfDay = translator.getStartOfDayAsMillisecond("2018-02-17");
-        Long endOfDay = translator.getEndOfDayAsMillisecond("2018-02-17");
+        Long startOfDay = DayRangeTranslator.getStartOfDayByDate("2018-02-17");
+        Long endOfDay = DayRangeTranslator.getEndOfDayByDate("2018-02-17");
         Assert.assertEquals(startOfDay.longValue(), 1518825600000L);
         Assert.assertEquals(endOfDay.longValue(), 1518911999000L);
     }

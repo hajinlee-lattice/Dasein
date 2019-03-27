@@ -304,7 +304,7 @@ abstract class QueryTranslator {
                 } else if (object instanceof DateRestriction) {
                     DateRestriction dateRestriction = (DateRestriction) object;
                     modifyDateRestriction(dateRestriction, timeTranslator);
-                    Restriction concrete = new DayRangeTranslator().convert(dateRestriction);
+                    Restriction concrete = DayRangeTranslator.convert(dateRestriction);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(dateRestriction);
                     parent.getRestrictions().add(concrete);
@@ -321,7 +321,7 @@ abstract class QueryTranslator {
         } else if (restriction instanceof DateRestriction) {
             DateRestriction dateRestriction = (DateRestriction) restriction;
             modifyDateRestriction(dateRestriction, timeTranslator);
-            translated = new DayRangeTranslator().convert(dateRestriction);
+            translated = DayRangeTranslator.convert(dateRestriction);
         } else {
             translated = restriction;
         }
@@ -346,7 +346,8 @@ abstract class QueryTranslator {
         if (timeTranslator == null) {
             throw new NullPointerException("TimeTranslator cannot be null.");
         }
-        dateRestriction.setTimeFilter(timeTranslator.translate(dateRestriction.getTimeFilter()));
+        dateRestriction
+                .setTimeFilter(timeTranslator.translate(dateRestriction.getTimeFilter(), dateRestriction.getAttr()));
     }
 
     private static AggregationFilter setAggToSum(AggregationFilter filter) {

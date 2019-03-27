@@ -26,7 +26,7 @@ public class TimeFilterTranslator {
     private final ImmutableMap<String, PeriodBuilder> periodBuilders;
     private final ImmutableMap<String, Integer> currentPeriodIds;
     private final String evaluationDate;
-    private ConcurrentHashMap<ComparisonType, Map<AttributeLookup, List<Object>>> specialValues;
+    private ConcurrentHashMap<ComparisonType, Map<AttributeLookup, List<Object>>> specifiedValues;
 
     public TimeFilterTranslator(List<PeriodStrategy> strategyList, String evaluationDate) {
         Map<String, Integer> currentPeriodMap = new HashMap<>();
@@ -43,27 +43,40 @@ public class TimeFilterTranslator {
         }
         this.currentPeriodIds = ImmutableMap.copyOf(currentPeriodMap);
         this.evaluationDate = evaluationDate;
-        this.specialValues = new ConcurrentHashMap<>();
+        this.specifiedValues = new ConcurrentHashMap<>();
         for (ComparisonType type : ComparisonType.VAGUE_TYPES) {
-            specialValues.put(type, new HashMap<>());
+            specifiedValues.put(type, new HashMap<>());
         }
     }
 
-    public ConcurrentHashMap<ComparisonType, Map<AttributeLookup, List<Object>>> getSpecialValues() {
-        return this.specialValues;
+    public ConcurrentHashMap<ComparisonType, Map<AttributeLookup, List<Object>>> getSpecifiedValues() {
+        return this.specifiedValues;
     }
 
-    public TimeFilter translate(TimeFilter timeFilter) {
+    public TimeFilter translate(TimeFilter timeFilter, AttributeLookup lookup) {
         Pair<String, String> range = translateRange(timeFilter);
         List<Object> vals;
         if (range == null && ComparisonType.EVER.equals(timeFilter.getRelation())) {
             return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
         } else if (range == null && ComparisonType.IS_EMPTY.equals(timeFilter.getRelation())) {
             return new TimeFilter(ComparisonType.IS_EMPTY, null, null);
+        } else if (range == null && ComparisonType.LASTEST_DAY.equals(timeFilter.getRelation())) {
+            if (lookup == null) {
+                throw new NullPointerException("lookup cannot be null for LASTEST_DAY comparator");
+            }
+            Map<AttributeLookup, List<Object>> map = specifiedValues.get(ComparisonType.LASTEST_DAY);
+            if (!map.containsKey(lookup)) {
+                throw new NullPointerException("TimeFilterTranslator does not have the lookup: " + lookup);
+            }
+            return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(), map.get(lookup));
         } else {
             vals = Arrays.asList(range.getLeft(), range.getRight());
             return new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Date.name(), vals);
         }
+    }
+
+    public TimeFilter translate(TimeFilter timeFilter) {
+        return this.translate(timeFilter, null);
     }
 
     public Pair<String, String> translateRange(TimeFilter timeFilter) {

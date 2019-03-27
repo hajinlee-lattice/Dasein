@@ -52,6 +52,7 @@ import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.exposed.translator.DayRangeTranslator;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 import reactor.core.publisher.Flux;
@@ -85,20 +86,11 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                     frontEndQuery);
-            // check whether need to preprocess FrontEndQuery?
-            // 1. wether any restriction has the new operator?
-            // return Map<attr: operator>
-            // LASTED_DATE
+
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
-            // Preprocess front end query by saving the max value in cache
-            // map
-            // 1) query max date
-            // 2) round
-            // augment timetranslator
             preprocess(map, version, frontEndQuery, timeTranslator);
 
-            // replace frontend query in place
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
@@ -147,6 +139,8 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
+        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+        preprocess(map, version, frontEndQuery, timeTranslator);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
         if (CollectionUtils.isEmpty(query.getLookups())) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
@@ -299,7 +293,8 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             for (ComparisonType type : map.keySet()) {
                 switch (type) {
                 case LASTEST_DAY:
-                    getMaxDates(map.get(type), version, timeTranslator);
+                    Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), version, timeTranslator);
+                    updateTimeFilterTranslator(timeTranslator, type, maxDates);
                     break;
                 default:
                     throw new UnsupportedOperationException(
@@ -307,6 +302,15 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 }
             }
         }
+    }
+
+    void updateTimeFilterTranslator(TimeFilterTranslator timeTranslator, ComparisonType type,
+            Map<AttributeLookup, Object> maxDates) {
+        Map<AttributeLookup, List<Object>> specifiedValues = timeTranslator.getSpecifiedValues().get(type);
+        maxDates.forEach((k, v) -> {
+            specifiedValues.put(k, Arrays.asList(DayRangeTranslator.getStartOfDayByTimestamp(v),
+                    DayRangeTranslator.getEndOfDayByTimestamp(v)));
+        });
     }
 
     private Map<String, Object> postProcess(Map<String, Object> result, boolean enforceTranslation,
@@ -335,12 +339,13 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return result;
     }
 
-    void getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version,
+    Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version,
             TimeFilterTranslator timeTranslator) {
         String tenantId = MultiTenantContext.getTenant().getId();
         // Currently, only account and contact entity can have date attributes
         List<AttributeLookup> accountMaxLookups = new ArrayList<>();
         List<AttributeLookup> contactMaxLookups = new ArrayList<>();
+        Map<AttributeLookup, Object> results = new HashMap<>();
         for (AttributeLookup lookup : lookups) {
             if (BusinessEntity.Account.equals(lookup.getEntity())) {
                 accountMaxLookups.add(lookup);
@@ -362,10 +367,10 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
             String query = MessageFormat.format("SELECT {0} FROM {1}", selections, accountTableName);
             log.info("query for accountTableName " + query);
-            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
-            // for (Map.Entry<String, Object> map : retList.get(0).entrySet()) {
-            // log.info(map.getKey() + ": " + map.getValue());
-            // }
+            Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
+            retMap.forEach((k, v) -> {
+                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
+            });
         }
 
         if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
@@ -379,12 +384,12 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
             String query = MessageFormat.format("SELECT {0} FROM {1}", selections, contactTableName);
             log.info("query for contactTableName " + query);
-            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
-            // for (Map.Entry<String, Object> map : retList.get(0).entrySet()) {
-            // log.info(map.getKey() + ": " + map.getValue());
-            // }
+            Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
+            retMap.forEach((k, v) -> {
+                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
+            });
         }
-
+        return results;
     }
 
     void getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups, DataCollection.Version version) {

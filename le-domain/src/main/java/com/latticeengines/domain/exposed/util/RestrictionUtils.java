@@ -48,7 +48,7 @@ public class RestrictionUtils {
             // If the current operator needs further specification
             // and the TimeFilterTranslator does not have its specs
             if (ComparisonType.VAGUE_TYPES.contains(cmp)
-                    && !timeTranslator.getSpecialValues().get(cmp).containsKey(lookup)) {
+                    && !timeTranslator.getSpecifiedValues().get(cmp).containsKey(lookup)) {
                 if (map.containsKey(cmp)) {
                     map.get(cmp).add(lookup);
                 } else {
