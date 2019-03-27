@@ -519,8 +519,24 @@ angular
                         { name: 'LeadStatus', displayName: 'Lead Status', type: 'TEXT'},
                         { name: 'LeadSource', displayName: 'Lead Source', type: 'TEXT'},
                         { name: 'LeadType', displayName: 'Lead Type', type: 'TEXT'},
-                        { name: 'CreatedDate', displayName: 'Created Date', type: createdDate.fieldType, fromExistingTemplate: createdDate.fromExistingTemplate},
-                        { name: 'LastModifiedDate', displayName: 'Last Modified Date', type: lastModifiedDate.fieldType, fromExistingTemplate: lastModifiedDate.fromExistingTemplate},
+                        { 
+                            name: 'CreatedDate', 
+                            displayName: 'Created Date', 
+                            type: createdDate.fieldType, 
+                            fromExistingTemplate: createdDate.fromExistingTemplate,
+                            dateFormatString : createdDate.fromExistingTemplate == true ? createdDate.dateFormatString : undefined,
+                            timeFormatString: createdDate.fromExistingTemplate == true ? createdDate.timeFormatString: undefined,
+                            timezone: createdDate.fromExistingTemplate == true ? createdDate.timezone : undefined
+                        },
+                        { 
+                            name: 'LastModifiedDate', 
+                            displayName: 'Last Modified Date', 
+                            type: lastModifiedDate.fieldType, 
+                            fromExistingTemplate: lastModifiedDate.fromExistingTemplate,
+                            dateFormatString : lastModifiedDate.fromExistingTemplate == true ? lastModifiedDate.dateFormatString : undefined,
+                            timeFormatString: lastModifiedDate.fromExistingTemplate == true ? lastModifiedDate.timeFormatString: undefined,
+                            timezone: lastModifiedDate.fromExistingTemplate == true ? lastModifiedDate.timezone : undefined
+                        },
                         { name: 'DoNotMail', displayName: 'Has Opted Out of Email',  type: 'TEXT' },
                         { name: 'DoNotCall', displayName: 'Has Opted Out of Phone Calls', type: 'TEXT' }
                     ];
