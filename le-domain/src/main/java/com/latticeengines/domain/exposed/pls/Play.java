@@ -52,18 +52,17 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "PLAY",
-        indexes = { //
-                @Index(name = "PLAY_DELETED", columnList = "DELETED"), //
-                @Index(name = "PLAY_CLEANUP_DONE", columnList = "CLEANUP_DONE") //
-        })
+@Table(name = "PLAY", indexes = { //
+        @Index(name = "PLAY_DELETED", columnList = "DELETED"), //
+        @Index(name = "PLAY_CLEANUP_DONE", columnList = "CLEANUP_DONE") //
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FilterDefs({
-        @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId",
-                parameters = {@ParamDef(name = "tenantFilterId", type = "java.lang.Long")}),
-        @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true")})
-@Filters({@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
-        @Filter(name = "softDeleteFilter", condition = "DELETED != true")})
+        @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
+                @ParamDef(name = "tenantFilterId", type = "java.lang.Long") }),
+        @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true") })
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
+        @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
 public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, SoftDeletable {
@@ -97,7 +96,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment targetSegment;
     @JsonProperty("ratingEngine")
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private RatingEngine ratingEngine;
@@ -105,10 +104,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Transient
     private LaunchHistory launchHistory;
     @JsonProperty("talkingPoints")
-    @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
+    @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TalkingPoint> talkingPoints;
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -134,14 +133,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
     @JsonProperty("playType")
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_PLAY_TYPE", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PlayType playType;
     @JsonProperty("playGroups")
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @JoinTable(name = "PLAY_PLAY_GROUP", joinColumns = {@JoinColumn(name = "FK_PLAY_ID")},
-            inverseJoinColumns = {@JoinColumn(name = "FK_PLAY_GROUP_ID")})
+    @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinTable(name = "PLAY_PLAY_GROUP", joinColumns = { @JoinColumn(name = "FK_PLAY_ID") }, inverseJoinColumns = {
+            @JoinColumn(name = "FK_PLAY_GROUP_ID") })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<PlayGroup> playGroups;
     @JsonProperty("lastTalkingPointPublishTime")
@@ -155,7 +154,8 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Column(name = "CLEANUP_DONE", nullable = false)
     private Boolean isCleanupDone = Boolean.FALSE;
 
-    public Play() {}
+    public Play() {
+    }
 
     @Override
     @JsonIgnore
