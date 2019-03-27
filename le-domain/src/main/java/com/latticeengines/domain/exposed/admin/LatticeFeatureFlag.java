@@ -32,6 +32,7 @@ public enum LatticeFeatureFlag {
     AUTO_IMPORT_ON_INACTIVE("AutoImportOnInactive", "Run Auto Import on Inactive stack"),
     IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."),
     ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"),
+    ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
