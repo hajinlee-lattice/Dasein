@@ -69,7 +69,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         SourceFile sourceFile = uploadSourceFile(csvFileName, entity);
         String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
         String taskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, entity,
-                entity + FEED_TYPE_SUFFIX, subType, entityType.getDisplayName());
+                getFeedTypeByEntity(entity), subType, entityType.getDisplayName());
         ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace, taskId,
                 sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
@@ -81,7 +81,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, entity + FEED_TYPE_SUFFIX);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, getFeedTypeByEntity(entity));
         ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace, dataFeedTask.getUniqueId(),
                 sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
@@ -101,8 +101,8 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         }
         templates = cdlService.getS3ImportTemplate(customerSpace);
         Assert.assertNotNull(templates);
-        List<String> feedTypes = Arrays.asList(ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_CONTACT + FEED_TYPE_SUFFIX,
-                ENTITY_TRANSACTION + FEED_TYPE_SUFFIX);
+        List<String> feedTypes = Arrays.asList(getFeedTypeByEntity(ENTITY_ACCOUNT), getFeedTypeByEntity(ENTITY_CONTACT),
+                getFeedTypeByEntity(ENTITY_TRANSACTION));
         List<S3ImportTemplateDisplay> renderedTemplats = templates.stream()
                 .filter(template -> feedTypes.contains(template.getFeedType())).collect(Collectors.toList());
         for (S3ImportTemplateDisplay display : renderedTemplats) {
