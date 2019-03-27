@@ -19,7 +19,7 @@
             {{ enrichment.ImportanceOrdering }}
         </span>
     </div>
-    <span>
+    <span ng-class="{ 'disabled': vm.section == 're.model_iteration' && !vm.checkApprovedUsage(enrichment) }">
         <span class="attribute-count background-color show-tooltip delay bottom left" ng-if="(totalcount = vm.getAttributeRules(enrichment)).length > 0">
             <strong>{{ totalcount.length }}</strong>
             <div class="tooltip_">
