@@ -237,7 +237,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                 this.modelGuid = ((AIModel) this.ratingModel).getModelSummaryId();
             }
             setPageSize(pageSize);
-            setRowspPerFile(rowsPerFile);
+            setRowsPerFile(rowsPerFile);
         }
 
         @Override
