@@ -14,10 +14,9 @@ export const actions = {
         return dispatch({
             type: SET_PLAY,
             payload: initialState.play
-        })
+        });
     },
     fetchPlay: (play_name) => dispatch => {
-        console.log(play_name, initialState.play);
         let observer = new Observer(
             response => {
                 if (response.status == 200) {
@@ -35,10 +34,10 @@ export const actions = {
         let observer = new Observer(
             response => {
                 if (response.status == 200) {
-                    return {
+                    return dispatch({
                         type: FETCH_PLAYS,
                         payload: response.data
-                    };
+                    });
                 }
             },
             error => { }

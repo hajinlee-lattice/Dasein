@@ -28,9 +28,9 @@ export class OverviewComponent extends Component {
 
     componentDidMount() {
         let play = this.props.OverviewService.getPlay();
-        console.log('The play', play);
         this.setState({play: play});
         // this.unsubscribe = store.subscribe(this.handleChange);
+        console.log(play);
     }
 
     componentWillUnmount() {
@@ -43,16 +43,23 @@ export class OverviewComponent extends Component {
     }
 
     render() {
-        console.log('======> RENDERING');
-        return (
-            <div className="main-panel">
-                <LeHPanel halignment={SPACEAROUND}>
-                    <MainComponent />
-                    <RatingsComponent />
-                </LeHPanel>
-                <SystemsComponent />
-            </div>
-        );
+        if(this.state.play) {
+            return (
+                <div className="main-panel">
+                    <LeHPanel halignment={SPACEAROUND}>
+                        <MainComponent play={this.state.play} />
+                        <RatingsComponent />
+                    </LeHPanel>
+                    <SystemsComponent />
+                </div>
+            );
+        } else {
+            return (
+                <div className="main-panel">
+                        loading...
+                </div>
+            );
+        }
     }
 }
 
