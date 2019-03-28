@@ -491,8 +491,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobList.add(job);
             }
         }
-        log.info("workflowJobPids: " + workflowJobPids.toString());
-        log.info("canceled_workflowJobPids: " + canceled_workflowJobPids.toString());
+        log.debug("workflowJobPids: " + workflowJobPids.toString());
+        log.debug("canceled_workflowJobPids: " + canceled_workflowJobPids.toString());
 
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
             List<Job> workflowJobs = workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
