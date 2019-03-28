@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -52,6 +53,10 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
     private boolean excludeCDLAttributes;
 
     private RatingEngineType ratingEngineType;
+
+    private List<ColumnMetadata> userSelectedAcctAttributesForModeling;
+
+    private Map<String, ColumnMetadata> userSelectedAPSAttributesMap;
 
     @Value("${cdl.modeling.product.spent.special.handling:true}")
     private Boolean doSpecialHandlingForProductSpent;
@@ -85,17 +90,30 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
 
     @Override
     public void execute() {
-        List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
-                .getNewModelingAttrs(customerSpace, dataCollectionVersion).collectList().block();
+        userSelectedAcctAttributesForModeling = servingStoreProxy
+                .getNewModelingAttrs(customerSpace, BusinessEntity.Account, dataCollectionVersion).collectList()
+                .block();
         log.info(String.format("userSelectedAttributesForModeling = %s",
-                JsonUtils.serialize(userSelectedAttributesForModeling)));
+                JsonUtils.serialize(userSelectedAcctAttributesForModeling)));
+
+        if (typesUsingProductSpent.contains(ratingEngineType)) {
+            List<ColumnMetadata> userSelectedAPSAttributesForModeling = servingStoreProxy
+                    .getNewModelingAttrs(customerSpace, BusinessEntity.APSAttribute, dataCollectionVersion)
+                    .collectList().block();
+            log.info(String.format("userSelectedAPSAttributesForModeling = %s",
+                    JsonUtils.serialize(userSelectedAPSAttributesForModeling)));
+
+            userSelectedAPSAttributesMap = new HashMap<>();
+            userSelectedAPSAttributesForModeling
+                    .forEach(attr -> userSelectedAPSAttributesMap.put(attr.getAttrName(), attr));
+
+        }
 
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         log.info("Attributes from event table:" + JsonUtils.serialize(eventTable.getAttributes()));
 
-        if (CollectionUtils.isNotEmpty(userSelectedAttributesForModeling)) {
-            Set<String> attributesWithModelAndAllInsights = updateApprovedUsageForAttributes(
-                    userSelectedAttributesForModeling, eventTable);
+        if (CollectionUtils.isNotEmpty(userSelectedAcctAttributesForModeling)) {
+            Set<String> attributesWithModelAndAllInsights = updateApprovedUsageForAttributes(eventTable);
             updateApprovedUsageForDependentCuratedAttributes(eventTable, attributesWithModelAndAllInsights);
 
             metadataProxy.updateTable(customerSpace, eventTable.getName(), eventTable);
@@ -105,31 +123,39 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
         }
     }
 
-    public Set<String> updateApprovedUsageForAttributes(List<ColumnMetadata> userSelectedAttributesForModeling,
-            Table eventTable) {
+    public Set<String> updateApprovedUsageForAttributes(Table eventTable) {
         eventTable.setName(eventTable.getName() + "_sel_attrs");
         eventTable.setDisplayName("EventTable_With_UserSelectedAttributesForModeling");
 
-        Map<String, ColumnMetadata> userSelectedAttributesMap = new HashMap<>();
-        userSelectedAttributesForModeling.forEach(attr -> userSelectedAttributesMap.put(attr.getAttrName(), attr));
+        Map<String, ColumnMetadata> userSelectedAcctAttributesMap = new HashMap<>();
+        userSelectedAcctAttributesForModeling
+                .forEach(attr -> userSelectedAcctAttributesMap.put(attr.getAttrName(), attr));
+
         Set<String> attributesWithModelAndAllInsights = new HashSet<>();
 
         for (Attribute eventTableAttribute : eventTable.getAttributes()) {
             if (Category.PRODUCT_SPEND.getName().equals(eventTableAttribute.getCategory())
                     && doSpecialHandlingForProductSpent) {
                 if (typesUsingProductSpent.contains(ratingEngineType)) {
-                    List<ApprovedUsage> approvedUsage = Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS);
-                    if (userSelectedAttributesMap.containsKey(eventTableAttribute.getName())) {
-                        approvedUsage = userSelectedAttributesMap.get(eventTableAttribute.getName())
+                    List<ApprovedUsage> approvedUsage = Collections.singletonList(ApprovedUsage.NONE);
+                    if (userSelectedAPSAttributesMap.containsKey(eventTableAttribute.getName())) {
+                        approvedUsage = userSelectedAPSAttributesMap.get(eventTableAttribute.getName())
                                 .getApprovedUsageList();
+                        attributesWithModelAndAllInsights.add(eventTableAttribute.getName());
+                        log.info(String.format(
+                                "Setting ApprovedUsage for Attribute %s (Category '%s') as %s based "
+                                        + "on user configured APS attributes",
+                                eventTableAttribute.getName(), eventTableAttribute.getCategory(),
+                                JsonUtils.serialize(approvedUsage)));
+                    } else {
+                        log.info(String.format(
+                                "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because "
+                                        + "it was not part of user configured APS attributes",
+                                eventTableAttribute.getName(), eventTableAttribute.getCategory(),
+                                JsonUtils.serialize(approvedUsage)));
                     }
 
-                    log.info(String.format("Overwrite ApprovedUsage for Attribute %s (Category '%s') as %s",
-                            eventTableAttribute.getName(), eventTableAttribute.getCategory(),
-                            JsonUtils.serialize(approvedUsage)));
-                    attributesWithModelAndAllInsights.add(eventTableAttribute.getName());
-                    eventTableAttribute
-                            .setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[0]));
+                    eventTableAttribute.setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[0]));
                 } else {
                     log.info(String.format(
                             "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because %s attributes should not be used "
@@ -139,14 +165,14 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
                     eventTableAttribute.setApprovedUsage(ApprovedUsage.NONE);
                 }
             } else {
-                if (userSelectedAttributesMap.containsKey(eventTableAttribute.getName()) //
+                if (userSelectedAcctAttributesMap.containsKey(eventTableAttribute.getName()) //
                         && CollectionUtils.isNotEmpty( //
-                                userSelectedAttributesMap.get(eventTableAttribute.getName()).getApprovedUsageList())) {
-                    List<ApprovedUsage> approvedUsage = userSelectedAttributesMap.get(eventTableAttribute.getName())
+                                userSelectedAcctAttributesMap.get(eventTableAttribute.getName())
+                                        .getApprovedUsageList())) {
+                    List<ApprovedUsage> approvedUsage = userSelectedAcctAttributesMap.get(eventTableAttribute.getName())
                             .getApprovedUsageList();
                     attributesWithModelAndAllInsights.add(eventTableAttribute.getName());
-                    eventTableAttribute
-                            .setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[0]));
+                    eventTableAttribute.setApprovedUsage(approvedUsage.toArray(new ApprovedUsage[0]));
                 } else {
                     log.info(String.format(
                             "Setting ApprovedUsage for Attribute %s (Category '%s') as %s because it is not part of user "
