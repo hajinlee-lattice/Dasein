@@ -15,7 +15,6 @@ import org.apache.avro.util.Utf8;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -37,7 +38,6 @@ import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
-import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -108,6 +108,18 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Autowired
     private JobService jobService;
+
+    @BeforeClass(groups = "deployment")
+    private void setup() {
+        HdfsPodContext.changeHdfsPodId(podId);
+        cleanupAvroDir(avroDir);
+    }
+
+    @AfterClass(groups = "deployment")
+    private void destroy() {
+        HdfsPodContext.changeHdfsPodId(podId);
+        cleanupAvroDir(avroDir);
+    }
 
     // Test against DerivedColumnsCache
     @Test(groups = "deployment", enabled = true)
@@ -312,11 +324,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDirInThisRun + "/" + fileName));
 
         // use avro dir and with schema
-        MatchInput input = createAvroBulkMatchInput(true, schema, version);
+        MatchInput input = createAvroBulkMatchInput(true, schema, version, avroDir, fileName);
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) input.getInputBuffer();
         avroInputBuffer.setAvroDir(avroDirInThisRun);
         MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -361,10 +373,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         uploadDataCsv(avroDir, fileName, "matchinput/BulkMatchInput.csv", fieldTypes, "ID");
 
         // use avro file and without schema
-        MatchInput input = createAvroBulkMatchInput(false, null, version);
+        MatchInput input = createAvroBulkMatchInput(false, null, version, avroDir, fileName);
         input.setExcludePublicDomain(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -373,18 +385,18 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testMultiBlockBulkMatch() throws InterruptedException {
-        String version = "1.0.0";
-        HdfsPodContext.changeHdfsPodId(podId);
-        cleanupAvroDir(hdfsPathBuilder.podDir().toString());
-        cleanupAvroDir(avroDir);
-        uploadTestAVro(avroDir, fileName);
+    @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
+    public void testMultiBlockBulkMatch(String version) throws InterruptedException {
+        String path = avroDir + "/" + version;
+        cleanupAvroDir(path);
+        uploadTestAVro(path, fileName);
 
-        MatchInput input = createAvroBulkMatchInput(true, null, version);
+        MatchInput input = createAvroBulkMatchInput(true, null, version, path, fileName);
         // input.setExcludePublicDomain(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
+        log.info("Test multi-block match command: DataCloudVersion = {}, ApplicationId = {}", version,
+                appId.toString());
 
         // mimic one block failed
         while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
@@ -392,8 +404,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
-        Assert.assertFalse(MatchUtils.isValidForAccountMasterBasedMatch(version));
-        jobService.killJob(ConverterUtils.toApplicationId(blockAppId));
+        // Assert.assertFalse(MatchUtils.isValidForAccountMasterBasedMatch(version));
+        jobService.killJob(ApplicationId.fromString(blockAppId));
 
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -413,7 +425,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     @Test(groups = "deployment", enabled = true)
     public void testGetBulkConfig() {
         String currentVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
-        MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);
+        MatchInput input = createAvroBulkMatchInput(true, null, currentVersion, avroDir, fileName);
         BulkMatchWorkflowConfiguration bulkConf = matchProxy.getBulkConfig(input, podId);
         Assert.assertNotNull(bulkConf);
         Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
@@ -472,7 +484,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         return objs;
     }
 
-    private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema, String dataCloudVersion) {
+    private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema, String dataCloudVersion,
+            String avroDir, String fileName) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(Predefined.RTS);

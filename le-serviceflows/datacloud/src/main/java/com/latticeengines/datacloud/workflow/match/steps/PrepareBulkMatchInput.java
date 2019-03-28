@@ -2,8 +2,10 @@ package com.latticeengines.datacloud.workflow.match.steps;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -28,6 +30,7 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -44,8 +47,22 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Value("${datacloud.match.max.num.blocks}")
-    private Integer maxNumBlocks;
+    @Value("${datacloud.match.parallel.blocks.max.num}")
+    private Integer maxNumParallelBlocks;
+
+    @Value("${datacloud.match.fuzzy.blocks.size.threshold}")
+    private Integer fuzzyBlockSizeThreshold;
+
+    // After we introduce customized entity, need to have default setting for
+    // maximum block number
+    @Value("${datacloud.match.account.block.max.num}")
+    private Integer maxNumAccountBlocks;
+
+    @Value("${datacloud.match.contact.block.max.num}")
+    private Integer maxNumContactBlocks;
+
+    @Value("${datacloud.match.txn.block.max.num}")
+    private Integer maxNumTxnBlocks;
 
     private String avroGlobs;
 
@@ -91,7 +108,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             if (getConfiguration().getMatchInput().isFetchOnly()) {
                 return divideIntoNumBlocks(count, determineNumBlocksForAM(count));
             } else {
-                return new Integer[] { count.intValue() };
+                return divideIntoNumBlocks(count,
+                        determineNumBlocksForFuzzyMatch(count, getConfiguration().getMatchInput()));
             }
         } else {
             return divideIntoNumBlocks(count, determineNumBlocks(count));
@@ -104,21 +122,41 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
         Integer numBlocks;
 
-        if (count < (minBlockSize * maxNumBlocks)) {
+        if (count < (minBlockSize * maxNumParallelBlocks)) {
             numBlocks = Math.max((int) (count / minBlockSize), 1);
-        } else if (count > (maxBlockSize * maxNumBlocks)) {
+        } else if (count > (maxBlockSize * maxNumParallelBlocks)) {
             numBlocks = (int) (count / maxBlockSize);
         } else {
-            numBlocks = maxNumBlocks;
+            numBlocks = maxNumParallelBlocks;
         }
 
         return numBlocks;
     }
 
+    private Integer determineNumBlocksForFuzzyMatch(Long count, MatchInput input) {
+        @SuppressWarnings("serial")
+        Map<String, Integer> entityMaxBlocks = new HashMap<String, Integer>() {
+            {
+                // Both null and LatticeAccount are for LDC match
+                put(null, maxNumAccountBlocks); //
+                put(BusinessEntity.LatticeAccount.name(), maxNumAccountBlocks); //
+                put(BusinessEntity.Account.name(), maxNumAccountBlocks); //
+                put(BusinessEntity.Contact.name(), maxNumContactBlocks); //
+                put(BusinessEntity.Transaction.name(), maxNumTxnBlocks); //
+            }
+        };
+
+        if (entityMaxBlocks.get(input.getTargetEntity()) == null) {
+            throw new UnsupportedOperationException("Unsupported target entity in match: " + input.getTargetEntity());
+        }
+        Integer maxBlocks = entityMaxBlocks.get(input.getTargetEntity());
+        return (int) Math.min(count / fuzzyBlockSizeThreshold + 1, maxBlocks);
+    }
+
     private Integer determineNumBlocks(Long count) {
         Integer numBlocks = 1;
         Integer averageBlockSize = getConfiguration().getAverageBlockSize();
-        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumBlocks) {
+        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumParallelBlocks) {
             numBlocks++;
         }
         return numBlocks;

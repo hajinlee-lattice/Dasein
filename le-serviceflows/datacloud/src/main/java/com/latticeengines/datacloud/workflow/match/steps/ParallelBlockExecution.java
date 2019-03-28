@@ -70,8 +70,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     @Autowired
     private ZkConfigurationService zkConfigurationService;
 
-    @Value("${datacloud.match.max.num.blocks}")
-    private Integer maxNumBlocks;
+    @Value("${datacloud.match.parallel.blocks.max.num}")
+    private Integer maxNumParallelBlocks;
 
     @Value("${datacloud.match.block.interval.sec}")
     private int blockRampingRate;
@@ -142,7 +142,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void submitMatchBlocks() {
-        while ((remainingJobs.size() > 0) && (applicationIds.size() < maxNumBlocks)) {
+        while ((remainingJobs.size() > 0) && (applicationIds.size() < maxNumParallelBlocks)) {
             DataCloudJobConfiguration jobConfiguration = remainingJobs.remove(0);
             ApplicationId appId = ApplicationId //
                     .fromString(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
