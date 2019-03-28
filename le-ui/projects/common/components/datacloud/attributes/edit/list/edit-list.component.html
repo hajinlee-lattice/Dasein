@@ -52,7 +52,7 @@
                         id="attrDisplayName_{{$index}}" 
                         type="text" 
                         class="form-control"
-                        maxlength="63"
+                        maxlength="255"
                         ng-model="item.DisplayName"
                         ng-blur="$ctrl.onBlur(item, 'attrDisplayName_' + $index)"
                         ng-disabled="$ctrl.isStartsDisabled()">
@@ -61,7 +61,7 @@
 
             <div class="edit-attribute-description">
                 <textarea
-                        ng-init="maxlength = 63;"
+                        ng-init="maxlength = 255;"
                         maxlength="{{maxlength}}"
                         name="attrDescription_{{$index}}" 
                         id="attrDescription_{{$index}}" 
