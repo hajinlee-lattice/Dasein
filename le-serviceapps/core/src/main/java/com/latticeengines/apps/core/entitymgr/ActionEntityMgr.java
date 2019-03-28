@@ -25,4 +25,5 @@ public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
 
     void cancel(Long actionPid);
 
+    Action getActionByJobPid(Long jobPid);
 }

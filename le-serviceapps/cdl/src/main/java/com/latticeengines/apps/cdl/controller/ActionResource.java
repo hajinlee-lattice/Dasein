@@ -79,4 +79,10 @@ public class ActionResource {
         actionService.patchOwnerIdByPids(ownerId, pids);
     }
 
+    @GetMapping(value = "/action")
+    @ApiOperation(value = "get Action By TrackingPid")
+    public Action getActionByjobPid(@PathVariable String customerSpace, @RequestParam Long jobPid) {
+        return actionService.getActionByJobPid(jobPid);
+    }
+
 }

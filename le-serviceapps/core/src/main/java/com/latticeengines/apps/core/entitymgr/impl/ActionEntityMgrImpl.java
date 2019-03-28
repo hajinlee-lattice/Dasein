@@ -97,4 +97,10 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
     public void cancel(Long actionPid) {
         actionDao.cancel(actionPid);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Action getActionByJobPid(Long jobPid) {
+        return actionRepository.findByTrackingPid(jobPid);
+    }
 }

@@ -98,4 +98,11 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
         }
         put("patch owner id", url, null);
     }
+
+    @Override
+    public Action getActionByJobPid(String customerSpace, Long jobPid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/action?jobPid={jobPid}",
+                shortenCustomerSpace(customerSpace), String.valueOf(jobPid));
+        return get("get Action By JobPid", url, Action.class);
+    }
 }
