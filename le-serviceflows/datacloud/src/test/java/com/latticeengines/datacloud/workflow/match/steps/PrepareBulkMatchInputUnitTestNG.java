@@ -30,7 +30,8 @@ public class PrepareBulkMatchInputUnitTestNG {
                 // LDC Match
                 { "2.0.17", null, false, 50L, new Integer[] { 50 } }, //
                 { "2.0.17", null, false, 75L, new Integer[] { 75 } }, //
-                // When count >= 100, always divide into 2 blocks
+                // When count >= 100 (mocked threshold), always divide into 2
+                // blocks
                 { "2.0.17", null, false, 100L, new Integer[] { 50, 50 } }, //
                 { "2.0.17", null, false, 200L, new Integer[] { 100, 100 } }, //
                 { "2.0.17", null, false, 1000L, new Integer[] { 500, 500 } }, //
@@ -38,7 +39,8 @@ public class PrepareBulkMatchInputUnitTestNG {
                 // LDC Match
                 { "2.0.17", BusinessEntity.LatticeAccount.name(), false, 50L, new Integer[] { 50 } }, //
                 { "2.0.17", BusinessEntity.LatticeAccount.name(), false, 75L, new Integer[] { 75 } }, //
-                // When count >= 100, always divide into 2 blocks
+                // When count >= 100 (mocked threshold), always divide into 2
+                // blocks
                 { "2.0.17", BusinessEntity.LatticeAccount.name(), false, 100L, new Integer[] { 50, 50 } }, //
                 { "2.0.17", BusinessEntity.LatticeAccount.name(), false, 200L, new Integer[] { 100, 100 } }, //
                 { "2.0.17", BusinessEntity.LatticeAccount.name(), false, 1000L, new Integer[] { 500, 500 } }, //
@@ -46,7 +48,8 @@ public class PrepareBulkMatchInputUnitTestNG {
                 // Account Entity Match
                 { "2.0.17", BusinessEntity.Account.name(), false, 50L, new Integer[] { 50 } }, //
                 { "2.0.17", BusinessEntity.Account.name(), false, 75L, new Integer[] { 75 } }, //
-                // When count >= 100, always divide into 2 blocks
+                // When count >= 100 (mocked threshold), always divide into 2
+                // blocks
                 { "2.0.17", BusinessEntity.Account.name(), false, 100L, new Integer[] { 50, 50 } }, //
                 { "2.0.17", BusinessEntity.Account.name(), false, 200L, new Integer[] { 100, 100 } }, //
                 { "2.0.17", BusinessEntity.Account.name(), false, 1000L, new Integer[] { 500, 500 } }, //
@@ -55,7 +58,8 @@ public class PrepareBulkMatchInputUnitTestNG {
                 { "2.0.17", BusinessEntity.Contact.name(), false, 50L, new Integer[] { 50 } }, //
                 { "2.0.17", BusinessEntity.Contact.name(), false, 100L, new Integer[] { 50, 50 } }, //
                 { "2.0.17", BusinessEntity.Contact.name(), false, 200L, new Integer[] { 66, 66, 68 } }, //
-                // When count >= 400, always divide into 4 blocks
+                // When count >= 400 (mocked threshold), always divide into 4
+                // blocks
                 { "2.0.17", BusinessEntity.Contact.name(), false, 400L, new Integer[] { 100, 100, 100, 100 } }, //
                 { "2.0.17", BusinessEntity.Contact.name(), false, 1000L, new Integer[] { 250, 250, 250, 250 } }, //
 
@@ -64,7 +68,8 @@ public class PrepareBulkMatchInputUnitTestNG {
                 { "2.0.17", BusinessEntity.Transaction.name(), false, 100L, new Integer[] { 50, 50 } }, //
                 { "2.0.17", BusinessEntity.Transaction.name(), false, 200L, new Integer[] { 66, 66, 68 } }, //
                 { "2.0.17", BusinessEntity.Transaction.name(), false, 400L, new Integer[] { 80, 80, 80, 80, 80 } }, //
-                // When count >= 800, always divide into 8 blocks
+                // When count >= 800 (mocked threshold), always divide into 8
+                // blocks
                 { "2.0.17", BusinessEntity.Transaction.name(), false, 800L,
                         new Integer[] { 100, 100, 100, 100, 100, 100, 100, 100 } }, //
                 { "2.0.17", BusinessEntity.Transaction.name(), false, 1000L,
