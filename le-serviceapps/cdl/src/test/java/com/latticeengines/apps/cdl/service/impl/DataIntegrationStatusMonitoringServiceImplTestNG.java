@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
 import com.latticeengines.domain.exposed.cdl.InitiatedEventDetail;
 import com.latticeengines.domain.exposed.cdl.MessageType;
+import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -261,6 +262,11 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setEventType(DataIntegrationEventType.Completed.toString());
         updateStatusMonitorMessage.setEventTime(new Date());
         updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
+        ProgressEventDetail eventDetail = new ProgressEventDetail();
+        eventDetail.setFailed(1L);
+        eventDetail.setProcessed(2L);
+        eventDetail.setTotalRecordsSubmitted(3L);
+        updateStatusMonitorMessage.setEventDetail(eventDetail);
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
         statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
@@ -271,7 +277,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId());
-        Assert.assertEquals(LaunchState.Synced, playLaunch.getLaunchState());
+        Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
 
         updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
