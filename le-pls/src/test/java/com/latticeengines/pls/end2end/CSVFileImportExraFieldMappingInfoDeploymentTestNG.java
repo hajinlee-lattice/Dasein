@@ -29,7 +29,7 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
 
         Assert.assertNotNull(baseAccountFile);
-        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT);
         String dfId = cdlService.createS3Template(customerSpace, baseAccountFile.getName(),
                 SOURCE, ENTITY_ACCOUNT, feedType, null, ENTITY_ACCOUNT + "Data");
 
