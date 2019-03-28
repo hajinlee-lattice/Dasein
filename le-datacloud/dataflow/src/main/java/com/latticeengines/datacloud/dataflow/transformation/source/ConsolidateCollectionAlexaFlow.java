@@ -16,6 +16,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaIndustryBuffer;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -24,7 +25,7 @@ import cascading.operation.Buffer;
 @Component(ConsolidateCollectionAlexaFlow.BEAN_NAME)
 public class ConsolidateCollectionAlexaFlow extends ConsolidateCollectionFlow {
     public static final String BEAN_NAME = "consolidateCollectionAlexaFlow";
-    private static final String FIELD_DOMAIN = "URL";
+    private static final String FIELD_DOMAIN = DataCloudConstants.ATTR_ALEXA_DOMAIN;
     private static final String[] FIELDS_COUNTRY = AlexaFunction.OUTPUT_FIELDS;
     private static final String[] FIELDS_RANK = new String[] { "Rank", "ReachRank", "ViewsRank", "US_Rank", "AU_Rank",
             "GB_Rank", "CA_Rank" };
