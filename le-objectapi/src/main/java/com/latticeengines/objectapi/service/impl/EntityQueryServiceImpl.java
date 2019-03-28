@@ -293,7 +293,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             for (ComparisonType type : map.keySet()) {
                 switch (type) {
                 case LASTEST_DAY:
-                    Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), version, timeTranslator);
+                    Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), version);
                     updateTimeFilterTranslator(timeTranslator, type, maxDates);
                     break;
                 default:
@@ -339,8 +339,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return result;
     }
 
-    Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version,
-            TimeFilterTranslator timeTranslator) {
+    Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version) {
         String tenantId = MultiTenantContext.getTenant().getId();
         // Currently, only account and contact entity can have date attributes
         List<AttributeLookup> accountMaxLookups = new ArrayList<>();
@@ -386,13 +385,14 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             log.info("query for contactTableName " + query);
             Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
             retMap.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
+                results.put(new AttributeLookup(BusinessEntity.Contact, k), v);
             });
         }
         return results;
     }
 
-    void getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups, DataCollection.Version version) {
+    Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,
+            DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -400,6 +400,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         // Currently, only account and contact entity can have date attributes
         List<AggregateLookup> accountMaxLookups = new ArrayList<>();
         List<AggregateLookup> contactMaxLookups = new ArrayList<>();
+        Map<AttributeLookup, Object> results = new HashMap<>();
         for (AttributeLookup lookup : lookups) {
             if (BusinessEntity.Account.equals(lookup.getEntity())) {
                 accountMaxLookups.add(AggregateLookup.max(lookup).as(lookup.getAttribute().toLowerCase()));
@@ -419,10 +420,9 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             DataPage dataPage = queryEvaluatorService.getData(attrRepo, accountQuery,
                     RedshiftQueryProvider.USER_SEGMENT);
             Map<String, Object> map = dataPage.getData().get(0);
-            System.out.println("Account");
-            for (String key : map.keySet()) {
-                System.out.println(key + ": " + map.get(key).toString());
-            }
+            map.forEach((k, v) -> {
+                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
+            });
         }
         if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
             Query contactQuery = Query.builder() //
@@ -432,11 +432,11 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             DataPage dataPage = queryEvaluatorService.getData(attrRepo, contactQuery,
                     RedshiftQueryProvider.USER_SEGMENT);
             Map<String, Object> map = dataPage.getData().get(0);
-            System.out.println("Contact");
-            for (String key : map.keySet()) {
-                System.out.println(key + ": " + map.get(key).toString());
-            }
+            map.forEach((k, v) -> {
+                results.put(new AttributeLookup(BusinessEntity.Contact, k), v);
+            });
         }
+        return results;
     }
 
 }

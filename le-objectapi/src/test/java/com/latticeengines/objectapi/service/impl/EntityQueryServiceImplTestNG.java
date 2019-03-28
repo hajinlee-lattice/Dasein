@@ -82,7 +82,34 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
         set.addAll(Arrays.asList(accout_2, accout_3));
         // set.addAll(Arrays.asList(contact_1, contact_2));
-        Map<AttributeLookup, Object> results = entityQueryService.getMaxDates(set, DataCollection.Version.Blue, null);
+        Map<AttributeLookup, Object> results = entityQueryService.getMaxDates(set, DataCollection.Version.Blue);
+        results.forEach((k, v) -> {
+            System.out.println(k + ": " + v);
+        });
+    }
+
+    @Test(groups = "manual")
+    public void testMaxViaFrontEndQuery() {
+        DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
+        Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
+        Mockito.when(proxy.getTableName(any(), any(), any()))
+                .thenReturn("qa_juan_dataattribute_test_0212_02_account_2019_02_26_06_59_15_utc");
+        queryEvaluatorService.setDataCollectionProxy(proxy);
+
+        Set<AttributeLookup> set = new HashSet<>();
+        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, "user_createddate");
+        AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, "user_testdate_dd_mmm_yyyy__8h");
+        AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account,
+                "user_testdate_column_dd_mmm_yyyy_withoutdate");
+        AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact,
+                "user_testdate_column_dd_mmm_yyyy_withoutdate");
+        AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact,
+                "user_created_date_mm_dd_yyyy_hh_mm_ss_12h");
+        // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
+        set.addAll(Arrays.asList(accout_2, accout_3));
+        // set.addAll(Arrays.asList(contact_1, contact_2));
+        Map<AttributeLookup, Object> results = entityQueryService.getMaxDatesViaFrontEndQuery(set,
+                DataCollection.Version.Blue);
         results.forEach((k, v) -> {
             System.out.println(k + ": " + v);
         });

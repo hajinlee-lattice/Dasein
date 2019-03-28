@@ -290,7 +290,7 @@ abstract class QueryTranslator {
                 if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
                     modifyTxnRestriction(txRestriction, timeTranslator);
-                    Restriction concrete = new DateRangeTranslator().convert(txRestriction, queryFactory, repository,
+                    Restriction concrete = DateRangeTranslator.convert(txRestriction, queryFactory, repository,
                             sqlUser);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(txRestriction);
@@ -314,7 +314,7 @@ abstract class QueryTranslator {
         } else if (restriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
             modifyTxnRestriction(txRestriction, timeTranslator);
-            translated = new DateRangeTranslator().convert(txRestriction, queryFactory, repository, sqlUser);
+            translated = DateRangeTranslator.convert(txRestriction, queryFactory, repository, sqlUser);
         } else if (restriction instanceof MetricRestriction) {
             MetricRestriction metricRestriction = (MetricRestriction) restriction;
             translated = MetricTranslator.convert(metricRestriction);
