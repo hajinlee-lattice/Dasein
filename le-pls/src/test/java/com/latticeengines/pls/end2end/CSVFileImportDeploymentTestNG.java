@@ -83,7 +83,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
-        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
+        String feedType = getFeedTypeByEntity("ExternalSystem", ENTITY_ACCOUNT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
@@ -130,7 +130,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE_FROMATDATE,
                 ClassLoader
                         .getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE_FROMATDATE));
-        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
+        String feedType = getFeedTypeByEntity("FormatDate", ENTITY_ACCOUNT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE,
                         feedType);
@@ -232,7 +232,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
-        String feedType = getFeedTypeByEntity(ENTITY_CONTACT);
+        String feedType = getFeedTypeByEntity("ExternalSystem", ENTITY_CONTACT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
 
@@ -293,7 +293,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Small_Account.csv"));
 
-        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
+        String feedType = getFeedTypeByEntity("TestSchemaUpdate", ENTITY_ACCOUNT);
         boolean cityExist = false;
         boolean countryExist = false;
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
@@ -417,8 +417,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         SourceFile missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(missingAccountFile);
         startCDLImport(missingAccountFile, ENTITY_ACCOUNT);
-        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, getFeedTypeByEntity(ENTITY_ACCOUNT),
-                ENTITY_ACCOUNT);
+        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT), ENTITY_ACCOUNT);
         Table accountTemplate2 = accountDataFeedTask.getImportTemplate();
         Table sourceTable = metadataProxy.getTable(customerSpace, missingAccountFile.getTableName());
         Assert.assertNull(sourceTable.getAttribute(InterfaceName.Website));
@@ -431,7 +431,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
 
-        String feedType = getFeedTypeByEntity(ENTITY_CONTACT);
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_CONTACT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -450,7 +450,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Exception ex = null;
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
-                    sourceFile.getName(), SOURCE, ENTITY_CONTACT, getFeedTypeByEntity(ENTITY_CONTACT));
+                    sourceFile.getName(), SOURCE, ENTITY_CONTACT, getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_CONTACT));
 
             JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
             assertEquals(completedStatus, JobStatus.COMPLETED);
@@ -480,7 +480,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     public void testParallelImport() {
         SourceFile sourceFile1 = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(sourceFile1);
-        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT);
         ApplicationId applicationId1 = cdlService.submitCSVImport(customerSpace, sourceFile1.getName(),
                 sourceFile1.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
 
@@ -504,7 +504,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Small_Account.csv"));
 
-        String feedType = getFeedTypeByEntity(ENTITY_ACCOUNT);
+        String feedType = getFeedTypeByEntity("TestWrongFieldMapping", ENTITY_ACCOUNT);
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(firstFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);

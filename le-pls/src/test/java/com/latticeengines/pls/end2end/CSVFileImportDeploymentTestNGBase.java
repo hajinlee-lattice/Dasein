@@ -120,7 +120,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
 
-        String feedType = getFeedTypeByEntity(entity);
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, entity);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), entity, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -138,21 +138,21 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
 
     protected void startCDLImport(SourceFile sourceFile, String entity) {
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
-                sourceFile.getName(), SOURCE, entity, getFeedTypeByEntity(entity));
+                sourceFile.getName(), SOURCE, entity, getFeedTypeByEntity(DEFAULT_SYSTEM, entity));
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    public String getFeedTypeByEntity(String entity) {
+    public String getFeedTypeByEntity(String system, String entity) {
         String feedType = entity + FEED_TYPE_SUFFIX;
         switch (entity) {
             case ENTITY_ACCOUNT: feedType =
-                    DEFAULT_SYSTEM + SPLIT_CHART + EntityType.Accounts.getDefaultFeedTypeName();break;
+                    system + SPLIT_CHART + EntityType.Accounts.getDefaultFeedTypeName();break;
             case ENTITY_CONTACT: feedType =
-                    DEFAULT_SYSTEM + SPLIT_CHART + EntityType.Contacts.getDefaultFeedTypeName();break;
+                    system + SPLIT_CHART + EntityType.Contacts.getDefaultFeedTypeName();break;
             case ENTITY_TRANSACTION: feedType =
-                    DEFAULT_SYSTEM + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
+                    system + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
             default:break;
         }
         return feedType;
