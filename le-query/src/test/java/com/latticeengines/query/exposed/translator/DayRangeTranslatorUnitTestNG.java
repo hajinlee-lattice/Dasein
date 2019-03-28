@@ -58,6 +58,12 @@ public class DayRangeTranslatorUnitTestNG {
         Long endOfDay = DayRangeTranslator.getEndOfDayByDate("2018-02-17");
         Assert.assertEquals(startOfDay.longValue(), 1518825600000L);
         Assert.assertEquals(endOfDay.longValue(), 1518911999000L);
+
+        Long timestamp = 1518825700000L;
+        startOfDay = DayRangeTranslator.getStartOfDayByTimestamp(timestamp);
+        endOfDay = DayRangeTranslator.getEndOfDayByTimestamp(timestamp);
+        Assert.assertEquals(startOfDay.longValue(), 1518825600000L);
+        Assert.assertEquals(endOfDay.longValue(), 1518911999000L);
     }
 
 }
