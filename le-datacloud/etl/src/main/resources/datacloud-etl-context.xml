@@ -12,6 +12,7 @@
     <import resource="classpath:datacloud-etl-persistence-legacy-context.xml" />
     <import resource="classpath:dataflow-context.xml" />
     <import resource="classpath:yarn-context.xml" />
+    <import resource="classpath:spark-context.xml" />
     <import resource="classpath:metadata-hive-context.xml"/>
     <import resource="classpath:datacloud-collection-context.xml"/>
 
@@ -46,19 +47,19 @@
     <bean id="pipelineTransformationReportDao" class="com.latticeengines.datacloud.etl.transformation.dao.impl.PipelineTransformationReportDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-    
+
     <bean id="latticeIdStrategyDao" class="com.latticeengines.datacloud.etl.transformation.dao.impl.LatticeIdStrategyDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-    
+
     <bean id="orchestrationDao" class="com.latticeengines.datacloud.etl.orchestration.dao.impl.OrchestrationDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-    
+
     <bean id="orchestrationProgressDao" class="com.latticeengines.datacloud.etl.orchestration.dao.impl.OrchestrationProgressDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-    
+
     <bean id="purgeStrategyDao" class="com.latticeengines.datacloud.etl.purge.dao.impl.PurgeStrategyDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>

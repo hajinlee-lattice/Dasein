@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -43,6 +44,9 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
 
     @Value("${pls.cdl.transform.cascading.partitions}")
     protected int cascadingPartitions;
+
+    @Value("${pls.cdl.transform.spark.executors}")
+    private int sparkExecutors;
 
     @Value("${pls.cdl.transform.tez.am.mem.gb}")
     private int tezAmMemGb; // requested memory for application master
@@ -124,6 +128,13 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         return JsonUtils.serialize(on);
     }
 
+    protected String appendEngineConf(SparkJobConfig jobConfig,
+                                      TransformationFlowParameters.EngineConfiguration engineConf) {
+        ObjectNode on = OM.valueToTree(jobConfig);
+        on.set("EngineConfig", OM.valueToTree(engineConf));
+        return JsonUtils.serialize(on);
+    }
+
     protected String emptyStepConfig(TransformationFlowParameters.EngineConfiguration engineConf) {
         return appendEngineConf(new TransformerConfig(), engineConf);
     }
@@ -136,6 +147,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
+        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         return engineConf;
@@ -149,6 +161,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * extraHeavyMultiplier));
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * extraHeavyMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
+        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         return engineConf;

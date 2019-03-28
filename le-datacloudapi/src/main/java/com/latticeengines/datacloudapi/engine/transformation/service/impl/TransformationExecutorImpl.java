@@ -2,6 +2,7 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -76,15 +77,19 @@ public class TransformationExecutorImpl implements TransformationExecutor {
     @Override
     public TransformationProgress kickOffNewPipelineProgress(
             TransformationProgressEntityMgr transformationProgressEntityMgr, PipelineTransformationRequest request) {
-        Integer retries = 1;
+        int retries = 1;
         try {
             PipelineTransformationService service = (PipelineTransformationService) transformationService;
             TransformationConfiguration transformationConfiguration = service
                     .createTransformationConfiguration(request);
 
             if (transformationConfiguration != null) {
+                String submitter = request.getSubmitter();
+                if (StringUtils.isBlank(submitter)) {
+                    submitter = jobSubmitter;
+                }
                 TransformationProgress progress = transformationService.startNewProgress(transformationConfiguration,
-                        jobSubmitter);
+                        submitter);
                 scheduleTransformationWorkflow(transformationConfiguration, progress, transformationProgressEntityMgr);
                 return progress;
             }
@@ -93,7 +98,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             throw e;
         }
         throw new LedpException(LedpCode.LEDP_25015, new String[] { transformationService.getSource().getSourceName(),
-                retries.toString(),
+                String.valueOf(retries),
                 RequestContext.getErrors() == null ? null : String.join("  &&  ", RequestContext.getErrors()) });
     }
 
@@ -104,8 +109,12 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         TransformationConfiguration transformationConfiguration = service.createTransformationConfiguration(request);
 
         if (transformationConfiguration != null) {
+            String submitter = request.getSubmitter();
+            if (StringUtils.isBlank(submitter)) {
+                submitter = jobSubmitter;
+            }
             TransformationProgress progress = transformationService.startNewProgress(transformationConfiguration,
-                    jobSubmitter);
+                    submitter);
             return getTransformationWorkflowConf(transformationConfiguration, progress);
         } else {
             throw new RuntimeException("Cannot create  TransformationConfiguration");

@@ -17,7 +17,8 @@ angular
       BEFORE: "Before",
       AFTER: "After",
       IS_EMPTY: "Is Empty",
-      LAST: "Last"
+      LAST: "Last",
+      LATEST_DAY: 'Latest Day'
     };
     this.getPeriodNumericalConfig = function() {
       return {
@@ -77,7 +78,8 @@ angular
         { name: "BETWEEN_DATE", displayName: "Between" },
         { name: "BEFORE", displayName: "Before" },
         { name: "AFTER", displayName: "After" },
-        { name: "IS_EMPTY", displayName: "Is Empty" }
+        { name: "IS_EMPTY", displayName: "Is Empty" },
+        { name: "LATEST_DAY", displayName: "Latest Day" }
       ];
     };
 
@@ -174,6 +176,7 @@ angular
       switch (bkt.Fltr.Cmp) {
         case "EVER":
         case "IS_EMPTY":
+        case 'LATEST_DAY':
           valRedable = "";
           period = "";
           break;

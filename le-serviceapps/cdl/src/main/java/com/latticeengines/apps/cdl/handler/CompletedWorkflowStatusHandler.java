@@ -11,6 +11,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
+import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
@@ -34,19 +35,27 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
     public DataIntegrationStatusMonitor handleWorkflowState(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {
         
-        log.info("CALLING HANDLE WORKFLOW STATE");
-
         checkStatusMonitorExists(statusMonitor, status);
 
         statusMonitor.setEventCompletedTime(status.getEventTime());
 
         updateMonitoringStatus(statusMonitor, status.getEventType());
 
+        ProgressEventDetail eventDetail = (ProgressEventDetail) status.getEventDetail();
+
         switch (statusMonitor.getEntityName()) {
         case "PlayLaunch":
-            log.info("UPDATING PLAY LAUNCH STATE");
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            playLaunch.setLaunchState(LaunchState.Synced);
+            Long recordsProcessed = eventDetail.getProcessed();
+            Long recordsFailed = eventDetail.getFailed();
+            Long totalRecords = eventDetail.getTotalRecordsSubmitted();
+            if (recordsProcessed.equals(totalRecords)) {
+                playLaunch.setLaunchState(LaunchState.Synced);
+            } else if (recordsFailed.equals(totalRecords)) {
+                playLaunch.setLaunchState(LaunchState.SyncFailed);
+            } else {
+                playLaunch.setLaunchState(LaunchState.PartialSync);
+            }
             playLaunchService.update(playLaunch);
         }
 

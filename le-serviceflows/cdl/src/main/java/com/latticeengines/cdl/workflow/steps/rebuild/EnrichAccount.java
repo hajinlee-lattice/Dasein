@@ -89,6 +89,13 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         } else {
             log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);
         }
+        if (StringUtils.isBlank(masterTableName)) {
+            throw new IllegalStateException("Cannot find the master table in default collection");
+        }
+        Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
+        if (masterTable == null) {
+            throw new IllegalStateException("Cannot find the master table in default collection");
+        }
 
         String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
         if (StringUtils.isNotBlank(fullAccountTableName)) {
@@ -100,13 +107,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
             }
         }
 
-        if (StringUtils.isBlank(masterTableName)) {
-            throw new IllegalStateException("Cannot find the master table in default collection");
-        }
-        Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
-        if (masterTable == null) {
-            throw new IllegalStateException("Cannot find the master table in default collection");
-        }
         long count = ScalingUtils.getTableCount(masterTable);
         int multiplier = ScalingUtils.getMultiplier(count);
         if (multiplier > 1) {

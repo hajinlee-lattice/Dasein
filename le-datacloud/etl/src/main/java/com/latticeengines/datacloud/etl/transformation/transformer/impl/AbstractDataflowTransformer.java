@@ -208,14 +208,10 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     protected Map<Source, List<String>> setupBaseSourceVersionMap(TransformStep step, P parameters, T configuration) {
-        Map<Source, List<String>> baseSourceVersionMap = new HashMap<Source, List<String>>();
+        Map<Source, List<String>> baseSourceVersionMap = new HashMap<>();
         for (int i = 0; i < step.getBaseSources().length; i++) {
             Source baseSource = step.getBaseSources()[i];
-            List<String> versionList = baseSourceVersionMap.get(baseSource);
-            if (versionList == null) {
-                versionList = new ArrayList<>();
-                baseSourceVersionMap.put(baseSource, versionList);
-            }
+            List<String> versionList = baseSourceVersionMap.computeIfAbsent(baseSource, k -> new ArrayList<>());
             versionList.add(step.getBaseVersions().get(i));
         }
         return baseSourceVersionMap;

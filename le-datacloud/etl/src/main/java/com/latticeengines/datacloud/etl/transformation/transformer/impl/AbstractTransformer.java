@@ -31,6 +31,8 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
 
+    protected T configuration;
+
     abstract public String getName();
 
     abstract protected boolean validateConfig(T config, List<String> sourceNames);
@@ -51,7 +53,8 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
             if (config == null) {
                 return false;
             } else {
-                return validateConfig(config, sourceNames);
+                configuration = config;
+                return validateConfig(configuration, sourceNames);
             }
         }
     }
@@ -138,6 +141,11 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     protected void updateStatusToFailed(TransformationProgress progress, String errorMsg, Exception e) {
         progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, log);
+    }
+
+    @Override
+    public String outputSubDir() {
+        return "";
     }
 
 }

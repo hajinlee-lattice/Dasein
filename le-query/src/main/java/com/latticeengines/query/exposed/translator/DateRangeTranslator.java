@@ -25,7 +25,7 @@ public class DateRangeTranslator extends TranslatorCommon {
 
     private static final BusinessEntity transaction = BusinessEntity.Transaction;
 
-    public Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
+    public static Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
         if (isHasNotPurchased(txnRestriction)) {
             SubQuery notPurchasedSubQuery = constructHasPurchasedSubQuery(txnRestriction, queryFactory, repository,
@@ -47,13 +47,13 @@ public class DateRangeTranslator extends TranslatorCommon {
         }
     }
 
-    private boolean isHasNotPurchased(TransactionRestriction txnRestriction) {
+    private static boolean isHasNotPurchased(TransactionRestriction txnRestriction) {
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         AggregationFilter spendFilter = txnRestriction.getSpentFilter();
         return unitFilter == null && spendFilter == null && Boolean.TRUE.equals(txnRestriction.isNegate());
     }
 
-    private SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
+    private static SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
         StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
         BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
@@ -76,8 +76,8 @@ public class DateRangeTranslator extends TranslatorCommon {
         return subQuery;
     }
 
-    private SubQuery constructHasPurchasedSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
-            AttributeRepository repository, String sqlUser) {
+    private static SubQuery constructHasPurchasedSubQuery(TransactionRestriction txnRestriction,
+            QueryFactory queryFactory, AttributeRepository repository, String sqlUser) {
         StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
         BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
         BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
@@ -94,7 +94,7 @@ public class DateRangeTranslator extends TranslatorCommon {
         return subQuery;
     }
 
-    private BooleanExpression getProductPredicate(String productId) {
+    private static BooleanExpression getProductPredicate(String productId) {
         String[] productIds = productId.split(",");
         StringPath productIdPath = Expressions.stringPath(InterfaceName.ProductId.name());
         if (productIds.length == 1) {
@@ -104,7 +104,7 @@ public class DateRangeTranslator extends TranslatorCommon {
         }
     }
 
-    private BooleanExpression getDatePredicate(TimeFilter timeFilter) {
+    private static BooleanExpression getDatePredicate(TimeFilter timeFilter) {
         if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
             return null;
         }
@@ -121,7 +121,7 @@ public class DateRangeTranslator extends TranslatorCommon {
         return mergePredicates(predicate1, predicate2);
     }
 
-    private BooleanExpression mergePredicates(BooleanExpression... predicates) {
+    private static BooleanExpression mergePredicates(BooleanExpression... predicates) {
         BooleanExpression merged = null;
         for (BooleanExpression predicate : predicates) {
             if (predicate != null) {
@@ -135,7 +135,7 @@ public class DateRangeTranslator extends TranslatorCommon {
         return merged;
     }
 
-    private BooleanExpression getAggPredicate(TransactionRestriction txnRestriction) {
+    private static BooleanExpression getAggPredicate(TransactionRestriction txnRestriction) {
         AggregationFilter spentFilter = txnRestriction.getSpentFilter();
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
 
