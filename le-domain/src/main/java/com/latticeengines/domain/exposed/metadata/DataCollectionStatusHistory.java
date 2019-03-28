@@ -5,14 +5,22 @@ import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Filters;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -23,16 +31,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_DATA_COLLECTION_STATUS_HISTORY")
+@Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
-public class DataCollectionStatusHistory implements HasPid, HasAuditingFields, Serializable {
+public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditingFields, Serializable {
     private static final long serialVersionUID = 1531666744740489629L;
     public static final String NOT_SET = "not set";
 
@@ -42,8 +53,10 @@ public class DataCollectionStatusHistory implements HasPid, HasAuditingFields, S
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "TENANT_NAME", nullable = false)
-    private String tenantName;
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Tenant tenant;
 
     @Type(type = "json")
     @Column(name = "Detail", columnDefinition = "'JSON'")
@@ -67,15 +80,18 @@ public class DataCollectionStatusHistory implements HasPid, HasAuditingFields, S
         this.pid = pid;
     }
 
+    @Override
     @JsonIgnore
-    public String getTenantName() {
-        return tenantName;
+    public Tenant getTenant() {
+        return tenant;
     }
 
+    @Override
     @JsonIgnore
-    public void setTenantName(String tenantName) {
-        this.tenantName = tenantName;
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
+
 
     @JsonIgnore
     public DataCollectionStatusDetailHistory getDetail() {
