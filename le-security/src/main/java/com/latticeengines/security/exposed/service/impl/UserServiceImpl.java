@@ -222,6 +222,10 @@ public class UserServiceImpl implements UserService {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
+        // make sure only internal user has expiration date
+        if (!AccessLevel.getInternalAccessLevel().contains(accessLevel)) {
+            expirationDate = null;
+        }
         // remove comparing user with same access level to tenant in different
         // update times as user with same access level can be expiration date
         if (resignAccessLevel(tenantId, username)) {

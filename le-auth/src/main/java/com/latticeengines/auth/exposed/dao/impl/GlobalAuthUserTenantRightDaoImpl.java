@@ -148,4 +148,14 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         return CollectionUtils.isNotEmpty(query.list());
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where Expiration_Date is not null", entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        return (List<GlobalAuthUserTenantRight>) query.list();
+    }
+
 }

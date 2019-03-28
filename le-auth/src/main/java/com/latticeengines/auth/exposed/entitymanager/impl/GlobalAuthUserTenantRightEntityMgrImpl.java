@@ -83,4 +83,10 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
         return gaUserTenantRightDao.deleteByUserId(userId);
     }
 
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
+        return gaUserTenantRightDao.findByNonNullExprationDate();
+    }
+
 }

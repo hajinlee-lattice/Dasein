@@ -1,6 +1,8 @@
 package com.latticeengines.security.exposed;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -232,5 +234,9 @@ public enum AccessLevel implements GrantedAuthority {
             }
         }
         return maxLevel;
+    }
+
+    public static final List<AccessLevel> getInternalAccessLevel() {
+        return Arrays.asList(AccessLevel.INTERNAL_ADMIN, AccessLevel.INTERNAL_USER, AccessLevel.SUPER_ADMIN);
     }
 }
