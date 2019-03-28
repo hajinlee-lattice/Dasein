@@ -40,7 +40,6 @@ export default function () {
                     item: enrichment
                     //restriction: bucket 
                 });
-                
 
                 var entity = enrichment.Entity;
                 var fieldname = enrichment.ColumnId;
@@ -200,6 +199,14 @@ export default function () {
                     (!vm.lookupMode && ['wizard.ratingsengine_segment', 'edit', 'team'].indexOf(vm.section) == -1)
             }
 
+
+            // Jamey's old version
+            // vm.isBktEmpty = function (enrichment) {
+            //     if (vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
+            //         return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined ||
+            //             !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
+            //     }
+            // }
             vm.isBktEmpty = function (enrichment) {
                 if (vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
                     return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined || vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List == undefined 
