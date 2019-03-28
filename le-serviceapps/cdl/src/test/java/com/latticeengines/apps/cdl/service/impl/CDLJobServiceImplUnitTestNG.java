@@ -30,16 +30,12 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class CDLJobServiceImplUnitTestNG {
 
     @Mock
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
-
-    @Mock
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Mock
     private WorkflowProxy workflowProxy;
@@ -91,6 +87,7 @@ public class CDLJobServiceImplUnitTestNG {
         doNothing().when(dataFeedProxy).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
 
         doReturn(true).when(cdlJobService).submitProcessAnalyzeJob(any(Tenant.class), any(CDLJobDetail.class));
+        doReturn(false).when(cdlJobService).systemCheck();
     }
 
     @Test(groups = "unit")

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
+import com.latticeengines.pls.service.SystemStatusService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -68,6 +70,9 @@ public class CDLResource {
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
+    @Inject
+    private SystemStatusService systemStatusService;
+
     @RequestMapping(value = "/consolidateAndProfile", method = RequestMethod.POST)
     @ApiOperation(value = "Start Consolidate And Profile job")
     public ResponseDocument<String> startConsolidateAndProfileJob() {
@@ -79,6 +84,10 @@ public class CDLResource {
     @RequestMapping(value = "/processanalyze", method = RequestMethod.POST)
     @ApiOperation(value = "Start Process And Analyze job")
     public ResponseDocument<String> processAnalyze(@RequestBody(required = false) ProcessAnalyzeRequest request) {
+        StatusDocument statusDocument = systemStatusService.getSystemStatus();
+        if (StatusDocument.UNDER_MAINTENANCE.equals(statusDocument.getStatus())) {
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18182));
+        }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (request == null) {
             request = new ProcessAnalyzeRequest();
