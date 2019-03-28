@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProgressEventDetail extends EventDetail {
 
-    ProgressEventDetail() {
+    public ProgressEventDetail() {
     }
 
     private Long batchId;
