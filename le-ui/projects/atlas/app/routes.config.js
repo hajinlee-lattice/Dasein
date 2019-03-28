@@ -328,6 +328,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                     DataCloudStore.getAllEnrichmentsConcurrently(opts, true).then((result) => {
                         result.forEach((item) => {
+                            item.Entity = "Account";
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
                             }
