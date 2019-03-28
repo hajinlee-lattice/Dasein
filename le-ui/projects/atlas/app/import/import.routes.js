@@ -663,6 +663,10 @@ angular
         })
         .state('home.import.data.productpurchases.ids', {
             url: '/transactionids',
+            onEnter: function($state, ImportWizardStore, FieldDocument){
+                ImportWizardStore.setSavedDocumentInState('home.import.data.productpurchases', FieldDocument.fieldMappings);
+                ImportWizardStore.setSavedDocumentInState('home.import.data.productpurchases.ids', FieldDocument.fieldMappings);
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
