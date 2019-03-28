@@ -21,7 +21,7 @@ public interface CollectionDBService {
 
     void ingest();
 
-    void consolidate();
+    void consolidate(List<String> effectiveVendors);
 
     void cleanup(Timestamp start, Timestamp end);
 }

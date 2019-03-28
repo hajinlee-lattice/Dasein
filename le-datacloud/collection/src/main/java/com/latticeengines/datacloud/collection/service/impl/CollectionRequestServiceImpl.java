@@ -11,10 +11,12 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
@@ -86,6 +88,22 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
             }
 
+        }
+
+        //filter invalid domains
+        for (int i = 0; i < nonTransferred.size(); ++i) {
+
+            if (rawReqFilter.get(i)) {
+
+                continue;
+
+            }
+
+            if (StringUtils.isEmpty(DomainUtils.parseDomain(nonTransferred.get(i).getDomain()))) {
+
+                rawReqFilter.set(i, true);
+
+            }
         }
 
         return rawReqFilter;
