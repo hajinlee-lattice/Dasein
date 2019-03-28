@@ -42,7 +42,7 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
         switch (statusMonitor.getEntityName()) {
         case "PlayLaunch":
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            playLaunch.setLaunchState(LaunchState.Failed);
+            playLaunch.setLaunchState(LaunchState.SyncFailed);
             playLaunchService.update(playLaunch);
         }
 

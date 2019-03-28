@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.MessageType;
+import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -364,9 +365,18 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(statusMonitorList.size(), 2);
 
         statusMessage2.setEventType(DataIntegrationEventType.Completed.toString());
+        ProgressEventDetail eventDetail = new ProgressEventDetail();
+        eventDetail.setFailed(0L);
+        eventDetail.setProcessed(1L);
+        eventDetail.setTotalRecordsSubmitted(1L);
+        statusMessage2.setEventDetail(eventDetail);
         statusMessage2.setMessage("Workflow marked as Complete");
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
         Thread.sleep(1000L);
+
+        playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
+
+        assertEquals(playLaunch2.getLaunchState(), LaunchState.Synced);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateExportIntegrationStatusMonitor" })

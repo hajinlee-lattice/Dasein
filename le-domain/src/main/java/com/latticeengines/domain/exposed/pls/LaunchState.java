@@ -15,7 +15,9 @@ public enum LaunchState {
     Deleted, //
 
     Syncing, //
-    Synced;
+    Synced, //
+    PartialSync, //
+    SyncFailed;
 
     private static Map<LaunchState, Collection<LaunchState>> transitionMap = new HashMap<>();
 
@@ -34,12 +36,14 @@ public enum LaunchState {
         Set<LaunchState> statesAfterLaunched = new HashSet<>();
         statesAfterLaunched.add(Syncing);
         statesAfterLaunched.add(Synced);
-        statesAfterLaunched.add(Failed);
+        statesAfterLaunched.add(PartialSync);
+        statesAfterLaunched.add(SyncFailed);
         transitionMap.put(Launched, statesAfterLaunched);
 
         Set<LaunchState> statesAfterSyncing = new HashSet<>();
         statesAfterSyncing.add(Synced);
-        statesAfterSyncing.add(Failed);
+        statesAfterLaunched.add(PartialSync);
+        statesAfterSyncing.add(SyncFailed);
         transitionMap.put(Syncing, statesAfterSyncing);
     }
 
