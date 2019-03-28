@@ -387,16 +387,17 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
     public void testMultiBlockBulkMatch(String version) throws InterruptedException {
+        HdfsPodContext.changeHdfsPodId(podId);
         String path = avroDir + "/" + version;
         cleanupAvroDir(path);
         uploadTestAVro(path, fileName);
+        Long expectedTotal = AvroUtils.count(yarnConfiguration, new Path(path, fileName).toString());
 
         MatchInput input = createAvroBulkMatchInput(true, null, version, path, fileName);
-        // input.setExcludePublicDomain(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
-        log.info("Test multi-block match command: DataCloudVersion = {}, ApplicationId = {}", version,
-                appId.toString());
+        log.info("Test multi-block match command: DataCloudVersion = {}, ApplicationId = {}, Submitted Rows = {}",
+                version, appId.toString(), expectedTotal);
 
         // mimic one block failed
         while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
@@ -404,7 +405,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
-        // Assert.assertFalse(MatchUtils.isValidForAccountMasterBasedMatch(version));
         jobService.killJob(ApplicationId.fromString(blockAppId));
 
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
@@ -420,6 +420,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        Assert.assertEquals(AvroUtils.count(yarnConfiguration, finalStatus.getResultLocation() + "/*.avro"),
+                expectedTotal);
     }
 
     @Test(groups = "deployment", enabled = true)
