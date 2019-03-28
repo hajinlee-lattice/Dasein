@@ -1062,7 +1062,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    public void consolidate() {
+    public void consolidate(List<String> effectiveVendors) {
 
         /*
         if (consolidationExecPeriod == 86400 * 7) {
@@ -1082,8 +1082,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         if (CollectionUtils.size(consumedWorkers) == 0) {
 
-            log.info("no ingested worker output to consolidate, quit...");
-            return;
+            log.warn("Notice: there're 0 ingested worker output to consolidate...");
 
         }
 
@@ -1093,12 +1092,15 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         try {
 
+            Set<String> external_vendor_set = effectiveVendors == null ? null : new HashSet<>(effectiveVendors);
+
             for (VendorConfig vendorConfig: vendorConfigMgr.findAll()) {
 
                 String vendor = vendorConfig.getVendor();
 
                 //only handling effective vendors
-                if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
+                if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor) ||
+                    external_vendor_set != null && !external_vendor_set.contains(vendor)) {
 
                     continue;
 

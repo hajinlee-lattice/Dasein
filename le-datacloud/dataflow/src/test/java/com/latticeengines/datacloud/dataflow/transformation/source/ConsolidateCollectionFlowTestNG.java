@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +17,7 @@ public class ConsolidateCollectionFlowTestNG extends DataCloudDataFlowFunctional
 
     @Override
     protected String getFlowBeanName() {
-        return ConsolidateCollectionFlow.BEAN_NAME;
+        return ConsolidateCollectionBWFlow.BEAN_NAME;
     }
 
 
