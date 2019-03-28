@@ -6,7 +6,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -41,10 +43,13 @@ import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -400,9 +405,31 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                         processorContext.getBlockOutput().getStatistics().getRowsMatched(), count));
             }
         }
+
+        log.error("$JAW$ Creating MatchBlock Map");
+        Map<EntityMatchResult, Long> matchResultMap = new HashMap<>();
+        if (OperationalMode.ENTITY_MATCH.equals(processorContext.getGroupMatchInput().getOperationalMode())) {
+            log.error("$JAW$ Setting up MatchBlock Map");
+            MatchStatistics matchStats = processorContext.getBlockOutput().getStatistics();
+            if (matchStats.getOrphanedNoMatchCount() == null) {
+                log.error("$JAW$ Found null Orphaned No Match Count for ProcessContext: "
+                        + processorContext.getRootOperationUid());
+            }
+
+            matchResultMap.put(EntityMatchResult.ORPHANED_NO_MATCH,
+                    matchStats.getOrphanedNoMatchCount() == null ? 0L : matchStats.getOrphanedNoMatchCount());
+            matchResultMap.put(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID,
+                    matchStats.getOrphanedUnmatchedAccountIdCount() == null ?
+                            0L : matchStats.getOrphanedUnmatchedAccountIdCount());
+            matchResultMap.put(EntityMatchResult.MATCHED_BY_MATCHKEY,
+                    matchStats.getMatchedByMatchKeyCount() == null ? 0L : matchStats.getMatchedByMatchKeyCount());
+            matchResultMap.put(EntityMatchResult.MATCHED_BY_ACCOUNTID,
+                    matchStats.getMatchedByAccountIdCount() == null ? 0L : matchStats.getMatchedByAccountIdCount());
+        }
+
         try {
             matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue())
-                    .commit();
+                    .matchResults(matchResultMap).commit();
         } catch (Exception e) {
             log.warn("Failed to update block matched rows.", e);
         }

@@ -37,6 +37,25 @@ public class MatchUtils {
             mergedStats.setColumnMatchCount(columnCounts);
         }
         mergedStats.setRowsMatched(stats.getRowsMatched() + newStats.getRowsMatched());
+        log.error("$JAW$ Merging Match Stats");
+        mergedStats.setOrphanedNoMatchCount(stats.getOrphanedNoMatchCount() + newStats.getOrphanedNoMatchCount());
+        log.error("   Stats Orphaned No Match: " + stats.getOrphanedNoMatchCount());
+        log.error("   New Stats Orphaned No Match: " + newStats.getOrphanedNoMatchCount());
+        log.error("   Merges Stats Orphaned No Match: " + mergedStats.getOrphanedNoMatchCount());
+        mergedStats.setOrphanedUnmatchedAccountIdCount(stats.getOrphanedUnmatchedAccountIdCount()
+                + newStats.getOrphanedUnmatchedAccountIdCount());
+        log.error("   Stats Orphaned Unmatched Account ID: " + stats.getOrphanedUnmatchedAccountIdCount());
+        log.error("   New Stats Orphaned Unmatched Account ID: " + newStats.getOrphanedUnmatchedAccountIdCount());
+        log.error("   Merges Stats Orphaned Unmatched Account ID: " + mergedStats.getOrphanedUnmatchedAccountIdCount());
+        mergedStats.setMatchedByMatchKeyCount(stats.getMatchedByMatchKeyCount() + newStats.getMatchedByMatchKeyCount());
+        log.error("   Stats Matched By MatchKey: " + stats.getMatchedByMatchKeyCount());
+        log.error("   New Stats Matched By MatchKey: " + newStats.getMatchedByMatchKeyCount());
+        log.error("   Merges Stats Matched By MatchKey: " + mergedStats.getMatchedByMatchKeyCount());
+        mergedStats.setMatchedByAccountIdCount(stats.getMatchedByAccountIdCount()
+                + newStats.getMatchedByAccountIdCount());
+        log.error("   Stats Matched By Account ID: " + stats.getMatchedByAccountIdCount());
+        log.error("   New Stats Matched By Account ID: " + newStats.getMatchedByAccountIdCount());
+        log.error("   Merges Stats Matched By Account ID: " + mergedStats.getMatchedByAccountIdCount());
         return mergedStats;
     }
 

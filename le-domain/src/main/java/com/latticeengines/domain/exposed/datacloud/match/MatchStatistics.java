@@ -29,6 +29,13 @@ public class MatchStatistics {
     private Long timeElapsedInMsec;
     private List<Integer> columnMatchCount;
 
+    private Long orphanedNoMatchCount;
+    private Long orphanedUnmatchedAccountIdCount;
+    private Long matchedByMatchKeyCount;
+    private Long matchedByAccountIdCount;
+
+    //private EntityMatchAggregation entityMatchAggregation;
+
     @MetricField(name = "RowsRequested", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsRequested")
     public Integer getRowsRequested() {
@@ -69,6 +76,48 @@ public class MatchStatistics {
     @JsonProperty("ColumnMatchCount")
     public void setColumnMatchCount(List<Integer> columnMatchCount) {
         this.columnMatchCount = columnMatchCount;
+    }
+
+    /*
+    public EntityMatchAggregation getEntityMatchAggregation() {
+        return entityMatchAggregation;
+    }
+
+    public void setEntityMatchAggregation(EntityMatchAggregation entityMatchAggregation) {
+        this.entityMatchAggregation = entityMatchAggregation;
+    }
+    */
+
+    public Long getOrphanedNoMatchCount() {
+        return orphanedNoMatchCount;
+    }
+
+    public void setOrphanedNoMatchCount(Long orphanedNoMatchCount) {
+        this.orphanedNoMatchCount = orphanedNoMatchCount;
+    }
+
+    public Long getOrphanedUnmatchedAccountIdCount() {
+        return orphanedUnmatchedAccountIdCount;
+    }
+
+    public void setOrphanedUnmatchedAccountIdCount(Long orphanedUnmatchedAccountIdCount) {
+        this.orphanedUnmatchedAccountIdCount = orphanedUnmatchedAccountIdCount;
+    }
+
+    public Long getMatchedByMatchKeyCount() {
+        return matchedByMatchKeyCount;
+    }
+
+    public void setMatchedByMatchKeyCount(Long matchedByMatchKeyCount) {
+        this.matchedByMatchKeyCount = matchedByMatchKeyCount;
+    }
+
+    public Long getMatchedByAccountIdCount() {
+        return matchedByAccountIdCount;
+    }
+
+    public void setMatchedByAccountIdCount(Long matchedByAccountIdCount) {
+        this.matchedByAccountIdCount = matchedByAccountIdCount;
     }
 
     @JsonProperty("TimeElapsed")

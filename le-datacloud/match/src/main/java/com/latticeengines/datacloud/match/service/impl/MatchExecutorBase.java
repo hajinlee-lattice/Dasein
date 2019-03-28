@@ -183,6 +183,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         int totalMatched = 0;
+        long orphanedNoMatchCount = 0L;
+        long orphanedUnmatchedAccountIdCount = 0L;
+        long matchedByMatchKeyCount = 0L;
+        long matchedByAccountIdCount = 0L;
 
         boolean isEntityMatch = OperationalMode.ENTITY_MATCH.equals(matchContext.getInput().getOperationalMode());
         if (isEntityMatch) {
@@ -252,8 +256,36 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     value = results.get(field);
                     String customerAccountId = internalRecord.getParsedSystemIds() == null ? null
                             : internalRecord.getParsedSystemIds().get(InterfaceName.AccountId.name());
+
+                    log.error("$JAW$   value: " + value + " value is null string: " + "null".equals(value));
+                    log.error("$JAW$   customerAccountId: " + customerAccountId + " customerAccountId is null string: "
+                            + "null".equals(customerAccountId));
+
                     if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
+                        log.error("$JAW$ __ANONYMOUS_AID__ will be returned.");
                         value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
+                    }
+
+                    // Record match result in enumeration for aggregation into match report.
+
+                    log.error("$JAW$ Selecting Match Result");
+                    if (value == null || value == "null") {
+                        //internalRecord.setEntityMatchResult(EntityMatchResult.ORPHANED_NO_MATCH);
+                        orphanedNoMatchCount++;
+                        log.error("$JAW$ Match Result Orphan No Match");
+                    } else if (customerAccountId == null) {
+                        //internalRecord.setEntityMatchResult(EntityMatchResult.MATCHED_BY_MATCHKEY);
+                        matchedByMatchKeyCount++;
+                        log.error("$JAW$ Match Result Matched By MatchKey");
+                    } else if (value.equals(customerAccountId)) {
+                        //internalRecord.setEntityMatchResult(EntityMatchResult.MATCHED_BY_ACCOUNTID);
+                        matchedByAccountIdCount++;
+                        log.error("$JAW$ Match Result Matched By Account ID");
+                    } else {
+                        //internalRecord.setEntityMatchResult(EntityMatchResult
+                        //        .ORPHANED_UNMATCHED_ACCOUNTID);
+                        orphanedUnmatchedAccountIdCount++;
+                        log.error("$JAW$ Match Result Orphan Unmatched Account ID");
                     }
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
@@ -337,6 +369,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
+        if (isEntityMatch) {
+            log.error("$JAW$ Copying Match Results to MatchStats");
+            matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(orphanedNoMatchCount);
+            matchContext.getOutput().getStatistics().setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
+            matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
+            matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
+        }
+
         if (columnMatchCount.length <= 10000) {
             matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
         }

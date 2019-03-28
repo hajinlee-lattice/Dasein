@@ -17,6 +17,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -55,7 +57,7 @@ import com.latticeengines.security.exposed.service.TenantService;
  *
  * Account match correctness verification is in EntityMatchCorrectnessTestNG &
  * AccountMatchCorrectnessDeploymentTestNG
- * 
+ *
  * dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
  */
 public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
@@ -434,6 +436,15 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, this.getClass().getSimpleName());
         int numNewAccounts = CASE_ALL_KEYS.equals(scenario) ? DATA_ALL_KEYS.length : 0;
         validateNewlyAllocatedAcct(finalStatus.getResultLocation(), numNewAccounts);
+
+        Map<EntityMatchResult, Long> matchResultMap = finalStatus.getMatchResults();
+        if (MapUtils.isNotEmpty(matchResultMap)) {
+            log.info("Lead to Account Match Results for Scenario: " + scenario + ":");
+            for (Map.Entry<EntityMatchResult, Long> entry : matchResultMap.entrySet()) {
+                log.error("   " + entry.getKey().name() + ": " + entry.getValue().toString());
+            }
+        }
+
         if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
         } else if (CASE_LEAD_TO_ACCT.equals(scenario) || CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
@@ -652,6 +663,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             log.info(record.toString());
             String entityId = record.get(InterfaceName.EntityId.name()) == null ? null
                     : record.get(InterfaceName.EntityId.name()).toString();
+            Assert.assertNotNull(googleEntityId);
             if (googleEntityId.equals(entityId)) {
                 Assert.assertNotNull(record.get(InterfaceName.LatticeAccountId.name()));
             } else {
