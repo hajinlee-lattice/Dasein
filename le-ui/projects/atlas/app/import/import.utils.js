@@ -145,7 +145,8 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         let unique = [];
         Object.keys(fieldsMapped).forEach(index => {
             let obj = fieldsMapped[index];
-            if(ImportUtils.uniqueIds[entity][obj.mappedField] && !isUniqueIdAlreadyAdded(unique, fieldsMapped[index].mappedField, fieldsMapped[index].userField)){
+            let entityUniqueIds = ImportUtils.uniqueIds[entity];
+            if(entityUniqueIds && entityUniqueIds[obj.mappedField] && !isUniqueIdAlreadyAdded(unique, fieldsMapped[index].mappedField, fieldsMapped[index].userField)){
                 unique.push(Object.assign({}, fieldsMapped[index]));
                 delete fieldsMapped.index;
             }
@@ -184,7 +185,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     }
     function updateUniqueIdsMapping(entity, savedObj, uniquiIdslist){
         Object.keys(savedObj).forEach(index => {
-            if(ImportUtils.uniqueIds[entity][savedObj[index].mappedField]){
+            if(ImportUtils.uniqueIds[entity] && ImportUtils.uniqueIds[entity][savedObj[index].mappedField]){
                 updateUniqueIdMapping(uniquiIdslist, savedObj[index]);
             }
         });
