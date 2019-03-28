@@ -19,6 +19,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -73,6 +74,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Value("${cdl.pa.default.max.iteration}")
+    private int defaultMaxIteration;
 
     private String customerSpace;
 
@@ -243,12 +247,17 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private List<List<RatingModelContainer>> splitIntoGenerations(List<RatingModelContainer> containers) {
         List<List<RatingModelContainer>> iterations = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(containers)) {
-            if (configuration.getMaxIteration() <= 1) {
-                log.info("Max Iteration is " + configuration.getMaxIteration() + ", run single pass.");
+            int maxIteration = configuration.getMaxIteration();
+            if (maxIteration == 0) {
+                maxIteration = defaultMaxIteration;
+            }
+            log.info("Max iteration is " + maxIteration + ".");
+            if (maxIteration == 1) {
+                log.info("Max Iteration is " + maxIteration + ", run single pass.");
                 iterations = Collections.singletonList(containers);
             } else {
                 try {
-                    List<List<String>> generations = getREDepGraphLayers(containers, configuration.getMaxIteration());
+                    List<List<String>> generations = getREDepGraphLayers(containers, maxIteration);
                     log.info("Got dependency graph layers: \n" + JsonUtils.pprint(generations));
                     if (CollectionUtils.isNotEmpty(generations) && generations.size() > 1) {
                         Map<String, RatingModelContainer> containerMap = new HashMap<>();
