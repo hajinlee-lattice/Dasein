@@ -139,6 +139,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MERGE = "MergeTransformer";
     public static final String TRANSFORMER_STANDARDIZATION = "standardizationTransformer";
 
+    public static final String TRANSFORMER_REMOVE_ORPHAN_CONTACT = "RemoveOrphanContact";
     public static final String TRANSFORMER_CONSOLIDATE_REPORT = "ConsolidateReporter";
     public static final String TRANSFORMER_CONSOLIDATE_DATA = "consolidateDataTransformer";
     public static final String TRANSFORMER_CONSOLIDATE_DELTA = "consolidateDeltaTransformer";

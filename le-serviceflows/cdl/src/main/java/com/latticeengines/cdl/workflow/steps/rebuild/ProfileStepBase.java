@@ -230,7 +230,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return step;
     }
 
-    private TransformationStepConfig initStepWithInputTable(String inputTableName, String tableSourceName) {
+    protected TransformationStepConfig initStepWithInputTable(String inputTableName, String tableSourceName) {
         TransformationStepConfig step = new TransformationStepConfig();
         SourceTable sourceTable = new SourceTable(inputTableName, customerSpace);
         List<String> baseSources = Collections.singletonList(tableSourceName);

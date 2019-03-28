@@ -251,7 +251,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     protected boolean doPostProcessing(TransformationProgress progress, String workflowDir, boolean saveResult) {
         boolean status = true;
-        String avroWorkflowDir = finalWorkflowOuputDir(progress);
+        String avroWorkflowDir = finalWorkflowOuputDir(workflowDir, progress);
         if (saveResult) {
             Source source = getSource();
             String version = progress.getVersion();
@@ -268,37 +268,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return saveSourceVersion(progress, null, source, version, workflowDir, null);
     }
 
-    protected boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
+    boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
             String workflowDir, Long count) {
-        boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir, count);
-        if (success && !(source instanceof TableSource)) {
-            try {
-                // Disable hive table creation
-                // createSourceHiveTable(source, version);
-            } catch (Exception e) {
-                getLogger().error("Failed to create hive table.", e);
-            }
-        }
-        return success;
-    }
-
-    protected void createSourceHiveTable(Source source, String version) {
-        // register hive table
-        if (source instanceof TableSource) {
-            TableSource tableSource = (TableSource) source;
-            hiveTableService.createTable(tableSource.getTable().getName(), tableSource.getCustomerSpace(),
-                    tableSource.getTable().getNamespace());
-        } else {
-            hiveTableService.createTable(source.getSourceName(), version);
-        }
-    }
-
-    protected boolean saveSourceVersionWithoutHive(TransformationProgress progress, Schema schema, Source source,
-            String version, String workflowDir, Long count) {
-        String avroWorkflowDir = finalWorkflowOuputDir(progress);
+        String finalWorkflowDir = finalWorkflowOuputDir(workflowDir, progress);
         // extract schema
         try {
-            extractSchema(source, schema, version, workflowDir);
+            extractSchema(source, schema, version, finalWorkflowDir);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.", e);
             return false;
@@ -313,12 +288,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                 sourceDir = sourceVersionDirInHdfs(source, version);
             }
             deleteFSEntry(progress, sourceDir);
-            String currentMaxVersion = null;
+            String currentMaxVersion;
 
-            log.info(String.format("Moving files from %s to %s", avroWorkflowDir, sourceDir));
+            log.info(String.format("Moving files from %s to %s", finalWorkflowDir, sourceDir));
             int cnt = 0;
             for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
-                    avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
+                    finalWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
                 if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
                     HdfsUtils.mkdir(yarnConfiguration, sourceDir);
                 }
@@ -326,7 +301,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                 HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
                 cnt++;
             }
-            log.info(String.format("Moved %d files from %s to %s", cnt, avroWorkflowDir, sourceDir));
+            log.info(String.format("Moved %d files from %s to %s", cnt, finalWorkflowDir, sourceDir));
 
             if (source instanceof TableSource) {
                 // register table with metadata proxy
@@ -496,10 +471,9 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return dataflowDir;
     }
 
-    protected String finalWorkflowOuputDir(TransformationProgress progress) {
-        // Firehose transformation has special setting. Otherwise, it is the
-        // default dataFlowDir
-        return initialDataFlowDirInHdfs(progress);
+    protected String finalWorkflowOuputDir(String workflowDir, TransformationProgress progress) {
+        // Firehose transformation has special setting. Otherwise, it is the passed in workflowDir
+        return workflowDir;
     }
 
     protected String getVersion(TransformationProgress progress) {

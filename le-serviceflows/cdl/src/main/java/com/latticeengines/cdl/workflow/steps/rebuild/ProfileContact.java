@@ -1,7 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_REMOVE_ORPHAN_CONTACT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +29,9 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
+import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 
 @Component(ProfileContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -61,22 +66,45 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
 
         int profileStep = 0;
         int bucketStep = 1;
+        int removeOrphanStep = 2;
 
         TransformationStepConfig profile = profile(masterTableName);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName, servingStoreTablePrefix);
-        TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, dedupFields);
+        TransformationStepConfig removeOrphan = removeOrphan(bucketStep);
+        TransformationStepConfig calc = calcStats(profileStep, removeOrphanStep, statsTablePrefix, dedupFields);
         TransformationStepConfig sortProfile = sort(profileStep, profileTablePrefix,
                 DataCloudConstants.PROFILE_ATTR_ATTRNAME, 1);
         // -----------
         List<TransformationStepConfig> steps = Arrays.asList( //
                 profile, //
                 bucket, //
+                removeOrphan, //
                 calc, //
                 sortProfile //
         );
         // -----------
         request.setSteps(steps);
         return request;
+    }
+
+    private TransformationStepConfig removeOrphan(int bucketStep) {
+        TableRoleInCollection accountRole = BusinessEntity.Account.getBatchStore();
+        Table accountTable = dataCollectionProxy.getTable(customerSpace.toString(), accountRole, inactive);
+        if (accountTable == null) {
+            accountTable = dataCollectionProxy.getTable(customerSpace.toString(), accountRole, active);
+        }
+        if (accountTable == null) {
+            throw new IllegalStateException("No account batch store, cannot filter orphan contacts.");
+        }
+        TransformationStepConfig step = initStepWithInputTable(accountTable.getName(), "Account");
+        step.setInputSteps(Collections.singletonList(bucketStep));
+        step.setTransformer(TRANSFORMER_REMOVE_ORPHAN_CONTACT);
+        RemoveOrphanConfig jobConf = new RemoveOrphanConfig();
+        jobConf.setParentId(InterfaceName.AccountId.name());
+        jobConf.setParentSrcIdx(1);
+        String confStr = appendEngineConf(jobConf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
     }
 
     @Override

@@ -107,7 +107,7 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
     /*
      * GOAL: Ensure that over the period of time missing versions and also
      * handled.
-     * 
+     *
      * LOGIC: return the first element (in high-to-low order) from
      * latestBaseVersions for which there is no entry in latestVersions list
      */
@@ -242,7 +242,7 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
     }
 
     @Override
-    protected String finalWorkflowOuputDir(TransformationProgress progress) {
+    protected String finalWorkflowOuputDir(String workflowDir, TransformationProgress progress) {
         return initialDataFlowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + AVRO_DIR_FOR_CONVERSION;
     }
 }

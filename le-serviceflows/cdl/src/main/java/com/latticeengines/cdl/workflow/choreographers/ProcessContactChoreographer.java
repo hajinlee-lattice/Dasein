@@ -99,7 +99,16 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
             return false;
         } else {
             boolean commonRebuild = super.shouldRebuild();
-            return commonRebuild || (hasAttrLifeCycleChange && !reset);
+            if (!commonRebuild && !reset) {
+                if (hasAttrLifeCycleChange) {
+                    log.info("Should rebuild, since has attr life cycle change");
+                    return true;
+                } else if (hasAccounts && !hasActiveServingStore) {
+                    log.info("Should rebuild, since has account, and not reset");
+                    return true;
+                }
+            }
+            return commonRebuild;
         }
     }
 
