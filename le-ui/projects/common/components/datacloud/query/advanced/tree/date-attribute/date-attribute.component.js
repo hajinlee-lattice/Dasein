@@ -58,6 +58,7 @@ angular
           case 'BETWEEN_DATE':
           case 'BEFORE':
           case 'AFTER':
+          case 'LATEST_DAY':
 
           return '';
 

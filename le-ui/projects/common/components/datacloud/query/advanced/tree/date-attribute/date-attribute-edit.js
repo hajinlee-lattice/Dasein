@@ -102,6 +102,7 @@ angular
 
         this.cmpsList = [
           { name: "EVER", displayName: "Ever" },
+          { name: "LATEST_DAY", displayName: "Latest Day" },
           { name: "IN_CURRENT_PERIOD", displayName: "Current" },
           { name: "WITHIN", displayName: "Previous" },
           { name: "LAST", displayName: "Last" },
@@ -110,6 +111,7 @@ angular
           { name: "BEFORE", displayName: "Before" },
           { name: "AFTER", displayName: "After" },
           { name: "IS_EMPTY", displayName: "Is Empty" }
+
         ];
         this.changeCmp(this.timeCmp, true);
       };
@@ -131,6 +133,7 @@ angular
           switch (value) {
             case "EVER":
             case "IS_EMPTY":
+            case 'LATEST_DAY':
             QueryTreeDateAttributeStore.restValues(
                 this.bucketrestriction.bkt
             );
