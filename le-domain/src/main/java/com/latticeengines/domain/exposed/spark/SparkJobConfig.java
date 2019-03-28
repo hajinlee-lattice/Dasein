@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.WorkflowSparkJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 
 import reactor.core.publisher.Flux;
 
@@ -25,9 +26,12 @@ import reactor.core.publisher.Flux;
         setterVisibility = JsonAutoDetect.Visibility.NONE //
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "Name")
-@JsonSubTypes({ @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME),
-        @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME),
-        @JsonSubTypes.Type(value = WorkflowSparkJobConfig.class, name = "WorkflowSparkJobConfig"), })
+@JsonSubTypes({ //
+        @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME), //
+        @JsonSubTypes.Type(value = RemoveOrphanConfig.class, name = RemoveOrphanConfig.NAME), //
+        @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
+        @JsonSubTypes.Type(value = WorkflowSparkJobConfig.class, name = "WorkflowSparkJobConfig"), //
+})
 public abstract class SparkJobConfig {
 
     @JsonProperty("Input")

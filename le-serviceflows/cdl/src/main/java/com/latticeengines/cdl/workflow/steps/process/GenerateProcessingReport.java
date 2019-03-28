@@ -318,39 +318,28 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 return 0L;
             }
         case CONTACT:
-            String contactTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                    BusinessEntity.Contact.getServingStore(), inactive);
-            if (StringUtils.isNotBlank(contactTable)) {
-                frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                long allContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+            Table batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(), //
+                    BusinessEntity.Contact.getBatchStore(), inactive);
+            if (batchStoreTable != null) {
+                long allContacts = batchStoreTable.getExtracts().get(0).getProcessedRecords();
                 log.debug("There are " + allContacts + " contacts in total.");
-
-                String accountTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                        BusinessEntity.Account.getServingStore(), inactive);
-                if (StringUtils.isNotBlank(accountTable)) {
-                    Restriction nullAccountId = Restriction.builder()
-                            .let(BusinessEntity.Account, InterfaceName.AccountId.name()).isNotNull().build();
-                    FrontEndRestriction contactRestriction = new FrontEndRestriction();
-                    contactRestriction.setRestriction(nullAccountId);
+                String servingStoreTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                        BusinessEntity.Contact.getServingStore(), inactive);
+                if (StringUtils.isNotBlank(servingStoreTable)) {
                     frontEndQuery = new FrontEndQuery();
                     frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                    frontEndQuery.setAccountRestriction(contactRestriction);
-                    long nonOrphanContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery,
-                            inactive);
-                    log.debug("There are " + nonOrphanContacts + " non-orphan contacts.");
-
+                    long nonOrphanContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), //
+                            frontEndQuery, inactive);
+                    log.debug("There are " + nonOrphanContacts + " non-orphan contacts in redshift.");
                     long orphanContacts = allContacts - nonOrphanContacts;
                     log.debug("There are " + orphanContacts + " orphan contacts.");
-
                     return orphanContacts;
                 } else {
-                    log.info("There is only contact serving store but no account serving store, all " //
-                            + allContacts + " contacts are orphan.");
+                    log.info("There is no contact serving store, all contacts are orphan.");
                     return allContacts;
                 }
             } else {
-                log.info("There is no contact serving store, return 0 as the number of orphan contacts.");
+                log.info("There is no contact batch store, return 0 as the number of orphan contacts.");
                 return 0L;
             }
         case TRANSACTION:

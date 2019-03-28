@@ -476,8 +476,9 @@ public class PipelineTransformationService extends AbstractTransformationService
             } else {
                 boolean succeeded = transformer.transform(progress, workflowDir, step);
                 if (step.getTarget() != null) {
+                    String workflowOutputDir = getWorkflowOutputDir(step, workflowDir);
                     saveSourceVersion(progress, step.getTargetSchema(), step.getTarget(), step.getTargetVersion(),
-                            workflowDir, step.getCount());
+                            workflowOutputDir, step.getCount());
                 }
                 cleanupWorkflowDir(progress, workflowDir);
                 return succeeded;
@@ -499,7 +500,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 int iteration = (Integer) iterationContext.get(CTX_ITERATION);
                 log.info("Starting " + iteration + "-th iteration ...");
                 succeeded = transformer.transform(progress, workflowDir, step);
-                saveSourceVersionWithoutHive(progress, null, step.getTarget(), step.getTargetVersion(), workflowDir,
+                String workflowOutputDir = getWorkflowOutputDir(step, workflowDir);
+                saveSourceVersion(progress, null, step.getTarget(), step.getTargetVersion(), workflowOutputDir,
                         step.getCount());
                 cleanupWorkflowDir(progress, workflowDir);
                 converged = updateIterationContext(step, iterationContext);
@@ -762,14 +764,12 @@ public class PipelineTransformationService extends AbstractTransformationService
                 if (inputSteps == null) {
                     sourceNames = baseSourceNames;
                 } else {
-                    sourceNames = new ArrayList<String>();
+                    sourceNames = new ArrayList<>();
                     for (int i = 0; i < inputSteps.size(); i++) {
                         sourceNames.add(getTempSourceName(pipelineName, version, i, request.getKeepTemp()));
                     }
                     if (baseSourceNames != null) {
-                        for (String sourceName : baseSourceNames) {
-                            sourceNames.add(sourceName);
-                        }
+                        sourceNames.addAll(baseSourceNames);
                     }
                 }
                 if (!transformer.validateConfig(config, sourceNames)) {
@@ -837,4 +837,14 @@ public class PipelineTransformationService extends AbstractTransformationService
     public String findCurrentVersion(String pipelineName) {
         return null;
     }
+
+    private String getWorkflowOutputDir(TransformStep step, String workflowDir) {
+        String subDir = step.getTransformer().outputSubDir();
+        if (StringUtils.isNotBlank(subDir)) {
+            return workflowDir + "/" + subDir;
+        } else {
+            return workflowDir;
+        }
+    }
+
 }

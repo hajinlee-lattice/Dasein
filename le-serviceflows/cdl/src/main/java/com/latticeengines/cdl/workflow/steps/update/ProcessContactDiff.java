@@ -24,16 +24,13 @@ public class ProcessContactDiff extends BaseProcessSingleEntityDiffStep<ProcessC
         request.setName("ConsolidateContactDiff");
 
         int bucketStep = 0;
-        int retainStep = 1;
 
         TransformationStepConfig bucket = bucket(false);
-        TransformationStepConfig retainFields = retainFields(bucketStep, false);
-        TransformationStepConfig sort = sort(retainStep, 50);
+        TransformationStepConfig retainFields = retainFields(bucketStep, true);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(bucket);
         steps.add(retainFields);
-        steps.add(sort);
         request.setSteps(steps);
         return request;
     }

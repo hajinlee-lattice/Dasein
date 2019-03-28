@@ -13,4 +13,6 @@ public interface Transformer {
     boolean transform(TransformationProgress pipelineProgress, String workflowDir, TransformStep step);
 
     void initBaseSources(String confStr, List<String> sourceNames);
+
+    String outputSubDir();
 }

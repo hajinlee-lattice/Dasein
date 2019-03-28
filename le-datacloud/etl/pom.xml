@@ -78,7 +78,13 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-spark</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-metadata</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
