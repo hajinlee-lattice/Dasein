@@ -261,15 +261,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     log.error("$JAW$   customerAccountId: " + customerAccountId + " customerAccountId is null string: "
                             + "null".equals(customerAccountId));
 
-                    if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
-                        log.error("$JAW$ __ANONYMOUS_AID__ will be returned.");
-                        value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
-                    }
-
                     // Record match result in enumeration for aggregation into match report.
-
                     log.error("$JAW$ Selecting Match Result");
-                    if (value == null || value == "null") {
+                    if (value == null) {
                         //internalRecord.setEntityMatchResult(EntityMatchResult.ORPHANED_NO_MATCH);
                         orphanedNoMatchCount++;
                         log.error("$JAW$ Match Result Orphan No Match");
@@ -286,6 +280,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                         //        .ORPHANED_UNMATCHED_ACCOUNTID);
                         orphanedUnmatchedAccountIdCount++;
                         log.error("$JAW$ Match Result Orphan Unmatched Account ID");
+                    }
+
+                    if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
+                        log.error("$JAW$ __ANONYMOUS_AID__ will be returned.");
+                        value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
                     }
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
