@@ -14,6 +14,7 @@ import org.springframework.lang.NonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -215,6 +216,15 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             return restTemplate.getForObject(url, Map.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public StatusDocument systemCheck() {
+        try {
+            String url = constructUrl("pls/health/systemstatus");
+            return restTemplate.getForObject(url, StatusDocument.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31115, new String[] { e.getMessage() });
         }
     }
 
