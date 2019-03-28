@@ -251,7 +251,12 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
         @Override
         protected DataPage fetchPage(long ingestedCount, long pageSize) {
             if (frontEndQuery == null) {
-                frontEndQuery = dataQuery(ingestedCount, pageSize);
+                frontEndQuery = dataQuery();
+            }
+            if (pageSize > 0) {
+                AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
+                frontEndQuery.setSort(new FrontEndSort(Collections.singletonList(accountId), false));
+                frontEndQuery.setPageFilter(new PageFilter(ingestedCount, pageSize));
             }
             DataPage dataPage;
             if (RatingEngineType.CROSS_SELL.equals(engineType)) {
@@ -320,19 +325,19 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             }
         }
 
-        private FrontEndQuery dataQuery(long rowNum, long pageSize) {
+        private FrontEndQuery dataQuery() {
             if (RatingEngineType.RULE_BASED.equals(engineType)) {
-                return ruleBasedQuery(rowNum, pageSize);
+                return ruleBasedQuery();
             } else if (RatingEngineType.CUSTOM_EVENT.equals(engineType)) {
-                return customEventQuery(rowNum, pageSize);
+                return customEventQuery();
             } else if (RatingEngineType.CROSS_SELL.equals(engineType)) {
-                return crossSellQuery(rowNum, pageSize);
+                return crossSellQuery();
             } else {
                 throw new UnsupportedOperationException("Unknown rating engine type " + engineType);
             }
         }
 
-        private FrontEndQuery ruleBasedQuery(long rowNum, long pageSize) {
+        private FrontEndQuery ruleBasedQuery() {
             AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
             FrontEndQuery frontEndQuery = segment.toFrontEndQuery(BusinessEntity.Account);
             frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
@@ -340,31 +345,19 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                     accountId, //
                     new AttributeLookup(BusinessEntity.Rating, ratingModel.getId()) //
             ));
-            frontEndQuery.setSort(new FrontEndSort(Collections.singletonList(accountId), false));
-            if (pageSize > 0) {
-                frontEndQuery.setPageFilter(new PageFilter(rowNum, pageSize));
-            }
             return frontEndQuery;
         }
 
-        private EventFrontEndQuery crossSellQuery(long rowNum, long pageSize) {
-            EventFrontEndQuery frontEndQuery = ratingEngineProxy.getModelingQueryByRatingId(customerSpace.toString(),
+        private EventFrontEndQuery crossSellQuery() {
+            return ratingEngineProxy.getModelingQueryByRatingId(customerSpace.toString(),
                     engineSummary.getId(),
                     ratingModel.getId(), ModelingQueryType.TARGET);
-            if (pageSize > 0) {
-                frontEndQuery.setPageFilter(new PageFilter(rowNum, pageSize));
-            }
-            return frontEndQuery;
         }
 
-        private FrontEndQuery customEventQuery(long rowNum, long pageSize) {
+        private FrontEndQuery customEventQuery() {
             AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
             FrontEndQuery frontEndQuery = segment.toFrontEndQuery(BusinessEntity.Account);
             frontEndQuery.setLookups(Collections.singletonList(accountId));
-            frontEndQuery.setSort(new FrontEndSort(Collections.singletonList(accountId), false));
-            if (pageSize > 0) {
-                frontEndQuery.setPageFilter(new PageFilter(rowNum, pageSize));
-            }
             return frontEndQuery;
         }
 
