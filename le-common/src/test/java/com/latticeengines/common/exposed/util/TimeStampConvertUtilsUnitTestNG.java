@@ -186,6 +186,17 @@ public class TimeStampConvertUtilsUnitTestNG {
                 " \t\n		4-3-2018\t \t \n\n\n\n			01:23:55 am  \t\t\n		",
                 "MM-DD-YYYY", "00:00:00 12H", "UTC");
         Assert.assertEquals(actualTime, 1522718635000L);
+
+        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
+        // Test Case 16: Simple date with format MM/DD/YYYY, test start of Epoch.
+        actualTime = TimeStampConvertUtils.convertToLong("1/1/1970",
+                "MM/DD/YYYY", "", "");
+        Assert.assertEquals(actualTime, 0L);
+
+        // Test Case 17: Simple date with format MM/DD/YYYY, but the start of day before Epoch in New York.
+        actualTime = TimeStampConvertUtils.convertToLong("12/31/1969",
+                "MM/DD/YYYY", "", "America/New_York");
+        Assert.assertEquals(actualTime, -68400000L);
     }
 
     // Test error cases for date to timestamp conversion with date/time formats.
