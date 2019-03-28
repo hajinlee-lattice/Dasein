@@ -59,7 +59,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("4");
+        super.setup("2");
     }
 
     @Test(groups = "manual")
