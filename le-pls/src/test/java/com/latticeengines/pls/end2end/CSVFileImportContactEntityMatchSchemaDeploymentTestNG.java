@@ -57,7 +57,7 @@ public class CSVFileImportContactEntityMatchSchemaDeploymentTestNG extends CSVFi
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_ENTITY_MATCH_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_ENTITY_MATCH_FILE));
 
-        String feedType = getFeedTypeByEntity(ENTITY_CONTACT);
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_CONTACT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
