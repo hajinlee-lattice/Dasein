@@ -105,21 +105,48 @@
       background-color: rgba(0, 0, 0, 0.04);
     }
   }
- 
+
   .le-grid .le-cell {
     min-height: 20px;
     height: 100%;
     font-size: 100%;
     width: 100%;
   }
-    .custom-fields-grid{
-      width: 100%;
-    }
+  .custom-fields-grid {
+    width: 100%;
+  }
   .field-type {
-    // position: absolute;
     display: flex;
     flex-wrap: wrap;
     width: 100%;
+    &.pre-existing {
+      flex: 1;
+      justify-content: space-between;
+      align-items: stretch;
+      height: 100%;
+     
+      & > span {
+        padding: 0 0.5em 0 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .date-options-info {
+        align-items: center;
+        display: flex;
+        flex: 1;
+        align-items: center;
+        span {
+          padding: 0 0.2em;
+        }
+        .time-format-info {
+          width: 100%;
+          display: flex;
+          // justify-content: space-evenly;
+          flex-wrap: wrap;
+        }
+      }
+    }
     select.select-type {
       width: 100%;
       max-width: 110px;
