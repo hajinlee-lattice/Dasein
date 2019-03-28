@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 @Component
 public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
@@ -47,8 +46,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         switch (statusMonitor.getEntityName()) {
         case "PlayLaunch":
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            log.info(JsonUtils.serialize(eventDetail));
-
             Long recordsProcessed = eventDetail.getProcessed();
             Long recordsFailed = eventDetail.getFailed();
             Long totalRecords = eventDetail.getTotalRecordsSubmitted();
