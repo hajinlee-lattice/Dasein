@@ -37,9 +37,8 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
     @Override
     public void execute() {
         int iteration = getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class) + 1;
-        int maxIteration = configuration.getMaxIteration();
         putObjectInContext(CURRENT_RATING_ITERATION, iteration);
-        log.info("Start rating iteration " + iteration + " / " + maxIteration + ".");
+        log.info("Start rating iteration " + iteration + ".");
 
         removeObjectFromContext(AI_RAW_RATING_TABLE_NAME);
         removeObjectFromContext(RULE_RAW_RATING_TABLE_NAME);
