@@ -339,6 +339,7 @@ public enum LedpCode {
     LEDP_18212("No buckets nor launch unscored is set for play {0}, Nothing to Launch."),
     LEDP_18213("Failed while generating playlaunch export file: {0}."),
     LEDP_18214("Bulk scoring request exceeds the maximum number of rows on runtime, please try later."),
+    LEDP_18215("System is under maintenance, cannot submit processAnalyze job."),
     
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -648,6 +649,7 @@ public enum LedpCode {
     LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
     LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
+    LEDP_31115("check_system_error", "Error while check system status. Cause: {0}"), //
     LEDP_31199("missing_domain",
             "Required field(s) are missing: {0}. In case of lead type model, " //
                     + "make sure to specify 'Email' field and for non-lead type model " //

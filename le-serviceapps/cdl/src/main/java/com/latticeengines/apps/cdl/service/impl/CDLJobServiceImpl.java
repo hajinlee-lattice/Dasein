@@ -36,6 +36,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -54,6 +55,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -148,13 +150,23 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (cdlJobType == CDLJobType.PROCESSANALYZE) {
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
-                orchestrateJob();
+                if (!systemCheck()) {
+                    orchestrateJob();
+                }
             } catch (Exception e) {
                 log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed" + e);
                 throw e;
             }
         }
         return true;
+    }
+
+    @VisibleForTesting
+    boolean systemCheck() {
+        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(appPublicUrl);
+        StatusDocument statusDocument = proxy.systemCheck();
+        log.info(String.format("System status is : %s.", statusDocument.getStatus()));
+        return StatusDocument.UNDER_MAINTENANCE.equals(statusDocument.getStatus());
     }
 
     @Override
