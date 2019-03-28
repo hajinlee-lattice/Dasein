@@ -52,25 +52,27 @@
                         id="attrDisplayName_{{$index}}" 
                         type="text" 
                         class="form-control"
-                        maxlength="255"
+                        maxlength="256"
                         ng-model="item.DisplayName"
                         ng-blur="$ctrl.onBlur(item, 'attrDisplayName_' + $index)"
                         ng-disabled="$ctrl.isStartsDisabled()">
                 </input>
+                <em>({{item.DisplayName.length.toString() + "/" + maxlength.toString()}})</em>
             </div>
 
             <div class="edit-attribute-description">
                 <textarea
-                        ng-init="maxlength = 255;"
+                        ng-init="maxlength = 256;"
                         maxlength="{{maxlength}}"
                         name="attrDescription_{{$index}}" 
                         id="attrDescription_{{$index}}" 
                         class="form-control"
                         ng-model="item.Description" 
+                        ng-trim="false"
                         ng-blur="$ctrl.onBlur(item, 'attrDescription_' + $index)"
                         ng-disabled="$ctrl.isStartsDisabled()">
                 </textarea>
-                <em ng-class="{'low': item.Description.length < maxlength/3, 'medium': item.Description.length > maxlength/3 && item.Description.length < maxlength/3*2, 'high': item.Description.length > maxlength/3*2}">({{item.Description.length}})</em>
+                <em>({{item.Description.length.toString() + "/" + maxlength.toString()}})</em>
             </div>
 
         </li>
