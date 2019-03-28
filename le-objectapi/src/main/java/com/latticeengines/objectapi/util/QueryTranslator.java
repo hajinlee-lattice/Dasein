@@ -2,6 +2,8 @@ package com.latticeengines.objectapi.util;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,8 +17,10 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationType;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DateRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
@@ -64,6 +68,14 @@ abstract class QueryTranslator {
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
         restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
         return restriction;
+    }
+
+    void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
+            Map<ComparisonType, Set<AttributeLookup>> map) {
+        BusinessEntity mainEntity = frontEndQuery.getMainEntity();
+        log.info("mainentity is " + mainEntity);
+        inspectFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, map);
+        inspectInnerRestriction(frontEndQuery, mainEntity, timeTranslator, map);
     }
 
     Query translateProductQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
@@ -121,6 +133,36 @@ abstract class QueryTranslator {
         return RestrictionOptimizer.optimize(translated);
     }
 
+    void inspectFrontEndRestriction(FrontEndRestriction frontEndRestriction, TimeFilterTranslator timeTranslator,
+            Map<ComparisonType, Set<AttributeLookup>> map) {
+        if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
+            return;
+        }
+        inspectBucketRestriction(frontEndRestriction.getRestriction(), map, timeTranslator);
+    }
+
+    void inspectBucketRestriction(Restriction restriction, Map<ComparisonType, Set<AttributeLookup>> map,
+            TimeFilterTranslator timeTranslator) {
+        if (restriction instanceof LogicalRestriction) {
+            BreadthFirstSearch search = new BreadthFirstSearch();
+            search.run(restriction, (object, ctx) -> {
+                if (object instanceof BucketRestriction) {
+                    BucketRestriction bucket = (BucketRestriction) object;
+                    if (!Boolean.TRUE.equals(bucket.getIgnored())) {
+                        RestrictionUtils.inspectBucketRestriction(bucket, map, timeTranslator);
+                    }
+                }
+            });
+        } else if (restriction instanceof BucketRestriction) {
+            BucketRestriction bucket = (BucketRestriction) restriction;
+            if (!Boolean.TRUE.equals(bucket.getIgnored())) {
+                RestrictionUtils.inspectBucketRestriction(bucket, map, timeTranslator);
+            }
+        } else {
+            return;
+        }
+    }
+
     Restriction translateSalesforceIdRestriction(FrontEndQuery frontEndQuery, BusinessEntity entity,
             Restriction restriction) {
         // only add salesforce id restriction for account entity now
@@ -154,6 +196,23 @@ abstract class QueryTranslator {
         Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser,
                 true);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
+    }
+
+    void inspectInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+            TimeFilterTranslator timeTranslator, Map<ComparisonType, Set<AttributeLookup>> map) {
+        BusinessEntity innerEntity = null;
+        switch (outerEntity) {
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            break;
+        default:
+            break;
+        }
+        FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
+        inspectFrontEndRestriction(innerFrontEndRestriction, timeTranslator, map);
     }
 
     Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
@@ -231,7 +290,7 @@ abstract class QueryTranslator {
                 if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
                     modifyTxnRestriction(txRestriction, timeTranslator);
-                    Restriction concrete = new DateRangeTranslator().convert(txRestriction, queryFactory, repository,
+                    Restriction concrete = DateRangeTranslator.convert(txRestriction, queryFactory, repository,
                             sqlUser);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(txRestriction);
@@ -245,7 +304,7 @@ abstract class QueryTranslator {
                 } else if (object instanceof DateRestriction) {
                     DateRestriction dateRestriction = (DateRestriction) object;
                     modifyDateRestriction(dateRestriction, timeTranslator);
-                    Restriction concrete = new DayRangeTranslator().convert(dateRestriction);
+                    Restriction concrete = DayRangeTranslator.convert(dateRestriction);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(dateRestriction);
                     parent.getRestrictions().add(concrete);
@@ -255,14 +314,14 @@ abstract class QueryTranslator {
         } else if (restriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
             modifyTxnRestriction(txRestriction, timeTranslator);
-            translated = new DateRangeTranslator().convert(txRestriction, queryFactory, repository, sqlUser);
+            translated = DateRangeTranslator.convert(txRestriction, queryFactory, repository, sqlUser);
         } else if (restriction instanceof MetricRestriction) {
             MetricRestriction metricRestriction = (MetricRestriction) restriction;
             translated = MetricTranslator.convert(metricRestriction);
         } else if (restriction instanceof DateRestriction) {
             DateRestriction dateRestriction = (DateRestriction) restriction;
             modifyDateRestriction(dateRestriction, timeTranslator);
-            translated = new DayRangeTranslator().convert(dateRestriction);
+            translated = DayRangeTranslator.convert(dateRestriction);
         } else {
             translated = restriction;
         }
@@ -287,7 +346,8 @@ abstract class QueryTranslator {
         if (timeTranslator == null) {
             throw new NullPointerException("TimeTranslator cannot be null.");
         }
-        dateRestriction.setTimeFilter(timeTranslator.translate(dateRestriction.getTimeFilter()));
+        dateRestriction
+                .setTimeFilter(timeTranslator.translate(dateRestriction.getTimeFilter(), dateRestriction.getAttr()));
     }
 
     private static AggregationFilter setAggToSum(AggregationFilter filter) {

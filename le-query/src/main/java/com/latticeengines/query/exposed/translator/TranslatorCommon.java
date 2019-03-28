@@ -32,7 +32,7 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.WindowFunction;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class TranslatorCommon {
     static final int NUM_ADDITIONAL_PERIOD = 2;
     static final String ACCOUNT_ID = InterfaceName.AccountId.name();
@@ -99,9 +99,8 @@ public class TranslatorCommon {
     static final StringPath shiftedPeriodId = Expressions.stringPath(shiftedRevenuePath, PERIOD_ID);
     static final StringPath shiftedRevenue = Expressions.stringPath(shiftedRevenuePath, REVENUE);
 
-    BooleanExpression translateAggregatePredicate(StringPath stringPath,
-                                                  AggregationFilter aggregationFilter,
-                                                  boolean aggregate) {
+    static BooleanExpression translateAggregatePredicate(StringPath stringPath, AggregationFilter aggregationFilter,
+            boolean aggregate) {
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
         List<Object> values = aggregationFilter.getValues();
@@ -112,9 +111,8 @@ public class TranslatorCommon {
         case AVG:
         case AT_LEAST_ONCE:
         case EACH:
-            aggrPredicate = (aggregate) ?
-                    toAggregatedBooleanExpression(stringPath, cmp, values) :
-                    toBooleanExpression(stringPath, cmp, values);
+            aggrPredicate = (aggregate) ? toAggregatedBooleanExpression(stringPath, cmp, values)
+                    : toBooleanExpression(stringPath, cmp, values);
             break;
         }
 
@@ -126,23 +124,22 @@ public class TranslatorCommon {
     }
 
     private static boolean excludeNotPurchasedInLessThanOperation(AggregationFilter aggregationFilter) {
-        return !(aggregationFilter == null || isNotLessThanOperation(aggregationFilter.getComparisonType()) ||
-                 aggregationFilter.isIncludeNotPurchased());
+        return !(aggregationFilter == null || isNotLessThanOperation(aggregationFilter.getComparisonType())
+                || aggregationFilter.isIncludeNotPurchased());
     }
 
     private WindowFunction translateEver(WindowFunction windowAgg) {
         return windowAgg.rows().between().unboundedPreceding().currentRow();
     }
 
-    private WindowFunction translatePrior(WindowFunction windowAgg,
-                                          int priorOffset) {
+    private WindowFunction translatePrior(WindowFunction windowAgg, int priorOffset) {
         return windowAgg.rows().between().unboundedPreceding().preceding(priorOffset);
     }
 
-    private WindowFunction translateBetween(WindowFunction windowAgg,
-                                            int startOffset, int endOffset,
-                                            boolean preceding) {
-        // for row preceding, SQL requires we start with the larger offset, order matters
+    private WindowFunction translateBetween(WindowFunction windowAgg, int startOffset, int endOffset,
+            boolean preceding) {
+        // for row preceding, SQL requires we start with the larger offset,
+        // order matters
         int minOffset = Math.min(startOffset, endOffset);
         int maxOffset = Math.max(startOffset, endOffset);
         if (preceding) {
@@ -157,41 +154,27 @@ public class TranslatorCommon {
         if (ComparisonType.EVER == type) {
             return translateEver(windowAgg);
         } else if (ComparisonType.BETWEEN == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(1).toString()),
-                                    true);
+            return translateBetween(windowAgg, Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                    Integer.valueOf(timeFilter.getValues().get(1).toString()), true);
         } else if (ComparisonType.WITHIN == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    0,
-                                    true);
+            return translateBetween(windowAgg, Integer.valueOf(timeFilter.getValues().get(0).toString()), 0, true);
         } else if (ComparisonType.PRIOR == type) {
-            return translatePrior(windowAgg,
-                                  Integer.valueOf(timeFilter.getValues().get(0).toString()));
+            return translatePrior(windowAgg, Integer.valueOf(timeFilter.getValues().get(0).toString()));
         } else if (ComparisonType.FOLLOWING == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(1).toString()),
-                                    false);
+            return translateBetween(windowAgg, Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                    Integer.valueOf(timeFilter.getValues().get(1).toString()), false);
         } else if (ComparisonType.IN_CURRENT_PERIOD == type) {
             return translateBetween(windowAgg, 0, 0, true);
         } else if (ComparisonType.EQUAL == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    true);
+            return translateBetween(windowAgg, Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                    Integer.valueOf(timeFilter.getValues().get(0).toString()), true);
         } else {
             throw new UnsupportedOperationException("Unsupported time filter type " + type);
         }
     }
 
-    WindowFunction translateAggregateTimeWindow(StringPath keysAccountId,
-                                                StringPath keysPeriodId,
-                                                StringPath trxnVal,
-                                                TimeFilter timeFilter,
-                                                AggregationFilter aggregationFilter,
-                                                boolean ascendingPeriod) {
+    WindowFunction translateAggregateTimeWindow(StringPath keysAccountId, StringPath keysPeriodId, StringPath trxnVal,
+            TimeFilter timeFilter, AggregationFilter aggregationFilter, boolean ascendingPeriod) {
         NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
 
         AggregationType aggregateType = aggregationFilter.getAggregationType();
@@ -238,10 +221,10 @@ public class TranslatorCommon {
     static public Restriction translateHasEngagedToLogicalGroup(TransactionRestriction hasEngaged) {
         // PLS-8016, fix is commented out to match playmaker behavior
         /*
-        if (hasEngaged.getTimeFilter().getRelation() == ComparisonType.PRIOR_ONLY && !hasEngaged.isNegate()) {
-            return hasEngaged;
-        }
-        */
+         * if (hasEngaged.getTimeFilter().getRelation() ==
+         * ComparisonType.PRIOR_ONLY && !hasEngaged.isNegate()) { return
+         * hasEngaged; }
+         */
 
         // no need to translate if it's for single product
         if (hasEngaged.getProductId().split(",").length == 1) {
@@ -249,11 +232,10 @@ public class TranslatorCommon {
         }
 
         TransactionRestriction[] restrictionList;
-        restrictionList = Stream.of(hasEngaged.getProductId().split(","))
-                .map(prodId -> new TransactionRestriction(prodId,
-                                                          hasEngaged.getTimeFilter(),
-                                                          hasEngaged.isNegate(), null, null)
-                ).toArray(TransactionRestriction[]::new);
+        restrictionList = Stream
+                .of(hasEngaged.getProductId().split(",")).map(prodId -> new TransactionRestriction(prodId,
+                        hasEngaged.getTimeFilter(), hasEngaged.isNegate(), null, null))
+                .toArray(TransactionRestriction[]::new);
 
         if (hasEngaged.isNegate()) {
             return Restriction.builder().and(restrictionList).build();
@@ -264,32 +246,24 @@ public class TranslatorCommon {
     }
 
     static public boolean excludeNotPurchased(TransactionRestriction txRestriction) {
-        return excludeNotPurchasedInLessThanOperation(txRestriction.getSpentFilter()) ||
-               excludeNotPurchasedInLessThanOperation(txRestriction.getUnitFilter());
+        return excludeNotPurchasedInLessThanOperation(txRestriction.getSpentFilter())
+                || excludeNotPurchasedInLessThanOperation(txRestriction.getUnitFilter());
     }
 
     static public Restriction translateExcludeNotPurchased(TransactionRestriction txRestriction) {
 
         TransactionRestriction hasPurchased = new TransactionRestriction(txRestriction.getProductId(),
-                                                                         txRestriction.getTimeFilter(),
-                                                                         false,
-                                                                         null,
-                                                                         null);
+                txRestriction.getTimeFilter(), false, null, null);
         return Restriction.builder().and(txRestriction, hasPurchased).build();
     }
 
-    protected SubQuery translateAPSUnionAll(QueryFactory queryFactory,
-                                            AttributeRepository repository,
-                                            SubQuery[] apsSubQueryList,
-                                            String sqlUser) {
+    protected SubQuery translateAPSUnionAll(QueryFactory queryFactory, AttributeRepository repository,
+            SubQuery[] apsSubQueryList, String sqlUser) {
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
-        SQLQuery[] apsSelectAlls = Stream.of(apsSubQueryList)
-                .map(apsQuery -> factory.query().select(SQLExpressions.all).from(
-                        new PathBuilder<>(String.class, apsQuery.getAlias())))
-                .toArray(SQLQuery[]::new);
+        SQLQuery[] apsSelectAlls = Stream.of(apsSubQueryList).map(apsQuery -> factory.query().select(SQLExpressions.all)
+                .from(new PathBuilder<>(String.class, apsQuery.getAlias()))).toArray(SQLQuery[]::new);
 
-        SQLQuery unionAll = factory.query().select(SQLExpressions.all)
-                .from(SQLExpressions.unionAll(apsSelectAlls));
+        SQLQuery unionAll = factory.query().select(SQLExpressions.all).from(SQLExpressions.unionAll(apsSelectAlls));
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(unionAll);
@@ -297,9 +271,8 @@ public class TranslatorCommon {
         return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
     }
 
-    protected SubQuery translateAPSUnionAllReplaceNull(QueryFactory queryFactory,
-                                                       AttributeRepository repository,
-                                                       String apsTableName, String sqlUser) {
+    protected SubQuery translateAPSUnionAllReplaceNull(QueryFactory queryFactory, AttributeRepository repository,
+            String apsTableName, String sqlUser) {
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
 
         EntityPath<String> apsUnionAllPath = new PathBuilder<>(String.class, apsTableName);
@@ -308,15 +281,14 @@ public class TranslatorCommon {
 
         NumberExpression zero = Expressions.asNumber(0);
         CaseBuilder caseBuilder = new CaseBuilder();
-        CaseBuilder.Cases<Number, Expression<Number>> amountAggrCases =
-                caseBuilder.when(amountAggr.isNull()).then(zero);
+        CaseBuilder.Cases<Number, Expression<Number>> amountAggrCases = caseBuilder.when(amountAggr.isNull())
+                .then(zero);
         Expression amountExpr = amountAggrCases.otherwise(amountNumberPath);
-        CaseBuilder.Cases<Number, Expression<Number>> quantityAggrCases =
-                caseBuilder.when(quantityAggr.isNull()).then(zero);
+        CaseBuilder.Cases<Number, Expression<Number>> quantityAggrCases = caseBuilder.when(quantityAggr.isNull())
+                .then(zero);
         Expression quantityExpr = quantityAggrCases.otherwise(quantityNumberPath);
 
-        SQLQuery apsUnionAllNotNull = factory.query()
-                .select(accountId, periodId, amountExpr, quantityExpr)
+        SQLQuery apsUnionAllNotNull = factory.query().select(accountId, periodId, amountExpr, quantityExpr)
                 .from(apsUnionAllPath);
 
         SubQuery subQuery = new SubQuery();
