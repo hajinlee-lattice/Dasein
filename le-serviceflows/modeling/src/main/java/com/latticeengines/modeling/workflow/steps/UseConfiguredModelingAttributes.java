@@ -98,7 +98,7 @@ public class UseConfiguredModelingAttributes extends BaseWorkflowStep<UseConfigu
 
         if (typesUsingProductSpent.contains(ratingEngineType)) {
             List<ColumnMetadata> userSelectedAPSAttributesForModeling = servingStoreProxy
-                    .getNewModelingAttrs(customerSpace, BusinessEntity.APSAttribute, dataCollectionVersion)
+                    .getNewModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState, dataCollectionVersion)
                     .collectList().block();
             log.info(String.format("userSelectedAPSAttributesForModeling = %s",
                     JsonUtils.serialize(userSelectedAPSAttributesForModeling)));
