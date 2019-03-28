@@ -125,6 +125,9 @@ class ViewAllComponent extends Component {
                         let running = cell.props.rowData.modelingJobStatus == 'Running';
                         let completed = cell.props.rowData.modelingJobStatus == 'Completed';
 
+                        let timestamp = new Date(cell.props.rowData.created);
+                        const formattedDate = timestamp.toDateString().split(' ').slice(1).join(' ');
+
                         if (pending || running) {
                             return (
                                 <span className="running">
@@ -132,10 +135,16 @@ class ViewAllComponent extends Component {
                                     <span>{cell.props.rowData.modelingJobStatus}</span>
                                 </span>
                             )
+                        } else if (completed) {
+                            return (
+                                <span className="completed">
+                                    <span>Successfully created {formattedDate}</span>
+                                </span>
+                            )
                         } else {
                             return (
-                                <span className={(completed ? 'completed' : 'failed')}>
-                                    <span>{cell.props.rowData.modelingJobStatus}</span>
+                                <span className="failed">
+                                    <span>Failed {formattedDate}</span>
                                 </span>
                             )
                         }
