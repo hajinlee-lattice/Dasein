@@ -110,14 +110,23 @@
         </div>
         -->
         <!-- Rating -->
-        <bar-chart ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
-                            vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
-                            !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
-                            && enrichment.Entity === 'Rating'"
-            vm='vm' statcount="statcount = vm.getAttributeRules(enrichment, stat).length" config="vm.getChartConfig(vm.getBktListRating(enrichment))"
-            bktlist="vm.getBktListRating(enrichment)" callback="vm.chartRowClicked" enrichment="enrichment">
+        <bar-chart 
+            ng-if="
+                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
+                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
+                !vm.lookupMode && 
+                ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1 && 
+                enrichment.Entity === 'Rating'"
+            vm='vm' 
+            statcount="statcount = vm.getAttributeRules(enrichment, stat).length" 
+            config="vm.getChartConfig(vm.getBktListRating(enrichment))"
+            bktlist="vm.getBktListRating(enrichment)" 
+            callback="vm.chartRowClicked" 
+            enrichment="enrichment">
         </bar-chart>
-        <div class="attributes-more noselect" ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)"
+        <div 
+            class="attributes-more noselect" 
+            ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)"
             ng-if="enrichment.Entity === 'Rating' 
                             && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum' 
                             && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length > 5">
@@ -125,10 +134,15 @@
         </div>
         <!-- End Rating  -->
         <!-- Account - Contacts - PurchaseHistory Entity -->
-        <div class="stats" ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
-                                  vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
-                                  !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
-                                  && enrichment.Entity !== 'Rating'">
+
+        <div 
+            class="stats" 
+            ng-if="
+                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
+                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
+                !vm.lookupMode && 
+                ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1 && 
+                enrichment.Entity !== 'Rating'">
             <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
             <h5>
                 <label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
