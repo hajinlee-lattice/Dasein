@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -33,6 +34,32 @@ public class RestrictionUtils {
 
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
+
+    public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
+            Map<ComparisonType, Set<AttributeLookup>> map, TimeFilterTranslator timeTranslator) {
+        Bucket bkt = bucketRestriction.getBkt();
+        if (bkt == null) {
+            throw new IllegalArgumentException("cannot inspect null bucket restriction");
+        }
+
+        if (bkt.getDateFilter() != null) {
+            ComparisonType cmp = bkt.getDateFilter().getRelation();
+            AttributeLookup lookup = bucketRestriction.getAttr();
+            // If the current operator needs further specification
+            // and the TimeFilterTranslator does not have its specs
+            if (ComparisonType.VAGUE_TYPES.contains(cmp)
+                    && !timeTranslator.getSpecifiedValues().get(cmp).containsKey(lookup)) {
+                if (map.containsKey(cmp)) {
+                    map.get(cmp).add(lookup);
+                } else {
+                    Set<AttributeLookup> set = new HashSet<>();
+                    set.add(lookup);
+                    map.put(cmp, set);
+                }
+
+            }
+        }
+    }
 
     public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction,
             boolean translatePriorOnly) {
