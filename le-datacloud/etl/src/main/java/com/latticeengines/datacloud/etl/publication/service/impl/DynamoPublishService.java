@@ -11,12 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.publication.service.PublishService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -96,7 +98,7 @@ public class DynamoPublishService extends AbstractPublishService
             if (PublicationConfiguration.PublicationStrategy.APPEND.equals(configuration.getPublicationStrategy())) {
                 long readCapacity = configuration.getLoadingReadCapacity();
                 long writeCapacity = configuration.getLoadingWriteCapacity();
-                dynamoService.updateTableThroughput(tableName, readCapacity, writeCapacity);
+                updateThroughput(dynamoService, tableName, readCapacity, writeCapacity);
             }
             String sourceVersion = progress.getSourceVersion();
             String sourceName = progress.getPublication().getSourceName();
@@ -164,8 +166,37 @@ public class DynamoPublishService extends AbstractPublishService
     private void resumeThroughput(DynamoService dynamoService, String tableName, PublishToDynamoConfiguration configuration) {
         long readCapacity = configuration.getRuntimeReadCapacity();
         long writeCapacity = configuration.getRuntimeWriteCapacity();
-        dynamoService.updateTableThroughput(tableName, readCapacity, writeCapacity);
-        log.info(String.format("Changed throughput of %s to (%d, %d)", tableName, readCapacity, writeCapacity));
+        updateThroughput(dynamoService, tableName, readCapacity, writeCapacity);
+    }
+
+    /**
+     * Update read & write capacity of Dynamo table. Retry 3 times, waiting
+     * intervals are 30s, 60s, 120s.
+     *
+     * Reason: If Dynamo table is configured as auto-scaling and it's already
+     * under scaling status, request of updating capacity will fail
+     *
+     * @param dynamoService
+     * @param tableName
+     * @param readCapacity
+     * @param writeCapacity
+     */
+    private void updateThroughput(DynamoService dynamoService, String tableName, long readCapacity,
+            long writeCapacity) {
+        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 30, 2, null);
+        try {
+            retry.execute(context -> {
+                if (context.getRetryCount() >= 1) {
+                    log.warn("Updating capacity of table {} wasn't successful. Retrying for {} times", tableName,
+                            context.getRetryCount());
+                }
+                dynamoService.updateTableThroughput(tableName, readCapacity, writeCapacity);
+                return null;
+            });
+        } catch (Exception ex) {
+            throw ex;
+        }
+        log.info("Changed throughput of {} to ({}, {})", tableName, readCapacity, writeCapacity);
     }
 
     private String entityClassCanonicalName(PublishToDynamoConfiguration configuration) {
