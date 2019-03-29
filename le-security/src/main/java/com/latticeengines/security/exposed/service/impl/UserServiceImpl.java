@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String username = userRegistration.getUser().getUsername();
-        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser);
+        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser, null);
 
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
@@ -217,13 +217,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser) {
+    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
+            Long expirationDate) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
-        if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
+        // make sure only internal user has expiration date
+        if (!AccessLevel.getInternalAccessLevel().contains(accessLevel)) {
+            expirationDate = null;
+        }
+        // remove comparing user with same access level to tenant in different
+        // update times as user with same access level can be expiration date
+        if (resignAccessLevel(tenantId, username)) {
             try {
-                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser);
+                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser,
+                        expirationDate);
             } catch (Exception e) {
                 LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
@@ -378,7 +386,8 @@ public class UserServiceImpl implements UserService {
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
-            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName);
+            assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
+                    user.getExpirationDate());
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());

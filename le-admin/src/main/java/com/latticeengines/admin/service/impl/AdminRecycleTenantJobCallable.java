@@ -5,21 +5,28 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
-    private static final long InAcessPeriod = TimeUnit.DAYS.toMillis(120);
+    private static final long inAcessPeriod = TimeUnit.DAYS.toMillis(120);
     private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
+    private static final List<String> userLevels = AccessLevel.getInternalAccessLevel().stream()
+            .map(accessLevel -> accessLevel.toString())
+            .collect(Collectors.toList());
     @SuppressWarnings("unused")
     private String jobArguments;
 
@@ -27,6 +34,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     private UserService userService;
     private com.latticeengines.admin.service.TenantService adminTenantService;
     private com.latticeengines.security.exposed.service.TenantService tenantService;
+    private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
     private static final Logger log = LoggerFactory.getLogger(AdminRecycleTenantJobCallable.class);
     public AdminRecycleTenantJobCallable(Builder builder) {
         this.jobArguments = builder.jobArguments;
@@ -34,6 +42,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         this.userService = builder.userService;
         this.adminTenantService = builder.adminTenantService;
         this.tenantService = builder.tenantService;
+        this.userTenantRightEntityMgr = builder.userTenantRightEntityMgr;
     }
 
     @Override
@@ -47,30 +56,46 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                 List<User> users = userService.getUsers(tenant.getId());
                 users.forEach(user -> {
-                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
-                    log.info(String.format("send POC tenant %s inactive notification to user %s.", tenant.getName(),
-                            user.getUsername()));
+                    if (userLevels.contains(user.getAccessLevel())) {
+                        emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                        log.info(String.format("send POC tenant %s inactive notification to user %s.", tenant.getName(),
+                                user.getUsername()));
+                    }
                 });
             } else if (currentTime > expiredTime && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
                 tenant.setStatus(TenantStatus.INACTIVE);
                 tenantService.updateTenant(tenant);
                 log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
-            } else if (expiredTime + InAcessPeriod - emailPeriod < currentTime
-                    && currentTime < expiredTime + InAcessPeriod) {
+            } else if (expiredTime + inAcessPeriod - emailPeriod < currentTime
+                    && currentTime < expiredTime + inAcessPeriod) {
                 // send email to user who can visit tenant two weeks before
                 // delete tenant
-                int days = (int) Math.ceil((expiredTime + InAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
+                int days = (int) Math.ceil((expiredTime + inAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
                 List<User> users = userService.getUsers(tenant.getId());
                 users.forEach(user -> {
-                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
-                    log.info(String.format("send POC tenant %s inaccessible notification to user %s.", tenant.getName(),
-                            user.getUsername()));
+                    if (userLevels.contains(user.getAccessLevel())) {
+                        emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
+                        log.info(String.format("send POC tenant %s inaccessible notification to user %s.",
+                                tenant.getName(), user.getUsername()));
+                    }
                 });
 
-            } else if (currentTime > expiredTime + InAcessPeriod) {
+            } else if (currentTime > expiredTime + inAcessPeriod) {
                 CustomerSpace space = CustomerSpace.parse(tenant.getId());
                 adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
                 log.info(String.format("POC tenant %s has been deleted", tenant.getName()));
+            }
+        }
+
+        List<GlobalAuthUserTenantRight> tenantRights = userTenantRightEntityMgr.findByNonNullExprationDate();
+        for (GlobalAuthUserTenantRight tenantRight : tenantRights) {
+            if (LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() > tenantRight
+                    .getExpirationDate() && tenantRight.getGlobalAuthTenant() != null
+                    && tenantRight.getGlobalAuthUser() != null) {
+                String tenantId = tenantRight.getGlobalAuthTenant().getId();
+                String userName = tenantRight.getGlobalAuthUser().getEmail();
+                log.info(String.format(String.format("Quartz job deleted %s from tenant %s", tenantId, userName)));
+                userService.deleteUser(tenantId, userName);
             }
         }
         return null;
@@ -82,6 +107,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         private UserService userService;
         private com.latticeengines.admin.service.TenantService adminTenantService;
         private com.latticeengines.security.exposed.service.TenantService tenantService;
+        private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
 
         public Builder() {
 
@@ -109,6 +135,11 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         public Builder securityTenantService(
                 com.latticeengines.security.exposed.service.TenantService tenantService) {
             this.tenantService = tenantService;
+            return this;
+        }
+
+        public Builder userTenantRightEntityMgr(GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr) {
+            this.userTenantRightEntityMgr = userTenantRightEntityMgr;
             return this;
         }
     }

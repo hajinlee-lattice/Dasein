@@ -24,6 +24,7 @@ CREATE PROCEDURE `UpdateGlobalTenantConfig`()
       ALTER TABLE `GlobalAuthentication`.`GlobalTenant` ADD COLUMN `Created_By_User` varchar(255);
       ALTER TABLE `GlobalAuthentication`.`GlobalUser` ADD COLUMN `Created_By_User` varchar(255);
       ALTER TABLE `GlobalAuthentication`.`GlobalUserTenantRight` ADD COLUMN `Created_By_User` varchar(255);
+      ALTER TABLE `GlobalAuthentication`.`GlobalUserTenantRight` ADD COLUMN `Expiration_Date` bigint;
   END;
 //
 DELIMITER ;

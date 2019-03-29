@@ -29,7 +29,8 @@ public interface UserService {
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 
-    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser);
+    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
+            Long expirationDate);
 
     boolean resignAccessLevel(String tenantId, String username);
 

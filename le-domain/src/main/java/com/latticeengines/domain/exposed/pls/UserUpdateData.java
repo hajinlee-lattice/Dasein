@@ -11,6 +11,7 @@ public class UserUpdateData {
     private String newPassword;
     private Map<String, EntityAccessRightsData> rights;
     private String accessLevel;
+    private Long expirationDate;
 
     @JsonProperty("OldPassword")
     public String getOldPassword() {
@@ -50,6 +51,16 @@ public class UserUpdateData {
     @JsonProperty("AccessLevel")
     public void setAccessLevel(String accessLevel) {
         this.accessLevel = accessLevel;
+    }
+
+    @JsonProperty("ExpirationDate")
+    public Long getExpirationDate() {
+        return expirationDate;
+    }
+
+    @JsonProperty("ExpirationDate")
+    public void setExpirationDate(Long expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     @Override

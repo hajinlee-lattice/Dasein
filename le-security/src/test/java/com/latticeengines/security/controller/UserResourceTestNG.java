@@ -6,16 +6,20 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -381,5 +385,47 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         logoutTicket(ticket);
 
         makeSureUserDoesNotExist(user.getUsername());
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    @Test(groups = { "functional", "deployment" })
+    public void testTenantRightAfterExpiration() {
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+
+        User existingUser = createTestUser(AccessLevel.INTERNAL_ADMIN);
+        ResponseDocument<List<?>> usersResponse = restTemplate.getForObject(usersApi, ResponseDocument.class);
+        assertNotNull(usersResponse);
+        List<User> users = JsonUtils.convertList(usersResponse.getResult(), User.class);
+        List<String> names = users.stream().map(user -> user.getUsername()).collect(Collectors.toList());
+        // ensure existing exists in returned list
+        Assert.assertTrue(names.contains(existingUser.getUsername()));
+
+        updateExpirationDate(existingUser, AccessLevel.INTERNAL_ADMIN, false);
+        makeSureUserDoesNotExist(existingUser.getUsername());
+
+        // verify external user is not subject to expiration date
+        existingUser = createTestUser(AccessLevel.EXTERNAL_USER);
+        updateExpirationDate(existingUser, AccessLevel.EXTERNAL_ADMIN, true);
+        makeSureUserDoesNotExist(existingUser.getUsername());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void updateExpirationDate(User existingUser, AccessLevel accessLevel, boolean exists) {
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(accessLevel.name());
+        // update expiration date to now
+        data.setExpirationDate(System.currentTimeMillis());
+        String url = usersApi + existingUser.getUsername() + "/";
+
+        ResponseDocument response = sendHttpPutForObject(restTemplate, url, data, ResponseDocument.class);
+        assertTrue(response.isSuccess());
+
+        // verify the user whether tenant exists in get users api
+        ResponseDocument<List<?>> usersResponse = restTemplate.getForObject(usersApi, ResponseDocument.class);
+        assertNotNull(usersResponse);
+        List<User> users = JsonUtils.convertList(usersResponse.getResult(), User.class);
+        List<String> names = users.stream().map(user -> user.getUsername()).collect(Collectors.toList());
+        // ensure existing user not exist in returned users
+        Assert.assertEquals(names.contains(existingUser.getUsername()), exists);
     }
 }

@@ -174,7 +174,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
                     tenant));
-            return globalAuthGrantRight(right, tenant, username, null);
+            return globalAuthGrantRight(right, tenant, username, null, null);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[] { right, username, tenant });
@@ -182,18 +182,20 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser) {
+    public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser,
+            Long expirationDate) {
         try {
-            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
-                    tenant));
-            return globalAuthGrantRight(right, tenant, username, createdByUser);
+            log.info(String.format("Granting right %s to user %s for tenant %s with expiration period %s.", right,
+                    username, tenant, expirationDate));
+            return globalAuthGrantRight(right, tenant, username, createdByUser, expirationDate);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[] { right, username, tenant });
         }
     }
 
-    public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser)
+    public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser,
+            Long expirationDate)
             throws Exception {
 
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
@@ -208,6 +210,13 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                         globalAuthUser.getPid(),
                         tenantData.getPid(), right);
         if (rightData != null) {
+            // update expiration date of tenant for user
+            // if expiration date changes, update tenant right
+            if (expirationDate != rightData.getExpirationDate()
+                    || (expirationDate != null && !expirationDate.equals(rightData.getExpirationDate()))) {
+                rightData.setExpirationDate(expirationDate);
+                gaUserTenantRightEntityMgr.update(rightData);
+            }
             return true;
         }
 
@@ -216,6 +225,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         rightData.setGlobalAuthTenant(tenantData);
         rightData.setOperationName(right);
         rightData.setCreatedByUser(createdByUser);
+        rightData.setExpirationDate(expirationDate);
         gaUserTenantRightEntityMgr.create(rightData);
 
         if (isZendeskEnabled(globalAuthUser.getEmail())) {
@@ -729,6 +739,10 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
                 if (StringUtils.isNotEmpty(userRightData.getOperationName())) {
                     user.setAccessLevel(userRightData.getOperationName());
+                }
+
+                if (userRightData.getExpirationDate() != null) {
+                    user.setExpirationDate(userRightData.getExpirationDate());
                 }
 
                 AbstractMap.SimpleEntry<User, HashSet<String>> uRights = new AbstractMap.SimpleEntry<>(user,
