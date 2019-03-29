@@ -35,6 +35,9 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     private ResetContact resetContact;
 
     @Inject
+    private ProcessAccountChoreographer accountChoreographer;
+
+    @Inject
     private UpdateContactWorkflow updateContactWorkflow;
 
     @Inject
@@ -100,6 +103,10 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
         } else {
             boolean commonRebuild = super.shouldRebuild();
             if (!commonRebuild && !reset) {
+                if (accountChoreographer.hasNonTrivialChange()) {
+                    log.info("Should rebuild, since account has non-trivial change");
+                    return true;
+                }
                 if (hasAttrLifeCycleChange) {
                     log.info("Should rebuild, since has attr life cycle change");
                     return true;
