@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -57,7 +56,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     @Inject
     protected MetadataProxy metadataProxy;
 
-    protected CustomerSpace customerSpace;
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
 
@@ -125,10 +123,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected TransformationStepConfig reportDiff(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
-
         step.setInputSteps(Collections.singletonList(inputStep));
 
-        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
         ConsolidateReportConfig config = new ConsolidateReportConfig();
         config.setEntity(entity);
         String configStr = appendEngineConf(config, lightEngineConfig());
@@ -313,7 +309,11 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getConsolidateRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        if (request == null) {
+            return null;
+        } else {
+            return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        }
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
@@ -330,4 +330,5 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected abstract PipelineTransformationRequest getConsolidateRequest();
+
 }

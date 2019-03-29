@@ -215,6 +215,10 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         }
     }
 
+    protected boolean hasKeyInContext(String key) {
+        return executionContext.containsKey(key);
+    }
+
     protected void removeObjectFromContext(String key) {
         log.info("Removing " + key + " from context.");
         executionContext.remove(key);

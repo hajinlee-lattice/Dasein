@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
+import com.latticeengines.cdl.workflow.steps.merge.RematchAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -33,6 +34,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     private MergeAccount mergeAccount;
 
     @Inject
+    private RematchAccount rematchAccount;
+
+    @Inject
     private CloneAccount cloneAccount;
 
     @Inject
@@ -47,10 +51,15 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     protected boolean rebuildNotForDataCloudChange = false;
     protected boolean dataCloudChanged = false;
     private boolean hasAttrLifeCycleChange = false;
+    private boolean shouldRematch = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        return isCommonSkip(step, seq);
+        if (isRematchStep(step)) {
+            return !shouldRematch;
+        } else {
+            return isCommonSkip(step, seq);
+        }
     }
 
     @Override
@@ -85,6 +94,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
+        checkShouldRematch(step);
         super.doInitialize(step);
         checkDataCloudChange(step);
         checkAttrLifeCycleChange(step);
@@ -104,11 +114,29 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         log.info("Has life cycle change related to Account attributes.");
     }
 
+    private void checkShouldRematch(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        shouldRematch = grapherContext.isFullRematch();
+    }
+
     @Override
     protected boolean shouldRebuild() {
         rebuildNotForDataCloudChange = super.shouldRebuild();
-        rebuildNotForDataCloudChange = rebuildNotForDataCloudChange || (hasAttrLifeCycleChange && !reset);
-        return rebuildNotForDataCloudChange || (dataCloudChanged && !reset);
+        if (!rebuildNotForDataCloudChange) {
+            if (shouldRematch) {
+                log.info("Should rebuild, because fully re-matched");
+                rebuildNotForDataCloudChange = true;
+            } else if (hasAttrLifeCycleChange && !reset) {
+                log.info("Should rebuild, because detected attr life cycle change.");
+                rebuildNotForDataCloudChange = true;
+            }
+        }
+        if (!rebuildNotForDataCloudChange && (dataCloudChanged && !reset)) {
+            log.info("Should rebuild, because there were data cloud changes.");
+            return true;
+        }
+        return rebuildNotForDataCloudChange;
     }
 
     @Override
@@ -126,7 +154,11 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return false;
     }
 
-    public boolean hasNonTrivialChange() {
+    private boolean isRematchStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(rematchAccount.name());
+    }
+
+    boolean hasNonTrivialChange() {
         return rebuild || update;
     }
 
