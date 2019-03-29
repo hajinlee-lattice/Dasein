@@ -51,7 +51,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(freshSelection.size(), 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupAttributeSelectionBeforeTest" })
     public void testGetLeadEnrichmentCategories() throws IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
@@ -72,7 +72,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentCategories" })
     public void testGetLeadEnrichmentSubcategories() {
         String url = apiHostPort + "/score/enrichment/subcategories?category=" + Category.TECHNOLOGY_PROFILE.toString();
         List<?> subcategoryListRaw = oAuth2RestTemplate.getForObject(url, List.class);
@@ -98,7 +98,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         return expectedCategorySet;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "cleanupAttributeSelectionBeforeTest" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentSubcategories" })
     public void testGetLeadEnrichmentAttributesBeforeSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         Assert.assertNotNull(combinedAttributeList);
@@ -135,7 +135,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     }
 
     @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
+            "testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave" })
     public void testSaveLeadEnrichmentAttributes() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
@@ -321,7 +321,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     }
 
     @Test(groups = "deployment", enabled = false, dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+            "testGetLeadEnrichmentSelectedAttributePremiumCountAfterSecondSave" })
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
                 SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE);
