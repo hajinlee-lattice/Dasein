@@ -261,10 +261,10 @@ angular.module('lp.import')
                 state: 'producthierarchy.ids.producthierarchy', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveMapping(nextState);
+                    ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true);                
-                    });
+                    }, []);
                 }
             },{ 
                 label: 'Save Template', 

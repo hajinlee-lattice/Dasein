@@ -27,4 +27,6 @@ public interface ActionService {
     List<Action> findByPidIn(List<Long> actionPids);
 
     Action cancel(Long actionPid);
+
+    List<Action> getActionsByJobPid(Long jobPid);
 }

@@ -17,9 +17,14 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 public class EntityRawSeed {
     private final String id; // entity ID
     private final String entity; // CDL entity
+    private final boolean isNewlyAllocated; // whether this is a newly allocated entity
     private final int version; // internal version for optimistic locking
     private final List<EntityLookupEntry> lookupEntries; // list of lookup entry associated, sorted by entry priority, desc
     private final Map<String, String> attributes; // extra attributes to stored in the seed, cannot be used for lookup
+
+    public EntityRawSeed(String id, String entity, boolean isNewlyAllocated) {
+        this(id, entity, isNewlyAllocated, -1, Collections.emptyList(), null);
+    }
 
     public EntityRawSeed(
             @NotNull String id, @NotNull String entity,
@@ -30,12 +35,18 @@ public class EntityRawSeed {
     public EntityRawSeed(
             @NotNull String id, @NotNull String entity, int version,
             @NotNull List<EntityLookupEntry> lookupEntries, Map<String, String> attributes) {
+        this(id, entity, false, version, lookupEntries, attributes);
+    }
+
+    public EntityRawSeed(String id, String entity, boolean isNewlyAllocated, int version,
+            List<EntityLookupEntry> lookupEntries, Map<String, String> attributes) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(lookupEntries);
         this.id = id;
         this.entity = entity;
         this.version = version;
+        this.isNewlyAllocated = isNewlyAllocated;
         // defensive copy, lookup key is immutable so no need to copy its fields
         this.lookupEntries = Collections.unmodifiableList(lookupEntries);
         this.attributes = attributes == null ? Collections.emptyMap() : Collections.unmodifiableMap(attributes);
@@ -47,6 +58,10 @@ public class EntityRawSeed {
 
     public String getEntity() {
         return entity;
+    }
+
+    public boolean isNewlyAllocated() {
+        return isNewlyAllocated;
     }
 
     public int getVersion() {

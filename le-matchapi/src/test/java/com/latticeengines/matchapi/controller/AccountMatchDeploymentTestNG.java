@@ -52,6 +52,8 @@ import com.latticeengines.security.exposed.service.TenantService;
  *
  * Account match correctness verification is in EntityMatchCorrectnessTestNG &
  * AccountMatchCorrectnessDeploymentTestNG
+ * 
+ * dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
  */
 public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AccountMatchDeploymentTestNG.class);

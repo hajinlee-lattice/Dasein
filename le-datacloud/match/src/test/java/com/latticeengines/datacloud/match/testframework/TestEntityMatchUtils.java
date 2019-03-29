@@ -66,6 +66,11 @@ public class TestEntityMatchUtils {
         return new EntityRawSeed(seedId, TEST_ENTITY, Arrays.asList(lookupEntries), null);
     }
 
+    public static EntityRawSeed newSeed(@NotNull String seedId, boolean isNewlyAllocated,
+            EntityLookupEntry... lookupEntries) {
+        return new EntityRawSeed(seedId, TEST_ENTITY, isNewlyAllocated, -1, Arrays.asList(lookupEntries), null);
+    }
+
     /**
      * Create an {@link EntityRawSeed} with given additional attributes and empty {@link EntityLookupEntry} list.
      * Entity will be {@link TestEntityMatchUtils#TEST_ENTITY}

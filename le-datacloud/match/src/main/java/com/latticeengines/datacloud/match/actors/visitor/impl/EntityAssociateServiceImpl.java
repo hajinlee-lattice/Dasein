@@ -108,7 +108,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         EntityRawSeed targetSeed = getOrAllocate(associationReq, pickTargetEntity(associationReq));
         if (targetSeed == null) {
             // no target seed, just return
-            return new EntityAssociationResponse(associationReq.getTenant(), associationReq.getEntity(), null);
+            return new EntityAssociationResponse(associationReq.getTenant(), associationReq.getEntity(), null, false);
         }
 
         return associate(lookupRequestId, associationReq, targetSeed);
@@ -263,7 +263,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         } else {
             // allocate new seed
             String seedId = entityMatchInternalService.allocateId(tenant, entity);
-            return new EntityRawSeed(seedId, entity, Collections.emptyList(), null);
+            return new EntityRawSeed(seedId, entity, true);
         }
     }
 
@@ -309,7 +309,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 // ignore result as attribute update won't fail
                 entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false);
             }
-            return getResponse(request, targetEntitySeed.getId());
+            return getResponse(request, targetEntitySeed.getId(), targetEntitySeed.isNewlyAllocated());
         }
 
 
@@ -337,7 +337,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 }
                 // fail to associate the highest priority entry
                 return getResponse(
-                        request, null,
+                        request, null, false,
                         getConflictMessages(targetEntitySeed.getId(), request, maxPriorityResult, null, null));
             }
 
@@ -370,7 +370,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     " seed conflict entries = {}, requestId = {}",
                     result, mappingConflictEntries, seedConflictEntries, requestId);
             return getResponse(
-                    request, targetEntitySeed.getId(),
+                    request, targetEntitySeed.getId(), targetEntitySeed.isNewlyAllocated(),
                     getConflictMessages(targetEntitySeed.getId(), request, result, mappingConflictEntries,
                             seedConflictEntries));
         }
@@ -380,7 +380,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 " seed conflict entries = {}, requestId = {}",
                 mappingConflictEntries, seedConflictEntries, requestId);
         return getResponse(
-                request, targetEntitySeed.getId(),
+                request, targetEntitySeed.getId(), targetEntitySeed.isNewlyAllocated(),
                 getConflictMessages(targetEntitySeed.getId(), request, null, mappingConflictEntries,
                         seedConflictEntries));
     }
@@ -557,12 +557,15 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
     }
 
     private EntityAssociationResponse getResponse(
-            @NotNull EntityAssociationRequest request, String entitySeedId, @NotNull List<String> associationErrors) {
-        return new EntityAssociationResponse(request.getTenant(), request.getEntity(), entitySeedId, associationErrors);
+            @NotNull EntityAssociationRequest request, String entitySeedId, boolean isNewlyAllocated,
+            @NotNull List<String> associationErrors) {
+        return new EntityAssociationResponse(request.getTenant(), request.getEntity(), isNewlyAllocated, entitySeedId,
+                associationErrors);
     }
 
-    private EntityAssociationResponse getResponse(@NotNull EntityAssociationRequest request, String entitySeedId) {
-        return new EntityAssociationResponse(request.getTenant(), request.getEntity(), entitySeedId);
+    private EntityAssociationResponse getResponse(@NotNull EntityAssociationRequest request, String entitySeedId,
+            boolean isNewlyAllocated) {
+        return new EntityAssociationResponse(request.getTenant(), request.getEntity(), entitySeedId, isNewlyAllocated);
     }
 
     /*

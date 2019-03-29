@@ -23,6 +23,9 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("RebuildSteps")
     private List<String> rebuildSteps = new ArrayList<>();
 
+    @JsonProperty("SkipEntities")
+    private Set<BusinessEntity> skipEntities = new HashSet<>();
+
     @JsonProperty("IgnoreDataCloudChange")
     private Boolean ignoreDataCloudChange;
 
@@ -35,11 +38,9 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("MaxRatingIteration")
     private Integer MaxRatingIterations;
 
-    @JsonProperty("SkipEntities")
-    private Set<BusinessEntity> skipEntities = new HashSet<>();
-
-    @JsonProperty("SkipAPS")
-    private boolean skipAPS = false;
+    // refresh all the results related to fuzzy match
+    @JsonProperty("FullRematch")
+    private Boolean fullRematch;
 
     // flag to force start another PA disregarding the number of currently running
     // PA in the cluster
@@ -114,14 +115,6 @@ public class ProcessAnalyzeRequest {
         this.skipEntities = skipEntities;
     }
 
-    public boolean isSkipAPS() {
-        return skipAPS;
-    }
-
-    public void setSkipAPS(boolean skipAPS) {
-        this.skipAPS = skipAPS;
-    }
-
     public boolean isInheritAllCompleteImportActions() {
         return inheritAllCompleteImportActions;
     }
@@ -144,5 +137,13 @@ public class ProcessAnalyzeRequest {
 
     public void setForceRun(Boolean forceRun) {
         this.forceRun = forceRun;
+    }
+
+    public Boolean getFullRematch() {
+        return fullRematch;
+    }
+
+    public void setFullRematch(Boolean fullRematch) {
+        this.fullRematch = fullRematch;
     }
 }

@@ -138,11 +138,18 @@
     				<td class="red-text">{{launch.stats.errors | number}}</td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
     				<td class="green-text">{{launch.stats.contactsWithinRecommendations | number}}</td>
-                    <td>
-                        <span class="fa fa-check" ng-if="launch.launchState === 'Launched'"></span>
-                        <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching'"></span>
+                    <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">
+                        <span class="fa fa-check" ng-if="launch.launchState === 'Launched' || launch.launchState === 'Synced'"></span>
+                        <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching' || launch.launchState === 'Syncing'"></span>
                         <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'Failed'"></span>
                         {{launch.launchState}}
+                    </td>
+                    <td ng-if="launch.launchState === 'PartialSync' || launch.launchState === 'SyncFailed'">
+                        <span class="fa fa-exclamation-triangle orange-text" ng-if="launch.launchState === 'PartialSync'"></span>
+                        <span ng-if="launch.launchState === 'PartialSync'"> Partially Synced </span>
+                        
+                        <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
+                        <span ng-if="launch.launchState === 'SyncFailed'"> Sync Failed </span>
                     </td>
     			</tr>
     		</tbody>

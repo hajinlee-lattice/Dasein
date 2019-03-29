@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -142,7 +141,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
-        setBaseTables(fullAccountTableName, step);
+        addBaseTables(step, fullAccountTableName);
         step.setTransformer(TRANSFORMER_PROFILER);
 
         ProfileConfig conf = new ProfileConfig();
@@ -156,7 +155,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private TransformationStepConfig bucketEncode() {
         TransformationStepConfig step = new TransformationStepConfig();
-        setBaseTables(fullAccountTableName, step);
+        addBaseTables(step, fullAccountTableName);
         step.setInputSteps(Collections.singletonList(profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
@@ -167,12 +166,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(bucketStep, profileStep));
         step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(statsTablePrefix);
-        step.setTargetTable(targetTable);
-
+        setTargetTable(step, statsTablePrefix);
         CalculateStatsConfig conf = new CalculateStatsConfig();
         step.setConfiguration(appendEngineConf(conf, extraHeavyEngineConfig()));
         return step;

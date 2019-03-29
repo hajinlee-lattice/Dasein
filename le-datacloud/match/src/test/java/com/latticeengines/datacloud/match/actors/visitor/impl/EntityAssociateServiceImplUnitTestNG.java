@@ -70,6 +70,12 @@ public class EntityAssociateServiceImplUnitTestNG {
         Assert.assertFalse(it.hasNext());
         // expected associated id matched
         Assert.assertEquals(response.getAssociatedEntityId(), expectedAssociatedEntityId);
+        if (expectedAssociatedEntityId == null) {
+            // if failed to associate, isNewlyAllocated flag should be false
+            Assert.assertFalse(response.isNewlyAllocated());
+        } else {
+            Assert.assertEquals(response.isNewlyAllocated(), currentTargetSnapshot.isNewlyAllocated());
+        }
         if (hasAssociationError) {
             Assert.assertFalse(response.getAssociationErrors().isEmpty());
         } else {
@@ -181,7 +187,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                  */
                 {
                         newRequest(new Object[][] {{ SFDC_1, null }}), // only SFDC_1 in request
-                        newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]), // target seed is a newly allocated one
+                        newSeed(TEST_ENTITY_ID, true), // target seed is a newly allocated one
                         // should only call associate once with SFDC_1 (highest priority lookup entry)
                         singletonList(newSeed(TEST_ENTITY_ID, SFDC_1)),
                         // seed before association has no lookup entry (newly allocated)
@@ -194,7 +200,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                  */
                 {
                         newRequest(new Object[][] {{ SFDC_1, null }, { MKTO_1, null }, { DC_FACEBOOK_1, null }}),
-                        newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]), // target seed is a newly allocated one
+                        newSeed(TEST_ENTITY_ID, true), // target seed is a newly allocated one
                         // should call associate twice
                         // first time with with SFDC_1 (highest priority lookup entry)
                         // second time with the rest of lookup entries (actually we will update all entries
@@ -383,7 +389,45 @@ public class EntityAssociateServiceImplUnitTestNG {
                         // no conflict even if DUNS_1 already mapped to another entity (cuz mapping is many to one)
                         TEST_ENTITY_ID, false
                 },
-                // TODO add more test cases
+                /*
+                 * Case #12: empty target seed (newly allocated), one system ID in request, and
+                 * have conflict in lookup
+                 */
+                { newRequest(new Object[][] { { SFDC_1, null } }), // only SFDC_1 in request
+                        newSeed(TEST_ENTITY_ID, true), // target seed is a newly allocated one
+                        // should only call associate once with SFDC_1 (highest priority lookup entry)
+                        singletonList(newSeed(TEST_ENTITY_ID, SFDC_1)),
+                        // seed before association has no lookup entry (newly allocated)
+                        // therefore no conflict in seed
+                        // unfortunately, SFDC_1 is mapped to other seed during association
+                        singletonList( //
+                                Triple.of(newSeed(TEST_ENTITY_ID, false), //
+                                        emptyList(), //
+                                        singletonList(SFDC_1))), //
+                        null, true },
+                /*
+                 * Case #13: empty target seed (newly allocated), more than 1 lookup entries in
+                 * request, conflict in lower priority key's lookup mapping
+                 */
+                { newRequest(new Object[][] { { SFDC_1, null }, { MKTO_1, null }, { DC_FACEBOOK_1, null } }),
+                        newSeed(TEST_ENTITY_ID, true), // target seed is a newly allocated one
+                        // should call associate twice
+                        // first time with with SFDC_1 (highest priority lookup entry)
+                        // second time with the rest of lookup entries (actually we will update all
+                        // entries
+                        // for simplicity, since it will be one update request either way)
+                        asList(newSeed(TEST_ENTITY_ID, SFDC_1), newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_1, DC_FACEBOOK_1)),
+                        // seed before first association has no lookup entry (newly allocated)
+                        // seed before second association only has the highest priority entry
+                        // therefore no association error in seed
+                        // however, MKTO_1 is mapped to other seed during association, so conflict in
+                        // lookup. Should still associate to the target seed since conflict is not in
+                        // highest priority key
+                        asList(noConflictResult(newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0])), //
+                                Triple.of( //
+                                        newSeed(TEST_ENTITY_ID, false, SFDC_1), //
+                                        emptyList(), singletonList(MKTO_1))), //
+                        TEST_ENTITY_ID, true },
         };
     }
 

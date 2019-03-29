@@ -1,19 +1,43 @@
 package com.latticeengines.modelquality.controller;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.monitor.SlackSettings;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
+import com.latticeengines.monitor.exposed.service.SlackService;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
+
+    private static final Logger log = LoggerFactory
+            .getLogger(AccountMasterModelRunResourceByLocationDeploymentTestNG.class);
 
     private static final ImmutableMap<String, String> testCases = ImmutableMap.<String, String>builder() //
             .put("Mulesoft_NA_loc_AccountMaster", "Mulesoft_NA_loc.csv") //
@@ -25,6 +49,21 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
             .put("PolyCom_loc_AccountMaster", "PolyCom_loc.csv") //
             .put("Tenable_loc_AccountMaster", "Tenable_loc.csv") //
             .build();
+
+    @Inject
+    private SlackService slackService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    @Value("${modelquality.test.slack.webhook.url:}")
+    private String webhookUrl;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -55,19 +94,69 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
     }
 
     @Test(groups = "am")
-    public void runModelForOneCsv() {
+    public void runModelForCsv() {
         String dataSetName = getSystemProperty("MQ_DATASET");
-        if (testCases.containsKey(dataSetName)) {
-            String csvFile = testCases.get(dataSetName);
-            runModelAccountMaster(dataSetName, csvFile);
-        } else {
-            logger.info(String.format("Skipping run model, dataSetName=%s", dataSetName));
+        if (StringUtils.isBlank(dataSetName)) {
+            Assert.fail(String.format("No dataset specified. MQ_DATASET=%s", dataSetName));
+        }
+        String[] dataSets = dataSetName.split(",");
+        log.info("Data sets = {}", Arrays.toString(dataSets));
+        for (String dataSet : dataSets) {
+            if (testCases.containsKey(dataSetName)) {
+                String csvFile = testCases.get(dataSetName);
+                runModelWrapper(dataSetName, csvFile);
+            } else {
+                log.warn("Skipping run model, dataSetName={}", dataSet);
+            }
         }
     }
 
     @Test(groups = { "am_all" }, dataProvider = "getAccountMasterLocationCsvFile")
     public void runModelAccountMasterLocation(String dataSetName, String csvFile) {
-        runModelAccountMaster(dataSetName, csvFile);
+        runModelWrapper(dataSetName, csvFile);
+    }
+
+    private void runModelWrapper(String dataSetName, String csvFile) {
+        if (StringUtils.isBlank(dataSetName) || StringUtils.isBlank(csvFile)) {
+            return;
+        }
+
+        Stopwatch timer = Stopwatch.createStarted();
+        try {
+            log.info("Start model quality test (DataSet={}, CsvFile={})", dataSetName, csvFile);
+            notifyModelQualityTestStarted(dataSetName);
+            runModelAccountMaster(dataSetName, csvFile);
+            log.info("Model quality test (DataSet={}, CsvFile={}) finished successfully", dataSetName, csvFile);
+            sendModelQualityTestResult(dataSetName, timer.elapsed(TimeUnit.MILLISECONDS), Status.COMPLETED, null);
+        } catch (Exception e) {
+            log.error(String.format("Fail to run model quality test. DataSet=%s", dataSetName), e);
+            sendModelQualityTestResult(dataSetName, timer.elapsed(TimeUnit.MILLISECONDS), Status.FAILED,
+                    String.format("Error: %s", e.getMessage()));
+            boolean failFast = Boolean.TRUE.toString().equalsIgnoreCase(getSystemProperty("FAIL_FAST"));
+            if (failFast) {
+                log.error("Failing fast after one test failure");
+                throw e;
+            }
+        }
+    }
+
+    /*
+     * Find the log link for last job in test tenant (workaround since it is hard to
+     * extract application id from model run)
+     */
+    private String getLogLinkForLastJob() {
+        try {
+            List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(mainTestTenant);
+            Optional<Job> lastJob = jobs.stream() //
+                    .filter(Objects::nonNull) //
+                    .filter(job -> job.getPid() != null) //
+                    .max(Comparator.comparing(Job::getPid));
+            return lastJob.map(job -> workflowProxy.getLogLinkByWorkflowPid(job.getPid())) //
+                    .map(WorkflowLogLinks::getAppMasterUrl) //
+                    .orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @DataProvider(name = "getAccountMasterLocationCsvFile")
@@ -79,5 +168,42 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
             data[i] = new Object[] { entry.getKey(), entry.getValue() };
         }
         return data;
+    }
+
+    private void notifyModelQualityTestStarted(@NotNull String dataSetName) {
+        if (StringUtils.isBlank(webhookUrl)) {
+            return;
+        }
+        String dataCloudVersion = getDataCloudVersion();
+        String preText = String.format("[%s-%s][DataCloud %s]", leEnv, leStack, dataCloudVersion);
+        String message = String.format("Started test for dataset %s.\n Job url: %s", dataSetName,
+                getSystemProperty("BUILD_URL"));
+        SlackSettings settings = new SlackSettings(webhookUrl, null, preText, message, "ModelQualityTestRunner",
+                SlackSettings.Color.NORMAL);
+        slackService.sendSlack(settings);
+    }
+
+    private void sendModelQualityTestResult(@NotNull String dataSetName, long durationInMillis, @NotNull Status status,
+            String extraMessage) {
+        if (StringUtils.isBlank(webhookUrl)) {
+            return;
+        }
+        String dataCloudVersion = getDataCloudVersion();
+        SlackSettings.Color color = status == Status.FAILED ? SlackSettings.Color.DANGER : SlackSettings.Color.NORMAL;
+        String preText = String.format("[%s-%s][DataCloud %s]", leEnv, leStack, dataCloudVersion);
+        String title = String.format("Model quality test for dataset %s", dataSetName);
+        String message = String.format("Test %s after %s\nLog Link: %s", //
+                status.name(), DurationFormatUtils.formatDurationWords(durationInMillis, true, true), //
+                getLogLinkForLastJob());
+        if (StringUtils.isNotBlank(extraMessage)) {
+            message += "\n" + extraMessage;
+        }
+        SlackSettings settings = new SlackSettings(webhookUrl, title, preText, message, "ModelQualityTestRunner",
+                color);
+        slackService.sendSlack(settings);
+    }
+
+    private enum Status {
+        COMPLETED, FAILED
     }
 }

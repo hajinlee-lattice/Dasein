@@ -5,10 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +13,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ContactNameConcatenateConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -33,8 +24,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 @Component(MergeContact.BEAN_NAME)
@@ -141,45 +130,12 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     /*
      * Lead to account match configurations
      */
-
     private TransformationStepConfig leadToAccountMatch(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         step.setTransformer(TRANSFORMER_MATCH);
-        MatchTransformerConfig config = new MatchTransformerConfig();
-        config.setMatchInput(getMatchInput());
-        step.setConfiguration(JsonUtils.serialize(config));
+        String configStr = MatchUtils.getAllocateIdMatchConfigForContact(getBaseMatchInput(), getInputTableColumnNames(0));
+        step.setConfiguration(configStr);
         return step;
-    }
-
-    private MatchInput getMatchInput() {
-        MatchInput input = getBaseMatchInput();
-        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
-        input.setSkipKeyResolution(true);
-        input.setTargetEntity(BusinessEntity.Account.name());
-        // lookup mode for lead to account match
-        input.setAllocateId(false);
-        input.setFetchOnly(false);
-        input.setPredefinedSelection(ColumnSelection.Predefined.LeadToAcct);
-        MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        entityKeyMap.setKeyMap(getMatchKeys());
-        input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), entityKeyMap));
-        return input;
-    }
-
-    private Map<MatchKey, List<String>> getMatchKeys() {
-        Set<String> columnNames = getInputTableColumnNames(0);
-        // email is a required for lead to account match
-        Preconditions.checkArgument(columnNames.contains(InterfaceName.Email.name()),
-                "Missing mandatory column (Email) in input table for lead to account match");
-        Map<MatchKey, List<String>> matchKeys = new HashMap<>();
-        // for domain match key, value in Email column is considered first, if no value
-        // for Email, try to use value in Website column instead (set in
-        // addLDCMatchKeysIfExist)
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Email.name());
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.SystemId, InterfaceName.CustomerAccountId.name());
-        addLDCMatchKeysIfExist(columnNames, matchKeys);
-        log.info("Lead to account match keys = {}", JsonUtils.serialize(matchKeys));
-        return matchKeys;
     }
 }

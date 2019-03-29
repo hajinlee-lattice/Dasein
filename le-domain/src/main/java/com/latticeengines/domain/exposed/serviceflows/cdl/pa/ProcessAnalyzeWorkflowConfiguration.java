@@ -217,10 +217,17 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder skipSteps(Set<BusinessEntity> entities, boolean skipAPS) {
+        public Builder skipEntities(Set<BusinessEntity> entities) {
             processStepConfiguration.setSkipEntities(entities);
-            awsPythonDataConfiguration.setSkipStep(skipAPS);
-            apsGenerationStepConfiguration.setSkipStep(skipAPS);
+            if (CollectionUtils.containsAny(entities, BusinessEntity.AnalyticPurchaseState)) {
+                awsPythonDataConfiguration.setSkipStep(true);
+                apsGenerationStepConfiguration.setSkipStep(true);
+            }
+            return this;
+        }
+
+        public Builder setFullRematch(boolean fullRematch) {
+            processStepConfiguration.setFullRematch(fullRematch);
             return this;
         }
 

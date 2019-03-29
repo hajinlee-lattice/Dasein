@@ -449,8 +449,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                  alert("At least one source feature flag for LP3.0 should be checked.");
                  return false;
              }
-         } else if (!$scope.tenantInfo.properties.contract) {
-        	 alert("Please populate contract.");
+         }
+         if (!$scope.tenantInfo.properties.contract) {
+         	 alert("Please populate contract.");
              return false;
          }
          return true;

@@ -481,13 +481,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .setFullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)//put dataQuotaLimit into
                 // stepConfiguration
                 .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
                 .dataQuotaLimit(defaultProductBundlesQuotaLimit, ProductType.Analytic)
                 .dataQuotaLimit(defaultProductSkuQuotaLimit, ProductType.Spending)
                 .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
-                .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
+                .skipEntities(request.getSkipEntities()) //
                 .build();
     }
 

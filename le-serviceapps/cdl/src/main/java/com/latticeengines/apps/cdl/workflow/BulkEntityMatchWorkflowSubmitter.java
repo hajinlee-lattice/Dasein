@@ -43,9 +43,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(BulkEntityMatchWorkflowSubmitter.class);
 
-    @Value("${datacloud.match.max.num.blocks:4}")
-    private Integer maxNumBlocks;
-
     @Value("${datacloud.match.bulk.group.size:20}")
     private Integer groupSize;
 

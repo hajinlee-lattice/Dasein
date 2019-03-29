@@ -462,7 +462,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     }
 
     protected void waitAndCheckModelRun(String modelName) {
+        waitAndCheckModelRun(modelName, true);
+    }
 
+    protected void waitAndCheckModelRun(String modelName, boolean failWithAssert) {
         long start = System.currentTimeMillis();
         while (true) {
             String status = modelQualityProxy.getModelRunStatusByName(modelName);
@@ -473,14 +476,23 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             }
 
             if (status.equals("FAILED")) {
-                Assert.fail("Failed due to= " + modelRun.getErrorMessage());
-                break;
+                String msg = String.format("Failed due to= %s", modelRun.getErrorMessage());
+                if (failWithAssert) {
+                    Assert.fail(msg);
+                } else {
+                    throw new RuntimeException(msg);
+                }
             }
             System.out.println(
                     "Waiting for modelRun name \"" + modelName + "\": Status is " + modelRun.getStatus().toString());
             long end = System.currentTimeMillis();
             if ((end - start) > 10 * 3_600_000) { // 10 hours max
-                Assert.fail("Timeout for modelRun name \"" + modelName + "\"");
+                String msg = "Timeout for modelRun name \"" + modelName + "\"";
+                if (failWithAssert) {
+                    Assert.fail(msg);
+                } else {
+                    throw new RuntimeException(msg);
+                }
             }
             try {
                 Thread.sleep(300_000); // 5 mins
