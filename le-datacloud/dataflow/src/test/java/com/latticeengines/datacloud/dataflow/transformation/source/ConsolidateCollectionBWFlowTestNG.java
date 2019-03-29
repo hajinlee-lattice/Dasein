@@ -13,7 +13,10 @@ import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunction
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class ConsolidateCollectionFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+public class ConsolidateCollectionBWFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    private final static String FIELD_DOMAIN = "Domain";
+    private final static String FIELD_TECH_NAME = "Technology_Name";
+    private final static String FIELD_TIMESTAMP = "Last_Modification_Date";
 
     @Override
     protected String getFlowBeanName() {
@@ -30,9 +33,9 @@ public class ConsolidateCollectionFlowTestNG extends DataCloudDataFlowFunctional
 
     private TransformationFlowParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
-                Pair.of("URL", String.class), //
-                Pair.of("TechName", String.class),
-                Pair.of("Timestamp", Long.class)
+                Pair.of(FIELD_DOMAIN, String.class), //
+                Pair.of(FIELD_TECH_NAME, String.class),
+                Pair.of(FIELD_TIMESTAMP, Long.class)
         );
         Object[][] data = new Object[][] { //
                 { "url_1", "1", 1L }, //
@@ -47,8 +50,8 @@ public class ConsolidateCollectionFlowTestNG extends DataCloudDataFlowFunctional
 
         ConsolidateCollectionParameters parameters = new ConsolidateCollectionParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
-        parameters.setGroupBy(Arrays.asList("URL", "TechName"));
-        parameters.setSortBy("Timestamp");
+        parameters.setGroupBy(Arrays.asList(FIELD_DOMAIN, FIELD_TECH_NAME));
+        parameters.setSortBy(FIELD_TIMESTAMP);
         return parameters;
     }
 
@@ -56,8 +59,8 @@ public class ConsolidateCollectionFlowTestNG extends DataCloudDataFlowFunctional
         List<GenericRecord> records = readOutput();
         Assert.assertEquals(records.size(), 4);
         for (GenericRecord record : records) {
-            long ts = (long) record.get("Timestamp");
-            String combKey = record.get("TechName").toString() + "-" + record.get("URL").toString();
+            long ts = (long) record.get(FIELD_TIMESTAMP);
+            String combKey = record.get(FIELD_TECH_NAME).toString() + "-" + record.get(FIELD_DOMAIN).toString();
             long expectedTs = 0;
             switch (combKey) {
                 case "1-url_1":
