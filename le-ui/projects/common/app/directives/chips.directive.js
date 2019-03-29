@@ -13,7 +13,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             model: '@',
             queryscope: '@',
             showicon: '@',
-            initialvalue: '='
+            initialvalue: '=',
+            initiallyselected: '='
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -29,8 +30,6 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.queryScope = scope.queryscope;
             scope.isSelectionDone = false;
             scope.showIcon = scope.showicon;
-
-           
             scope.sortList = (objA, objB) => {
                 let a = objA[scope.displayname];
                 let b = objB[scope.displayname];
@@ -132,7 +131,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 scope.showQueryList = visible;
             }
 
-            scope.chooseItem = function (item) {
+            scope.chooseItem = function (item, callCallback) {
                 if (item) {
                     if(scope.singleSelection) {
                         scope.chips = {};
@@ -143,8 +142,9 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     if(scope.singleSelection){
                         scope.query = '';
                     }
-                    
-                    scope.callCallback();
+                    if(callCallback !== false){
+                        scope.callCallback();
+                    }
                     if (scope.singleSelection){
                         scope.setListVisibility(false);
                     }
@@ -194,6 +194,11 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 let array = array2.map(function(e) {
                     let f = array1.find(a => a[scope.id] == e);
                     scope.chooseItem(f);
+                });
+            }
+            if(scope.initiallyselected){
+                scope.initiallyselected.forEach((item) => {
+                    scope.chooseItem(item, false);
                 });
             }
 
