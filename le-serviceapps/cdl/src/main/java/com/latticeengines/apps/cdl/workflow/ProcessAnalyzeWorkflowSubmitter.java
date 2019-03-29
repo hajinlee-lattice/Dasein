@@ -487,7 +487,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dataQuotaLimit(defaultProductBundlesQuotaLimit, ProductType.Analytic)
                 .dataQuotaLimit(defaultProductSkuQuotaLimit, ProductType.Spending)
                 .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
-                .skipSteps(request.getSkipEntities(), request.isSkipAPS()) //
+                .skipEntities(request.getSkipEntities()) //
                 .build();
     }
 

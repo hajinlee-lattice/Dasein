@@ -106,8 +106,7 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
                 if (accountChoreographer.hasNonTrivialChange()) {
                     log.info("Should rebuild, since account has non-trivial change");
                     return true;
-                }
-                if (hasAttrLifeCycleChange) {
+                } else if (hasAttrLifeCycleChange) {
                     log.info("Should rebuild, since has attr life cycle change");
                     return true;
                 } else if (hasAccounts && !hasActiveServingStore) {
