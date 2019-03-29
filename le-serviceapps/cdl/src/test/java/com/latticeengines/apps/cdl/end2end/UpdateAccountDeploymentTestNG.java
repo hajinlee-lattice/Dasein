@@ -52,9 +52,16 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         verifyBatchServingStoreCount();
 
-        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+        Map<BusinessEntity, Long> segment3Counts = getSegmentCounts(SEGMENT_NAME_3);
         verifyTestSegment3Counts(segment3Counts);
+    }
+
+    protected Map<BusinessEntity, Long> getSegmentCounts(String segmentName) {
+        if (SEGMENT_NAME_3.equals(segmentName)) {
+            return ImmutableMap.of( //
+                    BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+        }
+        throw new IllegalArgumentException(String.format("Segment %s is not supported", segmentName));
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {

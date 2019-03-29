@@ -23,6 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
@@ -48,6 +49,11 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccountDeploymentTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateAccountWithAdvancedMatchDeploymentTestNG.class);
+    // number of account/contact in segment 3 for entity match
+    // compare to the checkpoint, three contact now match to anonymous acc. two
+    // added contacts match to existing account and satisfy the segment criteria
+    private static final long SEGMENT3_ACCOUNT_CNT = 24;
+    private static final long SEGMENT3_CONTACT_CNT = 24;
 
     static final String CHECK_POINT = "entitymatch_update1";
 
@@ -77,6 +83,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     protected void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 3, "Account");
+        mockCSVImport(BusinessEntity.Contact, 9, "Contact_EntityMatch-2");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
@@ -104,11 +111,10 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         verifyAccountSeedLookupData();
     }
 
-    // TODO: After adding contact import, need to change expected numContacts
     @Override
     protected void verifyBatchServingStoreCount() {
         long numAccounts = 1000;
-        long numContacts = 500;
+        long numContacts = 523;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
         Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
@@ -116,7 +122,16 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
     }
 
-    // TODO: After adding contact import, need to change expected
+    @Override
+    protected Map<BusinessEntity, Long> getSegmentCounts(String segmentName) {
+        // only verify segment 3 for now
+        if (SEGMENT_NAME_3.equals(segmentName)) {
+            return ImmutableMap.of( //
+                    BusinessEntity.Account, SEGMENT3_ACCOUNT_CNT, BusinessEntity.Contact, SEGMENT3_CONTACT_CNT);
+        }
+        throw new IllegalArgumentException(String.format("Segment %s is not supported", segmentName));
+    }
+
     // new/update/total #contact in report
     @Override
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
@@ -129,10 +144,10 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         accountReport.put(ReportPurpose.ENTITY_MATCH_SUMMARY.name() + "_" + ReportConstants.PUBLISH_SEED, ACCOUNT_2);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 23L);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 50L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1 + 23L);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
