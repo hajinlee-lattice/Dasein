@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.mockito.InjectMocks;
@@ -53,6 +54,7 @@ public class CDLJobServiceImplUnitTestNG {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        CDLJobServiceImpl.appIdMap = new LinkedHashMap<>();
         cdlJobService.concurrentProcessAnalyzeJobs = 8;
         cdlJobService.minimumScheduledJobCount = 3;
         cdlJobService.maximumScheduledJobCount = 5;
