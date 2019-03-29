@@ -3,12 +3,13 @@ package com.latticeengines.ulysses.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -83,13 +84,13 @@ public class DanteConfigurationResource {
 
             List<PropertyMetadata> talkingPointAttributes = servingStoreProxy
                     .getDecoratedMetadata(customerSpace, BusinessEntity.Account,
-                            Arrays.asList(ColumnSelection.Predefined.TalkingPoint))
+                            Collections.singletonList(ColumnSelection.Predefined.TalkingPoint))
                     // Dante has a special meaning for "SalesforceAccountID"
                     // so ignore the attribute info from CDL
                     .filter(attr -> !attr.getAttrName().equals(salesForceAccountIdAttributeName))
                     .map(PropertyMetadata::new).collectList().block();
 
-            log.info("Found " + talkingPointAttributes.size() + " talking point attributes " //
+            log.info("Found " + CollectionUtils.size(talkingPointAttributes) + " talking point attributes " //
                     + "for the tenant " + customerSpace);
 
             NotionMetadata danteAccountMetadata = metadataDocument.getNotions().stream()
