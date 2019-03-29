@@ -113,6 +113,12 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = {"testCreate"})
+    public void testGetActionByJodPid() {
+        List<Action> action = getActionsByJobPid(actions.get(0).getTrackingPid());
+        Assert.assertNotNull(action);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testCreate"})
     public void testCancel() {
         for (Action action : actions) {
             System.out.println(JsonUtils.serialize(action));
@@ -207,4 +213,6 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
     protected List<Action> findByPidIn(List<Long> actionPids) {
         return actionEntityMgr.findByPidIn(actionPids);
     }
+
+    protected List<Action> getActionsByJobPid(Long jobPid) { return actionEntityMgr.getActionsByJobPid(jobPid); }
 }

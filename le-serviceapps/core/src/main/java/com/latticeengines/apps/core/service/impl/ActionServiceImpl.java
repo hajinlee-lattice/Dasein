@@ -129,4 +129,9 @@ public class ActionServiceImpl implements ActionService {
         return null;
     }
 
+    @Override
+    public List<Action> getActionsByJobPid(Long jobPid) {
+        return actionEntityMgr.getActionsByJobPid(jobPid);
+    }
+
 }

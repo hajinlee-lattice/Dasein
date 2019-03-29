@@ -157,7 +157,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
         List<Object> listObj = JsonUtils.deserialize(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS),
                 List.class);
-        Assert.assertEquals(listObj.size(), 4);
+        Assert.assertEquals(listObj.size(), 5);
         Assert.assertNull(job.getNote());
         log.info(String.format("listObj is %s", listObj));
 
@@ -236,7 +236,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     public void testExpandActions() {
         List<Action> actions = generateActions();
         List<Job> expandedJobs = workflowJobService.expandActions(actions);
-        Assert.assertEquals(actions.size(), 5);
+        Assert.assertEquals(actions.size(), 6);
         Assert.assertEquals(expandedJobs.size(), 4);
         Job firstJob = expandedJobs.get(0);
         Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName());
@@ -275,6 +275,16 @@ public class WorkflowJobServiceImplUnitTestNG {
         job1.setJobType("bulkmatchworkflow");
         workflowJobService.updateJobWithSubJobsIfIsPnA(job1);
         Assert.assertNull(job1.getSubJobs());
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateJobActionId() {
+        Job job = createFailedImportJob(jobIds[1]);
+        Assert.assertNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+        when(actionProxy.getActionsByJobPid(anyString(), any())).thenReturn(generateActions());
+        workflowJobService.updateJobActionId(job);
+        log.info(" job is :" + JsonUtils.serialize(job));
+        Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
     }
 
     @Test(groups = "unit")
@@ -432,11 +442,18 @@ public class WorkflowJobServiceImplUnitTestNG {
         actionConfig.setHiddenFromUI(true);
         action5.setActionInitiator(INITIATOR);
         action5.setActionConfiguration(actionConfig);
+        Action action6 = new Action();
+        action6.setPid(3L);
+        action6.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action6.setActionConfiguration(new ImportActionConfiguration());
+        action6.setActionStatus(ActionStatus.ACTIVE);
+        action6.setTrackingPid(jobIds[1]);
         actions.add(action1);
         actions.add(action2);
         actions.add(action3);
         actions.add(action4);
         actions.add(action5);
+        actions.add(action6);
         return actions;
     }
 
@@ -482,6 +499,20 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Long> actionIds = Arrays.asList(101L, 102L, 103L);
         Map<String, String> inputContext = new HashMap<>();
         inputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIds.toString());
+        job.setInputs(inputContext);
+        return job;
+    }
+
+    private Job createFailedImportJob(Long jobId) {
+        Job job = new Job();
+        job.setId(jobId);
+        job.setPid(jobId);
+        job.setName("cdlDataFeedImportWorkflow");
+        job.setDescription("cdlDataFeedImportWorkflow");
+        job.setJobType("cdlDataFeedImportWorkflow");
+        job.setStartTimestamp(new Date());
+        job.setJobStatus(JobStatus.FAILED);
+        Map<String, String> inputContext = new HashMap<>();
         job.setInputs(inputContext);
         return job;
     }
