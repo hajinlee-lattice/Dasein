@@ -50,9 +50,6 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     @Inject
     private MatchDecisionGraphService matchDecisionGraphService;
 
-    @Value("${datacloud.match.max.num.blocks:4}")
-    private Integer maxNumBlocks;
-
     @Value("${datacloud.match.num.threads:4}")
     private Integer threadPoolSize;
 

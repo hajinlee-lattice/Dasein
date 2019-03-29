@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -203,8 +204,9 @@ public class MatchInput implements Fact, Dimension {
     // Since some entity matches will require matching other entities, eg. Contact might require Account, and
     // Transaction requires Account, Contact, and Product, it won't necessarily be clear from the Entity Key Map
     // what the ultimate match goal is.
+    // TargetEntity = LatticeAccount means it's LDC match (default)
     @JsonProperty("TargetEntity")
-    String targetEntity;
+    String targetEntity = BusinessEntity.LatticeAccount.name();
 
     // A map from Business Entity (as a String) to EntityKeyMap.
     @JsonProperty("EntityKeyMaps")
