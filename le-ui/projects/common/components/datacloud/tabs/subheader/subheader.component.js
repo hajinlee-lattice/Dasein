@@ -8,7 +8,7 @@ angular
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
-        // vm.showExportDropdown = false;
+
         vm.displayExportBanner = false;
         angular.extend(vm, {
             enrichments: [],
@@ -40,6 +40,7 @@ angular
 
         vm.init = function () {
             QueryStore.setPublicProperty('enableSaveSegmentButton', false);
+            QueryStore.cancelUpdateBucketCalls = false;
             this.header.exportSegment.items = [
                 {
                     label: 'Enriched Accounts',
@@ -372,6 +373,44 @@ angular
             vm.header.exportSegment.items[2].disabledif =
                 !accountsAvailable || !contactsAvailable;
         };
+
+        vm.refreshCounts = function() {
+            vm.isRefreshing = true;
+            var segmentName = $stateParams.segment;
+            if (segmentName == 'Create') {
+                return;
+            }
+            var accountRestrictions = QueryStore.getAccountRestriction(),
+                contactRestrictions = QueryStore.getContactRestriction();
+
+            var segment = SegmentStore.sanitizeSegment({
+                account_restriction: accountRestrictions,
+                contact_restriction: contactRestrictions
+            });
+
+            vm.public.resetLabelIncrementor = true;
+            var flattenedSegmentRestrictions = SegmentStore.flattenSegmentRestrictions(segment);
+
+            vm.updateAllBucketCounts(flattenedSegmentRestrictions, 0);
+            vm.isRefreshing = false;
+        }
+
+        vm.updateAllBucketCounts = function(bucketRestrictions, index) {
+            if (QueryStore.cancelUpdateBucketCalls == true) {
+                return;
+            } else if (index > bucketRestrictions.length - 1) {
+                vm.saveSegment();
+                return;
+            }
+            console.log("index: " + index);
+            var restriction = bucketRestrictions[index];
+            QueryTreeService.updateBucketCount(angular.copy(restriction.bucketRestriction), undefined).then(function(data) {
+                if (typeof data == 'number') {
+                    restriction.bucketRestriction.bkt.Cnt = data;
+                }
+                vm.updateAllBucketCounts(bucketRestrictions, index + 1);
+            });
+        }
 
         function checkStatusBeforeExport(exportType, $event) {
             $event.preventDefault();
