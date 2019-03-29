@@ -50,10 +50,10 @@ CREATE PROCEDURE `UpdatePLSTables`()
     ALTER TABLE `PLS_MultiTenant`.`DATAFEED_TASK` ADD COLUMN `S3_IMPORT_STATUS` VARCHAR(30);
     UPDATE `PLS_MultiTenant`.`DATAFEED_TASK` SET `S3_IMPORT_STATUS`='Active';
 
-    ALTER TABLE `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` ADD COLUMN `CREATION_TIME` datetime not null default '1970-01-01 00:00:00'
-    ALTER TABLE `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` ADD COLUMN `UPDATE_TIME` datetime not null default '1970-01-01 00:00:00'
+    ALTER TABLE `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` ADD COLUMN `CREATION_TIME` datetime not null default '1970-01-01 00:00:00';
+    ALTER TABLE `PLS_MultiTenant`.`PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` ADD COLUMN `UPDATE_TIME` datetime not null default '1970-01-01 00:00:00';
     drop table if exists `METADATA_DATA_COLLECTION_STATUS_HISTORY`;
-    create table `METADATA_DATA_COLLECTION_STATUS_HISTORY` (`PID` bigint not null auto_increment, `CREATION_TIME` datetime not null, `Detail` JSON, `TENANT_NAME` varchar(255) not null, `UPDATE_TIME` datetime not null, primary key (`PID`)) engine=InnoDB;
+    create table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` (`PID` bigint not null auto_increment, `CREATION_TIME` datetime not null, `Detail` JSON, `TENANT_NAME` varchar(255) not null, `UPDATE_TIME` datetime not null, primary key (`PID`)) engine=InnoDB;
 
    	
     ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` ADD COLUMN `FK_TENANT_ID` BIGINT NULL;

@@ -20,4 +20,6 @@ public interface GlobalAuthUserTenantRightDao extends BaseDao<GlobalAuthUserTena
     List<GlobalAuthUserTenantRight> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    List<GlobalAuthUserTenantRight> findByNonNullExprationDate();
 }

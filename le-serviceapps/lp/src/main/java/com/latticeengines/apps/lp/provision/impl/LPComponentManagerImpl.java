@@ -172,7 +172,7 @@ public class LPComponentManagerImpl implements LPComponentManager {
                 updatePasswordBasedOnUsername(user);
             }
             try {
-                userService.assignAccessLevel(accessLevel, tenantId, email, userName);
+                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);

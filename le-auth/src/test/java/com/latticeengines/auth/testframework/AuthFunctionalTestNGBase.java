@@ -2,6 +2,8 @@ package com.latticeengines.auth.testframework;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
@@ -10,8 +12,10 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-auth-context.xml" })
 public class AuthFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
 
     @Autowired
     protected GlobalAuthTenantEntityMgr gaTenantEntityMgr;

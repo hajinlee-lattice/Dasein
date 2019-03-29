@@ -136,7 +136,8 @@ public class AdminResource extends InternalResourceBase {
         LOGGER.info(String.format("Updating user %s in the tenant %s using the internal API", username, tenantId));
 
         if (accessLevel != null) {
-            userService.assignAccessLevel(accessLevel, tenantId, username, MultiTenantContext.getEmailAddress());
+            userService.assignAccessLevel(accessLevel, tenantId, username, MultiTenantContext.getEmailAddress(),
+                    userUpdateData.getExpirationDate());
             LOGGER.info(String.format("User %s has been updated to %s for the tenant %s through the internal API",
                     username, accessLevel.name(), tenantId));
         }

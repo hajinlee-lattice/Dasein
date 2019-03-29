@@ -37,6 +37,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
     $scope.ResourceUtility = ResourceUtility;
     // get rid of external admin per Tejas. will add it back when PLS 2.1 is released
     //$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
+    $scope.periodsToSelect = ["NEVER", "SEVEN_DAYS", "THIRTY_DAYS" ];
     var makeLevels = function(email){
         var email = email || '';
         $scope.levelsToSelect = [];
@@ -83,11 +84,17 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
         }
     }
 
+    $scope.allowExpireSelect = function(){
+        if ($scope.user && $scope.user.Email && $scope.user.Email.length && !$scope.showAddUserSuccess && isLatticeEmail($scope.user.Email)) {
+            return true;
+        }
+    }
+
     $scope.saveInProgress = false;
     $scope.addUserErrorMessage = "";
     $scope.showAddUserError = false;
 
-    $scope.user = {AccessLevel: RightsUtility.accessLevel.EXTERNAL_USER.name};
+    $scope.user = {AccessLevel: RightsUtility.accessLevel.EXTERNAL_USER.name, ExpirePeriod : "NEVER"};
 
     function isLatticeEmail(email) {
         var domain = 'lattice-engines.com';
@@ -194,7 +201,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
         $scope.user.Email = $scope.existingUser.Email;
         $scope.user.Username = $scope.existingUser.Username;
 
-        UserManagementService.AssignAccessLevel($scope.user.Username, $scope.user.AccessLevel).then(function(result){
+        UserManagementService.AssignAccessLevel($scope.user.Username, $scope.user.AccessLevel, $scope.user.ExpirePeriod).then(function(result){
             if (result.Success) {
                 $scope.showAddUserSuccess = true;
                 $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_EXSITING_USER_SUCCESS",
