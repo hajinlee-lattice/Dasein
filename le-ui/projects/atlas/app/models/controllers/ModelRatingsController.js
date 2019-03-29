@@ -82,15 +82,44 @@ angular.module('lp.models.ratings', [
             //     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
             // }
 
-            console.log("here 2");
+            if ($stateParams.useSelectedIteration) {
 
-            var id = vm.activeIteration.modelSummaryId;
-            ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
-                vm.workingBuckets = result;
-            });
-            ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
-                vm.ratingsSummary = result;
-            });
+                var id = vm.activeIteration.modelSummaryId;
+                ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
+                    vm.workingBuckets = result;
+                });
+                ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                    vm.ratingsSummary = result;
+                });
+
+            } else {
+
+                vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
+
+                // If the model has been published previously and is Active
+                if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+
+                    console.log("here 3");
+
+                    // Set active iteration and working buckets (determines what is displayed in the chart)
+                    vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
+                    vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
+
+                    var id = vm.activeIteration.modelSummaryId;
+                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                        // Helps with chart data and display
+                        vm.ratingsSummary = result;
+                    });
+
+                } else {
+
+                    console.log("here 4");
+
+                    // If the model has not been published or is inactive, 
+                    // select the most recent iteration in the select menu
+                    vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
+                }
+            }
 
 
             // Set active iteration (default value for iteration select menu) 
