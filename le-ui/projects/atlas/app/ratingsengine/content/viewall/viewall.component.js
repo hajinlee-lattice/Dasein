@@ -126,7 +126,6 @@ class ViewAllComponent extends Component {
                               <LeButton
                                   name="activate"
                                   callback={() => {
-                                      console.log(this.props.$stateParams);
                                       this.props.$state.go('home.model.ratings', { 
                                         rating_id: this.props.$stateParams.rating_id, 
                                         modelId: cell.props.rowData.modelSummaryId, 
