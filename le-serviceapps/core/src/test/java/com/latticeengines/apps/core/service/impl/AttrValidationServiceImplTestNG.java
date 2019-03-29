@@ -7,11 +7,12 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
@@ -25,8 +26,9 @@ public class AttrValidationServiceImplTestNG extends ServiceAppsFunctionalTestNG
 
     private List<AttrConfig> attrConfigList = new ArrayList<>();
 
-    @BeforeTest
+    @BeforeClass(groups = "functional")
     public void setup() {
+        setupTestEnvironment();
         attrConfigList.addAll(Arrays.asList(AttrConfigTestUtils.getAccountId(), AttrConfigTestUtils.getAnnualRevenue(),
                 AttrConfigTestUtils.getCustomeAccountAttr(), AttrConfigTestUtils.getContactId(),
                 AttrConfigTestUtils.getContactFirstName()));
@@ -42,6 +44,10 @@ public class AttrValidationServiceImplTestNG extends ServiceAppsFunctionalTestNG
         prop1.setSystemValue(100);
         prop1.setCustomValue(99);
         attrConfig.putProperty("IntValue", prop1);
+        AttrConfigProp<String> prop2 = new AttrConfigProp<>();
+        prop2.setAllowCustomization(false);
+        prop2.setSystemValue("TestAttr");
+        attrConfig.putProperty(ColumnMetadataKey.DisplayName, prop2);
         attrConfigs.add(attrConfig);
         ValidationDetails details = attrValidationService.validate(attrConfigList, attrConfigs,
                 AttrConfigUpdateMode.Usage);
