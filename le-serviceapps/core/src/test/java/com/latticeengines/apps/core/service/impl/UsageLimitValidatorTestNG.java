@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.util.StringUtils;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
@@ -26,6 +27,11 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
 
     private static final long exportLimit = AttrConfigUsageOverview.defaultExportLimit;
     private static final long companyProfileLimit = AttrConfigUsageOverview.defaultCompanyProfileLimit;
+
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        setupTestEnvironment();
+    }
 
     @Test(groups = "functional")
     public void testGetLimit() {
