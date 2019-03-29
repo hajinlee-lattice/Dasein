@@ -3,6 +3,7 @@ package com.latticeengines.objectapi.service.impl;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.objectapi.service.PurchaseHistoryService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component("purchaseHistoryService")
 public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
@@ -40,6 +43,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -166,15 +172,24 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     @Override
     public DataPage getAllSpendAnalyticsSegments() {
         Tenant tenant = MultiTenantContext.getTenant();
-        String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
-        log.info(String.format("Get Account Table %s for %s", accountTableName, tenant.getId()));
-        String query = MessageFormat.format(
-                "SELECT distinct {0}, count({1}) as {2}, True as IsSegment, {0} as AccountId FROM {3} WHERE {0} IS NOT NULL GROUP BY {0}",
-                InterfaceName.SpendAnalyticsSegment, InterfaceName.AccountId, InterfaceName.RepresentativeAccounts,
-                accountTableName);
-        log.info("query for getAllSpendAnalyticsSegments " + query);
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
-        return new DataPage(retList);
+        // SpendAnalyticsSegment is optional in Account data. Check to see if
+        // this column exists. If not, return empty result
+        List<ColumnMetadata> acctCMList = servingStoreProxy.getDecoratedMetadataFromCache(
+                MultiTenantContext.getCustomerSpace().toString(), BusinessEntity.Account);
+
+        if (acctCMList.stream()
+                .anyMatch(cm -> cm.getAttrName().equalsIgnoreCase(InterfaceName.SpendAnalyticsSegment.name()))) {
+            String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
+            log.info(String.format("Get Account Table %s for %s", accountTableName, tenant.getId()));
+            String query = MessageFormat.format(
+                    "SELECT distinct {0}, count({1}) as {2}, True as IsSegment, {0} as AccountId FROM {3} WHERE {0} IS NOT NULL GROUP BY {0}",
+                    InterfaceName.SpendAnalyticsSegment, InterfaceName.AccountId, InterfaceName.RepresentativeAccounts,
+                    accountTableName);
+            log.info("query for getAllSpendAnalyticsSegments " + query);
+            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+            return new DataPage(retList);
+        }
+        return new DataPage(Collections.emptyList());
     }
 
     private String getAndValidateServingStoreTableName(String customerSpace, BusinessEntity businessEntity) {
