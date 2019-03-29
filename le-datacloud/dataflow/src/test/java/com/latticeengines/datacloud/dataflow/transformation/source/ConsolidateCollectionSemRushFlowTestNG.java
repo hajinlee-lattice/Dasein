@@ -27,7 +27,7 @@ public class ConsolidateCollectionSemRushFlowTestNG extends DataCloudDataFlowFun
     }
 
 
-    @Test(groups = "semFlow")
+    @Test(groups = "functional")
     public void testRunFlow() {
         TransformationFlowParameters parameters = prepareInput();
         executeDataFlow(parameters);
