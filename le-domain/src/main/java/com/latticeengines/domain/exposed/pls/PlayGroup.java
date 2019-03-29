@@ -84,7 +84,7 @@ public class PlayGroup implements HasPid, HasId<String>, HasTenantId, HasAuditin
     private String updatedBy;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "playGroups")
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "playGroups")
     private Set<Play> plays;
 
     public PlayGroup() {

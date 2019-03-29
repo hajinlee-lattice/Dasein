@@ -8,7 +8,6 @@ angular.module('lp.import.wizard.customfields', [])
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name),
         extraFieldMappingInfo = FieldDocument.extraFieldMappingInfo;
 
-
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
     }else{
@@ -143,6 +142,30 @@ angular.module('lp.import.wizard.customfields', [])
                 $scope.$apply();
             }, 100);
             
+        }
+    }
+    vm.getDateFormatFromLatticeSchema = (mappedField) => {
+        let fieldSchema = ImportUtils.getFieldFromLaticeSchema(ImportWizardStore.getEntityType(), mappedField);
+        if(fieldSchema){
+            return fieldSchema.dateFormatString;
+        }else{
+            return '';
+        }
+    }
+    vm.getTimeFormatFromLatticeSchema = (mappedField) => {
+        let fieldSchema = ImportUtils.getFieldFromLaticeSchema(ImportWizardStore.getEntityType(), mappedField);
+        if(fieldSchema){
+            return fieldSchema.timeFormatString;
+        }else{
+            return '';
+        }
+    }
+    vm.getTimezoneFromLatticeSchema = (mappedField) => {
+        let fieldSchema = ImportUtils.getFieldFromLaticeSchema(ImportWizardStore.getEntityType(), mappedField);
+        if(fieldSchema){
+            return fieldSchema.timezone;
+        }else{
+            return '';
         }
     }
     vm.init();

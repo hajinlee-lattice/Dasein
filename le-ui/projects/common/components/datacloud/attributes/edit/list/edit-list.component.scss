@@ -55,31 +55,27 @@
                     white-space: nowrap;
                     text-overflow: ellipsis;
                 }
-            }    
-        
+            } 
+            
             &.edit-attribute-displayname {
                 max-width: 25%;
+                em {
+                    right: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    opacity:.5;
+                }
             }
 
             &.edit-attribute-description {
                 max-width: 50%;
                 position: relative;
-                padding-right: 2em;
                 em {
-                    position: absolute;
                     right: 0;
                     top: 50%;
                     transform: translateY(-50%);
-                    &.low {
-                        color: green;
-                    }
-                    &.medium {
-                        color: orange;
-                    }
-                    &.high {
-                        color: red;
-                    }
-                }
+                    opacity:.5;
+                }           
             }
         }
     }

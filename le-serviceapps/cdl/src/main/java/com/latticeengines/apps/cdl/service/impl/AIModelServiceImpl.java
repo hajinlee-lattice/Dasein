@@ -223,7 +223,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (CollectionUtils.isEmpty(attributeMetadata)) {
             log.warn("No metadata attribute metadata found for tenant: " + customerSpace);
-            // Initilize an empty map so that modeling query generation does not fail
+            // Initilize an empty map so that modeling query generation does not
+            // fail
             attributeMetadata = new HashSet<>();
         }
 
@@ -265,6 +266,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
     }
 
+    @Override
     public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
         AIModel aiModel = getRatingModelById(aiModelId);
         if (aiModel.getModelingJobStatus().isTerminated()) {
@@ -409,6 +411,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     cm.setPredictivePower(predictors.getOrDefault(toReturn.getAttrName(), new Predictor())
                             .getUncertaintyCoefficient());
                     cm.setEntity(BusinessEntity.Account);
+                    cm.setSubcategory("Other");
                     return toReturn;
 
                 }, () -> iterationAttributes).block();
@@ -490,8 +493,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 && CollectionUtils.isNotEmpty(predictor.getPredictorElements());
         cm.setCanEnrich(!predictorsElementsExist);
         attrStat.setNonNullCount(predictorsElementsExist
-                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum()
-                : 0);
+                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum() : 0);
         attrStat.getBuckets()
                 .setBucketList(predictorsElementsExist
                         ? predictor.getPredictorElements().stream().map(this::convertToBucket)
@@ -529,6 +531,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             bkt.setLabel("< " + predictorElement.getUpperExclusive());
             bkt.setComparisonType(ComparisonType.LESS_THAN);
             bkt.setValues(Collections.singletonList(predictorElement.getUpperExclusive()));
+        } else if (predictorElement.getUpperExclusive() == null) {
+            bkt.setLabel(">= " + predictorElement.getLowerInclusive());
+            bkt.setComparisonType(ComparisonType.GREATER_OR_EQUAL);
+            bkt.setValues(Collections.singletonList(predictorElement.getLowerInclusive()));
         } else {
             bkt.setLabel(predictorElement.getLowerInclusive() + " - " + predictorElement.getUpperExclusive());
             bkt.setComparisonType(ComparisonType.GTE_AND_LT);

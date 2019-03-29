@@ -65,7 +65,7 @@ public class TenantServiceImpl implements TenantService {
         oldTenant.setStatus(tenant.getStatus());
         oldTenant.setContract(tenant.getContract());
         if (tenant.getRegisteredTime() == null) {
-            oldTenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli());
+            oldTenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         } else {
             oldTenant.setRegisteredTime(tenant.getRegisteredTime());
         }

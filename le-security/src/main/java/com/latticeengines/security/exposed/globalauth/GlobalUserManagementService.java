@@ -17,7 +17,7 @@ public interface GlobalUserManagementService {
 
     Boolean grantRight(String right, String tenant, String username);
 
-    Boolean grantRight(String right, String tenant, String username, String createdByUser);
+    Boolean grantRight(String right, String tenant, String username, String createdByUser, Long expirationDate);
 
     Boolean revokeRight(String right, String tenant, String username);
 

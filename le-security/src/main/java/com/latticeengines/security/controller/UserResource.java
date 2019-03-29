@@ -192,6 +192,7 @@ public class UserResource {
         String loginUsername = loginUser.getUsername();
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
 
+
         // update access level
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
@@ -201,9 +202,8 @@ public class UserResource {
                 return SimpleBooleanResponse.failedResponse(
                         Collections.singletonList("Cannot update to a level higher than that of the login user."));
             }
-
             boolean newUser = !userService.inTenant(tenantId, username);
-            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername);
+            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate());
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);

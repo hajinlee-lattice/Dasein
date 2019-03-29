@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -135,6 +136,14 @@ public class PlayGroupResource {
                 log.error("Play Group already exists with PID: " + playGroup.getPid() + " or ID:" + playGroup.getId());
             } else {
                 validationErrors.add("ID or PID must be empty to create a new Group");
+            }
+        }
+        List<PlayGroup> groups = playGroupEntityMgr.findAll();
+        if (groups != null) {
+            List<PlayGroup> sameName = groups.stream()
+                    .filter(pt -> pt.getDisplayName().equals(playGroup.getDisplayName())).collect(Collectors.toList());
+            if (!sameName.isEmpty()) {
+                validationErrors.add("Play Group with same display name already exists");
             }
         }
         return validationErrors;
