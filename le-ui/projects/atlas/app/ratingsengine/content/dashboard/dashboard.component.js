@@ -353,9 +353,21 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.initDataModel();
         }
 
-        vm.isIterationActive = function (iterationId) {
+        vm.showActivateButton = function (iteration) {
+            if (vm.ratingEngine.status == 'ACTIVE') {
+                if (vm.isIterationScoringActive(iteration.id)) {
+                    return false;
+                } else {
+                    return iteration.modelingJobStatus == 'Completed' ? true : false;
+                }
+            } else {
+                return iteration.modelingJobStatus == 'Completed' ? true : false; 
+            }
+        }
+
+        vm.isIterationScoringActive = function (iterationId) {
             if (vm.ratingEngine.scoring_iteration != null) {
-                if (vm.ratingEngine.scoring_iteration.AI.id == iterationId && vm.ratingEngine.status != 'ACTIVE') {
+                if (vm.ratingEngine.scoring_iteration.AI.id == iterationId) {
                     return true;
                 } else {
                     return false;
