@@ -1,5 +1,0 @@
-build@le-lubuntu:~/Projects/modelquality/modelqualityproject$ hdfs dfs -mkdir hdfs://10.41.1.104:8020/app/a/2.0.38/experiments
-build@le-lubuntu:~/Projects/modelquality/modelqualityproject$ hdfs dfs -mkdir hdfs://10.41.1.104:8020/app/a/2.0.38/experiments/1
-build@le-lubuntu:~/Projects/modelquality/modelqualityproject$ hdfs dfs -copyFromLocal /home/build/Downloads/lepipeline.tar.gz hdfs://10.41.1.104:8020/app/a/2.0.38/experiments/1/lepipeline.tar.gz
-build@le-lubuntu:~/Projects/modelquality/modelqualityproject$ hdfs dfs -copyFromLocal /home/build/Downloads/changedpipeline.json hdfs://10.41.1.104:8020/app/a/2.0.38/experiments/1/changedpipeline.json
-build@le-lubuntu:~/Projects/modelquality/modelqualityproject$ hdfs dfs -copyFromLocal /home/build/Downloads/changedpipeline.json hdfs://10.41.1.104:8020/app/a/2.0.38/experiments/1/pipeline.json
