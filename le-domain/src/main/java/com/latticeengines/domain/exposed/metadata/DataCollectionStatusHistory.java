@@ -60,7 +60,7 @@ public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditi
 
     @Type(type = "json")
     @Column(name = "Detail", columnDefinition = "'JSON'")
-    private DataCollectionStatusDetailHistory detail = new DataCollectionStatusDetailHistory();
+    private DataCollectionStatusDetail detail = new DataCollectionStatusDetail();
 
     @Column(name = "CREATION_TIME", nullable = false)
     private Date creationTime;
@@ -94,12 +94,12 @@ public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditi
 
 
     @JsonIgnore
-    public DataCollectionStatusDetailHistory getDetail() {
+    public DataCollectionStatusDetail getDetail() {
         return detail;
     }
 
     @JsonIgnore
-    public void setDetail(DataCollectionStatusDetailHistory detail) {
+    public void setDetail(DataCollectionStatusDetail detail) {
         this.detail = detail;
     }
 
@@ -257,156 +257,6 @@ public class DataCollectionStatusHistory implements HasPid, HasTenant, HasAuditi
     @JsonProperty("UpdateTime")
     public void setUpdated(Date updated) {
         this.updateTime = updated;
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class DataCollectionStatusDetailHistory implements Serializable {
-        private static final long serialVersionUID = -6509860646479703874L;
-
-        @JsonProperty("DateMap")
-        Map<String, Long> dateMap;
-
-        @JsonProperty("MinTxnDate")
-        private Integer minTxnDate = 0;
-
-        @JsonProperty("MaxTxnDate")
-        private Integer maxTxnDate = 0;
-
-        @JsonProperty("EvaluationDate")
-        private String evaluationDate = NOT_SET;
-
-        @JsonProperty("DataCloudBuildNumber")
-        private String dataCloudBuildNumber = NOT_SET;
-
-        @JsonProperty("AccountCount")
-        private Long accountCount = 0L;
-
-        @JsonProperty("ContactCount")
-        private Long contactCount = 0L;
-
-        @JsonProperty("TransactionCount")
-        private Long transactionCount = 0L;
-
-        @JsonProperty("ProductCount")
-        private Long productCount = 0L;
-
-        @JsonProperty("OrphanContactCount")
-        private Long orphanContactCount = 0L;
-
-        @JsonProperty("OrphanTransactionCount")
-        private Long orphanTransactionCount = 0L;
-
-        @JsonProperty("UnmatchedAccountCount")
-        private Long unmatchedAccountCount = 0L;
-
-        @JsonProperty("ApsRollingPeriod")
-        private String apsRollingPeriod;
-
-        public Integer getMinTxnDate() {
-            return minTxnDate;
-        }
-
-        public void setMinTxnDate(Integer minTxnDate) {
-            this.minTxnDate = minTxnDate;
-        }
-
-        public Integer getMaxTxnDate() {
-            return maxTxnDate;
-        }
-
-        public void setMaxTxnDate(Integer maxTxnDate) {
-            this.maxTxnDate = maxTxnDate;
-        }
-
-        public String getEvaluationDate() {
-            return evaluationDate;
-        }
-
-        public void setEvaluationDate(String evaluationDate) {
-            this.evaluationDate = evaluationDate;
-        }
-
-        public String getDataCloudBuildNumber() {
-            return dataCloudBuildNumber;
-        }
-
-        public void setDataCloudBuildNumber(String dataCloudBuildNumber) {
-            this.dataCloudBuildNumber = dataCloudBuildNumber;
-        }
-
-        public Long getAccountCount() {
-            return accountCount;
-        }
-
-        public void setAccountCount(Long accountCount) {
-            this.accountCount = accountCount;
-        }
-
-        public Long getContactCount() {
-            return contactCount;
-        }
-
-        public void setContactCount(Long contactCount) {
-            this.contactCount = contactCount;
-        }
-
-        public Long getTransactionCount() {
-            return transactionCount;
-        }
-
-        public void setTransactionCount(Long transactionCount) {
-            this.transactionCount = transactionCount;
-        }
-
-        public Long getProductCount() {
-            return productCount;
-        }
-
-        public void setProductCount(Long productCount) {
-            this.productCount = productCount;
-        }
-
-        public Long getOrphanContactCount() {
-            return orphanContactCount;
-        }
-
-        public void setOrphanContactCount(Long orphanContactCount) {
-            this.orphanContactCount = orphanContactCount;
-        }
-
-        public Long getOrphanTransactionCount() {
-            return orphanTransactionCount;
-        }
-
-        public void setOrphanTransactionCount(Long orphanTransactionCount) {
-            this.orphanTransactionCount = orphanTransactionCount;
-        }
-
-        public Long getUnmatchedAccountCount() {
-            return unmatchedAccountCount;
-        }
-
-        public void setUnmatchedAccountCount(Long unmatchedAccountCount) {
-            this.unmatchedAccountCount = unmatchedAccountCount;
-        }
-
-        public String getApsRollingPeriod() {
-            return apsRollingPeriod;
-        }
-
-        public void setApsRollingPeriod(String apsRollingPeriod) {
-            this.apsRollingPeriod = apsRollingPeriod;
-        }
-
-        public Map<String, Long> getDateMap() {
-            return dateMap;
-        }
-
-        public void setDateMap(Map<String, Long> dateMap) {
-            this.dateMap = dateMap;
-        }
-
     }
 
 }
