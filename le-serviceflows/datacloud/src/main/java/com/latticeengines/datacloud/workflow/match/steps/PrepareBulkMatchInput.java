@@ -11,7 +11,9 @@ import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,22 +50,31 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Value("${datacloud.match.parallel.blocks.max.num}")
-    private Integer maxNumParallelBlocks;
-
-    @Value("${datacloud.match.fuzzy.blocks.size.threshold}")
-    private Integer fuzzyBlockSizeThreshold;
+    @Value("${datacloud.match.fetch.concurrent.blocks.max}")
+    private Integer maxFetchConcurrentBlocks;
 
     // After we introduce customized entity, need to have default setting for
-    // maximum block number
-    @Value("${datacloud.match.account.block.max.num}")
-    private Integer maxNumAccountBlocks;
+    // maximum concurrent block number
+    @Value("${datacloud.match.account.concurrent.blocks.max}")
+    private Integer maxAccountConcurrentBlocks;
 
-    @Value("${datacloud.match.contact.block.max.num}")
-    private Integer maxNumContactBlocks;
+    @Value("${datacloud.match.contact.concurrent.blocks.max}")
+    private Integer maxContactConcurrentBlocks;
 
-    @Value("${datacloud.match.txn.block.max.num}")
-    private Integer maxNumTxnBlocks;
+    @Value("${datacloud.match.txn.concurrent.blocks.max}")
+    private Integer maxTxnConcurrentBlocks;
+
+    @Value("${datacloud.match.fuzzy.block.size.min}")
+    private Integer minFuzzyBlockSize;
+
+    @Value("${datacloud.match.fuzzy.block.size.max}")
+    private Integer maxFuzzyBlockSize;
+
+    @Value("${datacloud.match.fetch.block.size.min}")
+    private Integer minFetchBlockSize;
+
+    @Value("${datacloud.match.fetch.block.size.max}")
+    private Integer maxFetchBlockSize;
 
     private String avroGlobs;
 
@@ -108,58 +119,106 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     Integer[] determineBlockSizes(Long count) {
         if (MatchUtils.isValidForAccountMasterBasedMatch(getConfiguration().getMatchInput().getDataCloudVersion())) {
             if (getConfiguration().getMatchInput().isFetchOnly()) {
-                return divideIntoNumBlocks(count, determineNumBlocksForAM(count));
+                return divideIntoNumBlocks(count, determineNumBlocksForFetchOnly(count));
             } else {
                 return divideIntoNumBlocks(count,
                         determineNumBlocksForFuzzyMatch(count, getConfiguration().getMatchInput()));
             }
         } else {
-            return divideIntoNumBlocks(count, determineNumBlocks(count));
+            return divideIntoNumBlocks(count, determineNumBlocksForRTS(count));
         }
     }
 
-    private Integer determineNumBlocksForAM(Long count) {
-        Integer minBlockSize = 25_000;
-        Integer maxBlockSize = 120_000;
-
-        Integer numBlocks;
-
-        if (count < (minBlockSize * maxNumParallelBlocks)) {
-            numBlocks = Math.max((int) (count / minBlockSize), 1);
-        } else if (count > (maxBlockSize * maxNumParallelBlocks)) {
-            numBlocks = (int) (count / maxBlockSize);
-        } else {
-            numBlocks = maxNumParallelBlocks;
-        }
-
-        return numBlocks;
-    }
-
+    /**
+     * For 2.0 DataCloud based fuzzy match (Non-FetchOnly mode)
+     *
+     * Determine total number of blocks and set maximum concurrent #block into
+     * executionContext
+     *
+     * @param count
+     * @param input
+     * @return
+     */
     private Integer determineNumBlocksForFuzzyMatch(Long count, MatchInput input) {
+        // Entity -> (minBlockSize, maxBlockSize, maxConcurrentBlocks)
         @SuppressWarnings("serial")
-        Map<String, Integer> entityMaxBlocks = new HashMap<String, Integer>() {
+        Map<String, Triple<Integer, Integer, Integer>> entityBlockInfo = new HashMap<String, Triple<Integer, Integer, Integer>>() {
             {
-                // Both null and LatticeAccount are for LDC match
-                put(null, maxNumAccountBlocks); //
-                put(BusinessEntity.LatticeAccount.name(), maxNumAccountBlocks); //
-                put(BusinessEntity.Account.name(), maxNumAccountBlocks); //
-                put(BusinessEntity.Contact.name(), maxNumContactBlocks); //
-                put(BusinessEntity.Transaction.name(), maxNumTxnBlocks); //
+                // LDC Match
+                put(null, Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxAccountConcurrentBlocks)); //
+                // LDC Match
+                put(BusinessEntity.LatticeAccount.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxAccountConcurrentBlocks)); //
+                // Account Entity Match
+                put(BusinessEntity.Account.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxAccountConcurrentBlocks)); //
+                // Contact Entity Match (M28)
+                put(BusinessEntity.Contact.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxContactConcurrentBlocks)); //
+                // Transaction Entity Match (M29)
+                put(BusinessEntity.Transaction.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxTxnConcurrentBlocks)); //
             }
         };
 
-        if (entityMaxBlocks.get(input.getTargetEntity()) == null) {
+        if (!entityBlockInfo.containsKey(input.getTargetEntity())) {
             throw new UnsupportedOperationException("Unsupported target entity in match: " + input.getTargetEntity());
         }
-        Integer maxBlocks = entityMaxBlocks.get(input.getTargetEntity());
-        return (int) Math.min(count / fuzzyBlockSizeThreshold + 1, maxBlocks);
+        Triple<Integer, Integer, Integer> blockInfo = entityBlockInfo.get(input.getTargetEntity());
+        // Fail fast in case we configure anything wrong
+        if (ObjectUtils.defaultIfNull(blockInfo.getLeft(), 0) == 0
+                || ObjectUtils.defaultIfNull(blockInfo.getMiddle(), 0) == 0
+                || ObjectUtils.defaultIfNull(blockInfo.getRight(), 0) == 0) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid setting for entity %s: %s", input.getTargetEntity(), blockInfo.toString()));
+        }
+        executionContext.put(BulkMatchContextKey.MAX_CONCURRENT_BLOCKS, blockInfo.getRight());
+        return determineNumBlocks(count, blockInfo.getLeft(), blockInfo.getMiddle(), blockInfo.getRight());
     }
 
-    private Integer determineNumBlocks(Long count) {
+    /**
+     * For 2.0 DataCloud based fuzzy match (FetchOnly mode)
+     *
+     * Determine total number of blocks and set maximum concurrent #block into
+     * executionContext
+     *
+     * @param count
+     * @param input
+     * @return
+     */
+    private Integer determineNumBlocksForFetchOnly(Long count) {
+        executionContext.put(BulkMatchContextKey.MAX_CONCURRENT_BLOCKS, maxFetchConcurrentBlocks);
+        return determineNumBlocks(count, minFetchBlockSize, maxFetchBlockSize, maxFetchConcurrentBlocks);
+    }
+
+    /**
+     * For V1.0 DerivedColumnsCache based SQL lookup match
+     *
+     * Determine total number of blocks and set maximum concurrent #block into
+     * executionContext
+     *
+     * @param count
+     * @return
+     */
+    private Integer determineNumBlocksForRTS(Long count) {
         Integer numBlocks = 1;
         Integer averageBlockSize = getConfiguration().getAverageBlockSize();
-        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumParallelBlocks) {
+        while (count >= averageBlockSize * numBlocks && numBlocks < maxFetchConcurrentBlocks) {
             numBlocks++;
+        }
+        executionContext.put(BulkMatchContextKey.MAX_CONCURRENT_BLOCKS, maxFetchConcurrentBlocks);
+        return numBlocks;
+    }
+
+    private Integer determineNumBlocks(Long count, Integer minBlockSize, Integer maxBlockSize,
+            Integer maxConcurrentBlocks) {
+        Integer numBlocks;
+        if (count < (minBlockSize * maxConcurrentBlocks)) {
+            numBlocks = Math.max((int) (count / minBlockSize), 1);
+        } else if (count > (maxBlockSize * maxConcurrentBlocks)) {
+            numBlocks = (int) (count / maxBlockSize);
+        } else {
+            numBlocks = maxConcurrentBlocks;
         }
         return numBlocks;
     }

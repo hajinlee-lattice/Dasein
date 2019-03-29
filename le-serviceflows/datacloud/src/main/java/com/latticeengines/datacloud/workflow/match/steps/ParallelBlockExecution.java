@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -69,9 +70,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     @Autowired
     private ZkConfigurationService zkConfigurationService;
-
-    @Value("${datacloud.match.parallel.blocks.max.num}")
-    private Integer maxNumParallelBlocks;
 
     @Value("${datacloud.match.block.interval.sec}")
     private int blockRampingRate;
@@ -142,7 +140,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void submitMatchBlocks() {
-        while ((remainingJobs.size() > 0) && (applicationIds.size() < maxNumParallelBlocks)) {
+        Integer maxConcurrentBlocks = (Integer) executionContext.get(BulkMatchContextKey.MAX_CONCURRENT_BLOCKS);
+        if (ObjectUtils.defaultIfNull(maxConcurrentBlocks, 0) == 0) {
+            throw new RuntimeException("Invalid maximum concurrent number of blocks: " + maxConcurrentBlocks);
+        }
+        while ((remainingJobs.size() > 0) && (applicationIds.size() < maxConcurrentBlocks)) {
             DataCloudJobConfiguration jobConfiguration = remainingJobs.remove(0);
             ApplicationId appId = ApplicationId //
                     .fromString(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
