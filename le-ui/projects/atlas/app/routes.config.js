@@ -327,12 +327,24 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                     DataCloudStore.ratingIterationFilter = 'all';
 
                     DataCloudStore.getAllEnrichmentsConcurrently(opts, true).then((result) => {
+
+                        // console.log(result.find(x => x.ImportanceOrdering));
+                        // console.log(result.find(x => x.PredictivePower));
+
                         result.forEach((item) => {
                             item.Entity = "Account";
+                            if (!item.ImportanceOrdering) {
+                                item.ImportanceOrdering = 0;
+                            }
+                            if (!item.PredictivePower) {
+                                item.PredictivePower = 0;
+                            }
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
                             }
                         })
+
+                        console.log(result);
                         deferred.resolve(result);
                     });
 
