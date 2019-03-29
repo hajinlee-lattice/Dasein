@@ -62,6 +62,29 @@
                     </div>
                 </div>
             </div>
+            <div class="dashboard-section play-groups">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>Campaign Groups</h2>
+                    </div>
+                    <div class="dashboard-section-content">
+                        <chips 
+                            placeholder="All Campaign Groups" 
+                            datasource="vm.allPlayGroups" 
+                            callback-function="vm.changePlayGroups(args)"
+                            single-selection="false"
+                            id="id"
+                            initiallyselected="vm.play.playGroups"
+                            displayname="displayName"
+                            queryscope="displayName"
+                            showicon="true">
+                        </chips>
+                    </div>
+                    <div class="dashboard-section-footer">
+                        <button class="preview button blue-button" ng-click="vm.savePlayGroups()">Save Groups</button>
+                    </div>
+                </div>
+            </div>
 
             <div class="dashboard-section talking-points">
                 <div class="dashboard-section-container">

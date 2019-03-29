@@ -1,10 +1,11 @@
 angular.module('lp.playbook.dashboard', [
     'ngAnimate',
-    'mainApp.appCommon.utilities.TimestampIntervalUtility'
+    'mainApp.appCommon.utilities.TimestampIntervalUtility',
+    'mainApp.appCommon.directives.chips'
 ])
 .controller('PlaybookDashboard', function(
     $q, $scope, $stateParams, $state, $interval, $timeout, $rootScope,
-    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore, CampaignTypes
+    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore, CampaignTypes, CampaignGroups
 ) {
 
     var vm = this,
@@ -35,7 +36,8 @@ angular.module('lp.playbook.dashboard', [
         editing: {},
         barChartConfig: PlaybookWizardStore.barChartConfig,
         barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig,
-        campaignTypes: CampaignTypes
+        campaignTypes: CampaignTypes,
+        allPlayGroups: CampaignGroups
     });
 
     // $q.when($stateParams.play_name, function() {
@@ -308,6 +310,18 @@ angular.module('lp.playbook.dashboard', [
 
             vm.campaignType = play.playType.id;
         });
+    }
+
+    vm.changePlayGroups = function(args) {
+        vm.play.playGroups = args;
+    }
+
+    vm.savePlayGroups = function() {
+        var opts = {
+                name: vm.play.name,
+                playGroups: vm.play.playGroups,
+            };
+        PlaybookWizardStore.savePlay(opts).then(function(play){});
     }
 
     function reformatBucketMetadata(bucketMetadata) {
