@@ -368,12 +368,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
+        log.error("$JAW$ MEB TotalMatched: " + totalMatched);
         if (isEntityMatch) {
             log.error("$JAW$ Copying Match Results to MatchStats");
             matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(orphanedNoMatchCount);
             matchContext.getOutput().getStatistics().setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
+
+            log.error("$JAW$ MEB OrphanedNoMatchCount: " + orphanedNoMatchCount);
+            log.error("$JAW$ MEB OrphanedUnmatchedAccountIdCount: " + orphanedUnmatchedAccountIdCount);
+            log.error("$JAW$ MEB MatchedByMatchKeyCount): " + matchedByMatchKeyCount);
+            log.error("$JAW$ MEB MatchedByAccountIdCount: " + matchedByAccountIdCount);
         }
 
         if (columnMatchCount.length <= 10000) {

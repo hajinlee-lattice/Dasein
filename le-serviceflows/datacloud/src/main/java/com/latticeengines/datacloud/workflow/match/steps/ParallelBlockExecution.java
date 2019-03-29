@@ -215,6 +215,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 for (MatchBlock block : blocks) {
                     count += block.getMatchedRows() != null ? block.getMatchedRows() : 0L;
 
+                    log.error("$JAW$ MatchBlock Rows Matched: " + block.getMatchedRows());
+
                     if (MapUtils.isNotEmpty(block.getMatchResults())) {
                         log.error("$JAW$ Found non-empty MatchBlock result.");
                         Map<EntityMatchResult, Long> map = block.getMatchResults();
@@ -235,6 +237,13 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                                 map.get(EntityMatchResult.MATCHED_BY_MATCHKEY) : 0L;
                         matchedByAccountIdCount += map.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID) ?
                                 map.get(EntityMatchResult.MATCHED_BY_ACCOUNTID) : 0L;
+
+
+                        log.error("$JAW$ Incr MatchBlock Orphaned No Match: " + orphanedNoMatchCount);
+                        log.error("$JAW$ Incr MatchBlock Orphaned Unmatched Account ID: " +
+                                orphanedUnmatchedAccountIdCount);
+                        log.error("$JAW$ Incr MatchBlock Matched By MatchKey: " + matchedByMatchKeyCount);
+                        log.error("$JAW$ Incr MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
                     }
                 }
             }
@@ -250,6 +259,13 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 entityMatchResultMap.put(EntityMatchResult.MATCHED_BY_MATCHKEY, matchedByMatchKeyCount);
                 entityMatchResultMap.put(EntityMatchResult.MATCHED_BY_ACCOUNTID, matchedByAccountIdCount);
             }
+
+            log.error("$JAW$ Final Rows Matched: " + count);
+            log.error("$JAW$ Final MatchBlock Orphaned No Match: " + orphanedNoMatchCount);
+            log.error("$JAW$ Final MatchBlock Orphaned Unmatched Account ID: " +
+                    orphanedUnmatchedAccountIdCount);
+            log.error("$JAW$ Final MatchBlock Matched By MatchKey: " + matchedByMatchKeyCount);
+            log.error("$JAW$ Final MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
 
             log.info("Aggregated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
             matchCommandService.update(rootOperationUid) //

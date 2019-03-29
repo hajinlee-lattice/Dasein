@@ -38,6 +38,9 @@ public class MatchUtils {
         }
         mergedStats.setRowsMatched(stats.getRowsMatched() + newStats.getRowsMatched());
         log.error("$JAW$ Merging Match Stats");
+        log.error("   Stats Rows Matched: " + stats.getRowsMatched());
+        log.error("   New Stats Rows Matched: " + newStats.getRowsMatched());
+        log.error("   Merges Stats Rows Matched: " + mergedStats.getRowsMatched());
         mergedStats.setOrphanedNoMatchCount(stats.getOrphanedNoMatchCount() + newStats.getOrphanedNoMatchCount());
         log.error("   Stats Orphaned No Match: " + stats.getOrphanedNoMatchCount());
         log.error("   New Stats Orphaned No Match: " + newStats.getOrphanedNoMatchCount());

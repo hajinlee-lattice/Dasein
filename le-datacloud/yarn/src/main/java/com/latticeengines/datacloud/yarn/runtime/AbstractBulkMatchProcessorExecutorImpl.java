@@ -406,6 +406,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
         }
 
+
+        log.error("$JAW$ MatchBlock Rows Matched: " + processorContext.getBlockOutput().getStatistics()
+                .getRowsMatched());
+
         log.error("$JAW$ Creating MatchBlock Map");
         Map<EntityMatchResult, Long> matchResultMap = new HashMap<>();
         if (OperationalMode.ENTITY_MATCH.equals(processorContext.getGroupMatchInput().getOperationalMode())) {
@@ -415,6 +419,11 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 log.error("$JAW$ Found null Orphaned No Match Count for ProcessContext: "
                         + processorContext.getRootOperationUid());
             }
+
+            log.error("$JAW$ MatchBlock Orphaned No Match: " + matchStats.getOrphanedNoMatchCount());
+            log.error("$JAW$ MatchBlock Orphaned Unmatched Account ID: " + matchStats.getOrphanedUnmatchedAccountIdCount());
+            log.error("$JAW$ MatchBlock Matched By MatchKey: " + matchStats.getMatchedByMatchKeyCount());
+            log.error("$JAW$ MatchBlock Matched By Account ID: " + matchStats.getMatchedByAccountIdCount());
 
             matchResultMap.put(EntityMatchResult.ORPHANED_NO_MATCH,
                     matchStats.getOrphanedNoMatchCount() == null ? 0L : matchStats.getOrphanedNoMatchCount());
