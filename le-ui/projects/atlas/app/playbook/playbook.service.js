@@ -802,6 +802,20 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.setGroups = function(groups) {
+        this.groups = groups;
+    }
+
+    this.getGroups = function(params) {
+        var deferred = $q.defer();
+
+        PlaybookWizardService.getGroups().then(function(data){
+            PlaybookWizardStore.setGroups(data);
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    }
+
     this.setRecommendationCounts = function(recommendationCounts) {
         this.recommendationCounts = recommendationCounts;
     }
@@ -1250,6 +1264,27 @@ angular.module('lp.playbook')
         $http({
             method: 'GET',
             url: '/pls/playtypes',
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.getGroups = function(engineId, query) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '/pls/playgroups',
         }).then(
             function onSuccess(response) {
                 var result = response.data;

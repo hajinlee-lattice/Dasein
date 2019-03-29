@@ -265,6 +265,15 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                CampaignGroups: function($q, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getGroups().then(function(result){
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             views: {

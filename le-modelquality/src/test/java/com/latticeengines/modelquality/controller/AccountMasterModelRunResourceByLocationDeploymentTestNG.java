@@ -193,12 +193,13 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
             return;
         }
         String dataCloudVersion = getDataCloudVersion();
-        SlackSettings.Color color = status == Status.FAILED ? SlackSettings.Color.DANGER : SlackSettings.Color.NORMAL;
+        SlackSettings.Color color = status == Status.FAILED ? SlackSettings.Color.DANGER : SlackSettings.Color.GOOD;
         String preText = String.format("[%s-%s][DataCloud %s]", leEnv, leStack, dataCloudVersion);
         String title = String.format("Model quality test for dataset %s", dataSetName);
-        String message = String.format("Test %s after %s\nLog Link: %s", //
+        String message = String.format("Test %s after %s\nLog Link: %s\nTenant: %s", //
                 status.name(), DurationFormatUtils.formatDurationWords(durationInMillis, true, true), //
-                getLogLinkForLastJob());
+                getLogLinkForLastJob(), //
+                mainTestTenant.getId());
         if (StringUtils.isNotBlank(extraMessage)) {
             message += "\n" + extraMessage;
         }
