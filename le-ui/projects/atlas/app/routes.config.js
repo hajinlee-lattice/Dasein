@@ -302,7 +302,6 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                     ModelReviewStore.GetReviewData(
                         modelId
                     ).then(function (result) {
-                        // console.log('### ReviewData result', result);
                         var warnings = {};
                         result.forEach(item => {
                             warnings[item.name] = item;
