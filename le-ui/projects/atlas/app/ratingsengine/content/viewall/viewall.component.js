@@ -29,7 +29,7 @@ class ViewAllComponent extends Component {
                 name: "creation-history",
                 sorting:{
                     initial: 'iteration',
-                    direction: 'dis'
+                    direction: 'desc'
                 },
                 pagination:{
                     perPage: 10,
@@ -62,19 +62,6 @@ class ViewAllComponent extends Component {
                       onlyTemplate: true,
                       colSpan: 1,
                       template: cell => {
-                        if (cell.props.rowData) {
-                          return (
-                            <span>{cell.props.rowData.iteration}</span>
-                          )
-                        } else {
-                          return null;
-                        }
-                      }
-                  },
-                  {
-                      onlyTemplate: true,
-                      colSpan: 2,
-                      template: cell => {
 
                         let isActive = false;
                         let iterationId = cell.props.rowData.id;
@@ -91,34 +78,77 @@ class ViewAllComponent extends Component {
                             isActive = false;
                         }
 
-                        if (isActive) {
+                        if (isActive && ratingEngine.status == 'ACTIVE') {
                             return (
-                                <p className="green-text">
-                                    Scoring Active
-                                </p>
-                            )
-                        } else if (!isActive && iterationCompleted) {
-                            return (
-                                <LeButton
-                                    name="activate"
-                                    callback={() => {
-                                        console.log(this.props.$stateParams);
-                                        this.props.$state.go('home.model.ratings', { 
-                                          rating_id: this.props.$stateParams.rating_id, 
-                                          modelId: cell.props.rowData.modelSummaryId, 
-                                          section: 'dashboard.ratings', 
-                                          ratingEngine: ratingEngine,
-                                          useSelectedIteration: true
-                                        })
-                                    }}
-                                    config={{
-                                        label: "Activate",
-                                        classNames: "activate-button"
-                                    }}
-                                  />
+                              <span className="active">{cell.props.rowData.iteration}</span>
                             )
                         } else {
-                            return '';
+                          return (
+                            <span>{cell.props.rowData.iteration}</span>
+                          )
+                        }
+                      }
+                  },
+                  {
+                      onlyTemplate: true,
+                      colSpan: 2,
+                      template: cell => {
+
+                        let isScoringActive = false;
+                        let showActivateButton = false;
+                        let iterationId = cell.props.rowData.id;
+                        let iterationCompleted = cell.props.rowData.modelingJobStatus == 'Completed';
+                        let ratingEngine = this.props.RatingsEngineStore.getRatingEngine();
+
+                        if (ratingEngine.scoring_iteration != null) {
+                            if (ratingEngine.scoring_iteration.AI.id == iterationId) {
+                                isScoringActive = true;
+                            } else {
+                                isScoringActive = false;
+                            }
+                        } else {
+                            isScoringActive = false;
+                        }
+
+                        if (ratingEngine.status == 'ACTIVE') {
+                            if (isScoringActive) {
+                                showActivateButton = false;
+                            } else {
+                                showActivateButton = iterationCompleted ? true : false;
+                            }
+                        } else {
+                            showActivateButton = iterationCompleted ? true : false; 
+                        }
+
+                        if (showActivateButton) {
+
+                          return (
+                              <LeButton
+                                  name="activate"
+                                  callback={() => {
+                                      console.log(this.props.$stateParams);
+                                      this.props.$state.go('home.model.ratings', { 
+                                        rating_id: this.props.$stateParams.rating_id, 
+                                        modelId: cell.props.rowData.modelSummaryId, 
+                                        section: 'dashboard.ratings', 
+                                        ratingEngine: ratingEngine,
+                                        useSelectedIteration: true
+                                      })
+                                  }}
+                                  config={{
+                                      label: "Activate",
+                                      classNames: "activate-button"
+                                  }}
+                                />
+                          )
+                        } else if (!showActivateButton && isScoringActive && iterationCompleted) {
+                          return (
+                              <p className="green-text">
+                                  Scoring Active
+                              </p>
+                          )
+                        } else {
+                          return '';
                         }
                       }
                   },

@@ -111,6 +111,10 @@
                             width: 28px;
                             padding: 4px 0;
                             font-size: 11px;
+                            &.active {
+                                background: #0F9E4D;
+                                color: #fff;
+                            }
         				}
         			}
         		}

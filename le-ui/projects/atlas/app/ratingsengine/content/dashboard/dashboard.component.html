@@ -211,19 +211,19 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"
-                                ng-class="{active: vm.isIterationActive(iteration.id) &&
+                                ng-class="{active: vm.isIterationScoringActive(iteration.id) &&
                                         vm.statusIsActive}">
                                 <!-- <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"> -->
                                 <td>
                                     <p>{{ iteration.iteration }}</p>
                                 </td>
                                 <td>
-                                    <p class="green-text" ng-if="vm.isIterationActive(iteration.id) && vm.statusIsActive">
+                                    <p class="green-text" ng-if="vm.isIterationScoringActive(iteration.id) && vm.statusIsActive">
                                         Scoring <br />Active
                                     </p>
-                                    <a class="button" ng-if="
-                                            !vm.isIterationActive(iteration.id) && 
-                                            iteration.modelingJobStatus == 'Completed'"
+                                    <a 
+                                        class="button" 
+                                        ng-if="vm.showActivateButton(iteration)"
                                         ui-sref="home.model.ratings({ 
                                                     rating_id: vm.ratingEngine.id,
                                                     modelId: iteration.modelSummaryId,
