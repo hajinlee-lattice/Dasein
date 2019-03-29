@@ -13,19 +13,23 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class EntityAssociationResponse {
     private final Tenant tenant;
     private final String entity;
+    private final boolean isNewlyAllocated; // should be false if associatedEntityId is null
     private final String associatedEntityId;
     private final List<String> associationErrors;
 
-    public EntityAssociationResponse(@NotNull Tenant tenant, @NotNull String entity, String associatedEntityId) {
-        this(tenant, entity, associatedEntityId, Collections.emptyList());
+    public EntityAssociationResponse(@NotNull Tenant tenant, @NotNull String entity, String associatedEntityId,
+            boolean isNewlyAllocated) {
+        this(tenant, entity, isNewlyAllocated, associatedEntityId, Collections.emptyList());
     }
 
-    public EntityAssociationResponse(Tenant tenant, String entity, String associatedEntityId, List<String> associationErrors) {
+    public EntityAssociationResponse(Tenant tenant, String entity, boolean isNewlyAllocated, String associatedEntityId,
+            List<String> associationErrors) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(associationErrors);
         this.tenant = tenant;
         this.entity = entity;
+        this.isNewlyAllocated = isNewlyAllocated;
         this.associatedEntityId = associatedEntityId;
         this.associationErrors = associationErrors;
     }
@@ -36,6 +40,10 @@ public class EntityAssociationResponse {
 
     public String getEntity() {
         return entity;
+    }
+
+    public boolean isNewlyAllocated() {
+        return isNewlyAllocated;
     }
 
     public String getAssociatedEntityId() {

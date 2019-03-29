@@ -172,7 +172,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public <V> void putObjectInContext(String key, V val) {
         String json = JsonUtils.serialize(val);
         executionContext.putString(key, json);
-        log.info("Updating " + key + " in context to " + json);
+        log.debug("Updating " + key + " in context to " + json);
         // expand to its steps
         if (val instanceof WorkflowConfiguration) {
             log.info(val.getClass().getSimpleName() + " is a workflow configuration. Try to expand its steps.");
