@@ -987,13 +987,14 @@ public class EmailServiceImpl implements EmailService {
                         EmailTemplateBuilder.Template.PLS_CANCEL_ACTION_SUCCESS);
 
                 builder.replaceToken("{{tenantname}}", cancelActionEmailInfo.getTenantName());
-                builder.replaceToken("{{username}}", user.getUsername());
+                builder.replaceToken("{{username}}", user.getFirstName());
                 builder.replaceToken("{{actionname}}", cancelActionEmailInfo.getActionName());
                 builder.replaceToken("{{actionusername}}", cancelActionEmailInfo.getActionUserName());
                 builder.replaceToken("{{url}}", hostport);
 
                 Multipart mp = builder.buildMultipart();
-                sendMultiPartEmail(EmailSettings.PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT, mp,
+                sendMultiPartEmail(String.format(EmailSettings.PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT,
+                        cancelActionEmailInfo.getTenantName()), mp,
                         Collections.singleton(user.getEmail()));
                 log.info("Sending PLS action cancel success email to " + user.getEmail() + " succeeded.");
             }

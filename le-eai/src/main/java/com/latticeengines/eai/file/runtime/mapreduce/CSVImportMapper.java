@@ -416,7 +416,15 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                             attr.getTimeFormatString(), attr.getTimezone());
                     if (timestamp < 0) {
-                        throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                        // In order to support the requirements of:
+                        //   https://solutions.lattice-engines.com/browse/PLS-12846  and
+                        //   https://solutions.lattice-engines.com/browse/DP-9653
+                        // We change the behavior of negative timestamps from throwing an exception and failing to
+                        // parse the input CSV row to logging a warning and setting the timestamp value to zero.
+                        LOG.warn(String.format(
+                                "Converting date/time %s to timestamp generated negative value %d for column %s",
+                                fieldCsvValue, timestamp, attr.getDisplayName()));
+                        return 0L;
                     }
                     return timestamp;
                 } else {
