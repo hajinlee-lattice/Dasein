@@ -33,7 +33,6 @@ export default function () {
                         label: 'Sort By',
                         icon: 'numeric',
                         order: '',
-                        property: 'PredictivePower',
                         items: [
                             { 
                                 label: 'Predictive Power', 
@@ -259,8 +258,8 @@ export default function () {
 
                     if (vm.section == 're.model_iteration') {
                         var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
-                        var importance = 'ImportanceOrdering';
-                        var predictive = 'PredictivePower';
+                        var importance = sortPrefix + 'ImportanceOrdering';
+                        var predictive = sortPrefix + 'PredictivePower';
                         var name = sortPrefix + 'DisplayName';
 
                         if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
