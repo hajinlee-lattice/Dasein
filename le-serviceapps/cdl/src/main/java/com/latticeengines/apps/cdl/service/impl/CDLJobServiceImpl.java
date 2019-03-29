@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
@@ -69,6 +71,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String USERID = "Auto Scheduled";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
+    @VisibleForTesting
+    static LinkedHashMap<String, Long> appIdMap;
+
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
 
@@ -127,6 +132,11 @@ public class CDLJobServiceImpl implements CDLJobService {
     @PostConstruct
     public void init() {
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        appIdMap = new LinkedHashMap<String, Long>() {
+            protected boolean removeEldestEntry(Map.Entry<String, Long> eldest) {
+                return System.currentTimeMillis() - eldest.getValue() > TimeUnit.HOURS.toMillis(2);
+            }
+        };
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -254,12 +264,20 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         } else {
             List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types, jobStatuses);
+            for (WorkflowJob job : runningPAJobs) {
+                appIdMap.remove(job.getApplicationId());
+            }
             runningPAJobsCount = runningPAJobs.size();
 
             for (WorkflowJob workflowJob : runningPAJobs) {
                 if (USERID.equals(workflowJob.getUserId())) {
                     autoScheduledPAJobsCount++;
                 }
+            }
+            if (appIdMap.size() > 0) {
+                log.info(String.format("There's %d applications submitted but cannot get from job query: %s",
+                        appIdMap.size(), appIdMap.entrySet().toString()));
+                autoScheduledPAJobsCount += appIdMap.size();
             }
 
             sb.append(String.format("Have %d running PA jobs. ", runningPAJobsCount));
@@ -395,6 +413,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
                 applicationId = cdlProxy.processAnalyze(tenant.getId(), request);
             }
+            appIdMap.put(applicationId.toString(), System.currentTimeMillis());
             cdlJobDetail.setApplicationId(applicationId.toString());
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.RUNNING);
         } catch (Exception e) {
@@ -426,10 +445,6 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
         return false;
-    }
-
-    private void submitImportJob(String jobArguments) {
-
     }
 
     private void updateOneJobStatus(CDLJobType cdlJobType, CDLJobDetail cdlJobDetail, Job job) {
