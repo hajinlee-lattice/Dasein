@@ -643,9 +643,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (job.getInputs() != null) {
             String actionIdsStr = job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS);
             if (StringUtils.isEmpty(actionIdsStr) && job.getPid() != null) {
-                Action action = actionProxy.getActionByJobPid(tenantId, job.getPid());
-                if (action != null) {
-                    job.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID, String.valueOf(action.getPid()));
+                List<Action> actions = actionProxy.getActionsByJobPid(tenantId, job.getPid());
+                if (CollectionUtils.isNotEmpty(actions)) {
+                    if (actions.size() > 1) {
+                        log.warn("this trackingPid " + job.getPid() + " has multi action, using the first one");
+                    }
+                    job.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID,
+                            String.valueOf(actions.get(0).getPid()));
                 }
             }
         }

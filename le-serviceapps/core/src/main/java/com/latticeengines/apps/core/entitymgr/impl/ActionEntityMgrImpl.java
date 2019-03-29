@@ -100,7 +100,7 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Action getActionByJobPid(Long jobPid) {
-        return actionRepository.findByTrackingPid(jobPid);
+    public List<Action> getActionsByJobPid(Long jobPid) {
+        return actionRepository.findAllByTrackingPid(jobPid);
     }
 }

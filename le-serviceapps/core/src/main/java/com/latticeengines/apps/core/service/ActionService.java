@@ -28,5 +28,5 @@ public interface ActionService {
 
     Action cancel(Long actionPid);
 
-    Action getActionByJobPid(Long jobPid);
+    List<Action> getActionsByJobPid(Long jobPid);
 }

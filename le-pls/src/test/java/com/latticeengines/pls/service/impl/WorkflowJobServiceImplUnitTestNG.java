@@ -281,7 +281,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     public void testUpdateJobActionId() {
         Job job = createFailedImportJob(jobIds[1]);
         Assert.assertNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
-        when(actionProxy.getActionByJobPid(anyString(), any())).thenReturn(generateActions().get(5));
+        when(actionProxy.getActionsByJobPid(anyString(), any())).thenReturn(generateActions());
         workflowJobService.updateJobActionId(job);
         log.info(" job is :" + JsonUtils.serialize(job));
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));

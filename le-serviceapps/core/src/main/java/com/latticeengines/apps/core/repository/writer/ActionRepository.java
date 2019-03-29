@@ -19,5 +19,5 @@ public interface ActionRepository extends BaseJpaRepository<Action, Long> {
 
     List<Action> findByPidIn(List<Long> actionPids);
 
-    Action findByTrackingPid(@NonNull Long trackingPid);
+    List<Action> findAllByTrackingPid(@NonNull Long trackingPid);
 }

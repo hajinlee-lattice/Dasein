@@ -100,9 +100,10 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
     }
 
     @Override
-    public Action getActionByJobPid(String customerSpace, Long jobPid) {
-        String url = constructUrl("/customerspaces/{customerSpace}/action?jobPid={jobPid}",
+    public List<Action> getActionsByJobPid(String customerSpace, Long jobPid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/actions?jobPid={jobPid}",
                 shortenCustomerSpace(customerSpace), String.valueOf(jobPid));
-        return get("get Action By JobPid", url, Action.class);
+        List<?> list = get("get Actions By JobPid", url, List.class);
+        return JsonUtils.convertList(list, Action.class);
     }
 }
