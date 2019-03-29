@@ -213,9 +213,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     private Integer determineNumBlocks(Long count, Integer minBlockSize, Integer maxBlockSize,
             Integer maxConcurrentBlocks) {
         Integer numBlocks;
-        if (count < (minBlockSize * maxConcurrentBlocks)) {
+        if (count < ((long) minBlockSize * maxConcurrentBlocks)) {
             numBlocks = Math.max((int) (count / minBlockSize), 1);
-        } else if (count > (maxBlockSize * maxConcurrentBlocks)) {
+        } else if (count > ((long) maxBlockSize * maxConcurrentBlocks)) {
             numBlocks = (int) (count / maxBlockSize);
         } else {
             numBlocks = maxConcurrentBlocks;
