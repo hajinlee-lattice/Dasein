@@ -38,7 +38,7 @@ def find_cluster(env, app_id):
             return cluster_id
 
     clusters = get_clusters(False)
-    print("Search %d active clusters first" % (len(clusters)))
+    print("Search %d inactive clusters then" % (len(clusters)))
     for cluster_id in clusters:
         if app_in_cluster(env, cluster_id, app_id):
             print("Found app-id %s in cluster %s" % (app_id, cluster_id))
@@ -54,6 +54,8 @@ def app_in_cluster(env, cluster_id, app_id):
         Bucket=bucket,
         Prefix='%s/containers/%s' % (cluster_id, app_id)
     )
+    if cluster_id == 'j-1C94U3R4UDDDD':
+        print(resp)
     return resp['KeyCount'] > 0
 
 
@@ -126,5 +128,7 @@ if __name__ == "__main__":
         cluster_id = find_cluster(args.env, app_id)
     else:
         cluster_id = args.cluster_id
+    if cluster_id is None:
+        raise ValueError("Cannot find a cluster having the log for %s" % app_id)
 
     download_log(args.env, app_id, cluster_id, dest)

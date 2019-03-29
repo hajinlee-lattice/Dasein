@@ -126,4 +126,8 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return false;
     }
 
+    public boolean hasNonTrivialChange() {
+        return rebuild || update;
+    }
+
 }
