@@ -81,10 +81,9 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
             String modelName = modelQualityProxy.createModelRun(aModelRunEntityNames, //
                     mainTestTenant.getId(), user, password, plsDeployedHostPort);
             Assert.assertEquals(aModelRunEntityNames.getName(), modelName);
-            waitAndCheckModelRun(modelName);
+            waitAndCheckModelRun(modelName, false);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            Assert.fail("Failed", ex);
+            throw new RuntimeException(ex);
         }
     }
 
