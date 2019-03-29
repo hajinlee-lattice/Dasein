@@ -205,6 +205,12 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "UTC-4");
         Assert.assertEquals(expected1c, 1564200000000L);
         Assert.assertEquals(records.get(2).get(fieldName1).toString(), Long.toString(expected1c));
+        // The 4th row has a value that is pre-Epoch so 0 should be returned as the timestamp.
+        long expected1d = 0L;
+        Assert.assertEquals(records.get(3).get(fieldName1).toString(), Long.toString(expected1d));
+        log.info("Value returned for input 31/12/1969 America/New_York was: "
+                + records.get(3).get(fieldName1).toString());
+
 
         // Validate TestDate2
         String fieldName2 = "user_TestDate2";
@@ -225,6 +231,14 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "M.d.yy H:m:s", "GMT+8");
         Assert.assertEquals(expected2c, 4081725296000L);
         Assert.assertEquals(records.get(2).get(fieldName2).toString(), Long.toString(expected2c));
+        // Test that two digit date which if it had started with "19" instead of "20" would be pre-Epoch time, works
+        // correctly.
+        long expected2d = computeTimestamp("12.12.68 12:12:12", true,
+                "M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2d, 3122511132000L);
+        Assert.assertEquals(records.get(4).get(fieldName2).toString(), Long.toString(expected2d));
+        log.info("Value returned for input 12.12.68 12:12:12 Asia/Shanghai was: "
+                + records.get(4).get(fieldName2).toString());
     }
 
     @Test(groups = "deployment")
