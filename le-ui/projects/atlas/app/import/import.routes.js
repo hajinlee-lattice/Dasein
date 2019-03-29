@@ -893,6 +893,10 @@ angular
         })
         .state('home.import.data.producthierarchy.ids', {
             url: '/producthierarchyids',
+            onEnter: function($state, ImportWizardStore, FieldDocument){
+                ImportWizardStore.setSavedDocumentInState('home.import.data.producthierarchy', FieldDocument.fieldMappings);
+                ImportWizardStore.setSavedDocumentInState('home.import.data.producthierarchy.ids', FieldDocument.fieldMappings);
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
