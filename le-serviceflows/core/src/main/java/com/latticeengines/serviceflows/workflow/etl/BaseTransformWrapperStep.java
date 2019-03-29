@@ -1,8 +1,12 @@
 package com.latticeengines.serviceflows.workflow.etl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +17,15 @@ import org.springframework.yarn.client.YarnClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -66,8 +74,8 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     @Value("${pls.cdl.transform.extra.heavy.multiplier}")
     private int extraHeavyMultiplier;
 
+    protected CustomerSpace customerSpace;
     protected String pipelineVersion;
-
     protected int scalingMultiplier = 1;
 
     @Override
@@ -137,6 +145,31 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
 
     protected String emptyStepConfig(TransformationFlowParameters.EngineConfiguration engineConf) {
         return appendEngineConf(new TransformerConfig(), engineConf);
+    }
+
+    protected void addBaseTables(TransformationStepConfig step, String... sourceTableNames) {
+        List<String> baseSources = step.getBaseSources();
+        if (CollectionUtils.isEmpty(baseSources)) {
+            baseSources = new ArrayList<>();
+        }
+        Map<String, SourceTable> baseTables = step.getBaseTables();
+        if (MapUtils.isEmpty(baseTables)) {
+            baseTables = new HashMap<>();
+        }
+        for (String sourceTableName: sourceTableNames) {
+            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+            baseSources.add(sourceTableName);
+            baseTables.put(sourceTableName, sourceTable);
+        }
+        step.setBaseSources(baseSources);
+        step.setBaseTables(baseTables);
+    }
+
+    protected void setTargetTable(TransformationStepConfig step, String tablePrefix) {
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(tablePrefix);
+        step.setTargetTable(targetTable);
     }
 
     protected TransformationFlowParameters.EngineConfiguration heavyEngineConfig() {

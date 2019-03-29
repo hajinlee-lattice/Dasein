@@ -41,6 +41,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
 
+    @JsonProperty("full_rematch")
+    private boolean fullRematch;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -119,5 +122,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public boolean isFullRematch() {
+        return fullRematch;
+    }
+
+    public void setFullRematch(boolean fullRematch) {
+        this.fullRematch = fullRematch;
     }
 }

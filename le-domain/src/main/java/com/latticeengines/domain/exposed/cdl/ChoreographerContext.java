@@ -35,6 +35,9 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean businessCalenderChanged;
 
+    @JsonProperty
+    private boolean fullRematch;
+
     public Set<BusinessEntity> getJobImpactedEntities() {
         return jobImpactedEntities;
     }
@@ -89,5 +92,13 @@ public class ChoreographerContext {
 
     public void setBusinessCalenderChanged(boolean businessCalenderChanged) {
         this.businessCalenderChanged = businessCalenderChanged;
+    }
+
+    public boolean isFullRematch() {
+        return fullRematch;
+    }
+
+    public void setFullRematch(boolean fullRematch) {
+        this.fullRematch = fullRematch;
     }
 }

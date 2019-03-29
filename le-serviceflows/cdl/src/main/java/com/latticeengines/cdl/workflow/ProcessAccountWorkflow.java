@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
+import com.latticeengines.cdl.workflow.steps.merge.RematchAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.match.CommitEntityMatchWorkflow;
@@ -22,6 +23,9 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
 
     @Inject
     private MergeAccountWrapper mergeAccountWrapper;
+
+    @Inject
+    private RematchAccountWrapper rematchAccountWrapper;
 
     @Inject
     private UpdateAccountWorkflow updateAccountWorkflow;
@@ -39,6 +43,7 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
     public Workflow defineWorkflow(ProcessAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(mergeAccountWrapper) //
+                .next(rematchAccountWrapper) //
                 .next(updateAccountWorkflow) //
                 .next(rebuildAccountWorkflow) //
                 .next(commitEntityMatchWorkflow) //

@@ -38,6 +38,10 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("MaxRatingIteration")
     private Integer MaxRatingIterations;
 
+    // refresh all the results related to fuzzy match
+    @JsonProperty("FullRematch")
+    private Boolean fullRematch;
+
     // flag to force start another PA disregarding the number of currently running
     // PA in the cluster
     @JsonProperty("ForceRun")
@@ -133,5 +137,13 @@ public class ProcessAnalyzeRequest {
 
     public void setForceRun(Boolean forceRun) {
         this.forceRun = forceRun;
+    }
+
+    public Boolean getFullRematch() {
+        return fullRematch;
+    }
+
+    public void setFullRematch(Boolean fullRematch) {
+        this.fullRematch = fullRematch;
     }
 }
