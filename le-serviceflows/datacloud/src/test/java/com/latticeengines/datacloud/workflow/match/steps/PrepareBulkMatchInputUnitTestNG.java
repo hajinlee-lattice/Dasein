@@ -129,6 +129,9 @@ public class PrepareBulkMatchInputUnitTestNG {
                 { "1.0.0", null, false, 5000L, new Integer[] { 1666, 1666, 1668 } },//
                 { "1.0.0", null, false, 7500L, new Integer[] { 1875, 1875, 1875, 1875 } },//
                 { "1.0.0", null, false, 9999L, new Integer[] { 2499, 2499, 2499, 2502 } },//
+                // count >= averageBlockSize * maxConcurrentBlocks (2500 * 4)
+                { "1.0.0", null, false, 10000L, new Integer[] { 2500, 2500, 2500, 2500 } }, //
+                { "1.0.0", null, false, 100000L, new Integer[] { 25000, 25000, 25000, 25000 } },//
         };
     }
 
