@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
+
+    private static EmailValidator emailValidator = EmailValidator.getInstance();
 
     @Override
     public boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant) {
@@ -459,6 +462,12 @@ public class UserServiceImpl implements UserService {
         User oldUser = findByEmail(email);
         RegistrationResult result = new RegistrationResult();
         result.setValid(true);
+
+        if (!emailValidator.isValid(email)) {
+            result.setValid(false);
+            result.setErrMsg("Not a valid email address");
+            return result;
+        }
 
         if (oldUser != null) {
             result.setValid(false);

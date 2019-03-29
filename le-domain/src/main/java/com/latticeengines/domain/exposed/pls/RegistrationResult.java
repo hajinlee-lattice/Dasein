@@ -8,6 +8,7 @@ public class RegistrationResult {
     private String password;
     private User conflictingUser;
     private boolean valid;
+    private String errMsg;
 
     @JsonProperty("Password")
     public String getPassword() {
@@ -42,5 +43,15 @@ public class RegistrationResult {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @JsonProperty("ErrMsg")
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    @JsonProperty("ErrMsg")
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
     }
 }
