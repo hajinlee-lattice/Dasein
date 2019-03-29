@@ -73,7 +73,7 @@ public class ActionServiceImpl implements ActionService {
             User actionUser = userService.findByEmail(emailAddress);//the user who canceled this action
             log.info("actionUser is :" + actionUser.getUsername());
             CancelActionEmailInfo cancelActionEmailInfo = new CancelActionEmailInfo();
-            cancelActionEmailInfo.setActionUserName(actionUser.getUsername());
+            cancelActionEmailInfo.setActionUserName(actionUser.getFirstName());
             cancelActionEmailInfo.setTenantName(tenant.getName());
             cancelActionEmailInfo.setActionName(getActionName(action));
             log.info("paramArr is :" + cancelActionEmailInfo.toString());
