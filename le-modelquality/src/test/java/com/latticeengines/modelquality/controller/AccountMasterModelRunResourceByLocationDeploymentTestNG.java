@@ -99,26 +99,29 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
         if (StringUtils.isBlank(dataSetName)) {
             Assert.fail(String.format("No dataset specified. MQ_DATASET=%s", dataSetName));
         }
+        boolean failFast = Boolean.TRUE.toString().equalsIgnoreCase(getSystemProperty("FAIL_FAST"));
         String[] dataSets = dataSetName.split(",");
         log.info("Data sets = {}", Arrays.toString(dataSets));
+        boolean hasFailure = false;
         for (String dataSet : dataSets) {
             if (testCases.containsKey(dataSetName)) {
                 String csvFile = testCases.get(dataSetName);
-                runModelWrapper(dataSetName, csvFile);
+                hasFailure = hasFailure || !runModelWrapper(dataSetName, csvFile, failFast);
             } else {
                 log.warn("Skipping run model, dataSetName={}", dataSet);
             }
         }
+        Assert.assertFalse(hasFailure);
     }
 
     @Test(groups = { "am_all" }, dataProvider = "getAccountMasterLocationCsvFile")
     public void runModelAccountMasterLocation(String dataSetName, String csvFile) {
-        runModelWrapper(dataSetName, csvFile);
+        runModelWrapper(dataSetName, csvFile, true);
     }
 
-    private void runModelWrapper(String dataSetName, String csvFile) {
+    private boolean runModelWrapper(String dataSetName, String csvFile, boolean failFast) {
         if (StringUtils.isBlank(dataSetName) || StringUtils.isBlank(csvFile)) {
-            return;
+            return true;
         }
 
         Stopwatch timer = Stopwatch.createStarted();
@@ -128,15 +131,16 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
             runModelAccountMaster(dataSetName, csvFile);
             log.info("Model quality test (DataSet={}, CsvFile={}) finished successfully", dataSetName, csvFile);
             sendModelQualityTestResult(dataSetName, timer.elapsed(TimeUnit.MILLISECONDS), Status.COMPLETED, null);
+            return true;
         } catch (Exception e) {
             log.error(String.format("Fail to run model quality test. DataSet=%s", dataSetName), e);
             sendModelQualityTestResult(dataSetName, timer.elapsed(TimeUnit.MILLISECONDS), Status.FAILED,
                     String.format("Error: %s", e.getMessage()));
-            boolean failFast = Boolean.TRUE.toString().equalsIgnoreCase(getSystemProperty("FAIL_FAST"));
             if (failFast) {
                 log.error("Failing fast after one test failure");
                 throw e;
             }
+            return false;
         }
     }
 
