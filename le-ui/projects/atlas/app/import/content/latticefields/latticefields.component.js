@@ -20,7 +20,6 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         return list;
     }
-    let masterRedux = this.redux = $state.get('home.import').data.redux;
     // //console.log('STORE ',masterRedux);
     var matchingFieldsList = makeList(MatchingFields),
         analysisFieldsList = makeList(AnalysisFields),

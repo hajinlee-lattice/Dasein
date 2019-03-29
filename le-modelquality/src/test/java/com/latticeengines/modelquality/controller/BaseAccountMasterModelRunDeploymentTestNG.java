@@ -62,10 +62,7 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
             PropData thisPropData = modelQualityProxy.getPropDataConfigByName(propData.getName());
             thisPropData.setName("ModelQualityDeploymentTest-AccountMaster");
 
-            String dataCloudVersion = getSystemProperty("MQ_DATACLOUD_VERSION");
-            if (StringUtils.isBlank(dataCloudVersion)) {
-                dataCloudVersion = columnMetadataProxy.latestVersion().getVersion();
-            }
+            String dataCloudVersion = getDataCloudVersion();
             logger.info("DataCloudVersion=" + dataCloudVersion);
             thisPropData.setDataCloudVersion(dataCloudVersion);
             thisPropData.setExcludePublicDomains(true);
@@ -89,6 +86,14 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
             ex.printStackTrace();
             Assert.fail("Failed", ex);
         }
+    }
+
+    protected String getDataCloudVersion() {
+        String dataCloudVersion = getSystemProperty("MQ_DATACLOUD_VERSION");
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = columnMetadataProxy.latestVersion().getVersion();
+        }
+        return dataCloudVersion;
     }
 
     void deleteLocalEntities() {
