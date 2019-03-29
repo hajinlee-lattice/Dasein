@@ -50,7 +50,6 @@ import com.latticeengines.yarn.exposed.service.JobService;
 
 public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DynamoPublishServiceTestNG.class);
 
     private static final String PUBLICATION_NAME = "TestAccountLookupPublication";

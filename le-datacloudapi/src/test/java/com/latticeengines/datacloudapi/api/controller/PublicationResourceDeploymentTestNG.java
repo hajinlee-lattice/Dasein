@@ -36,7 +36,7 @@ import com.latticeengines.proxy.exposed.datacloudapi.PublicationProxy;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 /**
- * workflowapi,datacloudapi,modeling,eai,sqoop
+ * dpltc deploy -a workflowapi,datacloudapi,modeling,eai,sqoop
  */
 @Component
 public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
