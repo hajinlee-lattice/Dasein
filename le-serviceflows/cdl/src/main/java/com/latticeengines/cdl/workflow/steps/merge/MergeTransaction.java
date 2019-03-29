@@ -98,15 +98,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         }
         log.info("Found rawTable " + rawTable.getName() + " @version " + inactive);
 
-        stringFields = new ArrayList<String>();
-        longFields = new ArrayList<String>();
-        intFields = new ArrayList<String>();
+        stringFields = new ArrayList<>();
+        longFields = new ArrayList<>();
+        intFields = new ArrayList<>();
         Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true);
         getTableFields(rawTemplate, stringFields, longFields, intFields);
 
-        List<String> curStringFields = new ArrayList<String>();
-        List<String> curLongFields = new ArrayList<String>();
-        List<String> curIntFields = new ArrayList<String>();
+        List<String> curStringFields = new ArrayList<>();
+        List<String> curLongFields = new ArrayList<>();
+        List<String> curIntFields = new ArrayList<>();
         getTableFields(rawTable, curStringFields, curLongFields, curIntFields);
 
         schemaChanged = compareFields(stringFields, curStringFields);

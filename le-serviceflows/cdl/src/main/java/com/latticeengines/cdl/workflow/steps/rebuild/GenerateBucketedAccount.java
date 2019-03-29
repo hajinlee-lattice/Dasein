@@ -151,7 +151,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
     private TransformationStepConfig filter() {
         TransformationStepConfig step = new TransformationStepConfig();
-        setBaseTables(fullAccountTableName, step);
+        addBaseTables(step, fullAccountTableName);
         step.setTransformer(TRANSFORMER_COPIER);
 
         CacheService cacheService = CacheServiceBase.getCacheService();

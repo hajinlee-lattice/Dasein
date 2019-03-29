@@ -146,7 +146,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MATCH);
 
-        setBaseTables(sourceTableName, step);
+        addBaseTables(step, sourceTableName);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);

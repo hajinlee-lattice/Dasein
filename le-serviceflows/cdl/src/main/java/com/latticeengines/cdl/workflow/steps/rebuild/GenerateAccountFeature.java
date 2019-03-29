@@ -134,7 +134,7 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
 
     private TransformationStepConfig filter() {
         TransformationStepConfig step = new TransformationStepConfig();
-        setBaseTables(fullAccountTableName, step);
+        addBaseTables(step, fullAccountTableName);
         step.setTransformer(TRANSFORMER_COPIER);
         List<String> retainAttrNames = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //

@@ -126,12 +126,18 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_FEATURE_TABLE_NAME, //
                 ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //
-                ACCOUNT_STATS_TABLE_NAME
+                ACCOUNT_STATS_TABLE_NAME, //
+                FULL_REMATCH_PA //
         );
         clearExecutionContext(renewableKeys);
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();
+
+        if (!hasKeyInContext(FULL_REMATCH_PA)) {
+            boolean fullRematch = Boolean.TRUE.equals(configuration.isFullRematch());
+            putObjectInContext(FULL_REMATCH_PA, fullRematch);
+        }
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
@@ -219,6 +225,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<String> segments = getActionImpactedSegmentNames(ratingActions);
         grapherContext.setHasRatingEngineChange(
                 CollectionUtils.isNotEmpty(ratingActions) || CollectionUtils.isNotEmpty(segments));
+
+        grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
@@ -456,7 +464,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_FEATURE_TABLE_NAME, //
                 ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //
-                ACCOUNT_STATS_TABLE_NAME
+                ACCOUNT_STATS_TABLE_NAME, //
+                REMATCHED_ACCOUNT_TABLE_NAME //
         );
         Set<String> tableNamesForRetry = tableKeysForRetry.stream() //
                 .map(this::getStringValueFromContext) //

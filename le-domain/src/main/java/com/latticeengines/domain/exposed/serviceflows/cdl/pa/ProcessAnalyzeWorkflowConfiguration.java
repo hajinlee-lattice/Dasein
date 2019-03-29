@@ -219,10 +219,15 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder skipEntities(Set<BusinessEntity> entities) {
             processStepConfiguration.setSkipEntities(entities);
-            if (entities.contains(BusinessEntity.AnalyticPurchaseState)) {
+            if (CollectionUtils.containsAny(entities, BusinessEntity.AnalyticPurchaseState)) {
                 awsPythonDataConfiguration.setSkipStep(true);
                 apsGenerationStepConfiguration.setSkipStep(true);
             }
+            return this;
+        }
+
+        public Builder setFullRematch(boolean fullRematch) {
+            processStepConfiguration.setFullRematch(fullRematch);
             return this;
         }
 
