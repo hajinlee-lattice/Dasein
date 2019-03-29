@@ -53,4 +53,7 @@ public class ActionServiceImplTestNG extends ActionEntityMgrImplTestNG {
         return actionService.findByPidIn(actionPids);
     }
 
+    @Override
+    protected  List<Action> getActionsByJobPid(Long jobPid) { return actionService.getActionsByJobPid(jobPid); }
+
 }

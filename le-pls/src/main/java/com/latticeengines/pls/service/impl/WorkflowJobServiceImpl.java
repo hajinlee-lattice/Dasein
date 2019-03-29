@@ -570,6 +570,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 updateJobWithRatingEngineSummaryInfo(job, true, ratingIdToRatingEngineSummaries);
             }
             updateJobWithSubJobsIfIsPnA(job);
+            updateJobActionId(job);
         }
     }
 
@@ -632,6 +633,24 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 List<Action> actions = getActions(actionPids);
                 List<Job> subJobs = expandActions(actions);
                 job.setSubJobs(subJobs);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void updateJobActionId(Job job) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        if (job.getInputs() != null) {
+            String actionIdsStr = job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS);
+            if (StringUtils.isEmpty(actionIdsStr) && job.getPid() != null) {
+                List<Action> actions = actionProxy.getActionsByJobPid(tenantId, job.getPid());
+                if (CollectionUtils.isNotEmpty(actions)) {
+                    if (actions.size() > 1) {
+                        log.warn("this trackingPid " + job.getPid() + " has multi action, using the first one");
+                    }
+                    job.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID,
+                            String.valueOf(actions.get(0).getPid()));
+                }
             }
         }
     }
