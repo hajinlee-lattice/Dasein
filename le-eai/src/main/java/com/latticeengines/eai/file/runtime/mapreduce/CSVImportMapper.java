@@ -83,6 +83,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
 
     private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
+    private static final int MAX_CACHE_IDS = 5000000;
 
     private Schema schema;
 
@@ -118,13 +119,15 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private String cacheKey;
 
-    private boolean setExpire;
-
     private int redisTimeout;
 
     private String redisEndpoint;
 
     private boolean localRedis;
+
+    private int currentIds;
+
+    private int blockIdx;
 
     private RetryTemplate retryTemplate;
 
@@ -169,7 +172,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             localRedis = Boolean.parseBoolean(conf.get("eai.redis.local"));
             LOG.info(String.format("Redis endpoint: %s, timeout: %d, localRedis: %b", redisEndpoint, redisTimeout, localRedis));
             cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
-            setExpire = false;
+            currentIds = 0;
+            blockIdx = 0;
             retryTemplate = RetryUtils.getRetryTemplate(3);
             redisTemplate = RedisTemplateUtils.createRedisTemplate(localRedis, redisTimeout, redisEndpoint);
         }
@@ -331,8 +335,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             if (deduplicate) {
                                 if (containsId(id)) {
                                     throw new LedpException(LedpCode.LEDP_17017, new String[]{id});
-                                } else {
-                                    addId(id);
                                 }
                             }
                         }
@@ -528,25 +530,44 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private boolean containsId(String id) {
-        return retryTemplate.execute(ctx -> redisTemplate.opsForSet().isMember(cacheKey, id));
-
-    }
-
-    private void addId(String id) {
-        retryTemplate.execute(ctx -> redisTemplate.opsForSet().add(cacheKey, id));
-        if (!setExpire) {
-            setExpire();
+        for (int i = 0; i < blockIdx; i++) {
+            final String key = cacheKey + i;
+            if (retryTemplate.execute(ctx -> redisTemplate.opsForSet().isMember(key, id))) {
+                return true;
+            }
+        }
+        if (currentIds == 0) {
+            final String key = cacheKey + blockIdx;
+            retryTemplate.execute(ctx -> redisTemplate.opsForSet().add(key, id));
+            retryTemplate.execute(ctx -> redisTemplate.expire(key, 1, TimeUnit.DAYS));
+            currentIds++;
+            return false;
+        } else if (currentIds == MAX_CACHE_IDS) {
+            final String key = cacheKey + blockIdx;
+            if (retryTemplate.execute(ctx -> redisTemplate.opsForSet().isMember(key, id))) {
+                return true;
+            } else {
+                blockIdx++;
+                final String newKey = cacheKey + blockIdx;
+                retryTemplate.execute(ctx -> redisTemplate.opsForSet().add(newKey, id));
+                retryTemplate.execute(ctx -> redisTemplate.expire(newKey, 1, TimeUnit.DAYS));
+                currentIds = 1;
+                return false;
+            }
+        } else {
+            final String key = cacheKey + blockIdx;
+            long add = retryTemplate.execute(ctx -> redisTemplate.opsForSet().add(key, id));
+            currentIds += add;
+            return add == 0;
         }
     }
 
-    private void setExpire() {
-        retryTemplate.execute(ctx -> redisTemplate.expire(cacheKey, 1, TimeUnit.DAYS));
-        setExpire = true;
-    }
-
     private void clearCache() {
-        LOG.info("Redis template expire for key: " + cacheKey + " is: " + redisTemplate.getExpire(cacheKey));
-        retryTemplate.execute(ctx -> redisTemplate.delete(cacheKey));
+        for (int i = 0; i <= blockIdx; i++) {
+            final String key = cacheKey + i;
+            LOG.info("Redis template expire for key: " + key + " is: " + redisTemplate.getExpire(key));
+            retryTemplate.execute(ctx -> redisTemplate.delete(key));
+        }
     }
 
 }
