@@ -43,6 +43,8 @@ angular.module('common.datacloud.query')
         this.isDataAvailable = null;
         this.collectionStatus = null;
 
+        this.cancelUpdateBucketCalls = false;
+
         this.init = function() {
             this.initRestrictions();
         }
