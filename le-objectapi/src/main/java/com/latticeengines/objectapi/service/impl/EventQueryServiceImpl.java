@@ -1,5 +1,8 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.util.Map;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -9,6 +12,9 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.Query;
@@ -68,9 +74,10 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     }
 
     /*
-     * This query seems to be super complex and in some cases each query is as big as 16 pages with different product and time periods selections by user
-     * As this query is adding so much load on Leader, it is blocking all other SEGMENT_USER queries.
-     * So, changed it back to BATCH_USER
+     * This query seems to be super complex and in some cases each query is as
+     * big as 16 pages with different product and time periods selections by
+     * user As this query is adding so much load on Leader, it is blocking all
+     * other SEGMENT_USER queries. So, changed it back to BATCH_USER
      */
     private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
             DataCollection.Version version) {
@@ -81,8 +88,19 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                     queryEvaluatorService.getQueryFactory(), attrRepo);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                     frontEndQuery.getSegmentQuery());
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator,
-                    BATCH_USER);
+            if (frontEndQuery.getMainEntity() == null) {
+                frontEndQuery.setMainEntity(BusinessEntity.Account);
+            }
+            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
+                    timeTranslator);
+            if (frontEndQuery.getSegmentQuery() != null) {
+                frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
+                Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
+                        .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
+                map.putAll(segmentMap);
+            }
+            preprocess(map, version, timeTranslator);
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
             return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
@@ -98,6 +116,18 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                     queryEvaluatorService.getQueryFactory(), attrRepo);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                     frontEndQuery.getSegmentQuery());
+            if (frontEndQuery.getMainEntity() == null) {
+                frontEndQuery.setMainEntity(BusinessEntity.Account);
+            }
+            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
+                    timeTranslator);
+            if (frontEndQuery.getSegmentQuery() != null) {
+                frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
+                Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
+                        .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
+                map.putAll(segmentMap);
+            }
+            preprocess(map, version, timeTranslator);
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
             return queryEvaluatorService.getData(attrRepo, query, BATCH_USER);
         } catch (Exception e) {

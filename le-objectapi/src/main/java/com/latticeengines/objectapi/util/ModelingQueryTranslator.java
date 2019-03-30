@@ -54,7 +54,6 @@ public class ModelingQueryTranslator extends QueryTranslator {
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
 
         if (frontEndQuery.getSegmentQuery() != null) {
-            frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
             Restriction segmentRestriction = translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(),
                     timeTranslator, sqlUser);
             restriction = joinRestrictions(segmentRestriction, restriction);

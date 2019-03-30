@@ -104,7 +104,7 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
         log.info("Data sets = {}", Arrays.toString(dataSets));
         boolean hasFailure = false;
         for (String dataSet : dataSets) {
-            if (testCases.containsKey(dataSetName)) {
+            if (testCases.containsKey(dataSet)) {
                 String csvFile = testCases.get(dataSetName);
                 hasFailure = hasFailure || !runModelWrapper(dataSetName, csvFile, failFast);
             } else {

@@ -57,7 +57,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Inject
     private EventQueryService eventQueryService;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = { "functional", "manual" })
     public void setup() {
         super.setup("2");
     }
