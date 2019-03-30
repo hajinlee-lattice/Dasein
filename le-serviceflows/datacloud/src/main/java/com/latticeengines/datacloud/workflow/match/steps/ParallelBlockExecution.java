@@ -19,7 +19,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -68,9 +66,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     @Autowired
     private MatchCommandService matchCommandService;
 
-    @Autowired
-    private ZkConfigurationService zkConfigurationService;
-
     @Value("${datacloud.match.block.interval.sec}")
     private int blockRampingRate;
 
@@ -83,6 +78,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private YarnClient yarnClient;
     private String rootOperationUid;
     private List<ApplicationId> applicationIds = new ArrayList<>();
+    // Match Block ApplicationId -> Match Block UUID
     private Map<String, String> blockUuidMap = new HashMap<>();
     private int numErrors = 0;
     private float progress;
@@ -224,6 +220,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void setupErrorExport() {
         try {
             if (!AvroUtils.iterator(yarnConfiguration, matchErrorDir + "/*.avro").hasNext()) {
@@ -356,8 +353,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.info(errorMsg + ". Retry the block.");
             for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
                 if (jobConfiguration.getBlockOperationUid().equals(blockUid)) {
-                    ApplicationId newAppId = ConverterUtils.toApplicationId(
-                            matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                    ApplicationId newAppId = ApplicationId
+                            .fromString(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
                     blockUuidMap.remove(appId.toString());
                     blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
                     applicationIds.add(newAppId);
@@ -373,37 +370,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         }
     }
 
-    private Boolean doRetry(String blockUid) {
-        boolean useRemoteDnB;
-
-        int numOfBlocks = jobConfigurations.size();
-
-        if (numOfBlocks == 1) {
-            // Don't retry dnB for big block
-            DataCloudJobConfiguration jobConfiguration = jobConfigurations.get(0);
-            if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
-                useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
-            } else {
-                useRemoteDnB = true;
-            }
-            useRemoteDnB = useRemoteDnB
-                    && MatchUtils
-                            .isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion())
-                    && zkConfigurationService.useRemoteDnBGlobal();
-
-            if (useRemoteDnB) {
-                return false;
-            }
-        } else if (totalRetries > numOfBlocks * 0.1) {
-            // Only retry 10% of the total blocks.
-            return false;
-        }
-
-        boolean retryBlock = matchCommandService.blockIsRetriable(blockUid);
-        if (retryBlock) {
-            totalRetries++;
-        }
-        return retryBlock;
+    private boolean doRetry(String blockUid) {
+        return matchCommandService.blockIsRetriable(blockUid);
     }
 
     private void failTheWorkflowByFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
