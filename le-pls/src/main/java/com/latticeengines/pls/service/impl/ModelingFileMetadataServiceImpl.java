@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -152,10 +153,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
             standardMappingMap.put(fieldMapping.getUserField(), fieldMapping);
         }
+        Set<String> alreadyMappedField = templateMapping.getFieldMappings().stream()
+                                                        .map(FieldMapping::getMappedField)
+                                                        .filter(Objects::nonNull).collect(Collectors.toSet());
         for (FieldMapping fieldMapping : templateMapping.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 if (standardMappingMap.containsKey(fieldMapping.getUserField())
-                        && standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null) {
+                        && standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null
+                        && !alreadyMappedField.contains(standardMappingMap.get(fieldMapping.getUserField()).getMappedField())) {
                     fieldMapping.setMappedField(standardMappingMap.get(fieldMapping.getUserField()).getMappedField());
                     fieldMapping.setFieldType(standardMappingMap.get(fieldMapping.getUserField()).getFieldType());
                     fieldMapping.setMappedToLatticeField(false);
