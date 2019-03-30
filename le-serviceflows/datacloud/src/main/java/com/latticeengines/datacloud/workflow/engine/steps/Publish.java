@@ -31,6 +31,8 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
     public static final Logger log = LoggerFactory.getLogger(Publish.class);
 
+    private static final String SLACK_BOT = "SourcePublisher";
+
     @Inject
     private DataCloudNotificationService notificationService;
 
@@ -61,7 +63,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
             notificationService.sendSlack(
                     String.format("%s [%s]", publication.getPublicationName(), progress.getApplicationId()),
-                    String.format("Version %s starts to publish", progress.getSourceVersion()), "SourcePublisher",
+                    String.format("Version %s starts to publish", progress.getSourceVersion()), SLACK_BOT,
                     SlackSettings.Color.NORMAL);
 
             progress = progressService.update(progress).progress(0.05f).status(ProgressStatus.PROCESSING).commit();
@@ -81,7 +83,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                     String.format("%s [%s]", publication.getPublicationName(), progress.getApplicationId()),
                     String.format("Version %s is published after %s :clap:", progress.getSourceVersion(),
                             DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - startTime)),
-                    "SourcePublisher", SlackSettings.Color.GOOD);
+                    SLACK_BOT, SlackSettings.Color.GOOD);
         } catch (Exception e) {
             failByException(e);
         }
@@ -91,7 +93,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         log.error("Failed to publish " + progress, e);
         notificationService.sendSlack(
                 String.format("%s [%s]", progress.getPublication().getPublicationName(), progress.getApplicationId()),
-                String.format("Version %s is failed :sob:", progress.getSourceVersion()), "SourcePublisher",
+                String.format("Version %s is failed :sob:", progress.getSourceVersion()), SLACK_BOT,
                 SlackSettings.Color.DANGER);
         progressService.update(progress).fail(e.getMessage()).commit();
     }

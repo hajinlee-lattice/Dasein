@@ -401,7 +401,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         // mimic one block failed
         while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-            Thread.sleep(1000L);
+            Thread.sleep(5000L);
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
@@ -423,6 +423,38 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
         Assert.assertEquals(AvroUtils.count(yarnConfiguration, finalStatus.getResultLocation() + "/*.avro"),
                 expectedTotal);
+
+        // Submit match command again and kill same block twice. Expect the
+        // whole match command should fail
+        command = matchProxy.matchBulk(input, podId);
+        appId = ApplicationId.fromString(command.getApplicationId());
+        log.info("Test failing multi-block match command: DataCloudVersion = {}, ApplicationId = {}", version,
+                appId.toString());
+        Set<String> killedAppIds = new HashSet<>();
+        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
+            Thread.sleep(5000L);
+            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        }
+        while (killedAppIds.size() < 2) {
+            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+            blockAppId = command.getMatchBlocks().get(0).getApplicationId();
+            if (killedAppIds.contains(blockAppId)) {
+                Thread.sleep(5000L);
+                continue;
+            } else {
+                jobService.killJob(ApplicationId.fromString(blockAppId));
+                killedAppIds.add(blockAppId);
+            }
+        }
+        // Yarn status of bulk match workflow is still SUCCEEDED
+        status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.ABORTED);
+        finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.ABORTED);
     }
 
     @Test(groups = "deployment", enabled = true)
