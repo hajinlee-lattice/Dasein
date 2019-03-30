@@ -16,6 +16,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
@@ -39,7 +40,9 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 public class MatchCommandServiceImpl implements MatchCommandService {
 
     private static Logger log = LoggerFactory.getLogger(MatchCommandServiceImpl.class);
-    private static final Integer MAX_RETRIES = 2;
+
+    @Value("${datacloud.match.block.attempts.max}")
+    private Integer maxBlockAttempts;
 
     @Inject
     private MatchCommandEntityMgr matchCommandEntityMgr;
@@ -123,12 +126,13 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     @Override
-    public Boolean blockIsRetriable(String blockOperationUid) {
+    public boolean blockIsRetriable(String blockOperationUid) {
         MatchBlock matchBlock = matchBlockEntityMgr.findByBlockUid(blockOperationUid);
         if (matchBlock == null) {
             throw new RuntimeException("Cannot find a match block with block operation uid " + blockOperationUid);
         }
-        return matchBlock.getNumRetries() < MAX_RETRIES;
+        // #attempt = #retries + 1: 1st attempt has #retries as 0
+        return matchBlock.getNumRetries() + 1 < maxBlockAttempts;
     }
 
     @Override
@@ -239,6 +243,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             this.matchCommand = matchCommand;
         }
 
+        @Override
         public MatchCommandUpdaterImpl status(MatchStatus status) {
             if (MatchStatus.FAILED.equals(status) || MatchStatus.ABORTED.equals(status)) {
                 matchCommand.setStatusBeforeFailed(matchCommand.getMatchStatus());
@@ -247,26 +252,31 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return this;
         }
 
+        @Override
         public MatchCommandUpdaterImpl progress(Float progress) {
             matchCommand.setProgress(progress);
             return this;
         }
 
+        @Override
         public MatchCommandUpdaterImpl errorMessage(String errorMessage) {
             matchCommand.setErrorMessage(errorMessage.substring(0, Math.min(errorMessage.length(), 1000)));
             return this;
         }
 
+        @Override
         public MatchCommandUpdaterImpl rowsMatched(Integer rowsMatched) {
             matchCommand.setRowsMatched(rowsMatched);
             return this;
         }
 
+        @Override
         public MatchCommandUpdater rowsRequested(Integer rowsRequested) {
             matchCommand.setRowsRequested(rowsRequested);
             return this;
         }
 
+        @Override
         public MatchCommandUpdaterImpl dnbCommands() {
             // populating the list of DnBMatchCommand into MatchCommand
             List<DnBMatchCommand> dnbMatchList = dnbMatchCommandEntityMgr.findAllByField("RootOperationUID",
@@ -297,11 +307,13 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return this;
         }
 
+        @Override
         public MatchCommandUpdaterImpl resultLocation(String location) {
             matchCommand.setResultLocation(location);
             return this;
         }
 
+        @Override
         public MatchCommand commit() {
             matchCommand.setLatestStatusUpdate(new Date());
             synchronized (MatchCommandServiceImpl.class) {
@@ -319,6 +331,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             this.matchBlock = matchBlock;
         }
 
+        @Override
         public MatchBlockUpdaterImpl status(YarnApplicationState status) {
             if (YarnApplicationState.FAILED.equals(status) || YarnApplicationState.KILLED.equals(status)) {
                 matchBlock.setStateBeforeFailed(matchBlock.getApplicationState());
@@ -327,17 +340,20 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return this;
         }
 
+        @Override
         public MatchBlockUpdaterImpl progress(Float progress) {
             matchBlock.setProgress(progress);
             return this;
         }
 
+        @Override
         public MatchBlockUpdaterImpl errorMessage(String errorMessage) {
             matchBlock.setErrorMessage(errorMessage);
             return this;
         }
 
 
+        @Override
         public MatchBlockUpdater matchedRows(int matchedRows) {
             matchBlock.setMatchedRows(matchedRows);
             return this;
@@ -351,6 +367,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return this;
         }
 
+        @Override
         public MatchBlock commit() {
             matchBlock.setLatestStatusUpdate(new Date());
             synchronized (MatchCommandServiceImpl.class) {
