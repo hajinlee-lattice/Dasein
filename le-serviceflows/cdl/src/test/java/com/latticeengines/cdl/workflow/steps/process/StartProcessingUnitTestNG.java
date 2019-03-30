@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -98,7 +99,7 @@ public class StartProcessingUnitTestNG {
     private Object[][] getDCBuildNumber(){
         return new Object[][] {
                 { "2.12.8.7654321" }, //
-            { DataCollectionStatus.NOT_SET } //
+                { DataCollectionStatusDetail.NOT_SET } //
         };
     };
 
