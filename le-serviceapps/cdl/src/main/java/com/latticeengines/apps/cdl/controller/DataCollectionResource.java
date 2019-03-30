@@ -104,7 +104,7 @@ public class DataCollectionResource {
 
     @GetMapping(value = "/statushistory")
     @ResponseBody
-    @ApiOperation(value = "Get or create data collection status")
+    @ApiOperation(value = "Get data collection status history")
     public List<DataCollectionStatusHistory> getDataCollectionStatusHistory(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getCollectionStatusHistory(customerSpace);

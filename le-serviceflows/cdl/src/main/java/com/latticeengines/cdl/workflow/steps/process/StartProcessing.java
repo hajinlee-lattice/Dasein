@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -245,10 +246,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
             if (status != null
                     && (status.getDataCloudBuildNumber() == null
-                            || DataCollectionStatus.NOT_SET.equals(status.getDataCloudBuildNumber())
+                            || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
                             || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
-                statusBuildNumber = DataCollectionStatus.NOT_SET.equals(status.getDataCloudBuildNumber()) ? null
+                statusBuildNumber = DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber()) ? null
                         : status.getDataCloudBuildNumber();
                 changed = true;
             }
