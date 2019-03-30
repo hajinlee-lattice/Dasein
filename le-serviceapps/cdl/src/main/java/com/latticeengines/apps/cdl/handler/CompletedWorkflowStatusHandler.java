@@ -53,7 +53,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
                     log.info("MultiTenantContext tenant name: "
                             + MultiTenantContext.getTenant().getName());
                 }
-                log.info("statusMonitor: " + JsonUtils.serialize(status));
+                log.info("statusMonitor: " + JsonUtils.serialize(statusMonitor));
             }
             Long recordsProcessed = eventDetail.getProcessed();
             Long recordsFailed = eventDetail.getFailed();

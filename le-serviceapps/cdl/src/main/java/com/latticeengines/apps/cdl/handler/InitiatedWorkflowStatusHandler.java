@@ -50,7 +50,7 @@ public class InitiatedWorkflowStatusHandler implements WorkflowStatusHandler {
                 if (MultiTenantContext.getTenant() != null) {
                     log.info("MultiTenantContext tenant name: " + MultiTenantContext.getTenant().getName());
                 }
-                log.info("statusMonitor: " + JsonUtils.serialize(status));
+                log.info("statusMonitor: " + JsonUtils.serialize(statusMonitor));
             }
             playLaunch.setLaunchState(LaunchState.Syncing);
             playLaunchService.update(playLaunch);
