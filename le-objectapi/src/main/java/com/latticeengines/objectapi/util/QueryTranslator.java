@@ -1,6 +1,7 @@
 package com.latticeengines.objectapi.util;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,18 @@ abstract class QueryTranslator {
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
         restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
         return restriction;
+    }
+
+    public Map<ComparisonType, Set<AttributeLookup>> needPreprocess(FrontEndQuery frontEndQuery,
+            TimeFilterTranslator timeTranslator) {
+        Map<ComparisonType, Set<AttributeLookup>> results = new HashMap<>();
+        BusinessEntity mainEntity = frontEndQuery.getMainEntity();
+
+        if (BusinessEntity.Product.equals(mainEntity)) {
+            return results;
+        }
+        needPreprocess(frontEndQuery, timeTranslator, results);
+        return results;
     }
 
     void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,

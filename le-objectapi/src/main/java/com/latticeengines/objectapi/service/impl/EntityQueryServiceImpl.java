@@ -1,7 +1,5 @@
 package com.latticeengines.objectapi.service.impl;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,7 +16,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -52,8 +48,6 @@ import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-import com.latticeengines.query.exposed.translator.DayRangeTranslator;
-import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 import reactor.core.publisher.Flux;
 
@@ -65,9 +59,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
     private final QueryEvaluatorService queryEvaluatorService;
 
     private final TransactionService transactionService;
-
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
 
     @Inject
     public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
@@ -89,7 +80,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
-            preprocess(map, version, frontEndQuery, timeTranslator);
+            preprocess(map, version, timeTranslator);
 
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
@@ -140,7 +131,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
-        preprocess(map, version, frontEndQuery, timeTranslator);
+        preprocess(map, version, timeTranslator);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
         if (CollectionUtils.isEmpty(query.getLookups())) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
@@ -248,6 +239,8 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 attrRepo);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
+        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+        preprocess(map, version, timeTranslator);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator, sqlUser);
         query.setPageFilter(null);
         query.setSort(null);
@@ -287,32 +280,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         return false;
     }
 
-    void preprocess(Map<ComparisonType, Set<AttributeLookup>> map, DataCollection.Version version,
-            FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator) {
-        if (MapUtils.isNotEmpty(map)) {
-            for (ComparisonType type : map.keySet()) {
-                switch (type) {
-                case LASTEST_DAY:
-                    Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), version);
-                    updateTimeFilterTranslator(timeTranslator, type, maxDates);
-                    break;
-                default:
-                    throw new UnsupportedOperationException(
-                            String.format("ComparisonType %s is not supported for pre-processing.", type));
-                }
-            }
-        }
-    }
-
-    void updateTimeFilterTranslator(TimeFilterTranslator timeTranslator, ComparisonType type,
-            Map<AttributeLookup, Object> maxDates) {
-        Map<AttributeLookup, List<Object>> specifiedValues = timeTranslator.getSpecifiedValues().get(type);
-        maxDates.forEach((k, v) -> {
-            specifiedValues.put(k, Arrays.asList(DayRangeTranslator.getStartOfDayByTimestamp(v),
-                    DayRangeTranslator.getEndOfDayByTimestamp(v)));
-        });
-    }
-
     private Map<String, Object> postProcess(Map<String, Object> result, boolean enforceTranslation,
             Map<String, Map<Long, String>> translationMapping) {
         if (enforceTranslation //
@@ -337,106 +304,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                     });
         }
         return result;
-    }
-
-    Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version) {
-        String tenantId = MultiTenantContext.getTenant().getId();
-        // Currently, only account and contact entity can have date attributes
-        List<AttributeLookup> accountMaxLookups = new ArrayList<>();
-        List<AttributeLookup> contactMaxLookups = new ArrayList<>();
-        Map<AttributeLookup, Object> results = new HashMap<>();
-        for (AttributeLookup lookup : lookups) {
-            if (BusinessEntity.Account.equals(lookup.getEntity())) {
-                accountMaxLookups.add(lookup);
-            } else if (BusinessEntity.Contact.equals(lookup.getEntity())) {
-                contactMaxLookups.add(lookup);
-            } else {
-                throw new UnsupportedOperationException(
-                        String.format("Entity %s should not have Date Attribute.", lookup.getEntity().name()));
-            }
-        }
-        if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
-            String accountTableName = queryEvaluatorService.getAndValidateServingStoreTableName(
-                    MultiTenantContext.getTenant().getId(), BusinessEntity.Account, version);
-            log.info(String.format("Get accountTableName %s for %s", accountTableName, tenantId));
-
-            String selections = String.join(",", accountMaxLookups.stream().map(lookup -> {
-                return MessageFormat.format("max({0}) as {0}", lookup.getAttribute());
-            }).collect(Collectors.toList()));
-
-            String query = MessageFormat.format("SELECT {0} FROM {1}", selections, accountTableName);
-            log.info("query for accountTableName " + query);
-            Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
-            retMap.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
-            });
-        }
-
-        if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
-            String contactTableName = queryEvaluatorService.getAndValidateServingStoreTableName(
-                    MultiTenantContext.getTenant().getId(), BusinessEntity.Contact, version);
-            log.info(String.format("Get contactTableName %s for %s", contactTableName, tenantId));
-
-            String selections = String.join(",", contactMaxLookups.stream().map(lookup -> {
-                return MessageFormat.format("max({0}) as {0}", lookup.getAttribute());
-            }).collect(Collectors.toList()));
-
-            String query = MessageFormat.format("SELECT {0} FROM {1}", selections, contactTableName);
-            log.info("query for contactTableName " + query);
-            Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
-            retMap.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Contact, k), v);
-            });
-        }
-        return results;
-    }
-
-    Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,
-            DataCollection.Version version) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
-                queryEvaluatorService);
-        // System.out.println(JsonUtils.serialize(attrRepo));
-        // Currently, only account and contact entity can have date attributes
-        List<AggregateLookup> accountMaxLookups = new ArrayList<>();
-        List<AggregateLookup> contactMaxLookups = new ArrayList<>();
-        Map<AttributeLookup, Object> results = new HashMap<>();
-        for (AttributeLookup lookup : lookups) {
-            if (BusinessEntity.Account.equals(lookup.getEntity())) {
-                accountMaxLookups.add(AggregateLookup.max(lookup).as(lookup.getAttribute().toLowerCase()));
-            } else if (BusinessEntity.Contact.equals(lookup.getEntity())) {
-                contactMaxLookups.add(AggregateLookup.max(lookup).as(lookup.getAttribute().toLowerCase()));
-            } else {
-                throw new UnsupportedOperationException(
-                        String.format("Entity %s should not have Date Attribute.", lookup.getEntity().name()));
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
-            Query accountQuery = Query.builder() //
-                    .select(accountMaxLookups.toArray(new Lookup[accountMaxLookups.size()])) //
-                    .from(BusinessEntity.Account) //
-                    .build();
-            DataPage dataPage = queryEvaluatorService.getData(attrRepo, accountQuery,
-                    RedshiftQueryProvider.USER_SEGMENT);
-            Map<String, Object> map = dataPage.getData().get(0);
-            map.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
-            });
-        }
-        if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
-            Query contactQuery = Query.builder() //
-                    .select(contactMaxLookups.toArray(new Lookup[contactMaxLookups.size()])) //
-                    .from(BusinessEntity.Contact) //
-                    .build();
-            DataPage dataPage = queryEvaluatorService.getData(attrRepo, contactQuery,
-                    RedshiftQueryProvider.USER_SEGMENT);
-            Map<String, Object> map = dataPage.getData().get(0);
-            map.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Contact, k), v);
-            });
-        }
-        return results;
     }
 
 }
