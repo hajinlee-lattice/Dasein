@@ -119,7 +119,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         } else {
             upsertMasterStep = 2;
             diffStep = 3;
-            TransformationStepConfig upsertMaster = mergeMaster(fetchOnlyMatchStep);
+            TransformationStepConfig upsertMaster = mergeMaster(matchStep);
             steps.add(upsertMaster);
         }
 
@@ -235,6 +235,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
     }
 
+    @Override
     protected String getDiffTableName() {
         if (shortCutMode) {
             return diffTableNameInContext;
