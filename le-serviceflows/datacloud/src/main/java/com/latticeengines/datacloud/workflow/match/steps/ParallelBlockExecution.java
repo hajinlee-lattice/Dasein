@@ -504,6 +504,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void mergeBlockResult(ApplicationId appId) {
+        log.error("$JAW$ inside mergeBlockResults");
+
         String blockOperationUid = blockUuidMap.get(appId.toString());
         String blockJsonPath = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid)
                 .toString();

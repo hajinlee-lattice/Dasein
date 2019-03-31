@@ -68,6 +68,20 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             if (combinedContext == null) {
                 combinedContext = matchContext;
             }
+
+            if (processorContext != null && processorContext.getBlockOutput() != null &&
+                    processorContext.getBlockOutput().getStatistics() != null) {
+                processorContext.getBlockOutput().getStatistics().printMatchStatistics("execute 1 - processorContext");
+            } else {
+                log.error("$JAW$ execute 1 - processorContext: no value");
+            }
+            if (combinedContext != null && combinedContext.getOutput() != null &&
+                    combinedContext.getOutput().getStatistics() != null) {
+                combinedContext.getOutput().getStatistics().printMatchStatistics("execute 1 - combinedContext");
+            } else {
+                log.error("$JAW$ execute 1 - combinedContext: no value");
+            }
+
             if (processorContext.isPartialMatch()) {
                 processPartialMatch(processorContext, internalRecords, internalCompletedRecords, futures,
                         completedFutures, matchContext, combinedContext);
@@ -75,6 +89,19 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 continue;
             }
             matchContext = matchExecutor.executeAsync(matchContext);
+
+            if (processorContext != null && processorContext.getBlockOutput() != null &&
+                    processorContext.getBlockOutput().getStatistics() != null) {
+                processorContext.getBlockOutput().getStatistics().printMatchStatistics("execute 2 - processorContext");
+            } else {
+                log.error("$JAW$ execute 2 - processorContext: no value");
+            }
+            if (combinedContext != null && combinedContext.getOutput() != null &&
+                    combinedContext.getOutput().getStatistics() != null) {
+                combinedContext.getOutput().getStatistics().printMatchStatistics("execute 2 - combinedContext");
+            } else {
+                log.error("$JAW$ execute 2 - combinedContext: no value");
+            }
 
             if (CollectionUtils.isNotEmpty(matchContext.getFuturesResult())) {
                 log.info("Returned block " + block + " of " + matchContext.getFuturesResult().size()
@@ -93,6 +120,20 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                         completedFutures, null, combinedContext);
                 continue;
             }
+
+            if (processorContext != null && processorContext.getBlockOutput() != null &&
+                    processorContext.getBlockOutput().getStatistics() != null) {
+                processorContext.getBlockOutput().getStatistics().printMatchStatistics("execute 3 - processorContext");
+            } else {
+                log.error("$JAW$ execute 3 - processorContext: no value");
+            }
+            if (combinedContext != null && combinedContext.getOutput() != null &&
+                    combinedContext.getOutput().getStatistics() != null) {
+                combinedContext.getOutput().getStatistics().printMatchStatistics("execute 3 - combinedContext");
+            } else {
+                log.error("$JAW$ execute 3 - combinedContext: no value");
+            }
+
             processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
                     completedFutures, combinedContext, 0, 0);
         }
@@ -125,6 +166,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
         populateMatchOutput(processorContext, records, combinedContext);
         processorContext.getRowsProcessed().addAndGet(records.size());
+
+        log.error("$JAW$ processMatchOutput CALL 2");
+
         processMatchOutput(processorContext, combinedContext.getOutput());
         int rows = processorContext.getRowsProcessed().get();
         processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());
@@ -161,6 +205,20 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         futures.addAll(matchContext.getFuturesResult());
 
         do {
+
+            if (processorContext != null && processorContext.getBlockOutput() != null &&
+                    processorContext.getBlockOutput().getStatistics() != null) {
+                processorContext.getBlockOutput().getStatistics().printMatchStatistics("processFutures - processorContext");
+            } else {
+                log.error("$JAW$ processFutures - processorContext: no value");
+            }
+            if (combinedContext != null && combinedContext.getOutput() != null &&
+                    combinedContext.getOutput().getStatistics() != null) {
+                combinedContext.getOutput().getStatistics().printMatchStatistics("processFutures - combinedContext");
+            } else {
+                log.error("$JAW$ processFutures - combinedContext: no value");
+            }
+
             processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
                     completedFutures, combinedContext, 100, NUM_10K * 4);
             if (processorContext.isPartialMatch()) {
@@ -192,10 +250,38 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             batchCompletedRecords.add(internalCompletedRecords.get(i));
             batchCompletedFutures.add(completedFutures.get(i));
             if (batchCompletedFutures.size() >= NUM_1K) {
+
+                if (processorContext != null && processorContext.getBlockOutput() != null &&
+                        processorContext.getBlockOutput().getStatistics() != null) {
+                    processorContext.getBlockOutput().getStatistics().printMatchStatistics("consumeFutures 1 - processorContext");
+                } else {
+                    log.error("$JAW$ consumeFutures 1 - processorContext: no value");
+                }
+                if (combinedContext != null && combinedContext.getOutput() != null &&
+                        combinedContext.getOutput().getStatistics() != null) {
+                    combinedContext.getOutput().getStatistics().printMatchStatistics("consumeFutures 1 - combinedContext");
+                } else {
+                    log.error("$JAW$ consumeFutures 1 - combinedContext: no value");
+                }
+
                 consumeBatchFutures(processorContext, batchCompletedRecords, batchCompletedFutures, combinedContext);
             }
         }
         if (batchCompletedFutures.size() > 0) {
+
+            if (processorContext != null && processorContext.getBlockOutput() != null &&
+                    processorContext.getBlockOutput().getStatistics() != null) {
+                processorContext.getBlockOutput().getStatistics().printMatchStatistics("consumeFutures 2 - processorContext");
+            } else {
+                log.error("$JAW$ consumeFutures 2 - processorContext: no value");
+            }
+            if (combinedContext != null && combinedContext.getOutput() != null &&
+                    combinedContext.getOutput().getStatistics() != null) {
+                combinedContext.getOutput().getStatistics().printMatchStatistics("consumeFutures 2 - combinedContext");
+            } else {
+                log.error("$JAW$ consumeFutures 2 - combinedContext: no value");
+            }
+
             consumeBatchFutures(processorContext, batchCompletedRecords, batchCompletedFutures, combinedContext);
         }
         internalCompletedRecords.clear();
@@ -240,9 +326,24 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         log.info("Sending " + batchCompletedFutures.size() + " of futures to get results.");
 
         combinedContext = matchExecutor.executeMatchResult(combinedContext);
+
+        if (processorContext != null && processorContext.getBlockOutput() != null &&
+                processorContext.getBlockOutput().getStatistics() != null) {
+            processorContext.getBlockOutput().getStatistics().printMatchStatistics("consumeBatchFutures - processorContext");
+        } else {
+            log.error("$JAW$ consumeBatchFutures - processorContext: no value");
+        }
+        if (combinedContext != null && combinedContext.getOutput() != null &&
+                combinedContext.getOutput().getStatistics() != null) {
+            combinedContext.getOutput().getStatistics().printMatchStatistics("consumeBatchFutures - combinedContext");
+        } else {
+            log.error("$JAW$ consumeBatchFutures - combinedContext: no value");
+        }
+
         log.info("Returned " + combinedContext.getOutput().getResult().size() + " of record results.");
         processorContext.getRowsProcessed().addAndGet(batchCompletedRecords.size());
         checkMatchCode(processorContext, combinedContext);
+        log.error("$JAW$ processMatchOutput CALL 1");
 
         processMatchOutput(processorContext, combinedContext.getOutput());
         int rows = processorContext.getRowsProcessed().get();

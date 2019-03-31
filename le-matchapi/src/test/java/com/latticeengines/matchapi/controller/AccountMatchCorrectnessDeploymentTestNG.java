@@ -19,6 +19,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -117,6 +119,17 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
 
         MatchInput input = prepareBulkMatchInput("accountmatchinput_builduniverse.avro");
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, POD_ID);
+
+        log.error("MatchCommand Match Results:");
+        Map<EntityMatchResult, Long> matchResultMap = finalStatus.getMatchResults();
+        if (MapUtils.isEmpty(matchResultMap)) {
+            log.error("   NO ENTITY MATCH RESULTS!");
+        } else {
+            for (Map.Entry<EntityMatchResult, Long> entry : matchResultMap.entrySet()) {
+                log.error("   " + entry.getKey().name() + ": " + entry.getValue().toString());
+            }
+        }
+
         // set the accounts populated in the existing universe for verification of the
         // second match job (some of the records have to match to a specific entity ID
         // in the universe now)

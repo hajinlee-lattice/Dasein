@@ -2,6 +2,8 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,8 @@ import com.latticeengines.datacloud.match.service.MatchExecutor;
 
 @Component("bulkMatchExecutor")
 class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
+    private static final Logger log = LoggerFactory.getLogger(BulkMatchExecutor.class);
+
 
     @Autowired
     private BeanDispatcher beanDispatcher;
@@ -31,6 +35,8 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     @Override
     public MatchContext executeMatchResult(MatchContext matchContext) {
+        log.error("$JAW$ In BulkMatchExecutor.executeMatchResult");
+
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
         dbHelper.fetchIdResult(matchContext);
         dbHelper.fetchMatchResult(matchContext);

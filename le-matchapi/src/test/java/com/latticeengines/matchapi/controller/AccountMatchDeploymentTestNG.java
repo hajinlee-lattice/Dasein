@@ -448,7 +448,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
         } else if (CASE_LEAD_TO_ACCT.equals(scenario) || CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
-            validateLeadToAcctResult(finalStatus.getResultLocation(), scenario);
+            validateLeadToAcctResult(finalStatus, scenario);
         } else if (input.isFetchOnly()) {
             validateAcctMatchFetchOnlyResult(finalStatus.getResultLocation());
         } else {
@@ -673,7 +673,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         Assert.assertEquals(count, dataFetchOnly.length);
     }
 
-    private void validateLeadToAcctResult(String path, String scenario) {
+    private void validateLeadToAcctResult(MatchCommand finalStatus, String scenario) {
         Set<String> casesMatchedAID = null;
         Set<String> casesAnonymousAID = null;
         if (CASE_LEAD_TO_ACCT.equals(scenario)) {
@@ -686,7 +686,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             throw new IllegalArgumentException("Unrecognized test scenario: " + scenario);
         }
 
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, finalStatus.getResultLocation() + "/*.avro");
         int count = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -703,12 +703,42 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 throw new IllegalArgumentException("Unrecgoized test case group " + groupId);
             }
         }
+
+        Map<EntityMatchResult, Long> matchResultMap = finalStatus.getMatchResults();
+        log.error("For Scenario: " + scenario + ":");
+        if (MapUtils.isEmpty(matchResultMap)) {
+            log.error("   NO ENTITY MATCH RESULTS!");
+        } else {
+            for (Map.Entry<EntityMatchResult, Long> entry : matchResultMap.entrySet()) {
+                log.error("   " + entry.getKey().name() + ": " + entry.getValue().toString());
+            }
+        }
+
         if (CASE_LEAD_TO_ACCT.equals(scenario)) {
             Assert.assertEquals(count, DATA_LEAD_TO_ACCT.length);
+
+            // Validate MatchCommand Match Results.
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.ORPHANED_NO_MATCH));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.ORPHANED_NO_MATCH).longValue(), 8L);
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID).longValue(), 3L);
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.MATCHED_BY_MATCHKEY));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.MATCHED_BY_MATCHKEY).longValue(), 8L);
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.MATCHED_BY_ACCOUNTID).longValue(), 10L);
         }
         if (CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
             Assert.assertEquals(count, DATA_LEAD_TO_ACCT_NOAID.length);
 
+            // Validate MatchCommand Match Results.
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.ORPHANED_NO_MATCH));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.ORPHANED_NO_MATCH).longValue(), 9L);
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID).longValue(), 0L);
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.MATCHED_BY_MATCHKEY));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.MATCHED_BY_MATCHKEY).longValue(), 14L);
+            Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID));
+            Assert.assertEquals(matchResultMap.get(EntityMatchResult.MATCHED_BY_ACCOUNTID).longValue(), 0L);
         }
     }
 

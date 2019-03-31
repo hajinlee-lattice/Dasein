@@ -152,6 +152,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
+        log.error("$JAW$ inside processMatchOutput");
+
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
@@ -406,7 +408,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
         }
 
-
+        log.error("$JAW$ Count Value: " + count);
         log.error("$JAW$ MatchBlock Rows Matched: " + processorContext.getBlockOutput().getStatistics()
                 .getRowsMatched());
 

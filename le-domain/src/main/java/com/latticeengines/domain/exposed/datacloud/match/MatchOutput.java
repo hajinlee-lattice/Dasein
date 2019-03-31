@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,6 @@ public class MatchOutput {
     // ====================
 
     // for json constructor
-    @SuppressWarnings("unused")
     private MatchOutput() {
     }
 
@@ -124,6 +125,50 @@ public class MatchOutput {
     public void setStatistics(MatchStatistics statistics) {
         this.statistics = statistics;
     }
+
+    public MatchStatistics cloneStatistics() {
+        if (getStatistics() == null) {
+            return null;
+        }
+        MatchStatistics matchStatistics = new MatchStatistics();
+
+        if (getStatistics().getRowsRequested() != null) {
+            matchStatistics.setRowsRequested(getStatistics().getRowsRequested().intValue());
+        }
+        if (getStatistics().getRowsMatched() != null) {
+            matchStatistics.setRowsMatched(getStatistics().getRowsMatched().intValue());
+        }
+        if (getStatistics().getTimeElapsedInMsec() != null) {
+            matchStatistics.setTimeElapsedInMsec(getStatistics().getTimeElapsedInMsec().longValue());
+        }
+
+        if (CollectionUtils.isNotEmpty(getStatistics().getColumnMatchCount())) {
+            List<Integer> columnMatchCount = new ArrayList<>();
+            for (int count : getStatistics().getColumnMatchCount()) {
+                columnMatchCount.add(count);
+            }
+            matchStatistics.setColumnMatchCount(columnMatchCount);
+        } else if (getStatistics() != null) {
+            matchStatistics.setColumnMatchCount(new ArrayList<>());
+        }
+
+        if (getStatistics().getOrphanedNoMatchCount() != null) {
+            matchStatistics.setOrphanedNoMatchCount(getStatistics().getOrphanedNoMatchCount().longValue());
+        }
+        if (getStatistics().getOrphanedUnmatchedAccountIdCount() != null) {
+            matchStatistics.setOrphanedUnmatchedAccountIdCount(
+                getStatistics().getOrphanedUnmatchedAccountIdCount().longValue());
+        }
+        if (getStatistics().getMatchedByMatchKeyCount() != null) {
+            matchStatistics.setMatchedByMatchKeyCount(getStatistics().getMatchedByMatchKeyCount().longValue());
+        }
+        if (getStatistics().getMatchedByAccountIdCount() != null) {
+            matchStatistics.setMatchedByAccountIdCount(getStatistics().getMatchedByAccountIdCount().longValue());
+        }
+
+        return matchStatistics;
+    }
+
 
     @JsonProperty("SubmittedBy")
     public Tenant getSubmittedBy() {
@@ -213,4 +258,23 @@ public class MatchOutput {
     public void setEntityKeyMaps(Map<String, MatchInput.EntityKeyMap> entityKeyMaps) {
         this.entityKeyMaps = entityKeyMaps;
     }
+
+    // Creates a shallow copy of this MatchOutput except for MatchStatistics which is deeply copied to allow for
+    // proper statistics gathering in MatchUtils.java.
+    public MatchOutput shallowCopy() {
+        MatchOutput output = new MatchOutput();
+        output.setInputFields(inputFields);
+        output.setKeyMap(keyMap);
+        output.setOutputFields(outputFields);
+        output.setResult(result);
+        output.setMetadata(metadata);
+        output.setStatistics(cloneStatistics());
+        output.setSubmittedBy(submittedBy);
+        output.setReceivedAt(receivedAt);
+        output.setFinishedAt(finishedAt);
+        output.setRootOperationUID(rootOperationUID);
+        output.setEntityKeyMaps(entityKeyMaps);
+        return output;
+    }
+
 }

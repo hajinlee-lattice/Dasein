@@ -144,4 +144,13 @@ public class MatchStatistics {
         return Integer.valueOf(getTimeElapsedInMsec().toString());
     }
 
+    public void printMatchStatistics(String message) {
+        log.error("$JAW$ Printing Match Stats: " + message);
+        log.error("$JAW$    Stats Rows Matched: " + getRowsMatched());
+        log.error("$JAW$    Stats Orphaned No Match: " + getOrphanedNoMatchCount());
+        log.error("$JAW$    Stats Orphaned Unmatched Account ID: " + getOrphanedUnmatchedAccountIdCount());
+        log.error("$JAW$    Stats Matched By MatchKey: " + getMatchedByMatchKeyCount());
+        log.error("$JAW$    Stats Matched By Account ID: " + getMatchedByAccountIdCount());
+    }
+
 }

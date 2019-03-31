@@ -78,6 +78,10 @@ public class BulkMatchCallable implements Callable<MatchContext> {
         }
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(0);
+        matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(0L);
+        matchContext.getOutput().getStatistics().setOrphanedUnmatchedAccountIdCount(0L);
+        matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(0L);
+        matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(0L);
         return matchContext;
     }
 

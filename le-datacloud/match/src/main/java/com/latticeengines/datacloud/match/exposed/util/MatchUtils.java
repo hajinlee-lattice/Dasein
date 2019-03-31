@@ -19,9 +19,14 @@ public class MatchUtils {
     private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     public static MatchOutput mergeOutputs(MatchOutput output, MatchOutput newOutput) {
+        log.error("$JAW$ inside mergeOutputs");
+
         if (output == null) {
-            return newOutput;
+            log.error("$JAW$ Created shallow copy of newOutput.");
+            return newOutput.shallowCopy();
         }
+
+        log.error("$JAW$ output wasn't null");
         output.setStatistics(mergeStatistics(output.getStatistics(), newOutput.getStatistics()));
         output.getResult().addAll(newOutput.getResult());
         return output;
