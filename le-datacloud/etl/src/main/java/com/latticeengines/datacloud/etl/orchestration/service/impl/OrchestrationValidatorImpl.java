@@ -54,7 +54,7 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
             if (StringUtils.isBlank(config.getCronExpression())) {
                 return false;
             } else {
-                Date latestScheduledTime = CronUtils.getPreviousFireTime(config.getCronExpression()).toDate();
+                Date latestScheduledTime = CronUtils.getPreviousFireTimeByCron(config.getCronExpression());
                 String scheduledVersion = HdfsPathBuilder.dateFormat.format(latestScheduledTime);
                 if (!isDuplicateVersion(orch.getName(), scheduledVersion)) {
                     triggeredVersions.add(scheduledVersion);
