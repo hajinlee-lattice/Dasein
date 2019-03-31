@@ -2,6 +2,10 @@ package com.latticeengines.common.exposed.util;
 
 import static com.cronutils.model.CronType.QUARTZ;
 
+import java.text.ParseException;
+import java.util.Date;
+
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.joda.time.DateTime;
 
 import com.cronutils.model.definition.CronDefinitionBuilder;
@@ -19,6 +23,19 @@ public final class CronUtils {
     public static DateTime getPreviousFireTime(String cron, DateTime now) {
         ExecutionTime executionTime = ExecutionTime.forCron(parser.parse(cron));
         return executionTime.lastExecution(now);
+    }
+
+    public static Date getPreviousFireTimeByCron(String cron) {
+        return getPreviousFireTimeByCron(cron, new Date());
+    }
+
+    public static Date getPreviousFireTimeByCron(String cron, Date now) {
+        try {
+            CronExpression cronExpr = new CronExpression(cron);
+            return cronExpr.getPrevFireTime(now);
+        } catch (ParseException e) {
+            throw new RuntimeException("Fail to parse cron expression " + cron);
+        }
     }
 
     public static DateTime getNextFireTime(String cron) {
