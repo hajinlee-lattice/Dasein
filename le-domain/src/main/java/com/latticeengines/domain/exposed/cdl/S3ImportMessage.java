@@ -54,6 +54,10 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     @Column(name = "KEY", nullable = false)
     private String key;
 
+    @JsonProperty("feed_type")
+    @Column(name = "FEED_TYPE", nullable = false)
+    private String feedType;
+
     @JsonProperty("host_url")
     @Column(name = "HOST_URL", nullable = false)
     private String hostUrl;
@@ -103,6 +107,14 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
             throw new IllegalArgumentException("Do not support s3 message key: " + key);
         }
         this.key = key;
+    }
+
+    public String getFeedType() {
+        return feedType;
+    }
+
+    public void setFeedType(String feedType) {
+        this.feedType = feedType;
     }
 
     public String getHostUrl() {
