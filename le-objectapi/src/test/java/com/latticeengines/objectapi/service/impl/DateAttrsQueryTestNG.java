@@ -25,6 +25,17 @@ import com.latticeengines.objectapi.service.RatingQueryService;
  */
 public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
 
+    private final class AccountAttr {
+        static final String CreatedDate = "user_CreatedDate";
+        static final String TestDate1 = "user_TestDate_DD_MMM_YYYY_00_00_0024H__8H";
+        static final String TestDate2 = "user_TestDate_Column_dd_mmm_yyyy_withoutDate";
+    }
+
+    private final class ContactAttr {
+        static final String TestDate1 = "user_TestDate_Column_dd_mmm_yyyy_withoutDate";
+        static final String TestDate2 = "user_Created_Date_mm_dd_yyyy_hh_mm_ss_12h";
+    }
+
     @Inject
     private EntityQueryService entityQueryService;
 
@@ -42,14 +53,11 @@ public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
     @Test(groups = "manual")
     public void testMax() {
         Set<AttributeLookup> set = new HashSet<>();
-        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, "user_createddate");
-        AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, "user_testdate_dd_mmm_yyyy__8h");
-        AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account,
-                "user_testdate_column_dd_mmm_yyyy_withoutdate");
-        AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact,
-                "user_testdate_column_dd_mmm_yyyy_withoutdate");
-        AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact,
-                "user_created_date_mm_dd_yyyy_hh_mm_ss_12h");
+        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, AccountAttr.CreatedDate);
+        AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate1);
+        AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate2);
+        AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate1);
+        AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate2);
         // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
         set.addAll(Arrays.asList(accout_2, accout_3));
         // set.addAll(Arrays.asList(contact_1, contact_2));
@@ -62,14 +70,11 @@ public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
     @Test(groups = "manual")
     public void testMaxViaFrontEndQuery() {
         Set<AttributeLookup> set = new HashSet<>();
-        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, "user_createddate");
-        AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, "user_testdate_dd_mmm_yyyy__8h");
-        AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account,
-                "user_testdate_column_dd_mmm_yyyy_withoutdate");
-        AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact,
-                "user_testdate_column_dd_mmm_yyyy_withoutdate");
-        AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact,
-                "user_created_date_mm_dd_yyyy_hh_mm_ss_12h");
+        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, AccountAttr.CreatedDate);
+        AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate1);
+        AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate2);
+        AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate1);
+        AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate2);
         // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
         set.addAll(Arrays.asList(accout_2, accout_3));
         // set.addAll(Arrays.asList(contact_1, contact_2));
