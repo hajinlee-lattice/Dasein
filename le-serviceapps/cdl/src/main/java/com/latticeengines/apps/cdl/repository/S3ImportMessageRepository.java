@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 public interface S3ImportMessageRepository extends BaseJpaRepository<S3ImportMessage, Long> {
 
     @Query("select m from S3ImportMessage m where m.pid in " +
-            "(select MIN(sm.pid) from S3ImportMessage sm group by sm.dropBox)")
+            "(select MIN(sm.pid) from S3ImportMessage sm group by sm.dropBox, sm.feedType)")
     List<S3ImportMessage> getS3ImportMessageGroupByDropBox();
 
     S3ImportMessage findByKey(String key);
