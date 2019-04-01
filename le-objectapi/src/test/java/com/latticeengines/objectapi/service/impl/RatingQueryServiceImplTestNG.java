@@ -49,7 +49,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setupTestData(3);
+        setupTestData(3);
     }
 
     @Test(groups = "functional")

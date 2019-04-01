@@ -4,16 +4,13 @@ import static com.latticeengines.domain.exposed.util.RestrictionUtils.TRANSACTIO
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -49,9 +46,6 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";
-        static final String CreateDate = "CREATEDDATE";
-        static final String TestDate1 = "user_testdate_column_mm_dd_yy_hh_mm_ss_12h";
-        static final String TestDate2 = "user_testdata_column_yyyy_mm_dd_hh_mm_ss_24h";
     }
 
     private final class ContactAttr {
@@ -66,19 +60,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setupTestData(2);
-    }
-
-    @Test(groups = "functional")
-    public void testMax() {
-        Set<AttributeLookup> set = new HashSet<>(Arrays.asList(
-                new AttributeLookup(BusinessEntity.Account, AccountAttr.CreateDate),
-                new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate1),
-                new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate2)
-        ));
-        Map<AttributeLookup, Object> results = ReflectionTestUtils.invokeMethod(entityQueryService, //
-                "getMaxDates", set, attrRepo);
-        results.forEach((k, v) -> System.out.println(k + " : " + v));
+        setupTestData(3);
     }
 
     @Test(groups = "functional")
@@ -128,17 +110,17 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, Long.valueOf(33393));
+        Assert.assertEquals(count, Long.valueOf(32802));
     }
 
     @Test(groups = "functional")
     public void testContactCount() {
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(
-                "{\n" + "  \"main_entity\": \"Contact\",\n" + "  \"distinct\": false\n" + "}", FrontEndQuery.class);
+                "{\"main_entity\": \"Contact\",  \"distinct\": false}", FrontEndQuery.class);
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertEquals(count, 132628);
+        Assert.assertEquals(count, 132658);
     }
 
     @Test(groups = "functional")
@@ -155,7 +137,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.addLookups(BusinessEntity.ProductHierarchy, phAttr);
         long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertEquals(count, 33680);
+        Assert.assertEquals(count, 33248);
 
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, false);
