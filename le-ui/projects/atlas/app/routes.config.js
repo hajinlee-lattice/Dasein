@@ -283,8 +283,8 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
             },
             params: {
                 section: 're.model_iteration',
-                pageIcon: 'ico-attributes',
-                pageTitle: 'View Iteration',
+                pageIcon: 'ico-view-model',
+                pageTitle: 'Attributes',
                 gotoNonemptyCategory: true,
                 viewingIteration: true
             },
@@ -405,8 +405,8 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
         .state('home.model.attributes', {
             url: '/attributes',
             params: {
-                pageIcon: 'ico-attributes',
-                pageTitle: 'Attributes'
+                pageIcon: 'ico-donut',
+                pageTitle: 'Insights'
             },
             views: {
                 'main@': {
