@@ -76,7 +76,7 @@ for role in \
       -H 'cache-control: no-cache' \
       ${url} \
     | jq -r .[0]`
-    tbl1="Query_Test_$role}_${testDataVersion}"
+    tbl1="Query_Test_${role}_${testDataVersion}"
     if [[ -n ${tbl0} ]] && [[ "${tbl0}" != "null" ]]; then
         echo "CREATE TABLE ${tbl1} (LIKE ${tbl0});"
         echo "INSERT INTO ${tbl1} (SELECT * FROM ${tbl0});"
