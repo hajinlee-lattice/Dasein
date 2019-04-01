@@ -43,6 +43,7 @@ angular.module('lp.models.ratings', [
         currentConfiguration: CurrentConfiguration,
         workingBuckets: CurrentConfiguration,
         ratingsSummary: RatingsSummary,
+        showCurrentConfig: true,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         section: ($state.params && $state.params.section ? $state.params.section : '')
     });
@@ -99,8 +100,6 @@ angular.module('lp.models.ratings', [
                 // If the model has been published previously and is Active
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
 
-                    console.log("here 3");
-
                     // Set active iteration and working buckets (determines what is displayed in the chart)
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
                     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
@@ -118,6 +117,7 @@ angular.module('lp.models.ratings', [
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
+                    vm.showCurrentConfig = false;
                 }
             }
 
@@ -204,7 +204,7 @@ angular.module('lp.models.ratings', [
             modelId: vm.activeIteration.modelSummaryId,
             rating_id: $stateParams.rating_id,
             viewingIteration: false,
-            toggleRatings: true
+            useSelectedIteration: true
         }, {reload: true});
     }
 
