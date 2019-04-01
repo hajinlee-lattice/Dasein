@@ -74,7 +74,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
-            preprocess(map, version, timeTranslator);
+            preprocess(map, attrRepo, timeTranslator);
             Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
@@ -122,7 +122,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
         TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
-        preprocess(map, version, timeTranslator);
+        preprocess(map, attrRepo, timeTranslator);
         Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
@@ -198,7 +198,9 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
-            preprocess(map, version, timeTranslator);
+            AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                    queryEvaluatorService);
+            preprocess(map, attrRepo, timeTranslator);
             Query query = queryTranslator.translateRatingQuery(frontEndQuery, null, timeTranslator, sqlUser);
             query.setPageFilter(null);
             query.setSort(null);

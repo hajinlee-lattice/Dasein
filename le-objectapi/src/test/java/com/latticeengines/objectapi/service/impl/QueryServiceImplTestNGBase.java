@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -34,8 +35,16 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
     protected Tenant tenant;
     protected String maxTransactionDate;
 
-    protected void setup(String dataVersion) {
-        setupBase(dataVersion);
+    protected void setupTestData(int dataVersion) {
+        setupTestData(dataVersion, false);
+    }
+
+    protected void setupTestDataWithSpark(int dataVersion) {
+        setupTestData(dataVersion, true);
+    }
+
+    private void setupTestData(int dataVersion, boolean setupSpark) {
+        initializeAttributeRepo(dataVersion, setupSpark);
         mockDataCollectionProxy();
         mockPeriodProxy();
         tenant = new Tenant("LocalTest");
@@ -48,7 +57,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
     private void mockDataCollectionProxy() {
         DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
         Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
-        queryEvaluatorService.setDataCollectionProxy(proxy);
+        ReflectionTestUtils.setField(queryEvaluatorService, "dataCollectionProxy", proxy);
     }
 
     private void mockPeriodProxy() {

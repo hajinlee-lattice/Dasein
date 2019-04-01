@@ -8,8 +8,6 @@ import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLES
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +15,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -53,8 +49,6 @@ import net.lingala.zip4j.exception.ZipException;
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
 public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-
-    private static final Logger log = LoggerFactory.getLogger(QueryFunctionalTestNGBase.class);
 
     @Inject
     protected QueryEvaluator queryEvaluator;
@@ -150,8 +144,8 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         AttributeRepository attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
         if (version >= 3) {
-            for (TableRoleInCollection role: getRolesInAttrRepo()) {
-                attrRepo.changeServingStoreTableName(role, getServingStoreName(role, version));
+            for (TableRoleInCollection role: QueryTestUtils.getRolesInAttrRepo()) {
+                attrRepo.changeServingStoreTableName(role, QueryTestUtils.getServingStoreName(role, version));
             }
         }
         accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
@@ -167,8 +161,8 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
         if (version >= 3) {
             tblPathMap = new HashMap<>();
-            for (TableRoleInCollection role: getRolesInAttrRepo()) {
-                String tblName = getServingStoreName(role, version);
+            for (TableRoleInCollection role: QueryTestUtils.getRolesInAttrRepo()) {
+                String tblName = QueryTestUtils.getServingStoreName(role, version);
                 String path = pathMap.get(role);
                 tblPathMap.put(tblName, path);
                 attrRepo.changeServingStoreTableName(role, tblName);
@@ -190,7 +184,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
             throw new RuntimeException("Failed to unzip tables archive " + zipFilePath, e);
         }
         Map<TableRoleInCollection, String> pathMap = new HashMap<>();
-        getRolesInAttrRepo().forEach(role -> {
+        QueryTestUtils.getRolesInAttrRepo().forEach(role -> {
             try {
                 File tableJsonFile = new File(downloadsDir + File.separator + "TableJsons/" + role + ".json");
                 Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
@@ -224,23 +218,6 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         } catch (IOException e) {
             throw new RuntimeException("Failed to copy local dir to hdfs.", e);
         }
-    }
-
-    private Collection<TableRoleInCollection> getRolesInAttrRepo() {
-        return Arrays.asList( //
-                TableRoleInCollection.BucketedAccount,
-                TableRoleInCollection.SortedContact,
-                TableRoleInCollection.AggregatedTransaction,
-                TableRoleInCollection.AggregatedPeriodTransaction,
-                TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                TableRoleInCollection.PivotedRating,
-                TableRoleInCollection.CalculatedCuratedAccountAttribute,
-                TableRoleInCollection.SortedProduct
-        );
-    }
-
-    private String getServingStoreName(TableRoleInCollection role, int version) {
-        return String.format("Query_Test_%s_%d", role, version);
     }
 
     protected void sqlContains(SQLQuery<?> query, String content) {
