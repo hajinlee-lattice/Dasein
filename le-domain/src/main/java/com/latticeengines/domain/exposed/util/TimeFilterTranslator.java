@@ -60,11 +60,11 @@ public class TimeFilterTranslator {
             return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
         } else if (range == null && ComparisonType.IS_EMPTY.equals(timeFilter.getRelation())) {
             return new TimeFilter(ComparisonType.IS_EMPTY, null, null);
-        } else if (range == null && ComparisonType.LASTEST_DAY.equals(timeFilter.getRelation())) {
+        } else if (range == null && ComparisonType.LATEST_DAY.equals(timeFilter.getRelation())) {
             if (lookup == null) {
                 throw new NullPointerException("lookup cannot be null for LASTEST_DAY comparator");
             }
-            Map<AttributeLookup, List<Object>> map = specifiedValues.get(ComparisonType.LASTEST_DAY);
+            Map<AttributeLookup, List<Object>> map = specifiedValues.get(ComparisonType.LATEST_DAY);
             if (!map.containsKey(lookup)) {
                 throw new NullPointerException("TimeFilterTranslator does not have the lookup: " + lookup);
             }
