@@ -9,6 +9,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
@@ -25,6 +27,19 @@ public class TimeFilterTranslatorUnitTestNG {
             Assert.assertEquals(actual.getLeft(), expected.getLeft());
             Assert.assertEquals(actual.getRight(), expected.getRight());
         }
+    }
+
+    @Test(groups = "unit")
+    public void testTranslate() {
+        TimeFilterTranslator translator = getTranslator();
+        translator.getSpecifiedValues().get(ComparisonType.LATEST_DAY)
+                .put(new AttributeLookup(BusinessEntity.Account, "attr1"), Arrays.asList(12345L, 12346L));
+        TimeFilter tf = translator.translate(TimeFilter.latestDay(),
+                new AttributeLookup(BusinessEntity.Account, "attr1"));
+        Assert.assertEquals(tf.getRelation(), ComparisonType.BETWEEN);
+        Assert.assertNotNull(tf.getValues());
+        Assert.assertEquals(tf.getValues().size(), 2);
+        System.out.println(tf.getValues());
     }
 
     @DataProvider(name = "timeFilterProvider")
@@ -62,6 +77,7 @@ public class TimeFilterTranslatorUnitTestNG {
         return new Object[][] { //
                 { TimeFilter.ever(), null }, //
                 { TimeFilter.isEmpty(), null }, //
+                { TimeFilter.latestDay(), null }, //
                 { currentMonth, Pair.of("2018-02-01", "2018-02-28") }, //
                 { within1Month, Pair.of("2018-01-01", "2018-01-31") }, //
                 { within3Month, Pair.of("2017-11-01", "2018-01-31") }, //
