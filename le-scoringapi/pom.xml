@@ -11,24 +11,24 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-spring-boot-webmvc-parent</artifactId>
-        <version>4.16.0-SNAPSHOT</version>
+        <version>4.17.0-SNAPSHOT</version>
         <relativePath>../le-parent/spring-boot/webmvc</relativePath>
     </parent>
 
     <properties>
         <component-name>scoringapi</component-name>
-        <le.camille.version>4.16.0-SNAPSHOT</le.camille.version>
-        <le.common.version>4.16.0-SNAPSHOT</le.common.version>
-        <le.domain.version>4.16.0-SNAPSHOT</le.domain.version>
-        <le.datafabric.version>4.16.0-SNAPSHOT</le.datafabric.version>
-        <le.monitor.version>4.16.0-SNAPSHOT</le.monitor.version>
-        <le.oauth2.db.version>4.16.0-SNAPSHOT</le.oauth2.db.version>
-        <le.proxy.version>4.16.0-SNAPSHOT</le.proxy.version>
-        <le.network.version>4.16.0-SNAPSHOT</le.network.version>
-        <le.transform.version>4.16.0-SNAPSHOT</le.transform.version>
-        <le.testframework.version>4.16.0-SNAPSHOT</le.testframework.version>
-        <le.transform.version>4.16.0-SNAPSHOT</le.transform.version>
-        <le.hadoop.version>4.16.0-SNAPSHOT</le.hadoop.version>
+        <le.camille.version>4.17.0-SNAPSHOT</le.camille.version>
+        <le.common.version>4.17.0-SNAPSHOT</le.common.version>
+        <le.domain.version>4.17.0-SNAPSHOT</le.domain.version>
+        <le.datafabric.version>4.17.0-SNAPSHOT</le.datafabric.version>
+        <le.monitor.version>4.17.0-SNAPSHOT</le.monitor.version>
+        <le.oauth2.db.version>4.17.0-SNAPSHOT</le.oauth2.db.version>
+        <le.proxy.version>4.17.0-SNAPSHOT</le.proxy.version>
+        <le.network.version>4.17.0-SNAPSHOT</le.network.version>
+        <le.transform.version>4.17.0-SNAPSHOT</le.transform.version>
+        <le.testframework.version>4.17.0-SNAPSHOT</le.testframework.version>
+        <le.transform.version>4.17.0-SNAPSHOT</le.transform.version>
+        <le.hadoop.version>4.17.0-SNAPSHOT</le.hadoop.version>
         <jetty.port>8073</jetty.port>
         <jetty.ssl.port>9073</jetty.ssl.port>
         <jett.stop.port>10973</jett.stop.port>
