@@ -284,7 +284,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
             params: {
                 section: 're.model_iteration',
                 pageIcon: 'ico-view-model',
-                pageTitle: 'Attributes',
+                pageTitle: 'Attribute List',
                 gotoNonemptyCategory: true,
                 viewingIteration: true
             },
@@ -406,7 +406,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
             url: '/attributes',
             params: {
                 pageIcon: 'ico-donut',
-                pageTitle: 'Insights'
+                pageTitle: 'Attribute Analysis'
             },
             views: {
                 'main@': {
@@ -598,7 +598,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
             url: '/summary',
             params: {
                 pageIcon: 'ico-datatable',
-                pageTitle: 'Summary'
+                pageTitle: 'Model Summary'
             },
             views: {
                 'main@': {
