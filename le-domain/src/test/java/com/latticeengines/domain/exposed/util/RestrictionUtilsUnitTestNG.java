@@ -37,7 +37,7 @@ public class RestrictionUtilsUnitTestNG {
 
         RestrictionUtils.inspectBucketRestriction(br1, map, tft);
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.get(ComparisonType.LASTEST_DAY).size(), 1);
+        Assert.assertEquals(map.get(ComparisonType.LATEST_DAY).size(), 1);
 
         BucketRestriction br2 = new BucketRestriction();
         br2.setAttr(new AttributeLookup(BusinessEntity.Contact, "attr2"));
@@ -46,9 +46,9 @@ public class RestrictionUtilsUnitTestNG {
         br2.setBkt(bkt2);
         RestrictionUtils.inspectBucketRestriction(br2, map, tft);
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.get(ComparisonType.LASTEST_DAY).size(), 2);
+        Assert.assertEquals(map.get(ComparisonType.LATEST_DAY).size(), 2);
 
-        Map<AttributeLookup, List<Object>> latestDayValues = tft.getSpecifiedValues().get(ComparisonType.LASTEST_DAY);
+        Map<AttributeLookup, List<Object>> latestDayValues = tft.getSpecifiedValues().get(ComparisonType.LATEST_DAY);
         latestDayValues.put(new AttributeLookup(BusinessEntity.Account, "attr3"), Arrays.asList(1, 2));
         BucketRestriction br3 = new BucketRestriction();
         br3.setAttr(new AttributeLookup(BusinessEntity.Account, "attr3"));
@@ -57,7 +57,7 @@ public class RestrictionUtilsUnitTestNG {
         br3.setBkt(bkt3);
         RestrictionUtils.inspectBucketRestriction(br3, map, tft);
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.get(ComparisonType.LASTEST_DAY).size(), 2);
+        Assert.assertEquals(map.get(ComparisonType.LATEST_DAY).size(), 2);
     }
 
 }

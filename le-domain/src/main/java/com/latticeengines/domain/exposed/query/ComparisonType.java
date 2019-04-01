@@ -26,7 +26,7 @@ public enum ComparisonType {
     EVER, //
     IS_EMPTY, //
     LAST, // only for Date Attribute
-    LASTEST_DAY, // only for Date Attribute
+    LATEST_DAY, // only for Date Attribute
     IN_CURRENT_PERIOD, //
     BETWEEN, //
     PRIOR_ONLY, //
@@ -41,7 +41,7 @@ public enum ComparisonType {
 
     // this set needs preprocessing to specify parameters
     public static final Set<ComparisonType> VAGUE_TYPES = //
-            ImmutableSet.of(LASTEST_DAY);
+            ImmutableSet.of(LATEST_DAY);
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;
