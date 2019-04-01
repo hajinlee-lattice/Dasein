@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -228,7 +230,12 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 String dirPath = path.substring(0, path.lastIndexOf("*.avro"));
                 log.info("Diagnostic file path: " + dirPath);
                 if (HdfsUtils.fileExists(yarnConfiguration, dirPath + ERROR_FILE)) {
-                    errorFiles.add(dirPath + ERROR_FILE);
+                    Matcher matcher = Pattern.compile("^hdfs://(?<cluster>[^/]+)/Pods/(?<tail>.*)").matcher(dirPath);
+                    if (matcher.matches()) {
+                        errorFiles.add("/Pods/" + matcher.group("tail") + ERROR_FILE);
+                    } else {
+                        errorFiles.add(dirPath + ERROR_FILE);
+                    }
                 }
             } catch (IOException e) {
                 log.error("Check error file existence error.");
