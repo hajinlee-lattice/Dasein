@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.metadata.statistics;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -160,6 +163,13 @@ public class AttributeRepository {
 
     public void changeServingStoreTableName(TableRoleInCollection role, String tableName) {
         tableNameMap.put(role, tableName);
+    }
+
+    public AttributeRepository getDeepCopy() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        KryoUtils.write(bos, this);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return KryoUtils.read(bis, AttributeRepository.class);
     }
 
 }

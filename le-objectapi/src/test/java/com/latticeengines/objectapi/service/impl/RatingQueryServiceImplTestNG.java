@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -41,13 +42,14 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private static final String ATTR_ACCOUNT_NAME = "CompanyName";
     private static final String ATTR_CONTACT_TITLE = "Occupation";
+    private static final String VALUE_CONTACT_TITLE = "Analyst";
 
     @Inject
     private RatingQueryService queryService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("2");
+        super.setupTestData(3);
     }
 
     @Test(groups = "functional")
@@ -60,7 +62,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
-        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Analyst"));
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(VALUE_CONTACT_TITLE));
         Restriction contactRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
@@ -82,8 +84,10 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                     Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
-        frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "AccountId"),
-                new AttributeLookup(BusinessEntity.Rating, model.getId())));
+        frontEndQuery.setLookups(Arrays.asList( //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()), //
+                new AttributeLookup(BusinessEntity.Rating, model.getId())) //
+        );
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
@@ -128,7 +132,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Analyst"));
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(VALUE_CONTACT_TITLE));
         Restriction contactRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
@@ -142,7 +146,6 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
-            System.out.println(score + ":" + count);
             if (RatingBucketName.A.getName().equals(score)) {
                 Assert.assertEquals(count, Long.valueOf(1687));
             } else if (RatingBucketName.C.getName().equals(score)) {
@@ -195,11 +198,10 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
-//            System.out.println(score + ":" + count);
             if (RatingBucketName.A.getName().equals(score)) {
                 Assert.assertEquals(count, Long.valueOf(3908));
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals(count, Long.valueOf(29772));
+                Assert.assertEquals(count, Long.valueOf(29340));
             }
         });
     }

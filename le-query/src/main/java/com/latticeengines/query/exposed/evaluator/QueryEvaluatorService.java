@@ -115,18 +115,13 @@ public class QueryEvaluatorService {
                 sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "));
     }
 
-    public String getAndValidateServingStoreTableName(String customerSpace, BusinessEntity businessEntity,
-            DataCollection.Version version) {
-        String toReturn = dataCollectionProxy.getTableName(customerSpace, businessEntity.getServingStore(), version);
+    public String getAndValidateServingStoreTableName(BusinessEntity businessEntity, AttributeRepository attrRepo) {
+        String toReturn = attrRepo.getTableName(businessEntity.getServingStore());;
         if (StringUtils.isEmpty(toReturn)) {
             throw new LedpException(LedpCode.LEDP_37017,
-                    new String[] { "ServingStore" + businessEntity.name(), customerSpace });
+                    new String[] { "ServingStore " + businessEntity.name(), attrRepo.getCustomerSpace().getTenantId() });
         }
         return toReturn;
-    }
-
-    public void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
-        this.dataCollectionProxy = dataCollectionProxy;
     }
 
 }
