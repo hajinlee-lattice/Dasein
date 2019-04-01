@@ -9,23 +9,23 @@
 
     <properties>
         <component-name>le-scoring</component-name>
-        <le.common.version>4.17.0-SNAPSHOT</le.common.version>
-        <le.dataplatform.version>4.17.0-SNAPSHOT</le.dataplatform.version>
-        <le.db.version>4.17.0-SNAPSHOT</le.db.version>
-        <le.domain.version>4.17.0-SNAPSHOT</le.domain.version>
-        <le.monitor.version>4.17.0-SNAPSHOT</le.monitor.version>
-        <le.serviceruntime.version>4.17.0-SNAPSHOT</le.serviceruntime.version>
-        <le.security.version>4.17.0-SNAPSHOT</le.security.version>
-        <le.proxy.version>4.17.0-SNAPSHOT</le.proxy.version>
-        <le.scoringapi.version>4.17.0-SNAPSHOT</le.scoringapi.version>
-        <le.testframework.version>4.17.0-SNAPSHOT</le.testframework.version>
-        <le.quartzclient.version>4.17.0-SNAPSHOT</le.quartzclient.version>
+        <le.common.version>4.18.0-SNAPSHOT</le.common.version>
+        <le.dataplatform.version>4.18.0-SNAPSHOT</le.dataplatform.version>
+        <le.db.version>4.18.0-SNAPSHOT</le.db.version>
+        <le.domain.version>4.18.0-SNAPSHOT</le.domain.version>
+        <le.monitor.version>4.18.0-SNAPSHOT</le.monitor.version>
+        <le.serviceruntime.version>4.18.0-SNAPSHOT</le.serviceruntime.version>
+        <le.security.version>4.18.0-SNAPSHOT</le.security.version>
+        <le.proxy.version>4.18.0-SNAPSHOT</le.proxy.version>
+        <le.scoringapi.version>4.18.0-SNAPSHOT</le.scoringapi.version>
+        <le.testframework.version>4.18.0-SNAPSHOT</le.testframework.version>
+        <le.quartzclient.version>4.18.0-SNAPSHOT</le.quartzclient.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>4.17.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 

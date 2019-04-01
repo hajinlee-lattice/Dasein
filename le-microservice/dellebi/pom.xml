@@ -10,14 +10,14 @@
 
     <properties>
         <component-name>dellebi-microservice</component-name>
-        <le.microservice.version>4.17.0-SNAPSHOT</le.microservice.version>
-        <le.dellebi.version>4.17.0-SNAPSHOT</le.dellebi.version>
+        <le.microservice.version>4.18.0-SNAPSHOT</le.microservice.version>
+        <le.dellebi.version>4.18.0-SNAPSHOT</le.dellebi.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-web</artifactId>
-        <version>4.17.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../web-pom.xml</relativePath>
     </parent>
 

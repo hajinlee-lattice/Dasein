@@ -9,14 +9,14 @@
 
     <properties>
         <component-name>hadoop</component-name>
-        <le.common.version>4.17.0-SNAPSHOT</le.common.version>
-        <le.domain.version>4.17.0-SNAPSHOT</le.domain.version>
+        <le.common.version>4.18.0-SNAPSHOT</le.common.version>
+        <le.domain.version>4.18.0-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.17.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
