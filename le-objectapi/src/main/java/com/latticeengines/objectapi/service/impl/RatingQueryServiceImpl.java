@@ -19,6 +19,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.RatingQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
@@ -46,6 +48,7 @@ import com.latticeengines.objectapi.util.RatingQueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.exposed.service.SparkSQLService;
 
 import reactor.core.publisher.Flux;
 
@@ -56,10 +59,14 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
 
     private final TransactionService transactionService;
 
+    private final SparkSQLService sparkSQLService;
+
     @Inject
-    public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
+    public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService, //
+                                  SparkSQLService sparkSQLService) {
         this.queryEvaluatorService = queryEvaluatorService;
         this.transactionService = transactionService;
+        this.sparkSQLService = sparkSQLService;
     }
 
     @Override
@@ -168,6 +175,24 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                 counts.put(key, counts.get(key) + (Long) map.get("count"));
             });
             return counts;
+        } catch (Exception e) {
+            String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
+                    + " for tenant " + MultiTenantContext.getShortTenantId();
+            if (version != null) {
+                msg += " in " + version;
+            }
+            throw new QueryEvaluationException(msg, e);
+        }
+    }
+
+    @Override
+    public HdfsDataUnit getDataViaSparkSQL(FrontEndQuery frontEndQuery, DataCollection.Version version, //
+                                                  LivySession livySession) {
+        try {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            String queryStr = getQueryStr(frontEndQuery, version, "spark");
+            System.out.println(queryStr);
+            return sparkSQLService.getData(customerSpace, livySession, queryStr);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
                     + " for tenant " + MultiTenantContext.getShortTenantId();

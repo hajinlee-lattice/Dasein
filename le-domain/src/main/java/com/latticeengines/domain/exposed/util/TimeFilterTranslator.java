@@ -98,6 +98,8 @@ public class TimeFilterTranslator {
             return translatePrior(timeFilter.getPeriod(), timeFilter.getValues());
         case LAST:
             return translateLast(timeFilter.getPeriod(), timeFilter.getValues());
+        case LATEST_DAY:
+            return null;
         case BETWEEN:
             return translateBetween(timeFilter.getPeriod(), timeFilter.getValues());
         case IN_CURRENT_PERIOD:
