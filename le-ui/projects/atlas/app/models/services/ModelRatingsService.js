@@ -35,7 +35,7 @@ angular
         var deferred = $q.defer(),
             result,
             id = id || '',
-            url = '/pls/bucketedscore/abcdbuckets/uptodate/ratingengine/' + id;
+            url = '/pls/bucketedscore/abcdbuckets/ratingengine/' + id;
 
         $http({
             method: 'GET',

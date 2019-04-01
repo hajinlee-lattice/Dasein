@@ -168,7 +168,7 @@ public abstract class BaseQueryServiceImpl {
         if (MapUtils.isNotEmpty(map)) {
             for (ComparisonType type : map.keySet()) {
                 switch (type) {
-                case LASTEST_DAY:
+                case LATEST_DAY:
                     Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), attrRepo);
                     updateTimeFilterTranslator(timeTranslator, type, maxDates);
                     break;

@@ -74,7 +74,7 @@ public class TimeFilter implements Serializable {
 
     public static TimeFilter latestDay() {
         TimeFilter timeFilter = new TimeFilter();
-        timeFilter.relation = ComparisonType.LASTEST_DAY;
+        timeFilter.relation = ComparisonType.LATEST_DAY;
         timeFilter.values = Collections.emptyList();
         return timeFilter;
     }
