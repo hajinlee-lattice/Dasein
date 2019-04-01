@@ -277,6 +277,16 @@ Table of Contents
 		-webkit-mask-image: url("/assets/images/ico-attributes.svg");
 		mask: url("/assets/images/ico-attributes.svg");
 	}
+	&.ico-view-model {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-view-model.svg");
+		mask: url("/assets/images/ico-view-model.svg");
+	}
+	&.ico-donut {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-donut.svg");
+		mask: url("/assets/images/ico-donut.svg");
+	}
 	&.ico-leads {
 		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-leads.svg");
