@@ -47,7 +47,9 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
         initializeAttributeRepo(dataVersion, setupSpark);
         mockDataCollectionProxy();
         mockPeriodProxy();
-        tenant = new Tenant("LocalTest");
+        tenant = new Tenant();
+        tenant.setId(attrRepo.getCustomerSpace().toString());
+        tenant.setName(attrRepo.getCustomerSpace().getTenantId());
         tenant.setPid(1L);
         MultiTenantContext.setTenant(tenant);
         maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
