@@ -63,7 +63,7 @@ public abstract class BaseQueryServiceImpl {
         }
     }
 
-    Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, DataCollection.Version version) {
+    private Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, AttributeRepository attrRepo) {
         String tenantId = MultiTenantContext.getTenant().getId();
         // Currently, only account and contact entity can have date attributes
         List<AttributeLookup> accountMaxLookups = new ArrayList<>();
@@ -81,12 +81,12 @@ public abstract class BaseQueryServiceImpl {
         }
         if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
             String accountTableName = queryEvaluatorService.getAndValidateServingStoreTableName(
-                    MultiTenantContext.getTenant().getId(), BusinessEntity.Account, version);
+                    BusinessEntity.Account, attrRepo);
             log.info(String.format("Get accountTableName %s for %s", accountTableName, tenantId));
 
-            String selections = String.join(",", accountMaxLookups.stream().map(lookup -> {
-                return MessageFormat.format("max({0}) as {0}", lookup.getAttribute());
-            }).collect(Collectors.toList()));
+            String selections = accountMaxLookups.stream() //
+                    .map(lookup -> MessageFormat.format("max({0}) as {0}", lookup.getAttribute())) //
+                    .collect(Collectors.joining(","));
 
             String query = MessageFormat.format("SELECT {0} FROM {1}", selections, accountTableName);
             log.info("query for accountTableName " + query);
@@ -98,12 +98,12 @@ public abstract class BaseQueryServiceImpl {
 
         if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
             String contactTableName = queryEvaluatorService.getAndValidateServingStoreTableName(
-                    MultiTenantContext.getTenant().getId(), BusinessEntity.Contact, version);
+                    BusinessEntity.Contact, attrRepo);
             log.info(String.format("Get contactTableName %s for %s", contactTableName, tenantId));
 
-            String selections = String.join(",", contactMaxLookups.stream().map(lookup -> {
-                return MessageFormat.format("max({0}) as {0}", lookup.getAttribute());
-            }).collect(Collectors.toList()));
+            String selections = contactMaxLookups.stream() //
+                    .map(lookup -> MessageFormat.format("max({0}) as {0}", lookup.getAttribute())) //
+                    .collect(Collectors.joining(","));
 
             String query = MessageFormat.format("SELECT {0} FROM {1}", selections, contactTableName);
             log.info("query for contactTableName " + query);
@@ -115,8 +115,8 @@ public abstract class BaseQueryServiceImpl {
         return results;
     }
 
-    Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,
-            DataCollection.Version version) {
+    private Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,
+                                                             DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -163,13 +163,13 @@ public abstract class BaseQueryServiceImpl {
         return results;
     }
 
-    void preprocess(Map<ComparisonType, Set<AttributeLookup>> map, DataCollection.Version version,
+    void preprocess(Map<ComparisonType, Set<AttributeLookup>> map, AttributeRepository attrRepo,
             TimeFilterTranslator timeTranslator) {
         if (MapUtils.isNotEmpty(map)) {
             for (ComparisonType type : map.keySet()) {
                 switch (type) {
                 case LASTEST_DAY:
-                    Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), version);
+                    Map<AttributeLookup, Object> maxDates = getMaxDates(map.get(type), attrRepo);
                     updateTimeFilterTranslator(timeTranslator, type, maxDates);
                     break;
                 default:

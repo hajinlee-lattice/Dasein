@@ -40,7 +40,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("1");
+        super.setupTestData(1);
     }
 
     @Test(groups = "functional", enabled = false)

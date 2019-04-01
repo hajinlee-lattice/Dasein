@@ -80,7 +80,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
-            preprocess(map, version, timeTranslator);
+            preprocess(map, attrRepo, timeTranslator);
 
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
@@ -131,7 +131,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
-        preprocess(map, version, timeTranslator);
+        preprocess(map, attrRepo, timeTranslator);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
         if (CollectionUtils.isEmpty(query.getLookups())) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
@@ -240,7 +240,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
-        preprocess(map, version, timeTranslator);
+        preprocess(map, attrRepo, timeTranslator);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator, sqlUser);
         query.setPageFilter(null);
         query.setSort(null);

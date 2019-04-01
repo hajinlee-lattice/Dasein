@@ -39,7 +39,7 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.setup("2");
+        super.setupTestData(2);
     }
 
     @Test(groups = "functional")

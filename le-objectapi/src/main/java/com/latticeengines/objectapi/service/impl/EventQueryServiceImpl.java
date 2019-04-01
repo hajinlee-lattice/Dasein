@@ -99,7 +99,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                         .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
                 map.putAll(segmentMap);
             }
-            preprocess(map, version, timeTranslator);
+            preprocess(map, attrRepo, timeTranslator);
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
             return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
@@ -127,7 +127,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                         .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
                 map.putAll(segmentMap);
             }
-            preprocess(map, version, timeTranslator);
+            preprocess(map, attrRepo, timeTranslator);
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
             return queryEvaluatorService.getData(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
