@@ -261,7 +261,7 @@ public class ModelingFileUploadResource {
             throw new UIActionException(action, ledp.getCode());
         } catch (LedpException ledp) {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
-                    Status.Error, ledp.getCode().getMessage());
+                    Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
         } finally {
             try {
