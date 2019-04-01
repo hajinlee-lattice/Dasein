@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
+import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -141,13 +142,13 @@ public class S3ImportJmsConsumer {
                     log.warn("S3 import path is not correct: " + key);
                     return;
                 }
-                String fileName = parts[parts.length - 1];
-                String feedType = parts[parts.length - 2];
+                String fileName = S3ImportMessageUtils.getFileNameFromKey(key);
+                String feedType = S3ImportMessageUtils.getFeedTypeFromKey(key);
                 if (PS_SHARE.equals(feedType)) {
                     // skip files in PS_SHARE folder.
                     return;
                 }
-                String dropBoxPrefix = parts[parts.length - 4];
+                String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
                 Tenant tenant = dropBoxService.getDropBoxOwner(dropBoxPrefix);
                 if (tenant == null) {
                     log.error("Cannot find DropBox Owner: " + dropBoxPrefix);

@@ -53,20 +53,44 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
         List<S3ImportMessage> messages = s3ImportMessageService.getMessageGroupByDropBox();
         messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, messages.size());
+        Assert.assertEquals(2, messages.size());
         S3ImportMessage s3ImportMessage = messages.get(0);
-        Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);
-        Assert.assertEquals(s3ImportMessage.getKey(), key1);
-        Assert.assertEquals(s3ImportMessage.getDropBox().getDropBox(), prefix);
+        if (s3ImportMessage.getKey().equals(key1)) {
+            Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);
+            Assert.assertEquals(s3ImportMessage.getKey(), key1);
+            Assert.assertEquals(s3ImportMessage.getDropBox().getDropBox(), prefix);
+            Assert.assertEquals(messages.get(1).getBucket(), BUCKET);
+            Assert.assertEquals(messages.get(1).getKey(), key2);
+            Assert.assertEquals(messages.get(1).getDropBox().getDropBox(), prefix);
+        } else {
+            Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);
+            Assert.assertEquals(s3ImportMessage.getKey(), key2);
+            Assert.assertEquals(s3ImportMessage.getDropBox().getDropBox(), prefix);
+            Assert.assertEquals(messages.get(1).getBucket(), BUCKET);
+            Assert.assertEquals(messages.get(1).getKey(), key1);
+            Assert.assertEquals(messages.get(1).getDropBox().getDropBox(), prefix);
+        }
         s3ImportMessageService.deleteMessage(s3ImportMessage);
         Thread.sleep(1000L);
         messages = s3ImportMessageService.getMessageGroupByDropBox();
         messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, messages.size());
+        Assert.assertEquals(2, messages.size());
         s3ImportMessage = messages.get(0);
-        Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);
-        Assert.assertEquals(s3ImportMessage.getKey(), key2);
-        Assert.assertEquals(s3ImportMessage.getDropBox().getDropBox(), prefix);
+        if (s3ImportMessage.getKey().equals(key2)) {
+            Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);
+            Assert.assertEquals(s3ImportMessage.getKey(), key2);
+            Assert.assertEquals(s3ImportMessage.getDropBox().getDropBox(), prefix);
+            Assert.assertEquals(messages.get(1).getBucket(), BUCKET);
+            Assert.assertEquals(messages.get(1).getKey(), key3);
+            Assert.assertEquals(messages.get(1).getDropBox().getDropBox(), prefix);
+        } else {
+            Assert.assertEquals(s3ImportMessage.getBucket(), BUCKET);
+            Assert.assertEquals(s3ImportMessage.getKey(), key3);
+            Assert.assertEquals(s3ImportMessage.getDropBox().getDropBox(), prefix);
+            Assert.assertEquals(messages.get(1).getBucket(), BUCKET);
+            Assert.assertEquals(messages.get(1).getKey(), key2);
+            Assert.assertEquals(messages.get(1).getDropBox().getDropBox(), prefix);
+        }
     }
 }

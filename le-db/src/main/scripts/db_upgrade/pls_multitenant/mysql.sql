@@ -79,6 +79,7 @@ CREATE PROCEDURE `CreateS3ImportMessageTable`()
          `CREATED`     DATETIME NOT NULL,
          `HOST_URL`    VARCHAR(255) NOT NULL,
          `KEY`         VARCHAR(255) NOT NULL,
+         `FEED_TYPE`   VARCHAR(255) NOT NULL,
          `UPDATED`     DATETIME NOT NULL,
          `FK_DROP_BOX` BIGINT NOT NULL,
          PRIMARY KEY (`PID`)

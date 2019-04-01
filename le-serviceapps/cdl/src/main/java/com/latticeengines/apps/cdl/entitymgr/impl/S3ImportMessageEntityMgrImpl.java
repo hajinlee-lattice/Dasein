@@ -78,6 +78,7 @@ public class S3ImportMessageEntityMgrImpl
             message = new S3ImportMessage();
             message.setBucket(bucket);
             message.setKey(key);
+            message.setFeedType(S3ImportMessageUtils.getFeedTypeFromKey(key));
             message.setHostUrl(hostUrl);
             message.setDropBox(dropBox);
             s3ImportMessageDao.create(message);

@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -52,6 +54,7 @@ public class S3ImportServiceImpl implements S3ImportService {
             log.info("There's no import message that needs to process!");
             return true;
         }
+        Set<String> dropBoxSet = new HashSet<>();
         for (S3ImportMessage message : messageList) {
             try {
                 log.info("Start processing : " + message.getKey());
@@ -69,8 +72,14 @@ public class S3ImportServiceImpl implements S3ImportService {
                     log.info(String.format("Import paused for template: %s", dataFeedTask.getUniqueId()));
                     continue;
                 }
+                if (dropBoxSet.contains(message.getDropBox().getDropBox())) {
+                    log.info(String.format("Already submitted one import for dropBox: %s",
+                            message.getDropBox().getDropBox()));
+                    continue;
+                }
                 log.info(String.format("S3 import for %s / %s", message.getBucket(), message.getKey()));
                 if (submitApplication(tenantId, message.getBucket(), feedType, message.getKey(), message.getHostUrl())) {
+                    dropBoxSet.add(message.getDropBox().getDropBox());
                     s3ImportMessageService.deleteMessage(message);
                 }
             } catch (RuntimeException e) {
