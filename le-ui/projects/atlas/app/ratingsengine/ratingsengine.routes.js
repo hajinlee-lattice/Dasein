@@ -805,58 +805,6 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.activatescoring', {
-                url: '/activatescoring',
-                resolve: {
-                    CurrentConfiguration: function($q, $stateParams, ModelRatingsService) {
-                        var deferred = $q.defer(),
-                            ratingId = $stateParams.rating_id;
-
-                        ModelRatingsService.MostRecentConfigurationRatingEngine(ratingId).then(function(result) {
-                            deferred.resolve(result);
-                        });
-
-                        return deferred.promise;
-                    },
-                    RatingsSummary: function($q, $stateParams, ModelRatingsService) {
-                        var deferred = $q.defer(),
-                            ratingId = $stateParams.rating_id,
-                            modelId = $stateParams.ratingEngine.latest_iteration.AI.id;
-
-                        ModelRatingsService.GetBucketedScoresSummaryRatingEngine(ratingId, modelId).then(function(result) {
-                            deferred.resolve(result);
-                        });
-
-                        return deferred.promise;
-                    },
-                    HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
-                        var deferred = $q.defer(),
-                            ratingId = $stateParams.rating_id;
-
-                        ModelRatingsService.HistoricalABCDBucketsRatingEngine(ratingId).then(function(result) {
-                            deferred.resolve(result);
-                        });
-
-                        return deferred.promise;
-                    }
-                },
-                params: {
-                    pageIcon: 'ico-ratings',
-                    pageTitle: 'Ratings',
-                    section: 'dashboard.scoring',
-                    ratingEngine: null
-                },
-                views: {
-                    "main@": {
-                        // controller: 'RatingsEngineActivateScoring',
-                        // controllerAs: 'vm',
-                        // templateUrl: 'app/ratingsengine/content/activatescoring/activatescoring.component.html'
-                        controller: 'ModelRatingsController',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/models/views/ModelRatingsView.html'
-                    }
-                }
-            })
             .state('home.ratingsengine.rulesprospects', {
                 url: '/rules/:rating_id/:wizard_steps',
                 params: {
