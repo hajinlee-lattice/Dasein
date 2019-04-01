@@ -67,7 +67,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
                         };
                         QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
-                        showNumericalRange();
+                        setTimeout(() => {
+                            showNumericalRange();
+                        }, 0);
+                        
                     }
                 }
 
