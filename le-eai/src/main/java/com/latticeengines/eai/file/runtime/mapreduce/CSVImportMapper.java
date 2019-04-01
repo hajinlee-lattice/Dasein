@@ -175,7 +175,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             currentIds = 0;
             blockIdx = 0;
             retryTemplate = RetryUtils.getRetryTemplate(3);
-            redisTemplate = RedisTemplateUtils.createRedisTemplate(localRedis, redisTimeout, redisEndpoint);
+            redisTemplate = RedisTemplateUtils.createPoolingRedisTemplate(localRedis, redisTimeout, redisEndpoint);
         }
     }
 
