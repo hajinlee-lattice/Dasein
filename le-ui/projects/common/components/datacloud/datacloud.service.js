@@ -28,6 +28,7 @@ angular.module('common.datacloud')
             this.premiumSelectMaximum = null;
             this.topAttributes = null;
             this.ratingsEngineAttributes = [];
+            this.ratingIterationFilter = null;
             this.metadata = {
                 current: 1,
                 currentCategory: 1,
