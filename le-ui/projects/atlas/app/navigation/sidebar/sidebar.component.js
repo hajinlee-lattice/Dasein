@@ -218,7 +218,7 @@ angular
                     },
                     sref: "home.connectors",
                     label: !store.showCdlEnabledPage ? ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC") : "Connections",
-                    icon: "ico-connectors ico-light-gray"
+                    icon: "ico-connections ico-light-gray"
                 },{
                     if: store.showApiConsole && !store.showCdlEnabledPage,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
