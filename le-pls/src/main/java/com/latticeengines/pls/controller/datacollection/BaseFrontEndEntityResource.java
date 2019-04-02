@@ -1,7 +1,9 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -20,6 +25,8 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -34,11 +41,15 @@ public abstract class BaseFrontEndEntityResource {
 
     private final DataCollectionProxy dataCollectionProxy;
 
+    private final GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
+
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
-                               DataCollectionProxy dataCollectionProxy) {
+                               DataCollectionProxy dataCollectionProxy,
+                               GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         this.entityProxy = entityProxy;
         this.segmentProxy = segmentProxy;
         this.dataCollectionProxy = dataCollectionProxy;
+        this.graphDependencyToUIActionUtil = graphDependencyToUIActionUtil;
     }
 
     public Long getCount(FrontEndQuery frontEndQuery) {
@@ -59,6 +70,15 @@ public abstract class BaseFrontEndEntityResource {
         if (BusinessEntity.Product.equals(mainEntity)) {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
+        } else {
+            try {
+                validateBucketsInQuery(frontEndQuery);
+            } catch (LedpException e) {
+                if (LedpCode.LEDP_40057.equals(e.getCode())) {
+                    throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
+                            "Failed to get " + getMainEntity() + " count");
+                }
+            }
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(mainEntity);
@@ -89,6 +109,15 @@ public abstract class BaseFrontEndEntityResource {
         if (BusinessEntity.Product.equals(getMainEntity())) {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
+        } else {
+            try {
+                validateBucketsInQuery(frontEndQuery);
+            } catch (LedpException e) {
+                if (LedpCode.LEDP_40057.equals(e.getCode())) {
+                    throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
+                            "Failed to get " + getMainEntity() + " data");
+                }
+            }
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
@@ -100,6 +129,27 @@ public abstract class BaseFrontEndEntityResource {
             data.getData().forEach(this::postProcessRecord);
         }
         return data;
+    }
+
+    private void validateBucketsInQuery(FrontEndQuery frontEndQuery) throws LedpException {
+        Restriction accountRestriction = (frontEndQuery.getAccountRestriction() != null) ? //
+                frontEndQuery.getAccountRestriction().getRestriction() : null;
+        Restriction contactRestriction = (frontEndQuery.getContactRestriction() != null) ? //
+                frontEndQuery.getContactRestriction().getRestriction() : null;
+        List<BucketRestriction> invalidBkts = new ArrayList<>();
+        try {
+            invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));
+            invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(contactRestriction));
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_40057, e, new String[]{ e.getMessage() });
+        }
+        if (CollectionUtils.isNotEmpty(invalidBkts)) {
+            String message = invalidBkts.stream() //
+                    .map(BucketRestriction::getAttr) //
+                    .map(AttributeLookup::toString) //
+                    .collect(Collectors.joining(","));
+            throw new LedpException(LedpCode.LEDP_40057, new String[]{ message });
+        }
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {

@@ -3,14 +3,21 @@ package com.latticeengines.domain.exposed.util;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NOT_NULL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
@@ -23,6 +30,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DateRestriction;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -31,6 +39,8 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class RestrictionUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(RestrictionUtils.class);
 
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
@@ -58,6 +68,96 @@ public class RestrictionUtils {
                 }
 
             }
+        }
+    }
+
+    public static List<BucketRestriction> validateBktsInRestriction(Restriction restriction) {
+        List<BucketRestriction> invalidBkts = new ArrayList<>();
+        if (restriction != null) {
+            if (restriction instanceof LogicalRestriction) {
+                BreadthFirstSearch search = new BreadthFirstSearch();
+                search.run(restriction, (object, ctx) -> {
+                    accumulateInvalidBkts(object, invalidBkts);
+                });
+            } else if (restriction instanceof BucketRestriction) {
+                accumulateInvalidBkts(restriction, invalidBkts);
+            }
+        }
+        return invalidBkts;
+    }
+
+    private static void accumulateInvalidBkts(Object obj, List<BucketRestriction> invalidBkts) {
+        if (obj instanceof BucketRestriction) {
+            BucketRestriction bucket = (BucketRestriction) obj;
+            if (!Boolean.TRUE.equals(bucket.getIgnored())) {
+                try {
+                    RestrictionUtils.validateBucket(bucket);
+                } catch (Exception e) {
+                    log.warn("Invalid bucket: " + JsonUtils.serialize(bucket), e);
+                    invalidBkts.add(bucket);
+                }
+            }
+        }
+    }
+
+    private static void validateBucket(BucketRestriction bucketRestriction) {
+        Bucket bkt = bucketRestriction.getBkt();
+        ComparisonType comparisonType = bkt.getComparisonType();
+        if (comparisonType == null) {
+            throw new UnsupportedOperationException("Bucket without comparator is obsolete.");
+        } else {
+            AttributeLookup attr = bucketRestriction.getAttr();
+            if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
+                // PH buckets
+                return;
+            }
+            if (bkt.getTransaction() != null) {
+                // special buckets
+                return;
+            }
+            if (bkt.getDateFilter() != null) {
+                // special buckets
+                return;
+            }
+            if (bkt.getChange() != null) {
+                // special buckets
+                return;
+            }
+            validateCompartorAndValues(comparisonType, bkt.getValues());
+        }
+    }
+
+    private static void validateCompartorAndValues(ComparisonType comparator, List<Object> values) {
+        switch (comparator) {
+            case IS_NULL:
+            case IS_NOT_NULL:
+                validateEmptyValue(comparator, values);
+                break;
+            case EQUAL:
+            case NOT_EQUAL:
+            case GREATER_THAN:
+            case GREATER_OR_EQUAL:
+            case LESS_THAN:
+            case LESS_OR_EQUAL:
+            case CONTAINS:
+            case NOT_CONTAINS:
+            case STARTS_WITH:
+            case ENDS_WITH:
+                validateSingleValue(comparator, values);
+                break;
+            case GTE_AND_LTE:
+            case GT_AND_LTE:
+            case GTE_AND_LT:
+            case GT_AND_LT:
+            case BETWEEN:
+                validateInRangeValues(values);
+                break;
+            case IN_COLLECTION:
+            case NOT_IN_COLLECTION:
+                validateNonEmptyValue(comparator, values);
+                break;
+            default:
+                throw new UnsupportedOperationException("comparator " + comparator + " is not supported yet");
         }
     }
 
@@ -219,9 +319,11 @@ public class RestrictionUtils {
         Restriction restriction = null;
         switch (comparisonType) {
         case IS_NULL:
+            validateEmptyValue(comparisonType, values);
             restriction = new ConcreteRestriction(false, attr, IS_NULL, null);
             break;
         case IS_NOT_NULL:
+            validateEmptyValue(comparisonType, values);
             restriction = new ConcreteRestriction(false, attr, IS_NOT_NULL, null);
             break;
         case EQUAL:
@@ -241,21 +343,27 @@ public class RestrictionUtils {
             restriction = convertBinaryValueComparison(attr, comparisonType, values.get(0), values.get(1));
             break;
         case IN_COLLECTION:
+            validateNonEmptyValue(comparisonType, values);
             restriction = Restriction.builder().let(attr).inCollection(values).build();
             break;
         case NOT_IN_COLLECTION:
+            validateNonEmptyValue(comparisonType, values);
             restriction = Restriction.builder().let(attr).notInCollection(values).build();
             break;
         case CONTAINS:
+            validateSingleValue(comparisonType, values);
             restriction = Restriction.builder().let(attr).contains(values.get(0)).build();
             break;
         case NOT_CONTAINS:
+            validateSingleValue(comparisonType, values);
             restriction = Restriction.builder().let(attr).notcontains(values.get(0)).build();
             break;
         case STARTS_WITH:
+            validateSingleValue(comparisonType, values);
             restriction = Restriction.builder().let(attr).not().startsWith(values.get(0)).build();
             break;
         case ENDS_WITH:
+            validateSingleValue(comparisonType, values);
             restriction = Restriction.builder().let(attr).not().endsWith(values.get(0)).build();
             break;
         default:
@@ -331,13 +439,25 @@ public class RestrictionUtils {
 
     private static void validateSingleValue(ComparisonType comparisonType, List<Object> values) {
         if (values == null || values.size() != 1) {
-            throw new IllegalArgumentException(comparisonType + " should have exactly one value");
+            throw new IllegalArgumentException(comparisonType + " should have exactly one value.");
         }
     }
 
     private static void validateInRangeValues(List<Object> values) {
         if (values == null || values.size() != 2) {
-            throw new IllegalArgumentException("range should contain both min and max value");
+            throw new IllegalArgumentException("range should contain both min and max value.");
+        }
+    }
+
+    private static void validateEmptyValue(ComparisonType comparisonType, List<Object> values) {
+        if (CollectionUtils.isNotEmpty(values)) {
+            throw new IllegalArgumentException(comparisonType + " should not have any value.");
+        }
+    }
+
+    private static void validateNonEmptyValue(ComparisonType comparisonType, List<Object> values) {
+        if (CollectionUtils.isEmpty(values)) {
+            throw new IllegalArgumentException(comparisonType + " should have at least one value.");
         }
     }
 
