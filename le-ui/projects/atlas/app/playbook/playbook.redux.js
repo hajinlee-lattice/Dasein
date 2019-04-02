@@ -44,6 +44,7 @@ export const actions = {
         );
         httpService.get(host + '/play', observer, {});
     }
+    ///pls/play/{playname}/launches/configurations
 };
 
 export const reducer = (state = initialState, action) => {
