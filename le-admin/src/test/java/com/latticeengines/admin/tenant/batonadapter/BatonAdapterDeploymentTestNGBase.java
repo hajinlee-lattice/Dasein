@@ -51,11 +51,6 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         tenantId = contractId;
 
         loginAD();
-        try {
-            deleteTenant(contractId, tenantId);
-        } catch (Exception e) {
-            // ignore
-        }
         createTenant(contractId, tenantId);
 
         // setup magic rest template
