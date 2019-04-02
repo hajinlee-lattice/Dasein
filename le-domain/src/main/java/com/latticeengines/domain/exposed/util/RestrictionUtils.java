@@ -102,62 +102,61 @@ public class RestrictionUtils {
 
     private static void validateBucket(BucketRestriction bucketRestriction) {
         Bucket bkt = bucketRestriction.getBkt();
-        ComparisonType comparisonType = bkt.getComparisonType();
-        if (comparisonType == null) {
-            throw new UnsupportedOperationException("Bucket without comparator is obsolete.");
-        } else {
-            AttributeLookup attr = bucketRestriction.getAttr();
-            if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
-                // PH buckets
-                return;
-            }
-            if (bkt.getTransaction() != null) {
-                // special buckets
-                return;
-            }
-            if (bkt.getDateFilter() != null) {
-                // special buckets
-                return;
-            }
-            if (bkt.getChange() != null) {
-                // special buckets
-                return;
-            }
-            validateCompartorAndValues(comparisonType, bkt.getValues());
+        AttributeLookup attr = bucketRestriction.getAttr();
+        if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
+            // PH buckets
+            return;
         }
+        if (bkt.getTransaction() != null) {
+            // special buckets
+            return;
+        }
+        if (bkt.getDateFilter() != null) {
+            // special buckets
+            return;
+        }
+        if (bkt.getChange() != null) {
+            // special buckets
+            return;
+        }
+        ComparisonType comparisonType = bkt.getComparisonType();
+        validateComparatorAndValues(comparisonType, bkt.getValues());
     }
 
-    private static void validateCompartorAndValues(ComparisonType comparator, List<Object> values) {
+    private static void validateComparatorAndValues(ComparisonType comparator, List<Object> values) {
+        if (comparator == null) {
+            throw new UnsupportedOperationException("Bucket without comparator is obsolete.");
+        }
         switch (comparator) {
-            case IS_NULL:
-            case IS_NOT_NULL:
-                validateEmptyValue(comparator, values);
-                break;
-            case EQUAL:
-            case NOT_EQUAL:
-            case GREATER_THAN:
-            case GREATER_OR_EQUAL:
-            case LESS_THAN:
-            case LESS_OR_EQUAL:
-            case CONTAINS:
-            case NOT_CONTAINS:
-            case STARTS_WITH:
-            case ENDS_WITH:
-                validateSingleValue(comparator, values);
-                break;
-            case GTE_AND_LTE:
-            case GT_AND_LTE:
-            case GTE_AND_LT:
-            case GT_AND_LT:
-            case BETWEEN:
-                validateInRangeValues(values);
-                break;
-            case IN_COLLECTION:
-            case NOT_IN_COLLECTION:
-                validateNonEmptyValue(comparator, values);
-                break;
-            default:
-                throw new UnsupportedOperationException("comparator " + comparator + " is not supported yet");
+        case IS_NULL:
+        case IS_NOT_NULL:
+            validateEmptyValue(comparator, values);
+            break;
+        case EQUAL:
+        case NOT_EQUAL:
+        case GREATER_THAN:
+        case GREATER_OR_EQUAL:
+        case LESS_THAN:
+        case LESS_OR_EQUAL:
+        case CONTAINS:
+        case NOT_CONTAINS:
+        case STARTS_WITH:
+        case ENDS_WITH:
+            validateSingleValue(comparator, values);
+            break;
+        case GTE_AND_LTE:
+        case GT_AND_LTE:
+        case GTE_AND_LT:
+        case GT_AND_LT:
+        case BETWEEN:
+            validateInRangeValues(values);
+            break;
+        case IN_COLLECTION:
+        case NOT_IN_COLLECTION:
+            validateNonEmptyValue(comparator, values);
+            break;
+        default:
+            throw new UnsupportedOperationException("comparator " + comparator + " is not supported yet");
         }
     }
 
@@ -404,31 +403,23 @@ public class RestrictionUtils {
         Restriction restriction;
         switch (comparisonType) {
         case GTE_AND_LTE:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gte(min).build(),
-                            Restriction.builder().let(attr).lte(max).build())
+            restriction = Restriction.builder().and( //
+                    Restriction.builder().let(attr).gte(min).build(), Restriction.builder().let(attr).lte(max).build())
                     .build();
             break;
         case GT_AND_LTE:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gt(min).build(),
-                            Restriction.builder().let(attr).lte(max).build())
+            restriction = Restriction.builder().and( //
+                    Restriction.builder().let(attr).gt(min).build(), Restriction.builder().let(attr).lte(max).build())
                     .build();
             break;
         case GTE_AND_LT:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gte(min).build(),
-                            Restriction.builder().let(attr).lt(max).build())
+            restriction = Restriction.builder().and( //
+                    Restriction.builder().let(attr).gte(min).build(), Restriction.builder().let(attr).lt(max).build())
                     .build();
             break;
         case GT_AND_LT:
-            restriction = Restriction.builder()
-                    .and( //
-                            Restriction.builder().let(attr).gt(min).build(),
-                            Restriction.builder().let(attr).lt(max).build())
+            restriction = Restriction.builder().and( //
+                    Restriction.builder().let(attr).gt(min).build(), Restriction.builder().let(attr).lt(max).build())
                     .build();
             break;
         default:
