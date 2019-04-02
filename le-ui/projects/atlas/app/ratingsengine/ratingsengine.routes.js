@@ -336,11 +336,12 @@ angular
                 }
             })
             .state('home.ratingsengine.dashboard.training', {
-                url: '/remodel-settings',
+                url: '/remodel-settings/:aiModel',
                 params: {
                     pageIcon: 'ico-attributes',
                     pageTitle: 'View Iteration',
-                    viewingIteration: true
+                    viewingIteration: true,
+                    aiModel: ''
                 },
                 onEnter: ['$stateParams', 'BackStore', function($stateParams, BackStore) {
                     var backState = 'home.ratingsengine.dashboard',

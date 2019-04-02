@@ -148,10 +148,11 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
             }
         })
         .state('home.model', {
-            url: '/model/:modelId/:rating_id',
+            url: '/model/:modelId/:rating_id/:aiModel',
             params: {
                 modelId: '',
                 rating_id: '',
+                aiModel: '',
                 viewingIteration: false,
                 useSelectedIteration: false
             },
