@@ -1,6 +1,7 @@
 angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.SegmentsUtility'])
 .controller('PlaybookWizardSegment', function(
-    $scope, $state, $stateParams, ResourceUtility, PlaybookWizardStore, SegmentsUtility, Segments
+    $scope, $state, $stateParams, 
+    ResourceUtility, PlaybookWizardStore, SegmentsUtility, Segments, FeatureFlagService
 ) {
     var vm = this;
 
@@ -10,7 +11,8 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
         segments: Segments,
         stateParams: $stateParams,
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -59,7 +61,11 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
 
         play.segment = segment;
         PlaybookWizardStore.savePlay(play).then(function(result) {
-             $state.go('home.playbook.dashboard', {play_name: play.name});
+            if(vm.alwaysOnCampaigns) { 
+                $state.go('home.playbook.overview', {play_name: play.name} );
+            } else {
+                $state.go('home.playbook.dashboard', {play_name: play.name});
+            }
         });
     }
 

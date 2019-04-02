@@ -82,7 +82,7 @@ class LeVPanel extends Component {
         style={this.getFlex()}
       >
         <div
-          className={`le-flex-content sub-container ${this.getHAlignment()} ${this.getVAlignment()} ${this.getVStretch()} ${this.getHStretch()} ${
+          className={`le-flex-content sub-container container-vertical ${this.getHAlignment()} ${this.getVAlignment()} ${this.getVStretch()} ${this.getHStretch()} ${
             this.props.classesName ? this.props.classesName : ""
           }`}
           style={this.getFlex()}

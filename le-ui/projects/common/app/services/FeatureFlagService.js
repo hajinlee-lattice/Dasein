@@ -60,6 +60,7 @@ angular.module('common.services.featureflag', [
         ENABLE_CDL: 'EnableCdl',
         IMPORT_WITHOUT_IDS: 'ImportWithoutIds',
         ENABLE_ENTITY_MATCH: 'EnableEntityMatch',
+        ALWAYS_ON_CAMPAIGNS: 'AlwaysOnCampaigns',
         // ====================
         // END: product flags
         // ====================
@@ -157,6 +158,7 @@ angular.module('common.services.featureflag', [
             SetFlag(flags.ENABLE_CDL, false);
             SetFlag(flags.IMPORT_WITHOUT_IDS, true);
             SetFlag(flags.ENABLE_ENTITY_MATCH, false);
+            SetFlag(flags.ALWAYS_ON_CAMPAIGNS, false);
 
             // update user-level flags
             if (ApiHost !== '/ulysses') {

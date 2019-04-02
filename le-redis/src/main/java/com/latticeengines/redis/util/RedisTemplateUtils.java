@@ -6,6 +6,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -28,6 +29,42 @@ public class RedisTemplateUtils {
         redisTemplate.setEnableTransactionSupport(true);
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
+    }
+
+    public static RedisTemplate<String, Object> createPoolingRedisTemplate(boolean localRedis, int timeout,
+                                                                    String redisEndpoint) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(getValueSerializer());
+        redisTemplate.setConnectionFactory(poolingLettuceConnectionFactory(localRedis, timeout, redisEndpoint));
+        redisTemplate.setEnableTransactionSupport(true);
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
+
+    private static RedisConnectionFactory poolingLettuceConnectionFactory(boolean localRedis, int redisTimeout,
+                                                                   String redisEndpoint) {
+        RedisConnectionFactory factory;
+        if (localRedis) {
+            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
+            LettucePoolingClientConfiguration poolingClientConfiguration = LettucePoolingClientConfiguration.builder()
+                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
+                    .shutdownTimeout(Duration.ZERO) //
+                    .build();
+            factory = new LettuceConnectionFactory(standaloneConfiguration, poolingClientConfiguration);
+        } else {
+            RedisURI redisURI = RedisURI.create(redisEndpoint);
+            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
+            standaloneConfiguration.setHostName(redisURI.getHost());
+            LettucePoolingClientConfiguration poolingClientConfig = LettucePoolingClientConfiguration.builder()
+                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
+                    .shutdownTimeout(Duration.ZERO) //
+                    .useSsl() //
+                    .build();
+            factory = new LettuceConnectionFactory(standaloneConfiguration, poolingClientConfig);
+        }
+        ((LettuceConnectionFactory) factory).afterPropertiesSet();
+        return factory;
     }
 
     private static RedisConnectionFactory lettuceConnectionFactory(boolean localRedis, int redisTimeout,

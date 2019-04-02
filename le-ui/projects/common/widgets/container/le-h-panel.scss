@@ -1,7 +1,7 @@
 .fill-width {
   display: inline-flex;
   flex-direction: row;
-  .le-flex-content {
+  .le-flex-content.container-horizontal {
     display: flex;
     flex-direction: row;
   }

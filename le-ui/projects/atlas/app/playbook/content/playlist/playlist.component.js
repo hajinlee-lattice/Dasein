@@ -3,7 +3,8 @@ angular.module('lp.playbook.plays', [
     'mainApp.appCommon.services.FilterService'
 ])
 .controller('PlayListController', function ($scope, $timeout, $element, $state, $stateParams, $interval, $filter,
-    PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore, FilterService) {
+    PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore, FilterService, 
+    FeatureFlagService) {
 
     var vm = this,
         onpage = true,
@@ -54,7 +55,8 @@ angular.module('lp.playbook.plays', [
             }
         },
         barChartConfig: PlaybookWizardStore.barChartConfig,
-        barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig
+        barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig,
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     vm.sumValuesOfObject = function(object) {
@@ -106,7 +108,11 @@ angular.module('lp.playbook.plays', [
             return false;
         }
 
-        $state.go('home.playbook.dashboard', {play_name: play.name} );
+        if(vm.alwaysOnCampaigns) { 
+            $state.go('home.playbook.overview', {play_name: play.name} );
+        } else {
+            $state.go('home.playbook.dashboard', {play_name: play.name} );
+        }
     };
 
     var oldPlayDisplayName = '';

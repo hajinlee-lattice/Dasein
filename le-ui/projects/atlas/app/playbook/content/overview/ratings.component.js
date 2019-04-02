@@ -2,7 +2,8 @@ import React, { Component, react2angular } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import LeVPanel from "common/widgets/container/le-v-panel";
-import LeHPanel from "common/widgets/container/le-h-panel";
+import LeBarchart from "common/widgets/charts/le-barchart";
+import { get } from 'lodash';
 
 class RatingsComponent extends Component {
     constructor(props) {
@@ -10,10 +11,31 @@ class RatingsComponent extends Component {
 
     }
 
+    getRatings() {
+        console.log(this.props.play);
+        if(_.get(this.props, 'play.ratings')) {
+            var ratings = {};
+            for(var i in this.props.play.ratings) {
+                var rating = this.props.play.ratings[i];
+                ratings[i] = {
+                    label: rating.bucket,
+                    value: rating.count
+                }
+            }
+            return (
+                <LeBarchart data={ratings}></LeBarchart>
+            );
+        }
+    }
+
     render() {
         return (
-            <LeVPanel hstretch={"true"}  flex={"1"}>
-                <LeHPanel hstretch={"true"}>Account Ratings</LeHPanel>
+            <LeVPanel>
+                <h2>Account Ratings</h2>
+                <h3>model name</h3>
+                <div>
+                    {this.getRatings()}
+                </div>
             </LeVPanel>
         );
     }
