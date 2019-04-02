@@ -219,9 +219,9 @@ export class ConnectorList extends Component {
         return (
             <div className="main-panel">
                 <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Configuration Wizard" template={this.getIFrame} />
-                <LeHPanel hstretch={"true"} halignment={CENTER}>
-                    <h2 className="connectors-title">Select one of our application connectors</h2>
-                </LeHPanel>
+                <h2 className="connectors-title">Add a new connection</h2>
+                {/* <LeHPanel hstretch={"true"} halignment={CENTER}>
+                </LeHPanel> */}
                 <LeVPanel halignment={CENTER}>
                     
                     <LeHPanel hstretch={"true"} halignment={CENTER} valignment={CENTER}>

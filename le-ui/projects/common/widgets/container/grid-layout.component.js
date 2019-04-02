@@ -1,7 +1,7 @@
 import React, { Component } from "../../react-vendor";
 import './grid-layout.scss';
 
-const gridStyle = {};
+let gridStyle = {};
 const containerStyle = {};
 class GridLayout extends Component {
 
@@ -9,17 +9,9 @@ class GridLayout extends Component {
         super(props);
         if(props.min){
             gridStyle.gridTemplateColumns = `${'repeat( auto-fill, minmax('}${props.min}${'px, 1fr) )'}`;
+        }else if(props.gridStyle){
+            gridStyle = Object.assign(gridStyle, props.gridStyle);
         }
-        // let columnsGap = this.props.columnsGap ? this.props.columnsGap : 20;
-        // let rowsGap = this.props.rowsGap ? this.props.rowsGap : 20;
-        // let maxWidth = this.props.maxWidth ? this.props.maxWidth : 1200;
-        // let min = this.getColumnMinWidth(maxWidth, columnsGap);
-        // gridStyle.gridTemplateColumns = 'repeat( auto-fill, minmax(260px, 1fr) )';
-        // gridStyle.gridTemplateRows = 'auto';
-        // gridStyle.gridAutoFlow = 'row';
-        // gridStyle.rowGap = rowsGap +'px';
-        // gridStyle.columnGap = columnsGap + 'px';
-        // containerStyle.maxWidth = maxWidth + 'px';
     }
 
     getColumnMinWidth(maxWidth, columnsGap) {

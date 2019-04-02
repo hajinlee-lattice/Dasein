@@ -13,11 +13,13 @@ import Observer from "common/app/http/observer";
 import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
 import './systems.component.scss';
+import LeHPanel from "common/widgets/container/le-h-panel";
+import GridLayout from 'common/widgets/container/grid-layout.component';
+import { RIGHT, CENTER } from "common/widgets/container/le-alignments";
 
 export default class SystemComponent extends Component {
     constructor(props) {
         super(props);
-        console.log('System', props.system);
         this.state = { system: props.system, openModal: false, saving: false };
         this.editMappingClickHandler = this.editMappingClickHandler.bind(this);
         this.modalCallback = this.modalCallback.bind(this);
@@ -114,21 +116,20 @@ export default class SystemComponent extends Component {
             }
 
             return ret;
-        }else{
+        } else {
             return '-';
         }
     }
 
     getAccountIdRow() {
         if (this.props.system.externalSystemType != "MAP") {
-            return (<div className="le-layout-flex-grid">
-                        <div className="le-layout-flex-col lable">
-                            Account Id
-                        </div>
-                        <div className="le-layout-flex-col color-blue content" title={this.state.system.accountId}>
-                            {this.state.system.accountId}
-                        </div>
-                    </div>);
+
+            return (
+                <Aux>
+                    <span className="s-label">Account Id:</span>
+                    <span className="s-text" title={this.state.system.accountId}>{this.state.system.accountId}</span>
+                </Aux>
+            );
         }
         return null;
     }
@@ -139,62 +140,41 @@ export default class SystemComponent extends Component {
         return (
             <Aux>
                 <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} />
-                <LeTile classNames="system-tile">
-                    <LeTileHeader classNames="system-title">
-                        <div className="system-image-container">
-                            <img src={this.props.img} className="systemImage" />
-                        </div>
-                        <div className="system-title-container">
-                            <span className="le-tile-title">{this.state.system.externalSystemName}</span>
-                        </div>
+                <LeTile>
+                    <LeTileHeader>
+                        <LeHPanel valignment={CENTER}>
+                            <img src={this.props.img} className="s-image" />
+                            <p className="s-title">{this.state.system.externalSystemName}</p>
+                        </LeHPanel>
                     </LeTileHeader>
-                    <LeTileBody classNames={'system-body'}>
-                        <div>
-                        <div className="le-layout-flex-grid">
-                            <div className="le-layout-flex-col lable">
-                                System Org Name
-                                </div>
-                            <div className="le-layout-flex-col color-blue content">
-                                {this.state.system.orgName}
-                            </div>
-                        </div>
-                        <div className="le-layout-flex-grid">
-                            <div className="le-layout-flex-col lable">
-                                System Org Id
-                            </div>
-                            <div className="le-layout-flex-col color-blue content">
-                                {this.state.system.orgId}
-                            </div>
-                        </div>
-                        {this.getAccountIdRow()}
-                        <div className="le-layout-flex-grid">
-                            <div className="le-layout-flex-col lable">
-                                Last Updated
-                            </div>
-                            <div className="le-layout-flex-col color-blue content">
-                                {this.getValueDateFormatted(this.state.system.updated)}
-                            </div>
-                        </div>
-                        <div className="le-layout-flex-grid">
-                            <div className="le-layout-flex-col lable">
-                                Status
-                            </div>
-                            <div className="le-layout-flex-col content">
-                                <span className={this.getSystemStatusClass()}>{this.getSystemStatus()}</span>
-                            </div>
-                        </div>
-                        </div>
+                    <LeTileBody classNames={"s-body"}>
+                        <GridLayout gridStyle={{
+                            gridTemplateColumns: '100px 1fr',
+                            rowGap: '1px',
+                            columnGap: '10px'
+                        }}>
+                            <span className="s-label">System Org Name:</span>
+                            <span className="s-text">{this.state.system.orgName}</span>
+                            <span className="s-label">System Org Id:</span>
+                            <span className="s-text">{this.state.system.orgId}</span>
+                            {this.getAccountIdRow()}
+                            <span className="s-label">Last Updated:</span>
+                            <span className="s-text">{this.getValueDateFormatted(this.state.system.updated)}</span>
+                            <span className="s-label">Status:</span>
+                            <span className={`${'s-text'} ${this.getSystemStatusClass()}`}>{this.getSystemStatus()}</span>
+                        </GridLayout>
                     </LeTileBody>
-                    <LeTileFooter classNames={'system-footer right-controlls'}>
-                        <LeButton
-                            name={`${"edit-mappings-"}${this.state.system.orgName}`}
-                            disabled={this.state.saving || !this.state.system.isRegistered}
-                            config={{
-                                label: "Edit Mappings",
-                                classNames: "blue-button"
-                            }}
-                            callback={this.editMappingClickHandler}
-                        />
+                    <LeTileFooter>
+                        <LeHPanel hstretch={true} halignment={RIGHT}>
+                            <LeButton
+                                name={`${"edit-mappings-"}${this.state.system.orgName}`}
+                                disabled={this.state.saving || !this.state.system.isRegistered}
+                                config={{
+                                    label: "Edit Mappings",
+                                    classNames: "blue-button"
+                                }}
+                                callback={this.editMappingClickHandler}
+                            /></LeHPanel>
                     </LeTileFooter>
                 </LeTile>
             </Aux>
