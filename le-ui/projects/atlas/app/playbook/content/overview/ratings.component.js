@@ -8,11 +8,9 @@ import { get } from 'lodash';
 class RatingsComponent extends Component {
     constructor(props) {
         super(props);
-
     }
 
     getRatings() {
-        console.log(this.props.play);
         if(_.get(this.props, 'play.ratings')) {
             var ratings = {};
             for(var i in this.props.play.ratings) {
@@ -30,9 +28,9 @@ class RatingsComponent extends Component {
 
     render() {
         return (
-            <LeVPanel>
+            <LeVPanel className="main-panel panel">
                 <h2>Account Ratings</h2>
-                <h3>model name</h3>
+                <h3>{this.props.play.ratingEngine.displayName}</h3>
                 <div>
                     {this.getRatings()}
                 </div>

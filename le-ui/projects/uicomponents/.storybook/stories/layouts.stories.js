@@ -25,11 +25,11 @@ stories.addDecorator(withKnobs);
 stories.add("Complex Layout", () => (
   <div className="container">
     <LeVPanel vstretch={"true"} hstretch={"true"}>
-      <LeHPanel hstretch={"true"} classesName="header">
+      <LeHPanel hstretch={"true"} className="header">
         <span>Toolbar</span>
       </LeHPanel>
-      <LeHPanel hstretch={"true"} classesName="body" flex={"10"}>
-        <LeVPanel vstretch={true} classesName={"nav"}>
+      <LeHPanel hstretch={"true"} className="body" flex={"10"}>
+        <LeVPanel vstretch={true} className={"nav"}>
           <form>
             <LeInputText
               config={{
@@ -43,14 +43,14 @@ stories.add("Complex Layout", () => (
             />
           </form>
         </LeVPanel>
-        <LeVPanel vstretch={true} classesName={"main"} flex={"6"}>
+        <LeVPanel vstretch={true} className={"main"} flex={"6"}>
           <span>2</span>
         </LeVPanel>
-        <LeVPanel vstretch={true} classesName={"info"}>
+        <LeVPanel vstretch={true} className={"info"}>
           <span>3</span>
         </LeVPanel>
       </LeHPanel>
-      <LeHPanel hstretch={"true"} classesName="footer">
+      <LeHPanel hstretch={"true"} className="footer">
         <span>Footer</span>
       </LeHPanel>
     </LeVPanel>

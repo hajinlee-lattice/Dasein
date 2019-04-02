@@ -20,7 +20,7 @@ export default class LeBarchart extends Component {
 
     this.clickHandler = this.clickHandler.bind(this);
 
-    if(!this.props.debug) {
+    if(this.props.debug) {
       console.log('LeBarchart', this.props);
     }
     if(!this.props.data) {
@@ -29,7 +29,9 @@ export default class LeBarchart extends Component {
   }
 
   clickHandler(event, item) {
-    this.props.callback(this.props.name, this.state, event, item);
+    if(this.props.callback && typeof this.props.callback === 'function') {
+      this.props.callback(this.props.name, this.state, event, item);
+    }
   }
 
   getData(data) {
@@ -82,13 +84,13 @@ export default class LeBarchart extends Component {
         chartVerticalTemplate.bars.push(
           <div>
             <div className="bar" style={style} data-label={item.label} data-value={item.value}></div>
-            <em>{item.value}</em>
+            <em>{item.value.toLocaleString()}</em>
           </div>
         );
       } else {style.maxHeight = percent + '%';
         chartHorizontalTemplate.push(
           <li key={index} onClick={(event) => {return clickHandler(event, item) }}>
-            <em>{item.value}</em>
+            <em>{item.value.toLocaleString()}</em>
             <div style={style} data-label={item.label} data-value={item.value}></div>
             <strong>{item.label}</strong>
           </li>

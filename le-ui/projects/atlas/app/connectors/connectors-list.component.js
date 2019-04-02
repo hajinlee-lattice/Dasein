@@ -226,7 +226,7 @@ export class ConnectorList extends Component {
                     
                     <LeHPanel hstretch={"true"} halignment={CENTER} valignment={CENTER}>
                         {/* <button>L</button> */}
-                        <LeHPanel hstretch={"false"} halignment={CENTER} classesName="connectors-list">
+                        <LeHPanel hstretch={"false"} halignment={CENTER} className="connectors-list">
                             {this.getConnectros()}
                         </LeHPanel>
                         {/* <button>R</button> */}
