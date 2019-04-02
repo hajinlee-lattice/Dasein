@@ -67,7 +67,7 @@ public class DataIntegrationStatusMonitoringServiceImpl implements DataIntegrati
     private DataIntegrationStatusMonitor handleStatusMonitor(DataIntegrationStatusMonitorMessage status) {
         DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitoringEntityMgr
                 .getStatus(status.getWorkflowRequestId());
-        if (statusMonitor.getTenant() != null) {
+        if (statusMonitor != null && statusMonitor.getTenant() != null) {
             MultiTenantContext.setTenant(statusMonitor.getTenant());
         }
         WorkflowStatusHandler handler = getWorkflowStatusHandler(status.getEventType());
