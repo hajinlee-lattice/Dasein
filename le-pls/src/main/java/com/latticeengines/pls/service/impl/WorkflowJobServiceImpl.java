@@ -632,6 +632,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             if (CollectionUtils.isNotEmpty(actionPids)) {
                 List<Action> actions = getActions(actionPids);
                 List<Job> subJobs = expandActions(actions);
+                for (Job job1 : subJobs) {
+                    updateJobActionId(job1);
+                }
                 job.setSubJobs(subJobs);
             }
         }
