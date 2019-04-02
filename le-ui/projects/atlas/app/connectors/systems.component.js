@@ -14,8 +14,7 @@ import '../../../common/widgets/layout/le-layouts.scss';
 export default class SystemsComponent extends Component {
     constructor(props) {
         super(props);
-
-        this.state = { connectors: [], loading: true};
+        this.state = { connectors: [], loading: true };
     }
 
     componentDidMount() {
@@ -30,20 +29,20 @@ export default class SystemsComponent extends Component {
             })
         );
     }
-    
+
     getSystems() {
         let ret = [];
-        if(this.state.connectors && this.state.connectors.length > 0){
+        if (this.state.connectors && this.state.connectors.length > 0) {
             this.state.connectors.forEach(system => {
-                ret.push((<SystemComponent system={system} img={ConnectorService.getImgByConnector(system.externalSystemName)}/>));
+                ret.push((<SystemComponent system={system} img={ConnectorService.getImgByConnector(system.externalSystemName)} />));
             });
-            
-        }else {
-            switch(this.state.loading){
+
+        } else {
+            switch (this.state.loading) {
                 case true:
-                ret.push(<div></div>)
-                ret.push(<div style={{display: 'flex', justifyContent: 'center'}}><i className="fa fa-spinner fa-spin fa-2x fa-fw" /></div>);
-                break;
+                    ret.push(<div></div>)
+                    ret.push(<div style={{ display: 'flex', justifyContent: 'center' }}><i className="fa fa-spinner fa-spin fa-2x fa-fw" /></div>);
+                    break;
             }
         }
 
@@ -51,9 +50,9 @@ export default class SystemsComponent extends Component {
 
     }
     getCount() {
-        if(!this.state.loading){
+        if (!this.state.loading) {
             return (<h2 className="systems-header"><strong className="systems-count">{this.state.count}</strong><span>connections</span></h2>);
-        }else{
+        } else {
             return null;
         }
 
@@ -61,8 +60,14 @@ export default class SystemsComponent extends Component {
     render() {
         return (
             <div className="systems-main">
-            {this.getCount()}
-            <GridLayout>{this.getSystems()}</GridLayout>
+                {this.getCount()}
+                <GridLayout 
+                    gridStyle={{
+                    rowGap: '20px',
+                    columnGap: '20px',
+                    gridAutoRows: 'auto',
+                    gridTemplateColumns: 'repeat( auto-fill, minmax(260px, 1fr) )'
+                }}>{this.getSystems()}</GridLayout>
             </div>
         );
     }
