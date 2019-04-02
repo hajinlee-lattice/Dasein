@@ -341,8 +341,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                                 item.HasWarnings = true;
                             }
                         })
-
-                        console.log(result);
+                        
                         deferred.resolve(result);
                     });
 
