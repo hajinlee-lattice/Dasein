@@ -96,7 +96,7 @@ export default class ProfilesComponent extends Component {
 
     render() {
         return (
-            <LeHPanel classesName="profiles" hstretch={"true"} wrap halignment={SPACEBETWEEN}>
+            <LeHPanel className="profiles" hstretch={"true"} wrap halignment={SPACEBETWEEN}>
                 {this.getProfiles()}
             </LeHPanel>
         );
