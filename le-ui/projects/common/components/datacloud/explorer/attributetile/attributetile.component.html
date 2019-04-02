@@ -135,6 +135,8 @@
         <!-- End Rating  -->
         <!-- Account - Contacts - PurchaseHistory Entity -->
 
+        <span ng-if="vm.cube == null && vm.section == 're.model_iteration'"><i class="fa fa-spinner fa-pulse fw"></i></span>
+
         <div 
             class="stats" 
             ng-if="
@@ -144,6 +146,7 @@
                 ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1 && 
                 enrichment.Entity !== 'Rating'">
             <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
+
             <h5>
                 <label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ?
                     'Attribute range' : 'Attribute values'}}

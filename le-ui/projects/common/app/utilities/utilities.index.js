@@ -1,4 +1,4 @@
-console.log('Utilities module');
+// console.log('Utilities module');
 // import angular from "angular";
 import * as jStorage from 'jstorage';
 

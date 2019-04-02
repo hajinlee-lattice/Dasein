@@ -1,4 +1,4 @@
-console.log('Services module');
+// console.log('Services module');
 // import angular from "angular";s
 import './ConfigService';
 import './SessionService';

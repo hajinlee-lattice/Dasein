@@ -1,4 +1,4 @@
-console.log("Wizard module");
+// console.log("Wizard module");
 // import angular from "angular";
 
 import '../../app/utilities/ResourceUtility';
