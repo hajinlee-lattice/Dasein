@@ -53,8 +53,8 @@
         <li class="save-segment" ng-if="!vm.checkState('model_iteration')">
             <span ng-if="vm.enableSaveSegmentMsg" class="confirmation-title"><i class="fa fa-check confermation-ok"
                     aria-hidden="true"></i>Segment Saved</span>
-            <button class="save button white-button" ng-click="vm.refreshCounts()" ng-disabled="vm.public.enableSaveSegmentButton || vm.isSaving" ng-if="vm.segment != 'Create' && vm.checkState('builder')">
-                Refresh
+            <button class="save button white-button" ng-click="vm.refreshCounts()" ng-disabled="vm.public.enableSaveSegmentButton || vm.isRefreshing" ng-if="vm.segment != 'Create' && vm.checkState('builder')">
+                {{ vm.isRefreshing ? 'Refreshing' : 'Refresh' }}
                 <i class="fa fa-spinner fa-spin fa-fw" ng-if="vm.isRefreshing"></i>
             </button>      
             <menu-dropdown config="vm.header.exportSegment" class="button export-button" ng-click="vm.disableExport()"></menu-dropdown>

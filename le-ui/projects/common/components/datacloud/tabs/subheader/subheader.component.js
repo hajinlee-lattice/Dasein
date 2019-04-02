@@ -376,6 +376,7 @@ angular
 
         vm.refreshCounts = function() {
             vm.isRefreshing = true;
+            QueryStore.setPublicProperty('disableAllTreeRestrictions', true);
             var segmentName = $stateParams.segment;
             if (segmentName == 'Create') {
                 return;
@@ -392,17 +393,19 @@ angular
             var flattenedSegmentRestrictions = SegmentStore.flattenSegmentRestrictions(segment);
 
             vm.updateAllBucketCounts(flattenedSegmentRestrictions, 0);
-            vm.isRefreshing = false;
         }
 
         vm.updateAllBucketCounts = function(bucketRestrictions, index) {
             if (QueryStore.cancelUpdateBucketCalls == true) {
+                QueryStore.setPublicProperty('disableAllTreeRestrictions', false);
+                vm.isRefreshing = false;
                 return;
             } else if (index > bucketRestrictions.length - 1) {
+                QueryStore.setPublicProperty('disableAllTreeRestrictions', false);
+                vm.isRefreshing = false;
                 vm.saveSegment();
                 return;
             }
-            console.log("index: " + index);
             var restriction = bucketRestrictions[index];
             QueryTreeService.updateBucketCount(angular.copy(restriction.bucketRestriction), undefined).then(function(data) {
                 if (typeof data == 'number') {

@@ -173,7 +173,7 @@ angular
             }
             
             vm.editBucket = function() {
-                if (vm.root.draggedItem == vm) {
+                if (vm.root.draggedItem == vm || QueryStore.getPublicProperty('disableAllTreeRestrictions')) {
                     return;
                 }
 
@@ -368,6 +368,10 @@ angular
 
             vm.categoryClass = function(category) {
                 return category ? category.toLowerCase().replace(/\s/g, "_") : '' ;
+            }
+
+            vm.disableAllRestrictions = function() {
+                return QueryStore.getPublicProperty('disableAllTreeRestrictions');
             }
 
             vm.init();
