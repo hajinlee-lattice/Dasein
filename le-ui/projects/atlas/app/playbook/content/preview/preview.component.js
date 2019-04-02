@@ -1,6 +1,7 @@
 angular.module('lp.playbook.wizard.preview', [])
 .controller('PlaybookWizardPreview', function(
-    $state, $stateParams, ResourceUtility, Play, TalkingPointPreviewResources, CgTalkingPointStore
+    $state, $stateParams, 
+    ResourceUtility, Play, TalkingPointPreviewResources, CgTalkingPointStore, FeatureFlagService
 ) {
     var vm = this;
 
@@ -8,7 +9,8 @@ angular.module('lp.playbook.wizard.preview', [])
         play: Play,
         stateParams: $stateParams,
         published: null,
-        showPublishingSpinner: false
+        showPublishingSpinner: false,
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     vm.init = function() {
@@ -19,7 +21,11 @@ angular.module('lp.playbook.wizard.preview', [])
         CgTalkingPointStore.publishTalkingPoints(vm.play.name).then(function(results){
             vm.published = results;
             vm.showPublishingSpinner = false;
-            $state.go('home.playbook.dashboard', {play_name: vm.play.name});
+            if(vm.alwaysOnCampaigns) { 
+                $state.go('home.playbook.overview', {play_name: play.name} );
+            } else {
+                $state.go('home.playbook.dashboard', {play_name: vm.play.name});
+            }
         });
     }
 

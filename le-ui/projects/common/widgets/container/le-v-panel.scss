@@ -38,7 +38,7 @@
 .fill-height {
   display: inline-flex;
   flex-direction: column;
-  .le-flex-content {
+  .le-flex-content.container-vertical {
     flex: 1;
     display: flex;
     flex-direction: column;

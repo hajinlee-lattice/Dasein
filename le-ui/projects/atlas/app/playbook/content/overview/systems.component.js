@@ -12,9 +12,7 @@ class SystemsComponent extends Component {
 
     render() {
         return (
-            <LeVPanel hstretch={"true"}>
-                <LeHPanel hstretch={"true"}>Connected Systems</LeHPanel>
-            </LeVPanel>
+            <LeHPanel hstretch={"true"}>Connected Systems</LeHPanel>
         );
     }
 }

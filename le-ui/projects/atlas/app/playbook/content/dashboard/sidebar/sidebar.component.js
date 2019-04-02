@@ -3,7 +3,8 @@ angular
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('SidebarPlaybookController', function(
-    $rootScope, $state, $stateParams, StateHistory, ResourceUtility, PlaybookWizardStore, Play
+    $rootScope, $state, $stateParams, 
+    StateHistory, ResourceUtility, PlaybookWizardStore, Play, FeatureFlagService
 ) {
     var vm = this;
 
@@ -13,7 +14,7 @@ angular
         stateParams: $stateParams,
         StateHistory: StateHistory,
         play: Play,
-        dashboardType: ''
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     vm.init = function() {

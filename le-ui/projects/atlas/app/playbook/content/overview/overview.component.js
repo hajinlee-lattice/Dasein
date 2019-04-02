@@ -30,7 +30,6 @@ export class OverviewComponent extends Component {
         let play = this.props.OverviewService.getPlay();
         this.setState({play: play});
         // this.unsubscribe = store.subscribe(this.handleChange);
-        console.log(play);
     }
 
     componentWillUnmount() {
@@ -47,10 +46,14 @@ export class OverviewComponent extends Component {
             return (
                 <div className="main-panel">
                     <LeHPanel halignment={SPACEAROUND}>
-                        <MainComponent play={this.state.play} />
-                        <RatingsComponent />
+                        <LeVPanel flex={"1"}>
+                            <MainComponent play={this.state.play} />
+                        </LeVPanel>
+                        <RatingsComponent play={this.state.play} />
                     </LeHPanel>
-                    <SystemsComponent />
+                    <LeVPanel hstretch={"true"}>
+                        <SystemsComponent play={this.state.play} />
+                    </LeVPanel>
                 </div>
             );
         } else {
