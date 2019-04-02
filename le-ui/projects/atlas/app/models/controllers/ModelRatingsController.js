@@ -112,12 +112,20 @@ angular.module('lp.models.ratings', [
 
                 } else {
 
-                    console.log("here 4");
+                    var id = $stateParams.modelId;
+                    ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
+                        if (vm.currentRating.scoring_iteration) {
+                            vm.currentConfiguration = currentConfig;
+                            vm.showCurrentConfig = true;
+                        } else {
+                            vm.showCurrentConfig = false;
+                        }
+                    });
 
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
-                    vm.showCurrentConfig = false;
+                    
                 }
             }
 
@@ -504,6 +512,7 @@ angular.module('lp.models.ratings', [
                 var id = $stateParams.modelId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
                     vm.currentConfiguration = currentConfig;
+                    vm.showCurrentConfig = true;
                 });
 
                 RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){

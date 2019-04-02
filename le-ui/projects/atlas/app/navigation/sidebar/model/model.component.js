@@ -21,9 +21,6 @@ angular
     });
 
     vm.init = function() {
-
-        console.log(vm.stateParams);
-
         vm.IsPmml = IsPmml;
         vm.IsRatingEngine = IsRatingEngine;
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
