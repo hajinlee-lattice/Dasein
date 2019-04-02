@@ -11,12 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.mortbay.log.Log;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,17 +40,15 @@ public class MetadataSegmentResource {
 
     private final MetadataSegmentService metadataSegmentService;
     private final MetadataSegmentExportService metadataSegmentExportService;
-    private final SessionService sessionService;
 
     @Inject
     public MetadataSegmentResource(MetadataSegmentService metadataSegmentService,
             MetadataSegmentExportService metadataSegmentExportService, SessionService sessionService) {
         this.metadataSegmentService = metadataSegmentService;
         this.metadataSegmentExportService = metadataSegmentExportService;
-        this.sessionService = sessionService;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments() {
@@ -58,21 +57,21 @@ public class MetadataSegmentResource {
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get segment with name")
     public MetadataSegment getSegmentByName(@PathVariable String segmentName) {
         return metadataSegmentService.getSegmentByName(segmentName);
     }
 
-    @GetMapping(value = "/{segmentName}/dependencies")
+    @GetMapping("/{segmentName}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, List<String>> getDependencies(@PathVariable String segmentName) throws Exception {
         return metadataSegmentService.getDependencies(segmentName);
     }
 
-    @GetMapping(value = "/{segmentName}/dependencies/modelAndView")
+    @GetMapping("/{segmentName}/dependencies/modelAndView")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, UIAction> getDependenciesModelAndView(@PathVariable String segmentName) {
@@ -81,7 +80,7 @@ public class MetadataSegmentResource {
                 : ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create or update a segment by name")
     public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment) {
@@ -95,7 +94,7 @@ public class MetadataSegmentResource {
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
     }
 
-    @RequestMapping(value = "/{segmentName}/modelAndView", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{segmentName}/modelAndView")
     @ApiOperation(value = "Delete a segment by name")
     public Map<String, UIAction> deleteSegmentByNameModelAndView(@PathVariable String segmentName,
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
@@ -103,14 +102,14 @@ public class MetadataSegmentResource {
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
-    @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping("/{segmentName}")
     @ApiOperation(value = "Delete a segment by name")
     public void deleteSegmentByName(@PathVariable String segmentName,
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         metadataSegmentService.deleteSegmentByName(segmentName, hardDelete);
     }
 
-    @PutMapping(value = "/{segmentName}/revertdelete")
+    @PutMapping("/{segmentName}/revertdelete")
     @ResponseBody
     @ApiOperation(value = "Revert segment deletion given its name")
     public Boolean revertDeleteSegment(@PathVariable String segmentName) {
@@ -118,35 +117,35 @@ public class MetadataSegmentResource {
         return true;
     }
 
-    @GetMapping(value = "/deleted")
+    @GetMapping("/deleted")
     @ResponseBody
     @ApiOperation(value = "Get all Deleted Segments")
     public List<String> getAllDeletedSegments() {
         return metadataSegmentService.getAllDeletedSegments();
     }
 
-    @RequestMapping(value = "/export", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/export")
     @ResponseBody
     @ApiOperation(value = "Create a segment export job")
     public MetadataSegmentExport createSegmentExportJob(@RequestBody MetadataSegmentExport metadataSegmentExportJob) {
         return metadataSegmentExportService.createSegmentExportJob(metadataSegmentExportJob);
     }
 
-    @RequestMapping(value = "/export", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/export")
     @ResponseBody
     @ApiOperation(value = "Get list of segment export job")
     public List<MetadataSegmentExport> getSegmentExportJobs(HttpServletRequest request) {
         return metadataSegmentExportService.getSegmentExports();
     }
 
-    @RequestMapping(value = "/export/{exportId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/export/{exportId}")
     @ResponseBody
     @ApiOperation(value = "Get segment export job")
     public MetadataSegmentExport getSegmentExportJob(@PathVariable String exportId) {
         return metadataSegmentExportService.getSegmentExportByExportId(exportId);
     }
 
-    @RequestMapping(value = "/export/{exportId}/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/export/{exportId}/download")
     @ResponseBody
     @ApiOperation(value = "Download result of export job")
     public void downloadSegmentExportResult(@PathVariable String exportId, HttpServletRequest request,
