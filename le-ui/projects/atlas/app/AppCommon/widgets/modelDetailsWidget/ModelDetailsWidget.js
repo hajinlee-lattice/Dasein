@@ -96,7 +96,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             if (ratingEngine.published_iteration != null && ratingEngine.published_iteration != undefined) {
                 $scope.modelIsReady = true;
             } else if (ratingEngine.scoring_iteration != null && ratingEngine.scoring_iteration != undefined) {
-                $scope.modelIsReady = ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && ratingEngine.published_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
+                $scope.modelIsReady = ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
             } else if (ratingEngine.latest_iteration != null && ratingEngine.latest_iteration != undefined) {
                 $scope.modelIsReady = (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && ratingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Failed') ? true : false;
             } else {
@@ -204,7 +204,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 if (ratingEngine.published_iteration != null && ratingEngine.published_iteration != undefined) {
                     $scope.modelIsReady = true;
                 } else if (ratingEngine.scoring_iteration != null && ratingEngine.scoring_iteration != undefined) {
-                    $scope.modelIsReady = ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && ratingEngine.published_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
+                    $scope.modelIsReady = ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
                 } else if (ratingEngine.latest_iteration != null && ratingEngine.latest_iteration != undefined) {
                     $scope.modelIsReady = (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && ratingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Failed') ? true : false;
                 } else {

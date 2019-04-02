@@ -270,11 +270,13 @@ angular
             var iteration = RatingsEngineStore.getRemodelIteration(),
                 modelId = iteration.modelSummaryId,
                 rating_id = $stateParams.rating_id,
+                aiModel = $stateParams.aiModel,
                 url = 'home.ratingsengine.dashboard.training';
 
             $state.go(url, {
                 rating_id: rating_id,
-                modelId: modelId
+                modelId: modelId,
+                aiModel: aiModel
             }, { reload: true });
         }
 
