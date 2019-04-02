@@ -16,7 +16,7 @@ export default class LeTableFooter extends Component {
             <div className="le-table-footer">
                 <div className="le-table-cell le-table-col-span-12">
                     <LePagination
-                        classesName="table-pagination"
+                        className="table-pagination"
                         total={this.props.total}
                         perPage={this.props.perPage}
                         start={this.props.start}

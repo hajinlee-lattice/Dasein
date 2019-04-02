@@ -70,7 +70,7 @@ export default class LePagination extends Component {
       return (
         <div
           className={`pd-pagination ${
-            this.props.classesName ? this.props.classesName : ""
+            this.props.className ? this.props.className : ""
           }`}
         >
           <LeButton

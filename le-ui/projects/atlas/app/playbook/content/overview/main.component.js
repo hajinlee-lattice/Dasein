@@ -36,6 +36,7 @@ class MainComponent extends Component {
 
     render() {
         return (
+            <LeVPanel flex={"1"} className="main-panel panel">
                 <ul>
                     <li>
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed in tellus sagittis, posuere leo vel, pellentesque tortor. Sed posuere massa nibh, sit amet pharetra elit suscipit vitae. Nulla ornare pharetra purus, ac feugiat ante dictum et. Donec mollis aliquet lacinia.
@@ -61,6 +62,7 @@ class MainComponent extends Component {
                         </LeHPanel>
                     </li>
                 </ul>
+            </LeVPanel>
         );
     }
 }

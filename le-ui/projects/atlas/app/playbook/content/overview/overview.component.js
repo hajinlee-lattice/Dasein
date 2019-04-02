@@ -44,11 +44,9 @@ export class OverviewComponent extends Component {
     render() {
         if(this.state.play) {
             return (
-                <div className="main-panel">
+                <div className="playbook-overview">
                     <LeHPanel halignment={SPACEAROUND}>
-                        <LeVPanel flex={"1"}>
-                            <MainComponent play={this.state.play} />
-                        </LeVPanel>
+                        <MainComponent play={this.state.play} />
                         <RatingsComponent play={this.state.play} />
                     </LeHPanel>
                     <LeVPanel hstretch={"true"}>
@@ -58,7 +56,7 @@ export class OverviewComponent extends Component {
             );
         } else {
             return (
-                <div className="main-panel">
+                <div className="playbook-overview">
                         loading...
                 </div>
             );
