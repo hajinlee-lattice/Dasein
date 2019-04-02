@@ -37,7 +37,8 @@ angular.module('common.datacloud.query')
 
         this.public = {
             enableSaveSegmentButton: false,
-            resetLabelIncrementor: false
+            resetLabelIncrementor: false,
+            disableAllTreeRestrictions: false
         };
 
         this.isDataAvailable = null;
@@ -123,6 +124,10 @@ angular.module('common.datacloud.query')
 
         this.setPublicProperty = function(property, value) {
             this.public[property] = value;
+        }
+
+        this.getPublicProperty = function(property) {
+            return !this.public.hasOwnProperty(property) ? null : this.public[property];
         }
 
         this.getPublic = function() {

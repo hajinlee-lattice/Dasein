@@ -263,8 +263,6 @@ angular
                     delete item.SegmentChecked;
                 });
 
-                QueryStore.cancelUpdateBucketCalls = true;
-
                 QueryStore.clear();
             }],
             resolve: angular.extend({}, DataCloudResolves, {
