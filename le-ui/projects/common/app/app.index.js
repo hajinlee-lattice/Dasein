@@ -1,4 +1,4 @@
-console.log('CommonApp module');
+// console.log('CommonApp module');
 
 import './utilities/utilities.index';
 import './services/services.index';
