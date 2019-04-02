@@ -10,9 +10,15 @@ systems-component{
 
         max-width: 1000px;
         width: 100%;
+        .systems-header{
+            padding-bottom: 1.4em;
+        }
+        .systems-count{
+            font-weight: bolder;
+            padding-right: 0.2em;
+        }
         .system-tile {
             height: 100%;
-            max-width: 320px;
             font-size: 0.8em;
             .system-title{
                 justify-content: flex-start;

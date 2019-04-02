@@ -17,7 +17,6 @@ import './systems.component.scss';
 export default class SystemComponent extends Component {
     constructor(props) {
         super(props);
-        console.log('System', props.system);
         this.state = { system: props.system, openModal: false, saving: false };
         this.editMappingClickHandler = this.editMappingClickHandler.bind(this);
         this.modalCallback = this.modalCallback.bind(this);

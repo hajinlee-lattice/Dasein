@@ -37,10 +37,18 @@ connector-list-component{
                     }
                 }
             }
-            .le-connector:hover{
-                // background-color: $saphire-two;
+            .le-connector{
+                border-radius: 0;
+                border-top: 0;
+                border-bottom: 0;
+                border-left: 0;
+                max-width: 500px;
             }
-        }   
+        }
+        .connectors-list .le-connector:last-child {
+            border: 0;
+        }
+
     
     .le-connectors{
         margin-top: 1px;
