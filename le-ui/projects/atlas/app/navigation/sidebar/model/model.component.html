@@ -39,7 +39,7 @@
     <li ng-if="
         (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
         (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
-        <a ui-sref="home.model.datacloud({ aiModel: vm.stateParams.aiModel })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
+        <a ui-sref="home.model.datacloud({ modelId: vm.stateParams.modelId, rating_id: vm.stateParams.rating_id, aiModel: vm.stateParams.aiModel })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico ico-view-model ico-light-gray"></span>
             </span>
@@ -49,7 +49,13 @@
     <li ng-if="
         (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
         (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
-        <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DONUT')}}">
+        <a 
+            ui-sref="home.model.attributes({ 
+                modelId: vm.stateParams.modelId, 
+                rating_id: vm.stateParams.rating_id, 
+                aiModel: vm.stateParams.aiModel, 
+                viewingIteration: true })" 
+            analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DONUT')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DONUT')}}">
                 <span class="ico ico-donut ico-light-gray"></span>
             </span>
@@ -59,7 +65,14 @@
     <li ng-if="
         (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
         (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
-        <a ui-sref="home.model.performance" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
+        <a 
+            ui-sref="home.model.performance({ 
+                modelId: vm.stateParams.modelId, 
+                rating_id: vm.stateParams.rating_id, 
+                aiModel: vm.stateParams.aiModel, 
+                viewingIteration: true })" 
+            analytics-on="click" 
+            analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
                 <span class="ico ico-performance ico-light-gray"></span>
             </span>
@@ -102,7 +115,14 @@
             vm.viewingIteration" 
         role="presentation" 
         ui-sref-active="active">
-        <a ui-sref="home.model.summary" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
+        <a 
+            ui-sref="home.model.summary({ 
+                modelId: vm.stateParams.modelId, 
+                rating_id: vm.stateParams.rating_id, 
+                aiModel: vm.stateParams.aiModel, 
+                viewingIteration: true })" 
+            analytics-on="click" 
+            analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
                 <span class="ico ico-datatable ico-light-gray"></span>
             </span>
