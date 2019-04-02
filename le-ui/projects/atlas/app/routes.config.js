@@ -332,9 +332,6 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                         result.forEach((item) => {
                             item.Entity = "Account";
-                            if (!item.ImportanceOrdering) {
-                                item.ImportanceOrdering = 0;
-                            }
                             if (!item.PredictivePower) {
                                 item.PredictivePower = 0;
                             }
