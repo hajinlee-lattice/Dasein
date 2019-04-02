@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -39,8 +40,9 @@ public class ContactResource extends BaseFrontEndEntityResource {
     private static final Logger log = LoggerFactory.getLogger(ContactResource.class);
 
     @Inject
-    public ContactResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
-        super(entityProxy, segmentProxy, dataCollectionProxy);
+    public ContactResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy,
+                           GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+        super(entityProxy, segmentProxy, dataCollectionProxy, graphDependencyToUIActionUtil);
     }
 
     @Deprecated
