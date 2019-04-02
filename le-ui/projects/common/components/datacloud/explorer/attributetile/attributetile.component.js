@@ -226,15 +226,48 @@ export default function () {
             }
 
             vm.select = function (quantity) {
+
+                console.log(DataCloudStore.ratingIterationFilter);
+
+                let iterationFilter = DataCloudStore.ratingIterationFilter;
                 let categoryAttributes = vm.getAttributes([vm.category]);
                 switch (quantity) {
                     case 'all':
+                        
+                        switch (iterationFilter) {
+                            case 'all':
+                                categoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
+                            case 'used':
+                                let usedCategoryAttributes = categoryAttributes.filter((item) => { return typeof item.ImportanceOrdering != 'undefined';});
+                                usedCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
+                            case 'warnings':
+                                let warningsCategoryAttributes = categoryAttributes.filter((item) => { return item.HasWarnings;});
+                                warningsCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
+                            case 'disabled':
+                                let disabledCategoryAttributes = categoryAttributes.filter((item) => { return item.ApprovedUsage[0] == 'None';});
+                                disabledCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
+                        };
+
                         Notice.success({ message: 'Enabled all attributes for remodeling' })
-                        categoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
+
                         break;
                     default:
-                        Notice.warning({ message: 'Disabled all attributes from remodeling' })
-                        categoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
+
+                        switch (iterationFilter) {
+                            case 'all':
+                                categoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
+                            case 'used':
+                                let usedCategoryAttributes = categoryAttributes.filter((item) => { return typeof item.ImportanceOrdering != 'undefined';});
+                                usedCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
+                            case 'warnings':
+                                let warningsCategoryAttributes = categoryAttributes.filter((item) => { return item.HasWarnings;});
+                                warningsCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
+                            case 'disabled':
+                                let disabledCategoryAttributes = categoryAttributes.filter((item) => { return item.ApprovedUsage[0] == 'None';});
+                                disabledCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
+                        };
+
+                        Notice.warning({ message: 'Disabled all attributes from remodeling' });
                 }
             }
 
