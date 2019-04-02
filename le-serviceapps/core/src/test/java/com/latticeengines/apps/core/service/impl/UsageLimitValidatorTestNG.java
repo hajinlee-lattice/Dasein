@@ -85,9 +85,9 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
-        // the static list have 6 config which are activated and enabled for
-        // enrichment
-        List<AttrConfig> subList = attrConfigs.subList(0, (int) (exportLimit - 6));
+        // the static list returned by AttrConfigTestUtils.generatePropertyList
+        // have 5 config which are activated and enabled for enrichment
+        List<AttrConfig> subList = attrConfigs.subList(0, (int) (exportLimit - 5));
         usageLimitValidator.validate(
                 AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, false, false, false, false),
                 subList);
