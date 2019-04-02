@@ -24,7 +24,7 @@ public class AttrConfigEntity extends BaseMultiTenantDocEntity<AttrConfig>
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Entity", //
-            columnDefinition = "'VARCHAR(20) GENERATED ALWAYS AS (`Document` ->> '$.Entity')'", //
+            columnDefinition = "'VARCHAR(30) GENERATED ALWAYS AS (`Document` ->> '$.Entity')'", //
             insertable = false, updatable = false)
     private BusinessEntity entity;
 
