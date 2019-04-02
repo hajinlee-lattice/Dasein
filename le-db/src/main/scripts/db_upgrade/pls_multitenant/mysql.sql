@@ -66,6 +66,10 @@ CREATE PROCEDURE `UpdatePLSTables`()
     
     ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` ADD COLUMN `EVENT_DETAIL` JSON;
     ALTER table PLS_MultiTenant.SOURCE_FILE add column FILE_ROWS bigint(20) DEFAULT NULL;
+
+alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add column `FK_TENANT_ID` bigint(20) not null 
+alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add constraint `FK_METADATADATACOLLECTIONSTATUSHISTORY_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade; 
+alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` drop column `TENANT_NAME` 
   END;
 //
 DELIMITER;
