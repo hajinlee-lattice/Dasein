@@ -73,7 +73,7 @@ public class SegmentResource {
         return segmentService.getDependencies(segmentName);
     }
 
-    @RequestMapping(value = "/pid/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/pid/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get segment with pid by name")
     public MetadataSegmentDTO getSegmentWithPid(@PathVariable String customerSpace, @PathVariable String segmentName) {
@@ -84,7 +84,7 @@ public class SegmentResource {
         return metadataSegmentDTO;
     }
 
-    @PostMapping(value = "")
+    @PostMapping("")
     @ResponseBody
     @Action
     @ApiOperation(value = "Create or update a segment")

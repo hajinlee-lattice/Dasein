@@ -24,6 +24,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -43,8 +44,9 @@ public class EntityResource extends BaseFrontEndEntityResource {
             ThreadPoolUtils.getFixedSizeThreadPool("entity-count", BusinessEntity.COUNT_ENTITIES.size());
 
     @Inject
-    public EntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
-        super(entityProxy, segmentProxy, dataCollectionProxy);
+    public EntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy,
+                          GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+        super(entityProxy, segmentProxy, dataCollectionProxy, graphDependencyToUIActionUtil);
 
     }
 

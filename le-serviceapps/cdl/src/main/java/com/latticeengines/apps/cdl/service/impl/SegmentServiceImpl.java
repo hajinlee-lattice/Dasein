@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -29,13 +30,17 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("segmentService")
@@ -63,6 +68,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
+        validateSegment(segment);
         MetadataSegment persistedSegment;
         if (StringUtils.isNotBlank(segment.getName())) {
             MetadataSegment existingSegment = findByName(segment.getName());
@@ -283,5 +289,22 @@ public class SegmentServiceImpl implements SegmentService {
             attribute = attribute.trim();
         }
         return attribute;
+    }
+
+    private void validateSegment(MetadataSegment segment) {
+        List<BucketRestriction> invalidBkts = new ArrayList<>();
+        try {
+            invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(segment.getAccountRestriction()));
+            invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(segment.getContactRestriction()));
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_40057, e, new String[]{ e.getMessage() });
+        }
+        if (CollectionUtils.isNotEmpty(invalidBkts)) {
+            String message = invalidBkts.stream() //
+                    .map(BucketRestriction::getAttr) //
+                    .map(AttributeLookup::toString) //
+                    .collect(Collectors.joining(","));
+            throw new LedpException(LedpCode.LEDP_40057, new String[]{ message });
+        }
     }
 }
