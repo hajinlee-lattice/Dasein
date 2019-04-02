@@ -98,13 +98,18 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
-        segment = translateForBackend(segment);
+        MetadataSegment translatedSegment = translateForBackend(segment);
         MetadataSegment metadataSegment;
         try {
-            metadataSegment = segmentProxy.createOrUpdateSegment(customerSpace, segment,
+            metadataSegment = segmentProxy.createOrUpdateSegment(customerSpace, translatedSegment,
                     MultiTenantContext.getEmailAddress());
         } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+            if (ex instanceof LedpException && LedpCode.LEDP_40057.equals(((LedpException) ex).getCode())) {
+                throw graphDependencyToUIActionUtil.handleInvalidBucketsError((LedpException) ex, //
+                        "Failed to save or update segment");
+            } else {
+                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+            }
         }
 
         MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment);

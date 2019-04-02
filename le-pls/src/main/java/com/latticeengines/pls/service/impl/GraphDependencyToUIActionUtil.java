@@ -106,13 +106,12 @@ public class GraphDependencyToUIActionUtil {
         String message = ex.getMessage();
         if (ex instanceof LedpException) {
             code = ((LedpException) ex).getCode();
-            if (code == codeToHandle) {
+            if (codeToHandle.equals(code)) {
                 String removeStartingText = codeToHandle.name() + ": ";
                 if (message.startsWith(removeStartingText)) {
                     message = message.substring(removeStartingText.length());
                 }
-
-                if (code == LedpCode.LEDP_40042) {
+                if (LedpCode.LEDP_40042.equals(code)) {
                     uiAction = handleDeleteFailedDueToDependency((LedpException) ex, code, title, messageHeader, view,
                             null, null);
                 }
@@ -137,5 +136,18 @@ public class GraphDependencyToUIActionUtil {
             uiAction = generateUIAction(defaultTitle, defaultView, Status.Error, ex.getMessage());
         }
         return uiAction;
+    }
+
+    public UIActionException handleInvalidBucketsError(LedpException ex, String title) {
+        String[] attrs = ex.getMessage().replace("Detected invalid buckets: ", "").split(",");
+        String message;
+        if (attrs.length > 1) {
+            // TODO: Ideally, we should convert backend attr names to display names. For now, just remove them.
+            message = "Detected " + attrs.length + " invalid buckets.";
+        } else {
+            message = "Detected invalid bucket.";
+        }
+        UIAction uiAction = generateUIAction(title, View.Banner, Status.Error, message);
+        return new UIActionException(uiAction, LedpCode.LEDP_40057);
     }
 }

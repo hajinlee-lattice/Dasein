@@ -1,8 +1,10 @@
 package com.latticeengines.apps.cdl.testframework;
 
+import static com.latticeengines.domain.exposed.query.ComparisonType.EQUAL;
+import static com.latticeengines.domain.exposed.query.ComparisonType.LESS_THAN;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -145,23 +147,23 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private Restriction createAccountRestriction() {
         Restriction b1 = //
-                createBucketRestriction(6, ComparisonType.EQUAL, //
-                        BusinessEntity.Account, COMPOSITE_RISK_SCORE);
+                createBucketRestriction( //
+                        BusinessEntity.Account, COMPOSITE_RISK_SCORE, EQUAL, 6);
         Restriction b2 = //
-                createBucketRestriction(1, ComparisonType.EQUAL, //
-                        BusinessEntity.Account, PREMIUM_MARKETING_PRESCREEN);
+                createBucketRestriction( //
+                        BusinessEntity.Account, PREMIUM_MARKETING_PRESCREEN, EQUAL, 1);
         Restriction b3 = //
-                createBucketRestriction(2, ComparisonType.LESS_THAN, //
-                        BusinessEntity.Account, CLOUD_TECHNOLOGIES_CONTACT_CENTER_MANAGEMENT);
+                createBucketRestriction( //
+                        BusinessEntity.Account, CLOUD_TECHNOLOGIES_CONTACT_CENTER_MANAGEMENT, LESS_THAN, 2);
         Restriction b4 = //
-                createBucketRestriction(4, ComparisonType.LESS_THAN, //
-                        BusinessEntity.Account, BUSINESS_TECHNOLOGIES_SSL);
+                createBucketRestriction( //
+                        BusinessEntity.Account, BUSINESS_TECHNOLOGIES_SSL, LESS_THAN, 4);
         Restriction b5 = //
-                createBucketRestriction(3, ComparisonType.LESS_THAN, //
-                        BusinessEntity.Account, BUSINESS_TECHNOLOGIES_ANALYTICS);
+                createBucketRestriction( //
+                        BusinessEntity.Account, BUSINESS_TECHNOLOGIES_ANALYTICS, EQUAL, 3);
         Restriction b6 = //
-                createBucketRestriction("CA", ComparisonType.EQUAL, //
-                        BusinessEntity.Account, STATE);
+                createBucketRestriction( //
+                        BusinessEntity.Account, STATE, EQUAL, "CA");
 
         Restriction innerLogical1 = LogicalRestriction.builder()//
                 .and(Arrays.asList(b1, b2, b3, b4, b5, b6)).build();
@@ -174,11 +176,9 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private Restriction createContactRestriction() {
         Restriction c1 = //
-                createBucketRestriction("CA", ComparisonType.EQUAL, //
-                        BusinessEntity.Contact, STATE);
+                createBucketRestriction(BusinessEntity.Contact, STATE, EQUAL, "CA");
         Restriction c2 = //
-                createBucketRestriction("TARLETON STATE UNIVERSITY", ComparisonType.EQUAL, //
-                        BusinessEntity.Contact, COMPANY_NAME);
+                createBucketRestriction(BusinessEntity.Contact, COMPANY_NAME, EQUAL, "TARLETON STATE UNIVERSITY");
 
         Restriction innerLogical1 = LogicalRestriction.builder()//
                 .or(Arrays.asList(c1, c2)).build();
@@ -189,14 +189,12 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 .and(Arrays.asList(innerLogical1, innerLogical2)).build();
     }
 
-    private Restriction createBucketRestriction(Object val, ComparisonType comparisonType, BusinessEntity entityType,
-            String attrName) {
-        Bucket bucket = null;
-
-        if (comparisonType == ComparisonType.EQUAL) {
-            bucket = Bucket.valueBkt(comparisonType, Collections.singletonList(val));
-        } else if (comparisonType == ComparisonType.LESS_THAN) {
-            bucket = Bucket.rangeBkt(null, val);
+    protected Restriction createBucketRestriction(BusinessEntity entityType, String attrName, //
+                                                  ComparisonType operator, Object... vals) {
+        Bucket bucket = new Bucket();
+        bucket.setComparisonType(operator);
+        if (vals.length > 0) {
+            bucket.setValues(Arrays.asList(vals));
         }
         return new BucketRestriction(new AttributeLookup(entityType, attrName), bucket);
     }
