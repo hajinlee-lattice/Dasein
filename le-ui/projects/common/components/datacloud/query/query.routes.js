@@ -110,6 +110,9 @@ angular.module('common.datacloud.query')
                     SegmentService.GetSegmentDependenciesModelView(name);
                 }
             }],
+            onExit: ['QueryStore', function(QueryStore) {
+                QueryStore.cancelUpdateBucketCalls = true;
+            }],
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
                     var deferred = $q.defer();

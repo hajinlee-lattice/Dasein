@@ -101,7 +101,7 @@
         <span class="query-section-item-records-number">
             <span class="query-section-item-records-label">RECORDS</span>
 
-            <div class="expanding-bars-init" ng-class="{'expanding-bars-spinner':vm.records_updating || vm.tree.bucketRestriction.bkt.Cnt == -1}">
+            <div class="expanding-bars-init" ng-class="{'expanding-bars-spinner':vm.records_updating || vm.tree.bucketRestriction.bkt.Cnt == -1 || vm.disableAllRestrictions()}">
                 <div ng-repeat="number in (vm.tree.bucketRestriction.bkt.Cnt|number).toString() track by $index">{{ number }}</div>
             </div>
         </span>
