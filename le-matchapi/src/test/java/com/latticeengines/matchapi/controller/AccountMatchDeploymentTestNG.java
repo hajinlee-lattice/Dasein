@@ -356,7 +356,9 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private String googleEntityId = null;
 
-    @BeforeClass(groups = "deployment")
+    // FIXME: Disable all the deployment tests related to Entity Match to tune
+    // Decision Graph in QA with PM
+    @BeforeClass(groups = "deployment", enabled = false)
     public void init() {
         HdfsPodContext.changeHdfsPodId(this.getClass().getSimpleName());
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -367,13 +369,13 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         tenant = tenantService.findByTenantId(tenant.getId());
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment", enabled = false)
     public void destroy() {
         tenantService.discardTenant(tenant);
     }
 
     // One record with all match key populated
-    @Test(groups = "deployment", priority = 1)
+    @Test(groups = "deployment", priority = 1, enabled = false)
     public void testAllKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_ALL_KEYS);
         runAndVerify(input, CASE_ALL_KEYS);
@@ -382,14 +384,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Records with partial match key (extracted from match key of #1)
     // populated, should all match to same EntityId in #1
-    @Test(groups = "deployment", priority = 2)
+    @Test(groups = "deployment", priority = 2, enabled = false)
     public void testPartialKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_PARTIAL_KEYS);
         runAndVerify(input, CASE_PARTIAL_KEYS);
     }
 
     // Use EntityId got from #1 to test fetch-only mode
-    @Test(groups = "deployment", priority = 3)
+    @Test(groups = "deployment", priority = 3, enabled = false)
     public void testFetchOnly() {
         MatchInput input = prepareBulkMatchInputFetchOnly();
         runAndVerify(input, null);
@@ -397,7 +399,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Provide all the match keys to test Lead-to-Account match ---
     // Non-AllocateId mode for Account match and return AccountId
-    @Test(groups = "deployment", priority = 4)
+    @Test(groups = "deployment", priority = 4, enabled = false)
     public void testLeadToAcct() {
         MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT, true, MatchKey.Email.name(),
                 false);
@@ -406,7 +408,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Provide patial match keys without AccountId to test Lead-to-Account match
     // --- Non-AllocateId mode for Account match and return AccountId
-    @Test(groups = "deployment", priority = 5)
+    @Test(groups = "deployment", priority = 5, enabled = false)
     public void testLeadToAcctNoAID() {
         MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT_NOAID, false,
                 MatchKey.Email.name(), true);
