@@ -298,7 +298,14 @@ angular
                             }
 
                             $scope.activeIteration = RatingEngine.latest_iteration[$scope.typeContext].iteration;
-                            $scope.modelIsReady = ((RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
+
+                            if (RatingEngine.published_iteration != null && RatingEngine.published_iteration != undefined) {
+                                $scope.modelIsReady = true;
+                            } else if (RatingEngine.scoring_iteration != null && RatingEngine.scoring_iteration != undefined) {
+                                $scope.modelIsReady = RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
+                            } else if (RatingEngine.latest_iteration != null && RatingEngine.latest_iteration != undefined) {
+                                $scope.modelIsReady = (RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && (RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Failed' && RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Pending' && RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running')) ? true : false;
+                            }
 
                             $scope.stateName = function () {
                                 return $state.current.name;

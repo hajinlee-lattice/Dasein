@@ -1,4 +1,4 @@
-console.log("Directive module");
+// console.log("Directive module");
 // import angular from "angular";
 
 import "./chips.directive";

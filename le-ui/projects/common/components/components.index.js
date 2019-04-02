@@ -1,4 +1,4 @@
-console.log('Components module');
+// console.log('Components module');
 
 import './banner/banner.component';
 import './datacloud/datacloud.index';
