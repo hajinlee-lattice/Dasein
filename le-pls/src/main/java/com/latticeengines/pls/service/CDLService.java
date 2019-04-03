@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
@@ -36,4 +37,5 @@ public interface CDLService {
 
     List<S3ImportTemplateDisplay> getS3ImportTemplate(String string);
 
+    List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path);
 }

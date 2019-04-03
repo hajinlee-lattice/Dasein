@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
@@ -288,5 +289,12 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
         return sourceFile;
 
+    }
+
+    @Override
+    public SourceFile createSourceFileFromS3(FileProperty fileProperty,
+                                      SchemaInterpretation schemaInterpretation,
+                                      String entity) {
+        return sourceFileService.createSourceFileFromS3(fileProperty, schemaInterpretation, entity);
     }
 }

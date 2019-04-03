@@ -429,4 +429,18 @@ public class S3ServiceImpl implements S3Service {
         }
         return paths;
     }
+
+    @Override
+    public List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix) {
+        final String delimiter = "/";
+        ListObjectsRequest request = new ListObjectsRequest().withBucketName(s3Bucket).withPrefix(prefix);
+        ObjectListing result = s3Client.listObjects(request);
+        List<S3ObjectSummary> s3ObjectSummaries = new LinkedList<>();
+        for (S3ObjectSummary summary : result.getObjectSummaries()) {
+            if (!summary.getKey().endsWith(delimiter)) {
+                s3ObjectSummaries.add(summary);
+            }
+        }
+        return s3ObjectSummaries;
+    }
 }

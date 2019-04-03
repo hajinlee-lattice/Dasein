@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -231,6 +232,17 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(result);
     }
 
+    @RequestMapping(value = "/importFile", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Import a file from s3")
+    public ResponseDocument<SourceFile> importFile( //
+                                                    @RequestBody FileProperty csvFile, //
+                                                    @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
+                                                    @RequestParam(value = "entity", required = false, defaultValue = "") String entity) {
+        return ResponseDocument.successResponse(
+                uploadFileFromS3(csvFile, schemaInterpretation, entity));
+    }
+
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
             SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat, boolean outsizeFlag) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
@@ -272,6 +284,21 @@ public class ModelingFileUploadResource {
                         Status.Error, ledp.getMessage());
                 throw new UIActionException(action, ledp.getCode());
             }
+        }
+    }
+
+    private SourceFile uploadFileFromS3(FileProperty csvFile,
+                                  SchemaInterpretation schemaInterpretation, String entity) {
+        try {
+            log.info(String.format("Uploading file %s (csvFileName=%s)", csvFile.getFileName(), csvFile.getFileName()));
+            if (!StringUtils.isEmpty(entity)) {
+                schemaInterpretation = SchemaInterpretation.getByName(entity);
+            }
+            return fileUploadService.createSourceFileFromS3(csvFile, schemaInterpretation, entity);
+        } catch (LedpException ledp) {
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                    Status.Error, ledp.getCode().getMessage());
+            throw new UIActionException(action, ledp.getCode());
         }
     }
 }

@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
@@ -29,4 +30,8 @@ public interface FileUploadService {
 
     SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
             CleanupOperationType cleanupOperationType);
+
+    SourceFile createSourceFileFromS3(FileProperty fileProperty,
+                                      SchemaInterpretation schemaInterpretation,
+                                      String entity);
 }

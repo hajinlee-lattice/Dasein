@@ -1,9 +1,12 @@
 package com.latticeengines.apps.lp.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.lp.entitymgr.SourceFileEntityMgr;
 import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -21,7 +25,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
+import com.latticeengines.domain.exposed.pls.FileProperty;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
@@ -47,6 +55,12 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    @Value("${pls.fileupload.maxupload.rows}")
+    private long maxUploadRows;
+
+    @Inject
+    private S3Service s3Service;
 
     @Override
     public SourceFile getByTableNameCrossTenant(String tableName) {
@@ -137,4 +151,62 @@ public class SourceFileServiceImpl implements SourceFileService {
         file.setTableName(tableName);
         sourceFileEntityMgr.create(file, targetTenant);
     }
+
+    @Override
+    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,
+                                             SchemaInterpretation schemaInterpretation,
+                                             String entity) {
+        String s3FilePath = fileProperty.getFilePath();
+        String key = formatString(s3FilePath);
+        if (key.startsWith(s3Bucket)) {
+            key = key.replaceFirst(s3Bucket, "");
+            key = formatString(key);
+        }
+        InputStream inputStream = s3Service.readObjectAsStream(s3Bucket, key);
+        String outputHdfsPath = null;
+        String outputFileName = fileProperty.getFileName();
+        try {
+            CustomerSpace space = CustomerSpace.parse(customerSpace);
+            String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), space).toString();
+            outputHdfsPath = outputPath;
+            SourceFile file = new SourceFile();
+            file.setName(outputFileName);
+            file.setPath(outputPath + "/" + outputFileName);
+            file.setSchemaInterpretation(schemaInterpretation);
+            file.setBusinessEntity(StringUtils.isEmpty(entity) ? null : BusinessEntity.getByName(entity));
+            file.setState(SourceFileState.Uploaded);
+            file.setDisplayName(outputFileName);
+
+            long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
+                    outputPath + "/" + outputFileName, maxUploadRows);
+            log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
+            file.setFileRows(fileRows);
+            sourceFileEntityMgr.create(file);
+            return sourceFileEntityMgr.findByName(file.getName());
+        } catch (IOException e) {
+            if (outputHdfsPath != null) {
+                try {
+                    HdfsUtils.rmdir(yarnConfiguration, outputHdfsPath + "/" + outputFileName);
+                } catch (IOException e1) {
+                    log.error(String.format("error when deleting file %s in hdfs",
+                            outputHdfsPath + "/" + outputFileName));
+                }
+            }
+            log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, outputFileName), e);
+            throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
+        }
+    }
+
+    private String formatString(String path) {
+        if (StringUtils.isNotEmpty(path)) {
+            while (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            while (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
+    }
+
 }

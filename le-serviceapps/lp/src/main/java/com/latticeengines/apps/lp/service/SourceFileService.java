@@ -3,6 +3,8 @@ package com.latticeengines.apps.lp.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
+import com.latticeengines.domain.exposed.pls.FileProperty;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public interface SourceFileService {
@@ -24,4 +26,8 @@ public interface SourceFileService {
     SourceFile getByTableNameCrossTenant(String name);
 
     List<SourceFile> findAllSourceFiles();
+
+    SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,
+                                      SchemaInterpretation schemaInterpretation,
+                                      String entity);
 }
