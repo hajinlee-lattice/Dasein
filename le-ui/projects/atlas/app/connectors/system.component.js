@@ -148,11 +148,7 @@ export default class SystemComponent extends Component {
                         </LeHPanel>
                     </LeTileHeader>
                     <LeTileBody classNames={"s-body"}>
-                        <GridLayout gridStyle={{
-                            gridTemplateColumns: '100px 1fr',
-                            rowGap: '1px',
-                            columnGap: '10px'
-                        }}>
+                        <GridLayout classNames="system-body-container">
                             <span className="s-label">System Org Name:</span>
                             <span className="s-text">{this.state.system.orgName}</span>
                             <span className="s-label">System Org Id:</span>
