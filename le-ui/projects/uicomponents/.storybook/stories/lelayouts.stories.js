@@ -21,23 +21,25 @@ import LeMenu from 'common/widgets/menu/le-menu';
 import LeMenuItem from 'common/widgets/menu/le-menu-item';
 import GridLayout from 'common/widgets/container/grid-layout.component';
 
-
-import "../../../common/widgets/layout/le-layouts.scss";
-import { MIN_GAP, MEDIUM_GAP, LARGE_GAP } from "../../../common/widgets/container/grid-layout.component";
+import { MIN_GAP, MEDIUM_GAP, LARGE_GAP } from "common/widgets/container/grid-layout.component";
+import { CENTER } from "common/widgets/container/le-alignments";
 const stories = storiesOf("Layouts", module);
 
 stories.addDecorator(withKnobs);
-const options = {
+const optionsGap = {
     None: '',
     Min: MIN_GAP,
     Medium: MEDIUM_GAP,
     Large: LARGE_GAP
   };
-const defaultValue = '';
+const defaultValueGap = '';
 
 
 stories.add("Three columns", () => (
-    <GridLayout gap={select('gap', options, defaultValue)}>
+    <GridLayout gap={select('gap', optionsGap, defaultValueGap)} 
+        min={number('Col width', 0)}
+        numCol={number('Num columns', 3)}
+        halignItems={CENTER}>
         <LeTile>
             <LeTileHeader>
                 <span className="le-tile-title">Test 1234</span>
