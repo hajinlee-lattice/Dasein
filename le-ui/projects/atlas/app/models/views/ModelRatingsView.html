@@ -164,8 +164,8 @@
                         <dt ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.bucketAvgRevenue">Average<br>Weighted Revenue</dt>
                         <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.bucketAvgRevenue">${{bucket.bucketAvgRevenue | number: 2}}</dd>
 
-                        <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.bucketAvgRevenue">Conversion Rate</dt>
-                        <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.bucketAvgRevenue">{{ bucket.conversionRate | number: 2 }}%</dd>
+                        <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' && !bucket.bucketAvgRevenue">Conversion Rate</dt>
+                        <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' && !bucket.bucketAvgRevenue">{{ bucket.conversionRate | number: 2 }}%</dd>
                     </dl>
                 </li>
             </ul><!-- End .bucket-tiles -->
