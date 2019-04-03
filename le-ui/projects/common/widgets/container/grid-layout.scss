@@ -9,11 +9,24 @@
         .le-grid-layout { 
             display: grid;
             grid-template-columns: repeat( auto-fill, minmax(260px, 1fr) );//override this 260px to change column width
-            row-gap: 10px;
-            column-gap: 10px;
-            justify-content: center;
-            align-content: center;
-            grid-auto-rows: 1fr;
+            // row-gap: 10px;
+            // column-gap: 10px;
+            // justify-items: center;
+            // align-items: center;
+            // grid-auto-rows: 1fr;
+
+            &.min-gap{
+                row-gap: 10px;
+                column-gap: 10px;
+            }
+            &.medium-gap{
+                row-gap: 20px;
+                column-gap: 20px;
+            }
+            &.large-gap{
+                row-gap: 30px;
+                column-gap: 30px;
+            }
         }
     }
 }

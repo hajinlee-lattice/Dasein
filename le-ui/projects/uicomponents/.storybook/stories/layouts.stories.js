@@ -14,7 +14,6 @@ import "common/assets/css/font-awesome.min.css";
 
 import LeVPanel from "common/widgets/container/le-v-panel";
 import LeHPanel from "common/widgets/container/le-h-panel";
-import LeButton from "common/widgets/buttons/le-button";
 
 import "./layouts.scss";
 import LeInputText from "common/widgets/inputs/le-input-text";
