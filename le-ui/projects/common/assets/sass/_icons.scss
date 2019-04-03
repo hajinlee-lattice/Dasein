@@ -122,6 +122,11 @@ Table of Contents
 		background-image: url("/assets/images/ico-segments-white.png");
 		background-size: 18px;
 	}
+	&.ico-connections {
+		background-color: transparent !important;
+		background-image: url("/assets/images/ico-connections-white.png");
+		background-size: 24px;
+	}
 	&.ico-analysis {
 		background-color: transparent !important;
 		background-image: url("/assets/images/ico-analysis-white.png");
