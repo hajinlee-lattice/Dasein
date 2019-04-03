@@ -77,8 +77,19 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
         return false;
     }
 
+    /**
+     * Override this method if any traveler validation needs to be done.
+     * 
+     * Throw exception when validation failed.
+     * 
+     * @param traveler
+     */
+    protected void validateTraveler(Traveler traveler) {
+    }
+
     @Override
     protected boolean process(Traveler traveler) {
+        validateTraveler(traveler);
         if (accept(traveler)) {
             if (!executorInitiated.get()) {
                 initExecutors();

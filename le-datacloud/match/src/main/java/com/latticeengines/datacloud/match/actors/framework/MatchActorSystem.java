@@ -51,7 +51,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDu
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchJunctionActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchPlannerMicroEngineActor;
 import com.latticeengines.domain.exposed.actors.ActorType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
@@ -170,7 +170,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
     @Override
     protected void initMicroEngines() {
         Class<? extends ActorTemplate>[] microEngineClz = new Class[] { //
-                MatchPlannerMicroEngineActor.class, //
+                AccountMatchPlannerMicroEngineActor.class, //
                 DunsDomainBasedMicroEngineActor.class, //
                 DomainBasedMicroEngineActor.class, //
                 DunsBasedMicroEngineActor.class, //
