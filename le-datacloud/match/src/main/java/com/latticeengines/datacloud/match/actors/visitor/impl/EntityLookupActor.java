@@ -23,7 +23,7 @@ public class EntityLookupActor extends DataSourceWrapperActorTemplate {
 
     @Inject
     @Qualifier("entityLookupService")
-    private DataSourceLookupServiceBase dnBCacheLookupService;
+    private DataSourceLookupServiceBase entityLookupService;
 
     @PostConstruct
     public void postConstruct() {
@@ -32,7 +32,7 @@ public class EntityLookupActor extends DataSourceWrapperActorTemplate {
 
     @Override
     protected DataSourceLookupService getDataSourceLookupService() {
-        return dnBCacheLookupService;
+        return entityLookupService;
     }
 
     @Override
