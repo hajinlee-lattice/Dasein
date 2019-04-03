@@ -411,7 +411,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
             if (expandChildrenJobs) {
-                job.setSubJobs(expandActions(actions));
+                job.setSubJobs(updateJobsWithActionId(expandActions(actions)));
             }
         }
         return job;
@@ -632,12 +632,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             if (CollectionUtils.isNotEmpty(actionPids)) {
                 List<Action> actions = getActions(actionPids);
                 List<Job> subJobs = expandActions(actions);
-                for (Job job1 : subJobs) {
-                    updateJobActionId(job1);
-                }
-                job.setSubJobs(subJobs);
+                job.setSubJobs(updateJobsWithActionId(subJobs));
             }
         }
+    }
+
+    List<Job> updateJobsWithActionId(List<Job> jobs) {
+        for (Job job1 : jobs) {
+            updateJobActionId(job1);
+        }
+        return jobs;
     }
 
     @VisibleForTesting
