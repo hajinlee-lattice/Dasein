@@ -278,7 +278,6 @@ export default function () {
                             retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
                         });
                     }
-                    console.log(retArr);
                     return retArr;
                 }
 

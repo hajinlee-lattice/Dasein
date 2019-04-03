@@ -167,7 +167,7 @@ class ViewAllComponent extends Component {
                             return (
                                 <span className="running">
                                     <span></span>
-                                    <span>{cell.props.rowData.modelingJobStatus}</span>
+                                    <span>Creating</span>
                                 </span>
                             )
                         } else if (completed) {

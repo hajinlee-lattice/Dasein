@@ -48,8 +48,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
-            DataCloudStore.setEnrichments(vm.attributes);
-
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
             vm.periodType = vm.datacollectionstatus.ApsRollingPeriod ? vm.datacollectionstatus.ApsRollingPeriod.toLowerCase() : 'quarter';

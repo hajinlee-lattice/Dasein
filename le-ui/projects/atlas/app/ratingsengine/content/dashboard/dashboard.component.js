@@ -342,7 +342,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 if ($stateParams.remodelSuccessBanner) {
                     Banner.success({
                         message:
-                            "A remodel job has started. You can track it's progress on the jobs page."
+                            "A remodel job has started. You can track its progress on the jobs page."
                     });
                 }
 
