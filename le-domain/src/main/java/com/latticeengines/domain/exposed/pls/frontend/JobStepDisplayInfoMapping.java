@@ -203,94 +203,7 @@ public final class JobStepDisplayInfoMapping {
             "export_data"
     };
 
-    private static final String[] PROCESS_ANALYZE_STEPS = { //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Merging, De-duping & matching to Lattice Data Cloud", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Analyzing", //
-            "Publishing", //
-            "Publishing", //
-            "Publishing", //
-            "Publishing", //
-            "Publishing", //
-            "Publishing", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring", //
-            "Scoring" //
-    };
+    private static final String[] PROCESS_ANALYZE_STEPS = generatePAStepDescriptions();
 
     private static final String[] RTS_BULK_SCORE_STEPS = {
             "scoring_targeted_accounts", //
@@ -513,5 +426,38 @@ public final class JobStepDisplayInfoMapping {
         } catch (RuntimeException exc) {
             return "no_mapped_step_description";
         }
+    }
+
+    // update this method when PA steps change
+    private static String[] generatePAStepDescriptions() {
+        String merge = "Merging, De-duping & matching to Lattice Data Cloud";
+        String analyze = "Analyzing";
+        String publish = "Publishing";
+        String score = "Scoring";
+
+        int totalSteps = 130; // check latest PA log
+        String[] steps = new String[totalSteps];
+        int step = 0;
+
+        // Merge Phase: everything before [8] cloneAccount
+        while (step < 8) {
+            steps[step++] = merge;
+        }
+
+        // Analyze Phase: until [67] combineStatistics
+        while (step <= 67) {
+            steps[step++] = analyze;
+        }
+
+        // Publish Phase: 2 publish steps
+        steps[step++] = publish;
+        steps[step++] = publish;
+
+        // Scoring Phase: every thing after that
+        while(step < totalSteps) {
+            steps[step++] = score;
+        }
+
+        return steps;
     }
 }
