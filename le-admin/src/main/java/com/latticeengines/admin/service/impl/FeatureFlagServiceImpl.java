@@ -153,6 +153,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_MODELING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.MIGRATION_TENANT, cg).setDefaultValue(false);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,

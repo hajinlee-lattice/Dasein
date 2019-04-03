@@ -1,20 +1,15 @@
 @import "common/widgets/colors.scss";
 systems-component {
   display: flex;
-  // border: 2px solid red;
   justify-content: center;
   background-color: $pearl-white;
   padding: 5px 20px 100px 20px;
-//   padding-bottom: 100px;
   .systems-main {
     max-width: 1000px;
     width: 100%;
 
     .systems-list{
-        row-gap: 20px;
-        column-gap: 20px;
         grid-auto-rows: auto;
-        border: 1px solid red;
     }
     .systems-header {
       padding-bottom: 1.4em;
@@ -50,7 +45,7 @@ systems-component {
         flex:1;
         padding: 10px;
        .system-body-container{
-            grid-template-columns: 100px 1fr;
+            grid-template-columns: 1fr 1.5fr;
             row-gap: 1px;
             column-gap: 10px;
         }

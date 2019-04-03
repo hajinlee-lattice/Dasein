@@ -78,7 +78,7 @@ public class StatusDocument {
 
     @JsonProperty("message")
     public void setMessage(String message) {
-        this.status = message;
+        this.message = message;
     }
 
     @Override

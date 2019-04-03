@@ -29,10 +29,11 @@ public enum LatticeFeatureFlag {
     ENABLE_EXTERNAL_INTEGRATION("EnableExternalIntegration", "Enable External Integration"), //
     PLAYBOOK_MODULE("PlaybookModule", "Playbook Module"), //
     LAUNCH_PLAY_TO_MAP_SYSTEM("LaunchPlayToMapSystem", "Launch Play to MAP System"), //
-    AUTO_IMPORT_ON_INACTIVE("AutoImportOnInactive", "Run Auto Import on Inactive stack"),
-    IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."),
-    ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"),
-    ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"),
+    AUTO_IMPORT_ON_INACTIVE("AutoImportOnInactive", "Run Auto Import on Inactive stack"), //
+    IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."), //
+    ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"), //
+    ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
+    MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
