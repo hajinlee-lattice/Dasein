@@ -259,26 +259,29 @@ export default function () {
                     if (vm.section == 're.model_iteration') {
                         var sortPrefix = vm.header.sort_modeliteration.order.replace('+', '');
                         var importance = sortPrefix + 'ImportanceOrdering';
+                        var nullImportance = '!ImportanceOrdering';
                         var predictive = sortPrefix + 'PredictivePower';
+                        var nullPredictive = '!PredictivePower';
                         var name = sortPrefix + 'DisplayName';
 
                         if (vm.header.sort_modeliteration.property == 'ImportanceOrdering') {
-                            retArr.push(importance);
+                            retArr.push(nullImportance, importance, '');
                         }
-
                         if (vm.header.sort_modeliteration.property == 'PredictivePower') {
-                            retArr.push(predictive);
+                            retArr.push(nullPredictive, predictive, '');
                         }
-
-                        retArr.push(name);
+                        if (vm.header.sort_modeliteration.property == 'DisplayName') {
+                            retArr.push(name);
+                        }
                     } else {
                         sortArr.forEach(function (item, index) {
                             retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
                         });
                     }
-
+                    console.log(retArr);
                     return retArr;
                 }
+
                 return sortPrefix + order;
             };
 

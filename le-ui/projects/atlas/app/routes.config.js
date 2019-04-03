@@ -332,9 +332,9 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                         result.forEach((item) => {
                             item.Entity = "Account";
-                            if (!item.PredictivePower) {
-                                item.PredictivePower = 0;
-                            }
+                            // if (!item.PredictivePower) {
+                            //     item.PredictivePower = 0;
+                            // }
                             if (item.IsCoveredByMandatoryRule || item.IsCoveredByOptionalRule) {
                                 item.HasWarnings = true;
                             }
