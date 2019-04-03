@@ -10,7 +10,7 @@ import SystemsService from './systems.service';
 import ConnectorService from './connectors.service';
 
 import './systems.component.scss';
-import '../../../common/widgets/layout/le-layouts.scss';
+import { MEDIUM_GAP } from "../../../common/widgets/container/grid-layout.component";
 export default class SystemsComponent extends Component {
     constructor(props) {
         super(props);
@@ -61,7 +61,7 @@ export default class SystemsComponent extends Component {
         return (
             <div className="systems-main">
                 {this.getCount()}
-                <GridLayout classNames="systems-list">{this.getSystems()}</GridLayout>
+                <GridLayout gap={MEDIUM_GAP} classNames="systems-list">{this.getSystems()}</GridLayout>
             </div>
         );
     }
