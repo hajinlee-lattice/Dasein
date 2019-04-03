@@ -1,23 +1,21 @@
 package com.latticeengines.apps.cdl.handler;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
-import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.FailedEventDetail;
-import com.latticeengines.domain.exposed.pls.LaunchState;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @Component
 public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
-    @Inject
-    private PlayLaunchService playLaunchService;
+    private String URL = "url";
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
@@ -37,13 +35,10 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         FailedEventDetail eventDetail = (FailedEventDetail) status.getEventDetail();
 
-        statusMonitor.setErrorFile(eventDetail.getErrorFile());
+        Map<String, String> errorFileMap = eventDetail.getErrorFile();
 
-        switch (statusMonitor.getEntityName()) {
-        case "PlayLaunch":
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            playLaunch.setLaunchState(LaunchState.SyncFailed);
-            playLaunchService.update(playLaunch);
+        if (errorFileMap != null && errorFileMap.containsKey(URL)) {
+            statusMonitor.setErrorFile(errorFileMap.get(URL));
         }
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
