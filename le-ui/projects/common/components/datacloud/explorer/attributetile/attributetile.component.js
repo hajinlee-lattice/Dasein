@@ -13,7 +13,7 @@ export default function () {
         templateUrl: '/components/datacloud/explorer/attributetile/attributetile.component.html',
         controller: function (
             $scope, $state, $document, $timeout, $interval, Notice,
-            QueryStore, DataCloudStore, NumberUtility, QueryTreeService
+            QueryStore, DataCloudStore, NumberUtility, QueryTreeService, RatingsEngineStore
         ) {
             'ngInject';
 
@@ -226,9 +226,6 @@ export default function () {
             }
 
             vm.select = function (quantity) {
-
-                console.log(DataCloudStore.ratingIterationFilter);
-
                 let iterationFilter = DataCloudStore.ratingIterationFilter;
                 let categoryAttributes = vm.getAttributes([vm.category]);
                 switch (quantity) {
@@ -269,6 +266,7 @@ export default function () {
 
                         Notice.warning({ message: 'Disabled all attributes from remodeling' });
                 }
+                RatingsEngineStore.setIterationEnrichments(vm.enrichments)
             }
 
             vm.toggleApprovedUsage = function (item) {
@@ -281,6 +279,7 @@ export default function () {
                         Notice.warning({ message: 'Disabled attribute from remodeling' })
                         item.ApprovedUsage[0] = 'None';
                 }
+                RatingsEngineStore.setIterationEnrichments(vm.enrichments)
             }
 
             vm.checkApprovedUsage = function (item) {

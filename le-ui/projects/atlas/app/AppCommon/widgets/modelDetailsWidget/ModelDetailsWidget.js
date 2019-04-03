@@ -71,7 +71,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
                 $scope.expectedValueModel = $scope.model.predictionType === 'EXPECTED_VALUE' ? true : false;
                 if ($scope.expectedValueModel) {
-                    $scope.averageRevenue = false;
+                    // $scope.averageRevenue = false;
+                    $scope.averageRevenue = data && data.ModelDetails.AverageRevenue ? data.ModelDetails.AverageRevenue : false;
                 }
 
                 var engineId = $stateParams.rating_id,
