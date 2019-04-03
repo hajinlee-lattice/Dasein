@@ -12,10 +12,10 @@
             </div>
             <i class="fa fa-warning pull-left"></i>Warning
         </div>
-        <span class="attribute-importance-label" ng-if="enrichment.ImportanceOrdering != 0">
+        <span class="attribute-importance-label" ng-if="enrichment.ImportanceOrdering">
             Feature Importance
         </span>
-        <span class="attribute-importance-number" ng-if="enrichment.ImportanceOrdering != 0">
+        <span class="attribute-importance-number" ng-if="enrichment.ImportanceOrdering">
             {{ enrichment.ImportanceOrdering }}
         </span>
     </div>
