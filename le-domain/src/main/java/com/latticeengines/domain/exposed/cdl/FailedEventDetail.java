@@ -1,17 +1,19 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.Map;
+
 public class FailedEventDetail extends EventDetail {
 
     public FailedEventDetail() {
     }
 
-    private String errorFile;
+    private Map<String, String> errorFile;
 
-    public String getErrorFile() {
+    public Map<String, String> getErrorFile() {
         return errorFile;
     }
 
-    public void setErrorFile(String errorFile) {
+    public void setErrorFile(Map<String, String> errorFile) {
         this.errorFile = errorFile;
     }
 }
