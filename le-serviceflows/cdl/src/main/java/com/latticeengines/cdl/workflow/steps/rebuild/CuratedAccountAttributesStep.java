@@ -94,13 +94,26 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         accountTableName = getAccountTableName();
         contactTableName = getContactTableName();
 
-        if (StringUtils.isBlank(accountTableName)) {
-            log.warn("Cannot find account master table.");
-            skipTransformation = true;
-        }
+        // Get a map of the imported BusinessEntities.
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                BusinessEntity.class, List.class);
 
-        if (StringUtils.isBlank(contactTableName)) {
-            log.warn("Cannot find contact master table.");
+        // Do not run this step if there is no account table, since accounts are required for this step to be
+        // meaningful.
+        if (StringUtils.isBlank(accountTableName)) {
+            log.warn("Cannot find account master table.  Skipping CuratedAccountAttributes Step.");
+            skipTransformation = true;
+        } else if (StringUtils.isBlank(contactTableName)) {
+            // Do not run this step if there is no contact table, since contacts are required for this step to be
+            // meaningful.
+            log.warn("Cannot find contact master table.  Skipping CuratedAccountAttributes Step.");
+            skipTransformation = true;
+        } else if ((MapUtils.isEmpty(entityImportsMap) || (!entityImportsMap.containsKey(BusinessEntity.Account)
+                && !entityImportsMap.containsKey(BusinessEntity.Contact)))
+                && (configuration.getRebuild() == null || !configuration.getRebuild())) {
+            // Skip this step if there are no newly imported accounts and no newly imported contacts, and force rebuild
+            // for BusinessEntity CuratedAccounts is null or has been set to false.
+            log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
             skipTransformation = true;
         }
 

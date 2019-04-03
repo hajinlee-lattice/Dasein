@@ -69,7 +69,7 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder skipEntitties(Set<BusinessEntity> entities) {
+        public Builder skipEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Account)) {
                     rebuildAccountWorkflowBuilder.build().setSkipCompletedSteps(true);
