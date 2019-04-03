@@ -260,8 +260,6 @@ angular.module('lp.models.ratings', [
         vm.bucketsLength = vm.buckets.length;
         vm.updateContent = false;
 
-
-
         if (vm.buckets.length === 6) {
             vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
             vm.canAddBucket = false;
@@ -513,6 +511,7 @@ angular.module('lp.models.ratings', [
                 ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
                     vm.currentConfiguration = currentConfig;
                     vm.showCurrentConfig = true;
+                    refreshChartData();
                 });
 
                 RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE', 'false').then(function(result){
@@ -585,8 +584,12 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
         
+        console.log(vm.currentRating);
+
         vm.latest_iteration = vm.currentRating.latest_iteration;
         vm.predictionType = vm.latest_iteration.AI.predictionType;
+
+        console.log(vm.predictionType);
 
         vm.header.filter.unfiltered = vm.scoringHistory;
         vm.header.filter.filtered = vm.scoringHistory;

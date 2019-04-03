@@ -29,7 +29,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     protected abstract boolean needAssistantActor();
 
     /**
-     * Whether the actor accept the traveler
+     * Whether the actor accept the traveler and take some actions
      * 
      * @param traveler
      * @return

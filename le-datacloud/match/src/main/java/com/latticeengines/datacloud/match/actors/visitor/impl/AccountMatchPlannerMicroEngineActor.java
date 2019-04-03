@@ -8,9 +8,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +30,12 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-@Component("matchPlannerMicroEngineActor")
+@Component("accountMatchPlannerMicroEngineActor")
 @Scope("prototype")
-public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
-    private static final Logger log = LoggerFactory.getLogger(MatchPlannerMicroEngineActor.class);
+public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
+
+    @Value("${datacloud.match.planner.account.executors.num}")
+    private int executorNum;
 
     @Inject
     @Qualifier("matchActorSystem")
@@ -66,35 +67,26 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
     }
 
     @Override
-    protected boolean accept(Traveler traveler) {
+    protected void validateTraveler(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-
         // First make sure this actor should be run on this traveler.
         if (!OperationalMode.ENTITY_MATCH.equals(matchTraveler.getMatchInput().getOperationalMode())) {
-            log.warn("MatchPlannerMicroEngineActor called when not in Entity Match.");
-            return false;
+            throw new RuntimeException(this.getClass().getSimpleName() + " called when not in Entity Match.");
         }
-
-        // TODO(jwinter): Decide if we want to keep all these error condition checks.
-
         if (StringUtils.isBlank(matchTraveler.getEntity())) {
             throw new IllegalArgumentException("MatchTraveler needs an entity set for Match Planning.");
         }
-
         if (!BusinessEntity.Account.name().equals(matchTraveler.getEntity())) {
             throw new UnsupportedOperationException(
-                    "MatchPlannerMicroEngineActor can currently only handle Account entities.");
+                    this.getClass().getSimpleName() + " only handles Account entity.");
         }
-
         // For Entity Match, the MatchKeyTuple should not yet be set.
         if (matchTraveler.getMatchKeyTuple() != null) {
             throw new IllegalArgumentException("MatchTraveler should not have MatchKeyTuple set for Entity Match.");
         }
-
         if (CollectionUtils.isEmpty(matchTraveler.getInputDataRecord())) {
             throw new IllegalArgumentException("MatchTraveler must have input record data to generate MatchKeyTuple.");
         }
-
         if (MapUtils.isEmpty(matchTraveler.getEntityKeyPositionMaps())) {
             throw new IllegalArgumentException("MatchTraveler must have EntityKeyPositionMap set.");
         }
@@ -102,29 +94,28 @@ public class MatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
         if (MapUtils.isEmpty(matchTraveler.getEntityKeyPositionMaps().get(matchTraveler.getEntity()))) {
             throw new IllegalArgumentException("MatchTraveler EntityKeyPositionMap must have map for set entity");
         }
-
-        // Not sure if this is necessary, but for now double check KeyMap.
         if (MapUtils.isEmpty(matchTraveler.getMatchInput().getEntityKeyMaps())) {
             throw new IllegalArgumentException("MatchTraveler's MatchInput EntityKeyMaps should not be empty");
         }
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = matchTraveler.getMatchInput().getEntityKeyMaps();
         if (!entityKeyMaps.containsKey(matchTraveler.getEntity())) {
-            throw new IllegalArgumentException("MatchTraveler missing EntityMatchKey map for match entity "
-                    + matchTraveler.getEntity());
+            throw new IllegalArgumentException(
+                    "MatchTraveler missing EntityMatchKey map for match entity " + matchTraveler.getEntity());
         }
         if (MapUtils.isEmpty(entityKeyMaps.get(matchTraveler.getEntity()).getKeyMap())) {
-            throw new IllegalArgumentException("MatchTraveler missing MatchKey map for match entity "
-                    + matchTraveler.getEntity());
+            throw new IllegalArgumentException(
+                    "MatchTraveler missing MatchKey map for match entity " + matchTraveler.getEntity());
         }
+    }
 
+    @Override
+    protected boolean accept(Traveler traveler) {
         return true;
     }
 
-    // TODO(@Jonathan): change to property file to make it configurable & actual
-    // number to be decided based on performance tuning
     @Override
     protected int getExecutorNum() {
-        return 4;
+        return executorNum;
     }
 
     @Override

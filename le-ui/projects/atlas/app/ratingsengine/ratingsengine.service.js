@@ -39,6 +39,7 @@ angular.module('lp.ratingsengine')
 
         this.currentRating = {};
         this.remodelIteration = null;
+        this.iterationEnrichments = [];
         this.iterations = null;
         this.usedBy = null;
         this.rule = null;
@@ -51,7 +52,6 @@ angular.module('lp.ratingsengine')
         this.predictionType = 'PROPENSITY';
         this.type = null;
         this.configFilters = {};
-        this.remodelAttributes = {};
         this.trainingSegment = null;
         this.trainingProducts = null;
         this.modelTrainingOptions = {
@@ -278,11 +278,11 @@ angular.module('lp.ratingsengine')
         this.remodelIteration = remodelIteration;
     }
 
-    this.setRemodelAttributes = function() {
-        return this.remodelAttributes;
+    this.getIterationEnrichments = function() {
+        return this.iterationEnrichments;
     }
-    this.getRemodelAttributes = function(remodelAttributes) {
-        this.remodelAttributes = remodelAttributes;
+    this.setIterationEnrichments = function(iterationEnrichments) {
+        this.iterationEnrichments = iterationEnrichments;
     }
 
     this.getIterations = function() {
@@ -499,20 +499,19 @@ angular.module('lp.ratingsengine')
         // Save iteration
         RatingsEngineService.saveIteration(engineId, iteration).then(function(result){
 
-            var modelId = result.AI.id,
-                attributes = {};
-                
-            DataCloudStore.getEnrichments().then(function(result){
-                attributes = result;
-            })
+            var modelId = result.AI.id;
 
             RatingsEngineStore.setValidation(stateToValidate, false);
             // Validate Model
             RatingsEngineService.validateModel(engineId, modelId, RatingsEngineStore.getRatingEngine()).then(function(result) {
                 var success = result.data == true;
-                if (success) {                    
+                if (success) {
 
-                    RatingsEngineService.launchModeling(engineId, modelId, attributes).then(function(applicationId){
+                    var enrichments = RatingsEngineStore.getIterationEnrichments();
+
+                    console.log(enrichments);
+
+                    RatingsEngineService.launchModeling(engineId, modelId, enrichments).then(function(applicationId){
 
                         RatingsEngineStore.setApplicationId(applicationId);
                         JobsStore.inProgressModelJobs[engineId] = null;
@@ -523,7 +522,6 @@ angular.module('lp.ratingsengine')
                         }
                         deferred.resolve(result);
                     });
-
 
                 } else {
                     var errorResult = {

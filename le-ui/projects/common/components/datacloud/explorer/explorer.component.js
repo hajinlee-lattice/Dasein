@@ -130,9 +130,8 @@ export default function (
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
             $state.go('home.datacloud.explorer');
         }
-
         // this is for when the datacloud is inside a rating engine model
-        if (typeof $stateParams['aiModel'] != "undefined") {
+        if (vm.section == 're.model_iteration') {
             var ratingId = $stateParams['rating_id'],
                 aiModel = $stateParams['aiModel'],
                 nocache = true,
@@ -142,6 +141,7 @@ export default function (
         }
 
         DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
+            console.log(result);
             vm.cube = result;
         });
 

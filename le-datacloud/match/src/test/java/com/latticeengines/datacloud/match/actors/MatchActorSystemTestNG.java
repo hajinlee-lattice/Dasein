@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphService;
+import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchPlannerMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
@@ -33,7 +34,6 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateM
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.MatchPlannerMicroEngineActor;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+
 
 @Test
 public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -72,7 +73,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             DunsDomainBasedMicroEngineActor.class.getSimpleName(), //
     };
     private static final String[] ACCOUNT_TRAVEL_STOPS = {
-            MatchPlannerMicroEngineActor.class.getSimpleName(), //
+            AccountMatchPlannerMicroEngineActor.class.getSimpleName(), //
             EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
             FUZZY_MATCH_JUNCTION_ACTOR, //
             EntityDunsBasedMicroEngineActor.class.getSimpleName(), //

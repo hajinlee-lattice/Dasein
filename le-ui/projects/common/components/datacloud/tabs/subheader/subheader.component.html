@@ -17,7 +17,7 @@
         </li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('model_iteration')">
-        <li ng-click="vm.clickIterationFilter('all')" ng-class="{'active':vm.checkIterationFilter('all')}">Top
+        <li ng-click="vm.clickIterationFilter('all')" ng-class="{'active':vm.checkIterationFilter('all')}">All
             {{ vm.getIterationFilterNumber('all') }}</li>
         <li>|</li>
         <li ng-click="vm.clickIterationFilter('used')" ng-class="{'active':vm.checkIterationFilter('used')}">Used by
@@ -71,7 +71,7 @@
         </li>
     </ul>
     <div ng-if="vm.checkState('model_iteration')">
-        The top 50 most predictive attributes are used by the model.
+        Up to 50 most predictive attributes are used by the model.
         <a class = "dl-attributes" href="#" ng-click="vm.clickedExport()"><i class="fa fa-download"></i> Download All Attributes</a>
     </div>
 </div>
