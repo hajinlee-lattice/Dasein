@@ -49,14 +49,12 @@ public class CuratedAttributesWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
-        // TODO: Consider adding a rebuild version of the
-        // CuratedAccountAttributeStep with looks at the diff in Accounts
-        // and contacts and only does the subset of computation required to
-        // update the table.
+        // CuratedAccountAttributeStep should be run during rebuild if the CuratedAccount BusinessEntity is included
+        // in the set of entities to rebuild, even if there is neither an new Account nor Contact CSV being imported.
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.CuratedAccount)) {
-                    // For now this is a no-op. My step is not configurable.
+                    curatedAccountAttributesStepConfiguration.setRebuild(true);
                 }
             }
             return this;
