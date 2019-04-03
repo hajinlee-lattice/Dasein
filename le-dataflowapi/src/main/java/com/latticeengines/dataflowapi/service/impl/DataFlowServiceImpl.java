@@ -45,7 +45,7 @@ public class DataFlowServiceImpl implements DataFlowService {
     private String trustStoreJks;
 
     @Value("${dataflowapi.am.mem}")
-    private String amMemory;
+    private int amMemory;
 
     @Override
     public ApplicationId submitDataFlow(DataFlowConfiguration dataFlowConfig) {
@@ -64,18 +64,21 @@ public class DataFlowServiceImpl implements DataFlowService {
         dataFlowJob.setClient("dataflowapiClient");
         dataFlowJob.setCustomer(customer);
 
+        int memMb = getAmMemoryMb(dataFlowConfig);
+        int vcores = getAmVCores(dataFlowConfig);
+
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getDataflowQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 dataFlowConfig.getDataFlowBeanName().replace(" ", "_"));
-        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "1");
-        appMasterProperties.put(AppMasterProperty.MEMORY.name(), amMemory);
+        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(vcores));
+        appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(memMb));
 
         Properties containerProperties = new Properties();
         containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), amMemory);
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(vcores));
+        containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(memMb));
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
@@ -100,6 +103,24 @@ public class DataFlowServiceImpl implements DataFlowService {
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);
         dataFlowJob.setContainerPropertiesObject(containerProperties);
         return dataFlowJob;
+    }
+
+    private int getAmMemoryMb(DataFlowConfiguration dataFlowConfig) {
+        Integer memGb = dataFlowConfig.getAmMemGb();
+        if (memGb == null) {
+            return amMemory;
+        } else {
+            return memGb * 1024;
+        }
+    }
+
+    private int getAmVCores(DataFlowConfiguration dataFlowConfig) {
+        Integer vcores = dataFlowConfig.getAmVcores();
+        if (vcores == null) {
+            return 1;
+        } else {
+            return vcores;
+        }
     }
 
 }

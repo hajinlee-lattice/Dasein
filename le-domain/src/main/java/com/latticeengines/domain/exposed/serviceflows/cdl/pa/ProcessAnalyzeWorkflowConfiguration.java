@@ -30,6 +30,8 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
+    public static final String WORKFLOW_NAME = "processAnalyzeWorkflow";
+
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //

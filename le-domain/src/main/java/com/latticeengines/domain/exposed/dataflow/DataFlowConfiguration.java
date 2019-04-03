@@ -47,6 +47,12 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("apply_table_properties")
     private boolean applyTableProperties = false;
 
+    @JsonProperty("am_mem_gb")
+    private Integer amMemGb;
+
+    @JsonProperty("am_vcores")
+    private Integer amVcores;
+
     public String getDataFlowBeanName() {
         return dataFlowBeanName;
     }
@@ -151,4 +157,19 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         this.applyTableProperties = applyTableProperties;
     }
 
+    public Integer getAmMemGb() {
+        return amMemGb;
+    }
+
+    public void setAmMemGb(Integer amMemGb) {
+        this.amMemGb = amMemGb;
+    }
+
+    public Integer getAmVcores() {
+        return amVcores;
+    }
+
+    public void setAmVcores(Integer amVcores) {
+        this.amVcores = amVcores;
+    }
 }

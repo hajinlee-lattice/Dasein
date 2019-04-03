@@ -75,6 +75,9 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setDataFlowParameters(configuration.getDataFlowParams());
         dataFlowConfig.setApplyTableProperties(configuration.isApplyTableProperties());
 
+        dataFlowConfig.setAmMemGb(getYarnAmMemGb());
+        dataFlowConfig.setAmVcores(getYarnAmVCores());
+
         setJobProperties(dataFlowConfig);
 
         return dataFlowConfig;
@@ -161,6 +164,14 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             log.info("Set multiplier=" + multiplier + " base on count=" + count);
         }
         return multiplier;
+    }
+
+    protected Integer getYarnAmMemGb() {
+        return null;
+    }
+
+    protected Integer getYarnAmVCores() {
+        return null;
     }
 
 }
