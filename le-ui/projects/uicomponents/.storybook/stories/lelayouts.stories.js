@@ -23,12 +23,21 @@ import GridLayout from 'common/widgets/container/grid-layout.component';
 
 
 import "../../../common/widgets/layout/le-layouts.scss";
+import { MIN_GAP, MEDIUM_GAP, LARGE_GAP } from "../../../common/widgets/container/grid-layout.component";
 const stories = storiesOf("Layouts", module);
 
 stories.addDecorator(withKnobs);
+const options = {
+    None: '',
+    Min: MIN_GAP,
+    Medium: MEDIUM_GAP,
+    Large: LARGE_GAP
+  };
+const defaultValue = '';
+
 
 stories.add("Three columns", () => (
-    <GridLayout>
+    <GridLayout gap={select('gap', options, defaultValue)}>
         <LeTile>
             <LeTileHeader>
                 <span className="le-tile-title">Test 1234</span>

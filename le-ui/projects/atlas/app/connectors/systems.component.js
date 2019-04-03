@@ -61,13 +61,7 @@ export default class SystemsComponent extends Component {
         return (
             <div className="systems-main">
                 {this.getCount()}
-                <GridLayout 
-                    gridStyle={{
-                    rowGap: '20px',
-                    columnGap: '20px',
-                    gridAutoRows: 'auto',
-                    gridTemplateColumns: 'repeat( auto-fill, minmax(260px, 1fr) )'
-                }}>{this.getSystems()}</GridLayout>
+                <GridLayout classNames="systems-list">{this.getSystems()}</GridLayout>
             </div>
         );
     }
