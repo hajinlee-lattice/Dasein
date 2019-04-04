@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.service.impl;
 
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,7 +11,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.objectapi.service.EntityQueryService;
@@ -20,8 +18,8 @@ import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.service.RatingQueryService;
 
 /**
- * Before we have a test data that works for both date and non-date attrs,
- * we have to use a separate tests for comprehensive date attr query test
+ * Before we have a test data that works for both date and non-date attrs, we
+ * have to use a separate tests for comprehensive date attr query test
  */
 public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
 
@@ -66,22 +64,17 @@ public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
         results.forEach((k, v) -> System.out.println(k + ": " + v));
     }
 
-
     @Test(groups = "manual")
     public void testMaxViaFrontEndQuery() {
         Set<AttributeLookup> set = new HashSet<>();
-        AttributeLookup accout_1 = new AttributeLookup(BusinessEntity.Account, AccountAttr.CreatedDate);
         AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate1);
         AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate2);
         AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate1);
         AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate2);
-        // set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
-        set.addAll(Arrays.asList(accout_2, accout_3));
-        // set.addAll(Arrays.asList(contact_1, contact_2));
+        set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
         Map<AttributeLookup, Object> results = ReflectionTestUtils.invokeMethod(entityQueryService, //
-                "getMaxDatesViaFrontEndQuery", set, DataCollection.Version.Blue);
+                "getMaxDatesViaFrontEndQuery", set, attrRepo);
         results.forEach((k, v) -> System.out.println(k + ": " + v));
     }
-
 
 }

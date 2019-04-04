@@ -137,6 +137,14 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         count = entityProxy.getCount(mainCustomerSpace, query);
         Assert.assertEquals(count.longValue(), 0);
+
+        bkt = Bucket.dateBkt(TimeFilter.latestDay());
+        restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
+        query.setAccountRestriction(new FrontEndRestriction(restriction));
+        count = entityProxy.getCount(mainCustomerSpace, query);
+        log.info("count " + count);
+        Assert.assertTrue(count.longValue() > 0);
+        Assert.assertTrue(count.longValue() < ACCOUNT_1);
         log.info("verify date done");
     }
 
