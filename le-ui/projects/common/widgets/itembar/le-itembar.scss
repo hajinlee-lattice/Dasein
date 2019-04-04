@@ -1,0 +1,13 @@
+.le-itembar {
+	margin: 0 0 22px;
+	height: 2em;
+
+	> li, > li > div {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	> li {
+		margin-right: .333em;
+	}
+}
