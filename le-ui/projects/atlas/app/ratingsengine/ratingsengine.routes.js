@@ -304,14 +304,13 @@ angular
                             } else if (RatingEngine.scoring_iteration != null && RatingEngine.scoring_iteration != undefined) {
                                 $scope.modelIsReady = RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
                             } else if (RatingEngine.latest_iteration != null && RatingEngine.latest_iteration != undefined) {
-                                $scope.modelIsReady = (
+                                $scope.modelIsReady = Dashboard.iterations.length > 1 && (
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && 
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && 
                                         (
                                             RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Failed' && 
                                             RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Pending' && 
-                                            RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running' &&
-                                            Dashboard.iterations.length == 1
+                                            RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running'
                                         )
                                     ) ? true : false;
                             }
