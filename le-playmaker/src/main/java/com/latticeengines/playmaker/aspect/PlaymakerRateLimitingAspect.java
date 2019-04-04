@@ -20,10 +20,6 @@ import com.latticeengines.playmaker.service.PlaymakerRateLimitingService;
 @Aspect
 public class PlaymakerRateLimitingAspect {
 
-    private static final Logger log = LoggerFactory.getLogger(PlaymakerRateLimitingAspect.class);
-
-    public static final String PLAYMAKER_REQUEST_REGULATOR = "PlaymakerRequest";
-
     @Inject
     private OAuthUserEntityMgr oAuthUserEntityMgr;
 
