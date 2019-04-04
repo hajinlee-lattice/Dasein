@@ -12,7 +12,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.querydsl.sql.SQLQuery;
@@ -45,6 +47,12 @@ public class QueryEvaluator {
             if (l instanceof AttributeLookup) {
                 String attrName = ((AttributeLookup) l).getAttribute();
                 attrNames.put(attrName.toLowerCase(), attrName);
+            } else if (l instanceof AggregateLookup) {
+                Lookup lookup = ((AggregateLookup) l).getLookup();
+                if (lookup instanceof AttributeLookup) {
+                    String attrName = ((AttributeLookup) lookup).getAttribute();
+                    attrNames.put(attrName.toLowerCase(), attrName);
+                }
             }
         });
         attrNames.put(SCORE.toLowerCase(), SCORE);

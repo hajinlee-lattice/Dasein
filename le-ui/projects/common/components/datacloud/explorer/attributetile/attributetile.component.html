@@ -137,6 +137,8 @@
 
         <span ng-if="vm.cube == null && vm.section == 're.model_iteration'"><i class="fa fa-spinner fa-pulse fw"></i></span>
 
+
+
         <div 
             class="stats" 
             ng-if="
@@ -228,6 +230,10 @@
         </div>
         <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute">
             {{'No Data Available' | uppercase}}
+        </div>
+
+        <div ng-if="vm.isBktEmpty(enrichment)" class="free-text-attribute">
+            {{'Profiling Data is Not Available' | uppercase}}
         </div>
 
         <div class="attribute-modeliteration-toggle" ng-if="vm.section == 're.model_iteration'">

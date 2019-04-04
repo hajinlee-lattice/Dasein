@@ -141,8 +141,11 @@ export default function (
         }
 
         DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
-            console.log(result);
             vm.cube = result;
+
+            if (vm.section == 're.model_iteration') {
+                vm.checkEnrichmentsForDisable(Enrichments);
+            }
         });
 
         vm.processCategories();
@@ -174,6 +177,20 @@ export default function (
         }
 
         DataCloudStore.setMetadata('current', 1);
+    }
+
+    vm.checkEnrichmentsForDisable = function(enrichments) {
+        enrichments.forEach(function (enrichment) {
+            if (vm.cube && vm.cube.data && vm.cube.data[enrichment.Entity] && vm.cube.data[enrichment.Entity].Stats && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId]) {
+                if (
+                    vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined || 
+                    vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List == undefined || 
+                    !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length
+                ) {
+                    enrichment.ApprovedUsage[0] = 'None';
+                }
+            }
+        });
     }
 
     /* some rules that might hide the page */
@@ -326,6 +343,7 @@ export default function (
 
             vm.enrichmentsMap[enrichment.Entity + '.' + enrichment.ColumnId] = vm.enrichments.length;
             vm.enrichmentsObj[enrichment.Category].push(enrichment);
+
             vm.enrichments.push(enrichment);
         }
 
