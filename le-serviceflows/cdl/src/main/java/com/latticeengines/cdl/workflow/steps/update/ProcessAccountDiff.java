@@ -65,12 +65,11 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    protected String diffSlimTableName;
+    private String diffSlimTableName;
     private Table accountFeatureTable;
     private String accountFeatureTableName;
 
     private String filterAccountFeatureTablePrefix = "FilterAccountFeatures";
-
     private String mergeAccountFeatureTablePrefix = "MergeAccountFeatures";
 
     @Override
@@ -189,7 +188,7 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
 
     private TransformationStepConfig mergeMatch(int matchStep) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> steps = Arrays.asList(matchStep);
+        List<Integer> steps = Collections.singletonList(matchStep);
         step.setInputSteps(steps);
         useDiffTableAsSource(step, diffTableName);
         step.setTransformer("bulkMatchMergerTransformer");
