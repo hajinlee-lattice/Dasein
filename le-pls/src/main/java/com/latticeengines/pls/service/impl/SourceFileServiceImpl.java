@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.FileProperty;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -58,8 +57,8 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     @Override
-    public SourceFile createSourceFileFromS3(FileProperty fileProperty, SchemaInterpretation schemaInterpretation, String entity) {
-        return sourceFileProxy.createSourceFileFromS3(getShortTenantId(), fileProperty, schemaInterpretation, entity);
+    public SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity) {
+        return sourceFileProxy.createSourceFileFromS3(getShortTenantId(), fileProperty, entity);
     }
 
     private String getShortTenantId() {

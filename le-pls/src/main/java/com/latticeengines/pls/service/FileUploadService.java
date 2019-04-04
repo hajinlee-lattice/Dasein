@@ -31,7 +31,5 @@ public interface FileUploadService {
     SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
             CleanupOperationType cleanupOperationType);
 
-    SourceFile createSourceFileFromS3(FileProperty fileProperty,
-                                      SchemaInterpretation schemaInterpretation,
-                                      String entity);
+    SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity);
 }

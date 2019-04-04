@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service;
 
 import com.latticeengines.domain.exposed.pls.FileProperty;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public interface SourceFileService {
@@ -22,7 +21,5 @@ public interface SourceFileService {
 
     SourceFile getByTableNameAcrossTenant(String tableName);
 
-    SourceFile createSourceFileFromS3(FileProperty fileProperty,
-                                      SchemaInterpretation schemaInterpretation,
-                                      String entity);
+    SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity);
 }

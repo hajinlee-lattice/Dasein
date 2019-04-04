@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.FileProperty;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -78,10 +77,9 @@ public class SourceFileProxyImpl extends MicroserviceRestApiProxy implements Sou
     }
 
     @Override
-    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,
-                                             SchemaInterpretation schemaInterpretation, String entity) {
-        String url = URL_PRERIX + "/fromS3?schema={schema}&entity={entity}";
-        url = constructUrl(url, shortenCustomerSpace(customerSpace), schemaInterpretation, entity);
+    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,  String entity) {
+        String url = URL_PRERIX + "/fromS3?entity={entity}";
+        url = constructUrl(url, shortenCustomerSpace(customerSpace), entity);
         return post("create SourceFile by s#", url, fileProperty, SourceFile.class);
     }
 

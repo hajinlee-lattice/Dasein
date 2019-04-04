@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +19,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -55,9 +56,6 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
-
-    @Value("${pls.fileupload.maxupload.rows}")
-    private long maxUploadRows;
 
     @Inject
     private S3Service s3Service;
@@ -153,18 +151,24 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     @Override
-    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,
-                                             SchemaInterpretation schemaInterpretation,
-                                             String entity) {
+    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity) {
         String s3FilePath = fileProperty.getFilePath();
-        String key = formatString(s3FilePath);
+        String key = PathUtils.formatString(s3FilePath);
         if (key.startsWith(s3Bucket)) {
             key = key.replaceFirst(s3Bucket, "");
-            key = formatString(key);
+            key = PathUtils.formatString(key);
         }
-        InputStream inputStream = s3Service.readObjectAsStream(s3Bucket, key);
+        InputStream inputStream;
+        try {
+            inputStream = s3Service.readObjectAsStream(s3Bucket, key);
+        } catch (RuntimeException e) {
+            log.error("Failed to get object " + fileProperty.getFileName() + " from S3 bucket " + s3Bucket);
+            throw new LedpException(LedpCode.LEDP_18053, e, new String[] { fileProperty.getFileName() });
+        }
         String outputHdfsPath = null;
-        String outputFileName = fileProperty.getFileName();
+        String fileName = fileProperty.getFileName();
+        fileName = fileName.substring(0, fileName.lastIndexOf("."));
+        String outputFileName = fileName + DateTime.now().getMillis() + ".csv";
         try {
             CustomerSpace space = CustomerSpace.parse(customerSpace);
             String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), space).toString();
@@ -172,13 +176,13 @@ public class SourceFileServiceImpl implements SourceFileService {
             SourceFile file = new SourceFile();
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
-            file.setSchemaInterpretation(schemaInterpretation);
-            file.setBusinessEntity(StringUtils.isEmpty(entity) ? null : BusinessEntity.getByName(entity));
+            file.setSchemaInterpretation(SchemaInterpretation.getByName(entity));
+            file.setBusinessEntity(BusinessEntity.getByName(entity));
             file.setState(SourceFileState.Uploaded);
-            file.setDisplayName(outputFileName);
+            file.setDisplayName(fileProperty.getFileName());
 
             long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
-                    outputPath + "/" + outputFileName, maxUploadRows);
+                    outputPath + "/" + outputFileName);
             log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
             file.setFileRows(fileRows);
             sourceFileEntityMgr.create(file);
@@ -195,18 +199,6 @@ public class SourceFileServiceImpl implements SourceFileService {
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, outputFileName), e);
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
         }
-    }
-
-    private String formatString(String path) {
-        if (StringUtils.isNotEmpty(path)) {
-            while (path.startsWith("/")) {
-                path = path.substring(1);
-            }
-            while (path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
-        }
-        return path;
     }
 
 }

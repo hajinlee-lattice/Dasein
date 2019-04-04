@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,13 +13,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -72,10 +71,10 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
     }
 
     private void importFile(String entity, String s3Path) {
-        String key = formatString(s3Path);
+        String key = PathUtils.formatString(s3Path);
         if (key.startsWith(s3Bucket)) {
             key = key.replaceFirst(s3Bucket, "");
-            key = formatString(key);
+            key = PathUtils.formatString(key);
         }
         switch (entity) {
             case ENTITY_ACCOUNT: String path = key + "/" + ACCOUNT_SOURCE_FILE;
@@ -106,25 +105,13 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
     }
 
     private void testConfigTemplate(FileProperty csvFile, String entity) {
-        String uri = "/pls/models/uploadfile/importFile?schema=%s&entity=%s";
-        uri = String.format(uri, SchemaInterpretation.getByName(entity), entity);
+        String uri = "/pls/models/uploadfile/importFile?entity=%s";
+        uri = String.format(uri, entity);
         ResponseDocument responseDocument = restTemplate.postForObject(getRestAPIHostPort() + uri,
                 csvFile, ResponseDocument.class);
         Assert.assertNotNull(responseDocument);
         Assert.assertTrue(responseDocument.isSuccess());
         SourceFile sourceFile = JsonUtils.convertValue(responseDocument.getResult(), SourceFile.class);
         Assert.assertEquals(sourceFile.getDisplayName(), csvFile.getFileName());
-    }
-
-    private String formatString(String path) {
-        if (StringUtils.isNotEmpty(path)) {
-            while (path.startsWith("/")) {
-                path = path.substring(1);
-            }
-            while (path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
-        }
-        return path;
     }
 }

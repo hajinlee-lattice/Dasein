@@ -1,5 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class PathUtils {
 
     public static String stripoutProtocol(String hdfsPath) {
@@ -26,5 +28,17 @@ public class PathUtils {
             String glob = path.endsWith("/") ? path.substring(0, path.lastIndexOf("/")) : path;
             return glob + "/*.avro";
         }
+    }
+
+    public static String formatString(String path) {
+        if (StringUtils.isNotEmpty(path)) {
+            while (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            while (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
     }
 }

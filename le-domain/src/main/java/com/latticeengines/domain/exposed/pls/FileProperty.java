@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FileProperty {
 
-    @JsonProperty("fileName")
+    @JsonProperty("file_name")
     private String fileName;
 
-    @JsonProperty("fileSize")
+    @JsonProperty("file_size")
     private Long fileSize;
 
     @JsonProperty("lastModified")

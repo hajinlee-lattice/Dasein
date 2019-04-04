@@ -237,10 +237,9 @@ public class ModelingFileUploadResource {
     @ApiOperation(value = "Import a file from s3")
     public ResponseDocument<SourceFile> importFile( //
                                                     @RequestBody FileProperty csvFile, //
-                                                    @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
-                                                    @RequestParam(value = "entity", required = false, defaultValue = "") String entity) {
+                                                    @RequestParam(value = "entity") String entity) {
         return ResponseDocument.successResponse(
-                uploadFileFromS3(csvFile, schemaInterpretation, entity));
+                uploadFileFromS3(csvFile, entity));
     }
 
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
@@ -287,14 +286,10 @@ public class ModelingFileUploadResource {
         }
     }
 
-    private SourceFile uploadFileFromS3(FileProperty csvFile,
-                                  SchemaInterpretation schemaInterpretation, String entity) {
+    private SourceFile uploadFileFromS3(FileProperty csvFile, String entity) {
         try {
             log.info(String.format("Uploading file %s (csvFileName=%s)", csvFile.getFileName(), csvFile.getFileName()));
-            if (!StringUtils.isEmpty(entity)) {
-                schemaInterpretation = SchemaInterpretation.getByName(entity);
-            }
-            return fileUploadService.createSourceFileFromS3(csvFile, schemaInterpretation, entity);
+            return fileUploadService.createSourceFileFromS3(csvFile, entity);
         } catch (LedpException ledp) {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getCode().getMessage());

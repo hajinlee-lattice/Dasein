@@ -292,9 +292,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public SourceFile createSourceFileFromS3(FileProperty fileProperty,
-                                      SchemaInterpretation schemaInterpretation,
-                                      String entity) {
-        return sourceFileService.createSourceFileFromS3(fileProperty, schemaInterpretation, entity);
+    public SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity) {
+        return sourceFileService.createSourceFileFromS3(fileProperty, entity);
     }
 }
