@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
@@ -126,6 +127,10 @@ public class DataIntegrationStatusMonitor
     @Column(name = "UPDATED_DATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
+
+    @JsonProperty("s3Bucket")
+    @Transient
+    private String s3Bucket;
 
     @Override
     public Long getPid() {
@@ -263,6 +268,14 @@ public class DataIntegrationStatusMonitor
     @Override
     public void setUpdated(Date updated) {
         this.updatedDate = updated;
+    }
+
+    public String getS3Bucket() {
+        return s3Bucket;
+    }
+
+    public void setS3Bucket(String s3Bucket) {
+        this.s3Bucket = s3Bucket;
     }
 
 }

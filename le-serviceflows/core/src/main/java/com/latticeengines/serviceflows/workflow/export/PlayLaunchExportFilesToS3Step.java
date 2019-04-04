@@ -103,9 +103,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         message.setEntityId(playLaunchId);
         message.setEntityName(PlayLaunch.class.getSimpleName());
         message.setExternalSystemId(lookupIdMap.getOrgId());
-        message.setSourceFile(
-                s3ExportFilePaths.stream().filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst()
-                        .get());
+        String sourceFile = s3ExportFilePaths.stream().filter(path -> FilenameUtils.getExtension(path).equals(CSV))
+                .findFirst().get();
+        message.setSourceFile(sourceFile.substring(sourceFile.indexOf("dropfolder")));
         message.setEventType(DataIntegrationEventType.WorkflowSubmitted.toString());
         message.setEventTime(new Date());
         message.setMessageType(MessageType.Event.toString());
