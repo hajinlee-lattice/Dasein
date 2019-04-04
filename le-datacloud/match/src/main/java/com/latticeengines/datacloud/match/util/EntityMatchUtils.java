@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
@@ -93,5 +95,32 @@ public class EntityMatchUtils {
     public static boolean shouldSetTTL(EntityMatchEnvironment env) {
         // at the moment, only set TTL for staging environment
         return env == EntityMatchEnvironment.STAGING;
+    }
+
+    /**
+     * Determine whether it needs to output a list of newly allocated entities.
+     *
+     * @param input
+     *            target match input
+     * @return true if needed to output, false otherwise
+     */
+    public static boolean shouldOutputNewEntities(MatchInput input) {
+        return isAllocateIdModeEntityMatch(input) && input.isOutputNewEntities();
+    }
+
+    /**
+     * Helper to determine from current {@link MatchInput} whether it is entity
+     * match and is in allocateId mode.
+     *
+     * @param input
+     *            target match input object
+     * @return true if it is entity match and is in allocate mode
+     */
+    public static boolean isAllocateIdModeEntityMatch(MatchInput input) {
+        if (input == null) {
+            return false;
+        }
+
+        return OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode()) && input.isAllocateId();
     }
 }

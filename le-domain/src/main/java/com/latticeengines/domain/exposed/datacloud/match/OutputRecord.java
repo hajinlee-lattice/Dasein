@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -74,6 +75,10 @@ public class OutputRecord {
 
     @JsonIgnore
     private List<String> dnbCacheIds;
+
+    // Newly Allocated EntityIDs: entity -> entityId
+    @JsonIgnore
+    private Map<String, String> newEntityIds;
 
     @JsonProperty("NumFeatureValue")
     private int numFeatureValue;
@@ -227,6 +232,14 @@ public class OutputRecord {
 
     public void setDnbCacheIds(List<String> dnbCacheIds) {
         this.dnbCacheIds = dnbCacheIds;
+    }
+
+    public Map<String, String> getNewEntityIds() {
+        return newEntityIds;
+    }
+
+    public void setNewEntityIds(Map<String, String> newEntityIds) {
+        this.newEntityIds = newEntityIds;
     }
 
     public String getMatchedEmployeeRange() {

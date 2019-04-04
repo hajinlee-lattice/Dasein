@@ -148,9 +148,14 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             if (StringUtils.isNotBlank(associationResponse.getAssociatedEntityId())) {
                 traveler.setMatched(true);
                 traveler.setResult(associationResponse.getAssociatedEntityId());
+                if (associationResponse.isNewlyAllocated()) {
+                    // add newly allocated entity
+                    traveler.addNewlyAllocatedEntityId(associationResponse.getAssociatedEntityId());
+                }
                 traveler.debug(String.format(
-                        "Associate to entity successfully. Entity=%s, EntityId=%s, AssociationErrors=%s",
-                        associationResponse.getEntity(), associationResponse.getAssociatedEntityId(),
+                        "Associate to entity successfully. Entity=%s, EntityId=%s, NewlyAllocated=%b, AssociationErrors=%s",
+                        associationResponse.getEntity(), associationResponse.getAssociatedEntityId(), //
+                        associationResponse.isNewlyAllocated(),
                         associationResponse.getAssociationErrors()));
             } else {
                 // TODO log mode (bulk/realtime) and allocateId flag

@@ -35,12 +35,13 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -89,6 +90,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private List<DataCloudJobConfiguration> remainingJobs;
     private int totalRetries = 0;
     private String matchErrorDir;
+    // directory to store all newly allocated entity list of this match
+    private String matchNewEntityDir;
 
     @Override
     public void execute() {
@@ -111,6 +114,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
             matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
+            matchNewEntityDir = hdfsPathBuilder.constructMatchNewEntityDir(rootOperationUid).toString();
             remainingJobs = new ArrayList<DataCloudJobConfiguration>(jobConfigurations);
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
                 submitMatchBlocks();
@@ -213,6 +217,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     .progress(1f) //
                     .commit();
 
+            createNewEntityTable();
             setupErrorExport();
         } catch (Exception e) {
             String errorMessage = "Failed to finalize the match: " + e.getMessage();
@@ -245,6 +250,26 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH,
                 matchErrorDir + "CSV/matcherror.csv");
 
+    }
+
+    /*
+     * Create table for newly allocated entities
+     */
+    private void createNewEntityTable() {
+        MatchInput input = jobConfigurations.get(0).getMatchInput();
+        if (!EntityMatchUtils.shouldOutputNewEntities(input)) {
+            log.info(
+                    "Should not ouput new entities. Skip creating table for new entity result. "
+                            + "MatchInput(OperationalMode={},isAllocateId={},outputNewEntities={})",
+                    input.getOperationalMode(), input.isAllocateId(), input.isOutputNewEntities());
+            return;
+        }
+
+        String tableName = String.format("MatchNewEntity%s", rootOperationUid);
+        log.info("Creating Table for newly allocated entities. TableName={}", tableName);
+        Table newEntityTable = MetaDataTableUtils.createTable(yarnConfiguration, tableName, matchNewEntityDir);
+        newEntityTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), tableName, newEntityTable);
     }
 
     private List<ApplicationReport> gatherApplicationReports() {
@@ -333,6 +358,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                     mergeBlockResult(appId);
                     mergeBlockErrorResult(appId);
+                    mergeBlockNewEntityResult(appId);
                 } else {
                     log.error("Unknown teminal status " + status + " for Application [" + appId
                             + "]. Treat it as FAILED.");
@@ -468,25 +494,65 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void mergeBlockErrorResult(ApplicationId appId) {
-        if (!OperationalMode.ENTITY_MATCH.equals(jobConfigurations.get(0).getMatchInput().getOperationalMode())
-                || !jobConfigurations.get(0).getMatchInput().isAllocateId()) {
+        if (!EntityMatchUtils.isAllocateIdModeEntityMatch(jobConfigurations.get(0).getMatchInput())) {
             return;
         }
         String blockOperationUid = blockUuidMap.get(appId.toString());
+        String blockAvroGlob = hdfsPathBuilder.constructMatchBlockErrorAvroGlob(rootOperationUid, blockOperationUid);
         try {
-            String blockAvroGlob = hdfsPathBuilder.constructMatchBlockErrorAvroGlob(rootOperationUid,
-                    blockOperationUid);
-            if (HdfsUtils.getFilesByGlob(yarnConfiguration, blockAvroGlob).size() <= 0) {
-                return;
-            }
-            if (!HdfsUtils.fileExists(yarnConfiguration, matchErrorDir)) {
-                HdfsUtils.mkdir(yarnConfiguration, matchErrorDir);
-            }
-            HdfsUtils.moveGlobToDir(yarnConfiguration, blockAvroGlob, matchErrorDir);
+            moveBlockAvro(blockAvroGlob, matchErrorDir);
         } catch (Exception e) {
             throw new RuntimeException("Failed to move block error avro generated by application " + appId
                     + " to match output dir: " + e.getMessage(), e);
         }
+    }
+
+    /*
+     * Move all new entity avro files from target block directory to directory of
+     * the entire match
+     */
+    private void mergeBlockNewEntityResult(ApplicationId appId) {
+        if (appId == null || StringUtils.isBlank(matchNewEntityDir)) {
+            return;
+        }
+        MatchInput input = jobConfigurations.get(0).getMatchInput();
+        if (!EntityMatchUtils.shouldOutputNewEntities(input)) {
+            log.info(
+                    "Should not ouput new entities. Skip merging block new entity result. "
+                            + "MatchInput(OperationalMode={},isAllocateId={},outputNewEntities={})",
+                    input.getOperationalMode(), input.isAllocateId(), input.isOutputNewEntities());
+            return;
+        }
+
+        String blockOperationUid = blockUuidMap.get(appId.toString());
+        String blockAvroGlob = hdfsPathBuilder.constructMatchBlockNewEntityAvroGlob(rootOperationUid,
+                blockOperationUid);
+        try {
+            moveBlockAvro(blockAvroGlob, matchNewEntityDir);
+        } catch (Exception e) {
+            String msg = String.format(
+                    "Failed to move block avro for newly allocated entities to match dir %s. ApplicationId=%s, error=%s",
+                    matchNewEntityDir, appId, e.getMessage());
+            throw new RuntimeException(msg, e);
+        }
+    }
+
+    /*
+     * Move all block avro files (that satisfy blockAvroGlob) to destination
+     * directory
+     */
+    private void moveBlockAvro(String blockAvroGlob, String destDir) throws Exception {
+        if (HdfsUtils.getFilesByGlob(yarnConfiguration, blockAvroGlob).size() <= 0) {
+            log.info("No files satisfy glob={}. Skip copying.", blockAvroGlob);
+            return;
+        }
+        if (!HdfsUtils.fileExists(yarnConfiguration, destDir)) {
+            log.info("Creating destination directory = {}", destDir);
+            HdfsUtils.mkdir(yarnConfiguration, destDir);
+        }
+
+        log.info("Moving avro files (glob={}) to directory = {}", blockAvroGlob, destDir);
+        HdfsUtils.moveGlobToDir(yarnConfiguration, blockAvroGlob, destDir);
     }
 
     private Boolean hitThirtyPercentChance() {
