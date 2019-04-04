@@ -79,7 +79,6 @@ abstract class QueryTranslator {
             return results;
         }
         needPreprocess(frontEndQuery, timeTranslator, results);
-        log.info("results is the following");
         results.forEach((k, v) -> log.info(k + ":" + v));
         return results;
     }
