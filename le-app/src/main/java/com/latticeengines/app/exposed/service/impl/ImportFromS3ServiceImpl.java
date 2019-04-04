@@ -106,6 +106,13 @@ public class ImportFromS3ServiceImpl implements ImportFromS3Service {
         return in;
     }
 
+    @Override
+    public InputStream getS3FileInputStream(String bucketName, String key) {
+        InputStream in = s3Service.readObjectAsStream(bucketName, key);
+        return in;
+    }
+
+    @Override
     public String getS3FsProtocol() {
         return pathBuilder.getProtocol();
     }

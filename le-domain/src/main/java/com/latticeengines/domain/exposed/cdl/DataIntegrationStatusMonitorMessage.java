@@ -50,6 +50,7 @@ public class DataIntegrationStatusMonitorMessage {
     @JsonSubTypes({ //
             @Type(value = ProgressEventDetail.class, name = "Progress"), //
             @Type(value = ProgressEventDetail.class, name = "Completed"),
+            @Type(value = ProgressEventDetail.class, name = "InProgress"),
             @Type(value = AudienceCreationEventDetail.class, name = "AudienceCreation"),
             @Type(value = FailedEventDetail.class, name = "Failed"),
             @Type(value = InitiatedEventDetail.class, name = "Initiated") })

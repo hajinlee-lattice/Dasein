@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -46,6 +47,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     private static Logger log = LoggerFactory.getLogger(PlayLaunchServiceImpl.class);
 
     private static final String NULL_KEY = "NULL_KEY";
+
+    @Value("${aws.customer.export.s3.bucket}")
+    protected String exportS3Bucket;
 
     @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
@@ -144,6 +148,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             return;
         }
         Map<String, DataIntegrationStatusMonitor> dataIntegrationStatusMap = dataIntegrationStatusMonitors.stream()
+                .peek(sm -> sm.setS3Bucket(exportS3Bucket))
                 .collect(Collectors.toMap(dism -> dism.getEntityId(), dism -> dism));
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
     }
