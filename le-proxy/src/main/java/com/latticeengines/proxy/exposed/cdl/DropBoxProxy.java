@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 
 public interface DropBoxProxy {
 
@@ -20,4 +21,5 @@ public interface DropBoxProxy {
 
     boolean importS3file(String customerSpace, String s3Path, String hdfsPath, String filename);
 
+    List<FileProperty> getFileListForPath(String customerSpace, String s3Path);
 }

@@ -5,6 +5,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -73,6 +74,13 @@ public class SourceFileProxyImpl extends MicroserviceRestApiProxy implements Sou
         String url = "/sourcefiles/tablename/{tableName}";
         url = constructUrl(url, tableName);
         return get("get SourceFile by table name cross tenant", url, SourceFile.class);
+    }
+
+    @Override
+    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,  String entity) {
+        String url = URL_PRERIX + "/fromS3?entity={entity}";
+        url = constructUrl(url, shortenCustomerSpace(customerSpace), entity);
+        return post("create SourceFile by s#", url, fileProperty, SourceFile.class);
     }
 
 }

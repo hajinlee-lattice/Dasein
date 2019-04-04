@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -352,6 +353,11 @@ public class CDLServiceImpl implements CDLService {
         // ensure there exists 5 templates at least in the returned list
         populateDefaultTemplate(templates);
         return templates;
+    }
+
+    @Override
+    public List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path) {
+        return dropBoxProxy.getFileListForPath(customerSpace, s3Path);
     }
 
     private void populateDefaultTemplate(List<S3ImportTemplateDisplay> templates) {

@@ -696,4 +696,31 @@ public class HdfsUtils {
         return rows;
     }
 
+    public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
+                                                                    InputStream inputStream, String hdfsPath) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
+                return copyLarge(
+                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                        outputStream);
+            }
+        }
+    }
+
+    private static long copyLarge(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        int n = 0;
+        long rows = 0;
+        while (EOF != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            for (int i = 0; i < n; i++) {
+                if (buffer[i] == '\n') {
+                    rows++;
+                }
+            }
+        }
+        return rows;
+    }
+
 }
