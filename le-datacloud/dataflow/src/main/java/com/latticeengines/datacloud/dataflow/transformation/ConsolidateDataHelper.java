@@ -56,8 +56,7 @@ public class ConsolidateDataHelper {
     private static Map<String, String> checkAndSetDupeMap(String sourceName,
             Map<String, Map<String, String>> dupeFieldMap) {
         dupeFieldMap.putIfAbsent(sourceName, new HashMap<>());
-        Map<String, String> dupeFieldMapPerTable = dupeFieldMap.get(sourceName);
-        return dupeFieldMapPerTable;
+        return dupeFieldMap.get(sourceName);
     }
 
     static List<FieldList> getGroupFieldList(List<String> sourceNames, List<Table> sourceTables,
@@ -75,11 +74,7 @@ public class ConsolidateDataHelper {
             List<String> keyAttributes = new ArrayList<>();
             List<String> attributes = table.getPrimaryKey().getAttributes();
             for (String attribute : attributes) {
-                if (dupeFieldMapPerTable.containsKey(attribute)) {
-                    keyAttributes.add(dupeFieldMapPerTable.get(attribute));
-                } else {
-                    keyAttributes.add(attribute);
-                }
+                keyAttributes.add(dupeFieldMapPerTable.getOrDefault(attribute, attribute));
             }
             fieldLists.add(new FieldList(keyAttributes));
         }

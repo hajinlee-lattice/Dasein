@@ -92,7 +92,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
 
     private Node trimResult(Node source, List<String> trimFields) {
         if (CollectionUtils.isNotEmpty(trimFields)) {
-            Set<String> existingFields = source.getFieldNames().stream().collect(Collectors.toSet());
+            Set<String> existingFields = new HashSet<>(source.getFieldNames());
             for (String trimField : trimFields) {
                 if (CollectionUtils.isNotEmpty(existingFields) && existingFields.contains(trimField)) {
                     source = source.apply(new TrimFunction(trimField), new FieldList(trimField),
