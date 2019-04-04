@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
@@ -147,7 +148,7 @@ public class QueryTranslatorUnitTestNG {
                 Bucket.valueBkt("No"));
 
         BucketRestriction e = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "E"),
-                Bucket.rangeBkt(10, 100));
+                Bucket.dateBkt(TimeFilter.latestDay()));
 
         if (level == Level.Simple) {
             Restriction and = Restriction.builder().and(a, b).build();
