@@ -63,7 +63,7 @@ public class EmailSettings {
     public static final String S3_TEMPLATE_UPDATE_SUBJECT = " Template %s has been updated";
     public static final String S3_TEMPLATE_CREATE_SUBJECT = " Template %s has been created";
     public static final String LATTICE_HELP_CENTER_URL = "http://help.lattice-engines.com";
-    public static final String PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT = "SUB: Import Action Cancelled on %s ";
+    public static final String PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT = "Import Action Cancelled on %s ";
     private String from;
     private String password;
     private int port;
