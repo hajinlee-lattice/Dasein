@@ -14,7 +14,7 @@
                         class="form-control"
                         ng-model="vm.fieldMapping.account"
                         ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
-                        ng-required="false"
+                        ng-required="!vm.entityMatchEnabled"
                         ng-class="{'required': false}">
                         <option value="" hidden disabled>-- Choose Unique Identifier --</option>
                         <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">

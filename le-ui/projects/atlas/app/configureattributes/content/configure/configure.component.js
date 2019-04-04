@@ -488,6 +488,7 @@ angular.module('lp.configureattributes.configure', [])
                     type: 'sm',
                     title: 'Warning',
                     titlelength: 100,
+                    message: 'Are you sure you want to leave this page? You have unsaved configurations that will be lost.',
                     dischargetext: 'Cancel',
                     confirmtext: 'Yes, Confirm',
                     icon: 'fa fa-exclamation-triangle',
