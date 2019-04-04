@@ -127,6 +127,17 @@ angular.module('lp.import.wizard.latticefields', [])
         return (vm.unavailableFields.length >= vm.availableFields.length);
     }
 
+    function geUserFieldPosition(array, userField){
+        let index = -1;
+        array.forEach((element, i) => {
+            if(element.userField == userField){
+                index = i;
+                return;
+            }
+        });
+        return index;
+    }
+
     vm.changeLatticeField = function(mapping, form, field, updateFormats) {
         var _mapping = [];
         vm.unavailableFields = [];
@@ -156,11 +167,19 @@ angular.module('lp.import.wizard.latticefields', [])
             }
 
             if(map.userField) {
-                _mapping.push(map);
+                let index = geUserFieldPosition(_mapping, map.userField);
+                if(index < 0){
+                    _mapping.push(map);
+                }else if(map.unmap !== true){
+                    
+                    _mapping.push(map);
+                }else{
+                    console.log('ALREADY THERE NO PUSHING', index);
+                }
             }
 
             if(field){
-                
+                // console.log('IN FIELD', field, map);
                 if(updateFormats !== false && !field.fromExistingTemplate) {
                     vm.updateDateFormat(field, map);
                 }
@@ -181,8 +200,9 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         
         ImportWizardStore.setSaveObjects(_mapping);
-        // console.log('MAPPING &&&&&&&&&&&& ',_mapping);
+        console.log('MAPPING &&&&&&&&&&&& ',_mapping);
         vm.checkValidDelay(form);
+        
     };
     
     vm.initDateFields = () => {
