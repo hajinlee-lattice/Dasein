@@ -63,7 +63,6 @@ abstract class QueryTranslator {
             String sqlUser) {
         Restriction restriction;
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
-        log.info("mainentity is " + mainEntity);
         restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery),
                 timeTranslator, sqlUser, true);
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
@@ -80,13 +79,14 @@ abstract class QueryTranslator {
             return results;
         }
         needPreprocess(frontEndQuery, timeTranslator, results);
+        log.info("results is the following");
+        results.forEach((k, v) -> log.info(k + ":" + v));
         return results;
     }
 
     void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
             Map<ComparisonType, Set<AttributeLookup>> map) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
-        log.info("mainentity is " + mainEntity);
         inspectFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, map);
         inspectInnerRestriction(frontEndQuery, mainEntity, timeTranslator, map);
     }
