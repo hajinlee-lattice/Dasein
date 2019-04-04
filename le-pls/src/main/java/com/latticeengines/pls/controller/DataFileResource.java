@@ -199,13 +199,15 @@ public class DataFileResource {
     public void getSourceFileViaFileName( //
             @RequestParam(value = "fileName", required = true) String fileName, //
             @RequestParam(value = "filePath", required = false) String filePath,
+            @RequestParam(value = "bucketName", required = false) String bucketName,
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
             if (StringUtils.isEmpty(filePath)) {
                 dataFileProviderService.downloadFileByFileName(request, response, "application/csv", fileName);
             } else {
-                dataFileProviderService.downloadS3File(request, response, "application/csv", fileName, filePath);
+                dataFileProviderService.downloadS3File(request, response, "application/csv", fileName, filePath,
+                        bucketName);
             }
         } catch (Exception e) {
             throw e;

@@ -13,6 +13,8 @@ public interface ImportFromS3Service {
 
     InputStream getS3FileInputStream(String key);
 
+    InputStream getS3FileInputStream(String bucketName, String key);
+
     String getS3Bucket();
 
     String getPodId();

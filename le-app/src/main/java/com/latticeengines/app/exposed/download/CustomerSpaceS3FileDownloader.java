@@ -1,6 +1,10 @@
 package com.latticeengines.app.exposed.download;
 
+
 import java.io.InputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -8,13 +12,17 @@ import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomerSpaceS3FileDownloader.class);
+
     private String fileName;
     private String filePath;
+    private String bucketName;
 
     public CustomerSpaceS3FileDownloader(S3FileDownloadBuilder builder) {
         super(builder.mimeType, builder.importFromS3Service, builder.cdlAttrConfigProxy, builder.batonService);
         this.fileName = builder.fileName;
         this.filePath = builder.filePath;
+        this.bucketName = builder.bucketName;
     }
 
     @Override
@@ -24,7 +32,8 @@ public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
 
     @Override
     protected InputStream getFileInputStream() throws Exception {
-        return importFromS3Service.getS3FileInputStream(filePath);
+        return this.bucketName == null ? importFromS3Service.getS3FileInputStream(filePath)
+                : importFromS3Service.getS3FileInputStream(bucketName, filePath);
     }
 
     public static class S3FileDownloadBuilder {
@@ -32,6 +41,7 @@ public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
         private String mimeType;
         private String fileName;
         private String filePath;
+        private String bucketName;
         private ImportFromS3Service importFromS3Service;
         private CDLAttrConfigProxy cdlAttrConfigProxy;
         private BatonService batonService;
@@ -48,6 +58,11 @@ public class CustomerSpaceS3FileDownloader extends AbstractHttpFileDownLoader {
 
         public S3FileDownloadBuilder setFilePath(String filePath) {
             this.filePath = filePath;
+            return this;
+        }
+
+        public S3FileDownloadBuilder setBucketName(String bucketName) {
+            this.bucketName = bucketName;
             return this;
         }
 
