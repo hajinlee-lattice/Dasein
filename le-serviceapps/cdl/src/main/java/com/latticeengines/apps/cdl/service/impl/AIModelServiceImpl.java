@@ -1,29 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
@@ -78,8 +54,29 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
-
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {
@@ -403,18 +400,26 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
-                    if (importanceOrdering.containsKey(toReturn.getAttrName())) {
-                        // could move this into le-metadata as a decorator
-                        toReturn.setImportanceOrdering(importanceOrdering.get(toReturn.getAttrName()));
-                        importanceOrdering.remove(toReturn.getAttrName());
-                    }
-                    cm.setPredictivePower(predictors.getOrDefault(toReturn.getAttrName(), new Predictor())
-                            .getUncertaintyCoefficient());
-                    cm.setEntity(BusinessEntity.Account);
                     cm.setSubcategory("Other");
                     return toReturn;
 
                 }, () -> iterationAttributes).block();
+
+        if (MapUtils.isEmpty(modelingAttributes)) {
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "Modeling Attributes", aiModel.getId(), ratingEngine.getId(), customerSpace });
+        }
+
+        modelingAttributes.forEach((k, cm) -> {
+            if (importanceOrdering.containsKey(cm.getAttrName())) {
+                // could move this into le-metadata as a decorator
+                cm.setImportanceOrdering(importanceOrdering.get(cm.getAttrName()));
+                importanceOrdering.remove(cm.getAttrName());
+            }
+            cm.setPredictivePower(
+                    predictors.getOrDefault(cm.getAttrName(), new Predictor()).getUncertaintyCoefficient());
+            cm.setEntity(BusinessEntity.Account);
+        });
 
         if (MapUtils.isNotEmpty(importanceOrdering)) {
             log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
@@ -493,7 +498,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 && CollectionUtils.isNotEmpty(predictor.getPredictorElements());
         cm.setCanEnrich(!predictorsElementsExist);
         attrStat.setNonNullCount(predictorsElementsExist
-                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum() : 0);
+                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum()
+                : 0);
         attrStat.getBuckets()
                 .setBucketList(predictorsElementsExist
                         ? predictor.getPredictorElements().stream().map(this::convertToBucket)
