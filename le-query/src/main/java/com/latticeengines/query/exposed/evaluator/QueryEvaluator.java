@@ -49,7 +49,11 @@ public class QueryEvaluator {
                 attrNames.put(attrName.toLowerCase(), attrName);
             } else if (l instanceof AggregateLookup) {
                 Lookup lookup = ((AggregateLookup) l).getLookup();
-                if (lookup instanceof AttributeLookup) {
+                String alias = ((AggregateLookup) l).getAlias();
+                if (alias != null && (lookup instanceof AttributeLookup)) {
+                    String attrName = ((AttributeLookup) lookup).getAttribute();
+                    attrNames.put(attrName.toLowerCase(), alias);
+                } else if (alias == null && (lookup instanceof AttributeLookup)) {
                     String attrName = ((AttributeLookup) lookup).getAttribute();
                     attrNames.put(attrName.toLowerCase(), attrName);
                 }
