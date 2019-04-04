@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.monitor.exposed.ratelimit.RateLimitException;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 
@@ -88,5 +89,14 @@ public class LedpPlaymakerExceptionHandler {
         // details.put("trace", trace);
 
         return details;
+    }
+
+    @ExceptionHandler
+    @ResponseBody
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public JsonNode handleException(RateLimitException ex) {
+
+        return JsonUtils.getObjectMapper().valueToTree(ImmutableMap.of("errorCode", ex.getCode().name(), //
+                "errorMsg", ex.getMessage()));
     }
 }
