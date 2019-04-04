@@ -6,7 +6,7 @@ angular.module('common.attributes.categories', [])
         store: '<',
         callback: '&'
     },
-    controller: function ($state, $scope, $stateParams, StateHistory, DataCloudStore) {
+    controller: function ($state, $stateParams, StateHistory, DataCloudStore) {
         var vm = this;
 
         vm.current = 1;
