@@ -30,7 +30,7 @@ public class PathUtils {
         }
     }
 
-    public static String formatString(String path) {
+    public static String formatPath(String path) {
         if (StringUtils.isNotEmpty(path)) {
             while (path.startsWith("/")) {
                 path = path.substring(1);
@@ -40,5 +40,14 @@ public class PathUtils {
             }
         }
         return path;
+    }
+
+    public static String formatKey(String s3Bucket, String path) {
+        String key = formatPath(path);
+        if (key.startsWith(s3Bucket)) {
+            key = key.replaceFirst(s3Bucket, "");
+            key = formatPath(key);
+        }
+        return key;
     }
 }

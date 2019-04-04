@@ -12,10 +12,10 @@ public class FileProperty {
     @JsonProperty("file_size")
     private Long fileSize;
 
-    @JsonProperty("lastModified")
+    @JsonProperty("last_modified")
     private Date lastModified;
 
-    @JsonProperty("filePath")
+    @JsonProperty("file_path")
     private String filePath;
 
     public String getFileName() {

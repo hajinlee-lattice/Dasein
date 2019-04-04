@@ -233,8 +233,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private String getValidkey(String bucketname, String originalkey, String filename) {
-        originalkey = originalkey.replaceFirst(bucketname, "");
-        originalkey = PathUtils.formatString(originalkey);
+        originalkey = PathUtils.formatKey(bucketname, originalkey);
         if (!originalkey.endsWith("/")) {
             originalkey += "/";
         }
@@ -364,11 +363,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     public List<FileProperty> getFileListForPath(String customerSpace, String s3Path) {
         final String delimiter = "/";
         String bucket = getDropBoxBucket();
-        String prefix = PathUtils.formatString(s3Path);
-        if (prefix.startsWith(bucket)) {
-            prefix = prefix.replaceFirst(bucket, "");
-            prefix = PathUtils.formatString(prefix);
-        }
+        String prefix = PathUtils.formatKey(bucket, s3Path);
         List<S3ObjectSummary> s3ObjectSummaries = s3Service.getFilesWithInfoForDir(bucket, prefix);
         List<FileProperty> fileList = new LinkedList<>();
         for (S3ObjectSummary summary : s3ObjectSummaries) {
@@ -377,7 +372,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             if (fileName.startsWith(prefix)) {
                 fileName = fileName.replaceFirst(prefix, "");
             }
-            fileProperty.setFileName(PathUtils.formatString(fileName));
+            fileProperty.setFileName(PathUtils.formatPath(fileName));
             fileProperty.setFileSize(summary.getSize());
             fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
             fileProperty.setLastModified(summary.getLastModified());

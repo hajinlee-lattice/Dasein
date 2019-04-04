@@ -71,11 +71,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
     }
 
     private void importFile(String entity, String s3Path) {
-        String key = PathUtils.formatString(s3Path);
-        if (key.startsWith(s3Bucket)) {
-            key = key.replaceFirst(s3Bucket, "");
-            key = PathUtils.formatString(key);
-        }
+        String key = PathUtils.formatKey(s3Bucket, s3Path);
         switch (entity) {
             case ENTITY_ACCOUNT: String path = key + "/" + ACCOUNT_SOURCE_FILE;
                 s3Service.uploadInputStream(s3Bucket, path,

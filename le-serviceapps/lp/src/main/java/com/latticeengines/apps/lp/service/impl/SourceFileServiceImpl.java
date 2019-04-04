@@ -152,12 +152,7 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     @Override
     public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity) {
-        String s3FilePath = fileProperty.getFilePath();
-        String key = PathUtils.formatString(s3FilePath);
-        if (key.startsWith(s3Bucket)) {
-            key = key.replaceFirst(s3Bucket, "");
-            key = PathUtils.formatString(key);
-        }
+        String key = PathUtils.formatKey(s3Bucket, fileProperty.getFilePath());
         InputStream inputStream;
         try {
             inputStream = s3Service.readObjectAsStream(s3Bucket, key);
