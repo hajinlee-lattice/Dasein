@@ -50,7 +50,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
-        ImportWizardStore.setValidation('ids', false);
+        ImportWizardStore.setValidation('matchtoaccounts', vm.entityMatchEnabled);
 
         var userFields = [];
         vm.fieldMappings.forEach(function(fieldMapping, index) {
