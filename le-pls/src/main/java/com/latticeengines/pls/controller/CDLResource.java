@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
@@ -258,5 +259,13 @@ public class CDLResource {
     public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return cdlService.getS3ImportTemplate(customerSpace.toString());
+    }
+
+    @GetMapping(value = "/s3import/getFileList")
+    @ResponseBody
+    @ApiOperation("get file list under s3Path")
+    public List<FileProperty> getFileList(@RequestParam String s3Path) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path);
     }
 }

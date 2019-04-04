@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -109,4 +110,10 @@ public class DropBoxResource {
         return dropBoxService.uploadFileToS3(customerSpace, s3Path, filename, hdfsPath);
     }
 
+    @GetMapping(value = "/fileList")
+    @ApiOperation(value = "Get all files under path")
+    public List<FileProperty> getAllSubFolders(@PathVariable String customerSpace,
+                                               @RequestParam String s3Path) {
+        return dropBoxService.getFileListForPath(customerSpace, s3Path);
+    }
 }

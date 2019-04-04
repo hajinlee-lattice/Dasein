@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -53,6 +54,11 @@ public class SourceFileServiceImpl implements SourceFileService {
     @Override
     public SourceFile getByTableNameAcrossTenant(String tableName) {
         return sourceFileProxy.findByTableNameCrossTenant(tableName);
+    }
+
+    @Override
+    public SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity) {
+        return sourceFileProxy.createSourceFileFromS3(getShortTenantId(), fileProperty, entity);
     }
 
     private String getShortTenantId() {

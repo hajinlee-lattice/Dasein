@@ -54,6 +54,8 @@ public interface S3Service {
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
 
+    List<S3ObjectSummary> getFilesWithInfoForDir(String s3Bucket, String prefix);
+
     /**
      * Generate a read only URL to access the specified key under the input bucket. The URL will expires at
      * the given date.

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,18 +27,21 @@ import com.amazonaws.auth.policy.actions.S3Actions;
 import com.amazonaws.auth.policy.conditions.StringCondition;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -229,8 +233,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private String getValidkey(String bucketname, String originalkey, String filename) {
-        originalkey = originalkey.replaceFirst(bucketname, "");
-        originalkey = formatString(originalkey);
+        originalkey = PathUtils.formatKey(bucketname, originalkey);
         if (!originalkey.endsWith("/")) {
             originalkey += "/";
         }
@@ -244,18 +247,6 @@ public class DropBoxServiceImpl implements DropBoxService {
             suffix++;
         }
         return dest_key;
-    }
-
-    private String formatString(String path) {
-        if (StringUtils.isNotEmpty(path)) {
-            while (path.startsWith("/")) {
-                path = path.substring(1);
-            }
-            while (path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
-        }
-        return path;
     }
 
     private String formatPath(String path) {
@@ -366,6 +357,28 @@ public class DropBoxServiceImpl implements DropBoxService {
             dropbox.setAccessMode(null);
             entityMgr.update(dropbox);
         }
+    }
+
+    @Override
+    public List<FileProperty> getFileListForPath(String customerSpace, String s3Path) {
+        final String delimiter = "/";
+        String bucket = getDropBoxBucket();
+        String prefix = PathUtils.formatKey(bucket, s3Path);
+        List<S3ObjectSummary> s3ObjectSummaries = s3Service.getFilesWithInfoForDir(bucket, prefix);
+        List<FileProperty> fileList = new LinkedList<>();
+        for (S3ObjectSummary summary : s3ObjectSummaries) {
+            FileProperty fileProperty = new FileProperty();
+            String fileName = summary.getKey();
+            if (fileName.startsWith(prefix)) {
+                fileName = fileName.replaceFirst(prefix, "");
+            }
+            fileProperty.setFileName(PathUtils.formatPath(fileName));
+            fileProperty.setFileSize(summary.getSize());
+            fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
+            fileProperty.setLastModified(summary.getLastModified());
+            fileList.add(fileProperty);
+        }
+        return fileList;
     }
 
     private String getDropBoxId() {

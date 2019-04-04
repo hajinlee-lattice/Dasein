@@ -244,7 +244,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
                 Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, cdlJobDetail);
                 if (invokeTime != null) {
-                    if (dataFeed.getNextInvokeTime() == null || dataFeed.getNextInvokeTime().before(currentTime)) {
+                    if (dataFeed.getNextInvokeTime() == null || !dataFeed.getNextInvokeTime().equals(invokeTime)) {
                         dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                     }
                     if (currentTimeMillis > invokeTime.getTime()) {
