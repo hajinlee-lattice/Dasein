@@ -9,12 +9,10 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping Spark ..."
 
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
-    SPARK_VERSION=2.4.1
+    SPARK_VERSION=2.4.0
 
     if [[ ! -f "${ARTIFACT_DIR}/spark-${SPARK_VERSION}.tgz" ]]; then
-        APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
-        echo "Use apache mirror: ${APACHE_MIRROR}"
-        SPARK_TGZ_URL="${APACHE_MIRROR}spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz"
+        SPARK_TGZ_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz"
         wget ${SPARK_TGZ_URL} -O ${ARTIFACT_DIR}/spark-${SPARK_VERSION}.tgz
     fi
 
