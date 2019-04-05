@@ -84,7 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private String getMaxTransactionDate(CustomerSpace customerSpace, DataCollection.Version version) {
         AttributeLookup lookup = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.TransactionDate.name());
-        AggregateLookup lookup2 = AggregateLookup.max(lookup).as(InterfaceName.TransactionDate.name().toLowerCase());
+        AggregateLookup lookup2 = AggregateLookup.max(lookup).as("max_txn_date");
         Query query = Query.builder() //
                 .select(lookup2) //
                 .from(BusinessEntity.Transaction) //
@@ -105,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         return retry.execute(context -> {
             DataPage dataPage = queryEvaluatorService.getData(attrRepo, query, RedshiftQueryProvider.USER_SEGMENT);
-            return (String) dataPage.getData().get(0).get(InterfaceName.TransactionDate.name().toLowerCase());
+            return (String) dataPage.getData().get(0).get("max_txn_date");
         });
     }
 
