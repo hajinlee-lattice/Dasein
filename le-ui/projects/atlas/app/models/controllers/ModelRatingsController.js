@@ -27,7 +27,7 @@ angular.module('lp.models.ratings', [
 })
 .controller('ModelRatingsController', function (
     $scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, Model, Notice, 
-    ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore
+    ModelStore, ModelRatingsService, WorkingBuckets, RatingsSummary, RatingsEngineStore
 ) {
     var vm = this;
 
@@ -40,8 +40,7 @@ angular.module('lp.models.ratings', [
         showSaveBucketsError: false,
         updateContent: false,
         ResourceUtility: ResourceUtility,
-        currentConfiguration: CurrentConfiguration,
-        workingBuckets: CurrentConfiguration,
+        workingBuckets: WorkingBuckets,
         ratingsSummary: RatingsSummary,
         showCurrentConfig: true,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
@@ -70,35 +69,40 @@ angular.module('lp.models.ratings', [
                 }
             });
 
-            vm.currentConfiguration = angular.copy(vm.dashboard.summary.bucketMetadata);
-
-
-            vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
-
-            // if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-
-            //     console.log("here");
-            //     console.log(vm.dashboard.summary.bucketMetadata);
-
-            //     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
-            // }
+            // Currently Published Rating Buckets at bottom of the UI.
+            // Don't show for new models that have never been published.
+            // Show the latest_iteration config for the current model's model summary
+            if (vm.currentRating.scoring_iteration) {
+                var id = vm.currentRating.scoring_iteration.AI.modelSummaryId;
+                ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
+                    console.log(result);
+                    vm.currentConfiguration = result;
+                    vm.showCurrentConfig = true;
+                });
+            } else {
+                vm.showCurrentConfig = false;
+            }
 
             if ($stateParams.useSelectedIteration) {
 
-                var id = vm.activeIteration.modelSummaryId;
-                ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
-                    vm.workingBuckets = result;
-                });
+                vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
+
+                // Update UI data if user got to the UI from either the "Activate" button 
+                // or used the Iteration select menu from within the UI.
+                var id = $stateParams.modelId;
                 ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
                     vm.ratingsSummary = result;
                 });
-
             } else {
 
+                // This determines what the active iteration is.
+                // Active iteration is what is currently selected in the Iteration select box.
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
 
                 // If the model has been published previously and is Active
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
+
+                    console.log("here 2");
 
                     // Set active iteration and working buckets (determines what is displayed in the chart)
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
@@ -112,15 +116,7 @@ angular.module('lp.models.ratings', [
 
                 } else {
 
-                    var id = $stateParams.modelId;
-                    ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
-                        if (vm.currentRating.scoring_iteration) {
-                            vm.currentConfiguration = currentConfig;
-                            vm.showCurrentConfig = true;
-                        } else {
-                            vm.showCurrentConfig = false;
-                        }
-                    });
+                    console.log("here 3");
 
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
@@ -129,63 +125,11 @@ angular.module('lp.models.ratings', [
                 }
             }
 
-
-            // Set active iteration (default value for iteration select menu) 
-            // and working buckets (vm.workingBuckets is what drives the chart data)
-            // if ($stateParams.toggleRatings){
-
-            //     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
-
-            //     // if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-
-            //     //     console.log("here");
-            //     //     console.log(vm.dashboard.summary.bucketMetadata);
-
-            //     //     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
-            //     // }
-
-            //     console.log("here 2");
-
-            //     var id = vm.activeIteration.modelSummaryId;
-            //     ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
-            //         vm.workingBuckets = result;
-            //     });
-            //     ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
-            //         vm.ratingsSummary = result;
-            //     });
-
-            // } else {
-
-
-            //     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
-
-            //     // If the model has been published previously and is Active
-            //     if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
-
-            //         console.log("here 3");
-
-            //         // Set active iteration and working buckets (determines what is displayed in the chart)
-            //         vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
-            //         vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
-
-            //         var id = vm.activeIteration.modelSummaryId;
-            //         ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
-            //             // Helps with chart data and display
-            //             vm.ratingsSummary = result;
-            //         });
-
-            //     } else {
-
-            //         console.log("here 4");
-
-            //         // If the model has not been published or is inactive, 
-            //         // select the most recent iteration in the select menu
-            //         vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
-            //     }
-
-            //     console.log(vm.activeIteration);
-
-            // }
+            console.log(vm.currentRating);
+            console.log(vm.activeIteration);
+            console.log(vm.workingBuckets);
+            console.log(vm.currentConfiguration);
+            console.log(vm.showCurrentConfig);
 
             vm.ratingModelId = vm.activeIteration.id;
         }
@@ -509,6 +453,7 @@ angular.module('lp.models.ratings', [
 
                 var id = $stateParams.modelId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
+                    console.log(currentConfig);
                     vm.currentConfiguration = currentConfig;
                     vm.showCurrentConfig = true;
                     refreshChartData();
@@ -632,7 +577,7 @@ angular.module('lp.models.ratings', [
             // bucketHover: '=?', // function
             // modelType: '=?'
         },
-        controller: ['$scope', '$rootScope', '$state', '$stateParams', '$timeout', 'ResourceUtility', 'Model', 'ModelStore', 'ModelRatingsService', 'CurrentConfiguration', 'RatingsSummary', function ($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
+        controller: ['$scope', '$rootScope', '$state', '$stateParams', '$timeout', 'ResourceUtility', 'Model', 'ModelStore', 'ModelRatingsService', 'WorkingBuckets', 'RatingsSummary', function ($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, Model, ModelStore, ModelRatingsService, WorkingBuckets, RatingsSummary) {
             var vm = $scope;
             angular.extend(vm, {
                 workingBuckets: $scope.workingBuckets,

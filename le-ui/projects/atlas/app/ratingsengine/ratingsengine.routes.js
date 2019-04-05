@@ -560,7 +560,7 @@ angular
                     QueryRestriction: [function () {
                         return null;
                     }],
-                    CurrentConfiguration: [function () {
+                    WorkingBuckets: [function () {
                         return null;
                     }],
                     // end duplicates
@@ -1016,7 +1016,7 @@ angular
                     QueryRestriction: [function () {
                         return null;
                     }],
-                    CurrentConfiguration: [function () {
+                    WorkingBuckets: [function () {
                         return null;
                     }],
                     // end duplicates
