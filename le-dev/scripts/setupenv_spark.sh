@@ -9,7 +9,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping Spark ..."
 
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
-    SPARK_VERSION=2.4.0
+    SPARK_VERSION=2.4.1
 
     if [[ ! -f "${ARTIFACT_DIR}/spark-${SPARK_VERSION}.tgz" ]]; then
         APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
