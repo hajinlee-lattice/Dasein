@@ -119,7 +119,7 @@
     <div class="alert existing-mappings">
       <p>
         {{vm.extraFieldMappingInfo.existing_mappings.length}} 
-        pre-existing Custom Fields have been found. This will overwrite the existing information.
+        pre-existing Custom Fields have been found.
       </p>
     </div>
     <form name="form">
@@ -135,17 +135,29 @@
               Type
             </div>
           </div>
-          <div class="le-cell le-col-span-2">
+          <!-- <div class="le-cell le-col-span-2">
             <div class="container-flex">
               <input type="checkbox" ng-disabled="true"/> <label>Ignore</label>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="grid-body le-row" ng-repeat="field in vm.extraFieldMappingInfo.existing_mappings">
           <div class="le-cell le-col-span-5">
             <span>{{ field.userField }}</span>
           </div>
-          <div class="le-cell le-col-span-5">
+          <div class="le-cell le-col-span-7">
+            <div class="field-type pre-existing ">
+              <span>{{field.fieldType}}</span>
+              <div class="date-options-info">
+                  <span>{{vm.getDateFormatFromLatticeSchema(field.mappedField)}}</span>
+                  <div class="time-format-info">
+                      <span>{{vm.getTimeFormatFromLatticeSchema(field.mappedField)}}</span>
+                      <span>{{vm.getTimezoneFromLatticeSchema(field.mappedField)}}</span>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="le-cell le-col-span-5">
             <div class="field-type">
               <select ng-disabled="true" class="form-control select-type">
                 <option value="{{field.fieldType}}" selected>{{field.fieldType}}</option>
@@ -154,7 +166,7 @@
           </div>
           <div class="le-cell le-col-span-2">
             <input type="checkbox" ng-disabled="true" /> <label>Ignore</label>
-          </div>
+          </div> -->
         </div>
       </div>
     </form>
