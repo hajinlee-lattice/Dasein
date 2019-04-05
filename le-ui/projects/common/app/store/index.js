@@ -37,9 +37,10 @@ export function mount(path) {
 
 angular
     .module("mainApp.core.redux", [ngRedux])
-    .service("ReduxService", function($ngRedux) {
-        this.connect = function(name, actions, reducer, context) {
-            console.log(name, context);
+    .service("ReduxService", function ($ngRedux) {
+        this.connect = function (name, actions, reducer, context) {
+            context = context || {};
+
             if (!context.data) {
                 context.data = {};
             }
@@ -53,12 +54,7 @@ angular
 
             injectAsyncReducer(store, name, reducer);
 
-            return {
-                name,
-                actions,
-                unsubscribe,
-                context
-            };
+            return context.data.redux;
         };
     })
     .config($ngReduxProvider => {

@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.LatticeUse
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -26,17 +27,18 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
@@ -184,8 +186,10 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
                 uploadFile(s3Client, bucket, prefix);
             }
             Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
-            ListObjectsV2Result result = s3Client.listObjectsV2(bucket, prefix);
-            Assert.assertTrue(result.getKeyCount() > 0);
+            List<FileProperty> result = dropboxService.getFileListForPath(mainCustomerSpace
+            , prefix);
+            log.info(JsonUtils.serialize(result));
+            Assert.assertTrue(result.size() > 0);
             return true;
         });
 

@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.match.testframework.TestEntityMatchService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -46,7 +49,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -98,6 +100,9 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     @Inject
     private EntityMatchConfigurationService entityMatchConfigurationService;
 
+    @Inject
+    private TestEntityMatchService testEntityMatchService;
+
     private static final Tenant TENANT = new Tenant(
             MatchActorSystemTestNG.class.getSimpleName() + UUID.randomUUID().toString());
 
@@ -124,7 +129,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     private void testActorSystem(int numRequests, String decisionGraph, String expectedID, String domain, String duns)
             throws Exception {
         try {
-            entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, TENANT);
+            testEntityMatchService.bumpVersion(TENANT.getId());
             Integer maxRetries = null;
             try {
                 DecisionGraph dg = matchDecisionGraphService.getDecisionGraph(decisionGraph);
@@ -140,6 +145,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
 
             boolean hasError = false;
             String expectedEntityId = null;
+            int numNewlyAllocatedAccount = 0;
             for (OutputRecord result : matchRecords) {
                 int retries = getTravelRetriesFromTravelHistory(decisionGraph, result.getMatchLogs());
                 Assert.assertTrue(retries <= maxRetries);
@@ -167,7 +173,17 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                     if (record.getEntityId() != null) {
                         expectedEntityId = record.getEntityId();
                     }
+                    String accountEntityId = getNewAccountEntityId(record.getNewEntityIds());
+                    if (StringUtils.isNotBlank(accountEntityId)) {
+                        numNewlyAllocatedAccount++;
+                    }
                 }
+            }
+            if (decisionGraph.equals(ldcMatchDG)) {
+                Assert.assertEquals(numNewlyAllocatedAccount, 0, "LDC match should not allocate any new account.");
+            } else {
+                // entity match
+                Assert.assertEquals(numNewlyAllocatedAccount, 1, "Should only have one newly allocated account.");
             }
             Assert.assertFalse(hasError, "There are errors, see logs above.");
         } finally {
@@ -243,6 +259,14 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         }
         return new LinkedList<>(travelStops);
 
+    }
+
+    private String getNewAccountEntityId(Map<String, String> newEntityMap) {
+        if (MapUtils.isEmpty(newEntityMap)) {
+            return null;
+        }
+
+        return newEntityMap.get(BusinessEntity.Account.name());
     }
 
     private boolean verifyLDCMatchResult(InternalOutputRecord record, String expectedID) {

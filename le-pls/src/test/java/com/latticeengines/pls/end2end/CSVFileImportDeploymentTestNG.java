@@ -141,6 +141,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String dateFormatString2 = "MM.DD.YY";
         String timeFormatString2 = "00:00:00 24H";
         String timezone2 = "Asia/Shanghai";
+        String dateFormatString3 = "YYYY-MMM-DD";
+        String timeFormatString3 = "00:00 12H";
+        String timezone3 = "America/Chicago";
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (mapping.getUserField().equals("TestDate1")) {
                 mapping.setFieldType(UserDefinedType.DATE);
@@ -154,6 +157,12 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 mapping.setDateFormatString(dateFormatString2);
                 mapping.setTimeFormatString(timeFormatString2);
                 mapping.setTimezone(timezone2);
+            } else if (mapping.getUserField().equals("TestDate3")) {
+                mapping.setFieldType(UserDefinedType.DATE);
+                mapping.setMappedToLatticeField(false);
+                mapping.setDateFormatString(dateFormatString3);
+                mapping.setTimeFormatString(timeFormatString3);
+                mapping.setTimezone(timezone3);
             }
         }
 
@@ -239,6 +248,31 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(records.get(4).get(fieldName2).toString(), Long.toString(expected2d));
         log.info("Value returned for input 12.12.68 12:12:12 Asia/Shanghai was: "
                 + records.get(4).get(fieldName2).toString());
+
+
+        // Validate TestDate3
+        String fieldName3 = "user_TestDate3";
+        Assert.assertEquals(schema.getField(fieldName3).schema().getTypes().get(0).getType(), Schema.Type.LONG);
+        Assert.assertEquals(schema.getField(fieldName3).getProp("DateFormatString"), dateFormatString3);
+        Assert.assertEquals(schema.getField(fieldName3).getProp("TimeFormatString"), timeFormatString3);
+        Assert.assertEquals(schema.getField(fieldName3).getProp("Timezone"), timezone3);
+        // Check first three values of column.
+        long expected3a = computeTimestamp("1969-Dec-31 6:10 PM", true,
+                "yyyy-MMM-d h:m a", "GMT-6");
+        Assert.assertEquals(expected3a, 600000L);
+        Assert.assertEquals(records.get(0).get(fieldName3).toString(), Long.toString(expected3a));
+        long expected3b = computeTimestamp("2069-Dec-31 7:15 PM", true,
+                "yyyy-MMM-d h:m a", "GMT-6");
+        Assert.assertEquals(expected3b, 3155764500000L);
+        Assert.assertEquals(records.get(1).get(fieldName3).toString(), Long.toString(expected3b));
+        long expected3c = computeTimestamp("2019-Nov-11 11:11 AM", true,
+                "yyyy-MMM-d h:m a", "GMT-6");
+        Assert.assertEquals(expected3c, 1573492260000L);
+        Assert.assertEquals(records.get(2).get(fieldName3).toString(), Long.toString(expected3c));
+        long expected3d = computeTimestamp("1980-Jul-18 8:00 AM", true,
+                "yyyy-MMM-d h:m a", "GMT-5");
+        Assert.assertEquals(expected3d, 332773200000L);
+        Assert.assertEquals(records.get(3).get(fieldName3).toString(), Long.toString(expected3d));
     }
 
     @Test(groups = "deployment")

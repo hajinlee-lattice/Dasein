@@ -27,7 +27,7 @@ class MainComponent extends Component {
             if(this.props.play.targetSegment.accounts) {
                 counts.accounts = this.props.play.targetSegment.accounts;
             }
-            if(this.props.play.targetSegment.acontacts) {
+            if(this.props.play.targetSegment.contacts) {
                 counts.contacts = this.props.play.targetSegment.contacts;
             }
         }

@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface DropBoxService {
@@ -36,4 +37,5 @@ public interface DropBoxService {
 
     boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath);
 
+    List<FileProperty> getFileListForPath(String customerSpace, String s3Path);
 }

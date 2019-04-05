@@ -80,6 +80,10 @@ public class TimeStampConvertUtilsUnitTestNG {
 
     @Test(groups = { "unit", "functional" })
     public void testConvertToLongWithDateTimeFormatWithENLocale() {
+        String unsupportedDate = "13-April-17";
+        Assert.expectThrows(IllegalArgumentException.class, () -> TimeStampConvertUtils.convertToLong(unsupportedDate,
+                "DD-MMM-YY", "", ""));
+
         long actualTime = TimeStampConvertUtils.convertToLong("01-Feb-2018",
                 "DD-MMM-YYYY", "", "");
         Assert.assertEquals(actualTime, 1517443200000L);
@@ -98,6 +102,31 @@ public class TimeStampConvertUtilsUnitTestNG {
         actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018 01-23-45 Pm",
                 "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
         Assert.assertEquals(actualTime, 1522758225000L);
+
+        // Test Case 7: Date/time with format YYYY-MMM-DD 00:00 12H, in timezone America/Chicago.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("1969-Dec-31 6:10 PM",
+                "YYYY-MMM-DD", "00:00 12H", "America/Chicago");
+        Assert.assertEquals(actualTime, 600000L);
+
+        // Test Case 8: Date/time with format YYYY-MMM-DD 00:00 12H, in timezone America/Chicago, and month with
+        // improper casing.
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("1969-dEC-31 6:10 PM",
+                "YYYY-MMM-DD", "00:00 12H", "America/Chicago");
+        Assert.assertEquals(actualTime, 600000L);
+
+        // Test Case 9: Same as 6th case above, but with April in all capitals, eg. APR.
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("APR-3-2018 01-23-45 Pm",
+                "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
+        Assert.assertEquals(actualTime, 1522758225000L);
+
+        // Test Case 10: Same as 5th case above, but with February in all lowercase, eg. feb.
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("2018/feb/01",
+                "YYYY/MMM/DD", "", "");
+        Assert.assertEquals(actualTime, 1517443200000L);
     }
 
     // Test successful cases of date to timestamp conversion with various date/time formats.
@@ -187,24 +216,42 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "MM-DD-YYYY", "00:00:00 12H", "UTC");
         Assert.assertEquals(actualTime, 1522718635000L);
 
-        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
         // Test Case 16: Simple date with format MM/DD/YYYY, test start of Epoch.
+        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
         actualTime = TimeStampConvertUtils.convertToLong("1/1/1970",
                 "MM/DD/YYYY", "", "");
         Assert.assertEquals(actualTime, 0L);
 
-        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
         // Test Case 17: Simple date with format MM/DD/YYYY, but the start of day before Epoch in New York.
+        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
         actualTime = TimeStampConvertUtils.convertToLong("12/31/1969",
                 "MM/DD/YYYY", "", "America/New_York");
         Assert.assertEquals(actualTime, -68400000L);
 
-        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
         // Test Case 18: Simple date with format MM/DD/YYYY, but the start of day before Epoch in New York.
+        // From https://solutions.lattice-engines.com/browse/DP-9653: Testing pre-Epoch dates.
         actualTime = TimeStampConvertUtils.convertToLong("01/01/0100",
                 "MM/DD/YYYY", "", "UTC");
         Assert.assertEquals(actualTime, -59011459200000L);
-    }
+
+        // Test Case 19: Date/time with format MM.DD.YYYY 00:00 12H, in timezone America/Los_Angeles.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("11.02.2018 11:11 AM",
+                "MM.DD.YYYY", "00:00 12H", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1541182260000L);
+
+        // Test Case 20: Date/time with format YYYY-MM-DD 00:00 24H, in timezone America/New_York.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-04 19:10",
+                "YYYY-MM-DD", "00:00 24H", "America/New_York");
+        Assert.assertEquals(actualTime, 1554419400000L);
+
+        // Test Case 21: Date/time with format DD.MM.YY 00 00 24H, in timezone Pacific/Honolulu.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("31.01.70 00 00",
+                "DD.MM.YY", "00 00 24H", "Pacific/Honolulu");
+        Assert.assertEquals(actualTime, 3158388000000L);
+        }
 
     // Test error cases for date to timestamp conversion with date/time formats.
     @Test(groups = { "unit", "functional" })

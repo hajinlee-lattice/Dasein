@@ -152,7 +152,18 @@ ul.attr-list-results {
                 display: inline-block;
                 padding-left: 1em;
                 white-space: nowrap;
-                @include text-ellipsis;
+
+                span.attr-result-name {
+                    display: inline-block;
+                    width: 100%;
+                    height: 2.5em;
+                    
+                    > span {
+                        display: inline-block;
+                        width: 100%;
+                        @include text-ellipsis;
+                    }
+                }
             }
 
             i.fa-info-circle,

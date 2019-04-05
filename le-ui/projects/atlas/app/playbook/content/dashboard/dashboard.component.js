@@ -99,7 +99,9 @@ angular.module('lp.playbook.dashboard', [
         }
         return path.split('.').reduce(index, obj);
     }
-
+    vm.removePlayGroup = (playgroup) => {
+        console.log(playgroup)
+    }
     // var makeSimpleGraph = function(buckets, path) {
     //     console.log(buckets);
     //     var total =  0;
@@ -314,6 +316,7 @@ angular.module('lp.playbook.dashboard', [
 
     vm.changePlayGroups = function(args) {
         vm.play.playGroups = args;
+        console.log(args);
     }
 
     vm.savePlayGroups = function() {

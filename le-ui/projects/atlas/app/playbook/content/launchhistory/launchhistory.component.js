@@ -71,7 +71,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     // Set play name
     vm.playSelectChange = function(play){
 
-        console.log("play change");
+        // console.log("play change", play);
 
         if(play === undefined || play.length == 0){
             vm.playName = null;
@@ -84,6 +84,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.updateLaunchData();
     };
 
+    
     // Get data
     vm.updateLaunchData = function() {
 

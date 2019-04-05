@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -34,10 +35,12 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
@@ -80,7 +83,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
-        checkDelete(customerSpace, maintenanceOperationConfiguration);
+        checkDeleteAndImport(customerSpace, maintenanceOperationConfiguration);
 
         Long var = dataFeedProxy.lockExecution(customerSpace.toString(),
                 DataFeedExecutionJobType.CDLOperation);
@@ -229,9 +232,9 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         return fileName;
     }
 
-    private void checkDelete(CustomerSpace customerSpace,
-                             MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
-        Set<BusinessEntity> inusedEntity = new HashSet();
+    private void checkDeleteAndImport(CustomerSpace customerSpace,
+                                      MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+        Set<BusinessEntity> inusedEntity = new HashSet<>();
         List<Action> allAction = actionService.findAll();
         List<String> jobPidStrs = allAction.stream()
                 .filter(action -> action.getType() == ActionType.CDL_OPERATION_WORKFLOW && action.getTrackingPid() != null && action.getActionStatus() != ActionStatus.CANCELED)
@@ -254,7 +257,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                     (CleanupActionConfiguration) action.getActionConfiguration();
             inusedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
         }
-        Set<BusinessEntity> curEntity = new HashSet();
+        Set<BusinessEntity> curEntity = new HashSet<>();
         if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
             BusinessEntity businessEntity = ((CleanupOperationConfiguration) maintenanceOperationConfiguration)
                     .getEntity();
@@ -267,9 +270,34 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 curEntity.add(businessEntity);
             }
         }
+        Set<String> cleanupEntities = curEntity.stream().map(BusinessEntity::name).collect(Collectors.toSet());
         curEntity.retainAll(inusedEntity);//Take the intersection of two sets
         if (curEntity.size() > 0) {
             throw new RuntimeException("You can not submit more than one delete per entity");
+        }
+        // check import conflict
+        if (maintenanceOperationConfiguration instanceof CleanupAllConfiguration) {
+            CleanupAllConfiguration cleanupAllConfiguration = ((CleanupAllConfiguration) maintenanceOperationConfiguration);
+            CleanupOperationType type = cleanupAllConfiguration.getCleanupOperationType();
+            if (CleanupOperationType.ALL.equals(type) || CleanupOperationType.ALLDATAANDMETADATA.equals(type)) {
+                Set<Long> runningImportJobs = workflowProxy.getJobs(null, Collections.singletonList(
+                        "cdlDataFeedImportWorkflow"),
+                        Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName(), JobStatus.READY.getName()),
+                        false, customerSpace.getTenantId()).stream().map(Job::getPid).collect(Collectors.toSet());
+                List<Action> importActions = allAction.stream()
+                        .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && runningImportJobs.contains(action.getTrackingPid()))
+                        .collect(Collectors.toList());
+                for (Action action : importActions) {
+                    ImportActionConfiguration importActionConfiguration =
+                            (ImportActionConfiguration) action.getActionConfiguration();
+
+                    DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
+                            importActionConfiguration.getDataFeedTaskId());
+                    if (cleanupEntities.contains(dataFeedTask.getEntity())) {
+                        throw new RuntimeException("You can not submit delete ALL job while import job is running");
+                    }
+                }
+            }
         }
     }
 }

@@ -13,6 +13,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
@@ -29,6 +31,8 @@ import com.joestelmach.natty.Parser;
 
 public class TimeStampConvertUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
+
+    private static final Pattern MONTH = Pattern.compile("([a-zA-Z])([a-zA-Z]{2,})");
 
     // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
     // and to keep generated lists of user supported date formats, time formats, and time zones in order.
@@ -95,6 +99,13 @@ public class TimeStampConvertUtils {
         userToJavaTimeFormatMap.put("00-00-00 24H", "H-m-s");
         userToJavaTimeFormatMap.put("00 00 00 12H", "h m s a");
         userToJavaTimeFormatMap.put("00 00 00 24H", "H m s");
+
+        userToJavaTimeFormatMap.put("00:00 12H", "h:m a");
+        userToJavaTimeFormatMap.put("00:00 24H", "H:m");
+        userToJavaTimeFormatMap.put("00-00 12H", "h-m a");
+        userToJavaTimeFormatMap.put("00-00 24H", "H-m");
+        userToJavaTimeFormatMap.put("00 00 12H", "h m a");
+        userToJavaTimeFormatMap.put("00 00 24H", "H m");
     }
 
     // Set up static mappings for user exposed time zone format to Java 8 format.
@@ -289,6 +300,20 @@ public class TimeStampConvertUtils {
         // Now turn any whitespace larger than one space into exactly one space.
         // NOTE: This won't work if date formats have whitespace in them.
         dateTime = dateTime.replaceFirst("(\\s\\s+)", " ");
+
+        // Heuristic for https://solutions.lattice-engines.com/browse/DP-9768.
+        // Assume any contiguous set of 3 or more letters is a month in long format and convert it to Title Case
+        // (first letter capitalized) to allow Java 8 DateTimeFormatter to work properly.
+        Matcher matcher = MONTH.matcher(dateTime);
+        if (matcher.find() && matcher.groupCount() == 2) {
+            log.debug("Reformatting text form of month to proper case for Java DateTimeFormatter.");
+            log.debug("Original dateTime is: " + dateTime);
+            //log.debug("Group 1 is: " + matcher.group(1));
+            //log.debug("Group 2 is: " + matcher.group(2));
+            dateTime = dateTime.replaceFirst(matcher.group(1) + matcher.group(2),
+                    matcher.group(1).toUpperCase() + matcher.group(2).toLowerCase());
+            log.debug("Formatted month dateTime is: " + dateTime);
+        }
 
         try {
             // Check if a date format string is provided which allows the usage of LocalDateTime from Java 8.

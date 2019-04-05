@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.lp;
 
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public interface SourceFileProxy {
@@ -20,4 +21,5 @@ public interface SourceFileProxy {
 
     SourceFile findByTableNameCrossTenant(String tableName);
 
+    SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity);
 }

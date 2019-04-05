@@ -403,18 +403,26 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
-                    if (importanceOrdering.containsKey(toReturn.getAttrName())) {
-                        // could move this into le-metadata as a decorator
-                        toReturn.setImportanceOrdering(importanceOrdering.get(toReturn.getAttrName()));
-                        importanceOrdering.remove(toReturn.getAttrName());
-                    }
-                    cm.setPredictivePower(predictors.getOrDefault(toReturn.getAttrName(), new Predictor())
-                            .getUncertaintyCoefficient());
-                    cm.setEntity(BusinessEntity.Account);
                     cm.setSubcategory("Other");
                     return toReturn;
 
                 }, () -> iterationAttributes).block();
+
+        if (MapUtils.isEmpty(modelingAttributes)) {
+            throw new LedpException(LedpCode.LEDP_40036,
+                    new String[] { "Modeling Attributes", aiModel.getId(), ratingEngine.getId(), customerSpace });
+        }
+
+        modelingAttributes.forEach((k, cm) -> {
+            if (importanceOrdering.containsKey(cm.getAttrName())) {
+                // could move this into le-metadata as a decorator
+                cm.setImportanceOrdering(importanceOrdering.get(cm.getAttrName()));
+                importanceOrdering.remove(cm.getAttrName());
+            }
+            cm.setPredictivePower(
+                    predictors.getOrDefault(cm.getAttrName(), new Predictor()).getUncertaintyCoefficient());
+            cm.setEntity(BusinessEntity.Account);
+        });
 
         if (MapUtils.isNotEmpty(importanceOrdering)) {
             log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
@@ -493,7 +501,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 && CollectionUtils.isNotEmpty(predictor.getPredictorElements());
         cm.setCanEnrich(!predictorsElementsExist);
         attrStat.setNonNullCount(predictorsElementsExist
-                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum() : 0);
+                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum()
+                : 0);
         attrStat.getBuckets()
                 .setBucketList(predictorsElementsExist
                         ? predictor.getPredictorElements().stream().map(this::convertToBucket)

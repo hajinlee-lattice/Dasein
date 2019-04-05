@@ -55,6 +55,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     // Match result: entity -> entityId
     private final Map<String, String> entityIds = new HashMap<>();
+    // Newly Allocated EntityIDs: entity -> entityId
+    private final Map<String, String> newEntityIds = new HashMap<>();
 
 
     /***************************************************************************
@@ -208,6 +210,17 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public Map<String, String> getEntityIds() {
         return entityIds;
+    }
+
+    public void addNewlyAllocatedEntityId(String entityId) {
+        if (StringUtils.isBlank(entityId)) {
+            return;
+        }
+        newEntityIds.put(entity, entityId);
+    }
+
+    public Map<String, String> getNewEntityIds() {
+        return newEntityIds;
     }
 
     @MetricField(name = "LatticeAccountId")
