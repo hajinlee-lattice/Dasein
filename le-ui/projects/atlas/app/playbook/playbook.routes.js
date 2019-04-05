@@ -93,7 +93,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: '',
-                            launchStates: 'Launching,Launched,Failed',
+                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
                             sortby: 'created',
                             descending: true,
                             offset: 0,
@@ -109,7 +109,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: '',
-                            launchStates: 'Launching,Launched,Failed',
+                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
                             startTimestamp: 0
                         };
 
@@ -125,7 +125,7 @@ angular
                         launches = LaunchHistoryData,
                         uniqueLookupIdMapping = launches.uniqueLookupIdMapping,
                         allCountQuery = {
-                            launchStates: 'Launching,Launched,Failed',
+                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
                             offset: 0,
                             startTimestamp: 0,
                             orgId: '',
@@ -147,7 +147,7 @@ angular
 
                                 var countParams = {
                                     playName: $stateParams.play_name,
-                                    launchStates: 'Launching,Launched,Failed',
+                                    launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
                                     offset: 0,
                                     startTimestamp: 0,
                                     orgId: val.orgId,
@@ -590,7 +590,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: $stateParams.play_name,
-                            launchStates: 'Launching,Launched,Failed',
+                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
                             sortBy: 'created',
                             descending: true,
                             offset: 0,
@@ -605,7 +605,7 @@ angular
                     var deferred = $q.defer(),
                         params = {
                             playName: $stateParams.play_name,
-                            launchStates: 'Launching,Launched,Failed',
+                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
                             startTimestamp: 0
                         };
 
