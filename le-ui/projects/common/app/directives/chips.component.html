@@ -43,7 +43,7 @@
                 ng-class="(isRowSelected($index)) ?'query-result-row-selected-test' : ''"
                 ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()">
                 <span ng-click="chooseItem(item)">{{getDisplayName(item)}}</span>
-                <i class="fa fa-trash-o" aria-hidden="true" ng-if="removeRow == true" ng-click="removeRow(item)"></i>
+                <i class="fa fa-trash-o" aria-hidden="true" ng-if="showRemove()" ng-click="removeRow(item)"></i>
             </div>
         </div>
     </div>
