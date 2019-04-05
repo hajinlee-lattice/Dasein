@@ -192,33 +192,62 @@ angular
                 pageTitle: 'Campaign Overview',
                 play_name: ''
             },
-            onEnter: ['Play', 'BackStore', function(Play, BackStore) {
-                BackStore.setBackLabel(Play.displayName);
-                BackStore.setBackState('home.playbook');
-                BackStore.setHidden(false);
+            onEnter: function (ReduxService, $state) {
+                // BackStore.setBackLabel(Play.displayName);
+                // BackStore.setBackState('home.playbook');
+                // BackStore.setHidden(false);
 
-            }],
+                ReduxService.connect(
+                    'playbook.overview',
+                    actions,
+                    reducer,
+                    $state.get('home.playbook.overview')
+                );
+            },
+            onExit: function ($state) {
+                $state.get('home.playbook.overview').data.redux.unsubscribe();
+            },
             resolve: {
                 Play: ($q, $state, $stateParams, $ngRedux, OverviewService) => {
-                    let redux = $state.get('home.playbook').data.redux;
+                //     let redux = $state.get('home.playbook').data.redux;
 
                     var deferred = $q.defer();
 
-                    if(!redux.store.play) {
-                        redux.fetchPlay($stateParams.play_name);
+                //     if(!redux.store.play) {
+                //         redux.fetchPlay($stateParams.play_name);
 
-                        $ngRedux.subscribe(state => {
-                            OverviewService.setPlay(redux.store.play);
-                            deferred.resolve(redux.store.play);
-
-                        });
-                    } else {
-                        OverviewService.setPlay(redux.store.play);
-                        deferred.resolve(redux.store.play);
-                    }
+                //         $ngRedux.subscribe(state => {
+                //            console.log('Play subscribe:', state);
+                //            OverviewService.setPlay(redux.store.play);
+                //            deferred.resolve(redux.store.play);
+                //         });
+                //     } else {
+                //         OverviewService.setPlay(redux.store.play);
+                        deferred.resolve({});
+                //     }
 
                     return deferred.promise;
                 },
+                // Connections: ($q, $state, $stateParams, $ngRedux, OverviewService) => {
+                //     let redux = $state.get('home.playbook').data.redux;
+
+                //     var deferred = $q.defer();
+
+                //     if(!redux.store.connections) {
+                //         redux.fetchConnections($stateParams.play_name);
+
+                //         $ngRedux.subscribe(state => {
+                //             //OverviewService.setConnections(redux.store.connections);
+                //             deferred.resolve(redux.store.connections);
+
+                //         });
+                //     } else {
+                //         //OverviewService.setConnections(redux.store.connections);
+                //         deferred.resolve(redux.store.connections);
+                //     }
+
+                //     return deferred.promise;
+                // },
                 CampaignTypes: () => {
                     return false;
                 }
