@@ -91,7 +91,7 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
 
     // FIXME: Disable all the deployment tests related to Entity Match to tune
     // Decision Graph in QA with PM
-    @BeforeClass(groups = "deployment", enabled = true)
+    @BeforeClass(groups = "deployment", enabled = false)
     public void init() {
         HdfsPodContext.changeHdfsPodId(POD_ID);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -103,13 +103,13 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         log.info("Tenant ID: {}", tenant.getId());
     }
 
-    @AfterClass(groups = "deployment", enabled = true)
+    @AfterClass(groups = "deployment", enabled = false)
     public void destroy() {
         tenantService.discardTenant(tenant);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void test() {
         // instantiate test verifier
         AdvancedAccountMatchTestResultVerifier verifier = new AdvancedAccountMatchTestResultVerifier(tenant,
