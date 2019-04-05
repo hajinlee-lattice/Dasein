@@ -63,12 +63,7 @@ public class CalculateExpectedRevenuePercentile
         context = new ParsedContext(parameters);
 
         Node inputTable = addSource(context.inputTableName);
-        Node addBackupPredictedRevColumn = inputTable.addColumnWithFixedValue(context.backupPredictedRevFieldName, null,
-                Double.class);
-        Node addBackupProbabilityColumn = addBackupPredictedRevColumn
-                .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
-        Node addPercentileColumn = addBackupProbabilityColumn.addColumnWithFixedValue(context.percentileFieldName, null,
-                Integer.class);
+        Node addPercentileColumn = inputTable.addColumnWithFixedValue(context.percentileFieldName, null, Integer.class);
 
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());
 
@@ -111,6 +106,16 @@ public class CalculateExpectedRevenuePercentile
                 log.info(String.format("fitFunctionParametersMap = %s",
                         JsonUtils.serialize(context.fitFunctionParametersMap)));
 
+                // leaving the code for taking backup of PredictedRev and
+                // Probability so that we can easily enable it in future. To
+                // enable the backup just move next two lines between
+                // declaration of Node inputTable and Node addPercentileColumn
+                // and update Node references accordingly
+                Node addBackupPredictedRevColumn = calculatePercentile
+                        .addColumnWithFixedValue(context.backupPredictedRevFieldName, null, Double.class);
+                Node addBackupProbabilityColumn = addBackupPredictedRevColumn
+                        .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
+
                 // initialize expectedRevenueFitter based on corresponding
                 // fit function parameters
                 //
@@ -123,7 +128,7 @@ public class CalculateExpectedRevenuePercentile
                 // percentile column ("Score") as downstream processing expects
                 // final percentiles into original percentile column
 
-                calculatePercentile = calculateFittedExpectedRevenue(retainedFields, calculatePercentile);
+                calculatePercentile = calculateFittedExpectedRevenue(retainedFields, addBackupProbabilityColumn);
 
                 calculatePercentile = calculateFinalPercentile(retainedFields, calculatePercentile);
 
