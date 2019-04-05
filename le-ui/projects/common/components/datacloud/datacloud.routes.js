@@ -111,7 +111,7 @@ angular
                 QueryRestriction: [function() {
                     return null;
                 }],
-                CurrentConfiguration: [function() {
+                WorkingBuckets: [function() {
                     return null;
                 }],
                 RatingsEngineModels: [function() {

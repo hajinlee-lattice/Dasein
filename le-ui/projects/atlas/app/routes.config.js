@@ -381,7 +381,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
                 },
                 LookupResponse: () => { return { attributes: null } },
                 QueryRestriction: () => { return null },
-                CurrentConfiguration: () => { return null },
+                WorkingBuckets: () => { return null },
                 RatingsEngineModels: () => { return null }
             },
             views: {
@@ -449,7 +449,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
         .state('home.model.ratings', {
             url: '/ratings',
             resolve: {
-                CurrentConfiguration: function (
+                WorkingBuckets: function (
                     $q,
                     $stateParams,
                     ModelRatingsService
