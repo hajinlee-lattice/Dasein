@@ -28,7 +28,9 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     private static final String SEARCH_DISPLAY_NAME_STR3 = "Intent Change Users Database";
     private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "Database Intent Users Change";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
-    private static final int MAX_DESELECT = 2;
+    private static final int MAX_NORMAL_DESELECT = 1;
+    private static final int MAX_PREMIUM_DESELECT = 1;
+    private static final int MAX_DESELECT = MAX_NORMAL_DESELECT + MAX_PREMIUM_DESELECT;
     private static final int MAX_SELECT = 1;
     private static final int MAX_PREMIUM_SELECT = 2;
     private int selectCount = 0;
@@ -119,8 +121,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributeCountBeforeSave" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave() {
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
@@ -128,14 +129,12 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
     public void testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave() {
         checkLimitation();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave" })
     public void testSaveLeadEnrichmentAttributes() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
@@ -235,8 +234,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         checkLimitation();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentPremiumAttributesLimitation" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitation" })
     public void testGetLeadEnrichmentSelectedAttributeCount() {
         String url = apiHostPort + "/score/enrichment/selectedattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
@@ -252,8 +250,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributePremiumCount" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributePremiumCount" })
     public void testSaveLeadEnrichmentAttributesForSecondSave() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
@@ -296,8 +293,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentAttributesAfterSecondSave" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentAttributesAfterSecondSave" })
     public void testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave() {
         checkLimitation();
     }
@@ -311,8 +307,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountAfterSecondSave() {
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
@@ -505,32 +500,43 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
         selectCount = 0;
         premiumSelectCount = 0;
-        deselectCount = 0;
+        int deselectNormalCount = 0;
+        int deselectPremiumCount = 0;
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
             if (attr.getIsSelected()) {
-                if (deselectCount < MAX_DESELECT) {
-                    deselectCount++;
+                if (deselectNormalCount < MAX_NORMAL_DESELECT && !attr.getIsPremium()) {
+                    deselectNormalCount++;
                     attr.setIsSelected(false);
                     deselectedAttributeList.add(attr.getFieldName());
                     System.out.println(
-                            "Try to delete" + (attr.getIsPremium() ? " premium" : "") + ": " + attr.getDisplayName());
+                            String.format("Try to delete: %s (%s)", attr.getFieldName(), attr.getDisplayName()));
+                } else if (deselectPremiumCount < MAX_PREMIUM_DESELECT && attr.getIsPremium()) {
+                    deselectPremiumCount++;
+                    attr.setIsSelected(false);
+                    deselectedAttributeList.add(attr.getFieldName());
+                    System.out.println(String.format("Try to delete premium: %s (%s)", attr.getFieldName(),
+                            attr.getDisplayName()));
                 }
             } else {
                 if (selectCount < MAX_SELECT && !attr.getIsPremium()) {
                     selectCount++;
                     attr.setIsSelected(true);
                     newSelectedAttributeList.add(attr.getFieldName());
-                    System.out.println("Try to add: " + attr.getDisplayName());
+                    System.out
+                            .println(String.format("Try to add: %s (%s)", attr.getFieldName(), attr.getDisplayName()));
                 } else if (premiumSelectCount < MAX_PREMIUM_SELECT && attr.getIsPremium()) {
                     premiumSelectCount++;
                     attr.setIsSelected(true);
                     attr.setIsPremium(true);
                     newSelectedAttributeList.add(attr.getFieldName());
-                    System.out.println("Try to add premium: " + attr.getDisplayName());
+                    System.out.println(
+                            String.format("Try to add premium: %s (%s)", attr.getFieldName(), attr.getDisplayName()));
                 }
             }
         }
+
+        deselectCount = deselectNormalCount + deselectPremiumCount;
 
         return attributesOperationMap;
     }
