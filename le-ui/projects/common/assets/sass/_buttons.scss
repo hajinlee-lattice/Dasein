@@ -354,6 +354,12 @@ input::-moz-focus-inner {
 .button-group > .button-group {
   float: left;
 }
+.button-group > button:not(:last-child):not(:first-child) {
+  border-right: none;
+}
+.button-group * {
+  transition: none;
+}
 .button-group > .button-group:not(:first-child):not(:last-child) > .button {
   border-radius: 0;
 }

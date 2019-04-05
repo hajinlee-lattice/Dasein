@@ -93,7 +93,7 @@ attr-categories,
             position: absolute;
             left: -1em;
             right: -1em;
-            margin-top: 3.75em;
+            margin-top: 3.6em;
             z-index: 2;
         }
         .pd-pagination-prev {
@@ -111,9 +111,36 @@ attr-categories,
     .carousel-container {
         position: relative;
 
-        &:hover .enrichment-wizard-category-pagination {
+        .enrichment-wizard-category-pagination {
             opacity: 1;
         }
+
+        button.pd-pagination-prev,
+        button.pd-pagination-next {
+            background-color: #fff;
+            border-color: #ccc;
+            color: #bbb;
+            border-radius: 50%;
+            width: 31px;
+            
+            &:hover {
+                border-color: #aaa;
+                color: #999;
+            };S
+            
+            &:active {
+                border-color: #bbb;
+                color: #aaa;
+            };
+        }
+
+        button.borderless-button.pd-pagination-prev {
+            left: -1px;
+        }
+
+        button.borderless-button.pd-pagination-next {
+            right: -1px;
+        } 
     }
     .filters-tabs {
         @include flex-container;

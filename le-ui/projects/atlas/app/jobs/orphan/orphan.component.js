@@ -3,7 +3,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
     bindings: {
         OrphanCounts: '<'
     },
-    controller: function(
+    controller: function (
         JobsStore,
         JobsService,
         SegmentService,
@@ -34,7 +34,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: '10 items',
                         icon: 'numeric',
-                        click: function() {
+                        click: function () {
                             vm.pagesize = 10;
                             vm.currentPage = 1;
                             FilterService.setFilters('jobs.orphan.pagesize', {
@@ -45,7 +45,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: '25 items',
                         icon: 'numeric',
-                        click: function() {
+                        click: function () {
                             vm.pagesize = 25;
                             vm.currentPage = 1;
                             FilterService.setFilters('jobs.orphan.pagesize', {
@@ -56,7 +56,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: '50 items',
                         icon: 'numeric',
-                        click: function() {
+                        click: function () {
                             vm.pagesize = 50;
                             vm.currentPage = 1;
                             FilterService.setFilters('jobs.orphan.pagesize', {
@@ -67,7 +67,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: '100 items',
                         icon: 'numeric',
-                        click: function() {
+                        click: function () {
                             vm.pagesize = 100;
                             vm.currentPage = 1;
                             FilterService.setFilters('jobs.orphan.pagesize', {
@@ -105,7 +105,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: `Export ${
                             vm.orphanCounts['Unmatched Accounts']
-                        } Unmatched Accounts`,
+                            } Unmatched Accounts`,
                         icon: 'fa fa-building-o',
                         //disabledif: vm.orphanCounts["Unmatched Accounts"] === 0,
                         click: postOrphanWorkflow.bind(
@@ -116,7 +116,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: `Export ${
                             vm.orphanCounts['Orphan Contacts']
-                        } Orphaned Contacts`,
+                            } Orphaned Contacts`,
                         icon: 'fa fa-briefcase',
                         //disabledif: vm.orphanCounts["Orphan Contacts"] === 0,
                         click: postOrphanWorkflow.bind(null, 'CONTACT')
@@ -124,7 +124,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
                     {
                         label: `Export ${
                             vm.orphanCounts['Orphan Transactions']
-                        } Orphaned Product Purchases`,
+                            } Orphaned Product Purchases`,
                         icon: 'fa fa-users',
                         //disabledif: vm.orphanCounts["Orphan Transactions"] === 0,
                         click: postOrphanWorkflow.bind(null, 'TRANSACTION')
@@ -143,10 +143,10 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
         function postOrphanWorkflow(orphanType) {
             switch (orphanType) {
                 case 'UNMATCHED_ACCOUNT':
-                    var orphanDisplayName = 'Orphaned Product Purchases';
+                    var orphanDisplayName = 'Unmatched Accounts';
                     break;
                 case 'TRANSACTION':
-                    var orphanDisplayName = 'Unmatched Accounts';
+                    var orphanDisplayName = 'Orphaned Product Purchases';
                     break;
                 default:
                     var orphanDisplayName = 'Orphaned Contacts';
@@ -168,7 +168,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
             });
         }
 
-        vm.init = function() {
+        vm.init = function () {
             // vm.loading = true;
             // JobsStore.getJobs(false).then(function (result) {
             vm.jobs = JobsStore.getList('orphan');
@@ -183,7 +183,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
 
         this.init();
 
-        vm.isExpired = function(job) {
+        vm.isExpired = function (job) {
             var currentTime = Date.now();
             var isExpiredId =
                 job.inputs['EXPORT_ID'] == 'ORPHAN_ARTIFACT_EXPIRED';
@@ -195,9 +195,9 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
             return isExpiredId || isExpiredTime;
         };
 
-        vm.downloadOrphanExport = function(exportId) {
+        vm.downloadOrphanExport = function (exportId) {
             if (exportId && exportId !== null) {
-                SegmentService.DownloadExportedOrphans(exportId).then(function(
+                SegmentService.DownloadExportedOrphans(exportId).then(function (
                     result
                 ) {
                     var contentDisposition = result.headers(
@@ -221,7 +221,7 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
             }
         };
 
-        vm.getStatus = function(job) {
+        vm.getStatus = function (job) {
             switch (job.jobStatus) {
                 case 'Failed':
                     return 'Failed';
@@ -235,11 +235,11 @@ angular.module('lp.jobs.orphan', []).component('orphanExportList', {
             }
         };
 
-        vm.hideDownloadMessage = function() {
+        vm.hideDownloadMessage = function () {
             vm.showDownloadMessage = false;
         };
 
-        vm.clearMessages = function() {
+        vm.clearMessages = function () {
             vm.successMsg = null;
             vm.errorMsg = null;
             vm.queuedMsg = null;

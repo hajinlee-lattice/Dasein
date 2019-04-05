@@ -5,6 +5,7 @@ import 'atlas/notes/notes.index';
 import 'atlas/playbook/playbook.index';
 import 'atlas/ratingsengine/ratingsengine.index';
 import 'atlas/setup/setup.index';
+import 'atlas/segmentation/segmentation.index';
 import 'atlas/segments/segments.index';
 import 'atlas/sfdc/sfsc.index';
 import 'atlas/ssoconfig/ssocinfig.index';

@@ -22,30 +22,36 @@ export default class LePagination extends Component {
     }
   }
 
-  getFormTo(page) {
+  getFromTo(page) {
     let from = (page - 1) * this._perPage;
     let to = page * this._perPage;
+    let current = this.state.current;
     if (to > this._total) {
       to = this._total;
     }
-    return { from: from, to: to };
+    return { from, to, current };
   }
 
   componentDidMount() {
-    this.clickHandler("first");
+    this.clickHandler("current");
   }
 
   clickHandler(direction) {
     switch (direction) {
+      case "current":
+        this.setState({ current: this.state.current }, () => {
+          this.props.callback(this.getFromTo(this.state.current));
+        });
+        break;
       case "first":
         this.setState({ current: 1 }, () => {
-          this.props.callback(this.getFormTo(this.state.current));
+          this.props.callback(this.getFromTo(this.state.current));
         });
         break;
       case "next":
         if (this.state.current < this._numPages) {
           this.setState({ current: this.state.current + 1 }, () => {
-            this.props.callback(this.getFormTo(this.state.current));
+            this.props.callback(this.getFromTo(this.state.current));
           });
         }
         break;
@@ -53,14 +59,14 @@ export default class LePagination extends Component {
       case "prev":
         if (this.state.current > 1) {
           this.setState({ current: this.state.current - 1 }, () => {
-            this.props.callback(this.getFormTo(this.state.current));
+            this.props.callback(this.getFromTo(this.state.current));
           });
         }
 
         break;
       case "last":
         this.setState({ current: this._numPages }, () => {
-          this.props.callback(this.getFormTo(this.state.current));
+          this.props.callback(this.getFromTo(this.state.current));
         });
         break;
     }
@@ -71,7 +77,7 @@ export default class LePagination extends Component {
         <div
           className={`pd-pagination ${
             this.props.className ? this.props.className : ""
-          }`}
+            }`}
         >
           <LeButton
             name="borderless-former"
