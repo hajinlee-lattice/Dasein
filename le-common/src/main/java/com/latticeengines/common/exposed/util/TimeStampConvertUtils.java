@@ -95,6 +95,13 @@ public class TimeStampConvertUtils {
         userToJavaTimeFormatMap.put("00-00-00 24H", "H-m-s");
         userToJavaTimeFormatMap.put("00 00 00 12H", "h m s a");
         userToJavaTimeFormatMap.put("00 00 00 24H", "H m s");
+
+        userToJavaTimeFormatMap.put("00:00 12H", "h:m a");
+        userToJavaTimeFormatMap.put("00:00 24H", "H:m");
+        userToJavaTimeFormatMap.put("00-00 12H", "h-m a");
+        userToJavaTimeFormatMap.put("00-00 24H", "H-m");
+        userToJavaTimeFormatMap.put("00 00 12H", "h m a");
+        userToJavaTimeFormatMap.put("00 00 24H", "H m");
     }
 
     // Set up static mappings for user exposed time zone format to Java 8 format.
