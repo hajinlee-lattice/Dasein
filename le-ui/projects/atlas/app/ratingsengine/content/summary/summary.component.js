@@ -42,9 +42,8 @@ angular.module('lp.ratingsengine.wizard.summary', [])
         } else {
         	vm.ratingStatus = false;
         }
-
+        vm.rating.displayName = vm.rating.displayName.substring(0,50);
         vm.isValid = true;
-
     };
 
     vm.changeDetails = function(){

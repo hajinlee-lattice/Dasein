@@ -48,74 +48,6 @@ angular
                         return null;
                     }
                 },
-                HasRatingsAvailable: function(){
-                    return null;
-                }
-            },
-            redirectTo: 'home.playbook.plays'
-        })
-        .state('home.playbook.plays', {
-            url: '/plays',
-            views: {
-                "summary@": {
-                    controller: 'PlayListTabsController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/playlist/tabs/playlisttabs.component.html'
-                }
-            },
-            redirectTo: 'home.playbook.plays.list'
-        })
-        .state('home.playbook.plays.list', {
-            url: '/list',
-            params: {
-                pageIcon: 'ico-playbook',
-                pageTitle: 'Campaign Playbook'
-            },
-            resolve: {
-                PlayList: function($q, PlaybookWizardStore) {
-                    var deferred = $q.defer();
-
-                    PlaybookWizardStore.getPlays().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }
-            },
-            views: {
-                "main@": {
-                    controller: 'PlayListController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/playlist/playlist.component.html'
-                }
-            }
-        })
-        .state('home.playbook.plays.launchhistory', {
-            url: '/launchhistory',
-            resolve: {
-                LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer(),
-                        params = {
-                            playName: '',
-                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
-                            sortby: 'created',
-                            descending: true,
-                            offset: 0,
-                            max: 10
-                        };
-
-                    PlaybookWizardStore.getPlayLaunches(params).then(function(result){
-                        deferred.resolve(result);
-                    });
-                    return deferred.promise;
-                },
-                LaunchHistoryCount: function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer(),
-                        params = {
-                            playName: '',
-                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
-                            startTimestamp: 0
-                        };
                 redirectTo: 'home.playbook.plays'
             })
             .state('home.playbook.plays', {
@@ -146,19 +78,6 @@ angular
                         return deferred.promise;
                     }
                 },
-                FilterData: function($q, $timeout, $stateParams, PlaybookWizardStore, LaunchHistoryData) {
-
-                    var deferred = $q.defer(),
-                        filterItems = [],
-                        launches = LaunchHistoryData,
-                        uniqueLookupIdMapping = launches.uniqueLookupIdMapping,
-                        allCountQuery = {
-                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
-                            offset: 0,
-                            startTimestamp: 0,
-                            orgId: '',
-                            externalSystemType: ''
-                        }
                 views: {
                     "main@": {
                         controller: 'PlayListController',
@@ -213,26 +132,6 @@ angular
                                 externalSystemType: ''
                             }
 
-                                var countParams = {
-                                    playName: $stateParams.play_name,
-                                    launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
-                                    offset: 0,
-                                    startTimestamp: 0,
-                                    orgId: val.orgId,
-                                    externalSysType: val.externalSystemType
-                                }
-                                PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result) {
-                                    filterItems.push({ 
-                                        label: val.orgName,
-                                        data: {
-                                            orgName: val.orgName,
-                                            externalSystemType: val.externalSystemType,
-                                            destinationOrgId: val.orgId
-                                        }, 
-                                        action: {
-                                            destinationOrgId: val.orgId
-                                        },
-                                        total: result.toString()
                         PlaybookWizardStore.getPlayLaunchCount(allCountQuery).then(function (result) {
                             filterItems.push({
                                 label: "All",
@@ -709,43 +608,6 @@ angular
                         templateUrl: 'app/playbook/content/launchhistory/launchhistory.component.html'
                     }
                 }
-            }
-        })
-        .state('home.playbook.dashboard.launchhistory', {
-            url: '/launchhistory',
-            params: {
-                pageIcon: 'ico-refine',
-                pageTitle: 'Launch History',
-                section: 'dashboard.launchhistory'
-            },
-            resolve: {
-                LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer(),
-                        params = {
-                            playName: $stateParams.play_name,
-                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
-                            sortBy: 'created',
-                            descending: true,
-                            offset: 0,
-                            max: 10
-                        };
-                    PlaybookWizardStore.getPlayLaunches(params).then(function(result) {
-                        deferred.resolve(result);
-                    });
-                    return deferred.promise;
-                }, 
-                LaunchHistoryCount: function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer(),
-                        params = {
-                            playName: $stateParams.play_name,
-                            launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
-                            startTimestamp: 0
-                        };
-
-                    PlaybookWizardStore.getPlayLaunchCount(params).then(function(result){
-                        deferred.resolve(result);
-                    });
-                    return deferred.promise;
             })
             .state('home.playbook.dashboard.launch_job', {
                 url: '/launch/:applicationId/job',
