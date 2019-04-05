@@ -106,6 +106,16 @@ public class CalculateExpectedRevenuePercentile
                 log.info(String.format("fitFunctionParametersMap = %s",
                         JsonUtils.serialize(context.fitFunctionParametersMap)));
 
+                // leaving the code for taking backup of PredictedRev and
+                // Probability so that we can easily enable it in future. To
+                // enable the backup just move next two lines between
+                // declaration of Node inputTable and Node addPercentileColumn
+                // and update Node references accordingly
+                Node addBackupPredictedRevColumn = calculatePercentile
+                        .addColumnWithFixedValue(context.backupPredictedRevFieldName, null, Double.class);
+                Node addBackupProbabilityColumn = addBackupPredictedRevColumn
+                        .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
+
                 // initialize expectedRevenueFitter based on corresponding
                 // fit function parameters
                 //
@@ -117,11 +127,6 @@ public class CalculateExpectedRevenuePercentile
                 // copy values of ExpectedRevenuePercentile in original
                 // percentile column ("Score") as downstream processing expects
                 // final percentiles into original percentile column
-
-                Node addBackupPredictedRevColumn = calculatePercentile
-                        .addColumnWithFixedValue(context.backupPredictedRevFieldName, null, Double.class);
-                Node addBackupProbabilityColumn = addBackupPredictedRevColumn
-                        .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
 
                 calculatePercentile = calculateFittedExpectedRevenue(retainedFields, addBackupProbabilityColumn);
 
