@@ -738,6 +738,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         HdfsDataUnit unit = new HdfsDataUnit();
         unit.setName(alias);
         unit.setPath(PathUtils.toAvroGlob(this.getExtracts().get(0).getPath()));
+        unit.setCount(this.getExtracts().get(0).getProcessedRecords());
         return unit;
     }
 }

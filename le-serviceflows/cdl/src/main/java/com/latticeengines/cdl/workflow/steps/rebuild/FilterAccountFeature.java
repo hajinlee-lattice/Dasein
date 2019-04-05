@@ -1,9 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPIER;
+import static com.latticeengines.domain.exposed.cache.CacheName.TableRoleMetadataCache;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,15 +13,17 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.cdl.workflow.steps.update.FilterAccountFeatureDiff;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -31,22 +33,28 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
+import com.latticeengines.spark.exposed.job.common.CopyJob;
 
-@Component(GenerateAccountFeature.BEAN_NAME)
+
+@Component(FilterAccountFeature.BEAN_NAME)
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepConfiguration> {
+public class FilterAccountFeature extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig, CopyJob> {
 
-    static final String BEAN_NAME = "generateAccountFeature";
+    private static final Logger log = LoggerFactory.getLogger(FilterAccountFeatureDiff.class);
 
-    private static final Logger log = LoggerFactory.getLogger(GenerateAccountFeature.class);
+    static final String BEAN_NAME = "filterAccountFeature";
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -54,18 +62,22 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
+
+    private boolean shortCutMode = false;
     private DataCollection.Version inactive;
-    private String fullAccountTableName;
-    private String accountFeaturesTablePrefix = "AccountFeatures";
 
     @Override
-    protected BusinessEntity getEntity() {
-        return BusinessEntity.Account;
+    protected Class<CopyJob> getJobClz() {
+        return CopyJob.class;
     }
 
     @Override
-    protected TransformationWorkflowConfiguration executePreTransformation() {
-        customerSpace = configuration.getCustomerSpace();
+    protected CopyConfig configureJob(ProcessAccountStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
         String accountFeatureTableName = getStringValueFromContext(ACCOUNT_FEATURE_TABLE_NAME);
@@ -73,13 +85,14 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
             Table accountFeatureTable = metadataProxy.getTable(customerSpace.toString(), accountFeatureTableName);
             if (accountFeatureTable != null) {
                 log.info("Found account feature table in context, going thru short-cut mode.");
+                shortCutMode = true;
                 dataCollectionProxy.upsertTable(customerSpace.toString(), accountFeatureTableName, //
                         TableRoleInCollection.AccountFeatures, inactive);
                 return null;
             }
         }
 
-        fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
+        String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
         if (StringUtils.isBlank(fullAccountTableName)) {
             throw new IllegalStateException("Cannot find the fully enriched account table");
         }
@@ -87,55 +100,36 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
         if (fullAccountTable == null) {
             throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
         }
-        long count = ScalingUtils.getTableCount(fullAccountTable);
-        int multiplier = ScalingUtils.getMultiplier(count);
-        if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on fully enriched account table count=" + count);
-            scalingMultiplier = multiplier;
-        }
 
-        PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        CopyConfig config = new CopyConfig();
+        config.setAddTimestampAttrs(false);
+        config.setInput(Collections.singletonList(fullAccountTable.toHdfsDataUnit("FullAccount")));
+        config.setSelectAttrs(getRetrainAttrs());
+        return config;
     }
 
     @Override
-    protected void onPostTransformationCompleted() {
-        String accountFeatureTableName = TableUtils.getFullTableName(accountFeaturesTablePrefix, pipelineVersion);
-        Table accountFeatureTable = metadataProxy.getTable(customerSpace.toString(), accountFeatureTableName);
-        if (accountFeatureTable == null) {
-            throw new RuntimeException("Cannot find generated account feature table " + accountFeatureTableName);
+    protected void postJobExecution(SparkJobResult result) {
+        if (shortCutMode) {
+            return;
         }
-        setAccountFeatureTableSchema(accountFeatureTable);
-        dataCollectionProxy.upsertTable(customerSpace.toString(), accountFeatureTableName, TableRoleInCollection.AccountFeatures,
-                inactive);
-        accountFeatureTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.AccountFeatures,
-                inactive);
-        if (accountFeatureTable == null) {
-            throw new IllegalStateException(
-                    "Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
-        }
-        exportToS3AndAddToContext(accountFeatureTableName, ACCOUNT_FEATURE_TABLE_NAME);
+        String filteredTableName = NamingUtils.timestamp("AccountFeatures");
+        Table filteredTable = toTable(filteredTableName, InterfaceName.AccountId.name(), result.getTargets().get(0));
+        setAccountFeatureTableSchema(filteredTable);
+        metadataProxy.createTable(customerSpace.toString(), filteredTableName, filteredTable);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), filteredTableName, //
+                TableRoleInCollection.AccountFeatures, inactive);
+        exportToS3AndAddToContext(filteredTable, ACCOUNT_FEATURE_TABLE_NAME);
     }
 
-    private PipelineTransformationRequest getTransformRequest() {
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("AccountFeature");
-        request.setSubmitter(customerSpace.getTenantId());
-        request.setKeepTemp(false);
-        request.setEnableSlack(false);
-
-        TransformationStepConfig filter = filter();
-
-        List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(filter);
-        request.setSteps(steps);
-        return request;
-    }
-
-    private TransformationStepConfig filter() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        addBaseTables(step, fullAccountTableName);
-        step.setTransformer(TRANSFORMER_COPIER);
+    private List<String> getRetrainAttrs() {
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(customerSpace.getTenantId(), TableRoleMetadataCache);
+        try {
+            Thread.sleep(10000L);
+        } catch (InterruptedException e) {
+            log.warn("10 second sleep is interrupted.", e);
+        }
         List<String> retainAttrNames = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
                 .map(ColumnMetadata::getAttrName) //
@@ -150,18 +144,7 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
         if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
             retainAttrNames.add(InterfaceName.LatticeAccountId.name());
         }
-
-        CopierConfig conf = new CopierConfig();
-        conf.setRetainAttrs(retainAttrNames);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(accountFeaturesTablePrefix);
-        step.setTargetTable(targetTable);
-
-        return step;
+        return retainAttrNames;
     }
 
     private void setAccountFeatureTableSchema(Table table) {
@@ -181,7 +164,16 @@ public class GenerateAccountFeature extends ProfileStepBase<ProcessAccountStepCo
             attrs.add(attr0);
         });
         table.setAttributes(attrs);
-        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
     }
 
+    @Override
+    protected CustomerSpace parseCustomerSpace(ProcessAccountStepConfiguration stepConfiguration) {
+        return stepConfiguration.getCustomerSpace();
+    }
+
+    @Override
+    protected String getSecondaryJobName() {
+        return TableRoleInCollection.AccountFeatures.name();
+    }
 }
+

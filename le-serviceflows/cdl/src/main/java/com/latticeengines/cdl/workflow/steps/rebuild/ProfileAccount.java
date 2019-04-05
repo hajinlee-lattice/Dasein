@@ -216,13 +216,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
     }
 
-    private void registerDynamoExport() {
-        exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
-    }
-
     private void finishing() {
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
-        registerDynamoExport();
+        exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
     }
 
 }

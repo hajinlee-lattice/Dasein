@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.YarnClient;
 
@@ -26,13 +29,21 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.workflow.exposed.build.BaseWrapperStep;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfiguration>
         extends BaseWrapperStep<T, TransformationWorkflowConfiguration> {
@@ -41,14 +52,17 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
 
     private static final ObjectMapper OM = new ObjectMapper();
 
-    @Autowired
+    @Inject
     protected TransformationProxy transformationProxy;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
+
+    @Inject
+    protected MetadataProxy metadataProxy;
 
     @Value("${pls.cdl.transform.cascading.partitions}")
     protected int cascadingPartitions;
@@ -73,6 +87,24 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
 
     @Value("${pls.cdl.transform.extra.heavy.multiplier}")
     private int extraHeavyMultiplier;
+
+    @Inject
+    private EMREnvService emrEnvService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
+    @Resource(name = "distCpConfiguration")
+    protected Configuration distCpConfiguration;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
+
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
 
     protected CustomerSpace customerSpace;
     protected String pipelineVersion;
@@ -148,6 +180,9 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     }
 
     protected void addBaseTables(TransformationStepConfig step, String... sourceTableNames) {
+        if (customerSpace == null) {
+            throw new IllegalArgumentException("Have not set customerSpace.");
+        }
         List<String> baseSources = step.getBaseSources();
         if (CollectionUtils.isEmpty(baseSources)) {
             baseSources = new ArrayList<>();
@@ -169,6 +204,14 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(tablePrefix);
+        step.setTargetTable(targetTable);
+    }
+
+    protected void setTargetTable(TransformationStepConfig step, String tablePrefix, String primaryKey) {
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(tablePrefix);
+        targetTable.setPrimaryKey(primaryKey);
         step.setTargetTable(targetTable);
     }
 
@@ -209,5 +252,27 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         } else {
             return heavyEngineConfig();
         }
+    }
+
+    protected void exportToS3AndAddToContext(String tableName, String contextKey) {
+        boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
+        if (!shouldSkip) {
+            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+            String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
+            queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
+            Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+            ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
+                    customerSpace.toString(), table, //
+                    pathBuilder, s3Bucket, podId, //
+                    yarnConfiguration, //
+                    fileStatus -> true);
+            if (batchStoreRequest == null) {
+                throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
+            }
+            HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
+                    customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
+            exporter.run();
+        }
+        putStringValueInContext(contextKey, tableName);
     }
 }

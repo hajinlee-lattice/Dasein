@@ -1,7 +1,14 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -9,66 +16,130 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.serviceflows.core.spark.WorkflowSparkJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.SparkJobService;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
-public abstract class RunSparkJob<S extends SparkJobStepConfiguration, //
-        C extends WorkflowSparkJobConfig, J extends AbstractSparkJob<C>> extends BaseWorkflowStep<S> { //
+public abstract class RunSparkJob<S extends BaseStepConfiguration, //
+        C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
 
     @Inject
     private SparkJobService sparkJobService;
 
     @Inject
-    private LivySessionHolder livySessionHolder;
+    private EMREnvService emrEnvService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
+    @Resource(name = "distCpConfiguration")
+    protected Configuration distCpConfiguration;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Value("${camille.zk.pod.id}")
-    private String podId;
+    protected String podId;
 
-    protected CustomerSpace customerSpace;
-
-    @Override
-    public void execute() {
-        log.info("Executing spark job " + getJobClz().getSimpleName());
-        customerSpace = CustomerSpace.parse(getConfiguration().getCustomer());
-        C jobConfig = configureJob(configuration);
-        String tenantId = customerSpace.getTenantId();
-        String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
-        jobConfig.setWorkspace(workspace);
-        log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        SparkJobResult result = retry.execute(context -> {
-            if (context.getRetryCount() > 0) {
-                log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
-                        + getJobClz().getSimpleName());
-                livySessionHolder.killSession();
-            }
-            LivySession session = livySessionHolder //
-                    .createLivySession(tenantId + "~" + getJobClz().getSimpleName());
-            return sparkJobService.runJob(session, getJobClz(), jobConfig);
-        });
-        postJobExecution(result);
-        livySessionHolder.killSession();
-    }
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
 
     protected abstract Class<J> getJobClz();
-
     /**
      * Set job config except jobName and workspace.
      */
     protected abstract C configureJob(S stepConfiguration);
-
     protected abstract void postJobExecution(SparkJobResult result);
 
-    protected Table toTable(String tableName, HdfsDataUnit jobTarget) {
-        return SparkUtils.hdfsUnitToTable(tableName, jobTarget, yarnConfiguration, podId, customerSpace);
+    @Override
+    public void execute() {
+        log.info("Executing spark job " + getJobClz().getSimpleName());
+        customerSpace = parseCustomerSpace(configuration);
+        C jobConfig = configureJob(configuration);
+        if (jobConfig != null) {
+            String tenantId = customerSpace.getTenantId();
+            String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
+            jobConfig.setWorkspace(workspace);
+            log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
+            computeScalingMultiplier(jobConfig.getInput());
+            try {
+                RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+                SparkJobResult result = retry.execute(context -> {
+                    if (context.getRetryCount() > 0) {
+                        log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
+                                + getJobClz().getSimpleName());
+                        log.warn("Previous failure: " + context.getLastThrowable());
+                        killLivySession();
+                    }
+                    String jobName = tenantId + "~" + getJobClz().getSimpleName();
+                    String suffix = getSecondaryJobName();
+                    if (StringUtils.isNotBlank(suffix)) {
+                        jobName += "~" + suffix;
+                    }
+                    LivySession session = createLivySession(jobName);
+                    return sparkJobService.runJob(session, getJobClz(), jobConfig);
+                });
+                postJobExecution(result);
+            } finally {
+                killLivySession();
+            }
+        } else {
+            log.info("Spark job config is null, skip submitting spark job.");
+        }
+    }
+
+    protected CustomerSpace parseCustomerSpace(S stepConfiguration) {
+        if (stepConfiguration instanceof SparkJobStepConfiguration) {
+            SparkJobStepConfiguration sparkJobStepConfiguration = (SparkJobStepConfiguration) stepConfiguration;
+            return CustomerSpace.parse(sparkJobStepConfiguration.getCustomer());
+        } else {
+            throw new UnsupportedOperationException("Do not know how to parse customer space from a " //
+                    + stepConfiguration.getClass().getCanonicalName());
+        }
+    }
+
+    protected void overlayTableSchema(Table resultTable, Map<String, Attribute> attributeMap) {
+        List<Attribute> attrs = resultTable.getAttributes();
+        List<Attribute> newAttrs = attrs.stream().map(attr -> {
+            String attrName = attr.getName();
+            return attributeMap.getOrDefault(attrName, attr);
+        }).collect(Collectors.toList());
+        resultTable.setAttributes(newAttrs);
+    }
+
+    protected String getSecondaryJobName() {
+        return "";
+    }
+
+    protected void exportToS3AndAddToContext(Table table, String contextKey) {
+        String tableName = table.getName();
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
+        ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
+                customerSpace.toString(), table, //
+                pathBuilder, s3Bucket, podId, //
+                yarnConfiguration, //
+                fileStatus -> true);
+        if (batchStoreRequest == null) {
+            throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
+        }
+        HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
+                customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
+        exporter.run();
+        putStringValueInContext(contextKey, tableName);
     }
 
 }

@@ -43,26 +43,8 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
-        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        FailingStep failingStep = new FailingStep();
-        failingStep.setName("mergeContact");
-        request.setFailingStep(failingStep);
-        long start = System.currentTimeMillis();
-        processAnalyze(request, JobStatus.FAILED);
-        long duration1 = System.currentTimeMillis() - start;
-
-        wipeOutContractDirInHdfs();
-
         try {
-            start = System.currentTimeMillis();
-            retryProcessAnalyze();
-            long duration2 = System.currentTimeMillis() - start;
-            if (isLocalEnvironment()) {
-                // retry should be faster than the first attempt
-                Assert.assertTrue(duration2 < duration1, //
-                        "Duration of first and second PA are: " + duration1 + " and " + duration2);
-            }
-            verifyProcess();
+            runTestWithoutRetry();
         } finally {
             if (isLocalEnvironment()) {
                 saveCheckpoint(saveToCheckPoint());
@@ -70,24 +52,44 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         }
     }
 
+    private void runTestWithoutRetry() {
+        processAnalyzeSkipPublishS3OnLocal();
+        verifyProcess();
+    }
+
+    private void runTestWithRetry() {
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        FailingStep failingStep = new FailingStep();
+        failingStep.setName("mergeContact");
+        request.setFailingStep(failingStep);
+        long start = System.currentTimeMillis();
+        processAnalyze(request, JobStatus.FAILED);
+        long duration1 = System.currentTimeMillis() - start;
+        wipeOutContractDirInHdfs();
+        start = System.currentTimeMillis();
+        retryProcessAnalyze();
+        long duration2 = System.currentTimeMillis() - start;
+        if (isLocalEnvironment()) {
+            // retry should be faster than the first attempt
+            Assert.assertTrue(duration2 < duration1, //
+                    "Duration of first and second PA are: " + duration1 + " and " + duration2);
+        }
+        verifyProcess();
+    }
+
     // Add sleep between each import to avoid 2 import jobs generate table
     // extract with same timestamp in second, then extract could overwrite
     // between each other
-    protected void importData() throws Exception {
+    protected void importData() throws InterruptedException {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        mockCSVImport(BusinessEntity.Account, 1, "Account");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Contact, 1, "Contact");
-        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Account, 1, "DefaultSystem_AccountData");
+        Thread.sleep(1100);
+        mockCSVImport(BusinessEntity.Contact, 1, "DefaultSystem_ContactData");
+        Thread.sleep(1100);
         mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
-        Thread.sleep(2000);
+        Thread.sleep(1100);
         mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Account, 2, "Account");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Contact, 2, "Contact");
-        Thread.sleep(2000);
-
+        Thread.sleep(1100);
         // TODO: (Yintao) should be changed to mock vdb import
         mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
@@ -128,11 +130,10 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyDateAttrs();
 
         // Check that stats cubes only exist for the entities specified below.
-        verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact,
-                BusinessEntity.CuratedAccount);
-        verifyBatchStore(getExpectedbatchStoreCounts());
-        verifyRedshift(getExpectedRedshiftCounts());
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount);
+        verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
 
         createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
@@ -171,7 +172,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
                 ACCOUNT_1);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 1L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 6L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_1);
 
@@ -201,7 +202,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         return expectedReport;
     }
 
-    protected Map<BusinessEntity, Long> getExpectedbatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1, //
@@ -209,12 +210,17 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
-        return ImmutableMap.of(//
-                BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
-                BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_1);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
     }
 
-    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1);

@@ -20,21 +20,21 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
 
     @Test(groups = "deployment", priority = 0)
     public void testBundleProductMissingProductBundle() throws Exception {
-        importData(4, "ProductBundle_MissingProductBundle");
+        importData(3, "ProductBundle_MissingProductBundle");
         processAnalyze();
         verifyProcess(DataCollection.Version.Green);
     }
 
     @Test(groups = "deployment", priority = 1)
     public void testHierarchyProductMissingCategory() throws Exception {
-        importData(5, "ProductHierarchies_MissingCategory");
+        importData(4, "ProductHierarchies_MissingCategory");
         processAnalyze();
         verifyProcess(DataCollection.Version.Blue);
     }
 
     @Test(groups = "deployment", priority = 2)
     public void testHierarchyProductMissingFamily() throws Exception {
-        importData(6, "ProductHierarchies_MissingFamily");
+        importData(5, "ProductHierarchies_MissingFamily");
         processAnalyze();
         verifyProcess(DataCollection.Version.Green);
     }

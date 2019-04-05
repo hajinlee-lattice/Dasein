@@ -130,6 +130,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
+    protected static final String PROCESSED_DIFF_TABLES = "PROCESSED_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
     protected static final String HAS_CROSS_SELL_MODEL = "HAS_CROSS_SELL_MODEL";
@@ -142,6 +143,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
     protected static final String ENTITY_MATCH_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_ACCOUNT_TARGETTABLE";
     protected static final String ENTITY_MATCH_CONTACT_TARGETTABLE = "ENTITY_MATCH_CONTACT_TARGETTABLE";
+    protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_VERSION = "NEW_ENTITY_MATCH_VERSION";
@@ -154,6 +156,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
     protected static final String FULL_REMATCH_PA = "FULL_REMATCH_PA";
     protected static final String REMATCHED_ACCOUNT_TABLE_NAME = "REMATCHED_ACCOUNT_TABLE_NAME";
+    protected static final String ENRICHED_ACCOUNT_DIFF_TABLE_NAME = "ENRICHED_ACCOUNT_DIFF_TABLE_NAME";
 
     // store set of entities that are already published
     protected static final String PUBLISHED_ENTITIES = "PUBLISHED_ENTITIES";

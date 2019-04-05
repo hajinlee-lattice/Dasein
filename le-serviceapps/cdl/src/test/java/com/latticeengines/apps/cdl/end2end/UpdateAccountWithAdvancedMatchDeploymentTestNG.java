@@ -112,15 +112,22 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         verifyAccountSeedLookupData();
     }
 
-    @Override
-    protected void verifyBatchServingStoreCount() {
-        long numAccounts = 1000;
-        long numContacts = 523;
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, 1000L, //
+                BusinessEntity.Contact, 523L);
+    }
 
-        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, 1000L, //
+                BusinessEntity.Contact, 523L);
+    }
+
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, 1000L, //
+                BusinessEntity.Contact, 523L);
     }
 
     @Override
