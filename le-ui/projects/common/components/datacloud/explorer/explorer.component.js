@@ -2,7 +2,7 @@ export default function (
     $scope, $filter, $timeout, $interval, $q, $state, $stateParams, $injector,
     LookupStore, Enrichments, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum,
-    QueryRestriction, CurrentConfiguration, LookupResponse, QueryStore, ConfigureAttributesStore,
+    QueryRestriction, WorkingBuckets, LookupResponse, QueryStore, ConfigureAttributesStore,
     RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, Notice
 ) {
     'ngInject';
@@ -78,7 +78,7 @@ export default function (
         openHighlighter: {},
         categoryCounts: {},
         TileTableItems: {},
-        workingBuckets: CurrentConfiguration,
+        workingBuckets: WorkingBuckets,
         pagesize: 24,
         categorySize: 7,
         addBucketTreeRoot: null,

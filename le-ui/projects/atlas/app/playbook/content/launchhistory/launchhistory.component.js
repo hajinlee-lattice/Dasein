@@ -1,6 +1,6 @@
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
-    $scope, $state, $stateParams, $q, $filter, $timeout, $interval,  
+    $scope, $state, $stateParams, $q, $filter, $timeout, $interval,  BrowserStorageUtility,
     ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData
 ) {
     var vm = this;
@@ -34,6 +34,10 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     });
 
     vm.init = function() {
+        var clientSession = BrowserStorageUtility.getClientSession();
+        vm.tenantId = clientSession.Tenant.Identifier;
+        vm.auth = BrowserStorageUtility.getTokenDocument();
+
         vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
@@ -201,6 +205,22 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 displayName: vm.stored.play_display_name,
                 description: vm.stored.play_description
             });
+        }
+    }
+    
+    vm.getErrorFileName = function(launchSummary) {
+        var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
+        var filePath = integrationStatusMonitor.errorFile ? integrationStatusMonitor.errorFile : '';
+        if (filePath) {
+            return filePath.split('\\').pop().split('/').pop();
+        } 
+    }
+
+    vm.getErrorFilePath = function(launchSummary) {
+        var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
+        var filePath = integrationStatusMonitor.errorFile ? integrationStatusMonitor.errorFile : '';
+        if (filePath) {
+            return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
         }
     }
 
