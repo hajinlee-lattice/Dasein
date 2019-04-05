@@ -46,11 +46,13 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         parameters.inputSkippedAttributeList = getListObjectFromContext(INPUT_SKIPPED_ATTRIBUTES_KEY, String.class);
         configuration.setDataFlowParams(parameters);
         configuration.setJobProperties(initJobProperties());
+
     }
 
     protected Properties initJobProperties() {
         Properties jobProperties = new Properties();
         int partitions = cascadingPartitions;
+        configuration.setPartitions(partitions * 4); // used by TEZ
         jobProperties.put("mapreduce.job.reduces", String.valueOf(partitions * 4));
         jobProperties.put("mapred.reduce.tasks", String.valueOf(partitions * 4));
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * 2));
