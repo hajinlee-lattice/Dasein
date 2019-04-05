@@ -232,7 +232,7 @@
             {{'No Data Available' | uppercase}}
         </div>
 
-        <div ng-if="vm.isBktEmpty(enrichment)" class="free-text-attribute">
+        <div ng-if="vm.isBktEmpty(enrichment) && vm.section == 're.model_iteration'" class="free-text-attribute">
             {{'Profiling Data is Not Available' | uppercase}}
         </div>
 
