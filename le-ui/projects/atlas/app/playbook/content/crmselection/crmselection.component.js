@@ -7,10 +7,11 @@ angular.module('lp.playbook.wizard.crmselection', [])
         orgs: '<'
     },
     controller: function(
-        $scope, $state, $timeout, $stateParams,
+        $scope, $state, $timeout, $stateParams, Notice,
         ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService, QueryStore
     ) {
         var vm = this;
+        var MARKETO_CONTACTS_ERROR = 'You are trying to launch a segment with no contacts to Marketo. Please use a different system and try again.';
         vm.showMAPSystems = vm.featureflags.EnableCdl;
         vm.externalIntegrationEnabled = vm.featureflags.EnableExternalIntegration;
 
@@ -50,6 +51,12 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
                     vm.savedSegment = crmselection;
                     vm.stored.crm_selection = crmselection;
+
+                    if (isMarketoSystem() && !canLaunchToMarketo(vm.play.targetSegment)) {
+                        Notice.error({message: MARKETO_CONTACTS_ERROR});
+                        PlaybookWizardStore.setValidation('crmselection', false);
+                        return;
+                    }
 
                     if(vm.stored && vm.stored.crm_selection) {
                         PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
@@ -129,6 +136,12 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
             PlaybookWizardStore.setValidation('crmselection', false);
 
+            if (isMarketoSystem() && !canLaunchToMarketo(vm.play.targetSegment)) {
+                Notice.error({message: MARKETO_CONTACTS_ERROR});
+                PlaybookWizardStore.setValidation('crmselection', false);
+                return;
+            }
+
             if (vm.stored && vm.stored.crm_selection) {
                 PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                 PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
@@ -168,7 +181,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 } else {
                     vm.calculateUnscoredCounts(form, segment, accountId);
                 }
-            } else if (vm.externalIntegrationEnabled && vm.stored.crm_selection.externalSystemName == 'Marketo' && engineId) {
+            } else if (vm.externalIntegrationEnabled && isMarketoSystem() && engineId) {
                 // Find contacts without emails for play launches to Marketo
                 PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], {
                     lookupId: accountId,
@@ -190,6 +203,14 @@ angular.module('lp.playbook.wizard.crmselection', [])
             } else {
                 PlaybookWizardStore.setValidation('crmselection', form.$valid);
             }
+        }
+
+        function canLaunchToMarketo(segment) {
+            return segment && segment.contacts != undefined && segment.contacts > 0;
+        }
+
+        function isMarketoSystem() {
+            return vm.stored.crm_selection && vm.stored.crm_selection.externalSystemName == 'Marketo';
         }
 
 
