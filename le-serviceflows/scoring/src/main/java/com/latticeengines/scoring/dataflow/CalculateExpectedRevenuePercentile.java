@@ -63,12 +63,7 @@ public class CalculateExpectedRevenuePercentile
         context = new ParsedContext(parameters);
 
         Node inputTable = addSource(context.inputTableName);
-        Node addBackupPredictedRevColumn = inputTable.addColumnWithFixedValue(context.backupPredictedRevFieldName, null,
-                Double.class);
-        Node addBackupProbabilityColumn = addBackupPredictedRevColumn
-                .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
-        Node addPercentileColumn = addBackupProbabilityColumn.addColumnWithFixedValue(context.percentileFieldName, null,
-                Integer.class);
+        Node addPercentileColumn = inputTable.addColumnWithFixedValue(context.percentileFieldName, null, Integer.class);
 
         FieldList retainedFields = new FieldList(addPercentileColumn.getFieldNames());
 
@@ -123,7 +118,12 @@ public class CalculateExpectedRevenuePercentile
                 // percentile column ("Score") as downstream processing expects
                 // final percentiles into original percentile column
 
-                calculatePercentile = calculateFittedExpectedRevenue(retainedFields, calculatePercentile);
+                Node addBackupPredictedRevColumn = calculatePercentile
+                        .addColumnWithFixedValue(context.backupPredictedRevFieldName, null, Double.class);
+                Node addBackupProbabilityColumn = addBackupPredictedRevColumn
+                        .addColumnWithFixedValue(context.backupProbabilityFieldName, null, Double.class);
+
+                calculatePercentile = calculateFittedExpectedRevenue(retainedFields, addBackupProbabilityColumn);
 
                 calculatePercentile = calculateFinalPercentile(retainedFields, calculatePercentile);
 
