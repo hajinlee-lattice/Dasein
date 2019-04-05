@@ -269,6 +269,10 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "yyyy-MMM-d h:m a", "GMT-6");
         Assert.assertEquals(expected3c, 1573492260000L);
         Assert.assertEquals(records.get(2).get(fieldName3).toString(), Long.toString(expected3c));
+        long expected3d = computeTimestamp("1980-Jul-18 8:00 AM", true,
+                "yyyy-MMM-d h:m a", "GMT-5");
+        Assert.assertEquals(expected3d, 332773200000L);
+        Assert.assertEquals(records.get(3).get(fieldName3).toString(), Long.toString(expected3d));
     }
 
     @Test(groups = "deployment")
