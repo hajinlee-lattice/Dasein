@@ -3,6 +3,9 @@ package com.latticeengines.datacloud.match.util;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.CDL_LOOKUP;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.ENTITY_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.LDC_MATCH;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Transaction;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -17,6 +20,12 @@ public class EntityMatchUtilsUnitTestNG {
     private void testShouldOutputNewEntities(MatchInput input, boolean expectedResult) {
         boolean result = EntityMatchUtils.shouldOutputNewEntities(input);
         Assert.assertEquals(result, expectedResult, errorMsg(input, expectedResult));
+    }
+
+    @Test(groups = "unit", dataProvider = "shouldOutputNewEntity")
+    private void testShouldOutputNewEntity(MatchInput input, String currentEntity, boolean expectedResult) {
+        boolean result = EntityMatchUtils.shouldOutputNewEntity(input, currentEntity);
+        Assert.assertEquals(result, expectedResult);
     }
 
     @DataProvider(name = "shouldOuputNewEntities")
@@ -47,6 +56,25 @@ public class EntityMatchUtilsUnitTestNG {
         };
     }
 
+    @DataProvider(name = "shouldOutputNewEntity")
+    private Object[][] shouldOutputNewEntityTestData() {
+        return new Object[][] { //
+                // invalid match input
+                { null, Account.name(), false }, //
+                { null, Contact.name(), false }, //
+                { newEntityMatchInput(null), Account.name(), false }, //
+                { newEntityMatchInput(null), Contact.name(), false }, //
+                // for account match, no need to output newly allocated entity
+                // TODO add case to make sure we do not output new account for account match
+                { newEntityMatchInput(Account.name()), Contact.name(), false }, //
+                { newEntityMatchInput(Account.name()), Transaction.name(), false }, //
+                // for contact match, only output newly created account
+                { newEntityMatchInput(Contact.name()), Account.name(), true }, //
+                { newEntityMatchInput(Contact.name()), Contact.name(), false }, //
+                { newEntityMatchInput(Contact.name()), Transaction.name(), false }, //
+        };
+    }
+
     private String errorMsg(MatchInput input, boolean expectedResult) {
         return String.format("ExpectedResult=%b for input %s", expectedResult, debugString(input));
     }
@@ -59,11 +87,24 @@ public class EntityMatchUtilsUnitTestNG {
                 input.getOperationalMode(), input.isAllocateId(), input.isOutputNewEntities());
     }
 
+    /*
+     * Helper for testing which new entity to output under current match entity
+     */
+    private MatchInput newEntityMatchInput(String entity) {
+        MatchInput input = new MatchInput();
+        input.setOperationalMode(ENTITY_MATCH);
+        input.setAllocateId(true);
+        input.setOutputNewEntities(true);
+        input.setTargetEntity(entity);
+        return input;
+    }
+
     private MatchInput newMatchInput(OperationalMode mode, boolean isAllocateId, boolean outputNewEntities) {
         MatchInput input = new MatchInput();
         input.setOperationalMode(mode);
         input.setAllocateId(isAllocateId);
         input.setOutputNewEntities(outputNewEntities);
+        input.setTargetEntity(Contact.name());
         return input;
     }
 }

@@ -266,6 +266,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             List<List<Object>> values = outputRecord.getNewEntityIds() //
                     .entrySet() //
                     .stream() //
+                    // filter out the entities that we don't need to output
+                    .filter(entry -> EntityMatchUtils.shouldOutputNewEntity(processorContext.getOriginalInput(),
+                            entry.getKey())) //
                     .map(entry -> Arrays.<Object> asList(entry.getKey(), entry.getValue())) //
                     .collect(Collectors.toList());
             records.addAll(values.stream().map(row -> {

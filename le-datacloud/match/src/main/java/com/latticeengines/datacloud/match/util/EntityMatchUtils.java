@@ -1,11 +1,18 @@
 package com.latticeengines.datacloud.match.util;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -19,6 +26,17 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * Utility functions for entity match
  */
 public class EntityMatchUtils {
+
+    // Match Target Entity -> Set(Entity that we will output a list of newly
+    // allocated IDs)
+    private static final Map<String, Set<String>> OUTPUT_NEW_ENTITY_MAP = new HashMap<>();
+
+    static {
+        // FIXME put account here for testing, no need to output new accounts when it is
+        // Account match. remove this after we have contact match
+        OUTPUT_NEW_ENTITY_MAP.put(Account.name(), Sets.newHashSet(Account.name()));
+        OUTPUT_NEW_ENTITY_MAP.put(Contact.name(), Sets.newHashSet(Account.name()));
+    }
 
     /**
      * Generate a (somewhat) user friendly string for the input
@@ -105,7 +123,24 @@ public class EntityMatchUtils {
      * @return true if needed to output, false otherwise
      */
     public static boolean shouldOutputNewEntities(MatchInput input) {
-        return isAllocateIdModeEntityMatch(input) && input.isOutputNewEntities();
+        return isAllocateIdModeEntityMatch(input) && input.isOutputNewEntities()
+                && OUTPUT_NEW_ENTITY_MAP.containsKey(input.getTargetEntity());
+    }
+
+    /**
+     * Determine whether we should output current entity given the original target
+     * entity in {@link MatchInput}
+     *
+     * @param input
+     *            original match input instance
+     * @param currentEntity
+     *            entity for current decision graph
+     * @return true if we want to output newly allocated current entity, false
+     *         otherwise.
+     */
+    public static boolean shouldOutputNewEntity(MatchInput input, String currentEntity) {
+        return shouldOutputNewEntities(input) && OUTPUT_NEW_ENTITY_MAP.containsKey(input.getTargetEntity())
+                && OUTPUT_NEW_ENTITY_MAP.get(input.getTargetEntity()).contains(currentEntity);
     }
 
     /**
