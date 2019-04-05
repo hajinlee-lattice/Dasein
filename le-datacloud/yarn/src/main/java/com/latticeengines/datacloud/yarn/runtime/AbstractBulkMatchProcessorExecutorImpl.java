@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -15,6 +16,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -38,11 +40,11 @@ import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -148,6 +150,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
+            writeNewEntityDataToAvro(processorContext, groupOutput.getResult());
         } catch (IOException e) {
             throw new RuntimeException("Failed to write result to avro.", e);
         }
@@ -237,10 +240,60 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
     }
 
+    /*
+     * Aggregate all newly allocate entities from a list of output records and write
+     * to avro
+     */
+    private void writeNewEntityDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
+            throws IOException {
+        if (processorContext == null || CollectionUtils.isEmpty(outputRecords)) {
+            return;
+        }
+        // check whether we need to generate new entity file or not
+        if (!EntityMatchUtils.shouldOutputNewEntities(processorContext.getOriginalInput())) {
+            return;
+        }
+
+        // generate avro records for newly allocated entities
+        // [ entity, entityId ]
+        List<GenericRecord> records = new ArrayList<>();
+        Schema schema = processorContext.getNewEntitySchema();
+        for (OutputRecord outputRecord : outputRecords) {
+            if (outputRecord == null || MapUtils.isEmpty(outputRecord.getNewEntityIds())) {
+                continue;
+            }
+
+            List<List<Object>> values = outputRecord.getNewEntityIds() //
+                    .entrySet() //
+                    .stream() //
+                    // filter out the entities that we don't need to output
+                    .filter(entry -> EntityMatchUtils.shouldOutputNewEntity(processorContext.getOriginalInput(),
+                            entry.getKey())) //
+                    .map(entry -> Arrays.<Object> asList(entry.getKey(), entry.getValue())) //
+                    .collect(Collectors.toList());
+            records.addAll(values.stream().map(row -> {
+                // generate avro records
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                List<Schema.Field> fields = schema.getFields();
+                buildAvroRecords(row, builder, fields);
+                return builder.build();
+            }).collect(Collectors.toList()));
+        }
+
+        // write to hdfs
+        int randomSplit = random.nextInt(processorContext.getSplits());
+        String newEntityAvroFile = processorContext.getNewEntityOutputAvro(randomSplit);
+        if (!HdfsUtils.fileExists(yarnConfiguration, newEntityAvroFile)) {
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, newEntityAvroFile, records, useSnappy);
+        } else {
+            AvroUtils.appendToHdfsFile(yarnConfiguration, newEntityAvroFile, records, useSnappy);
+        }
+        log.info("Write {} newly allocated entity records to {}", records.size(), newEntityAvroFile);
+    }
+
     private void writeErrorDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
             throws IOException {
-        if (!OperationalMode.ENTITY_MATCH.equals(processorContext.getOriginalInput().getOperationalMode())
-                || !processorContext.getOriginalInput().isAllocateId()) {
+        if (!EntityMatchUtils.shouldOutputNewEntities(processorContext.getOriginalInput())) {
             return;
         }
         List<GenericRecord> records = new ArrayList<>();

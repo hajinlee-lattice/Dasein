@@ -212,6 +212,12 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("EntityKeyMaps")
     private Map<String, EntityKeyMap> entityKeyMaps;
 
+    // Temporary flag to output all newly allocated entities to avro files. Only
+    // applies to bulk match with allocateId
+    // mode. TODO change this after solution is finalized
+    @JsonProperty("OutputNewEntities")
+    private boolean outputNewEntities;
+
     // Temporary flag for entity bulk match test. Will remove after we have
     // workflow for testing
     @JsonProperty("BumpupEntitySeedVersion")
@@ -606,6 +612,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setEntityKeyMaps(Map<String, EntityKeyMap> entityKeyMaps) {
         this.entityKeyMaps = entityKeyMaps;
+    }
+
+    public boolean isOutputNewEntities() {
+        return outputNewEntities;
+    }
+
+    public void setOutputNewEntities(boolean outputNewEntities) {
+        this.outputNewEntities = outputNewEntities;
     }
 
     public boolean bumpupEntitySeedVersion() {

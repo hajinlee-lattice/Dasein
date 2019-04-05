@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -102,6 +103,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 // fetch: traveler.getEntityIds()
                 if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
                     matchRecord.setEntityId(result);
+                    if (MapUtils.isNotEmpty(traveler.getNewEntityIds())) {
+                        // copy new entity IDs map
+                        matchRecord.setNewEntityIds(traveler.getNewEntityIds());
+                    }
                     // Copy data from EntityMatchKeyRecord in MatchTraveler that was set by MatchPlannerMicroEngineActor
                     // into the InternalOutputRecord.
                     copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);

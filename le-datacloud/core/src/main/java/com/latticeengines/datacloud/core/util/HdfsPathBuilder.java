@@ -49,6 +49,9 @@ public class HdfsPathBuilder {
     private static final String MATCHES_SEGMENT = "Matches";
     private static final String BLOCKS_SEGMENT = "Blocks";
     private static final String BLOCKS_ERROR_SEGMENT = "BlocksError";
+    // newly allocated entities for entity match
+    private static final String NEW_ENTITIES = "NewEntities";
+    private static final String BLOCKS_NEW_ENTITY_SEGMENT = "BlockNewEntities";
     private static final String RAW_DATA_FLOW_TYPE = "Raw";
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
@@ -239,10 +242,18 @@ public class HdfsPathBuilder {
         return constructMatchDir(rootOperationUid).append("Error");
     }
 
+    public Path constructMatchNewEntityDir(String rootOperationUid) {
+        return constructMatchDir(rootOperationUid).append(NEW_ENTITIES);
+    }
+
     public Path constructMatchBlockErrorSplitAvro(String rootOperationUid, String blockOperationUid, int split) {
-        String fileName = BLOCK + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d", split)
-                + AVRO_FILE_EXTENSION;
+        String fileName = getBlockFileNameWithSplit(blockOperationUid, split);
         return constructMatchBlockErrorDir(rootOperationUid, blockOperationUid).append(fileName);
+    }
+
+    public Path constructMatchBlockNewEntitySplitAvro(String rootOperationUid, String blockOperationUid, int split) {
+        String fileName = getBlockFileNameWithSplit(blockOperationUid, split);
+        return constructMatchBlockNewEntityDir(rootOperationUid, blockOperationUid).append(fileName);
     }
 
     public Path constructMatchErrorFile(String rootOperationUid) {
@@ -274,6 +285,10 @@ public class HdfsPathBuilder {
         return constructMatchDir(rootOperationUid).append(BLOCKS_ERROR_SEGMENT).append(blockOperationUid);
     }
 
+    public Path constructMatchBlockNewEntityDir(String rootOperationUid, String blockOperationUid) {
+        return constructMatchDir(rootOperationUid).append(BLOCKS_NEW_ENTITY_SEGMENT).append(blockOperationUid);
+    }
+
     public String constructMatchBlockAvroGlob(String rootOperationUid, String blockOperationUid) {
         return constructMatchBlockDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
     }
@@ -282,9 +297,12 @@ public class HdfsPathBuilder {
         return constructMatchBlockErrorDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
     }
 
+    public String constructMatchBlockNewEntityAvroGlob(String rootOperationUid, String blockOperationUid) {
+        return constructMatchBlockNewEntityDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
+    }
+
     public Path constructMatchBlockSplitAvro(String rootOperationUid, String blockOperationUid, int split) {
-        String fileName = BLOCK + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d", split)
-                + AVRO_FILE_EXTENSION;
+        String fileName = getBlockFileNameWithSplit(blockOperationUid, split);
         return constructMatchBlockDir(rootOperationUid, blockOperationUid).append(fileName);
     }
 
@@ -340,5 +358,10 @@ public class HdfsPathBuilder {
 
     private String constructPartialPath(String name) {
         return name.endsWith(PATH_SEPARATOR) ? name.substring(0, name.lastIndexOf(PATH_SEPARATOR)) : name;
+    }
+
+    private String getBlockFileNameWithSplit(String blockOperationUid, int split) {
+        return BLOCK + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d", split)
+                + AVRO_FILE_EXTENSION;
     }
 }
