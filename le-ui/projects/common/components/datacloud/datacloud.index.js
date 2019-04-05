@@ -2,7 +2,7 @@
 import './datacloud.routes';
 import './datacloud.service';
 import './attributes/attributes.index';
-import './explorer/explore.index';
+import './explorer/explorer.index';
 import './lookup/lookup.index';
 import './picker/picker.index';
 import './query/query.index';

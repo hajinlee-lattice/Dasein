@@ -1,0 +1,100 @@
+@import '../../colors.scss';
+@import '../../layout/layout.scss';
+
+
+.le-tile-list {
+    background: #fff;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    margin: 2px 0;
+    padding: 0;
+    border-left: 4px solid #457EBA;
+    border-right: 1px solid #f9f9f9;
+    border-bottom: 1px solid #f9f9f9;
+    border-top: 1px solid #f9f9f9;
+    &:hover,
+    &:hover .tile-header,
+    &:hover .tile-footer,
+    &:hover .tile-footer .contact-count,
+    &:hover .tile-footer .account-count {
+        border-color: #6A9ACE;
+        cursor: pointer;
+    }
+    &:hover {
+        border-radius: 4px;
+    }
+    .tile-header {
+        display: flex;
+        align-items: center;
+        position: relative;
+        border-right: 1px solid #f9f9f9;
+        flex-wrap: nowrap;
+        width: 25%;
+        margin: 0;
+        padding: 0;
+        h2 {
+            background-size: 15px;
+            background-repeat: no-repeat;
+            background-position: 1em;
+            padding-left: 3em;
+            padding-right: 0em;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: unset;
+        }
+        .edit {
+            position: relative;
+            top: 0;
+            right: 0;
+        }
+    }
+    .tile-metadata {
+        display: flex;
+        align-items: center;
+        width: 25%;
+        border-top: none;
+        border-bottom: none;
+        padding: 1em;
+        ul {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+    }
+    .tile-body {
+        display: flex;
+        align-items: center;
+        display: block;
+        width: 37.5%;
+    }
+    .tile-footer {
+        position: relative;
+        border-top: none;
+        border-left: 1px solid #f9f9f9;
+        align-items: center;
+        width: 8em;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        .contact-count,
+        .account-count {
+            border-right: none;
+            border-top: none;
+            border-bottom: 1px solid #f9f9f9;
+            text-align: left;
+            float: none;
+            padding: 6px 8px 0px;
+            margin: 0;
+            width: 100%;
+        }
+        .contact-count {
+            border-bottom: none;
+        }
+    }
+}

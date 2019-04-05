@@ -127,6 +127,10 @@ angular.module('common.datacloud')
             DataCloudService.setHost(value);
         };
 
+        this.setPath = function (value) {
+            DataCloudService.setPath(value);
+        };
+
         this.getPremiumSelectMaximum = function () {
             var deferred = $q.defer();
             if (DataCloudStore.premiumSelectMaximum) {
@@ -380,6 +384,7 @@ angular.module('common.datacloud')
         };
 
         this.setCube = function (cube) {
+            console.log('setcube', cube);
             DataCloudStore.cube = cube;
         };
 
@@ -462,6 +467,10 @@ angular.module('common.datacloud')
 
         this.setHost = function (value) {
             this.host = value;
+        };
+
+        this.setPath = function (value) {
+            this.path = this.paths[value];
         };
 
         this.inModel = function () {

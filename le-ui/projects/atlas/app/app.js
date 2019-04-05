@@ -22,6 +22,7 @@ angular
         'common.exceptions',
         'common.attributes',
         'common.datacloud',
+        'atlas.segmentation',
         'lp.navigation',
         'lp.widgets',
         'lp.jobs',

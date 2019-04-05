@@ -60,7 +60,13 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     return item[scope.displayName];
                 }
             }
-
+            scope.showRemove = () => {
+                if(scope.enableremoverow == 'true'){
+                    return true;
+                }else {
+                    return false;
+                }
+            }
             scope.isSelectionDone = function(){
                 if(scope.singleSelection){
                     if(Object.keys(scope.chips).length > 0){

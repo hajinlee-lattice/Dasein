@@ -1,31 +1,34 @@
 angular
     .module("lp.segments")
-    .service("SegmentStore", function($q, $rootScope, $state, SegmentService) {
+    .service("SegmentStore", function (
+        $q, $rootScope, $state, SegmentService,
+        PercentStore, QueryTreeDateAttributeStore
+    ) {
         var SegmentStore = this;
 
         this.segments = [];
 
-        this.setSegments = function(segments) {
+        this.setSegments = function (segments) {
             this.segments = segments;
         };
 
-        this.getSegments = function() {
+        this.getSegments = function () {
             return this.segments;
         };
 
-        this.modalEditSegment = function(config) {
+        this.modalEditSegment = function (config) {
             if (config.action === "cancel") {
                 $state.go("home.segments");
             }
             return true;
         };
 
-        this.modalSetTileEditSegment = function(config) {
+        this.modalSetTileEditSegment = function (config) {
             $rootScope.$broadcast("tileEditSegment:" + config.action);
             return true; // modal will hide itself
         };
 
-        this.flattenSegmentRestrictions = function(segment) {
+        this.flattenSegmentRestrictions = function (segment) {
             var restrictions = [];
             if (
                 segment.account_restriction != null &&
@@ -36,7 +39,7 @@ angular
                 segment.contact_restriction.restriction.logicalRestriction
             ) {
                 segment.account_restriction.restriction.logicalRestriction.restrictions.forEach(
-                    function(restriction) {
+                    function (restriction) {
                         SegmentStore.flattenRestriction(
                             restriction,
                             restrictions
@@ -44,7 +47,7 @@ angular
                     }
                 );
                 segment.contact_restriction.restriction.logicalRestriction.restrictions.forEach(
-                    function(restriction) {
+                    function (restriction) {
                         SegmentStore.flattenRestriction(
                             restriction,
                             restrictions
@@ -56,11 +59,11 @@ angular
             return restrictions;
         };
 
-        this.flattenRestriction = function(restriction, array) {
+        this.flattenRestriction = function (restriction, array) {
             if (restriction.bucketRestriction) {
                 array.push(restriction);
             } else if (restriction.logicalRestriction) {
-                restriction.logicalRestriction.restrictions.forEach(function(
+                restriction.logicalRestriction.restrictions.forEach(function (
                     restriction
                 ) {
                     SegmentStore.flattenRestriction(restriction, array);
@@ -68,7 +71,7 @@ angular
             }
         };
 
-        this.getTopNAttributes = function(segment, n) {
+        this.getTopNAttributes = function (segment, n) {
             var restrictions = SegmentStore.flattenSegmentRestrictions(segment);
 
             if (n > restrictions.length) {
@@ -100,29 +103,115 @@ angular
             return result;
         };
 
-        this.sortAttributesByCnt = function(restrictions) {
-            var counts = restrictions.map(function(restriction, idx) {
+        this.sortAttributesByCnt = function (restrictions) {
+            var counts = restrictions.map(function (restriction, idx) {
                 return {
                     index: idx,
                     count: restriction.bucketRestriction.bkt.Cnt
                 };
             });
-            counts.sort(function(a, b) {
+            counts.sort(function (a, b) {
                 return b.count - a.count;
             });
-            restrictions = counts.map(function(restriction) {
+            restrictions = counts.map(function (restriction) {
                 return restrictions[restriction.index];
             });
             return restrictions;
         };
 
-        this.swap = function(array, i, j) {
+        this.formatAttributes = function (restrictions, cubedata) {
+            let attrs = [];
+            let enrichments = [];
+            let enrichmentsMap = DataCloudStore.getEnrichmentsMap();
+
+            restrictions.forEach(function (restriction) {
+                var bucketEntity = restriction.bucketRestriction.attr.split('.')[0],
+                    bucketColumnId = restriction.bucketRestriction.attr.split('.')[1],
+                    enrichment = enrichments[enrichmentsMap[bucketColumnId]];
+
+                if (enrichment && cubedata[bucketEntity] != undefined) {
+                    var cube = cubedata[bucketEntity].Stats[bucketColumnId];
+
+                    if (cube.Bkts) {
+                        var operatorType = cube.Bkts.Type;
+
+                        switch (operatorType) {
+                            case 'Enum':
+                                var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType);
+                                if (vals.length > 1) {
+                                    attrs.push({ label: enrichment.DisplayName + ': ', value: vals.length + ' Values Selected' });
+                                } else {
+                                    attrs.push({
+                                        label: enrichment.DisplayName + ': ', value:
+                                            `${vals[0] != undefined ? `${vals[0]}` : `${QueryTreeService.cmpMap[restriction.bucketRestriction.bkt.Cmp]}`}`
+                                    });
+                                }
+
+                                break;
+
+                            case 'Numerical':
+                                if (QueryTreeService.two_inputs.indexOf(restriction.bucketRestriction.bkt.Cmp) < 0) {
+                                    let label = QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp];
+                                    let operation = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0);
+                                    attrs.push({
+                                        label: enrichment.DisplayName + ': ',
+                                        value: QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] +
+                                            `${operation != undefined ? operation : ''}`
+                                    });
+                                } else {
+                                    attrs.push({
+                                        label: enrichment.DisplayName + ': '
+                                        , value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) +
+                                            '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1)
+                                    });
+                                }
+
+                                break;
+
+                            case 'Boolean':
+                                attrs.push({ label: enrichment.DisplayName + ': ', value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType) });
+
+                                break;
+
+                            case 'TimeSeries':
+                                var value = QueryTreeService.getOperationValue(restriction.bucketRestriction, 'Boolean') ? 'True' : 'False';
+                                attrs.push({ label: enrichment.DisplayName + ' (' + enrichment.Subcategory + '): ', value: value });
+
+                                break;
+                            case 'PercentChange':
+                                var value = PercentStore.getDirectionRedable(restriction.bucketRestriction) + ' ' + PercentStore.getCmpRedable(restriction.bucketRestriction).toLowerCase()
+                                    + ' ' + PercentStore.getValuesFormatted(restriction.bucketRestriction);
+                                attrs.push({ label: enrichment.DisplayName + ': ', value: value });
+
+                                break;
+                            case 'Date':
+                                var ret = QueryTreeDateAttributeStore.getCmpValueReadable(enrichment.DisplayName, restriction.bucketRestriction.bkt);
+                                attrs.push(ret);
+                                break;
+                        }
+                    } else {
+                        // for pure string attributes
+                        var value = QueryTreeService.getOperationLabel('String', restriction.bucketRestriction);
+                        if (QueryTreeService.hasInputs('String', restriction.bucketRestriction)) {
+                            value += " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'";
+                        }
+                        attrs.push({ label: enrichment.DisplayName + ': ', value: value });
+                    }
+                } else {
+                    vm.invalidSegments.add(segment.name);
+                }
+            });
+
+            return attrs;
+        };
+
+        this.swap = function (array, i, j) {
             var temp = array[i];
             array[i] = array[j];
             array[j] = temp;
         };
 
-        this.getSegmentByName = function(segmentName) {
+        this.getSegmentByName = function (segmentName) {
             var deferred = $q.defer(),
                 found = false;
 
@@ -138,7 +227,7 @@ angular
             }
 
             if (!found) {
-                SegmentService.GetSegmentByName(segmentName).then(function(
+                SegmentService.GetSegmentByName(segmentName).then(function (
                     result
                 ) {
                     deferred.resolve(result ? result : null);
@@ -148,7 +237,7 @@ angular
             return deferred.promise;
         };
 
-        this.CreateOrUpdateSegment = function(segment, restriction) {
+        this.CreateOrUpdateSegment = function (segment, restriction) {
             var ts = new Date().getTime();
 
             if (!segment) {
@@ -180,7 +269,7 @@ angular
             return SegmentService.CreateOrUpdateSegment(segment);
         };
 
-        this.sanitizeSegment = function(segment) {
+        this.sanitizeSegment = function (segment) {
             var aRestriction = segment.account_restriction
                 ? segment.account_restriction.restriction
                 : {};
@@ -195,12 +284,12 @@ angular
             return segment;
         };
 
-        this.sanitizeRuleBuckets = function(rule, keepEmptyBuckets) {
+        this.sanitizeRuleBuckets = function (rule, keepEmptyBuckets) {
             var map = rule.ratingRule.bucketToRuleMap,
                 prune = [];
 
             if (!keepEmptyBuckets) {
-                Object.keys(map).forEach(function(bucketName) {
+                Object.keys(map).forEach(function (bucketName) {
                     var account =
                         map[bucketName].account_restriction.logicalRestriction
                             .restrictions;
@@ -218,7 +307,7 @@ angular
                 }
             }
 
-            Object.keys(map).forEach(function(bucketName) {
+            Object.keys(map).forEach(function (bucketName) {
                 var bucket = map[bucketName];
 
                 if (bucket) {
@@ -243,9 +332,9 @@ angular
             return rule;
         };
 
-        this.sanitizeSegmentRestriction = function(tree) {
+        this.sanitizeSegmentRestriction = function (tree) {
             if (tree && tree.length > 0) {
-                tree.forEach(function(branch) {
+                tree.forEach(function (branch) {
                     if (branch && typeof branch.labelGlyph !== undefined) {
                         delete branch.labelGlyph;
                     }
@@ -265,7 +354,7 @@ angular
             return tree;
         };
 
-        this.removeEmptyBuckets = function(tree) {
+        this.removeEmptyBuckets = function (tree) {
             for (var branch, i = tree.length - 1; i >= 0; i--) {
                 branch = tree[i];
 
@@ -285,7 +374,7 @@ angular
                 }
             }
         };
-        this.modalCallback = function(args) {
+        this.modalCallback = function (args) {
             if (args.action === "ok") {
                 return true;
             } else if (args.action === "closedForced") {
@@ -293,8 +382,8 @@ angular
             }
         };
     })
-    .service("SegmentService", function($http, $q, $state) {
-        this.GetSegments = function() {
+    .service("SegmentService", function ($http, $q, $state) {
+        this.GetSegments = function () {
             var deferred = $q.defer(),
                 result,
                 url = "/pls/datacollection/segments";
@@ -323,7 +412,7 @@ angular
             return deferred.promise;
         };
 
-        this.GetSegmentByName = function(name) {
+        this.GetSegmentByName = function (name) {
             var deferred = $q.defer(),
                 result,
                 url = "/pls/datacollection/segments/" + name;
@@ -352,7 +441,7 @@ angular
             return deferred.promise;
         };
 
-        this.CreateOrUpdateSegment = function(segment) {
+        this.CreateOrUpdateSegment = function (segment) {
             var deferred = $q.defer();
 
             $http({
@@ -385,7 +474,7 @@ angular
             return deferred.promise;
         };
 
-        this.DeleteSegment = function(segmentName) {
+        this.DeleteSegment = function (segmentName) {
             var deferred = $q.defer(),
                 result = {},
                 url =
@@ -427,7 +516,7 @@ angular
             return deferred.promise;
         };
 
-        this.GetSegmentExports = function() {
+        this.GetSegmentExports = function () {
             var deferred = $q.defer(),
                 result,
                 url = "/pls/datacollection/segments/export";
@@ -456,7 +545,7 @@ angular
             return deferred.promise;
         };
 
-        this.GetSegmentExportByExportId = function(exportID) {
+        this.GetSegmentExportByExportId = function (exportID) {
             var deferred = $q.defer(),
                 result,
                 url = "/pls/datacollection/segments/export/" + exportID;
@@ -485,7 +574,7 @@ angular
             return deferred.promise;
         };
 
-        this.CreateOrUpdateSegmentExport = function(segment) {
+        this.CreateOrUpdateSegmentExport = function (segment) {
             var deferred = $q.defer(),
                 result = {},
                 url = "/pls/datacollection/segments/export";
@@ -518,7 +607,7 @@ angular
             return deferred.promise;
         };
 
-        this.DeleteExpiredSegmentExports = function() {
+        this.DeleteExpiredSegmentExports = function () {
             var deferred = $q.defer(),
                 result = {},
                 url = "/pls/datacollection/segments/export/cleanup";
@@ -551,7 +640,7 @@ angular
             return deferred.promise;
         };
 
-        this.DownloadExportedSegment = function(id) {
+        this.DownloadExportedSegment = function (id) {
             var deferred = $q.defer(),
                 result,
                 url = "/pls/datacollection/segments/export/" + id + "/download";
@@ -579,7 +668,7 @@ angular
             return deferred.promise;
         };
 
-        this.DownloadExportedOrphans = function(id) {
+        this.DownloadExportedOrphans = function (id) {
             var deferred = $q.defer(),
                 result,
                 url = `/pls/datacollection/orphans/orphanexport/${id}`;
@@ -607,7 +696,7 @@ angular
             return deferred.promise;
         };
 
-        this.GetSegmentDependenciesModelView = function(
+        this.GetSegmentDependenciesModelView = function (
             segmentId,
             errorDisplayCallback
         ) {
