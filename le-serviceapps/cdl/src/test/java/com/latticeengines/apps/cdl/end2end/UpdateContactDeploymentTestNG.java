@@ -29,7 +29,11 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         new Thread(this::createTestSegment3).start();
 
         importData();
-        processAnalyzeSkipPublishS3OnLocal();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
         try {
             verifyProcess();
         } finally {

@@ -46,7 +46,11 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         }).start();
 
         importData();
-        processAnalyzeSkipPublishS3OnLocal();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
         try {
             verifyProcess();
         } finally {
@@ -73,6 +77,11 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
+
+        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
+                VERIFY_DAILYTXN_AMOUNT_1, //
+                VERIFY_DAILYTXN_QUANTITY_1, //
+                VERIFY_DAILYTXN_COST);
     }
 
     private void verifyNumAttrsInAccount() {
@@ -148,7 +157,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);
         return map;
     }
