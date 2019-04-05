@@ -363,7 +363,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // FIXME: Disable all the deployment tests related to Entity Match to tune
     // Decision Graph in QA with PM
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment", enabled = true)
     public void init() {
         HdfsPodContext.changeHdfsPodId(this.getClass().getSimpleName());
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -374,13 +374,13 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         tenant = tenantService.findByTenantId(tenant.getId());
     }
 
-    @AfterClass(groups = "deployment", enabled = false)
+    @AfterClass(groups = "deployment", enabled = true)
     public void destroy() {
         tenantService.discardTenant(tenant);
     }
 
     // One record with all match key populated
-    @Test(groups = "deployment", priority = 1, enabled = false)
+    @Test(groups = "deployment", priority = 1, enabled = true)
     public void testAllKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_ALL_KEYS);
         runAndVerify(input, CASE_ALL_KEYS);
@@ -389,14 +389,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Records with partial match key (extracted from match key of #1)
     // populated, should all match to same EntityId in #1
-    @Test(groups = "deployment", priority = 2, enabled = false)
+    @Test(groups = "deployment", priority = 2, enabled = true)
     public void testPartialKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_PARTIAL_KEYS);
         runAndVerify(input, CASE_PARTIAL_KEYS);
     }
 
     // Use EntityId got from #1 to test fetch-only mode
-    @Test(groups = "deployment", priority = 3, enabled = false)
+    @Test(groups = "deployment", priority = 3, enabled = true)
     public void testFetchOnly() {
         MatchInput input = prepareBulkMatchInputFetchOnly();
         runAndVerify(input, null);
@@ -404,7 +404,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Provide all the match keys to test Lead-to-Account match ---
     // Non-AllocateId mode for Account match and return AccountId
-    @Test(groups = "deployment", priority = 4, enabled = false)
+    @Test(groups = "deployment", priority = 4, enabled = true)
     public void testLeadToAcct() {
         MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT, true, MatchKey.Email.name(),
                 false);
@@ -413,7 +413,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Provide patial match keys without AccountId to test Lead-to-Account match
     // --- Non-AllocateId mode for Account match and return AccountId
-    @Test(groups = "deployment", priority = 5, enabled = false)
+    @Test(groups = "deployment", priority = 5, enabled = true)
     public void testLeadToAcctNoAID() {
         MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT_NOAID, false,
                 MatchKey.Email.name(), true);
@@ -436,14 +436,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, this.getClass().getSimpleName());
         int numNewAccounts = CASE_ALL_KEYS.equals(scenario) ? DATA_ALL_KEYS.length : 0;
         validateNewlyAllocatedAcct(finalStatus.getResultLocation(), numNewAccounts);
-
-        Map<EntityMatchResult, Long> matchResultMap = finalStatus.getMatchResults();
-        if (MapUtils.isNotEmpty(matchResultMap)) {
-            log.info("Lead to Account Match Results for Scenario: " + scenario + ":");
-            for (Map.Entry<EntityMatchResult, Long> entry : matchResultMap.entrySet()) {
-                log.error("   " + entry.getKey().name() + ": " + entry.getValue().toString());
-            }
-        }
 
         if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
@@ -700,17 +692,17 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             } else if (casesAnonymousAID.contains(groupId)) {
                 Assert.assertEquals(acctId, DataCloudConstants.ENTITY_ANONYMOUS_AID);
             } else {
-                throw new IllegalArgumentException("Unrecgoized test case group " + groupId);
+                throw new IllegalArgumentException("Unrecognized test case group " + groupId);
             }
         }
 
         Map<EntityMatchResult, Long> matchResultMap = finalStatus.getMatchResults();
-        log.error("For Scenario: " + scenario + ":");
+        log.info("Lead to Account Match Results for Scenario: " + scenario + ":");
         if (MapUtils.isEmpty(matchResultMap)) {
-            log.error("   NO ENTITY MATCH RESULTS!");
+            log.info("   NO ENTITY MATCH RESULTS!");
         } else {
             for (Map.Entry<EntityMatchResult, Long> entry : matchResultMap.entrySet()) {
-                log.error("   " + entry.getKey().name() + ": " + entry.getValue().toString());
+                log.info("   " + entry.getKey().name() + ": " + entry.getValue().toString());
             }
         }
 

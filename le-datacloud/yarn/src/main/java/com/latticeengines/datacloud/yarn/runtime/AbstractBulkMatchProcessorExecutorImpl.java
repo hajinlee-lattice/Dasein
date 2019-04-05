@@ -152,8 +152,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @MatchStep
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
-        log.error("$JAW$ inside processMatchOutput");
-
         try {
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
@@ -400,6 +398,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                                 processorContext.getBlockSize(), count));
             }
         } else {
+            // NOTE: This path appears not to get executed.
             // check matched rows
             if (!processorContext.getBlockOutput().getStatistics().getRowsMatched().equals(count.intValue())) {
                 throw new RuntimeException(String.format(
@@ -408,25 +407,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
         }
 
-        log.error("$JAW$ Count Value: " + count);
-        log.error("$JAW$ MatchBlock Rows Matched: " + processorContext.getBlockOutput().getStatistics()
-                .getRowsMatched());
-
-        log.error("$JAW$ Creating MatchBlock Map");
         Map<EntityMatchResult, Long> matchResultMap = new HashMap<>();
         if (OperationalMode.ENTITY_MATCH.equals(processorContext.getGroupMatchInput().getOperationalMode())) {
-            log.error("$JAW$ Setting up MatchBlock Map");
             MatchStatistics matchStats = processorContext.getBlockOutput().getStatistics();
-            if (matchStats.getOrphanedNoMatchCount() == null) {
-                log.error("$JAW$ Found null Orphaned No Match Count for ProcessContext: "
-                        + processorContext.getRootOperationUid());
-            }
-
-            log.error("$JAW$ MatchBlock Orphaned No Match: " + matchStats.getOrphanedNoMatchCount());
-            log.error("$JAW$ MatchBlock Orphaned Unmatched Account ID: " + matchStats.getOrphanedUnmatchedAccountIdCount());
-            log.error("$JAW$ MatchBlock Matched By MatchKey: " + matchStats.getMatchedByMatchKeyCount());
-            log.error("$JAW$ MatchBlock Matched By Account ID: " + matchStats.getMatchedByAccountIdCount());
-
             matchResultMap.put(EntityMatchResult.ORPHANED_NO_MATCH,
                     matchStats.getOrphanedNoMatchCount() == null ? 0L : matchStats.getOrphanedNoMatchCount());
             matchResultMap.put(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID,

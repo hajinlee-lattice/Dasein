@@ -107,8 +107,6 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             }
         }
         if (combinedContext != null) {
-            log.error("$JAW$ processMatchOutput CALL 3");
-
             processMatchOutput(processorContext, combinedContext.getOutput());
             int rows = processorContext.getRowsProcessed().get();
             processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());

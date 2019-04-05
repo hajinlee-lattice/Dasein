@@ -19,14 +19,12 @@ public class MatchUtils {
     private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     public static MatchOutput mergeOutputs(MatchOutput output, MatchOutput newOutput) {
-        log.error("$JAW$ inside mergeOutputs");
-
         if (output == null) {
-            log.error("$JAW$ Created shallow copy of newOutput.");
+            // Creates a shallow copy of newOutput, which must be the first MatchOutput produced (since output is null),
+            // and returns this MatchOutput.  Note that the MatchStatistics object inside MatchOutput is the only
+            // component that is deeply copied.
             return newOutput.shallowCopy();
         }
-
-        log.error("$JAW$ output wasn't null");
         output.setStatistics(mergeStatistics(output.getStatistics(), newOutput.getStatistics()));
         output.getResult().addAll(newOutput.getResult());
         return output;
@@ -42,28 +40,19 @@ public class MatchUtils {
             mergedStats.setColumnMatchCount(columnCounts);
         }
         mergedStats.setRowsMatched(stats.getRowsMatched() + newStats.getRowsMatched());
-        log.error("$JAW$ Merging Match Stats");
-        log.error("   Stats Rows Matched: " + stats.getRowsMatched());
-        log.error("   New Stats Rows Matched: " + newStats.getRowsMatched());
-        log.error("   Merges Stats Rows Matched: " + mergedStats.getRowsMatched());
         mergedStats.setOrphanedNoMatchCount(stats.getOrphanedNoMatchCount() + newStats.getOrphanedNoMatchCount());
-        log.error("   Stats Orphaned No Match: " + stats.getOrphanedNoMatchCount());
-        log.error("   New Stats Orphaned No Match: " + newStats.getOrphanedNoMatchCount());
-        log.error("   Merges Stats Orphaned No Match: " + mergedStats.getOrphanedNoMatchCount());
         mergedStats.setOrphanedUnmatchedAccountIdCount(stats.getOrphanedUnmatchedAccountIdCount()
                 + newStats.getOrphanedUnmatchedAccountIdCount());
-        log.error("   Stats Orphaned Unmatched Account ID: " + stats.getOrphanedUnmatchedAccountIdCount());
-        log.error("   New Stats Orphaned Unmatched Account ID: " + newStats.getOrphanedUnmatchedAccountIdCount());
-        log.error("   Merges Stats Orphaned Unmatched Account ID: " + mergedStats.getOrphanedUnmatchedAccountIdCount());
         mergedStats.setMatchedByMatchKeyCount(stats.getMatchedByMatchKeyCount() + newStats.getMatchedByMatchKeyCount());
-        log.error("   Stats Matched By MatchKey: " + stats.getMatchedByMatchKeyCount());
-        log.error("   New Stats Matched By MatchKey: " + newStats.getMatchedByMatchKeyCount());
-        log.error("   Merges Stats Matched By MatchKey: " + mergedStats.getMatchedByMatchKeyCount());
         mergedStats.setMatchedByAccountIdCount(stats.getMatchedByAccountIdCount()
                 + newStats.getMatchedByAccountIdCount());
-        log.error("   Stats Matched By Account ID: " + stats.getMatchedByAccountIdCount());
-        log.error("   New Stats Matched By Account ID: " + newStats.getMatchedByAccountIdCount());
-        log.error("   Merges Stats Matched By Account ID: " + mergedStats.getMatchedByAccountIdCount());
+
+        log.debug("Merged Match Statistics");
+        log.debug("   Merged Stats Rows Matched: " + mergedStats.getRowsMatched());
+        log.debug("   Merged Stats Orphaned No Match: " + mergedStats.getOrphanedNoMatchCount());
+        log.debug("   Merged Stats Orphaned Unmatched Account ID: " + mergedStats.getOrphanedUnmatchedAccountIdCount());
+        log.debug("   Merged Stats Matched By MatchKey: " + mergedStats.getMatchedByMatchKeyCount());
+        log.debug("   Merged Stats Matched By Account ID: " + mergedStats.getMatchedByAccountIdCount());
         return mergedStats;
     }
 

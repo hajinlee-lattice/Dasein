@@ -246,44 +246,24 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 } else if (ColumnSelection.Predefined.LeadToAcct
                         .equals(matchContext.getInput().getPredefinedSelection())
                         && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
-                    // For Lead-to-Account match, if cannot find matched
-                    // AccountId or customer's AccountId doesn't match with
-                    // AccountId from matcher, return anonymous AccountId to
-                    // help ProfileContact step which requires existence of
-                    // AccountId. Anonymous AccountId is some predefined string
-                    // which should have very low chance to be conflict with
-                    // real AccountId. And these contacts become orphan.
+                    // For Lead-to-Account match, if cannot find matched AccountId or customer's AccountId doesn't
+                    // match with AccountId from matcher, return anonymous AccountId to help ProfileContact step
+                    // which requires existence of AccountId. Anonymous AccountId is some predefined string which
+                    // should have very low chance to be conflict with real AccountId. And these contacts become orphan.
                     value = results.get(field);
                     String customerAccountId = internalRecord.getParsedSystemIds() == null ? null
                             : internalRecord.getParsedSystemIds().get(InterfaceName.AccountId.name());
-
-                    log.error("$JAW$   value: " + value + " value is null string: " + "null".equals(value));
-                    log.error("$JAW$   customerAccountId: " + customerAccountId + " customerAccountId is null string: "
-                            + "null".equals(customerAccountId));
-
                     // Record match result in enumeration for aggregation into match report.
-                    log.error("$JAW$ Selecting Match Result");
                     if (value == null) {
-                        //internalRecord.setEntityMatchResult(EntityMatchResult.ORPHANED_NO_MATCH);
                         orphanedNoMatchCount++;
-                        log.error("$JAW$ Match Result Orphan No Match");
                     } else if (customerAccountId == null) {
-                        //internalRecord.setEntityMatchResult(EntityMatchResult.MATCHED_BY_MATCHKEY);
                         matchedByMatchKeyCount++;
-                        log.error("$JAW$ Match Result Matched By MatchKey");
                     } else if (value.equals(customerAccountId)) {
-                        //internalRecord.setEntityMatchResult(EntityMatchResult.MATCHED_BY_ACCOUNTID);
                         matchedByAccountIdCount++;
-                        log.error("$JAW$ Match Result Matched By Account ID");
                     } else {
-                        //internalRecord.setEntityMatchResult(EntityMatchResult
-                        //        .ORPHANED_UNMATCHED_ACCOUNTID);
                         orphanedUnmatchedAccountIdCount++;
-                        log.error("$JAW$ Match Result Orphan Unmatched Account ID");
                     }
-
                     if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
-                        log.error("$JAW$ __ANONYMOUS_AID__ will be returned.");
                         value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
                     }
                 } else if (results.containsKey(field)) {
@@ -368,18 +348,17 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
-        log.error("$JAW$ MEB TotalMatched: " + totalMatched);
+        log.debug("TotalMatched: " + totalMatched);
         if (isEntityMatch) {
-            log.error("$JAW$ Copying Match Results to MatchStats");
             matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(orphanedNoMatchCount);
             matchContext.getOutput().getStatistics().setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
 
-            log.error("$JAW$ MEB OrphanedNoMatchCount: " + orphanedNoMatchCount);
-            log.error("$JAW$ MEB OrphanedUnmatchedAccountIdCount: " + orphanedUnmatchedAccountIdCount);
-            log.error("$JAW$ MEB MatchedByMatchKeyCount): " + matchedByMatchKeyCount);
-            log.error("$JAW$ MEB MatchedByAccountIdCount: " + matchedByAccountIdCount);
+            log.debug("OrphanedNoMatchCount: " + orphanedNoMatchCount);
+            log.debug("OrphanedUnmatchedAccountIdCount: " + orphanedUnmatchedAccountIdCount);
+            log.debug("MatchedByMatchKeyCount: " + matchedByMatchKeyCount);
+            log.debug("MatchedByAccountIdCount: " + matchedByAccountIdCount);
         }
 
         if (columnMatchCount.length <= 10000) {

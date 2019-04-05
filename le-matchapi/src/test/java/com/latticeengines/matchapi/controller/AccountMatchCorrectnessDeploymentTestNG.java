@@ -19,7 +19,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -57,7 +55,7 @@ import com.latticeengines.security.exposed.service.TenantService;
  *
  * 2nd match is based on account universe built by 1st match, run another match,
  * analyze and verify match result
- * 
+ *
  * dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
  */
 public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBase {
@@ -93,7 +91,7 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
 
     // FIXME: Disable all the deployment tests related to Entity Match to tune
     // Decision Graph in QA with PM
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment", enabled = true)
     public void init() {
         HdfsPodContext.changeHdfsPodId(POD_ID);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -105,13 +103,13 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         log.info("Tenant ID: {}", tenant.getId());
     }
 
-    @AfterClass(groups = "deployment", enabled = false)
+    @AfterClass(groups = "deployment", enabled = true)
     public void destroy() {
         tenantService.discardTenant(tenant);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void test() {
         // instantiate test verifier
         AdvancedAccountMatchTestResultVerifier verifier = new AdvancedAccountMatchTestResultVerifier(tenant,
@@ -119,17 +117,6 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
 
         MatchInput input = prepareBulkMatchInput("accountmatchinput_builduniverse.avro");
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, POD_ID);
-
-        log.error("MatchCommand Match Results:");
-        Map<EntityMatchResult, Long> matchResultMap = finalStatus.getMatchResults();
-        if (MapUtils.isEmpty(matchResultMap)) {
-            log.error("   NO ENTITY MATCH RESULTS!");
-        } else {
-            for (Map.Entry<EntityMatchResult, Long> entry : matchResultMap.entrySet()) {
-                log.error("   " + entry.getKey().name() + ": " + entry.getValue().toString());
-            }
-        }
-
         // set the accounts populated in the existing universe for verification of the
         // second match job (some of the records have to match to a specific entity ID
         // in the universe now)

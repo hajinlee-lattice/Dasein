@@ -34,8 +34,6 @@ public class MatchStatistics {
     private Long matchedByMatchKeyCount;
     private Long matchedByAccountIdCount;
 
-    //private EntityMatchAggregation entityMatchAggregation;
-
     @MetricField(name = "RowsRequested", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsRequested")
     public Integer getRowsRequested() {
@@ -145,12 +143,12 @@ public class MatchStatistics {
     }
 
     public void printMatchStatistics(String message) {
-        log.error("$JAW$ Printing Match Stats: " + message);
-        log.error("$JAW$    Stats Rows Matched: " + getRowsMatched());
-        log.error("$JAW$    Stats Orphaned No Match: " + getOrphanedNoMatchCount());
-        log.error("$JAW$    Stats Orphaned Unmatched Account ID: " + getOrphanedUnmatchedAccountIdCount());
-        log.error("$JAW$    Stats Matched By MatchKey: " + getMatchedByMatchKeyCount());
-        log.error("$JAW$    Stats Matched By Account ID: " + getMatchedByAccountIdCount());
+        log.debug("Printing Match Stats: " + message);
+        log.debug("   Stats Rows Matched: " + getRowsMatched());
+        log.debug("   Stats Orphaned No Match: " + getOrphanedNoMatchCount());
+        log.debug("   Stats Orphaned Unmatched Account ID: " + getOrphanedUnmatchedAccountIdCount());
+        log.debug("   Stats Matched By MatchKey: " + getMatchedByMatchKeyCount());
+        log.debug("   Stats Matched By Account ID: " + getMatchedByAccountIdCount());
     }
 
 }

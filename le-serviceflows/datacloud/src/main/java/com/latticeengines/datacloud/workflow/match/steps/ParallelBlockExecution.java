@@ -210,24 +210,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             long orphanedUnmatchedAccountIdCount = 0L;
             long matchedByMatchKeyCount = 0L;
             long matchedByAccountIdCount = 0L;
-            log.error("$JAW$ Processing MatchBlock MatchResults.");
             if (blocks != null && !blocks.isEmpty()) {
                 for (MatchBlock block : blocks) {
                     count += block.getMatchedRows() != null ? block.getMatchedRows() : 0L;
-
-                    log.error("$JAW$ MatchBlock Rows Matched: " + block.getMatchedRows());
-
                     if (MapUtils.isNotEmpty(block.getMatchResults())) {
-                        log.error("$JAW$ Found non-empty MatchBlock result.");
                         Map<EntityMatchResult, Long> map = block.getMatchResults();
-                        if (map == null) {
-                            log.error("$JAW$ Map was null and should not be!");
-                        }
-
-                        for (Map.Entry<EntityMatchResult, Long> entry : map.entrySet()) {
-                            log.error("$JAW$ MAP ENTRY Key: " + entry.getKey() + "  Value: " + entry.getValue());
-                        }
-
                         orphanedNoMatchCount += map.containsKey(EntityMatchResult.ORPHANED_NO_MATCH) ?
                                 map.get(EntityMatchResult.ORPHANED_NO_MATCH) : 0L;
                         orphanedUnmatchedAccountIdCount +=
@@ -237,37 +224,30 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                                 map.get(EntityMatchResult.MATCHED_BY_MATCHKEY) : 0L;
                         matchedByAccountIdCount += map.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID) ?
                                 map.get(EntityMatchResult.MATCHED_BY_ACCOUNTID) : 0L;
-
-
-                        log.error("$JAW$ Incr MatchBlock Orphaned No Match: " + orphanedNoMatchCount);
-                        log.error("$JAW$ Incr MatchBlock Orphaned Unmatched Account ID: " +
-                                orphanedUnmatchedAccountIdCount);
-                        log.error("$JAW$ Incr MatchBlock Matched By MatchKey: " + matchedByMatchKeyCount);
-                        log.error("$JAW$ Incr MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
                     }
                 }
             }
 
+
+            log.info("Match Command Statistics:");
+            log.info("   Rows Matched: " + count);
             Map<EntityMatchResult, Long> entityMatchResultMap = new HashMap<>();
-            log.error("$JAW$ Creating MatchCommand Map");
             if (orphanedNoMatchCount != 0L || orphanedUnmatchedAccountIdCount != 0L || matchedByMatchKeyCount != 0L
                     || matchedByAccountIdCount != 0L) {
-                log.error("$JAW$ Setting up MatchCommand Map");
                 entityMatchResultMap.put(EntityMatchResult.ORPHANED_NO_MATCH, orphanedNoMatchCount);
                 entityMatchResultMap.put(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID,
                         orphanedUnmatchedAccountIdCount);
                 entityMatchResultMap.put(EntityMatchResult.MATCHED_BY_MATCHKEY, matchedByMatchKeyCount);
                 entityMatchResultMap.put(EntityMatchResult.MATCHED_BY_ACCOUNTID, matchedByAccountIdCount);
+
+                log.info("   MatchBlock Orphaned No Match: " + orphanedNoMatchCount);
+                log.info("   MatchBlock Orphaned Unmatched Account ID: " +
+                        orphanedUnmatchedAccountIdCount);
+                log.info("   MatchBlock Matched By MatchKey: " + matchedByMatchKeyCount);
+                log.info("   MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
             }
 
-            log.error("$JAW$ Final Rows Matched: " + count);
-            log.error("$JAW$ Final MatchBlock Orphaned No Match: " + orphanedNoMatchCount);
-            log.error("$JAW$ Final MatchBlock Orphaned Unmatched Account ID: " +
-                    orphanedUnmatchedAccountIdCount);
-            log.error("$JAW$ Final MatchBlock Matched By MatchKey: " + matchedByMatchKeyCount);
-            log.error("$JAW$ Final MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
-
-            log.info("Aggregated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
+            log.info("Aggregated statistics will be stored in " + MatchUtils.toAvroGlobs(avroDir));
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
                     .dnbCommands() //
@@ -504,8 +484,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void mergeBlockResult(ApplicationId appId) {
-        log.error("$JAW$ inside mergeBlockResults");
-
         String blockOperationUid = blockUuidMap.get(appId.toString());
         String blockJsonPath = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid)
                 .toString();
