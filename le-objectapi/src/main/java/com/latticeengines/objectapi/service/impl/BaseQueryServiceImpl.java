@@ -1,25 +1,20 @@
 package com.latticeengines.objectapi.service.impl;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -40,9 +35,6 @@ public abstract class BaseQueryServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(BaseQueryServiceImpl.class);
 
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
-
     @Inject
     private QueryEvaluatorService queryEvaluatorService;
 
@@ -60,65 +52,9 @@ public abstract class BaseQueryServiceImpl {
         }
     }
 
-    private Map<AttributeLookup, Object> getMaxDates(Set<AttributeLookup> lookups, AttributeRepository attrRepo) {
-        String tenantId = MultiTenantContext.getTenant().getId();
-        // Currently, only account and contact entity can have date attributes
-        List<AttributeLookup> accountMaxLookups = new ArrayList<>();
-        List<AttributeLookup> contactMaxLookups = new ArrayList<>();
-        Map<AttributeLookup, Object> results = new HashMap<>();
-        for (AttributeLookup lookup : lookups) {
-            if (BusinessEntity.Account.equals(lookup.getEntity())) {
-                accountMaxLookups.add(lookup);
-            } else if (BusinessEntity.Contact.equals(lookup.getEntity())) {
-                contactMaxLookups.add(lookup);
-            } else {
-                throw new UnsupportedOperationException(
-                        String.format("Entity %s should not have Date Attribute.", lookup.getEntity().name()));
-            }
-        }
-        if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
-            String accountTableName = queryEvaluatorService.getAndValidateServingStoreTableName(BusinessEntity.Account,
-                    attrRepo);
-            log.info(String.format("Get accountTableName %s for %s", accountTableName, tenantId));
-
-            String selections = accountMaxLookups.stream() //
-                    .map(lookup -> MessageFormat.format("max({0}) as {0}", lookup.getAttribute())) //
-                    .collect(Collectors.joining(","));
-
-            String query = MessageFormat.format("SELECT {0} FROM {1}", selections, accountTableName);
-            log.info("query for accountTableName " + query);
-            Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
-            retMap.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Account, k), v);
-            });
-        }
-
-        if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
-            String contactTableName = queryEvaluatorService.getAndValidateServingStoreTableName(BusinessEntity.Contact,
-                    attrRepo);
-            log.info(String.format("Get contactTableName %s for %s", contactTableName, tenantId));
-
-            String selections = contactMaxLookups.stream() //
-                    .map(lookup -> MessageFormat.format("max({0}) as {0}", lookup.getAttribute())) //
-                    .collect(Collectors.joining(","));
-
-            String query = MessageFormat.format("SELECT {0} FROM {1}", selections, contactTableName);
-            log.info("query for contactTableName " + query);
-            Map<String, Object> retMap = redshiftJdbcTemplate.queryForMap(query);
-            retMap.forEach((k, v) -> {
-                results.put(new AttributeLookup(BusinessEntity.Contact, k), v);
-            });
-        }
-        log.info("maxDate results are");
-        results.forEach((k, v) -> {
-            log.info(k + ":" + v);
-        });
-        return results;
-    }
-
     private Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,
             AttributeRepository attrRepo) {
-
+        log.info("lookups are: " + lookups);
         // Currently, only account and contact entity can have date attributes
         List<AggregateLookup> accountMaxLookups = new ArrayList<>();
         List<AggregateLookup> contactMaxLookups = new ArrayList<>();
@@ -158,6 +94,10 @@ public abstract class BaseQueryServiceImpl {
                 results.put(new AttributeLookup(BusinessEntity.Contact, k), v);
             });
         }
+        log.info("maxDate results are");
+        results.forEach((k, v) -> {
+            log.info(k + ":" + v);
+        });
         return results;
     }
 

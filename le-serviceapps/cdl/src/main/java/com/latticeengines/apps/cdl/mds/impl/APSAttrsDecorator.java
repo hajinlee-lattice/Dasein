@@ -52,6 +52,7 @@ public class APSAttrsDecorator implements Decorator {
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
             cm.enableGroup(Model);
+            cm.setCanModel(true);
         }
         return cm;
     }

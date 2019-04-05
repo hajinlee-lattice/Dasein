@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public final class MatchConstants {
@@ -42,6 +43,11 @@ public final class MatchConstants {
     public static final String AM_PRIMARY_INDUSTRY_FIELD = "LDC_PrimaryIndustry";
     public static final String AM_SECOND_INDUSTRY_FIELD = "LE_INDUSTRY";
     public static final String AM_DOMAIN_SOURCE = "LDC_DomainSource";
+
+    // entity match specific avro attributes
+    public static final String ENTITY_NAME_FIELD = "EntityName";
+    public static final String ENTITY_ID_FIELD = InterfaceName.EntityId.name();
+    public static final String ENTITY_MATCH_ERROR_FIELD = "Entity_Match_Error";
 
     // those are the internal avro attributes
     public static final String INT_LDC_LID = "__LDC_LID__";
