@@ -5,7 +5,7 @@ angular.module('lp.playbook.dashboard', [
 ])
 .controller('PlaybookDashboard', function(
     $q, $scope, $stateParams, $state, $interval, $timeout, $rootScope,
-    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore, CampaignTypes, CampaignGroups
+    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, FeatureFlagService, QueryStore, BackStore, CampaignTypes, CampaignGroups
 ) {
 
     var vm = this,
@@ -22,11 +22,13 @@ angular.module('lp.playbook.dashboard', [
             Launched: {
                 label: 'Relaunch'
             }
-        };
+        },
+        flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility,
+        playGroupsEnabled: FeatureFlagService.FlagIsEnabled(flags.MIGRATION_TENANT),
         launchHistory: [],
         invalid: [],
         editable: true,
