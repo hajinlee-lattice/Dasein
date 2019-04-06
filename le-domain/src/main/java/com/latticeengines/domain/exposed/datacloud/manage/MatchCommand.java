@@ -71,7 +71,6 @@ public class MatchCommand implements HasPid {
     private Integer rowsRequested;
     @Column(name = "RowsMatched")
     private Integer rowsMatched;
-    @JsonProperty("MatchResults")
     @Column(name = "MatchResults", columnDefinition = "'JSON'")
     @org.hibernate.annotations.Type(type = "json")
     private Map<EntityMatchResult, Long> matchResults;
@@ -137,10 +136,12 @@ public class MatchCommand implements HasPid {
         this.rowsMatched = rowsMatched;
     }
 
+    @JsonProperty("MatchResults")
     public Map<EntityMatchResult, Long> getMatchResults() {
         return matchResults;
     }
 
+    @JsonProperty("MatchResults")
     public void setMatchResults(Map<EntityMatchResult, Long> matchResults) {
         this.matchResults = matchResults;
     }
