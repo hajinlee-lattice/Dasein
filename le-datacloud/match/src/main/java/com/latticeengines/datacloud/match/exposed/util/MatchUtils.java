@@ -20,7 +20,10 @@ public class MatchUtils {
 
     public static MatchOutput mergeOutputs(MatchOutput output, MatchOutput newOutput) {
         if (output == null) {
-            return newOutput;
+            // Creates a shallow copy of newOutput, which must be the first MatchOutput produced (since output is null),
+            // and returns this MatchOutput.  Note that the MatchStatistics object inside MatchOutput is the only
+            // component that is deeply copied.
+            return newOutput.shallowCopy();
         }
         output.setStatistics(mergeStatistics(output.getStatistics(), newOutput.getStatistics()));
         output.getResult().addAll(newOutput.getResult());
@@ -37,6 +40,19 @@ public class MatchUtils {
             mergedStats.setColumnMatchCount(columnCounts);
         }
         mergedStats.setRowsMatched(stats.getRowsMatched() + newStats.getRowsMatched());
+        mergedStats.setOrphanedNoMatchCount(stats.getOrphanedNoMatchCount() + newStats.getOrphanedNoMatchCount());
+        mergedStats.setOrphanedUnmatchedAccountIdCount(stats.getOrphanedUnmatchedAccountIdCount()
+                + newStats.getOrphanedUnmatchedAccountIdCount());
+        mergedStats.setMatchedByMatchKeyCount(stats.getMatchedByMatchKeyCount() + newStats.getMatchedByMatchKeyCount());
+        mergedStats.setMatchedByAccountIdCount(stats.getMatchedByAccountIdCount()
+                + newStats.getMatchedByAccountIdCount());
+
+        log.debug("Merged Match Statistics");
+        log.debug("   Merged Stats Rows Matched: " + mergedStats.getRowsMatched());
+        log.debug("   Merged Stats Orphaned No Match: " + mergedStats.getOrphanedNoMatchCount());
+        log.debug("   Merged Stats Orphaned Unmatched Account ID: " + mergedStats.getOrphanedUnmatchedAccountIdCount());
+        log.debug("   Merged Stats Matched By MatchKey: " + mergedStats.getMatchedByMatchKeyCount());
+        log.debug("   Merged Stats Matched By Account ID: " + mergedStats.getMatchedByAccountIdCount());
         return mergedStats;
     }
 

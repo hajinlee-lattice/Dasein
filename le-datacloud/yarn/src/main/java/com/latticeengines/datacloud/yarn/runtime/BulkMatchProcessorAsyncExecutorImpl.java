@@ -75,7 +75,6 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 continue;
             }
             matchContext = matchExecutor.executeAsync(matchContext);
-
             if (CollectionUtils.isNotEmpty(matchContext.getFuturesResult())) {
                 log.info("Returned block " + block + " of " + matchContext.getFuturesResult().size()
                         + " futures from Async match.");
