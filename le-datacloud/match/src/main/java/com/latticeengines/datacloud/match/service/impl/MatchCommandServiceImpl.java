@@ -3,10 +3,12 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -33,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.manage.DnBMatchCommand;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 
@@ -271,6 +274,14 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
 
         @Override
+        public MatchCommandUpdaterImpl matchResults(Map<EntityMatchResult, Long> matchResultMap) {
+            if (MapUtils.isNotEmpty(matchResultMap)) {
+                    matchCommand.setMatchResults(matchResultMap);
+            }
+            return this;
+        }
+
+        @Override
         public MatchCommandUpdater rowsRequested(Integer rowsRequested) {
             matchCommand.setRowsRequested(rowsRequested);
             return this;
@@ -356,6 +367,14 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         @Override
         public MatchBlockUpdater matchedRows(int matchedRows) {
             matchBlock.setMatchedRows(matchedRows);
+            return this;
+        }
+
+        @Override
+        public MatchBlockUpdater matchResults(Map<EntityMatchResult, Long> matchResultMap) {
+            if (MapUtils.isNotEmpty(matchResultMap)) {
+                matchBlock.setMatchResults(matchResultMap);
+            }
             return this;
         }
 

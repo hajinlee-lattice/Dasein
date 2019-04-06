@@ -183,6 +183,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         int totalMatched = 0;
+        long orphanedNoMatchCount = 0L;
+        long orphanedUnmatchedAccountIdCount = 0L;
+        long matchedByMatchKeyCount = 0L;
+        long matchedByAccountIdCount = 0L;
 
         boolean isEntityMatch = OperationalMode.ENTITY_MATCH.equals(matchContext.getInput().getOperationalMode());
         if (isEntityMatch) {
@@ -242,16 +246,23 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 } else if (ColumnSelection.Predefined.LeadToAcct
                         .equals(matchContext.getInput().getPredefinedSelection())
                         && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
-                    // For Lead-to-Account match, if cannot find matched
-                    // AccountId or customer's AccountId doesn't match with
-                    // AccountId from matcher, return anonymous AccountId to
-                    // help ProfileContact step which requires existence of
-                    // AccountId. Anonymous AccountId is some predefined string
-                    // which should have very low chance to be conflict with
-                    // real AccountId. And these contacts become orphan.
+                    // For Lead-to-Account match, if cannot find matched AccountId or customer's AccountId doesn't
+                    // match with AccountId from matcher, return anonymous AccountId to help ProfileContact step
+                    // which requires existence of AccountId. Anonymous AccountId is some predefined string which
+                    // should have very low chance to be conflict with real AccountId. And these contacts become orphan.
                     value = results.get(field);
                     String customerAccountId = internalRecord.getParsedSystemIds() == null ? null
                             : internalRecord.getParsedSystemIds().get(InterfaceName.AccountId.name());
+                    // Record match result in enumeration for aggregation into match report.
+                    if (value == null) {
+                        orphanedNoMatchCount++;
+                    } else if (customerAccountId == null) {
+                        matchedByMatchKeyCount++;
+                    } else if (value.equals(customerAccountId)) {
+                        matchedByAccountIdCount++;
+                    } else {
+                        orphanedUnmatchedAccountIdCount++;
+                    }
                     if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
                         value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
                     }
@@ -337,6 +348,19 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
+        log.debug("TotalMatched: " + totalMatched);
+        if (isEntityMatch) {
+            matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(orphanedNoMatchCount);
+            matchContext.getOutput().getStatistics().setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
+            matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
+            matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
+
+            log.debug("OrphanedNoMatchCount: " + orphanedNoMatchCount);
+            log.debug("OrphanedUnmatchedAccountIdCount: " + orphanedUnmatchedAccountIdCount);
+            log.debug("MatchedByMatchKeyCount: " + matchedByMatchKeyCount);
+            log.debug("MatchedByAccountIdCount: " + matchedByAccountIdCount);
+        }
+
         if (columnMatchCount.length <= 10000) {
             matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
         }
