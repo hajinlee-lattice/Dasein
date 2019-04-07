@@ -392,9 +392,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         if (!BootstrapState.State.OK.equals(state.state)) {
             if (involvedDL) {
                 // bardjams may fail, and it won't impact test
-                log.warn("The tenant state is not OK after " + timeout + " msec.");
+                log.warn("The tenant state is not OK after " + TimeUnit.MINUTES.toMillis(10L) + " msec.");
             } else {
-                throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
+                throw new IllegalArgumentException("The tenant state is not OK after " + TimeUnit.MINUTES.toMillis(10L) + " msec.");
             }
         }
     }
