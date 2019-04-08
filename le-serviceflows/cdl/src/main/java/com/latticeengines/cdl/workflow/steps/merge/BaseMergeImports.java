@@ -167,6 +167,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly) {
+        return mergeInputs(useTargetTable, isDedupeSource, mergeOnly, mergedBatchStoreName, InterfaceName.Id.name(),
+                batchStorePrimaryKey);
+    }
+
+    private TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly,
+            String targetTableNamePrefix, String srcIdField, String masterIdField) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
         step.setBaseSources(baseSources);
@@ -177,28 +183,37 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         step.setBaseTables(baseTables);
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly, false));
+        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly, srcIdField, masterIdField));
         if (useTargetTable) {
-            TargetTable targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(mergedBatchStoreName);
-            step.setTargetTable(targetTable);
+            setTargetTable(step, targetTableNamePrefix);
         }
         return step;
     }
 
+    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly) {
+        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, InterfaceName.Id.name(),
+                batchStorePrimaryKey, true);
+    }
+
     protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
-            boolean copyCreateTime) {
+            String srcIdField, String masterIdField) {
+        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, srcIdField, masterIdField, false);
+    }
+
+    private String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
+            String srcIdField, String masterIdField, boolean heavyEngine) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(InterfaceName.Id.name());
-        config.setMasterIdField(batchStorePrimaryKey);
+        config.setSrcIdField(srcIdField);
+        config.setMasterIdField(masterIdField);
         config.setDedupeSource(isDedupeSource);
         config.setMergeOnly(isMergeOnly);
         config.setAddTimestamps(addTimettamps);
-        if (copyCreateTime) {
-            config.setColumnsFromRight(Collections.singleton(InterfaceName.CDLCreatedTime.name()));
+        config.setColumnsFromRight(Collections.singleton(InterfaceName.CDLCreatedTime.name()));
+        if (heavyEngine) {
+            return appendEngineConf(config, heavyEngineConfig());
+        } else {
+            return appendEngineConf(config, lightEngineConfig());
         }
-        return appendEngineConf(config, lightEngineConfig());
     }
 
     protected void generateDiffReport() {
@@ -265,9 +280,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         if (detail == null) {
             updateEntityValueMapInContext(entity, EXISTING_RECORDS, 0L, Long.class);
-            log.error(
-                    "Fail to find data collection status in workflow context, set previous count as 0 fors entity "
-                            + entity);
+            log.error("Fail to find data collection status in workflow context, set previous count as 0 fors entity "
+                    + entity);
             return;
         }
 
@@ -297,7 +311,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     private void setScalingMultiplier(List<Table> inputTables) {
         long count = 0L;
-        for (Table table: inputTables) {
+        for (Table table : inputTables) {
             count += ScalingUtils.getTableCount(table);
         }
         int multiplier = ScalingUtils.getMultiplier(count);

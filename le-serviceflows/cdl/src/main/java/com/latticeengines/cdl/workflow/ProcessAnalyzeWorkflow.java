@@ -46,6 +46,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ProcessAnalyzeListener processAnalyzeListener;
 
     @Inject
+    private MatchEntityWorkflow matchEntityWorkflow;
+
+    @Inject
     private ProcessAccountWorkflow processAccountWorkflow;
 
     @Inject
@@ -99,6 +102,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(startProcessing) //
                 .next(importProcessAnalyzeFromS3) //
+                .next(matchEntityWorkflow) //
                 .next(processAccountWorkflow) //
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //
