@@ -4,6 +4,7 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -19,7 +20,7 @@ public class PlayLaunchInitStepTestHelper {
     private ContactFetcher contactFetcher;
     private FrontEndQueryCreator frontEndQueryCreator;
 
-    public PlayLaunchInitStepTestHelper(PlayProxy playProxy, EntityProxy entityProxy,
+    public PlayLaunchInitStepTestHelper(PlayProxy playProxy, LookupIdMappingProxy lookupIdMappingProxy, EntityProxy entityProxy,
             RecommendationService recommendationService, long pageSize, MetadataProxy metadataProxy,
             SqoopProxy sqoopProxy, RatingEngineProxy ratingEngineProxy, JobService jobService,
             DataCollectionProxy dataCollectionProxy, String dataDbDriver, String dataDbUrl,
@@ -44,6 +45,7 @@ public class PlayLaunchInitStepTestHelper {
         playLaunchProcessor.setContactFetcher(contactFetcher);
         playLaunchProcessor.setFrontEndQueryCreator(frontEndQueryCreator);
         playLaunchProcessor.setRecommendationCreator(recommendationCreator);
+        playLaunchProcessor.setLookupIdMappingProxy(lookupIdMappingProxy);
         playLaunchProcessor.setPlayProxy(playProxy);
         playLaunchProcessor.setMetadataProxy(metadataProxy);
         playLaunchProcessor.setSqoopProxy(sqoopProxy);

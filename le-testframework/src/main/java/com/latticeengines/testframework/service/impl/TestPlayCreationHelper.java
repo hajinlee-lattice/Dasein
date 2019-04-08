@@ -351,7 +351,8 @@ public class TestPlayCreationHelper {
     }
 
     public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig) {
-        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(), playLaunchConfig.isPlayLaunchDryRun());
+        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(),
+                playLaunchConfig.isPlayLaunchDryRun());
         if (playLaunchConfig.isPlayLaunchDryRun()) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {
@@ -362,15 +363,12 @@ public class TestPlayCreationHelper {
 
     private PlayLaunch preparePlayLaunchObject(PlayLaunchConfig playLaunchConfig) {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(
-                playLaunchConfig.getBucketsToLaunch() != null ? playLaunchConfig.getBucketsToLaunch()
-                        : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
-        playLaunch.setDestinationOrgId(
-                playLaunchConfig.getDestinationSystemId() != null ? playLaunchConfig.getDestinationSystemId()
-                        : destinationOrgId);
-        playLaunch.setDestinationSysType(
-                playLaunchConfig.getDestinationSystemType() != null ? playLaunchConfig.getDestinationSystemType()
-                        : destinationOrgType);
+        playLaunch.setBucketsToLaunch(playLaunchConfig.getBucketsToLaunch() != null
+                ? playLaunchConfig.getBucketsToLaunch() : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
+        playLaunch.setDestinationOrgId(playLaunchConfig.getDestinationSystemId() != null
+                ? playLaunchConfig.getDestinationSystemId() : destinationOrgId);
+        playLaunch.setDestinationSysType(playLaunchConfig.getDestinationSystemType() != null
+                ? playLaunchConfig.getDestinationSystemType() : destinationOrgType);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
@@ -380,7 +378,6 @@ public class TestPlayCreationHelper {
         playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;
     }
-
 
     private void assertPlayLaunch(PlayLaunch playLaunch) {
         Assert.assertNotNull(playLaunch);
@@ -618,7 +615,7 @@ public class TestPlayCreationHelper {
 
         try {
             log.info("Cleaning up segment: " + segment.getName());
-            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName(),hardDelete);
+            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName(), hardDelete);
         } catch (Exception ex) {
             ignoreException(ex);
         }
