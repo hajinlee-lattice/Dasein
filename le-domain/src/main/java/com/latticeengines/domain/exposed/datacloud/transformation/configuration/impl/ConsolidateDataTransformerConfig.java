@@ -19,6 +19,7 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     private boolean dedupeSource;
     private boolean addTimestamps;
     private boolean mergeOnly;
+    private boolean inputLast;
     private List<String> trimFields = getDefaultTrimFields();
 
     public static List<String> getDefaultTrimFields() {
@@ -89,6 +90,14 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     public void setMergeOnly(boolean mergeOnly) {
         this.mergeOnly = mergeOnly;
+    }
+
+    public boolean isInputLast() {
+        return inputLast;
+    }
+
+    public void setInputLast(boolean inputLast) {
+        this.inputLast = inputLast;
     }
 
     public List<String> getTrimFields() {
