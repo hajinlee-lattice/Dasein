@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -80,6 +81,9 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     @Inject
     private EMREnvService emrEnvService;
+
+    @Inject
+    private EMRCacheService emrCacheService;
 
     @Inject
     private S3Service s3Service;
@@ -132,7 +136,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
         emrConfiguration = yarnConfiguration;
         if ("qacluster".equals(leEnv)) {
-            emrConfiguration = emrEnvService.getYarnConfiguration(QUARTZ_EMR);
+            String clusterId = emrCacheService.getClusterId(QUARTZ_EMR);
+            emrConfiguration = emrEnvService.getYarnConfiguration(clusterId);
         }
 
         String tenantId = CustomerSpace.parse(tenant).getTenantId();
