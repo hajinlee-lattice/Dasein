@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.DataFeedTaskImportListener;
 import com.latticeengines.cdl.workflow.steps.importdata.ImportDataFeedTask;
+import com.latticeengines.cdl.workflow.steps.importdata.InputFileValidator;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportDataFeedImportToS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -25,6 +26,9 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
     private ImportDataFeedTask importDataFeedTask;
 
     @Autowired
+    private InputFileValidator inputFileValidator;
+
+    @Autowired
     private DataFeedTaskImportListener dataFeedTaskImportListener;
 
     @Inject
@@ -34,6 +38,7 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
     public Workflow defineWorkflow(CDLDataFeedImportWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config)//
                 .next(importDataFeedTask)//
+                .next(inputFileValidator)//
                 .next(exportDataFeedImportToS3)//
                 .listener(dataFeedTaskImportListener)//
                 .build();
