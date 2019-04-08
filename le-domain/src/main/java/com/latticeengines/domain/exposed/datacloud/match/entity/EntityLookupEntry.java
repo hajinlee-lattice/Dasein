@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -78,10 +81,18 @@ public class EntityLookupEntry {
      *    attribute of this type.
      */
     public enum Type {
-        EXTERNAL_SYSTEM(1, 1, Mapping.ONE_TO_ONE),
-        DOMAIN_COUNTRY(0, 2, Mapping.MANY_TO_MANY),
-        DUNS(0, 1, Mapping.MANY_TO_ONE),
-        NAME_COUNTRY(0, 2, Mapping.MANY_TO_MANY);
+        EXTERNAL_SYSTEM(1, 1, ONE_TO_ONE), //
+        // types for account match only
+        DOMAIN_COUNTRY(0, 2, MANY_TO_MANY), //
+        DUNS(0, 1, Mapping.MANY_TO_ONE), //
+        NAME_COUNTRY(0, 2, MANY_TO_MANY), //
+        // types for contact match only
+        ACCT_EMAIL(0, 2, MANY_TO_MANY), // Account entity ID + Email
+        ACCT_NAME_PHONE(0, 3, MANY_TO_MANY), // Account entity ID + Contact Full Name + Phone Number
+        C_ACCT_EMAIL(0, 2, MANY_TO_MANY), // Customer Account ID + Email
+        C_ACCT_NAME_PHONE(0, 3, MANY_TO_MANY), // Customer Account ID + Contact Full Name + Phone Number
+        EMAIL(0, 1, MANY_TO_MANY), // Email only
+        NAME_PHONE(0, 2, MANY_TO_MANY); // Contact Full Name + Phone Number
 
         private static final String DELIMITER = "||";
         private static final String DELIMITER_REGEX = "\\|\\|";

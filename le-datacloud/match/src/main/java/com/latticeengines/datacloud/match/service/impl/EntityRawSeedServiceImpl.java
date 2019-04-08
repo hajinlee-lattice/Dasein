@@ -507,7 +507,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             @NotNull String entity, @NotNull String attributeName, Object value) {
         for (EntityLookupEntry.Type type : EntityLookupEntry.Type.values()) {
             int idx = attributeName.indexOf(type.name());
-            if (idx < 0) {
+            if (idx != 0) {
                 continue;
             }
 
