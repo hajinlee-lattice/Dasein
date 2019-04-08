@@ -96,7 +96,7 @@ public class EMRScalingRunnable implements Runnable {
 
         try {
             RetryTemplate retry = RetryUtils.getRetryTemplate(5);
-            metrics = retry.execute(context -> emrEnvService.getClusterMetrics(emrCluster));
+            metrics = retry.execute(context -> emrEnvService.getClusterMetrics(clusterId));
         } catch (Exception e) {
             log.error("Failed to retrieve cluster metrics for emr cluster " + emrCluster);
             return;
@@ -228,7 +228,7 @@ public class EMRScalingRunnable implements Runnable {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(context -> {
             try {
-                try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+                try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
                     yarnClient.start();
                     List<ApplicationReport> apps = yarnClient.getApplications(PENDING_APP_STATES);
                     return getReqs(apps);
@@ -244,7 +244,7 @@ public class EMRScalingRunnable implements Runnable {
         try {
             return retry.execute(context -> {
                 try {
-                    try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+                    try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
                         yarnClient.start();
                         List<ApplicationReport> apps = yarnClient.getApplications(ACTIVE_APP_STATES);
                         return apps.stream().anyMatch(appReport ->
