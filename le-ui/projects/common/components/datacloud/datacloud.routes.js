@@ -131,7 +131,7 @@ angular
         .state('home.segments', {
             url: '/segments',
             onEnter: function($state, DataCloudStore, FilterService) {
-                DataCloudStore.clear();
+                // DataCloudStore.clear();
                 if([
                     //'home.segment.explorer.attributes',
                     'home.segment.explorer.builder'

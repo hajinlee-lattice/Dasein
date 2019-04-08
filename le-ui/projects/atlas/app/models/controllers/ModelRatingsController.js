@@ -75,7 +75,6 @@ angular.module('lp.models.ratings', [
             if (vm.currentRating.scoring_iteration) {
                 var id = vm.currentRating.scoring_iteration.AI.modelSummaryId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
-                    console.log(result);
                     vm.currentConfiguration = result;
                     vm.showCurrentConfig = true;
                 });
@@ -102,8 +101,6 @@ angular.module('lp.models.ratings', [
                 // If the model has been published previously and is Active
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
 
-                    console.log("here 2");
-
                     // Set active iteration and working buckets (determines what is displayed in the chart)
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
                     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
@@ -115,21 +112,17 @@ angular.module('lp.models.ratings', [
                     });
 
                 } else {
-
-                    console.log("here 3");
-
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
-                    
                 }
             }
 
-            console.log(vm.currentRating);
-            console.log(vm.activeIteration);
-            console.log(vm.workingBuckets);
-            console.log(vm.currentConfiguration);
-            console.log(vm.showCurrentConfig);
+            // console.log(vm.currentRating);
+            // console.log(vm.activeIteration);
+            // console.log(vm.workingBuckets);
+            // console.log(vm.currentConfiguration);
+            // console.log(vm.showCurrentConfig);
 
             vm.ratingModelId = vm.activeIteration.id;
         }
@@ -453,7 +446,6 @@ angular.module('lp.models.ratings', [
 
                 var id = $stateParams.modelId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
-                    console.log(currentConfig);
                     vm.currentConfiguration = currentConfig;
                     vm.showCurrentConfig = true;
                     refreshChartData();
@@ -529,12 +521,8 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
         
-        console.log(vm.currentRating);
-
         vm.latest_iteration = vm.currentRating.latest_iteration;
         vm.predictionType = vm.latest_iteration.AI.predictionType;
-
-        console.log(vm.predictionType);
 
         vm.header.filter.unfiltered = vm.scoringHistory;
         vm.header.filter.filtered = vm.scoringHistory;
