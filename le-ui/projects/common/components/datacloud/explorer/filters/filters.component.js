@@ -32,6 +32,7 @@ export default function () {
                     sort_modeliteration: {
                         label: 'Sort By',
                         icon: 'numeric',
+                        property: 'DisplayName',
                         order: '',
                         items: [
                             { 

@@ -236,7 +236,8 @@
                                 </td>
                                 <td ng-class="{
                                         completed: iteration.modelingJobStatus === 'Completed',
-                                        failed: iteration.modelingJobStatus === 'Failed',
+                                        failed: iteration.modelingJobStatus === 'Failed' ||
+                                        iteration.modelingJobStatus === 'Cancelled',
                                         running: iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'
                                     }">
                                     <span ng-if="iteration.modelingJobStatus === 'Completed'">
@@ -245,7 +246,10 @@
                                     <span ng-if="iteration.modelingJobStatus === 'Failed'">
                                         Failed
                                     </span>
-                                    <span ng-if="iteration.modelingJobStatus === 'Completed' || iteration.modelingJobStatus === 'Failed'">
+                                    <span ng-if="iteration.modelingJobStatus === 'Cancelled'">
+                                        Cancelled
+                                    </span>
+                                    <span ng-if="iteration.modelingJobStatus === 'Completed' || iteration.modelingJobStatus === 'Failed' || iteration.modelingJobStatus === 'Cancelled'">
                                         {{ iteration.created | date }}
                                     </span>
 

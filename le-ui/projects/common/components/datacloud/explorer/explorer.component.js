@@ -138,9 +138,18 @@ export default function (
                 opts = {
                     url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/cube`
                 };
+        } else {
+            var nocache = true,
+                opts = {
+                    url: `/pls/datacollection/statistics/cubes`
+                };
         }
 
+        console.log(opts);
+
         DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
+
+            console.log(result);
             vm.cube = result;
 
             if (vm.section == 're.model_iteration') {
