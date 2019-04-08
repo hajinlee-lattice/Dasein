@@ -1,7 +1,5 @@
 package com.latticeengines.yarn.exposed.bean;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
@@ -26,7 +24,7 @@ public class MapReduceConfigurationTestNG extends AbstractTestNGSpringContextTes
     private EMRCacheService emrCacheService;
 
     @Test(groups = "functional", enabled = false)
-    public void testEmrYarnConfiguration() throws IOException {
+    public void testEmrYarnConfiguration() {
         Assert.assertEquals(hadoopConfiguration.get("fs.defaultFS"), //
                 String.format("hdfs://%s", emrCacheService.getMasterIp()));
     }
