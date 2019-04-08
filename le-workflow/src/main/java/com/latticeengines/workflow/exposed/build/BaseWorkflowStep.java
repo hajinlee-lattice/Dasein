@@ -140,6 +140,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
     protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
+    protected static final String ENTITY_MATCH_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_ACCOUNT_TARGETTABLE";
+    protected static final String ENTITY_MATCH_CONTACT_TARGETTABLE = "ENTITY_MATCH_CONTACT_TARGETTABLE";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_VERSION = "NEW_ENTITY_MATCH_VERSION";

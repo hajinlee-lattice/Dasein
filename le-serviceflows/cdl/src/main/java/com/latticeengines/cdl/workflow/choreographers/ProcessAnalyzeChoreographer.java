@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.MatchEntityWorkflow;
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
 import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
@@ -45,6 +46,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeChoreographer.class);
 
     @Inject
+    private ProcessMatchEntityChoreographer matchEntityChoreographer;
+
+    @Inject
     private ProcessAccountChoreographer accountChoreographer;
 
     @Inject
@@ -58,6 +62,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Inject
     private ProcessRatingChoreographer ratingChoreographer;
+
+    @Inject
+    private MatchEntityWorkflow matchEntityWorkflow;
 
     @Inject
     private ProcessAccountWorkflow accountWorkflow;
@@ -95,7 +102,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         boolean skip = false;
-        if (isAccountStep(seq)) {
+        if (isMatchEntityStep(seq)) {
+            skip = matchEntityChoreographer.skipStep(step, seq);
+        } else if (isAccountStep(seq)) {
             skip = accountChoreographer.skipStep(step, seq);
         } else if (isContactStep(seq)) {
             skip = contactChoreographer.skipStep(step, seq);
@@ -118,11 +127,16 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     @Override
     public void linkStepNamespaces(List<String> stepNamespaces) {
         super.linkStepNamespaces(stepNamespaces);
+        matchEntityChoreographer.linkStepNamespaces(stepNamespaces);
         accountChoreographer.linkStepNamespaces(stepNamespaces);
         contactChoreographer.linkStepNamespaces(stepNamespaces);
         productChoreographer.linkStepNamespaces(stepNamespaces);
         transactionChoreographer.linkStepNamespaces(stepNamespaces);
         ratingChoreographer.linkStepNamespaces(stepNamespaces);
+    }
+
+    private boolean isMatchEntityStep(int seq) {
+        return inWorkflow(seq, matchEntityWorkflow);
     }
 
     private boolean isAccountStep(int seq) {
