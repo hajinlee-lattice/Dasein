@@ -46,6 +46,7 @@ import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
+import com.amazonaws.services.dynamodbv2.xspec.UpdateAction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -53,6 +54,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -110,10 +112,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     public boolean setIfNotExists(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean setTTL) {
         checkNotNull(env, tenant, seed);
-        Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL);
-        // set attributes
-        getStringAttributes(seed).forEach(item::withString);
-        getStringSetAttributes(seed).forEach(item::withStringSet);
+        Item item = getItemFromSeed(env, tenant, seed, setTTL);
         return getRetryTemplate(env).execute(ctx ->
                 conditionalSet(getTableName(env), item));
     }
@@ -232,8 +231,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             builder.addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
         }
 
-        getStringAttributes(rawSeed).forEach((attrName, attrValue) -> builder.addUpdate(
-                S(attrName).set(if_not_exists(attrName, attrValue)))); // update if the attr not exist
+        getStringAttributes(rawSeed) //
+                .forEach((attrName, attrValue) -> builder
+                        .addUpdate(getStringAttrUpdateAction(rawSeed.getEntity(), attrName, attrValue)));
         // set does not matter, just add to set
         getStringSetAttributes(rawSeed)
                 .forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).append(attrValue)));
@@ -280,13 +280,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         if (CollectionUtils.isEmpty(rawSeeds)) {
             return false;
         }
-        List<Item> batchItems = rawSeeds.stream()
-                .map(seed -> {
-                    Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL);
-                    getStringAttributes(seed).forEach(item::withString);
-                    getStringSetAttributes(seed).forEach(item::withStringSet);
-                    return item;
-                }).collect(Collectors.toList());
+        List<Item> batchItems = rawSeeds.stream() //
+                .map(seed -> getItemFromSeed(env, tenant, seed, setTTL)) //
+                .collect(Collectors.toList());
         dynamoItemService.batchWrite(getTableName(env), batchItems);
         return true;
     }
@@ -412,6 +408,35 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         return new EntityRawSeed(seedId, entity, version, entries, attributes);
     }
 
+    /**
+     * Generate dynamo update action for input string attribute
+     *
+     * @param entity
+     *            target entity of current match
+     * @param attrName
+     *            attribute name to update
+     * @param attrValue
+     *            attribute value to update
+     * @return generated dynamo update action, will not be {@literal null}
+     */
+    private UpdateAction getStringAttrUpdateAction(@NotNull String entity, @NotNull String attrName, String attrValue) {
+        if (!attrName.startsWith(PREFIX_SEED_ATTRIBUTES)
+                || !EntityMatchUtils.shouldOverrideAttribute(entity, attrName)) {
+            Preconditions.checkNotNull(attrValue, String.format("Cannot update attribute %s to null value", attrName));
+            // lookup keys or first win attributes
+            return S(attrName).set(if_not_exists(attrName, attrValue));
+        }
+
+        // last win attributes
+        if (attrValue == null) {
+            // remove attribute when value is null
+            return S(attrName).remove();
+        } else {
+            // override
+            return S(attrName).set(attrValue);
+        }
+    }
+
     /*
      * set raw seed item if the item does not already exist (has partition key)
      *
@@ -448,6 +473,14 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         if (shouldSetTTL) {
             item.withNumber(ATTR_EXPIRED_AT, getExpiredAt());
         }
+        return item;
+    }
+
+    private Item getItemFromSeed(EntityMatchEnvironment env, Tenant tenant, EntityRawSeed seed, boolean setTTL) {
+        Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL);
+        // set attributes
+        getStringAttributes(seed).forEach(item::withString);
+        getStringSetAttributes(seed).forEach(item::withStringSet);
         return item;
     }
 
