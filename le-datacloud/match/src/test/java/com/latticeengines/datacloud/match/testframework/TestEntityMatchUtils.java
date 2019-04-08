@@ -1,9 +1,15 @@
 package com.latticeengines.datacloud.match.testframework;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromAccountIdEmail;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromAccountIdNamePhoneNumber;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromCustomerAccountIdEmail;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromCustomerAccountIdNamePhoneNumber;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDomainCountry;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDuns;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromEmail;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromExternalSystem;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromNameCountry;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromNamePhoneNumber;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -191,5 +197,35 @@ public class TestEntityMatchUtils {
                 fromExternalSystem(TEST_ENTITY, EXTERNAL_SYSTEM_ELOQUA, "e3");
         public static final EntityLookupEntry ELOQUA_4 =
                 fromExternalSystem(TEST_ENTITY, EXTERNAL_SYSTEM_ELOQUA, "e4");
+
+        // contact lookup keys
+        public static final EntityLookupEntry AE_GOOGLE_1_1 = fromAccountIdEmail(TEST_ENTITY, "a1", "john@google.com");
+        public static final EntityLookupEntry AE_GOOGLE_1_2 = fromAccountIdEmail(TEST_ENTITY, "a1",
+                "harold@google.com");
+        public static final EntityLookupEntry AE_GOOGLE_1_3 = fromAccountIdEmail(TEST_ENTITY, "a1",
+                "sameen@google.com");
+
+        public static final EntityLookupEntry CAE_GOOGLE_1_1 = fromCustomerAccountIdEmail(TEST_ENTITY, "ca1",
+                "john@google.com");
+        public static final EntityLookupEntry CAE_GOOGLE_1_2 = fromCustomerAccountIdEmail(TEST_ENTITY, "ca1",
+                "harold@google.com");
+
+        public static final EntityLookupEntry ANP_GOOGLE_1_1 = fromAccountIdNamePhoneNumber(TEST_ENTITY, "a1",
+                "John Reese", "000-123-4567");
+        public static final EntityLookupEntry ANP_GOOGLE_1_2 = fromAccountIdNamePhoneNumber(TEST_ENTITY, "a1",
+                "Harold Finch", "123-456-7777");
+
+        public static final EntityLookupEntry CANP_GOOGLE_1_1 = fromCustomerAccountIdNamePhoneNumber(TEST_ENTITY, "ca1",
+                "John Reese", "000-123-4567");
+        public static final EntityLookupEntry CANP_GOOGLE_1_2 = fromCustomerAccountIdNamePhoneNumber(TEST_ENTITY, "ca1",
+                "Harold Finch", "123-456-7777");
+
+        public static final EntityLookupEntry E_GOOGLE_1_1 = fromEmail(TEST_ENTITY, "john@google.com");
+        public static final EntityLookupEntry E_GOOGLE_1_2 = fromEmail(TEST_ENTITY, "harold@google.com");
+
+        public static final EntityLookupEntry NP_GOOGLE_1_1 = fromNamePhoneNumber(TEST_ENTITY, "John Reese",
+                "000-123-4567");
+        public static final EntityLookupEntry NP_GOOGLE_1_2 = fromNamePhoneNumber(TEST_ENTITY, "Harold Finch",
+                "123-456-7777");
     }
 }
