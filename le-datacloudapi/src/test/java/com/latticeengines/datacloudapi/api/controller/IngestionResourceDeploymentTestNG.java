@@ -144,7 +144,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     public void testIngestions() {
         // no sequential dependencies among groups
         // can comment out any group(s)
-        testIngestions1();
+        // Disable Orb test as Orb Key is expired
+        // testIngestions1();
         testIngestions2();
         testIngestions3();
     }

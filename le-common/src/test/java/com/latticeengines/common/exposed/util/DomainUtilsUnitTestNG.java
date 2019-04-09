@@ -31,4 +31,36 @@ public class DomainUtilsUnitTestNG {
                 { "www.abc.com.technology", "abc.com.technology" },
         };
     }
+
+    @Test(groups = "unit", dataProvider = "emailDataProvider")
+    public void testParseEmail(String rawEmail, String parsedEmail) {
+        Assert.assertEquals(DomainUtils.parseEmail(rawEmail), parsedEmail);
+    }
+
+    @DataProvider(name = "emailDataProvider")
+    private Object[][] emailDataProvider() {
+        // Schema: Raw Email, Parsed Email
+        return new Object[][] {
+                // Positive Cases
+                { "aa@gmail.com", "aa@gmail.com" }, //
+                { " aa@gmail.com ", "aa@gmail.com" }, //
+                { "  a  a  @  gm  ail   . com ", "aa@gmail.com" }, //
+                { "www.aa@gmail.com", "www.aa@gmail.com" }, //
+                { "www-aa@lattice-engines.com", "www-aa@lattice-engines.com" }, //
+                { "aa@sina.com.cn", "aa@sina.com.cn" }, //
+                { "aa@att.net", "aa@att.net" }, //
+                // Not able to validate domain extension (expected for now)
+                { "aa@gmail.aaa", "aa@gmail.aaa" }, //
+
+                // Negative Cases
+                { "gmail.com", null }, //
+                { "@gmail.com", null }, //
+                { "aa@gmail", null }, //
+                { "aa@@gmail.com", null }, //
+                { "aa@.gmail.com", null }, //
+                { "aa@gmail..com", null }, //
+                { "aa@@gmail.com.", null }, //
+
+        };
+    }
 }
