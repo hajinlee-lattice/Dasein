@@ -147,7 +147,7 @@ public class PlayLaunchProcessor {
                     .getActiveVersion(playLaunchContext.getCustomerSpace().toString());
             log.info(String.format("Using DataCollection.Version %s", version));
 
-            long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(tenant, playLaunchContext, version);
+            long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext, version);
 
             Long currentTimeMillis = System.currentTimeMillis();
 
@@ -208,11 +208,11 @@ public class PlayLaunchProcessor {
         }
     }
 
-    private long prepareQueriesAndCalculateAccCountForLaunch(Tenant tenant, PlayLaunchContext playLaunchContext,
+    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext,
             DataCollection.Version version) {
         long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
 
-        applyEmailFilterToQueries(tenant, playLaunchContext);
+        applyEmailFilterToQueries(playLaunchContext);
 
         totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount, version);
 
@@ -330,9 +330,9 @@ public class PlayLaunchProcessor {
         return effectiveAccountCount;
     }
 
-    private void applyEmailFilterToQueries(Tenant tenant, PlayLaunchContext playLaunchContext) {
+    private void applyEmailFilterToQueries(PlayLaunchContext playLaunchContext) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
-        LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(tenant.getId(),
+        LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
                 launch.getDestinationOrgId(), launch.getDestinationSysType());
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
         if (CDLExternalSystemName.Marketo.equals(destinationSystemName)) {
