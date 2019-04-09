@@ -23,14 +23,19 @@ angular
         $stateProvider
             .state('home.ratingsengine', {
                 url: '/ratings_engine',
-                onExit: function(QueryStore, FilterService) {
+                onExit: function(QueryStore) {
                     QueryStore.clear();
-                    FilterService.clear();
                 },
                 redirectTo: 'home.ratingsengine.list'
             })
             .state('home.ratingsengine.list', {
                 url: '/list',
+                onEnter: function ($state, FilterService, StateHistory) {
+                    var referringRoute = StateHistory.lastFrom().name;
+                    if (referringRoute != 'home.ratingsengine.dashboard' && referringRoute != 'home.model.ratings') {
+                        FilterService.clear();
+                    }
+                },
                 resolve: {
                     RatingList: function ($q, RatingsEngineStore) {
                         var deferred = $q.defer();
