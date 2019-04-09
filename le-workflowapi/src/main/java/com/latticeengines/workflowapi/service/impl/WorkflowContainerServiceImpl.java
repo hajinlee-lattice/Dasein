@@ -188,9 +188,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public com.latticeengines.domain.exposed.dataplatform.JobStatus getJobStatus(String applicationId) {
+    public com.latticeengines.domain.exposed.dataplatform.JobStatus getJobStatus(String applicationId, String clusterId) {
         try {
-            return jobService.getJobStatus(applicationId);
+            return jobService.getJobStatusByCluster(applicationId, clusterId);
         } catch (Exception e) {
             if (ExceptionUtils.indexOfThrowable(e, ApplicationNotFoundException.class) > -1) {
                 // return null when application does not exist in RM
