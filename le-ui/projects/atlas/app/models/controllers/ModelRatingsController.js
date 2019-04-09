@@ -123,7 +123,7 @@ angular.module('lp.models.ratings', [
             // console.log(vm.workingBuckets);
             // console.log(vm.currentConfiguration);
             // console.log(vm.showCurrentConfig);
-
+            vm.activeConfigNumber = vm.currentRating.scoring_iteration.AI.iteration;
             vm.ratingModelId = vm.activeIteration.id;
         }
         
@@ -447,6 +447,7 @@ angular.module('lp.models.ratings', [
                 var id = $stateParams.modelId;
                 ModelRatingsService.MostRecentConfiguration(id).then(function(currentConfig) {
                     vm.currentConfiguration = currentConfig;
+
                     vm.showCurrentConfig = true;
                     refreshChartData();
                 });
@@ -461,6 +462,8 @@ angular.module('lp.models.ratings', [
                         title: 'Publish Configuration', 
                         message: 'Your new ratings configuration has been published.'
                     });
+
+                    vm.activeConfigNumber = vm.activeIteration.iteration;
 
                     $rootScope.$broadcast('statusChange', { 
                         activeStatus: 'ACTIVE',
