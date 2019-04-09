@@ -28,6 +28,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -81,8 +83,11 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         List<Product> currentProducts = getCurrentProducts(currentTable);
         List<String> errorMessages = new ArrayList<>();
         mergeProducts(inputProducts, currentProducts, errorMessages);
-        String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
-        writeErrorFile(filePath, errorMessages);
+        if (CollectionUtils.isNotEmpty(errorMessages)) {
+            String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
+            writeErrorFile(filePath, errorMessages);
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
+        }
     }
 
     private void writeErrorFile(String filePath, List<String> errorMessages) {
@@ -96,7 +101,7 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
                 format = format.withHeader(ImportProperty.ERROR_HEADER);
             }
         } catch (IOException e) {
-            log.info("error when copying file to local");
+            log.info("Error when copying file to local");
         }
         // append error message to error file
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
@@ -105,13 +110,13 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
             }
             csvFilePrinter.close();
         } catch (IOException ex) {
-            log.info("error when writing error message to error file");
+            log.info("Error when writing error message to error file");
         }
         // copy error file back to hdfs
         try {
             HdfsUtils.copyLocalToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, filePath);
         } catch (IOException e) {
-            log.info("error when copying file to hdfs");
+            log.info("Error when copying file to hdfs");
         }
     }
 
