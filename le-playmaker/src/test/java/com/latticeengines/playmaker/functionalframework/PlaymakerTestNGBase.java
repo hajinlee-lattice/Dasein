@@ -59,7 +59,7 @@ public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {
         // make sure to replace all specialChars with '_'
         userName = userName.replaceAll("[^A-Za-z0-9]", "_");
 
-        return "LETest123." + userName + "." + hostName;
+        return "LETest." + userName + "." + hostName;
     }
 
 }

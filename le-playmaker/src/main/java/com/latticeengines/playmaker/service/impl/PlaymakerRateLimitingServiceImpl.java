@@ -27,7 +27,7 @@ public class PlaymakerRateLimitingServiceImpl implements PlaymakerRateLimitingSe
 
     public static final String PLAYMAKER_REQUEST_REGULATOR = "PlaymakerRequest";
 
-    private static final String COUNTER_REQUEST__PER_HOUR = "PlaymakerRequestPerHour";
+    private static final String COUNTER_REQUEST_PER_HOUR = "PlaymakerRequestPerHour";
     private static final String COUNTER_REQUEST_PER_MINUTE = "PlaymakerRequestPerMinute";
 
     private static final String PRODUCTION_ENVIRONMENT = "prod";
@@ -52,7 +52,7 @@ public class PlaymakerRateLimitingServiceImpl implements PlaymakerRateLimitingSe
             registerPlaymakerRequestRegulator(tenant);
         }
         Map<String, Long> quantities = new HashMap<>();
-        quantities.put(COUNTER_REQUEST__PER_HOUR, 1L);
+        quantities.put(COUNTER_REQUEST_PER_HOUR, 1L);
         quantities.put(COUNTER_REQUEST_PER_MINUTE, 1L);
         RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(getResourceName(tenant), quantities, 5,
                 TimeUnit.SECONDS, attemptOnly);
@@ -62,8 +62,9 @@ public class PlaymakerRateLimitingServiceImpl implements PlaymakerRateLimitingSe
 
     private void registerPlaymakerRequestRegulator(String tenant) {
         int perMinuteQuota = (isTestTenant(tenant) && playmakerEnvironment != PRODUCTION_ENVIRONMENT)? playmakerRequestsPerMinuteTest : playmakerRequestsPerMinute;
+        log.info("perMinuteQuota: "+perMinuteQuota);
         RateLimitDefinition definition = RateLimitDefinition.crossDivisionDefinition();
-        definition.addQuota(COUNTER_REQUEST__PER_HOUR, new RateLimitDefinition.Quota(playmakerRequestsPerHour, 1, TimeUnit.HOURS));
+        definition.addQuota(COUNTER_REQUEST_PER_HOUR, new RateLimitDefinition.Quota(playmakerRequestsPerHour, 1, TimeUnit.HOURS));
         definition.addQuota(COUNTER_REQUEST_PER_MINUTE, new RateLimitDefinition.Quota(perMinuteQuota, 1, TimeUnit.MINUTES));
         RateLimitedResourceManager.registerResource(getResourceName(tenant), definition);
         playmakerRequestRegulatorRegistered = true;
@@ -91,9 +92,7 @@ public class PlaymakerRateLimitingServiceImpl implements PlaymakerRateLimitingSe
         boolean findMatch = false;
 
         for (String prefix: TENANTID_PREFIXES) {
-            Pattern pattern = Pattern.compile(prefix + "\\d+" +
-                    "|" + prefix + "_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_UTC" +
-                    "|" + prefix + "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+            Pattern pattern = Pattern.compile(prefix);
             Matcher matcher = pattern.matcher(tenantId);
             if (matcher.find()) {
                 findMatch = true;
