@@ -44,6 +44,7 @@ public class DomainUtilsUnitTestNG {
                 // Positive Cases
                 { "aa@gmail.com", "aa@gmail.com" }, //
                 { " aa@gmail.com ", "aa@gmail.com" }, //
+                { "  a  a  @  gm  ail   . com ", "aa@gmail.com" }, //
                 { "www.aa@gmail.com", "www.aa@gmail.com" }, //
                 { "www-aa@lattice-engines.com", "www-aa@lattice-engines.com" }, //
                 { "aa@sina.com.cn", "aa@sina.com.cn" }, //
