@@ -425,9 +425,9 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
     }
 
     private boolean hasExtraAttributes(@NotNull EntityRawSeed target, Map<String, String> extraAttributes) {
-        // only check keys because currently we don't override attributes so there is no need to check values
+        // need to update if attrs in request is not a subset of current attrs
         return MapUtils.isNotEmpty(extraAttributes) &&
-                !target.getAttributes().keySet().containsAll(extraAttributes.keySet());
+                !target.getAttributes().entrySet().containsAll(extraAttributes.entrySet());
     }
 
     /*
