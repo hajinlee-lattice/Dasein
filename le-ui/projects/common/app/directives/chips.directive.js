@@ -5,6 +5,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
         restrict: 'E',
         templateUrl: '/app/directives/chips.component.html',
         scope: { 
+            icon: '@',
             placeholder: '@', 
             datasource: '=', 
             callback: '&callbackFunction', 
@@ -51,6 +52,14 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 }
             };
 
+            scope.getClassIcon = function(){
+                console.log('SEARCH ', scope.icon);
+                if(scope.icon){
+                    return scope.icon;
+                }else{
+                    return 'fa fa-search';
+                }
+            }
             scope.filterFunction = function(item) {
                 return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
             };

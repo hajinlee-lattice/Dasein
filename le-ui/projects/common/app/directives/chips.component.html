@@ -18,12 +18,11 @@
         ng-class="(showQueryList) ?'show-dropdown' : ''">
         <div ng-class="{'ng-search': showIcon}" ng-show="!isSelectionDone()">
             <a class="button icon-button white-button" ng-if="showIcon">
-                <span class="fa fa-search"></span>
+                <span class="{{getClassIcon()}}"></span>
             </a> 
             <input 
                 id="id"
                 class="query"
-                ng-class="{'search-icon': showIcon}"
                 type="text" 
                 placeholder="{{placeholder}}" 
                 ng-keyup="queryKeyPressed($event)" 
