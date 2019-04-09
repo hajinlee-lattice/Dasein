@@ -13,6 +13,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLoo
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -86,12 +88,21 @@ public class TestEntityMatchUtils {
      * @return generated seed
      */
     public static EntityRawSeed newSeed(@NotNull String seedId, String... attributeNameValues) {
+        return newSeedFromAttrs(seedId, TEST_ENTITY, attributeNameValues);
+    }
+
+    /*
+     * Create a seed with attributes only
+     */
+    public static EntityRawSeed newSeedFromAttrs(@NotNull String seedId, @NotNull String entity,
+            String... attributeNameValues) {
         Preconditions.checkNotNull(seedId);
+        Preconditions.checkNotNull(entity);
         Preconditions.checkArgument(attributeNameValues.length % 2 == 0);
         Map<String, String> attributes = IntStream.range(0, attributeNameValues.length / 2)
                 .mapToObj(idx -> Pair.of(attributeNameValues[2 * idx], attributeNameValues[2 * idx + 1]))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
-        return new EntityRawSeed(seedId, TEST_ENTITY, Collections.emptyList(), attributes);
+                .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
+        return new EntityRawSeed(seedId, entity, Collections.emptyList(), attributes);
     }
 
     /**
@@ -110,6 +121,45 @@ public class TestEntityMatchUtils {
                 seed1.getAttributes().entrySet().stream(), seed2.getAttributes().entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1));
         return new EntityRawSeed(seed1.getId(), seed1.getEntity(), entries, attributes);
+    }
+
+    /**
+     * Return the updated attribute map given the current state of the seed and the
+     * seed to update attributes.
+     *
+     * @param currState
+     *            current state of {@link EntityRawSeed} in the universe, can be
+     *            {@literal null}
+     * @param seedToUpdate
+     *            seed object used to update attributes, lookup entries will be
+     *            ignored.
+     * @return map of updated attributes, will not be {@literal null}
+     */
+    public static Map<String, String> getUpdatedAttributes(EntityRawSeed currState,
+            @NotNull EntityRawSeed seedToUpdate) {
+        if (currState == null) {
+            return new HashMap<>(seedToUpdate.getAttributes() //
+                    .entrySet() //
+                    .stream() //
+                    .filter(entry -> entry.getValue() != null) //
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        }
+
+        Map<String, String> attrs = new HashMap<>(currState.getAttributes());
+        for (Map.Entry<String, String> attr : seedToUpdate.getAttributes().entrySet()) {
+            if (EntityMatchUtils.shouldOverrideAttribute(seedToUpdate.getEntity(), attr.getKey())) {
+                if (attr.getValue() == null) {
+                    // remove
+                    attrs.remove(attr.getKey());
+                } else {
+                    // override value
+                    attrs.put(attr.getKey(), attr.getValue());
+                }
+            } else {
+                attrs.putIfAbsent(attr.getKey(), attr.getValue());
+            }
+        }
+        return attrs;
     }
 
     public static EntityRawSeed changeId(@NotNull EntityRawSeed seed, @NotNull String seedId) {
