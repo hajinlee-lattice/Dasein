@@ -25,14 +25,14 @@ public class MatchStatistics {
             .appendLiteral(".").appendMillis3Digit().toFormatter();
     private static Logger log = LoggerFactory.getLogger(MatchStatistics.class);
     private Integer rowsRequested;
-    private Integer rowsMatched;
+    private Integer rowsMatched = 0;
     private Long timeElapsedInMsec;
     private List<Integer> columnMatchCount;
 
-    private Long orphanedNoMatchCount;
-    private Long orphanedUnmatchedAccountIdCount;
-    private Long matchedByMatchKeyCount;
-    private Long matchedByAccountIdCount;
+    private Long orphanedNoMatchCount = 0L;
+    private Long orphanedUnmatchedAccountIdCount = 0L;
+    private Long matchedByMatchKeyCount = 0L;
+    private Long matchedByAccountIdCount = 0L;
 
     @MetricField(name = "RowsRequested", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsRequested")
@@ -75,16 +75,6 @@ public class MatchStatistics {
     public void setColumnMatchCount(List<Integer> columnMatchCount) {
         this.columnMatchCount = columnMatchCount;
     }
-
-    /*
-    public EntityMatchAggregation getEntityMatchAggregation() {
-        return entityMatchAggregation;
-    }
-
-    public void setEntityMatchAggregation(EntityMatchAggregation entityMatchAggregation) {
-        this.entityMatchAggregation = entityMatchAggregation;
-    }
-    */
 
     public Long getOrphanedNoMatchCount() {
         return orphanedNoMatchCount;
