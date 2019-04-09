@@ -399,6 +399,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
                 .getAllowedModelingAttrs(customerSpace, false, dataCollectionService.getActiveVersion(customerSpace))
+                .concatWith(
+                        servingStoreProxy.getAllowedModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState,
+                                false, dataCollectionService.getActiveVersion(customerSpace)))
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
