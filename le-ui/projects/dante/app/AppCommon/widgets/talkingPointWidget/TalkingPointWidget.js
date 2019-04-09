@@ -40,7 +40,7 @@ angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
     this.formatType = function (value, type) {
         switch (type) {
             case MetadataUtility.PropertyType.CURRENCY:
-                value = ResourceUtility.getString("CURRENCY_SYMBOL") + NumberUtility.AbbreviateLargeNumber(value, 1);
+                value = ResourceUtility.getString("CURRENCY_SYMBOL") + NumberUtility.AbbreviateLargeNumber(NumberUtility.RoundNumber(value, 2), 1);
                 break;
             case MetadataUtility.PropertyType.EPOCH_TIME:
                 value = new Date(value * 1000).toLocaleDateString();
