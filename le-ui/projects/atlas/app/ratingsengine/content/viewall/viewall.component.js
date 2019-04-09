@@ -159,6 +159,7 @@ class ViewAllComponent extends Component {
                         let pending = cell.props.rowData.modelingJobStatus == 'Pending';
                         let running = cell.props.rowData.modelingJobStatus == 'Running';
                         let completed = cell.props.rowData.modelingJobStatus == 'Completed';
+                        let cancelled = cell.props.rowData.modelingJobStatus == 'Cancelled';
 
                         let timestamp = new Date(cell.props.rowData.created);
                         const formattedDate = timestamp.toDateString().split(' ').slice(1).join(' ');
@@ -174,6 +175,12 @@ class ViewAllComponent extends Component {
                             return (
                                 <span className="completed">
                                     <span>Successfully created {formattedDate}</span>
+                                </span>
+                            )
+                        } else if (cancelled) {
+                          return (
+                                <span className="failed">
+                                    <span>Cancelled {formattedDate}</span>
                                 </span>
                             )
                         } else {
