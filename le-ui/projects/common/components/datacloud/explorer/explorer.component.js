@@ -130,32 +130,35 @@ export default function (
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
             $state.go('home.datacloud.explorer');
         }
-        // this is for when the datacloud is inside a rating engine model
-        if (vm.section == 're.model_iteration') {
-            var ratingId = $stateParams['rating_id'],
-                aiModel = $stateParams['aiModel'],
-                nocache = true,
-                opts = {
-                    url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/cube`
-                };
-        } else {
-            var nocache = true,
-                opts = {
-                    url: `/pls/datacollection/statistics/cubes`
-                };
-        }
 
-        console.log(opts);
 
-        DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
+        // Only run in Atlas
+        if (vm.section != 'insights' && vm.section != 'edit' && vm.section != 'team') {
 
-            console.log(result);
-            vm.cube = result;
+            console.log(vm.section);
+            console.log("here");
 
             if (vm.section == 're.model_iteration') {
-                vm.checkEnrichmentsForDisable(Enrichments);
+                var ratingId = $stateParams['rating_id'],
+                    aiModel = $stateParams['aiModel'],
+                    nocache = true,
+                    opts = {
+                        url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/cube`
+                    };
+            } else {
+                var nocache = true,
+                    opts = {
+                        url: `/pls/datacollection/statistics/cubes`
+                    };
             }
-        });
+
+            DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
+                vm.cube = result;
+                if (vm.section == 're.model_iteration') {
+                    vm.checkEnrichmentsForDisable(Enrichments);
+                }
+            });
+        }
 
         vm.processCategories();
         vm.processEnrichments(Enrichments, true);
