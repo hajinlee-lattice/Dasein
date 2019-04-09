@@ -120,6 +120,7 @@ export class ConnectorList extends Component {
 
     getSolutionConfiguration(userId, tag, instanceName) {
         const configWindow = openConfigWindow();
+        solutionInstanceConfig.orgType = tag;
         let observer = new Observer(
             response => {
                 if (response.data && response.data.authorizationCode) {
@@ -183,7 +184,7 @@ export class ConnectorList extends Component {
 
     getPopupUrl(solutionInstanceId, authorizationCode) {
         let partnerId = 'LatticeEngines';
-        return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}`;
+        return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}&customValidation=true`;
     }
 
     getPopup(solutionInstanceId, authorizationCode) {

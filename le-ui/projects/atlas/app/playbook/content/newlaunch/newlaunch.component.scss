@@ -71,13 +71,14 @@
                 min-width: 16em;
                 font-size: 12px;
                 margin-right: 20px;
-                color: #467dba;
+                color: black;
                 border-color: #d8d8d8;
                 height: 30px;
                 border-width: 1px;
                 border-style: solid;
                 border-radius: 3px;
                 vertical-align: middle;
+                background: white;
 
                 &.disabled {
                     cursor: not-allowed;
