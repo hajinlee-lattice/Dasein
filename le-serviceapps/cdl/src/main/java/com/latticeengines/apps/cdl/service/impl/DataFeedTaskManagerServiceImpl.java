@@ -470,7 +470,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             for (String header : headerFields) {
                 if (StringUtils.length(header) > MAX_HEADER_LENGTH) {
                     throw new LedpException(LedpCode.LEDP_18188,
-                            new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
+                            new String[] { String.valueOf(MAX_HEADER_LENGTH), header,
+                                    String.valueOf(StringUtils.length(header)) });
                 }
             }
             Map<String, String> headerCaseMapping = new HashMap<>();

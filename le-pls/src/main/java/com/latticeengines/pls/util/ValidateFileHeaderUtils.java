@@ -164,7 +164,9 @@ public class ValidateFileHeaderUtils {
     public static void checkForLongHeaders(Set<String> headerFields) {
         for (String field : headerFields) {
             if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
-                throw new LedpException(LedpCode.LEDP_18188, new String[] { String.valueOf(MAX_HEADER_LENGTH), field });
+                throw new LedpException(LedpCode.LEDP_18188,
+                        new String[] { String.valueOf(MAX_HEADER_LENGTH), field,
+                                String.valueOf(StringUtils.length(field)), String.valueOf(StringUtils.length(field)) });
             }
         }
     }
