@@ -1,0 +1,64 @@
+// @import "common/widgets/layout/layout.scss";
+@import "common/widgets/colors.scss";
+    .import-templates {
+      margin-top: 1.5em;
+      .cell-error {
+        background-color: $ruby;
+      }
+      .disabled-error {
+        pointer-events: all;
+        background-color: $orange-text;
+      }
+      .le-table-cell .actions{
+        flex: 1;
+      }
+      .le-table-row > .le-table-cell > .le-cell-template {
+       
+        .le-blu-link {
+          .le-link{
+            border-bottom: 0px solid white;
+            color: none;
+          }
+          color: $blue-text;
+          justify-content: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          
+          &.edit-button > .wrapper,
+          &.import-button > .wrapper {
+            width: 100%;
+            text-align: center;
+          }
+        }
+        .initially-hidden {
+          display: none;
+        }
+      }
+
+      .le-table-row:hover {
+        & > .le-table-cell > * {
+          color: $pearl-white;
+        }
+        & > .le-table-cell {
+          .le-blu-link {
+            color: $pearl-white;
+
+            & > .wrapper {
+              border: 1px solid $pearl-white;
+              border-radius: 6px;
+              .le-link{
+                color: $pearl-white;
+              }
+            }
+          }
+        }
+        & > .le-table-cell > .le-cell-template {
+          .initially-hidden {
+            display: initial;
+            color: $pearl-white;
+          }
+        }
+      }
+
+    }

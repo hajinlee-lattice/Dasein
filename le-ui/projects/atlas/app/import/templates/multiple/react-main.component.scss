@@ -1,0 +1,17 @@
+.main-panel{
+    // border: 1px solid red;
+    justify-content: center;
+    .main-body{
+        display: flex;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+    }
+    .main-content{
+        // border: 2px solid blue;
+        width: 100%;
+        max-width: 1200px;
+        height: 100%;
+        margin-top: 20px;
+    }
+}
