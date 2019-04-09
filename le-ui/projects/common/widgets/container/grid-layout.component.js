@@ -10,9 +10,9 @@ class GridLayout extends Component {
 
     constructor(props) {
         super(props);
-        if(props.gridStyle){
-            this.gridStyle = Object.assign(this.gridStyle, props.gridStyle);
-        }
+        // if(props.gridStyle){
+        //     this.gridStyle = Object.assign(this.gridStyle, props.gridStyle);
+        // }
     }
     getStyle() {
         let gridStyle = {};
@@ -31,8 +31,8 @@ class GridLayout extends Component {
         
         return (
             <div className="le-grid-layout-main">
-                <div className="le-grid-layout-container" style={containerStyle}>
-                    <div style={this.getStyle()} className={`le-grid-layout ${this.props.gap ? this.props.gap : ''} ${this.props.classNames ? this.props.classNames : ''}`}>
+                <div className="le-grid-layout-container">
+                    <div className={`le-grid-layout ${this.props.gap ? this.props.gap : ''} ${this.props.classNames ? this.props.classNames : ''}`}>
                         {this.props.children}
                     </div>
                 </div>
