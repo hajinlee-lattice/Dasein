@@ -3,12 +3,13 @@ package com.latticeengines.apps.cdl.util;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -55,6 +56,33 @@ public class FeatureImportanceUtil {
     @Inject
     private Configuration yarnConfiguration;
 
+    private class AttrFeatureImportance {
+        private double featureImportance;
+        private int rank;
+        private String attributeName;
+
+        AttrFeatureImportance(double featureImportance, String attributeName) {
+            this.featureImportance = featureImportance;
+            this.attributeName = attributeName;
+        }
+
+        public double getFeatureImportance() {
+            return featureImportance;
+        }
+
+        public void setFeatureImportance(double featureImportance) {
+            this.featureImportance = featureImportance;
+        }
+
+        public String getAttributeName() {
+            return attributeName;
+        }
+
+        public void setAttributeName(String attributeName) {
+            this.attributeName = attributeName;
+        }
+    }
+
     private List<String> getFeatureImportanceTransformSuffixes() {
         return Arrays.asList(featureImportanceTransformSuffixes.split(","));
     }
@@ -82,19 +110,21 @@ public class FeatureImportanceUtil {
                 throw new LedpException(LedpCode.LEDP_40037,
                         new String[] { featureImportanceFilePath, modelSummary.getId(), customerSpace });
             }
-            TreeMap<Double, String> sortedImportance = Flux.fromArray(featureImportanceRaw.split("\n"))
-                    .collect(TreeMap<Double, String>::new, (sortedMap, line) -> {
-                        try {
-                            sortedMap.put(Double.parseDouble(line.split(",")[1]), line.split(",")[0]);
-                        } catch (NumberFormatException e) {
-                            // ignore since this is for the first row
-                        }
-                    }).block();
+
+            List<AttrFeatureImportance> attrFI = Arrays.asList(featureImportanceRaw.split("\n")).stream().map(line -> {
+                try {
+                    return new AttrFeatureImportance(Double.parseDouble(line.split(",")[1]), line.split(",")[0]);
+                } catch (NumberFormatException e) {
+                    // ignore since this is for the first row
+                    return new AttrFeatureImportance(Double.MIN_VALUE, null);
+                }
+            }).filter(x -> x.getFeatureImportance() != Double.MIN_VALUE)
+                    .sorted(Comparator.comparingDouble(AttrFeatureImportance::getFeatureImportance).reversed())
+                    .collect(Collectors.toList());
 
             AtomicInteger i = new AtomicInteger(1);
-            Map<String, Integer> importanceOrdering = Flux.fromIterable(sortedImportance.descendingMap().entrySet())
-                    .collect(HashMap<String, Integer>::new, (map, es) -> map.put(es.getValue(), i.getAndIncrement()))
-                    .block();
+            Map<String, Integer> importanceOrdering = Flux.fromIterable(attrFI).collect(HashMap<String, Integer>::new,
+                    (map, afi) -> map.put(afi.getAttributeName(), i.getAndIncrement())).block();
 
             return convertDerivedAttrNamesToParentAttrNames(importanceOrdering);
         } catch (Exception e) {
@@ -127,7 +157,8 @@ public class FeatureImportanceUtil {
                         .reduce(parentAttributeName,
                                 (attr1, attr2) -> importanceOrdering.getOrDefault(attr1,
                                         Integer.MAX_VALUE) <= importanceOrdering.getOrDefault(attr2, Integer.MAX_VALUE)
-                                                ? attr1 : attr2);
+                                                ? attr1
+                                                : attr2);
                 toReturn.put(parentAttributeName, importanceOrdering.get(mostImportantDerivedAttr));
             } else if (getFeatureImportanceTransformSuffixes().stream().anyMatch(
                     suffix -> attrName.endsWith(suffix) && !attrName.contains(featureImportanceSpecialSuffix))) {
