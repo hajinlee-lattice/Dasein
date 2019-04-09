@@ -143,7 +143,7 @@ public class S3ServiceImpl implements S3Service {
             String destinationKey) {
         sourceKey = sanitizePathToKey(sourceKey);
         destinationKey = sanitizePathToKey(destinationKey);
-        s3Client.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
         s3Client.deleteObject(sourceBucketName, sourceKey);
     }
 
