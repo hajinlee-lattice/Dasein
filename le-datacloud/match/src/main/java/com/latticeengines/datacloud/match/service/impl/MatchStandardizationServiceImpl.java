@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.datacloud.match.Contact;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -214,6 +215,14 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         return nameLocation;
     }
 
+    private Contact createContact(String name, String email, String phoneNumber) {
+        Contact contact = new Contact();
+        contact.setName(name);
+        contact.setEmail(email);
+        contact.setPhoneNumber(phoneNumber);
+        return contact;
+    }
+
     @Override
     public void parseRecordForDuns(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                    EntityMatchKeyRecord record) {
@@ -268,6 +277,48 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
             }
         }
         matchKeyTuple.setSystemIds(systemIds);
+    }
+
+    /*
+     * Should be called after name/location is already standardized in
+     * EntityMatchKeyRecord parameter due to phone number standardization
+     * requires country code
+     */
+    @Override
+    public void parseRecordForContact(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+            EntityMatchKeyRecord record) {
+        try {
+            String originalName = null;
+            if (keyPositionMap.containsKey(MatchKey.Name)) {
+                List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
+                for (Integer namePos : namePosList) {
+                    originalName = (String) inputRecord.get(namePos);
+                }
+            }
+            String originalEmail = null;
+            if (keyPositionMap.containsKey(MatchKey.Email)) {
+                List<Integer> emailPosList = keyPositionMap.get(MatchKey.Email);
+                for (Integer emailPos : emailPosList) {
+                    originalEmail = (String) inputRecord.get(emailPos);
+                }
+            }
+            String originalPhone = null;
+            if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
+                List<Integer> phonePosList = keyPositionMap.get(MatchKey.PhoneNumber);
+                for (Integer phonePos : phonePosList) {
+                    originalPhone = (String) inputRecord.get(phonePos);
+                }
+            }
+
+            Contact origContact = createContact(originalName, originalEmail, originalPhone);
+            record.setOrigContact(origContact);
+            Contact parsedContact = origContact.normalize(record.getParsedNameLocation().getCountryCode());
+            record.setParsedContact(parsedContact);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            record.setFailed(true);
+            record.addErrorMessages("Error when cleanup contact fields: " + e.getMessage());
+        }
     }
 
     // TODO: If predefined dictionary doesn't have the attr, just do trim(),
