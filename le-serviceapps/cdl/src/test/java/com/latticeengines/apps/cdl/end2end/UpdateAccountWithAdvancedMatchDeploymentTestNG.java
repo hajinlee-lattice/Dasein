@@ -63,7 +63,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @BeforeClass(groups = { "end2end" })
+    @BeforeClass(groups = { "end2end" }, enabled = false)
     @Override
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
@@ -73,7 +73,8 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         log.info("Setup Complete!");
     }
 
-    @Test(groups = "end2end", enabled = true)
+    // Disable the test until we work on PA integration of M28
+    @Test(groups = "end2end", enabled = false)
     @Override
     public void runTest() throws Exception {
         super.runTest();
