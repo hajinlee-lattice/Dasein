@@ -3,6 +3,12 @@ package com.latticeengines.datacloud.match.util;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.CDL_LOOKUP;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.ENTITY_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.LDC_MATCH;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Domain;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Transaction;
@@ -11,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 
@@ -26,6 +33,41 @@ public class EntityMatchUtilsUnitTestNG {
     private void testShouldOutputNewEntity(MatchInput input, String currentEntity, boolean expectedResult) {
         boolean result = EntityMatchUtils.shouldOutputNewEntity(input, currentEntity);
         Assert.assertEquals(result, expectedResult);
+    }
+
+    @Test(groups = "unit", dataProvider = "shouldOverrideAttribute")
+    private void testShouldOverrideAttribute(String entity, String attrName, boolean expectedResult) {
+        boolean result = EntityMatchUtils.shouldOverrideAttribute(entity, attrName);
+        Assert.assertEquals(result, expectedResult,
+                String.format("shouldOverrideAttribute does not match the expected result for entity=%s, attrName=%s",
+                        entity, attrName));
+    }
+
+    @DataProvider(name = "shouldOverrideAttribute")
+    private Object[][] shouldOverrideAttributeTestData() {
+        return new Object[][] { //
+                // first win attributes in account match. currently only lattice account id
+                { Account.name(), LatticeAccountId.name(), false }, //
+                { Account.name(), attr(LatticeAccountId.name()), false }, //
+                // last win attributes in account match
+                { Account.name(), AccountId.name(), true }, //
+                { Account.name(), attr(AccountId.name()), true }, //
+                { Account.name(), Name.name(), true }, //
+                { Account.name(), attr(Name.name()), true }, //
+                { Account.name(), Country.name(), true }, //
+                { Account.name(), attr(Country.name()), true }, //
+                { Account.name(), Domain.name(), true }, //
+                { Account.name(), attr(Domain.name()), true }, //
+                { Account.name(), State.name(), true }, //
+                { Account.name(), attr(State.name()), true }, //
+                // last win attributes in contact match
+                { Contact.name(), LatticeAccountId.name(), true }, //
+                { Contact.name(), attr(LatticeAccountId.name()), true }, //
+                { Contact.name(), Name.name(), true }, //
+                { Contact.name(), attr(Name.name()), true }, //
+                { Contact.name(), Country.name(), true }, //
+                { Contact.name(), attr(Country.name()), true }, //
+        };
     }
 
     @DataProvider(name = "shouldOuputNewEntities")
@@ -106,5 +148,9 @@ public class EntityMatchUtilsUnitTestNG {
         input.setOutputNewEntities(outputNewEntities);
         input.setTargetEntity(Contact.name());
         return input;
+    }
+
+    private String attr(String attrName) {
+        return DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES + attrName;
     }
 }

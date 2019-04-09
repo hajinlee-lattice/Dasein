@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.match.util;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
@@ -30,12 +33,17 @@ public class EntityMatchUtils {
     // Match Target Entity -> Set(Entity that we will output a list of newly
     // allocated IDs)
     private static final Map<String, Set<String>> OUTPUT_NEW_ENTITY_MAP = new HashMap<>();
+    // Match Target Entity -> Set(Attribute names that will only be set when this
+    // attribute does not exist in seed)
+    private static final Map<String, Set<String>> FIRST_WIN_ATTRIBUTES = new HashMap<>();
 
     static {
         // FIXME put account here for testing, no need to output new accounts when it is
         // Account match. remove this after we have contact match
         OUTPUT_NEW_ENTITY_MAP.put(Account.name(), Sets.newHashSet(Account.name()));
         OUTPUT_NEW_ENTITY_MAP.put(Contact.name(), Sets.newHashSet(Account.name()));
+        // currently only LDC ID in account match is first win, others are last win
+        FIRST_WIN_ATTRIBUTES.put(Account.name(), Collections.singleton(InterfaceName.LatticeAccountId.name()));
     }
 
     /**
@@ -157,5 +165,29 @@ public class EntityMatchUtils {
         }
 
         return OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode()) && input.isAllocateId();
+    }
+
+    /**
+     * Determine whether we should override target attribute value or only set if
+     * the attribute does not exist
+     *
+     * @param entity
+     *            target entity in current match
+     * @param attrName
+     *            attribute name
+     * @return true if we should override, false if we should set only when not
+     *         exist
+     */
+    public static boolean shouldOverrideAttribute(@NotNull String entity, @NotNull String attrName) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(entity),
+                String.format("Target entity=%s should not be blank", entity));
+        Preconditions.checkArgument(StringUtils.isNotBlank(attrName),
+                String.format("Attribute name [%s] should not be blank", attrName));
+        if (attrName.startsWith(ENTITY_PREFIX_SEED_ATTRIBUTES)) {
+            attrName = attrName.substring(ENTITY_PREFIX_SEED_ATTRIBUTES.length());
+        }
+
+        // attrs not in firstWinMap are considered last win (override with new value)
+        return !FIRST_WIN_ATTRIBUTES.getOrDefault(entity, Collections.emptySet()).contains(attrName);
     }
 }
