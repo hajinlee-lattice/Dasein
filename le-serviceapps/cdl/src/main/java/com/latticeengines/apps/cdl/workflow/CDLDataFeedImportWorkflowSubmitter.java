@@ -144,7 +144,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .dataFeedTaskId(dataFeedTask.getUniqueId()) //
-                .skipStep(dataFeedTask.getTemplateDisplayName()) //
+                .fileValidation(dataFeedTask.getTemplateDisplayName()) //
                 .importConfig(connectorConfig) //
                 .userId(csvImportFileInfo.getFileUploadInitiator()) //
                 .inputProperties(ImmutableMap.<String, String>builder()

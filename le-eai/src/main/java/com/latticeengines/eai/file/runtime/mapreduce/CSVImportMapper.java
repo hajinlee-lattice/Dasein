@@ -56,6 +56,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.CriticalImportException;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -150,7 +151,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         LOG.info("Path is:" + outputPath);
 
         csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
-                LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+                LECSVFormat.format.withHeader(ImportProperty.ERROR_HEADER));
 
         if (StringUtils.isEmpty(table.getName())) {
             avroFileName = "file.avro";

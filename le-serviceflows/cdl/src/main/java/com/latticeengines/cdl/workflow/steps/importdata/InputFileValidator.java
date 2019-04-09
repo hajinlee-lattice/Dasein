@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.importdata;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +21,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HashUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -52,6 +59,7 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
 
         if (applicationId == null) {
             log.warn("There's no application Id! tenentId=" + tenantId);
+            return;
         }
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
@@ -66,14 +74,50 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
 
         }
-        List<Product> inputProducts = ProductUtils.loadProducts(yarnConfiguration, pathList.get(0), null, null);
+        List<Product> inputProducts = new ArrayList<>();
+
+        pathList.forEach(path -> inputProducts.addAll(ProductUtils.loadProducts(yarnConfiguration, path, null, null)));
         Table currentTable = getCurrentConsolidateProductTable(configuration.getCustomerSpace());
         List<Product> currentProducts = getCurrentProducts(currentTable);
-        mergeProducts(inputProducts, currentProducts);
+        List<String> errorMessages = new ArrayList<>();
+        mergeProducts(inputProducts, currentProducts, errorMessages);
+        String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
+        writeErrorFile(filePath, errorMessages);
+    }
+
+    private void writeErrorFile(String filePath, List<String> errorMessages) {
+
+        CSVFormat format = LECSVFormat.format;
+        // copy error file if file exists
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, ImportProperty.ERROR_FILE);
+            } else {
+                format = format.withHeader(ImportProperty.ERROR_HEADER);
+            }
+        } catch (IOException e) {
+            log.info("error when copying file to local");
+        }
+        // append error message to error file
+        try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
+            for (String message : errorMessages) {
+                csvFilePrinter.printRecord("", "", message);
+            }
+            csvFilePrinter.close();
+        } catch (IOException ex) {
+            log.info("error when writing error message to error file");
+        }
+        // copy error file back to hdfs
+        try {
+            HdfsUtils.copyLocalToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, filePath);
+        } catch (IOException e) {
+            log.info("error when copying file to hdfs");
+        }
     }
 
     @VisibleForTesting
-    List<Product> mergeProducts(List<Product> inputProducts, List<Product> currentProducts) {
+    List<Product> mergeProducts(List<Product> inputProducts, List<Product> currentProducts,
+            List<String> errorMessages) {
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
         for (Product inputProduct : inputProducts) {
@@ -106,7 +150,11 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
                     inputProduct.setProductLineId(lineId);
                 }
 
-                mergeHierarchyProduct(inputProduct, inputProductMap);
+                try {
+                    mergeHierarchyProduct(inputProduct, inputProductMap);
+                } catch (RuntimeException e) {
+                    errorMessages.add(e.getMessage());
+                }
             }
         }
         return new ArrayList<>(inputProductMap.values());
@@ -275,5 +323,23 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         newProduct.setProductCategoryId(categoryId);
         newProduct.setProductType(ProductType.Hierarchy.name());
         inputProductMap.put(compositeId, newProduct);
+    }
+
+    private static String getPath(String avroDir) {
+        log.info("Get avro path input " + avroDir);
+        if (!avroDir.endsWith(".avro")) {
+            return avroDir;
+        } else {
+            String[] dirs = avroDir.trim().split("/");
+            avroDir = "";
+            for (int i = 0; i < (dirs.length - 1); i++) {
+                log.info("Get avro path dir " + dirs[i]);
+                if (!dirs[i].isEmpty()) {
+                    avroDir = avroDir + "/" + dirs[i];
+                }
+            }
+        }
+        log.info("Get avro path output " + avroDir);
+        return avroDir;
     }
 }

@@ -72,8 +72,8 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         // for now only check file with entity ProductHierarchy
-        public Builder skipStep(String templateDisplayName) {
-            if (!BusinessEntity.ProductHierarchy.name().equals(templateDisplayName)) {
+        public Builder fileValidation(String businessEntity) {
+            if (!BusinessEntity.ProductHierarchy.name().equals(businessEntity)) {
                 inputFileValidatorConfiguration.setSkipStep(true);
             }
             return this;
