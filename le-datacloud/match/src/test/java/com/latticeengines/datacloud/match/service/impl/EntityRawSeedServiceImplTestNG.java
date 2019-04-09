@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.equalsDisregardPriority;
+import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.getUpdatedAttributes;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.AE_GOOGLE_1_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.AE_GOOGLE_1_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.AE_GOOGLE_1_3;
@@ -45,6 +46,16 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.Seed.EMPTY;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.City;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Domain;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,7 +90,6 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
@@ -90,7 +100,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     private static final Logger log = LoggerFactory.getLogger(EntityRawSeedServiceImplTestNG.class);
 
     private static final int TEST_NUM_STAGING_SHARDS = 2;
-    private static final String TEST_ENTITY = BusinessEntity.Account.name();
+    private static final String TEST_ENTITY = Account.name();
     private static final String EXT_SYSTEM_SFDC = "SFDC";
     private static final String EXT_SYSTEM_MARKETO = "MARKETO";
     private static final String TEST_COUNTRY = "USA";
@@ -392,6 +402,34 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
+    @Test(groups = "functional", dataProvider = "updateAttributes", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testUpdateAttributes(String entity, String[] currAttrs, String[] attrsToUpdate) {
+        String seedId = UUID.randomUUID().toString();
+        Tenant tenant = new Tenant(EntityRawSeedServiceImplTestNG.class.getSimpleName() + UUID.randomUUID().toString());
+        EntityRawSeed currState = currAttrs == null ? null
+                : TestEntityMatchUtils.newSeedFromAttrs(seedId, entity, currAttrs);
+        EntityRawSeed seedToUpdate = TestEntityMatchUtils.newSeedFromAttrs(seedId, entity, attrsToUpdate);
+
+        for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
+            if (currState != null) {
+                boolean setSucceeded = entityRawSeedService.setIfNotExists(env, tenant, currState, true);
+                Assert.assertTrue(setSucceeded, String.format("Seed(ID=%s,entity=%s) should not exist in tenant=%s",
+                        seedId, entity, tenant.getId()));
+            }
+
+            // update attributes
+            entityRawSeedService.updateIfNotSet(env, tenant, seedToUpdate, true);
+
+            EntityRawSeed finalState = entityRawSeedService.get(env, tenant, entity, seedId);
+            Assert.assertNotNull(finalState,
+                    String.format("Seed(ID=%s,entity=%s) should exist in tenant=%s", seedId, entity, tenant.getId()));
+            Map<String, String> expectedFinalAttributes = getUpdatedAttributes(currState, seedToUpdate);
+            Assert.assertEquals(finalState.getAttributes(), expectedFinalAttributes, String.format(
+                    "Attributes in the final state does not match the expected result. Seed(ID=%s,entity=%s), tenant=%s",
+                    seedId, entity, tenant.getId()));
+        }
+    }
+
     @DataProvider(name = "entityMatchEnvironment")
     private Object[][] provideEntityMatchEnv() {
         return new Object[][] {
@@ -430,6 +468,37 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
                         CAE_GOOGLE_1_2) }, //
                 { newSeed(TEST_SEED_ID, E_GOOGLE_1_2, ANP_GOOGLE_1_1, CAE_GOOGLE_1_2) }, //
         }; //
+    }
+
+    @DataProvider(name = "updateAttributes")
+    private Object[][] updateAttributesTestData() {
+        return new Object[][] { //
+                // lattice account ID attribute
+                { Account.name(), new String[] { LatticeAccountId.name(), "ldc_001" },
+                        new String[] { LatticeAccountId.name(), "ldc_002" } }, //
+                { Account.name(), new String[] { LatticeAccountId.name(), "ldc_001" },
+                        new String[] { LatticeAccountId.name(), "ldc_001" } }, //
+                { Account.name(), new String[0], new String[] { LatticeAccountId.name(), "ldc_001" } }, //
+                { Contact.name(), new String[] { LatticeAccountId.name(), "ldc_001" },
+                        new String[] { LatticeAccountId.name(), "ldc_002" } }, //
+                { Contact.name(), new String[] { LatticeAccountId.name(), "ldc_001" },
+                        new String[] { LatticeAccountId.name(), "ldc_001" } }, //
+                { Contact.name(), new String[0], new String[] { LatticeAccountId.name(), "ldc_001" } }, //
+                // account attributes in contact match
+                { Contact.name(), new String[] { Name.name(), "Google", State.name(), "CA" },
+                        new String[] { Name.name(), null, Domain.name(), "google.com", State.name(), "WA" } }, //
+                { Contact.name(), new String[] { Name.name(), "Google", State.name(), "CA" },
+                        new String[] { Name.name(), "Facebook", City.name(), "San Mateo" } }, //
+                { Contact.name(),
+                        new String[] { Name.name(), "Google", State.name(), "CA", Country.name(), "USA", Domain.name(),
+                                "google.com" },
+                        new String[] { Domain.name(), "fb.com", Name.name(), "Facebook", State.name(), "CA" } }, //
+                { Contact.name(), new String[] { CustomerAccountId.name(), "ca123", AccountId.name(), "a11" },
+                        new String[] { CustomerAccountId.name(), "ca555", Country.name(), "USA", AccountId.name(),
+                                "a11" } }, //
+                { Contact.name(), new String[] { CustomerAccountId.name(), "ca123", AccountId.name(), "a11" },
+                        new String[] { CustomerAccountId.name(), null, AccountId.name(), null } }, //
+        };
     }
 
     @DataProvider(name = "updateIfNotSet")
