@@ -114,7 +114,7 @@
         </button>
     </li>
     <li class="sort pull-right" ng-if="vm.section == 're.model_iteration'">
-        <menu-sort-by config="vm.header.sort_modeliteration" store="ratings.sort"></menu-sort-by>
+        <menu-sort-by config="vm.header.sort_modeliteration" store="iterationAttributes.sort"></menu-sort-by>
     </li>
     <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
