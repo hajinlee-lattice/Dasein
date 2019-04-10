@@ -9,7 +9,7 @@
                 <div class="actions pull-right">
                     <!-- ng-model="vm.status_toggle" -->
 
-                    <button class="button orange-button" ng-click="vm.deactivate()" ng-disabled="vm.disableButtonScoring()">
+                    <button class="button orange-button model-dashboard-activate-deactivate" ng-click="vm.deactivate()" ng-disabled="vm.disableButtonScoring()">
                         {{vm.getScoringButtonLable()}}
                     </button>
                     <button class="button orange-button" ng-if="vm.isRulesBased && vm.playbookEnabled" ui-sref="home.playbook.create.segment({ segment_name: vm.ratingEngine.segment.name })"

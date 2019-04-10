@@ -685,6 +685,7 @@ angular
                                 state: 'segment.rating.name',
                                 secondaryLinkValidation: true,
                                 secondaryLinkLabel: 'Save & Create Insights',
+                                secondaryClass: 'campaign-wizard-save-and-add-insights',
                                 secondaryFn: function () {
                                     PlaybookWizardStore.nextSaveAndGoto('home.playbook.dashboard.insights', {
                                         include_play_name: true
@@ -695,6 +696,7 @@ angular
                                     PlaybookWizardStore.nextSaveAndGoto('home.playbook');
                                 },
                                 nextLabel: 'Save & Go to Campaign List',
+                                nextClass: 'campaign-wizard-save-and-campaign-list',
                                 progressDisabled: true
                             }
                         ];
