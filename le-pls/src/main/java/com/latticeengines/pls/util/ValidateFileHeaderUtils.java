@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.apache.avro.SchemaParseException;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -162,10 +163,18 @@ public class ValidateFileHeaderUtils {
      * @throws LedpException with code {@link LedpCode#LEDP_18188} if any of the headers too long
      */
     public static void checkForLongHeaders(Set<String> headerFields) {
+        Map<String, Integer> map = new HashMap<String, Integer>();
         for (String field : headerFields) {
             if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
-                throw new LedpException(LedpCode.LEDP_18188, new String[] { String.valueOf(MAX_HEADER_LENGTH), field });
+                map.put(field, StringUtils.length(field));
             }
+        }
+        if (MapUtils.isNotEmpty(map)) {
+            StringBuilder sb = new StringBuilder();
+            map.entrySet().forEach(
+                    entry -> sb.append(String.format("\nfield: %s, length: %s", entry.getKey(), entry.getValue())));
+            throw new LedpException(LedpCode.LEDP_18188,
+                    new String[] { String.valueOf(MAX_HEADER_LENGTH), sb.toString() });
         }
     }
 
