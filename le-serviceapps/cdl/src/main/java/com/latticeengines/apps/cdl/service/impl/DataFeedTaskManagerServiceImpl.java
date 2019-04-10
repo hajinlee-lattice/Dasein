@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
@@ -467,11 +468,18 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             Set<String> headerFields = parser.getHeaderMap().keySet();
             ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(importConfig.getS3FileName(),
                     headerFields);
-            for (String header : headerFields) {
-                if (StringUtils.length(header) > MAX_HEADER_LENGTH) {
-                    throw new LedpException(LedpCode.LEDP_18188,
-                            new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
+            Map<String, Integer> longFieldMap = new HashMap<String, Integer>();
+            for (String field : headerFields) {
+                if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
+                    longFieldMap.put(field, StringUtils.length(field));
                 }
+            }
+            if (MapUtils.isNotEmpty(longFieldMap)) {
+                StringBuilder sb = new StringBuilder();
+                longFieldMap.entrySet().forEach(
+                        entry -> sb.append(String.format("\nfield: %s, length: %s", entry.getKey(), entry.getValue())));
+                throw new LedpException(LedpCode.LEDP_18188,
+                        new String[] { String.valueOf(MAX_HEADER_LENGTH), sb.toString() });
             }
             Map<String, String> headerCaseMapping = new HashMap<>();
             for (String field : headerFields) {

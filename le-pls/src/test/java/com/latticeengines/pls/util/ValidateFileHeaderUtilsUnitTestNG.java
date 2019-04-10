@@ -224,7 +224,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
     public Object[][] provideTestLongCSVHeaderFile() {
         return new Object[][] {
                 // invalid csv files
-                { "com/latticeengines/pls/util/long_headers.csv", 5, false },
+                { "com/latticeengines/pls/util/long_headers.csv", 6, false },
                 // valid csv files
                 { "com/latticeengines/pls/functionalframework/topPredictor_model.csv", 17, true }
         };
