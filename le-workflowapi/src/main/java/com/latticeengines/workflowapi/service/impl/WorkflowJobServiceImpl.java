@@ -728,6 +728,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                     // Check YARN container status. Fail the job if YARN container status is failed.
                     String applicationId = workflowJob.getApplicationId();
+                    String clusterId = workflowJob.getEmrClusterId();
                     if (StringUtils.isBlank(applicationId)) {
                         workflowJob.setStatus(JobStatus.FAILED.name());
                         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
@@ -747,7 +748,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     }
 
                     com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
-                            workflowContainerService.getJobStatus(applicationId);
+                            workflowContainerService.getJobStatus(applicationId, clusterId);
                     if (yarnStatus == null
                             || JobStatus.fromYarnStatus(yarnStatus.getStatus(), yarnStatus.getState()) == JobStatus.FAILED) {
                         workflowJob.setStatus(JobStatus.FAILED.name());
@@ -800,11 +801,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 if (jobUpdate.getLastUpdateTime().equals(jobUpdate.getCreateTime())
                         && currentTimeMillis - jobUpdate.getCreateTime() > ALLOWED_PENDING_THRESHOLD) {
                     String applicationId = workflowJob.getApplicationId();
+                    String emrClusterId = workflowJob.getEmrClusterId();
 
                     // check status from YARN if applicationId != null
                     if (applicationId != null) {
                         com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus =
-                                workflowContainerService.getJobStatus(applicationId);
+                                workflowContainerService.getJobStatus(applicationId, emrClusterId);
 
                         // TODO: check if yarnStatus is empty (application_id comes from differnt EMR cluster), then log an warning.
                         // if (yarnStatus is empty) {

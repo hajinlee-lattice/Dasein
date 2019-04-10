@@ -283,8 +283,16 @@ angular
                     },
                     "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, RatingsEngineStore, Dashboard, RatingEngine, Model, JobStatus) {
+
                             $scope.rating_id = $stateParams.rating_id || '';
-                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
+
+                            if (Dashboard.summary.publishedIterationId) {
+                                var iterationId = Dashboard.summary.publishedIterationId;
+                            } else if (Dashboard.summary.scoringIterationId) {
+                                var iterationId = Dashboard.summary.scoringIterationId;
+                            } else {
+                                var iterationId = Dashboard.summary.latestIterationId;
+                            }
                             $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
@@ -306,8 +314,10 @@ angular
 
                             if (RatingEngine.published_iteration != null && RatingEngine.published_iteration != undefined) {
                                 $scope.modelIsReady = true;
+
                             } else if (RatingEngine.scoring_iteration != null && RatingEngine.scoring_iteration != undefined) {
                                 $scope.modelIsReady = RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
+
                             } else if (RatingEngine.latest_iteration != null && RatingEngine.latest_iteration != undefined) {
                                 $scope.modelIsReady = Dashboard.iterations.length > 1 && (
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && 
@@ -783,7 +793,14 @@ angular
                     "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingsEngineStore, RatingEngine, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
-                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
+                            
+                            if (Dashboard.summary.publishedIterationId) {
+                                var iterationId = Dashboard.summary.publishedIterationId;
+                            } else if (Dashboard.summary.scoringIterationId) {
+                                var iterationId = Dashboard.summary.scoringIterationId;
+                            } else {
+                                var iterationId = Dashboard.summary.latestIterationId;
+                            }
                             $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
@@ -804,18 +821,21 @@ angular
                             $scope.activeIteration = RatingEngine.latest_iteration[$scope.typeContext].iteration;
                             
                             if (RatingEngine.published_iteration != null && RatingEngine.published_iteration != undefined) {
+
                                 $scope.modelIsReady = true;
+
                             } else if (RatingEngine.scoring_iteration != null && RatingEngine.scoring_iteration != undefined) {
+
                                 $scope.modelIsReady = RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
+
                             } else if (RatingEngine.latest_iteration != null && RatingEngine.latest_iteration != undefined) {
-                                $scope.modelIsReady = (
+                                $scope.modelIsReady = Dashboard.iterations.length > 1 && (
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && 
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && 
                                         (
                                             RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Failed' && 
                                             RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Pending' && 
-                                            RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running' &&
-                                            Dashboard.iterations.length == 1
+                                            RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running'
                                         )
                                     ) ? true : false;
                             }
