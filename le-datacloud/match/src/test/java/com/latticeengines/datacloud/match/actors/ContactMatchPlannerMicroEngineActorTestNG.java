@@ -49,7 +49,7 @@ public class ContactMatchPlannerMicroEngineActorTestNG extends SingleActorTestNG
         Assert.assertEquals(tuple.getPhoneNumber(), parsedContact.getPhoneNumber());
     }
 
-    // Just to make every field in Contact is standardized. Standardization
+    // Just to make sure every field in Contact is standardized. Standardization
     // correctness is verified in each util's unit test
     // CustomerContactId, RawContact, Country,
     // ParsedCustomerContactId, ParsedContact
