@@ -15,7 +15,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorT
 /**
  * Wrapper actor for {@link EntityFetchServiceImpl}
  */
-@Component("entityLookupActor")
+@Component("entityFetchActor")
 @Scope("prototype")
 public class EntityFetchActor extends DataSourceWrapperActorTemplate {
 
