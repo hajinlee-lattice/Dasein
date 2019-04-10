@@ -87,14 +87,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                         $scope.created = iteration.AI.created;
                     }
                 });
-
-
             }
 
 
             $scope.activeIteration = ratingEngine.scoring_iteration ? ratingEngine.scoring_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
-
-
 
             if (ratingEngine.published_iteration != null && ratingEngine.published_iteration != undefined) {
                 $scope.modelIsReady = true;
