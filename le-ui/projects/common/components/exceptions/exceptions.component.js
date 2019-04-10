@@ -12,6 +12,7 @@ angular
         Notice
     ) {
         this.check = function (response) {
+            //console.log('> check exception', response);
             if (!response || !response.data) {
                 return false;
             }
@@ -28,6 +29,7 @@ angular
         };
 
         this.process = function (response) {
+            //console.log('> process exception', response);
             if (this.check(response)) {
                 var config = response.config || { headers: {} },
                     params = (
@@ -79,6 +81,7 @@ angular
         };
 
         this.show = function (Service, response, options, callback) {
+            //console.log('> show exception', Service, response, options);
             if (!this.check(response)) {
                 return;
             }
@@ -88,7 +91,9 @@ angular
                 method = (uiAction.status || "error").toLowerCase(),
                 http_err = response.statusText,
                 http_code = response.status,
-                url = response.config.url,
+                url = response.config
+                    ? response.config.url
+                    : '',
                 title =
                     typeof uiAction.title != "undefined"
                         ? uiAction.title
