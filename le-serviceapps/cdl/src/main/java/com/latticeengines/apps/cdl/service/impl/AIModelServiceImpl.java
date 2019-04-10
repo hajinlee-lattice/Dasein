@@ -183,6 +183,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             throw new LedpException(LedpCode.LEDP_40040, new String[] { MultiTenantContext.getTenant().getId() });
         }
 
+        if (derivedFromRatingModel.getModelingJobStatus() != JobStatus.COMPLETED) {
+            throw new LedpException(LedpCode.LEDP_40058, new String[] { MultiTenantContext.getTenant().getId() });
+        }
+
         AIModel toCreate = new AIModel();
         toCreate.setPredictionType(derivedFromRatingModel.getPredictionType());
         toCreate.setCreatedBy(aiModel.getCreatedBy());
