@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
