@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     private String URL = "url";
-    
+
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
