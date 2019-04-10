@@ -1,5 +1,6 @@
 package com.latticeengines.yarn.exposed.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -254,7 +256,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Override
     public void populateJobStatusFromYarnAppReport(JobStatus jobStatus, String applicationId) {
-        ApplicationReport appReport = getJobReportById(ConverterUtils.toApplicationId(applicationId));
+        ApplicationReport appReport = getJobReportById(ApplicationId.fromString(applicationId));
         jobStatus.setId(applicationId);
         if (appReport != null) {
             jobStatus.setStatus(appReport.getFinalApplicationStatus());
@@ -285,6 +287,36 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     public JobStatus getJobStatus(String applicationId) {
         JobStatus jobStatus = new JobStatus();
         populateJobStatusFromYarnAppReport(jobStatus, applicationId);
+        return jobStatus;
+    }
+
+    @Override
+    public JobStatus getJobStatusByCluster(String applicationId, String clusterId) {
+        JobStatus jobStatus = new JobStatus();
+        if (StringUtils.isNotEmpty(clusterId)) {
+            try {
+                try (org.apache.hadoop.yarn.client.api.YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
+                    yarnClient.start();
+                    ApplicationReport appReport =
+                            yarnClient.getApplicationReport(ApplicationId.fromString(applicationId));
+                    jobStatus.setId(applicationId);
+                    if (appReport != null) {
+                        jobStatus.setStatus(appReport.getFinalApplicationStatus());
+                        jobStatus.setState(appReport.getYarnApplicationState());
+                        jobStatus.setDiagnostics(appReport.getDiagnostics());
+                        jobStatus.setFinishTime(appReport.getFinishTime());
+                        jobStatus.setProgress(appReport.getProgress());
+                        jobStatus.setStartTime(appReport.getStartTime());
+                        jobStatus.setTrackingUrl(appReport.getTrackingUrl());
+                        jobStatus.setAppResUsageReport(appReport.getApplicationResourceUsageReport());
+                    }
+                }
+            } catch (IOException | YarnException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return getJobStatus(applicationId);
+        }
         return jobStatus;
     }
 
