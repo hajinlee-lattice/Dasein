@@ -123,7 +123,10 @@ angular.module('lp.models.ratings', [
             // console.log(vm.workingBuckets);
             // console.log(vm.currentConfiguration);
             // console.log(vm.showCurrentConfig);
-            vm.activeConfigNumber = vm.currentRating.scoring_iteration.AI.iteration;
+
+            if (vm.currentRating.scoring_iteration) {
+                vm.activeConfigNumber = vm.currentRating.scoring_iteration.AI.iteration;
+            }
             vm.ratingModelId = vm.activeIteration.id;
         }
         

@@ -312,6 +312,7 @@ angular
 
                             $scope.activeIteration = RatingEngine.latest_iteration[$scope.typeContext].iteration;
 
+                            // Check if the sidebar nav should be enabled/disabled in /ratingsengine/ pages
                             if (RatingEngine.published_iteration != null && RatingEngine.published_iteration != undefined) {
                                 $scope.modelIsReady = true;
 
@@ -319,7 +320,9 @@ angular
                                 $scope.modelIsReady = RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
 
                             } else if (RatingEngine.latest_iteration != null && RatingEngine.latest_iteration != undefined) {
-                                $scope.modelIsReady = Dashboard.iterations.length > 1 && (
+                                // If only one iteration has been created, check it's status.
+                                if (Dashboard.iterations.length == 1) {
+                                    $scope.modelIsReady = Dashboard.iterations.length == 1 && (
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && 
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && 
                                         (
@@ -328,6 +331,12 @@ angular
                                             RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running'
                                         )
                                     ) ? true : false;
+                                } else if (Dashboard.iterations.length > 1) {
+                                    // If multiple iterations have been created, at least one is completed, but have not been scored or published
+                                    var iterations = Dashboard.iterations,
+                                        hasCompletedIteration = iterations.filter(iteration => (iteration.modelingJobStatus === "Completed"));
+                                    $scope.modelIsReady = hasCompletedIteration ? true : false;
+                                }
                             }
 
                             $scope.stateName = function () {
@@ -820,16 +829,15 @@ angular
                             }
                             $scope.activeIteration = RatingEngine.latest_iteration[$scope.typeContext].iteration;
                             
+                            // Check if the sidebar nav should be enabled/disabled in /ratingsengine/ pages
                             if (RatingEngine.published_iteration != null && RatingEngine.published_iteration != undefined) {
-
                                 $scope.modelIsReady = true;
-
                             } else if (RatingEngine.scoring_iteration != null && RatingEngine.scoring_iteration != undefined) {
-
                                 $scope.modelIsReady = RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != null && RatingEngine.scoring_iteration[$scope.typeContext].modelSummaryId != undefined ? true : false;
-
                             } else if (RatingEngine.latest_iteration != null && RatingEngine.latest_iteration != undefined) {
-                                $scope.modelIsReady = Dashboard.iterations.length > 1 && (
+                                // If only one iteration has been created, check it's status.
+                                if (Dashboard.iterations.length == 1) {
+                                    $scope.modelIsReady = Dashboard.iterations.length == 1 && (
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != null && 
                                         RatingEngine.latest_iteration[$scope.typeContext].modelSummaryId != undefined && 
                                         (
@@ -838,6 +846,12 @@ angular
                                             RatingEngine.latest_iteration[$scope.typeContext].modelingJobStatus != 'Running'
                                         )
                                     ) ? true : false;
+                                } else if (Dashboard.iterations.length > 1) {
+                                    // If multiple iterations have been created, at least one is completed, but have not been scored or published
+                                    var iterations = Dashboard.iterations,
+                                        hasCompletedIteration = iterations.filter(iteration => (iteration.modelingJobStatus === "Completed"));
+                                    $scope.modelIsReady = hasCompletedIteration ? true : false;
+                                }
                             }
 
                             $scope.stateName = function () {
