@@ -65,9 +65,10 @@ public class EntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                            @RequestParam(value = "version", required = false) DataCollection.Version version,
-                            @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
-        return entityQueryService.getQueryStr(frontEndQuery, version, BATCH_USER);
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+            @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation,
+            @RequestParam(value = "isCountQuery", required = false, defaultValue = "false") Boolean isCountQuery) {
+        return entityQueryService.getQueryStr(frontEndQuery, version, BATCH_USER, isCountQuery);
     }
 
     @PostMapping(value = "/ratingcount")

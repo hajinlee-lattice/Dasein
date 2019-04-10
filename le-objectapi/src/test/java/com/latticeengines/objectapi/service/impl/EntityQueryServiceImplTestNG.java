@@ -83,7 +83,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A")
+                .build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Product);
@@ -104,7 +105,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A")
+                .build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -115,8 +117,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Test(groups = "functional")
     public void testContactCount() {
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize(
-                "{\"main_entity\": \"Contact\",  \"distinct\": false}", FrontEndQuery.class);
+        FrontEndQuery frontEndQuery = JsonUtils.deserialize("{\"main_entity\": \"Contact\",  \"distinct\": false}",
+                FrontEndQuery.class);
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
@@ -258,8 +260,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Restriction txnRestriction = getTxnRestriction(txn);
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A")
                 .build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ContactAttr.Occupation).eq("Analyst")
-                .build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ContactAttr.Occupation)
+                .eq("Analyst").build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -309,7 +311,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Test(groups = "functional")
     public void testAccountSql() {
         FrontEndQuery frontEndQuery = getAccountDataQuery();
-        String sql = entityQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        String sql = entityQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, false);
         System.out.println(sql);
     }
 
@@ -342,8 +344,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A")
                 .build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ContactAttr.Occupation).eq("Analyst")
-                .build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, ContactAttr.Occupation)
+                .eq("Analyst").build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -466,11 +468,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     public void testContactDataWithAccountIds() {
         // mimic a segment get from metadata api
         MetadataSegment segment = new MetadataSegment();
-        Restriction accountRestrictionInternal = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName)
-                .gte("A").build();
+        Restriction accountRestrictionInternal = Restriction.builder()
+                .let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A").build();
         segment.setAccountRestriction(accountRestrictionInternal);
-        Restriction contactRestrictionInternal = Restriction.builder().let(BusinessEntity.Contact, ContactAttr.Occupation)
-                .gte("VP").build();
+        Restriction contactRestrictionInternal = Restriction.builder()
+                .let(BusinessEntity.Contact, ContactAttr.Occupation).gte("VP").build();
         segment.setContactRestriction(contactRestrictionInternal);
 
         // front end query from segment restrictions
@@ -531,10 +533,10 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).contains("On")
-                .build();
-        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).contains("Ca")
-                .build();
+        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName)
+                .contains("On").build();
+        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName)
+                .contains("Ca").build();
         Restriction or = Restriction.builder().or(restriction1, restriction2).build();
 
         // res 1
@@ -572,7 +574,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
-                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName)), false));
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName)),
+                false));
 
         String ratingField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.Rating);
         String scoreField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.Score);
@@ -619,8 +622,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName).gte("A")
-                .build();
+        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName)
+                .gte("A").build();
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
