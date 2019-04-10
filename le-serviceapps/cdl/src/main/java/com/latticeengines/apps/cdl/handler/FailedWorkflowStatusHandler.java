@@ -7,18 +7,25 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.FailedEventDetail;
+import com.latticeengines.domain.exposed.cdl.MessageType;
+import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @Component
 public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     private String URL = "url";
-
+    
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
+
+    @Inject
+    private PlayLaunchService playLaunchService;
 
     @Override
     public DataIntegrationEventType getEventType() {
@@ -35,11 +42,19 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         FailedEventDetail eventDetail = (FailedEventDetail) status.getEventDetail();
 
-        Map<String, String> errorFileMap = eventDetail.getErrorFile();
+        String messageType = status.getMessageType();
 
-        if (errorFileMap != null && errorFileMap.containsKey(URL)) {
-            String errorFile = errorFileMap.get(URL);
-            statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf("dropfolder")));
+        if (eventDetail != null) {
+            Map<String, String> errorFileMap = eventDetail.getErrorFile();
+
+            if (errorFileMap != null && errorFileMap.containsKey(URL)) {
+                String errorFile = errorFileMap.get(URL);
+                statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf("dropfolder")));
+            }
+        } else if (MessageType.Event.equals(MessageType.valueOf(messageType))) {
+            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
+            playLaunch.setLaunchState(LaunchState.SyncFailed);
+            playLaunchService.update(playLaunch);
         }
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
