@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.core.service.ActionService;
@@ -31,6 +31,7 @@ import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -455,6 +456,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         String apsRollingPeriod = zkConfigService
                 .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
         getDataQuotaLimit(CustomerSpace.parse(customerSpace), CDLComponent.componentName);
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName());
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName());
+        inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -468,12 +474,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchYarnQueue(scoringQueue) //
-                .inputProperties(ImmutableMap.<String, String>builder() //
-                        .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
-                        .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //
-                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
-                        .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIds.toString()) //
-                        .build()) //
+                .inputProperties(inputProperties) //
                 .workflowContainerMem(workflowMemMb) //
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //

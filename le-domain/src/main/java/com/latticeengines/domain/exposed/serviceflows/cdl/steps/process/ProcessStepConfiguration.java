@@ -1,13 +1,21 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.process;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
@@ -44,6 +52,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("full_rematch")
     private boolean fullRematch;
 
+    @JsonProperty("input_properties")
+    private Map<String, String> inputProperties;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -58,6 +69,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setActionIds(List<Long> actionIds) {
         this.actionIds = actionIds;
+        if (this.inputProperties != null) {
+            syncActionIds();
+        }
     }
 
     public String getDataCloudBuildNumber() {
@@ -130,5 +144,25 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setFullRematch(boolean fullRematch) {
         this.fullRematch = fullRematch;
+    }
+
+    public Map<String, String> getInputProperties() {
+        return inputProperties;
+    }
+
+    public void setInputProperties(Map<String, String> inputProperties) {
+        this.inputProperties = inputProperties;
+        syncActionIds();
+    }
+
+    private void syncActionIds() {
+        Set<Long> actionIdArray = new HashSet<>();
+        actionIdArray.addAll(actionIds);
+        String actionIdStr = this.inputProperties.get(WorkflowContextConstants.Inputs.ACTION_IDS);
+        if (StringUtils.isNotEmpty(actionIdStr)) {
+            List<?> rawActionIds = JsonUtils.deserialize(actionIdStr, List.class);
+            actionIdArray.addAll(JsonUtils.convertList(rawActionIds, Long.class));
+        }
+        inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIdArray));
     }
 }

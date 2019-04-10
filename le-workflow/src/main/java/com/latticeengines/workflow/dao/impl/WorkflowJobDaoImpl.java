@@ -432,4 +432,17 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.setParameter("tenantId", tenantPid);
         query.executeUpdate();
     }
+
+    @Override
+    public void updateInput(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.inputContextString=:inputContextString where workflowjob.pid=:pid",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("inputContextString", workflowJob.getInputContextString());
+        query.setParameter("pid", workflowJob.getPid());
+        query.executeUpdate();
+    }
 }

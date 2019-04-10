@@ -8,7 +8,9 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -490,6 +493,24 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.updateOutput(workflowJob2);
         WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
         assertEquals(workflowJob2.getOutputContextString(), workflowJob3.getOutputContextString());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testUpdateOutput")
+    public void testUpdateInput() {
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setApplicationId("application_000013");
+        workflowJob.setTenant(tenant2);
+        workflowJob.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJobEntityMgr.create(workflowJob);
+        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertNull(workflowJob2.getOutputContextString());
+        Map<String, String> inputMap = new HashMap<>();
+        inputMap.put(WorkflowContextConstants.Inputs.ACTION_IDS, "[111,222]");
+        workflowJob2.setInputContext(inputMap);
+        workflowJobEntityMgr.updateInput(workflowJob2);
+        WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertEquals(workflowJob2.getInputContextString(), workflowJob3.getInputContextString());
     }
 
     @DataProvider(name = "provideQueryByClusterIDData")
