@@ -152,6 +152,11 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     @SuppressWarnings("deprecation")
     protected void travel(Traveler traveler, ActorRef currentActorRef, boolean rejected) {
         getGuideBook().logVisit(ActorUtils.getPath(currentActorRef), traveler);
+        if (traveler.isReturnSender()) {
+            ActorRef sender = getContext().actorFor(traveler.getOriginalLocation());
+            sender.tell(traveler, self());
+            return;
+        }
         String nextLocation = getNextLocation(traveler);
         if (nextLocation == null) {
             nextLocation = traveler.getAnchorActorLocation();

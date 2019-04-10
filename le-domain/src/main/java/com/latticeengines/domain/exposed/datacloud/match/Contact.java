@@ -27,6 +27,16 @@ public class Contact implements Fact, Serializable {
     @JsonProperty("Email")
     private String email;
 
+    public Contact() {
+
+    }
+
+    public Contact(String name, String email, String phoneNumber) {
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
+
     public Contact normalize(String countryCode) {
         Contact normalized = new Contact();
         normalized.name = StringStandardizationUtils.getStandardString(name);

@@ -279,11 +279,6 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         matchKeyTuple.setSystemIds(systemIds);
     }
 
-    /*
-     * Should be called after name/location is already standardized in
-     * EntityMatchKeyRecord parameter due to phone number standardization
-     * requires country code
-     */
     @Override
     public void parseRecordForContact(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
             EntityMatchKeyRecord record) {
@@ -302,6 +297,15 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     originalEmail = (String) inputRecord.get(emailPos);
                 }
             }
+            // Country is needed for PhoneNumber standardization. If not
+            // mapped/provided, use USA as default
+            String originalCountry = null;
+            if (keyPositionMap.containsKey(MatchKey.Country)) {
+                List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
+                for (Integer countryPos : countryPosList) {
+                    originalCountry = (String) inputRecord.get(countryPos);
+                }
+            }
             String originalPhone = null;
             if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
                 List<Integer> phonePosList = keyPositionMap.get(MatchKey.PhoneNumber);
@@ -312,7 +316,11 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
 
             Contact origContact = createContact(originalName, originalEmail, originalPhone);
             record.setOrigContact(origContact);
-            Contact parsedContact = origContact.normalize(record.getParsedNameLocation().getCountryCode());
+
+            NameLocation nameLocation = getNameLocation(null, originalCountry, null, null, null, null);
+            nameLocationService.normalize(nameLocation);
+
+            Contact parsedContact = origContact.normalize(nameLocation.getCountryCode());
             record.setParsedContact(parsedContact);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -661,6 +662,9 @@ public class MatchInput implements Fact, Dimension {
         }
 
         public void addMatchKey(MatchKey key, String attr) {
+            if (keyMap == null) {
+                keyMap = new HashMap<>();
+            }
             if (keyMap.get(key) == null) {
                 keyMap.put(key, new ArrayList<>());
             }

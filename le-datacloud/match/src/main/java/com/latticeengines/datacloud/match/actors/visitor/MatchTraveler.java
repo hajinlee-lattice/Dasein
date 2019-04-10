@@ -58,6 +58,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Newly Allocated EntityIDs: entity -> entityId
     private final Map<String, String> newEntityIds = new HashMap<>();
 
+    // Entity -> MatchKeyTuple
+    private final Map<String, MatchKeyTuple> entityMatchKeyTuples = new HashMap<>();
+
 
     /***************************************************************************
      * Bound to current decision graph or request to external assistant actors
@@ -298,5 +301,17 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setEntityMatchErrors(List<String> entityMatchErrors) {
         this.entityMatchErrors = entityMatchErrors;
+    }
+
+    public Map<String, MatchKeyTuple> getEntityMatchKeyTuples() {
+        return entityMatchKeyTuples;
+    }
+
+    public MatchKeyTuple getEntityMatchKeyTuple(String entity) {
+        return entityMatchKeyTuples.get(entity);
+    }
+
+    public void addEntityMatchKeyTuple(String entity, MatchKeyTuple tuple) {
+        entityMatchKeyTuples.put(entity, tuple);
     }
 }
