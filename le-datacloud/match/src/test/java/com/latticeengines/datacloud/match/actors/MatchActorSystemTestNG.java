@@ -37,7 +37,6 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdResolveMic
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityNameCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -93,9 +92,6 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     @Inject
     private MatchDecisionGraphService matchDecisionGraphService;
-
-    @Inject
-    private EntityMatchVersionService entityMatchVersionService;
 
     @Inject
     private EntityMatchConfigurationService entityMatchConfigurationService;
