@@ -12,6 +12,7 @@
         <button
             ng-if="(vm.secondaryLink || vm.item.secondaryLink || vm.item.secondaryFn) && vm.item.lastRoute"
             class="button white-button"
+            ng-class="vm.item.secondaryClass"
             ng-click="vm.clickSecondary()"
             ng-disabled="(vm.item.secondaryLinkValidation && !vm.isValid())">
             {{vm.item.secondaryLinkLabel}}
@@ -20,6 +21,7 @@
             ng-if="!vm.item.hideNext"
             type="button" 
             class="button blue-button"
+            ng-class="vm.item.nextClass"
             ng-click="vm.click()"
             ng-disabled="!vm.isValid() || vm.nextDisabled">
             {{vm.item.nextLabel || 'Next'}}

@@ -45,7 +45,7 @@
     <ul class="subheader-tabs-buttons">
         <li class="save-segment" ng-if="vm.checkState('model_iteration')">
             <button 
-                class="button orange-button"
+                class="button orange-button model-view-iteration-remodel"
                 ng-click="vm.changeSettings()">
                 Remodel
             </button>
@@ -63,7 +63,7 @@
                 Clear
             </button>
             &nbsp;
-            <button class="save button blue-button" ng-click="vm.saveSegment()" ng-disabled="!vm.public.enableSaveSegmentButton">
+            <button class="save button blue-button mydata-save-segment" ng-click="vm.saveSegment()" ng-disabled="!vm.public.enableSaveSegmentButton">
                 {{ vm.segment == 'Create' ? 'Creat' : 'Sav'
                 }}{{ vm.isSaving ? 'ing' : 'e' }} Segment
                 <i class="fa fa-spinner fa-spin fa-fw" ng-if="vm.isSaving"></i>

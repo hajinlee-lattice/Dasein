@@ -94,7 +94,6 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
             if (frontEndQuery.getSegmentQuery() != null) {
-                frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
                 Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
                         .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
                 map.putAll(segmentMap);
@@ -122,7 +121,6 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
             if (frontEndQuery.getSegmentQuery() != null) {
-                frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
                 Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
                         .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
                 map.putAll(segmentMap);
