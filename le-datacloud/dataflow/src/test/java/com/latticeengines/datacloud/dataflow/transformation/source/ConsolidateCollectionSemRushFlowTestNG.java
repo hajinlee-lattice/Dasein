@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectio
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class ConsolidateCollectionSemRushFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private final static Logger log = LoggerFactory.getLogger(ConsolidateCollectionSemrushFlow.class);
+    private final static Logger log = LoggerFactory.getLogger(ConsolidateCollectionSemRushFlowTestNG.class);
     private final static String FIELD_DOMAIN = "Domain";
     private final static String FIELD_TIMESTAMP = "Last_Modification_Date";
     private final static String FIELD_RANK = "Rank";
