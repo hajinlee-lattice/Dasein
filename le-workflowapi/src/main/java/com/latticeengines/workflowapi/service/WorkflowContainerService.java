@@ -12,7 +12,7 @@ public interface WorkflowContainerService {
 
     String submitAwsWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid);
 
-    JobStatus getJobStatus(String applicationId);
+    JobStatus getJobStatus(String applicationId, String clusterId);
 
     WorkflowLogLinks getLogUrlByWorkflowPid(Long workflowPid);
 

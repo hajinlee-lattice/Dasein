@@ -38,6 +38,8 @@ public interface JobService extends AwsBatchJobService {
 
     JobStatus getJobStatus(String applicationId);
 
+    JobStatus getJobStatusByCluster(String applicationId, String clusterId);
+
     JobStatus waitFinalJobStatus(String applicationId, Integer timeoutInSec);
 
     void populateJobStatusFromYarnAppReport(JobStatus jobStatus, String applicationId);
