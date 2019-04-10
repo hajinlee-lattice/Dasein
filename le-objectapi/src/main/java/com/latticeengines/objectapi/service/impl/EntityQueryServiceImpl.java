@@ -72,18 +72,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                    attrRepo);
-            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
-            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
-                    frontEndQuery);
-
-            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
-                    timeTranslator);
-            preprocess(map, attrRepo, timeTranslator);
-
-            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
-            query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
+            Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, true);
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
@@ -104,11 +93,12 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
     }
 
     @Override
-    public String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
-        Query query = getDataQuery(frontEndQuery, version, sqlUser);
+    public String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser,
+            boolean isCountQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
+        Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, isCountQuery);
         try {
             return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -121,31 +111,34 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         }
     }
 
-    private Query getDataQuery(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
-                queryEvaluatorService);
+    private Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery, DataCollection.Version version,
+            String sqlUser, boolean isCountQuery) {
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
+        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), !isCountQuery);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
+
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
-        if (CollectionUtils.isEmpty(query.getLookups())) {
-            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+        if (isCountQuery) {
+            query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
+        } else {
+            if (CollectionUtils.isEmpty(query.getLookups())) {
+                query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+            }
+            updateLookups(frontEndQuery.getMainEntity(), query);
         }
-        updateLookups(frontEndQuery.getMainEntity(), query);
         return query;
     }
 
     private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version,
             String sqlUser, boolean enforceTranslation) {
-        Query query = getDataQuery(frontEndQuery, version, sqlUser);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
+        Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, false);
         try {
             Map<String, Map<Long, String>> translationMapping = new HashMap<>();
             if (enforceTranslation) {
