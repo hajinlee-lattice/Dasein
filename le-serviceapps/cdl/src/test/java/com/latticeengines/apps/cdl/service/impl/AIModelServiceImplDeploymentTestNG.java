@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -277,6 +278,12 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertThrows(LedpException.class, () -> aiModelService.createNewIteration(newIteration, aiRatingEngine));
         String derivedFromModelID = createdRatingEngine.getLatestIteration().getId();
         newIteration.setDerivedFromRatingModel(derivedFromModelID);
+
+        Assert.assertThrows(LedpException.class, () -> aiModelService.createNewIteration(newIteration, aiRatingEngine));
+        AIModel derivedModel = (AIModel) createdRatingEngine.getLatestIteration();
+        derivedModel.setModelingJobStatus(JobStatus.COMPLETED);
+        ratingEngineService.updateRatingModel(aiRatingEngineId, derivedModel.getId(),
+                derivedModel);
         iteration2 = aiModelService.createNewIteration(newIteration, createdRatingEngine);
 
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(aiRatingEngineId);
