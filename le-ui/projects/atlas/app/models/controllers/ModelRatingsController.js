@@ -86,12 +86,18 @@ angular.module('lp.models.ratings', [
 
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
 
+                console.log(vm.workingBuckets);
+
                 // Update UI data if user got to the UI from either the "Activate" button 
                 // or used the Iteration select menu from within the UI.
                 var id = $stateParams.modelId;
                 ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
                     vm.ratingsSummary = result;
                 });
+                ModelRatingsService.MostRecentConfiguration(id).then(function (result) {
+                    vm.workingBuckets = result;
+                });
+
             } else {
 
                 // This determines what the active iteration is.
@@ -101,6 +107,7 @@ angular.module('lp.models.ratings', [
                 // If the model has been published previously and is Active
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
 
+                    console.log("here");
                     // Set active iteration and working buckets (determines what is displayed in the chart)
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
                     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
@@ -110,8 +117,13 @@ angular.module('lp.models.ratings', [
                         // Helps with chart data and display
                         vm.ratingsSummary = result;
                     });
+                    ModelRatingsService.MostRecentConfiguration(id).then(function (result) {
+                        vm.workingBuckets = result;
+                    });
+                    
 
                 } else {
+                    console.log("here 2");
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
