@@ -1,47 +1,27 @@
 package com.latticeengines.datacloud.match.actors;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
-import akka.actor.ActorRef;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-
 @Component
-public class MatchSingleActorTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class DnBLookupActorTestNG extends SingleActorTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchSingleActorTestNG.class);
-
-    // IMPORTANT
-    // Should not run tests in parallel which need different mode
-    // (batch/realtime) for actorSystem
-    @Autowired
-    private MatchActorSystem actorSystem;
+    private static final Logger log = LoggerFactory.getLogger(DnBLookupActorTestNG.class);
 
     @Test(groups = { "functional" }, dataProvider = "dnbLookupActorData", priority = 1)
     public void testDnBActorRealtimeMode(String name, String countryCode, String state, String city,
@@ -104,20 +84,5 @@ public class MatchSingleActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         return new Object[][] { { "LATTICE ENGINES", "US", "CALIFORNIA", "FOSTER CITY", DnBReturnCode.OK, "028675958",
                 7, "AZZFAZZAFAF" }, //
         };
-    }
-
-    private Object sendMessageToActor(Object msg, Class<? extends ActorTemplate> actorClazz, boolean batchMode)
-            throws Exception {
-        LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
-        LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
-
-        ActorRef actorRef = actorSystem.getActorRef(actorClazz);
-
-        Timeout timeout = batchMode ? new Timeout(new FiniteDuration(30, TimeUnit.MINUTES))
-                : new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
-        Future<Object> future = Patterns.ask(actorRef, msg, timeout);
-
-        Object result = Await.result(future, timeout.duration());
-        return result;
     }
 }

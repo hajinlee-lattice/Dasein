@@ -27,6 +27,7 @@ import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.AccountMatchPlannerMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.CachedDunsValidateMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.ContactMatchPlannerMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnBCacheLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
@@ -190,6 +191,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 EntitySystemIdBasedMicroEngineActor.class, //
                 EntityDomainCountryBasedMicroEngineActor.class, //
                 EntityDunsBasedMicroEngineActor.class, //
+                ContactMatchPlannerMicroEngineActor.class, //
         };
         for (Class<? extends ActorTemplate> clz : microEngineClz) {
             initNamedActor(clz);

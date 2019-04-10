@@ -51,6 +51,10 @@ public abstract class Traveler {
     // If exceed time limit, treat as timeout failure
     private Timeout travelTimeout;
 
+    // ONLY for testing purpose, set to true: Traveler will ignore decision
+    // graph and return to sender after processing
+    private boolean returnSender;
+
     /***********************************
      * Bound to current decision graph
      ***********************************/
@@ -212,6 +216,14 @@ public abstract class Traveler {
 
     public void descRetry() {
         this.retries--;
+    }
+
+    public boolean isReturnSender() {
+        return returnSender;
+    }
+
+    public void setReturnSender(boolean returnSender) {
+        this.returnSender = returnSender;
     }
 
     /********************

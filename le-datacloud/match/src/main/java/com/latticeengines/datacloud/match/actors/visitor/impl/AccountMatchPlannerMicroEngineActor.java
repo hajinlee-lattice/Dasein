@@ -122,8 +122,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
     protected void execute(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         List<Object> inputRecord = matchTraveler.getInputDataRecord();
-        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps().get(matchTraveler
-                .getEntity());
+        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
+                .get(BusinessEntity.Account.name());
         EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null,
@@ -132,10 +132,10 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap,
                 matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
-        MatchKeyTuple matchKeyTuple = MatchKeyUtils.createMatchKeyTuple(entityMatchKeyRecord);
+        MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
 
         Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
-                .get(matchTraveler.getEntity()).getKeyMap();
+                .get(BusinessEntity.Account.name()).getKeyMap();
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
                 entityMatchKeyRecord);
 
@@ -146,5 +146,6 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         }
 
         matchTraveler.setMatchKeyTuple(matchKeyTuple);
+        matchTraveler.addEntityMatchKeyTuple(BusinessEntity.Account.name(), matchKeyTuple);
     }
 }

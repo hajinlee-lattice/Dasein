@@ -288,7 +288,7 @@ public class MatchKeyUtils {
 
     }
 
-    public static MatchKeyTuple createMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
+    public static MatchKeyTuple createAccountMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
         MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
         NameLocation nameLocationInfo = entityRecord.getParsedNameLocation();
         if (nameLocationInfo != null) {
@@ -304,6 +304,17 @@ public class MatchKeyUtils {
             matchKeyTuple.setDomain(entityRecord.getParsedDomain());
         }
         matchKeyTuple.setDuns(entityRecord.getParsedDuns());
+        return matchKeyTuple;
+    }
+
+    public static MatchKeyTuple createContactMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
+        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
+        Contact contact = entityRecord.getParsedContact();
+        if (contact != null) {
+            matchKeyTuple.setEmail(contact.getEmail());
+            matchKeyTuple.setName(contact.getName());
+            matchKeyTuple.setPhoneNumber(contact.getPhoneNumber());
+        }
         return matchKeyTuple;
     }
 }
