@@ -99,7 +99,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertEquals(entityLookupEntryService.get(env, tenant, TEST_ENTRY_1), MAIN_TEST_SEED_ID);
     }
 
-    @Test(groups = "functional", dataProvider = "entityMatchEnvironment")
+    @Test(groups = "functional", dataProvider = "entityMatchEnvironment", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testSetIfEquals(EntityMatchEnvironment env) {
         Tenant tenant = newTestTenant();
         // since no current entry, entry is created successfully
