@@ -229,7 +229,7 @@ export default function () {
                 let iterationFilter = DataCloudStore.ratingIterationFilter;
                 let categoryAttributes = vm.getAttributes([vm.category]);
                 switch (quantity) {
-                    case 'all':
+                    case 'selectall':
                         
                         switch (iterationFilter) {
                             case 'all':
@@ -245,7 +245,8 @@ export default function () {
                                 disabledCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
                         };
 
-                        Notice.success({ message: 'Enabled all attributes for remodeling' })
+                        // vm.setCategory(vm.categories[0]);
+                        Notice.success({ message: 'Enabled all attributes for remodeling' });
 
                         break;
                     default:
@@ -264,7 +265,8 @@ export default function () {
                                 disabledCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
                         };
 
-                        Notice.warning({ message: 'Disabled all attributes from remodeling' });
+                        // vm.setCategory(vm.categories[0]);
+                        Notice.warning({ message: 'Disabled all ' + vm.category + ' attributes from remodeling' });
                 }
                 RatingsEngineStore.setIterationEnrichments(vm.enrichments)
             }
