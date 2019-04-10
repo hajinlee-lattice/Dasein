@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.objectapi.service.EventQueryService;
 
@@ -39,8 +40,7 @@ public class EventResource {
     @PostMapping(value = "/count/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getTrainingCount(@PathVariable String customerSpace,
-            @RequestBody EventFrontEndQuery frontEndQuery,
+    public Long getTrainingCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getTrainingCount(frontEndQuery, version);
     }
@@ -56,17 +56,15 @@ public class EventResource {
     @PostMapping(value = "/data/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getScoringTuples(@PathVariable String customerSpace,
-                                           @RequestBody EventFrontEndQuery frontEndQuery,
-                                           @RequestParam(value = "version", required = false) DataCollection.Version version) {
+    public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getScoringTuples(frontEndQuery, version);
     }
 
     @PostMapping(value = "/data/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getTrainingTuples(@PathVariable String customerSpace,
-            @RequestBody EventFrontEndQuery frontEndQuery,
+    public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getTrainingTuples(frontEndQuery, version);
     }
@@ -74,10 +72,19 @@ public class EventResource {
     @PostMapping(value = "/data/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getEventTuples(@PathVariable String customerSpace,
-            @RequestBody EventFrontEndQuery frontEndQuery,
+    public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getEventTuples(frontEndQuery, version);
+    }
+
+    @PostMapping(value = "/query")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public String getQuery(@PathVariable String customerSpace, //
+            @RequestBody EventFrontEndQuery frontEndQuery, //
+            @RequestParam(value = "eventType", required = true) EventType eventType, //
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        return eventQueryService.getQueryStr(frontEndQuery, eventType, version);
     }
 
 }

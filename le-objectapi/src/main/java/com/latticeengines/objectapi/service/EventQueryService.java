@@ -1,7 +1,9 @@
 package com.latticeengines.objectapi.service;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public interface EventQueryService {
@@ -16,4 +18,6 @@ public interface EventQueryService {
     DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
 
     DataPage getEventTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+
+    String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, Version version);
 }
