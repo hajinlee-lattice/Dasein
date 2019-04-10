@@ -313,7 +313,7 @@ public enum LedpCode {
     LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
     LEDP_18187("Cannot populate full play information since No Rating Engine associated with the Play: {0}"), //
     LEDP_18188(
-            "The following field name length exceeded the limit of {0} characters. Shorten the field name \"{1}\" whose length is {2} to upload the file."), //
+            "The following field name length exceeded the limit of {0} characters. Shorten the field name to upload the file: {1}"), //
     LEDP_18189("There are Rating Models associated with the current segment {0} and thus it cannot be deleted."), //
     LEDP_18190("Update Usage Attribute Config failed due to dependency check failure"), //
     LEDP_18191("Marketo Scoring setup is missing required {0}"), //
