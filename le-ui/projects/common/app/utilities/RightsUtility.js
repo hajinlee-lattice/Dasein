@@ -13,7 +13,7 @@ app.service('RightsUtility', function (_, BrowserStorageUtility) {
     };
 
     this.getAccessLevel = function(s) {
-        return _.findWhere(this.accessLevel, {name : s});
+        return this.accessLevel[s] || {};
     };
 
     this.may = function(rightsDict, operation, category) {
