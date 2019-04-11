@@ -25,7 +25,8 @@ import Message, {
 import LeTable from "common/widgets/table/table";
 import './multiple-templates.list.scss';
 import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
-import ReactMainContainer from "../../../react/react-main-container";
+import ReactMainContainer from "atlas/react/react-main-container";
+import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
@@ -257,7 +258,7 @@ export default class MultipleTemplatesList extends Component {
         console.log('RENDERING', this.state.data);
         return (
             <ReactMainContainer>
-                <LeHPanel hstretch={true} halignment={SPACEBETWEEN}>
+                <LeToolBar justifycontent={SPACE_BETWEEN}>
                     <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
                     <LeButton
                         name="add"
@@ -272,7 +273,7 @@ export default class MultipleTemplatesList extends Component {
                             // alert('Call APIS');
                         }}
                     />
-                </LeHPanel>
+                </LeToolBar>
                 <LeTable
                     name="multiple-templates"
                     config={this.getConfig()}
