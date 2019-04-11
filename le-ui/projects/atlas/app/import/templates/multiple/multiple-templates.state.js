@@ -1,6 +1,7 @@
 import MultipleTemplatesList from './multiple-templates.list';
 import SummaryContainer from '../components/summary';
-export const multipletemplates = {
+import SystemCreationComponent from './system-creation.component';
+const templatesListState = {
   name: "templateslist",
   url: "/templateslist",
   onEnter: ($transition$, $state$) => {
@@ -20,3 +21,12 @@ export const multipletemplates = {
     'main': MultipleTemplatesList
   }
 };
+const creationSystemState = {
+  name: 'sistemcreation',
+  url: '/system',
+  views: {
+    'main': SystemCreationComponent
+  }
+};
+
+export const mtstates = [templatesListState, creationSystemState];

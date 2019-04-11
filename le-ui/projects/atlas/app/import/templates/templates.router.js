@@ -16,14 +16,14 @@ angular
 
         .state('home.importtemplates', {
             url: '/templates',
-            // onEnter: function(ImportWizardStore){
-            //     ImportWizardStore.clear();
-            // },
-            // params: {
-            //     tenantName: { dynamic: true, value: '' },
-            //     pageIcon: 'ico-analysis',
-            //     pageTitle: 'Data Processing & Analysis'
-            // },
+            onEnter: function(ImportWizardStore){
+                ImportWizardStore.clear();
+            },
+            params: {
+                tenantName: { dynamic: true, value: '' },
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
             views: {
                 'summary@': {
                     component: 'leSummaryComponent'
@@ -35,6 +35,10 @@ angular
         })
         .state('home.multipletemplates', {
             url:'/multitemplates',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
             onEnter: ($state, ReduxService) => {
                 ReduxService.connect(
                     'multitemplates',
