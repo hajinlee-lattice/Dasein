@@ -26,7 +26,7 @@ public class ProcessContactDiff extends BaseProcessSingleEntityDiffStep<ProcessC
         int bucketStep = 0;
 
         TransformationStepConfig bucket = bucket(false);
-        TransformationStepConfig retainFields = retainFields(bucketStep, true);
+        TransformationStepConfig retainFields = retainFields(bucketStep);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(bucket);

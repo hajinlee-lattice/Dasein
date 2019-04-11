@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.EnrichAccountWrapper;
-import com.latticeengines.cdl.workflow.steps.rebuild.GenerateAccountFeatureWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.FilterAccountFeature;
 import com.latticeengines.cdl.workflow.steps.rebuild.GenerateBucketedAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccountWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildAccountWorkflowConfiguration;
@@ -28,7 +28,7 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
     private ProfileAccountWrapper profileAccount;
 
     @Inject
-    private GenerateAccountFeatureWrapper generateAccountFeature;
+    private FilterAccountFeature filterAccountFeature;
 
     @Inject
     private GenerateBucketedAccountWrapper generateBucketedAccount;
@@ -38,7 +38,7 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(enrichAccount) //
                 .next(profileAccount) //
-                .next(generateAccountFeature) //
+                .next(filterAccountFeature) //
                 .next(generateBucketedAccount) //
                 .build();
     }

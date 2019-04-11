@@ -130,7 +130,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MERGE_MATCH = "mergeMatch";
     public static final String TRANSFORMER_STATS_CALCULATOR = "statsCalculator";
     public static final String TRANSFORMER_SORTER = "sourceSorter";
-    public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_DIFFER = "sourceDiffer";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
     public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
@@ -140,11 +139,11 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_STANDARDIZATION = "standardizationTransformer";
 
     public static final String TRANSFORMER_REMOVE_ORPHAN_CONTACT = "RemoveOrphanContact";
+    public static final String TRANSFORMER_COPY_TXMFR = "CopyTxmfr";
     public static final String TRANSFORMER_CONSOLIDATE_REPORT = "ConsolidateReporter";
     public static final String TRANSFORMER_CONSOLIDATE_DATA = "consolidateDataTransformer";
     public static final String TRANSFORMER_CONSOLIDATE_DELTA = "consolidateDeltaTransformer";
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
-    public static final String TRANSFORMER_CONSOLIDATE_RETAIN = "consolidateRetainFieldTransformer";
     public static final String TRANSFORMER_ATTRIBUTES_DERIVER = "purchaseAttributesDeriver";
     public static final String PERIOD_DATA_CLEANER = "periodDataCleaner";
     public static final String PERIOD_DATA_FILTER = "periodDatafilter";

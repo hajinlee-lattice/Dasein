@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConfigurableSparkJobTxfmr;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
-import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.RemoveOrphanJob;
 
 
@@ -22,7 +21,7 @@ public class RemoveOrphanTxfmr extends ConfigurableSparkJobTxfmr<RemoveOrphanCon
     }
 
     @Override
-    protected Class<? extends AbstractSparkJob<RemoveOrphanConfig>> getSparkJobClz() {
+    protected Class<RemoveOrphanJob> getSparkJobClz() {
         return RemoveOrphanJob.class;
     }
 

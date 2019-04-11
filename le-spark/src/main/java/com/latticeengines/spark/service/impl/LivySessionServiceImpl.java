@@ -47,9 +47,11 @@ public class LivySessionServiceImpl implements LivySessionService {
         if (MapUtils.isNotEmpty(sparkConf)) {
             conf.putAll(sparkConf);
         }
+        log.info("conf=" + JsonUtils.serialize(conf));
         payLoad.put("conf", conf);
         if (MapUtils.isNotEmpty(livyConf)) {
             payLoad.putAll(livyConf);
+            log.info("livyConf=" + JsonUtils.serialize(livyConf));
         }
         String url = host + URI_SESSIONS;
         String resp = restTemplate.postForObject(url, payLoad, String.class);

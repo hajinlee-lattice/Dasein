@@ -302,17 +302,19 @@ public class CheckpointService {
 
     public long countTableRole(TableRoleInCollection role, DataCollection.Version version) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        Table table = dataCollectionProxy.getTable(customerSpace.toString(), role, version);
-        if (table == null) {
+        List<Table> tables = dataCollectionProxy.getTables(customerSpace.toString(), role, version);
+        if (CollectionUtils.isEmpty(tables)) {
             Assert.fail("Cannot find table in role " + role);
         }
-        log.info("countRole " + role.name() + " Table " + table.getName() + " Path "
-                + table.getExtracts().get(0).getPath());
-        String path = table.getExtracts().get(0).getPath();
-        if (!path.endsWith(".avro")) {
-            path += path.endsWith("/") ? "*.avro" : "/*.avro";
-        }
-        return AvroUtils.count(yarnConfiguration, path);
+        return tables.stream().mapToLong(table -> {
+            log.info("countRole " + role.name() + " Table " + table.getName() + " Path "
+                    + table.getExtracts().get(0).getPath());
+            String path = table.getExtracts().get(0).getPath();
+            if (!path.endsWith(".avro")) {
+                path += path.endsWith("/") ? "*.avro" : "/*.avro";
+            }
+            return AvroUtils.count(yarnConfiguration, path);
+        }).sum();
     }
 
     public long countInRedshift(BusinessEntity entity) {

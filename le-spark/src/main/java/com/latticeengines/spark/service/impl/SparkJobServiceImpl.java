@@ -3,6 +3,7 @@ package com.latticeengines.spark.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,8 +76,8 @@ public class SparkJobServiceImpl implements SparkJobService {
     SparkJobResult runJob(LivySession session, Class<J> jobClz, C config, Iterable<String> extraJars) {
         J job;
         try {
-            job = jobClz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            job = jobClz.getConstructor().newInstance();
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Failed to instantiate a spark job of type " + jobClz);
         }
         cleanupTargetDirs(config.getTargets());

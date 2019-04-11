@@ -1,6 +1,5 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -15,7 +14,7 @@ import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Component
-public class LivySessionHolder {
+public class LivySessionManager {
 
     @Inject
     private LivySessionService sessionService;
@@ -26,27 +25,9 @@ public class LivySessionHolder {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
-    @Value("${dataflowapi.spark.driver.cores}")
-    private int driverCores;
-
-    @Value("${dataflowapi.spark.driver.mem}")
-    private String driverMem;
-
-    @Value("${dataflowapi.spark.executor.cores}")
-    private int executorCores;
-
-    @Value("${dataflowapi.spark.executor.mem}")
-    private String executorMem;
-
-    @Value("${dataflowapi.spark.max.executors}")
-    private String maxExecutors;
-
-    @Value("${dataflowapi.spark.min.executors}")
-    private String minExecutors;
-
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
-    public LivySession createLivySession(String jobName) {
+    LivySession createLivySession(String jobName, Map<String, Object> livyConf, Map<String, String> sparkConf) {
         LivySession session = livySessionHolder.get();
         if (session != null) {
             killSession();
@@ -61,34 +42,17 @@ public class LivySessionHolder {
         if (StringUtils.isBlank(jobName)) {
             jobName = "Workflow";
         }
-        session = sessionService.startSession(livyHost, jobName, getLivyConf(), getSparkConf());
+        session = sessionService.startSession(livyHost, jobName, livyConf, sparkConf);
         livySessionHolder.set(session);
         return session;
     }
 
-    public void killSession() {
+    void killSession() {
         LivySession session = livySessionHolder.get();
         if (session != null) {
             livySessionHolder.set(null);
             sessionService.stopSession(session);
         }
-    }
-
-    private Map<String, Object> getLivyConf() {
-        Map<String, Object> conf = new HashMap<>();
-        conf.put("driverCores", driverCores);
-        conf.put("driverMemory", driverMem);
-        conf.put("executorCores", executorCores);
-        conf.put("executorMemory", executorMem);
-        return conf;
-    }
-
-    private Map<String, String> getSparkConf() {
-        Map<String, String> conf = new HashMap<>();
-        conf.put("spark.executor.instances", String.valueOf(Math.max(Integer.valueOf(minExecutors), 1)));
-        conf.put("spark.dynamicAllocation.minExecutors", minExecutors);
-        conf.put("spark.dynamicAllocation.maxExecutors", maxExecutors);
-        return conf;
     }
 
 }

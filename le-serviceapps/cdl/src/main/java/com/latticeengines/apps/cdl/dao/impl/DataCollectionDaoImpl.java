@@ -33,7 +33,7 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
         queryPattern += " join cTbl.table as tbl";
         queryPattern += " where dc.name = :collectionName";
         if (tableRole != null) {
-            queryPattern += " and cTbl.role = :tableRole";
+            queryPattern += " and cTbl.role = :getTableRole";
         }
         if (version != null) {
             queryPattern += " and cTbl.version = :version";
@@ -43,7 +43,7 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
         Query query = session.createQuery(queryStr);
         query.setParameter("collectionName", collectionName);
         if (tableRole != null) {
-            query.setParameter("tableRole", tableRole);
+            query.setParameter("getTableRole", tableRole);
         }
         if (version != null) {
             query.setParameter("version", version);

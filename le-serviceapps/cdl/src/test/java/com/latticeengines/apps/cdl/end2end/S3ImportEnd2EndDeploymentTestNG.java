@@ -30,11 +30,11 @@ public class S3ImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
 
     @Test(groups = "manual")
     public void runTest() {
-        importData(BusinessEntity.Account, "Account_0_350.csv", "Account");
+        importData(BusinessEntity.Account, "Account_401_500.csv", "Account");
         S3FileToHdfsConfiguration config = new S3FileToHdfsConfiguration();
         config.setFeedType(ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
         config.setS3Bucket(S3_BUCKET);
-        config.setS3FilePath("/" + S3_CSV_DIR + "/" + S3_CSV_VERSION + "/Account_400_1000.csv");
+        config.setS3FilePath("/" + S3_CSV_DIR + "/" + S3_CSV_VERSION + "/Account_901_1000.csv");
         ApplicationId applicationId =  cdlProxy.submitS3ImportJob(mainCustomerSpace, config);
 
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
@@ -53,16 +53,12 @@ public class S3ImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
         catchException(importConfig);
         importConfig.setFilePath("");
         importConfig.setS3Bucket(S3_BUCKET);
-        importConfig.setS3FilePath("/" + S3_CSV_DIR + "/" + S3_CSV_VERSION + "/Account_400_1000.csv");
+        importConfig.setS3FilePath("/" + S3_CSV_DIR + "/" + S3_CSV_VERSION + "/Account_901_1000.csv");
         catchException(importConfig);
     }
 
     private void catchException(S3FileToHdfsConfiguration importConfig) {
-        try {
-            cdlProxy.submitS3ImportJob(mainCustomerSpace, importConfig);
-        } catch (Exception e) {
-            Assert.assertEquals(e instanceof RuntimeException, true);
-        }
+        Assert.assertThrows(RuntimeException.class, () -> cdlProxy.submitS3ImportJob(mainCustomerSpace, importConfig));
     }
 
 

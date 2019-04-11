@@ -267,7 +267,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             return true;
         } else if (hasManyUpdate) {
             log.info("Has more than 30% update, going to rebuild " + mainEntity());
-            return true;
+//            return true;
+            return false;
         } else if (jobImpacted) {
             return true;
         }

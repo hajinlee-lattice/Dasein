@@ -3,8 +3,9 @@ package com.latticeengines.domain.exposed.serviceflows.core.spark;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-public class ParseMatchResultJobConfig extends WorkflowSparkJobConfig {
+public class ParseMatchResultJobConfig extends SparkJobConfig {
 
     public static final String NAME = "parseMatchResult";
 

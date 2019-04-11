@@ -143,7 +143,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             if (sparkProps == null) {
                 sparkProps = new HashMap<>();
             }
-            session = createLivySession(progress.getCreatedBy(), sparkProps);
+            session = createLivySession(step, progress, sparkProps);
 
             SparkJobResult sparkJobResult = sparkJobService.runJob(session, getSparkJobClz(), sparkJobConfig);
             HdfsDataUnit output = sparkJobResult.getTargets().get(0);
@@ -283,8 +283,13 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         return parsed;
     }
 
-    private LivySession createLivySession(String creator, Map<String, String> sparkProps) {
-        String jobName = creator + "~" + getName();
+    private LivySession createLivySession(TransformStep step, TransformationProgress progress, //
+                                          Map<String, String> sparkProps) {
+        String creator = progress.getCreatedBy();
+        String primaryJobName = creator + "~" + getName();
+        String secondaryJobName = getSecondaryJobName(step);
+        String jobName = StringUtils.isNotBlank(secondaryJobName) //
+                ? primaryJobName + "~" + secondaryJobName : primaryJobName;
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
             livyHost = emrCacheService.getLivyUrl();
@@ -312,9 +317,22 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
 
     private Map<String, String> getSparkConf(Map<String, String> sparkProps) {
         Map<String, String> conf = new HashMap<>();
-        int numExecutors = Math.max(1, Integer.valueOf(sparkProps.getOrDefault("spark.executor.instances", "1")));
+        int numExecutors = sparkProps.containsKey("spark.executor.instances") ? //
+                Math.max(1, Integer.valueOf(sparkProps.get("spark.executor.instances"))) : 1;
         int adjustedMinExecutors = Math.min(Integer.valueOf(minExecutors), numExecutors);
+        if (sparkProps.containsKey("spark.dynamicAllocation.minExecutors")) {
+            adjustedMinExecutors = Math.max(0, Integer.valueOf(sparkProps.get("spark.dynamicAllocation.minExecutors")));
+        }
         int adjustedMaxExecutors = Math.max(Integer.valueOf(maxExecutors), numExecutors);
+        if (sparkProps.containsKey("spark.dynamicAllocation.maxExecutors")) {
+            int customMaxExecutors = Math.max(1, Integer.valueOf(sparkProps.get("spark.dynamicAllocation.maxExecutors")));
+            if (customMaxExecutors >= adjustedMinExecutors) {
+                adjustedMaxExecutors = customMaxExecutors;
+            } else {
+                log.warn("Customized max executors " + customMaxExecutors //
+                        + " is too small, keep using " + adjustedMaxExecutors);
+            }
+        }
         numExecutors = Math.max(numExecutors, adjustedMinExecutors);
         conf.put("spark.executor.instances", String.valueOf(numExecutors));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(adjustedMinExecutors));
@@ -334,6 +352,10 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             }
         });
         return conf;
+    }
+
+    protected String getSecondaryJobName(TransformStep step) {
+        return "";
     }
 
 }

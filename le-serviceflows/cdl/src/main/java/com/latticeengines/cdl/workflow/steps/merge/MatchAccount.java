@@ -54,7 +54,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         return request;
     }
 
-    protected boolean isShortCutMode() {
+    private boolean isShortCutMode() {
         String diffTableNameInContext = getStringValueFromContext(ACCOUNT_DIFF_TABLE_NAME);
         String batchStoreNameInContext = getStringValueFromContext(ACCOUNT_MASTER_TABLE_NAME);
         Table diffTableInContext = StringUtils.isNotBlank(diffTableNameInContext) ? //
@@ -66,8 +66,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     @Override
     protected void onPostTransformationCompleted() {
-        putStringValueInContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE,
-                TableUtils.getFullTableName(matchTargetTablePrefix, pipelineVersion));
+        String targetTableName = getEntityMatchTargetTableName();
+        putStringValueInContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE, targetTableName);
+        addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
     }
 
     private List<TransformationStepConfig> entityMatchSteps() {
@@ -130,5 +131,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private String getFetchOnlyMatchConfig() {
         return MatchUtils.getFetchOnlyMatchConfigForAccount(getBaseMatchInput());
+    }
+
+    private String getEntityMatchTargetTableName() {
+        return TableUtils.getFullTableName(matchTargetTablePrefix, pipelineVersion);
     }
 }

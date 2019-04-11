@@ -239,6 +239,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipPublishToS3(boolean skip) {
+            processStepConfiguration.setSkipPublishToS3(true);
+            return this;
+        }
+
         public Builder dataQuotaLimit(Long dataQuotaLimit, BusinessEntity businessEntity) {
             switch (businessEntity) {
                 case Account: processAccountWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);break;

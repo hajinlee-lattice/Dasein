@@ -59,6 +59,12 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("ImportActionPidsToInherit")
     private List<Long> importActionPidsToInherit;
 
+    /**
+     * Skip publish to S3, mainly to speed up e2e on local
+     */
+    @JsonProperty("SkipPublishToS3")
+    private Boolean skipPublishToS3;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
@@ -145,5 +151,13 @@ public class ProcessAnalyzeRequest {
 
     public void setFullRematch(Boolean fullRematch) {
         this.fullRematch = fullRematch;
+    }
+
+    public Boolean getSkipPublishToS3() {
+        return skipPublishToS3;
+    }
+
+    public void setSkipPublishToS3(Boolean skipPublishToS3) {
+        this.skipPublishToS3 = skipPublishToS3;
     }
 }

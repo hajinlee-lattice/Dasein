@@ -30,8 +30,8 @@ public enum TableRoleInCollection {
     CalculatedPurchaseHistory, //
     CalculatedDepivotedPurchaseHistory, //
 
-    // Curated Account Attribute has only requires one table for serving for
-    // now.
+    // Curated Account Attribute
+    // has only requires one table for serving for now.
     CalculatedCuratedAccountAttribute, //
 
     AnalyticPurchaseState, //
@@ -85,6 +85,8 @@ public enum TableRoleInCollection {
 
         PivotedRating.primaryKey = InterfaceName.AccountId;
         PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+
+        AccountFeatures.primaryKey = ConsolidatedAccount.primaryKey;
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }
