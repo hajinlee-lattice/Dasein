@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,8 +32,8 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private static final Logger log = LoggerFactory.getLogger(AccountDataQuotaLimitDeploymentTestNG.class);
 
-    @Value("${cdl.largeimport.account.filename:}")
-    private String account_csv;
+    @Value("${cdl.largeimport.account.filename}")
+    private String accountCsv;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -48,7 +47,6 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
     @BeforeClass(groups = "end2end")
     public void setup() {
         setupEnd2EndTestEnvironmentByFile(jsonFileName);
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "end2end")
@@ -62,7 +60,6 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
         }).start();
         importData();
         processAnalyze();
-
     }
 
     private void importData() {
@@ -70,8 +67,8 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
         long spendTime = 0L;
         spendTime = System.currentTimeMillis();
-        importData(BusinessEntity.Account, account_csv, "Account", false, false);
-        log.info("Import " + account_csv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
+        importData(BusinessEntity.Account, accountCsv, "Account", false, false);
+        log.info("Import " + accountCsv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
                 + " second");
     }
 

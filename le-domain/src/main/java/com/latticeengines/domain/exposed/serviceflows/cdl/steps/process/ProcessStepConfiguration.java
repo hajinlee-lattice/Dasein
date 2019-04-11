@@ -53,6 +53,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("input_properties")
     private Map<String, String> inputProperties;
 
+    @JsonProperty("skip_publish_to_s3")
+    private boolean skipPublishToS3;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -162,5 +165,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
             actionIdArray.addAll(JsonUtils.convertList(rawActionIds, Long.class));
         }
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIdArray));
+    }
+
+    public boolean isSkipPublishToS3() {
+        return skipPublishToS3;
+    }
+
+    public void setSkipPublishToS3(boolean skipPublishToS3) {
+        this.skipPublishToS3 = skipPublishToS3;
     }
 }

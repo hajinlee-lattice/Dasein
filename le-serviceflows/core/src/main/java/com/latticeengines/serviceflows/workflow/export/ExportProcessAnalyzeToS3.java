@@ -31,21 +31,22 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
-
-        DataCollection.Version inactiveVersion = getObjectFromContext(CDL_INACTIVE_VERSION,
-                DataCollection.Version.class);
-        Long paTs = getLongValueFromContext(PA_TIMESTAMP);
-        for (TableRoleInCollection role : TableRoleInCollection.values()) {
-            List<String> inactiveTableNames = dataCollectionProxy.getTableNames(customer, role, inactiveVersion);
-            if (CollectionUtils.isNotEmpty(inactiveTableNames)) {
-                log.info("Start to add inactive tables for tenant=" + customer + " role=" + role.name());
-                inactiveTableNames.forEach(t -> {
-                    addTableDir(t, requests, paTs);
-                });
+        boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
+        if (!shouldSkip) {
+            DataCollection.Version inactiveVersion = getObjectFromContext(CDL_INACTIVE_VERSION,
+                    DataCollection.Version.class);
+            Long paTs = getLongValueFromContext(PA_TIMESTAMP);
+            for (TableRoleInCollection role : TableRoleInCollection.values()) {
+                List<String> inactiveTableNames = dataCollectionProxy.getTableNames(customer, role, inactiveVersion);
+                if (CollectionUtils.isNotEmpty(inactiveTableNames)) {
+                    log.info("Start to add inactive tables for tenant=" + customer + " role=" + role.name());
+                    inactiveTableNames.forEach(t -> {
+                        addTableDir(t, requests, paTs);
+                    });
+                }
             }
+            addMatchError(requests);
         }
-
-        addMatchError(requests);
     }
 
     private void addMatchError(List<ImportExportRequest> requests) {

@@ -130,7 +130,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //
                 ACCOUNT_STATS_TABLE_NAME, //
-                FULL_REMATCH_PA //
+                FULL_REMATCH_PA, //
+                ENRICHED_ACCOUNT_DIFF_TABLE_NAME //
         );
         clearExecutionContext(renewableKeys);
         customerSpace = configuration.getCustomerSpace();
@@ -141,6 +142,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             boolean fullRematch = Boolean.TRUE.equals(configuration.isFullRematch());
             putObjectInContext(FULL_REMATCH_PA, fullRematch);
         }
+
+        putObjectInContext(SKIP_PUBLISH_PA_TO_S3, configuration.isSkipPublishToS3());
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
@@ -487,7 +490,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //
                 ACCOUNT_STATS_TABLE_NAME, //
-                REMATCHED_ACCOUNT_TABLE_NAME //
+                REMATCHED_ACCOUNT_TABLE_NAME, //
+                ENRICHED_ACCOUNT_DIFF_TABLE_NAME
         );
         Set<String> tableNamesForRetry = tableKeysForRetry.stream() //
                 .map(this::getStringValueFromContext) //

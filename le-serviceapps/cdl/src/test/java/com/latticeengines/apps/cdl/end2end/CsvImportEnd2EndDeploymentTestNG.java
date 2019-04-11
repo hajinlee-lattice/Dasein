@@ -66,31 +66,31 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
         if (importingEntity.equals(BusinessEntity.Account)) {
-            importData(BusinessEntity.Account, "Account_0_350.csv", "DefaultSystem_AccountData");
-            importData(BusinessEntity.Account, "Account_350_500.csv", "DefaultSystem_AccountData");
-            importData(BusinessEntity.Account, "Account_400_1000.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "Account_1_900.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "Account_401_500.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "Account_901_1000.csv", "DefaultSystem_AccountData");
         }
 
         if (importingEntity.equals(BusinessEntity.Contact)) {
-            importData(BusinessEntity.Contact, "Contact_0_350.csv", "DefaultSystem_ContactData");
-            importData(BusinessEntity.Contact, "Contact_350_500.csv", "DefaultSystem_ContactData");
-            importData(BusinessEntity.Contact, "Contact_400_1000.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "Contact_1_900.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "Contact_401_500.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "Contact_901_1000.csv", "DefaultSystem_ContactData");
         }
 
         if (importingEntity.equals(BusinessEntity.Product)) {
             importData(BusinessEntity.Product, "ProductBundles.csv", "DefaultSystem_ProductBundle");
             importData(BusinessEntity.Product, "ProductHierarchies.csv", "DefaultSystem_ProductHierarchy");
-            // may need to update feed type for VDB import.
-            importData(BusinessEntity.Product, "ProductVDB.csv", "ProductVDB");
             importData(BusinessEntity.Product, "ProductBundle_MissingProductBundle.csv", "DefaultSystem_ProductBundle");
             importData(BusinessEntity.Product, "ProductHierarchies_MissingCategory.csv", "DefaultSystem_ProductHierarchy");
             importData(BusinessEntity.Product, "ProductHierarchies_MissingFamily.csv", "DefaultSystem_ProductHierarchy");
+            // may need to update feed type for VDB import.
+            importData(BusinessEntity.Product, "ProductVDB.csv", "ProductVDB");
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {
-            importData(BusinessEntity.Transaction, "Transaction_0_15K.csv", "DefaultSystem_TransactionData");
-            importData(BusinessEntity.Transaction, "Transaction_15K_30K.csv", "DefaultSystem_TransactionData");
-            importData(BusinessEntity.Transaction, "Transaction_20K_60K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_1_25K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_25K_50K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_46K_60K.csv", "DefaultSystem_TransactionData");
         }
     }
 
@@ -135,9 +135,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
             saveImportTemplate(entity, "DefaultSystem_ProductHierarchy");
             saveImportTemplate(entity, "ProductVDB");
         } else {
-            saveImportTemplate(entity, entity.name());
-            saveImportTemplate(entity, entity.name());
-            saveImportTemplate(entity, entity.name());
+            saveImportTemplate(entity, "DefaultSystem_" + entity.name() + "Data");
         }
     }
 

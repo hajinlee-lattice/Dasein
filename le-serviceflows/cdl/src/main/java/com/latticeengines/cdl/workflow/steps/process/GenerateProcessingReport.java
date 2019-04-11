@@ -102,6 +102,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             BusinessEntity ownerEntity = getOwnerEntity(role);
             if (ownerEntity != null && resetEntities.contains(ownerEntity)) {
                 // skip swap for reset entities
+                log.info("Skip attempt to link " + role + " because its owner entity " //
+                        + ownerEntity + " is being reset.");
                 continue;
             }
             cloneTableService.linkInactiveTable(role);

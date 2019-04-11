@@ -8,6 +8,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public final class ScalingUtils {
 
+    /**
+     * 100_000 -> 2
+     * 1_000_000 -> 3
+     * 10_000_000 -> 4
+     */
     public static int getMultiplier(long count) {
         return (int) Math.max(1, Math.ceil(Math.log10((count + 1.D)) - 4));
     }

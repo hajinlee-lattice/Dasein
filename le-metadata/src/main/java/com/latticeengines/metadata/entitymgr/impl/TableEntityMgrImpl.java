@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -34,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -91,6 +95,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Inject
     private DataUnitEntityMgr dataUnitEntityMgr;
+
+    @Inject
+    private S3Service s3Service;
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
@@ -339,7 +346,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (copy.getExtracts().size() > 0) {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace,
                     existing.getNamespace());
-            
+
             String sourcePath = ExtractUtils.getSingleExtractPath(yarnConfiguration, copy, true, s3Bucket, useEmr);
             String destPath = tablesPath + "/" + copy.getName();
             try {
@@ -470,6 +477,21 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                         redshiftService.dropTable(redshiftTable);
                     } catch (Exception e) {
                         log.error(String.format("Failed to drop table %s from redshift", redshiftTable), e);
+                    }
+                } else if (DataUnit.StorageType.S3.equals(unit.getStorageType())) {
+                    S3DataUnit s3DataUnit = (S3DataUnit) unit;
+                    String s3Url = s3DataUnit.getLinkedDir();
+                    Matcher matcher = Pattern.compile("^(s3a|s3n|s3)://(?<bucket>[^/]+)" //
+                            + "/(?<prefix>.*)").matcher(s3Url);
+                    if (matcher.matches()) {
+                        String bucket = matcher.group("bucket");
+                        String prefix = matcher.group("prefix");
+                        if (prefix.endsWith(".avro")) {
+                            prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+                        }
+                        s3Service.cleanupPrefix(bucket, prefix);
+                    } else {
+                        log.warn("s3 data unit " + unit.getName() +" has an invalid url " + s3Url);
                     }
                 }
             }

@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -104,7 +105,8 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
 
     protected void postScriptExecution(SparkJobResult result) {
         String apsTableName = NamingUtils.timestamp(APS);
-        Table apsTable = toTable(apsTableName, result.getTargets().get(0));
+        Table apsTable = toTable(apsTableName, InterfaceName.AnalyticPurchaseState_ID.name(), //
+                result.getTargets().get(0));
         ApsGeneratorUtils.setupMetaData(apsTable, productMap);
         metadataProxy.updateTable(CustomerSpace.parse(configuration.getCustomer()).toString(), apsTableName, apsTable);
         dataCollectionProxy.upsertTable(configuration.getCustomer(), apsTableName,

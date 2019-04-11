@@ -435,17 +435,17 @@ public final class JobStepDisplayInfoMapping {
         String publish = "Publishing";
         String score = "Scoring";
 
-        int totalSteps = 130; // check latest PA log
+        int totalSteps = 300; // set to a number more than PA steps
         String[] steps = new String[totalSteps];
         int step = 0;
 
-        // Merge Phase: everything before [8] cloneAccount
-        while (step < 8) {
+        // Merge Phase: everything before [14] cloneAccount
+        while (step < 14) {
             steps[step++] = merge;
         }
 
-        // Analyze Phase: until [67] combineStatistics
-        while (step <= 67) {
+        // Analyze Phase: until [77] combineStatistics
+        while (step <= 77) {
             steps[step++] = analyze;
         }
 

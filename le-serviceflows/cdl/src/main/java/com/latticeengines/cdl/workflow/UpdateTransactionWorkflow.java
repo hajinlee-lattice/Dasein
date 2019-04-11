@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
+import com.latticeengines.cdl.workflow.steps.update.MergePeriodTransactionDiff;
+import com.latticeengines.cdl.workflow.steps.update.MergeTransactionDiff;
 import com.latticeengines.cdl.workflow.steps.update.ProcessTransactionDiffWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -29,12 +31,20 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<UpdateTransactio
     @Inject
     private ProcessTransactionDiffWrapper processTransactionDiffWrapper;
 
+    @Inject
+    private MergeTransactionDiff mergeTransactionDiff;
+
+    @Inject
+    private MergePeriodTransactionDiff mergePeriodTransactionDiff;
+
     @Override
     public Workflow defineWorkflow(UpdateTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(cloneTransaction) //
                 .next(clonePurchaseHistory) //
                 .next(processTransactionDiffWrapper) //
+                .next(mergeTransactionDiff) //
+                .next(mergePeriodTransactionDiff) //
                 .build();
     }
 }

@@ -308,28 +308,6 @@ public class HdfsToS3PathBuilder {
         return filePath;
     }
 
-    public String extractTenantId(String path) {
-        // try analytics
-        Matcher matcher = Pattern.compile("^/user/s-analytics/customers/(?<customerSpace>[^/]+)/.*").matcher(path);
-        if (matcher.matches()) {
-            String customerSpace = matcher.group("customerSpace");
-            return CustomerSpace.parse(customerSpace).getTenantId();
-        }
-
-        // try atlas
-        matcher = Pattern.compile("^/Pods/(?<podId>[^/]+)"//
-                + "/Contracts/(?<contractId>[^/]+)/Tenants/(?<tenantId>[^/]+)/.*").matcher(path);
-        if (matcher.matches()) {
-            return matcher.group("tenantId");
-        }
-
-        return null;
-    }
-
-    public String toParentDir(String dir) {
-        return StringUtils.substringBeforeLast(dir, PATH_SEPARATOR);
-    }
-
     private String getMetadataTableFolderName(String eventTable, String eventColumn) {
         return String.format("%s-%s-Metadata", eventTable.replaceAll("[^A-Za-z0-9_-]", "_"),
                 eventColumn.replaceAll("[^A-Za-z0-9_-]", "_"));

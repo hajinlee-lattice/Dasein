@@ -51,8 +51,9 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     @Override
     protected void onPostTransformationCompleted() {
-        putStringValueInContext(ENTITY_MATCH_CONTACT_TARGETTABLE,
-                TableUtils.getFullTableName(matchTargetTablePrefix, pipelineVersion));
+        String targetTableName = getEntityMatchTargetTableName();
+        putStringValueInContext(ENTITY_MATCH_CONTACT_TARGETTABLE, targetTableName);
+        addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
     }
 
     private List<TransformationStepConfig> entityMatchSteps() {
@@ -103,6 +104,10 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 getInputTableColumnNames(0));
         step.setConfiguration(configStr);
         return step;
+    }
+
+    private String getEntityMatchTargetTableName() {
+        return TableUtils.getFullTableName(matchTargetTablePrefix, pipelineVersion);
     }
 
 }

@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -37,6 +38,12 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def initializeJob(): (SparkSession, LatticeContext[C]) = {
     val jobConfig: C = getConfig
     val spark = SparkSession.builder().appName(getClass.getSimpleName).getOrCreate()
+    val checkpointDir =
+      if (jobConfig.getWorkspace != null)
+        jobConfig.getWorkspace + "/checkpoints"
+      else
+        "/spark-checkpoints"
+    spark.sparkContext.setCheckpointDir(checkpointDir)
     val stageInput: List[DataFrame] = if (CollectionUtils.isEmpty(jobConfig.getInput)) {
       Nil
     } else {
@@ -78,10 +85,11 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     }
     targets.zip(output).map { t =>
       val tgt = t._1
-      val df = t._2
+      val df = t._2.persist(StorageLevel.MEMORY_AND_DISK_SER)
       val path = tgt.getPath
       df.write.format("avro").save(path)
       tgt.setCount(df.count())
+      df.unpersist()
       tgt
     }
   }

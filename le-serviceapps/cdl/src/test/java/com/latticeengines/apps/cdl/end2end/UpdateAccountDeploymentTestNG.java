@@ -19,12 +19,12 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(resumeFromCheckPoint());
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), 500);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_1);
 
-        new Thread(this::createTestSegment1).start();
+        new Thread(this::createTestSegment3).start();
 
         importData();
-        processAnalyze();
+        processAnalyzeSkipPublishS3OnLocal();
 
         try {
             verifyProcess();
@@ -37,21 +37,21 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     protected void importData() throws Exception {
-        mockCSVImport(BusinessEntity.Account, 3, "Account");
+        mockCSVImport(BusinessEntity.Account, 3, "DefaultSystem_AccountData");
         Thread.sleep(2000);
     }
 
     protected void verifyProcess() {
         clearCache();
         runCommonPAVerifications();
-
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
+                BusinessEntity.CuratedAccount);
+        verifyBatchStore(getExpectedBatchStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
+        verifyServingStore(getExpectedServingStoreCounts());
 
-        createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-
-        verifyBatchServingStoreCount();
-
         Map<BusinessEntity, Long> segment3Counts = getSegmentCounts(SEGMENT_NAME_3);
         verifyTestSegment3Counts(segment3Counts);
     }
@@ -59,7 +59,8 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     protected Map<BusinessEntity, Long> getSegmentCounts(String segmentName) {
         if (SEGMENT_NAME_3.equals(segmentName)) {
             return ImmutableMap.of( //
-                    BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+                    BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, //
+                    BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
         }
         throw new IllegalArgumentException(String.format("Segment %s is not supported", segmentName));
     }
@@ -91,7 +92,8 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, TRANSACTION_1);
+        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TRANSACTION_IN_REPORT_1);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -103,21 +105,32 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return expectedReport;
     }
 
-    protected void verifyBatchServingStoreCount() {
-        long numAccounts = 1000;
-        long numContacts = 500;
-        // long numProducts = 99;
-        // long numTransactions = ???;
-        //
-        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-        // Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()),
-        // numProducts);
-        // Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction),
-        // numTransactions);
-        //
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        return map;
     }
 
     protected String resumeFromCheckPoint() {

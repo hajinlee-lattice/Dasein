@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CONSOLIDATE_RETAIN;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,13 +16,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateRetainFieldConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodCollectorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodConvertorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataAggregaterConfig;
@@ -33,7 +29,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataFilterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProductMapperConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -112,16 +107,14 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         if (metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName) == null) {
             throw new IllegalStateException("Cannot find result sorted period table");
         }
-
-        Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
-        sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
-        exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
-        addToListInContext(TEMPORARY_CDL_TABLES, sortedDailyTableName, String.class);
-
-        Table sortedPeriodTable = metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName);
-        sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
-        exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
-        addToListInContext(TEMPORARY_CDL_TABLES, sortedPeriodTableName, String.class);
+        Map<TableRoleInCollection, String> processedTableNames = getMapObjectFromContext(PROCESSED_DIFF_TABLES, //
+                TableRoleInCollection.class, String.class);
+        if (processedTableNames == null) {
+            processedTableNames = new HashMap<>();
+        }
+        processedTableNames.put(BusinessEntity.Transaction.getServingStore(), sortedDailyTableName);
+        processedTableNames.put(BusinessEntity.PeriodTransaction.getServingStore(), sortedPeriodTableName);
+        putObjectInContext(PROCESSED_DIFF_TABLES, processedTableNames);
     }
 
     @Override
@@ -139,7 +132,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig productAgr = rollupProduct(productTable); // productAgrStep
         TransformationStepConfig periodAdded = addPeriod(productAgrStep, null); // addPeriodStep
         TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
-        TransformationStepConfig dailyRetained = retainFields(dailyAgrStep,
+        TransformationStepConfig dailyRetained = retainFields(dailyAgrStep, //
                 TableRoleInCollection.AggregatedTransaction);
         TransformationStepConfig cleanDaily = cleanupDailyHistory();
         TransformationStepConfig updateDaily = updateDailyStore();
@@ -162,8 +155,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig periodData = collectPeriodData(periodsStep); // periodDataStep
         TransformationStepConfig periodDataWithPeriodId = addPeriod(periodDataStep, periodStrategies); // periodDataWithPeriodIdStep
         TransformationStepConfig periodAgr = aggregatePeriods(periodDataWithPeriodIdStep); // periodAgrStep
-        TransformationStepConfig periodRetained = retainFields(periodAgrStep,
-                TableRoleInCollection.AggregatedPeriodTransaction);
+        TransformationStepConfig periodRetained = retainFields(periodAgrStep, periodTablePrefix, //
+                servingStorePrimaryKey, TableRoleInCollection.AggregatedPeriodTransaction);
         TransformationStepConfig cleanPeriod = cleanupPeriodHistory(periodsStep, periodTables);
         TransformationStepConfig updatePeriod = updatePeriodStore(periodTables, periodsStep, periodAgrStep);
 
@@ -198,17 +191,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     private TransformationStepConfig collectDailyData() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_FILTER);
-
-        String rawDiffSource = "RawDiff";
-        SourceTable diffSourceTable = new SourceTable(diffTableName, customerSpace);
-        String rawTableSource = "RawMaster";
-        SourceTable masterSourceTable = new SourceTable(rawTable.getName(), customerSpace);
-        List<String> baseSources = Arrays.asList(rawDiffSource, rawTableSource);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(rawDiffSource, diffSourceTable);
-        baseTables.put(rawTableSource, masterSourceTable);
-        step.setBaseTables(baseTables);
+        addBaseTables(step, diffTableName);
+        addBaseTables(step, rawTable.getName());
 
         PeriodDataFilterConfig config = new PeriodDataFilterConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
@@ -223,7 +207,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setInputSteps(Collections.singletonList(dailyRawStep));
 
         String productTableName = productTable.getName();
-        List<String> baseSources = Arrays.asList(productTableName);
+        List<String> baseSources = Collections.singletonList(productTableName);
         step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(productTableName, new SourceTable(productTableName, customerSpace));
@@ -252,18 +236,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     private TransformationStepConfig cleanupDailyHistory() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
-
-        String sourceName1 = "DailyPeriodTable";
-        SourceTable sourceTable1 = new SourceTable(diffTableName, customerSpace);
-        String sourceName2 = "DailyTable";
-        SourceTable sourceTable2 = new SourceTable(dailyTable.getName(), customerSpace);
-        List<String> baseSources = Arrays.asList(sourceName1, sourceName2);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(sourceName1, sourceTable1);
-        baseTables.put(sourceName2, sourceTable2);
-
-        step.setBaseTables(baseTables);
+        addBaseTables(step, diffTableName);
+        addBaseTables(step, dailyTable.getName());
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -274,12 +248,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(addPeriodStep));
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(dailyTablePrefix);
-        targetTable.setPrimaryKey(servingStorePrimaryKey);
-        targetTable.setExpandBucketedAttrs(false);
-        step.setTargetTable(targetTable);
+        setTargetTable(step, dailyTablePrefix, servingStorePrimaryKey);
+
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setSumFields(
                 Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name(), InterfaceName.Quantity.name()));
@@ -302,16 +272,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
         step.setInputSteps(Collections.singletonList(dailyAgrStep));
-
-        String sourceName1 = "DailyPeriodTable";
-        SourceTable sourceTable1 = new SourceTable(diffTableName, customerSpace);
-        String sourceName2 = "DailyTable";
-        SourceTable sourceTable2 = new SourceTable(dailyTable.getName(), customerSpace);
-        step.setBaseSources(Arrays.asList(sourceName1, sourceName2));
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(sourceName1, sourceTable1);
-        baseTables.put(sourceName2, sourceTable2);
-        step.setBaseTables(baseTables);
+        addBaseTables(step, diffTableName);
+        addBaseTables(step, dailyTable.getName());
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
@@ -359,15 +321,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_FILTER);
         step.setInputSteps(Collections.singletonList(periodsStep));
-
-        String tableSourceName = "DailyTable";
-        String sourceTableName = dailyTable.getName();
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        addBaseTables(step, dailyTable.getName());
 
         PeriodDataFilterConfig config = new PeriodDataFilterConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
@@ -384,21 +338,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
         step.setInputSteps(Collections.singletonList(periodsStep));
 
-        List<String> baseSources = new ArrayList<>();
-        Map<String, SourceTable> baseTables = new HashMap<>();
         Map<String, Integer> transactionIdxes = new HashMap<>();
         for (int i = 0; i < periodTables.size(); i++) {
             Table periodTable = periodTables.get(i);
-            String tableSourceName = "PeriodTable" + periodTable.getName();
-            String sourceTableName = periodTable.getName();
-            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-            baseSources.add(tableSourceName);
-            baseTables.put(tableSourceName, sourceTable);
+            addBaseTables(step, periodTable.getName());
             transactionIdxes.put(PeriodStrategyUtils.getPeriodStrategyNameFromPeriodTableName(periodTable.getName(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction), i + 1);
         }
-        step.setBaseSources(baseSources);
-        step.setBaseTables(baseTables);
 
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
@@ -417,21 +363,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         inputSteps.add(periodAgrStep);
         step.setInputSteps(inputSteps);
 
-        List<String> baseSources = new ArrayList<>();
-        Map<String, SourceTable> baseTables = new HashMap<>();
         Map<String, Integer> transactionIdxes = new HashMap<>();
         for (int i = 0; i < periodTables.size(); i++) {
             Table periodTable = periodTables.get(i);
-            String tableSourceName = "PeriodTable" + periodTable.getName();
-            String sourceTableName = periodTable.getName();
-            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-            baseSources.add(tableSourceName);
-            baseTables.put(tableSourceName, sourceTable);
+            addBaseTables(step, periodTable.getName());
             transactionIdxes.put(PeriodStrategyUtils.getPeriodStrategyNameFromPeriodTableName(periodTable.getName(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction), i + 2);
         }
-        step.setBaseSources(baseSources);
-        step.setBaseTables(baseTables);
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setMultiPeriod(true);
@@ -439,29 +377,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
         step.setConfiguration(JsonUtils.serialize(config));
-        return step;
-    }
-
-    private TransformationStepConfig retainFields(int previousStep, TableRoleInCollection role) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(previousStep));
-        step.setTransformer(TRANSFORMER_CONSOLIDATE_RETAIN);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(periodTablePrefix);
-        targetTable.setPrimaryKey(servingStorePrimaryKey);
-        targetTable.setExpandBucketedAttrs(false);
-        step.setTargetTable(targetTable);
-
-        ConsolidateRetainFieldConfig config = new ConsolidateRetainFieldConfig();
-        Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), role);
-        if (servingTable != null) {
-            List<String> fieldsToRetain = AvroUtils.getSchemaFields(yarnConfiguration,
-                    servingTable.getExtracts().get(0).getPath());
-            config.setFieldsToRetain(fieldsToRetain);
-        }
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 

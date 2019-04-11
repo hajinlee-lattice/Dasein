@@ -75,7 +75,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     }
 
     @Override
-    protected void importData() throws Exception {
+    protected void importData() throws InterruptedException {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 1, "Account");
         Thread.sleep(2000);
@@ -221,7 +221,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     }
 
     @Override
-    protected Map<BusinessEntity, Long> getExpectedbatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1);
