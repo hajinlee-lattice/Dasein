@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DataFeedService;
-import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -35,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 public abstract class RatingEngineTemplate {
@@ -47,7 +47,7 @@ public abstract class RatingEngineTemplate {
     private BucketedScoreProxy bucketedScoreProxy;
 
     @Inject
-    private RatingEngineService ratingEngineService;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private DataFeedService dataFeedService;
@@ -108,7 +108,7 @@ public abstract class RatingEngineTemplate {
 
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
                 || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
-            List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngine.getId());
+            List<RatingModel> ratingModels = ratingEngineProxy.getRatingModels(tenantId, ratingEngine.getId());
             Boolean completed = ratingModels.size() > 1 || ratingEngineSummary.getScoringIterationId() != null || //
                     ((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() != JobStatus.PENDING;
             ratingEngineSummary.setCompleted(completed);
