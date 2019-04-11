@@ -25,6 +25,7 @@ import Message, {
 import LeTable from "common/widgets/table/table";
 import './multiple-templates.list.scss';
 import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
+import ReactMainContainer from "../../../react/react-main-container";
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
@@ -255,7 +256,7 @@ export default class MultipleTemplatesList extends Component {
     render() {
         console.log('RENDERING', this.state.data);
         return (
-            <div className={this.props.className}>
+            <ReactMainContainer>
                 <LeHPanel hstretch={true} halignment={SPACEBETWEEN}>
                     <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
                     <LeButton
@@ -283,7 +284,7 @@ export default class MultipleTemplatesList extends Component {
                 <p>
                     *Atlas currently only supports one template for each object.{" "}
                 </p>
-            </div>
+            </ReactMainContainer>
         );
     }
 }
