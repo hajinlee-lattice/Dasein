@@ -471,6 +471,7 @@ public class UserServiceImpl implements UserService {
 
         if (oldUser != null) {
             result.setValid(false);
+            result.setErrMsg("There is already a user in this tenant using the same email address.");
             if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);
             }
