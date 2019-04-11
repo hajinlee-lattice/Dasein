@@ -3,7 +3,7 @@ import {
     servicesPlugin,
     hashLocationPlugin
 } from "common/react-vendor";
-import { mtstates } from "./multiple-templates.state.js";
+import { mtstates } from "atlas/import/templates/multiple/multiple-templates.state.js";
 
 
 class ReactRouter {
