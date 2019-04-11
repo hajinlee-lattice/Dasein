@@ -218,10 +218,12 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                 Queue<String> expectedTravelStops = parseTravelStops(entity, retries, anonymousAcct);
                 Assert.assertNotNull(result);
                 // Uncomment these lines for troubleshooting
+                /*
                 log.info(String.format("Retries = %d, Expected Stops = %s", retries,
                         String.join(",", expectedTravelStops)));
                 log.info("MatchTravelerHistory");
                 log.info(String.join("\n", result.getMatchLogs()));
+                */
 
                 // Verify travel history
                 hasError = hasError || verifyTravelHistory(result.getMatchLogs(), expectedTravelStops);
