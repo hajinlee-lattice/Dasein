@@ -17,6 +17,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,7 @@ public class StartProcessingUnitTestNG {
         ProcessStepConfiguration config = new ProcessStepConfiguration();
         config.setActionIds(new ArrayList<>());
         config.setDataCloudBuildNumber("2.13.1.1234567");
+        config.setInputProperties(new HashMap<>());
         startProcessing.setConfiguration(config);
 
         StartProcessing spy = spy(startProcessing);
@@ -90,9 +92,13 @@ public class StartProcessingUnitTestNG {
         assertTrue(context.isDataCloudChanged());
         spy.putObjectInContext(BaseWorkflowStep.SYSTEM_ACTION_IDS, actionIds);
         actionIds = startProcessing.getListObjectFromContext(BaseWorkflowStep.SYSTEM_ACTION_IDS, Long.class);
+        List<Long> actionIdsArr =
+                JsonUtils.convertList(JsonUtils.deserialize(config.getInputProperties().get(WorkflowContextConstants.Inputs.ACTION_IDS),
+                        List.class), Long.class);
         assertTrue(CollectionUtils.isNotEmpty(actionIds));
         assertEquals(actionIds.size(), 1);
         assertEquals(actionIds.get(0), actionPid);
+        assertEquals(actionIds, actionIdsArr);
     }
 
     @DataProvider(name = "DataCloudBuildNumber")
@@ -129,6 +135,7 @@ public class StartProcessingUnitTestNG {
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
+        config.setInputProperties(new HashMap<>());
         config.setActionIds(Collections.singletonList(1111L));
         startProcessing.setConfiguration(config);
         Set<BusinessEntity> entities = startProcessing.new RebuildOnDeleteJobTemplate().getRebuildEntities();
