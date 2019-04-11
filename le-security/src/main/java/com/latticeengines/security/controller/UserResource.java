@@ -127,8 +127,11 @@ public class UserResource {
 
         RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
         response.setResult(result);
-        if (!result.isValid())
+        if (!result.isValid()) {
+            httpResponse.setStatus(400);
+            response.setErrors(Collections.singletonList(result.getErrMsg()));
             return response;
+        }
 
         LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
                 tenant.getId()));
