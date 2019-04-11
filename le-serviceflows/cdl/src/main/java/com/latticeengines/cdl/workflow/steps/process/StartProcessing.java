@@ -59,6 +59,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -66,13 +68,13 @@ import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.workflow.exposed.user.WorkflowUser;
 
 @Component("startProcessing")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(StartProcessing.class);
+    private static final String SYSTEM_ACTION_INITIATOR = "system@lattice-engines.com";
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -99,7 +101,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private DataCollection.Version activeVersion;
     private DataCollection.Version inactiveVersion;
     private ObjectNode reportJson;
-    private ChoreographerContext grapherContext = new ChoreographerContext();;
+    private ChoreographerContext grapherContext = new ChoreographerContext();
 
     @PostConstruct
     public void init() {
@@ -290,7 +292,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         action.setType(type);
         action.setCreated(new Date(System.currentTimeMillis()));
         action.setDescription(description);
-        action.setActionInitiator(WorkflowUser.DEFAULT_USER.name());
+        action.setActionInitiator(SYSTEM_ACTION_INITIATOR);
         action.setOwnerId(configuration.getOwnerId());
         action = actionProxy.createAction(customerSpace.getTenantId(), action);
         List<Long> systemActionIds = getListObjectFromContext(SYSTEM_ACTION_IDS, Long.class);
@@ -300,6 +302,25 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         systemActionIds.add(action.getPid());
         putObjectInContext(SYSTEM_ACTION_IDS, systemActionIds);
         log.info(String.format("System actions are: %s", JsonUtils.serialize(systemActionIds)));
+        String actionIdStr = configuration.getInputProperties().get(WorkflowContextConstants.Inputs.ACTION_IDS);
+        List<Long> actionIds;
+        if (StringUtils.isNotEmpty(actionIdStr)) {
+            List<?> rawActionIds = JsonUtils.deserialize(actionIdStr, List.class);
+            actionIds = JsonUtils.convertList(rawActionIds, Long.class);
+        } else {
+            actionIds = new ArrayList<>();
+        }
+        actionIds.add(action.getPid());
+        String actionIdString = JsonUtils.serialize(actionIds);
+        configuration.getInputProperties().put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIdString);
+        configuration.setActionIds(actionIds);
+        if (jobId != null) {
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobId);
+            if (job != null) {
+                job.getInputContext().put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIdString);
+                workflowJobEntityMgr.updateInput(job);
+            }
+        }
     }
 
     boolean hasAccountBatchStore() {

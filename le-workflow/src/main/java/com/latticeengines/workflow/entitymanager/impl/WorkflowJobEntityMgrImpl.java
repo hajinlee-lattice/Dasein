@@ -247,5 +247,9 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         workflowJobDao.updateErrorCategory(workflowJob);
     }
 
-
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateInput(WorkflowJob workflowJob) {
+        workflowJobDao.updateInput(workflowJob);
+    }
 }

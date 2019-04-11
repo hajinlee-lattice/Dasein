@@ -60,6 +60,8 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
     void updateErrorCategory(WorkflowJob workflowJob);
 
+    void updateInput(WorkflowJob workflowJob);
+
     /*
      * Tenant filter disabled methods, use these methods carefully. Intended to be
      * used for cross tenant features. E.g., get all running PA jobs.
