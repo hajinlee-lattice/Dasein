@@ -371,6 +371,15 @@ public class DropBoxServiceImpl implements DropBoxService {
             fileProperty.setFileSize(summary.getSize());
             fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
             fileProperty.setLastModified(summary.getLastModified());
+            fileProperty.setFileType(FileProperty.FileType.File.name());
+            fileList.add(fileProperty);
+        }
+        List<String> subFolders = s3Service.listSubFolders(bucket, prefix);
+        for (String subFolder : subFolders) {
+            FileProperty fileProperty = new FileProperty();
+            fileProperty.setFileName(subFolder);
+            fileProperty.setFileType(FileProperty.FileType.Folder.name());
+            fileProperty.setFilePath(bucket + delimiter + prefix + delimiter + subFolder);
             fileList.add(fileProperty);
         }
         return fileList;
