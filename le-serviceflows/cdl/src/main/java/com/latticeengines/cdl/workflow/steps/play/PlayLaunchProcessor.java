@@ -337,12 +337,14 @@ public class PlayLaunchProcessor {
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
         if (CDLExternalSystemName.Marketo.equals(destinationSystemName)) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
-            Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+            Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     accountFrontEndQuery.getContactRestriction().getRestriction());
-            accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
+            accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForAccountQuery));
 
             FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
-            contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
+            Restriction newContactRestrictionForContactQuery = applyEmailFilterToContactRestriction(
+                    contactFrontEndQuery.getContactRestriction().getRestriction());
+            contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
         }
     }
 
