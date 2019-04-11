@@ -47,7 +47,7 @@ export default class SystemCreationComponent extends Component {
                     console.log('CLIKC');
                     this.setState({ systemSelected: system }, this.validate);
                 }}>
-                    <LeCardImg src={system.img} classNames="system-image" />
+                    <div className="system-image"><LeCardImg src={system.img} /></div>
                     <LeCardBody contentAlignment={CENTER}>
                         <p>{system.text}</p>
                     </LeCardBody>
