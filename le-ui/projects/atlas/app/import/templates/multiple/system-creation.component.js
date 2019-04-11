@@ -11,6 +11,7 @@ import { LeToolBar, SPACE_BETWEEN } from "../../../../../common/widgets/toolbar/
 import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
+import ReactMainContainer from "../../../react/react-main-container";
 export default class SystemCreationComponent extends Component {
     constructor(props) {
         super(props);
@@ -60,9 +61,7 @@ export default class SystemCreationComponent extends Component {
 
     render() {
         return (
-            // <div className="main-panel">
-            //     <div className="main-body">
-            <div className={this.props.className}>
+            <ReactMainContainer>
                 <LeVPanel vstretch={"true"} hstretch={"true"}>
                     <p className="le-header">Import Data: Add System</p>
                     <p className="le-sub-header">Select System</p>
@@ -111,9 +110,7 @@ export default class SystemCreationComponent extends Component {
                         }}
                     />
                 </LeToolBar>
-            </div>
-            // </div>
-            // </div>
+            </ReactMainContainer>
         );
     }
 }
