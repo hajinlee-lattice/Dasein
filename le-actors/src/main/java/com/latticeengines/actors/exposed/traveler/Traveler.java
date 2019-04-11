@@ -63,7 +63,7 @@ public abstract class Traveler {
 
     private String decisionGraph;
 
-    // TODO(ZDD): Add comment
+    // Actor path -> Input data of every visit
     private Map<String, Set<String>> visitedHistory = new HashMap<>();
 
     // To capture how much time the travel spends in current actor
@@ -358,14 +358,16 @@ public abstract class Traveler {
                 .withCheckpoints(checkpoints) //
                 .withVisitingQueue(visitingQueue) //
                 .withRetries(retries) //
+                .withOthers(getOtherTransitionHistoryToPush()) //
                 .build();
         transitionHistory.push(snapshot);
         if (clearCurrent) {
-            visitedHistory.clear();
-            checkpoints.clear();
-            visitingQueue.clear();
+            visitedHistory = new HashMap<>();
+            checkpoints = new HashMap<>();
+            visitingQueue = new LinkedList<>();
             retries = 0;
             decisionGraph = null;
+            clearOtherCurrentTransitionHistory();
         }
     }
 
@@ -376,8 +378,20 @@ public abstract class Traveler {
         visitingQueue = snapshot.getVisitingQueue();
         retries = snapshot.getRetries();
         decisionGraph = snapshot.getDecisionGraph();
+        recoverOtherTransitionHistory(snapshot.getOthers());
     }
 
+    protected List<Object> getOtherTransitionHistoryToPush() {
+        return null;
+    }
+
+    protected void clearOtherCurrentTransitionHistory() {
+
+    }
+
+    protected void recoverOtherTransitionHistory(List<Object> others) {
+
+    }
 
     /**
      * To take snapshot of traveler status at junction actor
@@ -389,6 +403,7 @@ public abstract class Traveler {
         private Map<String, Long> checkpoints;
         private Queue<String> visitingQueue;
         private int retries;
+        private List<Object> others;
 
         public String getJunction() {
             return junction;
@@ -438,6 +453,14 @@ public abstract class Traveler {
             this.retries = retries;
         }
 
+        public List<Object> getOthers() {
+            return others;
+        }
+
+        public void setOthers(List<Object> others) {
+            this.others = others;
+        }
+
     }
 
     public static final class TransitionHistoryBuilder {
@@ -476,6 +499,11 @@ public abstract class Traveler {
 
         public TransitionHistoryBuilder withRetries(int retries) {
             transitionHistory.setRetries(retries);
+            return this;
+        }
+
+        public TransitionHistoryBuilder withOthers(List<Object> others) {
+            transitionHistory.setOthers(others);
             return this;
         }
 

@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -8,12 +11,12 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-@Component("entityEmailBasedMicroEngineActor")
+@Component("entityNamePhoneAIDBasedMicroEngineActor")
 @Scope("prototype")
-public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase<EntityLookupActor> {
-
+public class EntityNamePhoneAIDBasedMicroEngineActor extends EntityMicroEngineActorBase<EntityLookupActor> {
     @Override
     protected Class<EntityLookupActor> getDataSourceActorClz() {
         return EntityLookupActor.class;
@@ -31,9 +34,10 @@ public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase
         // Should we reject it in this actor or not?
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
         String aid = traveler.getEntityIds().get(BusinessEntity.Account.name());
-        return (aid == null //
-                || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(aid)) //
-                && tuple.getEmail() != null;
+        return !(aid == null //
+                || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(aid) //
+                || tuple.getName() == null //
+                || tuple.getPhoneNumber() == null);
     }
 
     @Override
@@ -44,8 +48,11 @@ public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase
     @Override
     protected Object prepareInputData(MatchTraveler traveler) {
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
+        String aid = traveler.getEntityIds().get(BusinessEntity.Account.name());
         MatchKeyTuple lookupTuple = new MatchKeyTuple.Builder() //
-                .withEmail(tuple.getEmail()) //
+                .withName(tuple.getName()) //
+                .withPhoneNumber(tuple.getPhoneNumber()) //
+                .withSystemIds(Arrays.asList(Pair.of(InterfaceName.AccountId.name(), aid))) //
                 .build();
         return prepareLookupRequest(traveler, lookupTuple);
     }

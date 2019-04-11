@@ -104,7 +104,7 @@ public enum InterfaceName {
     // AccountId from customer when entity match is enabled
     CustomerAccountId, //
     // ContactId from customer when entity match is enabled
-    CustomerContactid, //
+    CustomerContactId, //
 
     CDLCreatedTime, // creation timestamp of CDL entities
     CDLUpdatedTime, // update timestamp of CDL entities

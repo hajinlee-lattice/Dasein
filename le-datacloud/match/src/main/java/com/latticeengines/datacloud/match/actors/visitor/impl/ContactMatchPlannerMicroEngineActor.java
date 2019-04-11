@@ -64,6 +64,11 @@ public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
 
     @Override
     protected boolean accept(Traveler traveler) {
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
+        // If MatchKeyTuple is set up already, standardization is already done
+        if (matchTraveler.getMatchKeyTuple() != null) {
+            return false;
+        }
         return true;
     }
 
@@ -79,7 +84,8 @@ public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
             throw new RuntimeException(this.getClass().getSimpleName() + " called when not in Entity Match.");
         }
         if (!BusinessEntity.Contact.name().equals(matchTraveler.getEntity())) {
-            throw new UnsupportedOperationException(this.getClass().getSimpleName() + " only handles Contact entity.");
+            throw new UnsupportedOperationException(this.getClass().getSimpleName()
+                    + " only handles Contact entity, but found " + matchTraveler.getEntity());
         }
     }
 

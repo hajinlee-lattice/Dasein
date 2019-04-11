@@ -10,10 +10,9 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-@Component("entityEmailBasedMicroEngineActor")
+@Component("entityNamePhoneBasedMicroEngineActor")
 @Scope("prototype")
-public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase<EntityLookupActor> {
-
+public class EntityNamePhoneBasedMicroEngineActor extends EntityMicroEngineActorBase<EntityLookupActor> {
     @Override
     protected Class<EntityLookupActor> getDataSourceActorClz() {
         return EntityLookupActor.class;
@@ -33,7 +32,8 @@ public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase
         String aid = traveler.getEntityIds().get(BusinessEntity.Account.name());
         return (aid == null //
                 || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(aid)) //
-                && tuple.getEmail() != null;
+                && tuple.getName() != null //
+                && tuple.getPhoneNumber() != null;
     }
 
     @Override
@@ -45,7 +45,8 @@ public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase
     protected Object prepareInputData(MatchTraveler traveler) {
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
         MatchKeyTuple lookupTuple = new MatchKeyTuple.Builder() //
-                .withEmail(tuple.getEmail()) //
+                .withName(tuple.getName()) //
+                .withPhoneNumber(tuple.getPhoneNumber()) //
                 .build();
         return prepareLookupRequest(traveler, lookupTuple);
     }

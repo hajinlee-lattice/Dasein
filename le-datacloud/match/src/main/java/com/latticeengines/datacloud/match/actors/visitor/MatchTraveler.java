@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
+
     /*************************
      * Bound to whole travel
      **************************/
@@ -61,6 +63,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Entity -> MatchKeyTuple
     private final Map<String, MatchKeyTuple> entityMatchKeyTuples = new HashMap<>();
 
+    // Entity match errors
+    private List<String> entityMatchErrors;
 
     /***************************************************************************
      * Bound to current decision graph or request to external assistant actors
@@ -86,10 +90,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     // actor name -> index of entity match lookup result got from the actor in
     // entityMatchLookupResults list
-    private Map<String, Integer> actorLookupResIdxes = new HashMap<>();
-
-    // Entity match errors
-    private List<String> entityMatchErrors;
+    private Map<String, Integer> actorLookupResIdxes;
 
     /***********************
      * Overridden methods
@@ -122,6 +123,26 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void start() {
         super.start();
         debug("Has " + getMatchKeyTuple() + " to begin with.");
+    }
+
+    // Pushed order needs to be in sync with recoverOtherTransitionHistory()
+    @Override
+    protected List<Object> getOtherTransitionHistoryToPush() {
+        return Arrays.asList(entityMatchLookupResults, actorLookupResIdxes);
+    }
+
+    @Override
+    protected void clearOtherCurrentTransitionHistory() {
+        entityMatchLookupResults = null;
+        actorLookupResIdxes = null;
+    }
+
+    // Fetched order needs to be in sync with getOtherTransitionHistoryToPush()
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void recoverOtherTransitionHistory(List<Object> others) {
+        entityMatchLookupResults = (List<Pair<MatchKeyTuple, List<String>>>) others.get(0);
+        actorLookupResIdxes = (Map<String, Integer>) others.get(1);
     }
 
     /*******************************
@@ -260,6 +281,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Use addLookupResult() to add entity match lookup result instead of
     // directly adding to the list
     public List<Pair<MatchKeyTuple, List<String>>> getEntityMatchLookupResults() {
+        if (entityMatchLookupResults == null) {
+            entityMatchLookupResults = new ArrayList<>();
+        }
         return entityMatchLookupResults;
     }
 
@@ -270,6 +294,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Use this method to add entity match lookup result instead of
     // directly adding to list entityMatchLookupResults
     public void addLookupResult(String actorName, Pair<MatchKeyTuple, List<String>> lookupResults) {
+        if (actorLookupResIdxes == null) {
+            actorLookupResIdxes = new HashMap<>();
+        }
+        if (entityMatchLookupResults == null) {
+            entityMatchLookupResults = new ArrayList<>();
+        }
         if (actorLookupResIdxes.get(actorName) == null) {
             // 1st time lookup
             entityMatchLookupResults.add(lookupResults);
@@ -282,7 +312,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     }
 
     public boolean hasCompleteLookupResults(String actorName) {
-        if (actorLookupResIdxes.get(actorName) == null) {
+        if (actorLookupResIdxes == null || actorLookupResIdxes.get(actorName) == null) {
             return false;
         }
         int idx = actorLookupResIdxes.get(actorName);
@@ -314,4 +344,5 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void addEntityMatchKeyTuple(String entity, MatchKeyTuple tuple) {
         entityMatchKeyTuples.put(entity, tuple);
     }
+
 }
