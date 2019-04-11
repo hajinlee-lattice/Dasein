@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class S3ImportTemplateDisplay {
+
     @JsonProperty("Object")
     private String object;
     @JsonProperty("Path")
@@ -24,6 +26,8 @@ public class S3ImportTemplateDisplay {
     private String feedType;
     @JsonProperty("SystemName")
     private String systemName;
+    @JsonProperty("ImportStatus")
+    private DataFeedTask.S3ImportStatus importStatus;
 
     public String getObject() {
         return object;
@@ -84,5 +88,13 @@ public class S3ImportTemplateDisplay {
 
     public void setSystemName(String systemName) {
         this.systemName = systemName;
+    }
+
+    public DataFeedTask.S3ImportStatus getImportStatus() {
+        return importStatus;
+    }
+
+    public void setImportStatus(DataFeedTask.S3ImportStatus importStatus) {
+        this.importStatus = importStatus;
     }
 }
