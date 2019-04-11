@@ -25,7 +25,7 @@ export default class ReactAngularMainComponent extends Component {
                 <UIRouter router={ReactRouter.getRouter()}>
                     <UIView name="summary" />
                     <div className="main-body">
-                        <UIView name="main" className="main-content"/>
+                        <UIView name="main"/>
                     </div>
                 </UIRouter>
             </div>
