@@ -2,7 +2,7 @@ import './templates';
 import './components/summary';
 
 import {actions , reducer } from './multiple/multipletemplates.redux';
-import './multiple/react-main.component';
+import '../../react/react-angular-main.component';
 angular
 .module('lp.importtemplates', [
     
@@ -58,7 +58,7 @@ angular
             },
             views: {
                 'main@': {
-                    component: 'reactMainComponent'
+                    component: 'reactAngularMainComponent'
                 }
             }
         });

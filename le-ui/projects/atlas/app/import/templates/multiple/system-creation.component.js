@@ -9,7 +9,7 @@ import LeCardBody from 'common/widgets/container/card/le-card-body';
 import { CENTER } from 'common/widgets/container/le-alignments';
 import { LeToolBar, SPACE_BETWEEN } from "../../../../../common/widgets/toolbar/le-toolbar";
 import LeButton from "../../../../../common/widgets/buttons/le-button";
-import ReactRouter from './multiple-templates.router';
+import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 export default class SystemCreationComponent extends Component {
     constructor(props) {
