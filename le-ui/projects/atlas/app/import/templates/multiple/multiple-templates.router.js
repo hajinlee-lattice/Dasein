@@ -3,7 +3,7 @@ import {
     servicesPlugin,
     hashLocationPlugin
 } from "common/react-vendor";
-import { multipletemplates } from "./multiple-templates.state.js";
+import { mtstates } from "./multiple-templates.state.js";
 
 
 class ReactRouter {
@@ -22,7 +22,7 @@ class ReactRouter {
         this.routing.router.plugin(hashLocationPlugin);
 
         // Register each state
-        const states = [multipletemplates];
+        const states = mtstates;
         states.forEach(state => this.routing.router.stateRegistry.register(state));
 
         // Set initial and fallback states
@@ -52,6 +52,9 @@ class ReactRouter {
             return this.routing.router;
         }
     }
+    getStateService() {
+        return this.routing.router.stateService;
+    }
     getCurrentState() {
         console.log('SS ==> ',this.routing.router.stateService);
         let currentState = this.routing.router.stateService.current;
@@ -68,3 +71,4 @@ const instance = new ReactRouter();
 Object.freeze(instance);
 
 export default instance;
+

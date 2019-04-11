@@ -1,10 +1,12 @@
 import React, { Component } from "common/react-vendor";
-import { store, injectAsyncReducer} from 'store';
+import { store, injectAsyncReducer } from 'store';
 import ReactRouter from './multiple-templates.router';
 import { actions, reducer } from './multipletemplates.redux';
 import LeHPanel from 'common/widgets/container/le-h-panel';
 import {
-    SPACEBETWEEN
+    SPACEBETWEEN,
+    SPACEEVEN,
+    CENTER
 } from "common/widgets/container/le-alignments";
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
@@ -22,10 +24,9 @@ import Message, {
 
 import LeTable from "common/widgets/table/table";
 import './multiple-templates.list.scss';
-import GridContainer from "../templates-grid-container";
-import { ok } from "assert";
+import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
 export default class MultipleTemplatesList extends Component {
-    
+
     constructor(props) {
         super(props);
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
@@ -54,7 +55,7 @@ export default class MultipleTemplatesList extends Component {
     }
 
     handleChange = () => {
-        
+
         const data = store.getState()['multitemplates'];
         let templates = data.templates;
         this.setState({
@@ -93,8 +94,8 @@ export default class MultipleTemplatesList extends Component {
             name: "import-templates",
             header: [
                 {
-                    name: "playpause",
-                    displayName: "",
+                    name: "Actions",
+                    displayName: "Actions",
                     sortable: false
                 },
                 {
@@ -175,7 +176,7 @@ export default class MultipleTemplatesList extends Component {
                     colSpan: 2
                 },
                 {
-                    colSpan: 2,
+                    colSpan: 3,
                     template: cell => {
                         if (cell.props.rowData.Exist) {
                             return (
@@ -227,13 +228,22 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 2,
+                    colSpan: 1,
                     template: cell => {
                         return (
-                            <TemplatesRowActions
-                                rowData={cell.props.rowData}
-                                callback={this.actionCallbackHandler}
-                            />
+                            <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
+                                <i class="fa fa-upload" aria-hidden="true"></i>
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+
+                            </LeHPanel>
+                            // <TemplatesRowActions
+                            //     rowData={cell.props.rowData}
+                            //     callback={this.actionCallbackHandler}
+                            // />
+                            // rowData={cell.props.rowData}
+                            // callback={this.actionCallbackHandler}
+                            // />
                         );
                     }
                 }
@@ -248,7 +258,19 @@ export default class MultipleTemplatesList extends Component {
             <div className={this.props.className}>
                 <LeHPanel hstretch={true} halignment={SPACEBETWEEN}>
                     <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
-                    <span>Add/Edit System</span>
+                    <LeButton
+                        name="add"
+                        config={{
+                            label: "Add System",
+                            classNames: "blue-button",
+                            iconside: RIGHT,
+                            icon: 'fa fa-plus-circle'
+                        }}
+                        callback={() => {
+                            ReactRouter.getStateService().go('sistemcreation');
+                            // alert('Call APIS');
+                        }}
+                    />
                 </LeHPanel>
                 <LeTable
                     name="multiple-templates"

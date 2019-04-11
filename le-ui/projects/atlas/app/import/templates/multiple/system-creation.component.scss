@@ -1,0 +1,30 @@
+@import './react-main.component.scss';
+
+.le-header{
+    font-size: 18px;
+    margin: 0 0 1em 0;
+}
+.le-sub-header{
+    font-size: 15px;
+    margin: 1em 0 1em 0;
+}
+.le-label{
+    font-size: 12px;
+}
+.le-description {
+    font-size: 14px;
+    margin: 2em 0;
+}
+.system-info{
+    margin-top: 2em;
+}
+.le-card.system-creation{
+    max-width: none;
+    &:hover{
+        cursor: pointer;
+    }
+    .system-image{
+        height: 50px;
+        // border: 1px solid green;
+    }
+}
