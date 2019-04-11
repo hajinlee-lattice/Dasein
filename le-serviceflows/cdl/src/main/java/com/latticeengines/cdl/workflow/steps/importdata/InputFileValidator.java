@@ -71,10 +71,13 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         }
         List<String> pathList = eaiImportJobDetail.getPathDetail();
         pathList = pathList == null ? null
-                : pathList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+                : pathList.stream().filter(StringUtils::isNotBlank).map(path -> {
+            int index = path.indexOf("/Pods/");
+            path = index > 0 ? path.substring(index) : path;
+            return path;
+        }).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(pathList)) {
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
-
         }
         List<Product> inputProducts = new ArrayList<>();
 
