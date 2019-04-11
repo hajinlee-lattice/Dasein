@@ -195,7 +195,8 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         return step;
     }
 
-    private void exportToS3AndAddToContext(String tableName, String contextKey) {
+    @Override
+    protected void exportToS3AndAddToContext(String tableName, String contextKey) {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
         queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
