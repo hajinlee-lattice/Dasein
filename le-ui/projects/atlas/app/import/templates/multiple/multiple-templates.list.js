@@ -1,6 +1,6 @@
 import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
-import ReactRouter from './multiple-templates.router';
+import ReactRouter from '../../../react/router';
 import { actions, reducer } from './multipletemplates.redux';
 import LeHPanel from 'common/widgets/container/le-h-panel';
 import {

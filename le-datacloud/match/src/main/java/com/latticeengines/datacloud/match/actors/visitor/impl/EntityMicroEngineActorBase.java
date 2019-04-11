@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +105,10 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 .stream()
                 .flatMap(pair -> {
                     MatchKeyTuple tuple = pair.getKey();
-                    if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
+                    if (CollectionUtils.isNotEmpty(tuple.getSystemIds()) //
+                            && StringUtils.isBlank(tuple.getEmail()) //
+                            && StringUtils.isBlank(tuple.getName()) //
+                            && StringUtils.isBlank(tuple.getPhoneNumber())) {
                         // flatten system id, one system id name/value pair per result
                         int size = tuple.getSystemIds().size();
                         return IntStream.range(0, size).mapToObj(idx -> {
@@ -213,10 +215,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 traveler.debug(String.format(
                         "Cannot find any Entity=%s with MatchKeyTuple=%s",
                         lookupResponse.getEntity(), lookupResponse.getTuple()));
-            }
-            if (CollectionUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
-                // instantiate list
-                traveler.setEntityMatchLookupResults(new ArrayList<>());
             }
             // add lookup result
             traveler.addLookupResult(getCurrentActorName(),

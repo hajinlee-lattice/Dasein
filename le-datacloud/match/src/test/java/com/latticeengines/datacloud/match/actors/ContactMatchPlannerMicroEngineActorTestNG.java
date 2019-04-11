@@ -97,7 +97,7 @@ public class ContactMatchPlannerMicroEngineActorTestNG extends SingleActorTestNG
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
         EntityKeyMap entityKeyMap = new EntityKeyMap();
-        entityKeyMap.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerContactid.name());
+        entityKeyMap.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerContactId.name());
         entityKeyMaps.put(BusinessEntity.Contact.name(), entityKeyMap);
         input.setEntityKeyMaps(entityKeyMaps);
         traveler.setMatchInput(input);

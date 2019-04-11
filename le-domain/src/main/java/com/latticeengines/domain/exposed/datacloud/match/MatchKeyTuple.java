@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -161,9 +162,14 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
-    public List<Pair<String, String>> getSystemIds() { return systemIds; }
+    public List<Pair<String, String>> getSystemIds() {
+        return systemIds;
+    }
 
-    public void setSystemIds(List<Pair<String, String>> systemIds) { this.systemIds = systemIds; }
+    public void setSystemIds(List<Pair<String, String>> systemIds) {
+        this.systemIds = systemIds;
+        refreshCachedStrings();
+    }
 
     public boolean hasDomain() {
         return StringUtils.isNotEmpty(domain);
@@ -228,6 +234,7 @@ public class MatchKeyTuple implements Fact {
         constructIdForValue();
     }
 
+    // TODO(ZDD) Change MatchConstants to MatchKey?
     private void constructSerializedFormat() {
         StringBuilder sb = new StringBuilder("( ");
         if (StringUtils.isNotEmpty(duns)) {
@@ -259,6 +266,9 @@ public class MatchKeyTuple implements Fact {
         }
         if (StringUtils.isNotEmpty(email)) {
             sb.append(String.format("%s=%s, ", MatchConstants.EMAIL_FIELD, email));
+        }
+        if (CollectionUtils.isNotEmpty(systemIds)) {
+            sb.append(String.format("%s=%s, ", MatchKey.SystemId.name(), systemIds.toString()));
         }
         sb.append(")");
         serializedFormat = sb.toString();

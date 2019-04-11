@@ -1,8 +1,8 @@
 import React, { Component, react2angular, UIRouter, UIView } from "common/react-vendor";
-import ReactRouter from './multiple-templates.router';
+import ReactRouter from './router';
 import './react-main.component.scss';
 
-export default class ReactMainComponent extends Component {
+export default class ReactAngularMainComponent extends Component {
     constructor(props) {
         super(props);
         console.log(this.props.path);
@@ -36,5 +36,5 @@ export default class ReactMainComponent extends Component {
 angular
   .module("le.react.maincomponent", [])
   .component(
-    "reactMainComponent",
-    react2angular(ReactMainComponent, ['path'], []));
+    "reactAngularMainComponent",
+    react2angular(ReactAngularMainComponent, ['path'], []));
