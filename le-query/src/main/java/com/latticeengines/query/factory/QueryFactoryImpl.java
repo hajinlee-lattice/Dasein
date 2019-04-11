@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.query.exposed.factory.QueryFactory;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQuery;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQueryFactory;
 
 @Component("queryFactory")
 public class QueryFactoryImpl implements QueryFactory {
@@ -17,9 +17,9 @@ public class QueryFactoryImpl implements QueryFactory {
     @Inject
     private List<QueryProvider> queryProviders;
 
-    public SQLQuery<?> getQuery(AttributeRepository repository, String sqlUser) {
+    public BaseSQLQuery<?> getQuery(AttributeRepository repository, String sqlUser) {
         for (QueryProvider provider : queryProviders) {
-            if (provider.providesQueryAgainst(repository)) {
+            if (provider.providesQueryAgainst(repository, sqlUser)) {
                 return provider.getQuery(repository, sqlUser);
             }
         }
@@ -27,9 +27,9 @@ public class QueryFactoryImpl implements QueryFactory {
                 repository.getCollectionName()));
     }
 
-    public SQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser) {
+    public BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser) {
         for (QueryProvider provider : queryProviders) {
-            if (provider.providesQueryAgainst(repository)) {
+            if (provider.providesQueryAgainst(repository, sqlUser)) {
                 return provider.getCachedSQLQueryFactory(repository, sqlUser);
             }
         }

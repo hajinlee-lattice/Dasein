@@ -12,7 +12,9 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQuery;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -22,8 +24,13 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
 
     private static final Logger log = LoggerFactory.getLogger(AttributeResolver.class);
 
-    public AttributeResolver(AttributeRepository repository) {
+    protected QueryProcessor queryProcessor;
+    protected String sqlUser;
+
+    public AttributeResolver(AttributeRepository repository, QueryProcessor queryProcessor, String sqlUser) {
         super(repository);
+        this.queryProcessor = queryProcessor;
+        this.sqlUser = sqlUser;
     }
 
     @Override
@@ -64,17 +71,13 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
                 }
                 long bitMask = BitCodecUtils.bitMask(0L, 0, numBits);
                 log.info("Using bit mask " + bitMask + " and right shift " + offset + " to extract " + cm.getAttrName() + " from " + cm.getPhysicalName());
+                BaseSQLQuery<?> query = queryProcessor.getQueryFactory().getQuery(repository, sqlUser);
                 if (alias) {
-                    return Expressions
-                            .stringTemplate("({0}>>{1})&{2}", QueryUtils.getAttributePath(entity, physicalColumnName), //
-                                    offset, //
-                                    bitMask)
-                            .as(Expressions.stringPath(cm.getAttrName()));
+                    return query.getBitEncodedExpression(QueryUtils.getAttributePath(entity, physicalColumnName),
+                            offset, bitMask).as(Expressions.stringPath(cm.getAttrName()));
                 } else {
-                    return Expressions.stringTemplate("({0}>>{1})&{2}",
-                            QueryUtils.getAttributePath(entity, physicalColumnName), //
-                            offset, //
-                            bitMask);
+                    return query.getBitEncodedExpression(QueryUtils.getAttributePath(entity, physicalColumnName),
+                            offset, bitMask);
                 }
             }
         } else {

@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
@@ -49,7 +48,7 @@ public class TranslatorCommon {
     static final String QUANTITY_AGG = "quantityagg";
     static final String AMOUNT_VAL = "amountval";
     static final String QUANTITY_VAL = "quantityval";
-    static final String KEYS = "keys";
+    static final String KEYS = "tempkeys";
     static final String TRXN_PERIOD = "trxnbyperiod";
     static final String NUMBERS = "numbers";
     static final String REVENUE = "revenue";
@@ -281,12 +280,12 @@ public class TranslatorCommon {
 
         NumberExpression zero = Expressions.asNumber(0);
         CaseBuilder caseBuilder = new CaseBuilder();
-        CaseBuilder.Cases<Number, Expression<Number>> amountAggrCases = caseBuilder.when(amountAggr.isNull())
+        CaseBuilder.Cases<BigDecimal, NumberExpression<BigDecimal>> amountAggrCases = caseBuilder.when(amountAggr.isNull())
                 .then(zero);
-        Expression amountExpr = amountAggrCases.otherwise(amountNumberPath);
-        CaseBuilder.Cases<Number, Expression<Number>> quantityAggrCases = caseBuilder.when(quantityAggr.isNull())
+        NumberExpression amountExpr = amountAggrCases.otherwise(amountNumberPath).as(AMOUNT_AGG);
+        CaseBuilder.Cases<BigDecimal, NumberExpression<BigDecimal>> quantityAggrCases = caseBuilder.when(quantityAggr.isNull())
                 .then(zero);
-        Expression quantityExpr = quantityAggrCases.otherwise(quantityNumberPath);
+        NumberExpression quantityExpr = quantityAggrCases.otherwise(quantityNumberPath).as(QUANTITY_AGG);
 
         SQLQuery apsUnionAllNotNull = factory.query().select(accountId, periodId, amountExpr, quantityExpr)
                 .from(apsUnionAllPath);
