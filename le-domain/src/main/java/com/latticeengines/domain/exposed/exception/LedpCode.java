@@ -813,6 +813,7 @@ public enum LedpCode {
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
     LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
+    LEDP_40059("Error when validating with input file, please reference {0}."),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

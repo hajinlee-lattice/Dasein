@@ -147,8 +147,8 @@ public class TestDunsGuideBookUtils {
                         "ManualMatch" //
                 }, //
                 { //
-                        newTuple("Nazareth College", "USA", null, "Rochester"), //
-                        "051455062", "073670143", //
+                        newTuple("G.I.A. Publications Inc", "USA", null, "Chicago"), //
+                        "080935386", "062501705", //
                         "ManualMatch" //
                 }, //
 
