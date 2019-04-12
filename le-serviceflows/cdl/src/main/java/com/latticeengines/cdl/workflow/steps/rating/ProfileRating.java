@@ -174,7 +174,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         steps.add(calc);
 
         request.setSteps(steps);
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     private TransformationStepConfig pivot() {

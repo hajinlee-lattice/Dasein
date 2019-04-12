@@ -129,7 +129,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         if (request == null) {
             return null;
         } else {
-            return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+            return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
         }
     }
 

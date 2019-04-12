@@ -258,7 +258,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         steps.add(sortPeriod); // step 10
 
         request.setSteps(steps);
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     private void getProductTable() {

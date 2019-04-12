@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -308,8 +307,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         if (request == null) {
             return null;
         } else {
-            request.setSubmitter(CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
-            return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+            return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
         }
     }
 
