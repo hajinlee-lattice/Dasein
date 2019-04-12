@@ -90,7 +90,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchKey.Country.name(), //
             MatchKey.State.name(), //
             MatchKey.City.name(), //
-            InterfaceName.AccountId.name(), //
+            InterfaceName.CustomerAccountId.name(), //
             SFDC_ID, //
     };
 
@@ -402,6 +402,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         runAndVerify(input, null);
     }
 
+    // In M28, it is no longer supported. Disable the test
     // Provide all the match keys to test Lead-to-Account match ---
     // Non-AllocateId mode for Account match and return AccountId
     @Test(groups = "deployment", priority = 4, enabled = false)
@@ -411,6 +412,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         runAndVerify(input, CASE_LEAD_TO_ACCT);
     }
 
+    // In M28, it is no longer supported. Disable the test
     // Provide patial match keys without AccountId to test Lead-to-Account match
     // --- Non-AllocateId mode for Account match and return AccountId
     @Test(groups = "deployment", priority = 5, enabled = false)
@@ -459,7 +461,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setTargetEntity(BusinessEntity.Account.name());
         input.setAllocateId(true);
         input.setOutputNewEntities(true);
-        input.setEntityKeyMaps(prepareKeyMaps(FIELDS, new String[] { InterfaceName.AccountId.name(), SFDC_ID }, null));
+        input.setEntityKeyMaps(
+                prepareKeyMaps(FIELDS, new String[] { InterfaceName.CustomerAccountId.name(), SFDC_ID }, null));
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);

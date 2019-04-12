@@ -754,12 +754,17 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         OutputRecord record = output.getResult().get(0);
         Assert.assertNotNull(record);
         Assert.assertNotNull(record.getOutput());
-        // check if output contains only entityId column
-        Assert.assertEquals(output.getOutputFields(), Collections.singletonList(InterfaceName.EntityId.name()));
-        Assert.assertEquals(record.getOutput().size(), 1);
-        if (record.getOutput().get(0) != null) {
-            Assert.assertTrue(record.getOutput().get(0) instanceof String);
+        // check if output contains only AccountId & EntityId column
+        Assert.assertEquals(output.getOutputFields(),
+                Arrays.asList(InterfaceName.EntityId.name(), InterfaceName.AccountId.name()));
+        Assert.assertEquals(record.getOutput().size(), 2);
+        for (int i = 0; i < 2; i++) {
+            if (record.getOutput().get(i) != null) {
+                Assert.assertTrue(record.getOutput().get(i) instanceof String);
+            }
         }
+        // EntityId and AccountId should have same value
+        Assert.assertEquals(record.getOutput().get(0), record.getOutput().get(1));
         return (String) record.getOutput().get(0);
     }
 

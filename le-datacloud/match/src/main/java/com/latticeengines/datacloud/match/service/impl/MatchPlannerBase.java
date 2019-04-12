@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -171,21 +170,29 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     public List<ColumnMetadata> parseEntityMetadata(MatchInput input) {
         switch (input.getPredefinedSelection()) {
+        // AllocateId Mode
         case ID:
-            ColumnMetadata atlasIdColumnMetadata = new ColumnMetadata();
-            atlasIdColumnMetadata.setAttrName(InterfaceName.EntityId.name());
-            atlasIdColumnMetadata.setJavaClass(String.class.getSimpleName());
-            return Collections.singletonList(atlasIdColumnMetadata);
+            if (BusinessEntity.Account.name().equals(input.getTargetEntity())) {
+                return Arrays.asList( //
+                        new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
+                        new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()) //
+                        //new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName())
+                        );
+            }
+            if (BusinessEntity.Contact.name().equals(input.getTargetEntity())) {
+                return Arrays.asList( //
+                        new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
+                        new ColumnMetadata(InterfaceName.ContactId.name(), String.class.getSimpleName()) //
+                        //new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName())
+                        );
+            }
+            throw new IllegalArgumentException("Unsupported entity " + input.getTargetEntity());
+            // FetchOnly mode (Might be retired)
         case Seed:
-            ColumnMetadata ldcIdCM = new ColumnMetadata();
-            ldcIdCM.setAttrName(InterfaceName.LatticeAccountId.name());
-            ldcIdCM.setJavaClass(String.class.getSimpleName());
-            return Arrays.asList(ldcIdCM);
+            return Arrays
+                    .asList(new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()));
         case LeadToAcct:
-            ColumnMetadata accIdCM = new ColumnMetadata();
-            accIdCM.setAttrName(InterfaceName.AccountId.name());
-            accIdCM.setJavaClass(String.class.getSimpleName());
-            return Arrays.asList(accIdCM);
+            return Arrays.asList(new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()));
         default:
             throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
 
