@@ -59,7 +59,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
             EntityType entityType = EntityType.fromDisplayNameToEntityType(display.getObject());
             switch (entityType.getEntity().name()) {
                 case ENTITY_ACCOUNT:
-                    Assert.assertEquals(fileLists.size(), 3);
+                    Assert.assertEquals(fileLists.size(), 4);
                     testConfigTemplate(fileLists.get(0), entityType.getEntity().name());
                     break;
                 case ENTITY_CONTACT: Assert.assertEquals(fileLists.size(), 1);break;
@@ -83,6 +83,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
                 s3Service.uploadInputStream(s3Bucket, path,
                         ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE_MISSING),
                         true);
+                s3Service.createFolder(s3Bucket, key + "/subFolder1");
                 break;
             case ENTITY_CONTACT:
                 key = key + "/" + CONTACT_SOURCE_FILE;
