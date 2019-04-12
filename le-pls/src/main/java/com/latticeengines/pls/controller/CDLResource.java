@@ -284,7 +284,7 @@ public class CDLResource {
         return cdlService.getS3ImportTemplate(customerSpace.toString());
     }
 
-    @GetMapping(value = "/s3import/getFileList")
+    @GetMapping(value = "/s3import/fileList")
     @ResponseBody
     @ApiOperation("get file list under s3Path")
     public List<FileProperty> getFileList(@RequestParam String s3Path) {

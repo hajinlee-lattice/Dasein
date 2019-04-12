@@ -50,4 +50,12 @@ public class PathUtils {
         }
         return key;
     }
+
+    public static String getFileType(String path) {
+        path = formatPath(path);
+        if (path.contains(".")) {
+            return path.substring(path.lastIndexOf(".") + 1);
+        }
+        return null;
+    }
 }
