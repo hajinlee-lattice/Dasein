@@ -21,6 +21,9 @@ public class FileProperty {
     @JsonProperty("file_type")
     private String fileType;
 
+    @JsonProperty("is_directory")
+    private boolean isDirectory;
+
     public String getFileName() {
         return fileName;
     }
@@ -61,7 +64,11 @@ public class FileProperty {
         this.fileType = fileType;
     }
 
-    public enum FileType {
-        File, Folder
+    public boolean isDirectory() {
+        return isDirectory;
+    }
+
+    public void setDirectory(boolean directory) {
+        isDirectory = directory;
     }
 }
