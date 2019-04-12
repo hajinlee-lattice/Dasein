@@ -44,7 +44,11 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_3);
 
         importData();
-        processAnalyzeSkipPublishS3OnLocal();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
         try {
             verifyProcess();
         } finally {
@@ -59,12 +63,14 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         Thread.sleep(2000);
     }
 
-    private void verifyCheckPoint() throws Exception {
+    private void verifyCheckPoint() {
         verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
-                VERIFY_DAILYTXN_AMOUNT_1, VERIFY_DAILYTXN_QUANTITY_1, VERIFY_DAILYTXN_COST);
+                VERIFY_DAILYTXN_AMOUNT_1, //
+                VERIFY_DAILYTXN_QUANTITY_1, //
+                VERIFY_DAILYTXN_COST);
     }
 
-    private void verifyProcess() throws Exception {
+    private void verifyProcess() {
         runCommonPAVerifications();
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
@@ -74,7 +80,9 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         verifyServingStore(getExpectedServingStoreCounts());
 
         verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_2, MIN_TRANSACTION_DATE_2, MAX_TRANSACTION_DATE_2, //
-                VERIFY_DAILYTXN_AMOUNT_1 * 2, VERIFY_DAILYTXN_QUANTITY_1 * 2, VERIFY_DAILYTXN_COST * 2);
+                VERIFY_DAILYTXN_AMOUNT_1 * 2, //
+                VERIFY_DAILYTXN_QUANTITY_1 * 2, //
+                VERIFY_DAILYTXN_COST * 2);
     }
 
     private void setupUpdatedPurchaseHistoryMetrics() {

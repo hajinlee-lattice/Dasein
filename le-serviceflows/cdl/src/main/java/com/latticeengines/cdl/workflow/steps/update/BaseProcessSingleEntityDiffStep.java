@@ -79,7 +79,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     protected TransformationStepConfig bucket(boolean heavyEngine) {

@@ -115,7 +115,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         }
 
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     @Override

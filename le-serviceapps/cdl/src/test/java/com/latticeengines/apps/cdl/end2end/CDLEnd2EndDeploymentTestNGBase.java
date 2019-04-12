@@ -239,7 +239,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // VERIFY_PRODUCTID
     static final double VERIFY_DAILYTXN_AMOUNT_1 = 1860;
     static final double VERIFY_DAILYTXN_QUANTITY_1 = 10;
-    static final double VERIFY_DAILYTXN_COST = 1054.58839;
+    static final double VERIFY_DAILYTXN_COST = 1054.588389;
 
     int actionsNumber;
 
@@ -378,11 +378,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
     }
 
-    void processAnalyzeSkipPublishS3OnLocal() {
+    void processAnalyzeSkipPublishToS3() {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        if (isLocalEnvironment()) {
-            request.setSkipPublishToS3(true);
-        }
+        request.setSkipPublishToS3(true);
         processAnalyze(request);
     }
 
@@ -860,9 +858,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
         Report summaryReport = reports.get(0);
-        System.out.println(JsonUtils.pprint(summaryReport));
-//        verifySystemActionReport(summaryReport);
-//        verifyConsolidateSummaryReport(summaryReport, expectedReport);
+        verifySystemActionReport(summaryReport);
+        verifyConsolidateSummaryReport(summaryReport, expectedReport);
     }
 
     private void verifySystemActionReport(Report summaryReport) {
@@ -1306,26 +1303,27 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value));
     }
 
+    void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
+        if (MapUtils.isEmpty(expectedEntityCount)) {
+            return;
+        }
+        expectedEntityCount.forEach((key, value) -> {
+            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value);
+//            if (key != BusinessEntity.ProductHierarchy) {
+//                Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value);
+//            } else {
+//                int count = periodTransactionProxy.getProductHierarchy(mainCustomerSpace, null).size();
+//                Assert.assertEquals(Long.valueOf(count), value);
+//            }
+        });
+    }
+
     void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
         expectedEntityCount.forEach((key, value) -> //
                 Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
-    }
-
-    void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
-        if (MapUtils.isEmpty(expectedEntityCount)) {
-            return;
-        }
-        expectedEntityCount.forEach((key, value) -> {
-            if (key != BusinessEntity.ProductHierarchy) {
-                Assert.assertEquals(Long.valueOf(countInRedshift(key)), value);
-            } else {
-                int count = periodTransactionProxy.getProductHierarchy(mainCustomerSpace, null).size();
-                Assert.assertEquals(Long.valueOf(count), value);
-            }
-        });
     }
 
     void runCommonPAVerifications() {
@@ -1373,13 +1371,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return "dev".equals(leEnv);
     }
 
-    void verifyTxnDailyStore(int totalDays, String minDate, String maxDate, double amount, double quantity, double cost)
-            throws IOException {
+    void verifyTxnDailyStore(int totalDays, String minDate, String maxDate, //
+                             double amount, double quantity, double cost) {
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         Table dailyTable = dataCollectionProxy.getTable(mainCustomerSpace,
                 TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion);
         // Verify number of days
-        List<String> dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dailyTable.getExtractsDirectory());
+        List<String> dailyFiles;
+        try {
+            dailyFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dailyTable.getExtractsDirectory());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get daily table extracts.", e);
+        }
         dailyFiles = dailyFiles.stream().filter(f -> !f.contains("_SUCCESS")).collect(Collectors.toList());
         Assert.assertEquals(dailyFiles.size(), totalDays);
         // Verify max/min day period

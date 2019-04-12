@@ -37,13 +37,9 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
-import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component(ProcessAccountDiff.BEAN_NAME)
@@ -145,8 +141,8 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
                 throw new RuntimeException(
                         "Failed to find enriched account diff table " + enrichedDiffTableName + " in customer " + customerSpace);
             }
+            exportToS3AndAddToContext(enrichedDiffTableName, ENRICHED_ACCOUNT_DIFF_TABLE_NAME);
         }
-        exportToS3AndAddToContext(enrichedDiffTableName, ENRICHED_ACCOUNT_DIFF_TABLE_NAME);
         addToListInContext(TEMPORARY_CDL_TABLES, enrichedDiffTableName, String.class);
     }
 
@@ -193,25 +189,5 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
 
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
-    }
-
-    @Override
-    protected void exportToS3AndAddToContext(String tableName, String contextKey) {
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
-        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
-        ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
-                customerSpace.toString(), table, //
-                pathBuilder, s3Bucket, podId, //
-                yarnConfiguration, //
-                fileStatus -> true);
-        if (batchStoreRequest == null) {
-            throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
-        }
-        HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
-                customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
-        exporter.run();
-        putStringValueInContext(contextKey, tableName);
     }
 }

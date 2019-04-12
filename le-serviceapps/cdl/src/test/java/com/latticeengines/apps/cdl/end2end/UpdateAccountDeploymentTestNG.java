@@ -24,7 +24,11 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         new Thread(this::createTestSegment3).start();
 
         importData();
-        processAnalyzeSkipPublishS3OnLocal();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
 
         try {
             verifyProcess();
@@ -74,7 +78,8 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_3);
 
         Map<String, Object> purchaseHistoryReport = new HashMap<>();
-        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, 5L);
+        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                PURCHASE_HISTORY_1);
 
         Map<String, Object> contactReport = new HashMap<>();
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
