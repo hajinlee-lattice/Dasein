@@ -1,5 +1,6 @@
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
+import { store } from 'store';
 
 var CONST = {
     FETCH_PLAY: 'FETCH_PLAY',
@@ -8,18 +9,18 @@ var CONST = {
 }
 
 const initialState = {
-    play: {},
-    plays: [],
-    connections: []
+    play: null,
+    plays: null,
+    connections: null
 };
 
 export const actions = {
-    fetchPlay: (play_name, deferred) => dispatch => {
+    fetchPlay: (play_name, deferred) => {
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
             response => {
                 httpService.unsubscribeObservable(observer);
-                dispatch({
+                store.dispatch({
                     type: CONST.FETCH_PLAY,
                     payload: response.data
                 });
@@ -28,12 +29,12 @@ export const actions = {
         );
         httpService.get('/pls/play/' + play_name, observer, {});
     },
-    fetchPlays: (deferred) => dispatch => {
+    fetchPlays: (deferred) => {
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
             response => {
                 httpService.unsubscribeObservable(observer);
-                dispatch({
+                store.dispatch({
                     type: CONST.FETCH_PLAYS,
                     payload: response.data
                 });
@@ -42,12 +43,12 @@ export const actions = {
         );
         httpService.get('/pls/play', observer, {});
     },
-    fetchConnections: (play_name, deferred) => dispatch => {
+    fetchConnections: (play_name, deferred) => {
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
             response => {
                 httpService.unsubscribeObservable(observer);
-                dispatch({
+                store.dispatch({
                     type: CONST.FETCH_CONNECTIONS,
                     payload: response.data
                 });
