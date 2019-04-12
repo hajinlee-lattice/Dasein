@@ -44,7 +44,7 @@ public class AdvancedAccountMatchTestResultVerifier {
     public static final String COL_TEST_GRP_ID = "TestGroupId";
     public static final String COL_TEST_RECORD_ID = "TestRecordId";
     public static final String COL_EXISTS_IN_UNIVERSE = "ExistsInUniverse";
-    public static final String COL_ACCOUNT_ID = "AccountId";
+    public static final String COL_ACCOUNT_ID = InterfaceName.CustomerAccountId.name();
     public static final String COL_SFDC_ID = "SfdcId";
     public static final String COL_MKTO_ID = "MktoId";
     public static final String COL_MATCH_ERRORS = "Entity_Match_Error";

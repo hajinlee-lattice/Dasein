@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -376,14 +377,14 @@ public class MatchInputValidatorUnitTestNG {
         failed = false;
         entityKeyMap.getKeyMap().put(MatchKey.SystemId, Arrays.asList("ID", "SfdcId", "MktoId"));
         input.getEntityKeyMaps().remove(BusinessEntity.Account.name());
-        input.getEntityKeyMaps().put(BusinessEntity.Contact.name(), entityKeyMap);
+        input.getEntityKeyMaps().put(BusinessEntity.Transaction.name(), entityKeyMap);
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (UnsupportedOperationException e) {
             failed = true;
             Assert.assertTrue(e.getMessage().contains(
-                    "Entity Map currently only supports Account match and requires this entity's key map."),
+                    "Entity Map currently only supports Account & Contact match and requires this entity's key map."),
                     "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
             Assert.fail("Failed on wrong exception: " + e.getMessage());
@@ -510,7 +511,7 @@ public class MatchInputValidatorUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "unrequiredAccountMatchKey", //
             expectedExceptions = { IllegalArgumentException.class }, //
-            expectedExceptionsMessageRegExp = "For non-fetch-only mode, at least one of following match key should be provided: "
+            expectedExceptionsMessageRegExp = "For non-fetch-only mode Account match, at least one of following match key should be provided: "
                     + "Duns, Domain, Name and SystemId")
     public void testValidateAccountMatchKeysNonFetchOnly1(MatchKey[] keys) {
         // Don't set any required match key
@@ -519,7 +520,7 @@ public class MatchInputValidatorUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
             expectedExceptions = { IllegalArgumentException.class }, //
-            expectedExceptionsMessageRegExp = "For non-fetch-only mode, at least one of following match key should be provided: "
+            expectedExceptionsMessageRegExp = "For non-fetch-only mode Account match, at least one of following match key should be provided: "
                     + "Duns, Domain, Name and SystemId")
     public void testValidateAccountMatchKeysNonFetchOnly2(MatchKey[] keys) {
         // Set required match key, but don't map field
@@ -534,7 +535,7 @@ public class MatchInputValidatorUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
             expectedExceptions = { IllegalArgumentException.class }, //
-            expectedExceptionsMessageRegExp = "For fetch-only mode, must provide EntityId match key")
+            expectedExceptionsMessageRegExp = "For fetch-only mode Account match, must provide EntityId match key")
     public void testValidateAccountMatchKeysFetchOnly1(MatchKey[] keys) {
         // Don't provide EntityId for fetch-only mode
         validateAccountMatchKey(keys, true, true);
@@ -570,7 +571,12 @@ public class MatchInputValidatorUnitTestNG {
         }
 
         // This test doesn't care what fields and data are set
-        input.setFields(Arrays.stream(MatchKey.values()).map(key -> key.name()).collect(Collectors.toList()));
+        List<String> fields = Arrays.stream(MatchKey.values()).map(key -> key.name()).collect(Collectors.toList());
+        if (!fetchOnly) {
+            fields = fields.stream().filter(field -> !MatchKeyUtils.isEntityReservedField(field))
+                    .collect(Collectors.toList());
+        }
+        input.setFields(fields);
         input.setData(generateMockData(100, true));
 
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
@@ -580,7 +586,7 @@ public class MatchInputValidatorUnitTestNG {
     public Object[][] dataUnrequiredAccountMatchKey() {
         Set<MatchKey> requiredKeySet = new HashSet<>(Arrays.asList(REQUIRED_ENTITY_KEYS));
         List<MatchKey> unrequiredKeys = Arrays.stream(MatchKey.values()) //
-                .filter(key -> !requiredKeySet.contains(key)) //
+                .filter(key -> !requiredKeySet.contains(key) && !MatchKeyUtils.isEntityReservedField(key.name())) //
                 .collect(Collectors.toList());
         return getAllMatchKeyCombinations(unrequiredKeys.toArray(new MatchKey[unrequiredKeys.size()]));
     }

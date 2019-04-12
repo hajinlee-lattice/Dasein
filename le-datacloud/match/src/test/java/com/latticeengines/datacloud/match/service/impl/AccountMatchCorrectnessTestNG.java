@@ -69,14 +69,14 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     /**
      * <pre>
-     * [ SFDC, MKTO, ELOQUA, Name, Domain, Country, State ]
+     * [ CustomerAccountId, MKTO, ELOQUA, Name, Domain, Country, State ]
      * </pre>
      */
-    private static final String ID_SFDC = "SFDC";
+    private static final String ID_ACCT = "CustomerAccountId";
     private static final String ID_MKTO = "MKTO";
     private static final String ID_ELOQUA = "ELOQUA";
 
-    private static final String[] SYSTEM_ID_FIELDS = new String[] { ID_SFDC, ID_MKTO, ID_ELOQUA };
+    private static final String[] SYSTEM_ID_FIELDS = new String[] { ID_ACCT, ID_MKTO, ID_ELOQUA };
     private static final MatchKey[] MATCH_KEY_FIELDS = new MatchKey[] { MatchKey.Name, MatchKey.Domain,
             MatchKey.Country, MatchKey.State, MatchKey.DUNS };
     private static final String[] NON_SYSTEM_ID_FIELDS = Arrays.stream(MATCH_KEY_FIELDS).map(MatchKey::name)
@@ -96,10 +96,10 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     /**
      * Define 5 Account MatchKey groups:
-     * ID_SFDC, ID_MKTO, DUNS, Domain, Name
+     * ID_ACCT, ID_MKTO, DUNS, Domain, Name
      *
      * MatchKey Group -> Actual MatchKey mapping:
-     * ID_SFDC -> [ID_SFDC]
+     * ID_ACCT -> [ID_ACCT]
      * ID_MKTO -> [ID_MKTO]
      * DUNS -> [Customer DUNS] or [Name + Country] or [Domain +Country]
      * NOTE: Choose above 3 options for DUNS group due to DUNS in Account match is from LDC match.
@@ -114,7 +114,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      **/
     private final static Map<String, List<List<String>>> KEY_GROUP_MAP = new HashMap<>();
     static {
-        KEY_GROUP_MAP.put(ID_SFDC, Arrays.asList(Arrays.asList(ID_SFDC)));
+        KEY_GROUP_MAP.put(ID_ACCT, Arrays.asList(Arrays.asList(ID_ACCT)));
         KEY_GROUP_MAP.put(ID_MKTO, Arrays.asList(Arrays.asList(ID_MKTO)));
         KEY_GROUP_MAP.put(MatchKey.DUNS.name(), //
                 Arrays.asList( //
@@ -131,11 +131,11 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     // MatchKeys used in Account match decision graph (Don't consider MatchKey
     // combinations in LDC match)
-    private final static String[] ACCOUNT_KEYS_PRIORITIZED = { ID_SFDC, ID_MKTO, MatchKey.DUNS.name(),
+    private final static String[] ACCOUNT_KEYS_PRIORITIZED = { ID_ACCT, ID_MKTO, MatchKey.DUNS.name(),
             MatchKey.Domain.name(), MatchKey.Name.name() };
     // Reduced set of MatchKeys used in Account match decision graph. Only one
     // key per actor to reduce # test case
-    private final static String[] ACCOUNT_KEYS_REDUCED = { ID_SFDC, MatchKey.DUNS.name(), MatchKey.Domain.name(),
+    private final static String[] ACCOUNT_KEYS_REDUCED = { ID_ACCT, MatchKey.DUNS.name(), MatchKey.Domain.name(),
             MatchKey.Name.name() };
     // Account MatchKey -> Index in FIELDS
     private final static Map<String, Integer> ACCOUNT_KEYIDX_MAP = Stream.of(ACCOUNT_KEYS_PRIORITIZED)
@@ -163,10 +163,10 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
         // test allocate mode
-        List<Object> data = Arrays.asList("sfdc_1", "mkto_1", null, "GOOGLE", null, "USA", null, null);
+        List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         String entityId = verifyAndGetEntityId(output);
 
@@ -176,7 +176,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
 
         // test lookup, make sure we get the correct entity id with each match key
-        Assert.assertEquals(lookupAccount(tenant, "sfdc_1", null, null, null, null, null, null, null), entityId);
+        Assert.assertEquals(lookupAccount(tenant, "acct_1", null, null, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(tenant, null, "mkto_1", null, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(tenant, null, null, null, "GOOGLE", null, "USA", null, null), entityId);
     }
@@ -187,7 +187,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Tenant tenant = new Tenant(tenantId);
 
         // Baseline Normal Case
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
         // public domain without DUNS/name, but in email format, treat as public domain
         List<Object> data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
@@ -241,7 +241,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         // Pre-populate entries in the match table to match against during tests.
         //
         // Setup match entry with domain as lattice-engines.com.
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS
         List<Object> data = Arrays.asList(null, null, null, null, "lattice-engines.com", "USA", null, null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
@@ -249,7 +250,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Assert.assertNotNull(latticeEntityId);
 
         // Setup match entry with domain as marketo.com.
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // State, DUNS
         data = Arrays.asList(null, null, null, null, "marketo.com", "USA", null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
@@ -261,7 +263,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         // Test code functionality prioritizing email over website.
         //
         // Test that email is matched before website.
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Website, Country, State, DUNS, Email
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Website, Country,
+        // State, DUNS, Email
         data = Arrays.asList(null, null, null, null, "www.lattice-engines.com", "USA", null, null,
                 "private@marketo.com");
         // Create an EntityKeyMap as in other tests.
@@ -290,7 +293,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Assert.assertEquals(entityId, DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
         // Test extreme case with two email and two website domain fields.
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain1, Country, State, Email2, DUNS, Domain2, Email1
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain1, Country,
+        // State, Email2, DUNS, Domain2, Email1
         data = Arrays.asList(null, null, null, null, "www.aol.com", "USA", "CA",
                 "private@lattice-engines.com", 000000000, "not_a_domain_or_email", "somebody@outlook.com");
 
@@ -319,7 +323,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
         // Duns in input doesn't exist in LDC and there is no other match key,
         // return orphan EntityId
@@ -377,7 +381,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
 
         // Domain + Country
@@ -426,7 +430,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * same input data with 1st record and all the other LOWER priority keys
      * with different input data
      *
-     * eg. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
+     * eg. Record1: [acct_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
      * Record2: [mkto_id_1, 884745530, fakedomain2.com]
      *          (ID_MKTO is highest priority key)
      *
@@ -436,7 +440,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * priority keys with different input data. Meanwhile, set 1st record with
      * null value for those higher priority MatchKeys of 2ND record
      *
-     * eg. Record1: [sfdc_id_1, null, null, fakedomain1.com, fakename1]
+     * eg. Record1: [acct_id_1, null, null, fakedomain1.com, fakename1]
      * Record2: [mkto_id_2, 884745530, fakedomain1.com]
      *
      * Test 3: Construct 2 records. MatchKey preparation is same as Test2, and
@@ -445,7 +449,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * (Domain/Name), DO NOT set 1ST record with null value for these HIGHER
      * priority MatchKeys
      *
-     * eg. Record1: [sfdc_id_1, null, null, fakedomain1.com, fakename1]
+     * eg. Record1: [acct_id_1, null, null, fakedomain1.com, fakename1]
      * Record2: [mkto_id_2, 884745530, fakedomain2.com, fakename1]
      *
      * NOTE for data preparation: Prepare both Domain and Name with values which
@@ -466,13 +470,13 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS (ID_ELOQUA, Country, State are not used in this test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
         // DUNS to Account match
-        List<Object> baseData1 = Arrays.asList("sfdc_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
+        List<Object> baseData1 = Arrays.asList("acct_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
                 null, "060902413");
-        List<Object> baseData2 = Arrays.asList("sfdc_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
+        List<Object> baseData2 = Arrays.asList("acct_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
                 null, "884745530");
 
         // Test 1
@@ -560,9 +564,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * is allocated. Thus we can make sure when matching 2nd record, highest
      * priority key has conflict with 1st record
      *
-     * eg1. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
+     * eg1. Record1: [acct_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
      * Record2: [mkto_id_2, 060902413, fakedomain1.com] (ID_MKTO is highest priority key)
-     * eg2. Record1: [sfdc_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
+     * eg2. Record1: [acct_id_1, mkto_id_1, 060902413, fakedomain1.com, fakename1]
      * Record2: [fakedomain2.com, fakename1]
      * (Domain is highest priority key. Need to allocate another EntityId for fakedomain2.com first)
      *
@@ -582,13 +586,13 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS (ID_ELOQUA, Country, State are not used in this test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
         // DUNS to Account match
-        List<Object> baseData1 = Arrays.asList("sfdc_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
+        List<Object> baseData1 = Arrays.asList("acct_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
                 null, "060902413");
-        List<Object> baseData2 = Arrays.asList("sfdc_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
+        List<Object> baseData2 = Arrays.asList("acct_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
                 null, "884745530");
 
         List<Object> data1 = baseData1;
@@ -641,14 +645,14 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String tenantId = createNewTenantId();
         Tenant tenant = new Tenant(tenantId);
 
-        // Data schema: ID_SFDC, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS (ID_MKTO, ID_ELOQUA, Country, State are not used in this
         // test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
         // DUNS to Account match
-        List<Object> baseData1 = Arrays.asList("sfdc_id_1", null, null, "fakename1", "fakedomain1.com", null,
+        List<Object> baseData1 = Arrays.asList("acct_id_1", null, null, "fakename1", "fakedomain1.com", null,
                 null, "060902413");
-        List<Object> baseData2 = Arrays.asList("sfdc_id_2", null, null, "fakename2", "fakedomain2.com", null,
+        List<Object> baseData2 = Arrays.asList("acct_id_2", null, null, "fakename2", "fakedomain2.com", null,
                 null, "884745530");
 
         List<String> keysIntersection = getKeysIntersection(keys1, keys2);
@@ -681,7 +685,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * Submit 2 records to match service sequentially and should always return same EntityId
      *
      * eg.
-     * Record 1: MatchKey group = ID_SFDC + DUNS, MatchKey = ID_SFDC + Name + Country
+     * Record 1: MatchKey group = ID_ACCT + DUNS, MatchKey = ID_ACCT + Name + Country
      * Record 2: MatchKey group = ID_MKTO + DUNS, MatchKey = ID_MKTO + Customer DUNS
      * Even if Record1 and Record2 don't have overlap in MatchKey,
      * since we design Name + Country in Record1 to match to Customer DUNS in Record2 by DnB,
@@ -700,7 +704,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         Tenant tenant = new Tenant(tenantId);
         // Data and Fields are all the same, but MatchKey passed to MatchInput
         // are different
-        List<Object> data = Arrays.asList("sfdc_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
+        List<Object> data = Arrays.asList("acct_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
                 "060902413");
 
         runAndVerifyMatchPair(tenant, keys1, data, keys2, data, true);
@@ -736,9 +740,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     }
 
-    private String lookupAccount(Tenant tenant, String sfdcId, String mktoId, String eloquaId, String name,
+    private String lookupAccount(Tenant tenant, String acctId, String mktoId, String eloquaId, String name,
             String domain, String country, String state, String duns) {
-        List<Object> data = Arrays.asList(sfdcId, mktoId, eloquaId, name, domain, country, state, duns);
+        List<Object> data = Arrays.asList(acctId, mktoId, eloquaId, name, domain, country, state, duns);
         MatchOutput output = matchAccount(data, false, tenant, null, FIELDS).getRight();
         return verifyAndGetEntityId(output);
     }
@@ -754,12 +758,17 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         OutputRecord record = output.getResult().get(0);
         Assert.assertNotNull(record);
         Assert.assertNotNull(record.getOutput());
-        // check if output contains only entityId column
-        Assert.assertEquals(output.getOutputFields(), Collections.singletonList(InterfaceName.EntityId.name()));
-        Assert.assertEquals(record.getOutput().size(), 1);
-        if (record.getOutput().get(0) != null) {
-            Assert.assertTrue(record.getOutput().get(0) instanceof String);
+        // check if output contains only AccountId & EntityId column
+        Assert.assertEquals(output.getOutputFields(),
+                Arrays.asList(InterfaceName.EntityId.name(), InterfaceName.AccountId.name()));
+        Assert.assertEquals(record.getOutput().size(), 2);
+        for (int i = 0; i < 2; i++) {
+            if (record.getOutput().get(i) != null) {
+                Assert.assertTrue(record.getOutput().get(i) instanceof String);
+            }
         }
+        // EntityId and AccountId should have same value
+        Assert.assertEquals(record.getOutput().get(0), record.getOutput().get(1));
         return (String) record.getOutput().get(0);
     }
 
@@ -842,7 +851,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         map.setKeyMap(keyMap);
         keys.forEach(key -> {
             switch (key) {
-            case ID_SFDC:
+            case ID_ACCT:
             case ID_MKTO:
             case ID_ELOQUA:
                 // Priority is same as their order in keys list
@@ -1032,17 +1041,17 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
      * With a list of MatchKey groups, return all combinations of MatchKeys
      * (deduped) accordingly
      *
-     * eg. keyGroups = [ID_SFDC, DUNS, Name]
-     * After DFS keys = [ID_SFDC, Customer DUNS, Name],
-     *                  [ID_SFDC, Customer DUNS, Name, Country],
-     *                  [ID_SFDC, Domain, Country, Name],
-     *                  [ID_SFDC, Domain, Country, Name], (Deduped from [ID_SFDC, Domain, Country, Name, Country])
-     *                  [ID_SFDC, Name, Country], (Deduped from [ID_SFDC, Name, Country, Name])
-     *                  [ID_SFDC, Name, Country], (Deduped from [ID_SFDC, Name, Country, Name, Country])
-     * After dedup keys = [ID_SFDC, Customer DUNS, Name],
-     *                    [ID_SFDC, Customer DUNS, Name, Country],
-     *                    [ID_SFDC, Domain, Country, Name],
-     *                    [ID_SFDC, Name, Country]
+     * eg. keyGroups = [ID_ACCT, DUNS, Name]
+     * After DFS keys = [ID_ACCT, Customer DUNS, Name],
+     *                  [ID_ACCT, Customer DUNS, Name, Country],
+     *                  [ID_ACCT, Domain, Country, Name],
+     *                  [ID_ACCT, Domain, Country, Name], (Deduped from [ID_ACCT, Domain, Country, Name, Country])
+     *                  [ID_ACCT, Name, Country], (Deduped from [ID_ACCT, Name, Country, Name])
+     *                  [ID_ACCT, Name, Country], (Deduped from [ID_ACCT, Name, Country, Name, Country])
+     * After dedup keys = [ID_ACCT, Customer DUNS, Name],
+     *                    [ID_ACCT, Customer DUNS, Name, Country],
+     *                    [ID_ACCT, Domain, Country, Name],
+     *                    [ID_ACCT, Name, Country]
      *
      * @param keyGroups
      * @return
@@ -1070,7 +1079,8 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
                 Set<String> keys = new HashSet<>();
                 for (Pair<Integer, Integer> pair : idxSt) {
                     // Use set to dedup within one combination
-                    // eg. [ID_SFDC, Name, Country, Name, Country] -> [ID_SFDC, Name, Country]
+                    // eg. [ID_ACCT, Name, Country, Name, Country] -> [ID_ACCT,
+                    // Name, Country]
                     keys.addAll(KEY_GROUP_MAP.get(keyGroups.get(pair.getLeft())).get(pair.getRight()));
                 }
                 toReturn.add(new ArrayList<>(keys));

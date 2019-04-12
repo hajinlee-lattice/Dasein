@@ -1,5 +1,6 @@
 import React, { Component, react2angular } from "common/react-vendor";
-import { store } from 'store';
+import { store, injectAsyncReducer } from 'store';
+import { actions, reducer } from '../../playbook.redux';
 import './overview.component.scss';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
@@ -30,11 +31,23 @@ export class OverviewComponent extends Component {
 
     componentDidMount() {
         this.unsubscribe = store.subscribe(this.handleChange);
+
+        //injectAsyncReducer(store, 'playbook', reducer);
+        //let playstore = store.getState()['playbook'];
+        //actions.fetchPlay(this.props.playname);
+        //actions.fetchConnections(this.props.playname);
+
+        console.log('props', this.props);
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe();
     }
 
     handleChange = () => {
         const state = store.getState()['playbook'];
-        this.setState({});
+        this.setState(state);
+        console.log('handleChange', state);
     }
 
     render() {
@@ -85,14 +98,7 @@ export class OverviewComponent extends Component {
 
 angular
     .module("lp.playbook.overview", [])
-    .component('playbookOverview', {
-        template: `<playbook-overview-react play="$ctrl.play" connections="$ctrl.connections"></playbook-overview-react>`,
-        bindings: {
-            play: '<',
-            connections: '<'
-        }
-    })
     .component(
-        "playbookOverviewReact",
+        "playbookOverview",
         react2angular(OverviewComponent, ['play', 'connections'], ['$state', '$stateParams'])
     );

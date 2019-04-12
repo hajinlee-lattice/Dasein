@@ -57,6 +57,9 @@ public class InternalOutputRecord extends OutputRecord {
     // Entity -> (MatchKey -> list of field indexes in the input data record (above) which correspond to the match key)
     private Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps;
 
+    // Match result: entity -> entityId
+    private Map<String, String> entityIds;
+
     public String getParsedDomain() {
         return parsedDomain;
     }
@@ -307,4 +310,11 @@ public class InternalOutputRecord extends OutputRecord {
         this.origSystemIds = origSystemIds;
     }
 
+    public Map<String, String> getEntityIds() {
+        return entityIds;
+    }
+
+    public void setEntityIds(Map<String, String> entityIds) {
+        this.entityIds = entityIds;
+    }
 }

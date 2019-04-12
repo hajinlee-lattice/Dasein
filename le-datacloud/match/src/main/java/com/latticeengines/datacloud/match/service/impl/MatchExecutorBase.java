@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -266,6 +267,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     if (value == null || (customerAccountId != null && !value.equals(customerAccountId))) {
                         value = DataCloudConstants.ENTITY_ANONYMOUS_AID;
                     }
+                } else if (InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
+                    // retrieve Account EntityId (for entity match)
+                    value = internalRecord.getEntityIds() == null ? null
+                            : internalRecord.getEntityIds().get(BusinessEntity.Account.name());
+                } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
+                    // retrieve Contact EntityId (for entity match)
+                    value = internalRecord.getEntityIds() == null ? null
+                            : internalRecord.getEntityIds().get(BusinessEntity.Contact.name());
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);
