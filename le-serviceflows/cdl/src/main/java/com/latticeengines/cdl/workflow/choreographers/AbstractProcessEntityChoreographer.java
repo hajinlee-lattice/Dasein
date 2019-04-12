@@ -57,13 +57,13 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         if (isMergeStep(step)) {
             initialize(step);
-            return !shouldMerge();
+            return !shouldMerge(step);
         }
 
         if (isCloneStep(step)) {
             checkSchemaChange(step);
             checkManyUpdate(step);
-            reset = shouldReset();
+            reset = shouldReset(step);
             rebuild = shouldRebuild();
             update = shouldUpdate();
             log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
@@ -92,7 +92,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (isResetStep(step)) {
-            reset = shouldReset();
+            reset = shouldReset(step);
             if (!reset) {
                 log.info(msg + ", because not in reset mode.");
                 return true;
@@ -239,11 +239,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
-    boolean shouldMerge() {
+    protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
         return hasImports;
     }
 
-    protected boolean shouldReset() {
+    protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!hasBatchStore && !hasImports) {
             log.info("No batch store and no imports, going to reset entity.");
             return true;

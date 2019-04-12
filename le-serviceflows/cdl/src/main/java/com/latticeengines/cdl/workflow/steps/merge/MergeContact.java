@@ -43,7 +43,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
             upsertMasterStep = 0;
             diffStep = 1;
-            TransformationStepConfig upsertMaster = mergeMaster(matchedTable, configuration.isEntityMatchEnabled());
+            TransformationStepConfig upsertMaster = mergeMaster(configuration.isEntityMatchEnabled(), matchedTable);
             TransformationStepConfig diff = diff(matchedTable, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);
             List<TransformationStepConfig> steps = new ArrayList<>();
