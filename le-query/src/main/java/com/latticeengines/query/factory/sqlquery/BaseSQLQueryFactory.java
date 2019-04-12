@@ -6,7 +6,7 @@ import com.querydsl.sql.Configuration;
 import com.querydsl.sql.SQLQueryFactory;
 
 /**
- * Implementation for RedshiftSQL 
+ * Base Implementation for QueryFactory 
  *
  */
 public abstract class BaseSQLQueryFactory extends SQLQueryFactory {

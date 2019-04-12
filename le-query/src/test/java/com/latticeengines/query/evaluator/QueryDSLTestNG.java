@@ -82,7 +82,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         assertEquals(count, 100000);
     }
 
-    /*
     @Test(groups = "functional")
     public void testIntersect() throws SQLException {
         StringPath outerTable = Expressions.stringPath("bernard_txn_poc");
@@ -126,8 +125,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
             Assert.assertEquals(2, results.getLong("period_id"));
         }
     }
-    */
-    
+
     private SQLQueryFactory factory() {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);

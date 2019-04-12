@@ -6,13 +6,10 @@ import static org.testng.Assert.assertTrue;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.avro.Schema.Field;
-import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +20,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
@@ -168,21 +164,4 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
         throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
 
-    protected List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
-        List<Map<String, Object>> resultData = new ArrayList<>();
-        String avroPath = sparkResult.getPath();
-        AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
-        iterator.forEachRemaining(record -> {
-            Map<String, Object> row = new HashMap<>();
-            for (Field field: record.getSchema().getFields()) {
-                Object value = record.get(field.name());
-                if (value != null && value instanceof Utf8) {
-                    value = ((Utf8)value).toString();
-                }
-                row.put(field.name(), value);
-            }
-            resultData.add(row);
-        });
-        return resultData;
-    }
 }

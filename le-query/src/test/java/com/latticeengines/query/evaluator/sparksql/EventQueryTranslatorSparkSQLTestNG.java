@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.EventQueryTranslatorTest;
 import com.latticeengines.query.factory.SparkQueryProvider;
@@ -155,8 +158,11 @@ public class EventQueryTranslatorSparkSQLTestNG extends EventQueryTranslatorTest
             Assert.assertEquals(count, 24237);
             return count;
         case SparkQueryProvider.SPARK_BATCH_USER:
-            log.warn("This test needs to be implemented");
-            return 0;
+            HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(query);
+            List<Map<String, Object>> sparkResultsAsList = convertHdfsDataUnitToList(sparkResult);
+            log.info("SparkSQL Query Data Size: {}", sparkResultsAsList.size());
+            Assert.assertEquals(sparkResultsAsList.size(), 24237);
+            return sparkResultsAsList.size();
         }
         throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }

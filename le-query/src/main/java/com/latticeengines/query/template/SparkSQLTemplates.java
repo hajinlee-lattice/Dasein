@@ -120,6 +120,8 @@ public class SparkSQLTemplates extends SQLTemplates {
         add(Ops.DateTimeOps.ADD_MINUTES, "{0} + interval '{1s} minutes'");
         add(Ops.DateTimeOps.ADD_SECONDS, "{0} + interval '{1s} seconds'");
 
+        //REM: This functionality needs to be evaluated and provide correct functions
+        /*
         String yearsDiff = "date_part('year', age({1}, {0}))";
         String monthsDiff = "(" + yearsDiff + " * 12 + date_part('month', age({1}, {0})))";
         String weeksDiff =  "trunc((cast({1} as date) - cast({0} as date))/7)";
@@ -135,6 +137,7 @@ public class SparkSQLTemplates extends SQLTemplates {
         add(Ops.DateTimeOps.DIFF_HOURS,   hoursDiff);
         add(Ops.DateTimeOps.DIFF_MINUTES, minutesDiff);
         add(Ops.DateTimeOps.DIFF_SECONDS, secondsDiff);
+        */
 
         addTypeNameToCode("bool", Types.BIT, true);
         addTypeNameToCode("bytea", Types.BINARY);
