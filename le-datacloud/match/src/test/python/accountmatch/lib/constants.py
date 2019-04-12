@@ -1,5 +1,5 @@
 # match keys
-ACCOUNT_ID = 'AccountId'
+ACCOUNT_ID = 'CustomerAccountId'
 SFDC_ID = 'SfdcId'
 MKTO_ID = 'MktoId'
 NAME = 'Name'

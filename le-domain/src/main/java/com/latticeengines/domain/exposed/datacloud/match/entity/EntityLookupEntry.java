@@ -438,6 +438,7 @@ public class EntityLookupEntry {
             return tuple.getSystemIds().stream() //
                     .filter(pair -> pair != null && systemName.equals(pair.getKey())) //
                     .map(Pair::getValue) //
+                    .filter(StringUtils::isNotBlank) //
                     .findFirst() //
                     .orElse(null);
         }

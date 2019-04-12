@@ -128,6 +128,16 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("ColumnName")
     private String columnName;
 
+    public ColumnMetadata() {
+
+    }
+
+    public ColumnMetadata(String attrName, String javaClass) {
+        this.attrName = attrName;
+        this.javaClass = javaClass;
+    }
+
+    @Override
     @Deprecated // should use AttrName
     @JsonProperty("ColumnId")
     public String getColumnId() {
@@ -415,6 +425,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         return "[" + StringUtils.join(tokens, ",") + "]";
     }
 
+    @Override
     @JsonProperty(ColumnMetadataKey.Category)
     public String getCategoryAsString() {
         if (category != null) {
@@ -512,6 +523,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.category = category;
     }
 
+    @Override
     public String getSubcategory() {
         return subcategory;
     }
@@ -662,6 +674,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
                 || LogicalDataType.Timestamp.equals(this.getLogicalDataType());
     }
 
+    @Override
     public ColumnMetadata clone() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         KryoUtils.write(bos, this);
