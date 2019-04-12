@@ -121,13 +121,13 @@ angular
                     sref: MyDataState + MyDataParams,
                     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MYDATA"),
                     icon: "ico-analysis ico-light-gray"
-                }, {
-                    if: store.showSegmentationPage,
-                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                    active: store.checkSegmentationActiveState2,
-                    sref: "home.segmentation",
-                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SEGMENTATION"),
-                    icon: "ico-segments ico-light-gray"
+                    // }, {
+                    //     if: store.showSegmentationPage,
+                    //     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    //     active: store.checkSegmentationActiveState2,
+                    //     sref: "home.segmentation",
+                    //     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SEGMENTATION"),
+                    //     icon: "ico-segments ico-light-gray"
                 }, {
                     if: store.showSegmentationPage,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
