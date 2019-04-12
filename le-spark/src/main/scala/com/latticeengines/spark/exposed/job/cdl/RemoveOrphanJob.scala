@@ -6,8 +6,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class RemoveOrphanJob extends AbstractSparkJob[RemoveOrphanConfig] {
 
-  override val name = "RemoveOrphanJob"
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[RemoveOrphanConfig]): Unit = {
     val config: RemoveOrphanConfig = lattice.config
     val parentSrcIdx: Int = if (config.getParentSrcIdx == null) 1 else config.getParentSrcIdx.toInt

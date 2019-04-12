@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +48,7 @@ public class ScoreResource extends BaseScoring {
     @ApiOperation(value = "Get active models")
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         return getActiveModels(request, type, customerSpace);
     }
 
@@ -55,6 +57,7 @@ public class ScoreResource extends BaseScoring {
     @ApiOperation(value = "Get fields for a model")
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         return getModelFields(request, modelId, customerSpace);
     }
 
@@ -69,6 +72,7 @@ public class ScoreResource extends BaseScoring {
             @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted)
             throws ParseException {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         return getPaginatedModels(request, start, offset, maximum, considerAllStatus, considerDeleted, customerSpace);
     }
 
@@ -81,6 +85,7 @@ public class ScoreResource extends BaseScoring {
             @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted)
             throws ParseException {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         return getModelCount(request, start, considerAllStatus, considerDeleted, customerSpace);
     }
 
@@ -89,6 +94,7 @@ public class ScoreResource extends BaseScoring {
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         return scorePercentileRecord(request, scoreRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
@@ -101,6 +107,7 @@ public class ScoreResource extends BaseScoring {
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         return scorePercentileRecords(request, scoreRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
@@ -114,6 +121,7 @@ public class ScoreResource extends BaseScoring {
     public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         return scoreRecordsDebug(request, scoreRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false, false);
@@ -125,8 +133,14 @@ public class ScoreResource extends BaseScoring {
     public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         return scoreProbabilityRecord(request, scoreRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false, false);
     }
+
+    private void setCustomerSpaceInMDC(CustomerSpace customerSpace) {
+        MDC.put("customerspace", CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
+    }
+
 }

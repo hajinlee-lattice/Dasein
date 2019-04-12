@@ -12,8 +12,6 @@ import scala.collection.JavaConverters._
 
 class UpsertJob extends AbstractSparkJob[UpsertConfig] {
 
-  override val name = "UpsertJob"
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[UpsertConfig]): Unit = {
     val config: UpsertConfig = lattice.config
     val inputDfs = lattice.input
