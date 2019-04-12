@@ -8,7 +8,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -54,8 +53,7 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
-        request.setSubmitter(CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     protected abstract PipelineTransformationRequest getTransformRequest();

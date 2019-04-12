@@ -43,18 +43,20 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
+
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            runTestWithRetry();
+        }
+
         try {
-            runTestWithoutRetry();
+            verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
                 saveCheckpoint(saveToCheckPoint());
             }
         }
-    }
-
-    private void runTestWithoutRetry() {
-        processAnalyzeSkipPublishS3OnLocal();
-        verifyProcess();
     }
 
     private void runTestWithRetry() {
@@ -74,7 +76,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
             Assert.assertTrue(duration2 < duration1, //
                     "Duration of first and second PA are: " + duration1 + " and " + duration2);
         }
-        verifyProcess();
     }
 
     // Add sleep between each import to avoid 2 import jobs generate table

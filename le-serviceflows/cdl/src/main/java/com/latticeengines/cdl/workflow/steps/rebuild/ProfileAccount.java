@@ -104,7 +104,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         setEvaluationDateStrAndTimestamp();
 
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     @Override

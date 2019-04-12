@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -124,46 +123,24 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
         step.setInputSteps(Collections.singletonList(inputStep));
-
-        ConsolidateReportConfig config = new ConsolidateReportConfig();
-        config.setEntity(entity);
-        String configStr = appendEngineConf(config, lightEngineConfig());
-        step.setConfiguration(configStr);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(diffReportTablePrefix);
-        step.setTargetTable(targetTable);
-
+        configReportDiffStep(step);
         return step;
-
     }
 
     protected TransformationStepConfig reportDiff(String diffTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
-
-        String tableSourceName = "DiffTable";
-        SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
-
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
+        addBaseTables(step, diffTableName);
+        configReportDiffStep(step);
+        return step;
+    }
 
+    private void configReportDiffStep(TransformationStepConfig step) {
         ConsolidateReportConfig config = new ConsolidateReportConfig();
         config.setEntity(entity);
         String configStr = appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(configStr);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(diffReportTablePrefix);
-        step.setTargetTable(targetTable);
-
-        return step;
-
+        setTargetTable(step, diffReportTablePrefix);
     }
 
     protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly) {
@@ -194,13 +171,14 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly) {
-        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, InterfaceName.Id.name(),
+        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, InterfaceName.Id.name(), //
                 batchStorePrimaryKey, true);
     }
 
     protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
             String srcIdField, String masterIdField) {
-        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, srcIdField, masterIdField, false);
+        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, srcIdField, //
+                masterIdField, false);
     }
 
     private String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
@@ -329,7 +307,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         if (request == null) {
             return null;
         } else {
-            return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+            return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
         }
     }
 
