@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,15 +33,14 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
 
-//FIXME: stopped all tests here because it is spamming emails to @test.com domain
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
     private static final String FORBIDDEN_MSG = "403 FORBIDDEN";
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     private static final AccessLevel[] LEVELS = AccessLevel.values();
