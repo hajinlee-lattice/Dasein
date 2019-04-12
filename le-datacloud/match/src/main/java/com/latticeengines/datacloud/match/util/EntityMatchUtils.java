@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.match.util;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -165,6 +168,24 @@ public class EntityMatchUtils {
         }
 
         return OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode()) && input.isAllocateId();
+    }
+
+    /**
+     * Determine whether the target tuple has only System IDs match key combination.
+     * I.e., only {@link EntityLookupEntry.Type#EXTERNAL_SYSTEM} will be able to
+     * transform the tuple to {@link EntityLookupEntry}.
+     *
+     * @param tuple
+     *            target tuple
+     * @return true if only systemIds
+     */
+    public static boolean hasSystemIdsOnly(MatchKeyTuple tuple) {
+        if (tuple == null) {
+            return false;
+        }
+
+        return isNotEmpty(tuple.getSystemIds()) && isBlank(tuple.getEmail()) && isBlank(tuple.getName())
+                && isBlank(tuple.getPhoneNumber());
     }
 
     /**
