@@ -193,7 +193,7 @@ launch.json file with the following content
 
 #Debug Node server in Visual Studio
 
-1.	Build  using npm run build
+1.	Build  using npm run build IF YOU NEED TO USE THE UI
 2.	Add this to the package.js 
    "debuga": "nodemon --nolazy --inspect-brk=9229 bin/devsetup.js env=qa"
 3.	From terminal run npm run debuga
