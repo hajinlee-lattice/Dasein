@@ -272,7 +272,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     value = internalRecord.getEntityIds() == null ? null
                             : internalRecord.getEntityIds().get(BusinessEntity.Account.name());
                 } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
-                    // retrieve Account EntityId (for entity match)
+                    // retrieve Contact EntityId (for entity match)
                     value = internalRecord.getEntityIds() == null ? null
                             : internalRecord.getEntityIds().get(BusinessEntity.Contact.name());
                 } else if (results.containsKey(field)) {
