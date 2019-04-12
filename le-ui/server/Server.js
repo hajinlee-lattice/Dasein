@@ -26,7 +26,7 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
 var TrayRouter = require('./apis/tray_routes');
-
+var ResetPasswordRouter = require('./apis/reset/reset_password_router');
 class Server {
     constructor(express, app, options) {
         console.log(
@@ -244,6 +244,13 @@ class Server {
                         proxy.remote_path
                     );
                     break;
+                    case 'reset_pipe':
+                    this.createResetPasswordRouter(
+                        proxy.remote_host,
+                        proxy.local_path,
+                        proxy.remote_path
+                    );
+                    break;
                 default:
                     // throw error invalid configuration?
                     break;
@@ -430,6 +437,14 @@ class Server {
             console.log('TRAY PROXY <======================');
             var router = new TrayRouter(this.express, this.app, bodyParser, chalk,  API_URL, PATH, request, this.options.config.proxies, this.options.config.TRAY_MASTER_AUTHORIZATION).createRoutes();
             this.app.use('/tray', router);
+        }
+    }
+
+    createResetPasswordRouter(API_URL, API_PATH, PATH){
+        if(API_URL){
+            console.log('Reset Password PROXY <======================');
+            var router = new ResetPasswordRouter(this.express, this.app, bodyParser, chalk,  API_URL, PATH, request, this.options.config.proxies).createRoutes();
+            this.app.use('/reset', router);
         }
     }
 
