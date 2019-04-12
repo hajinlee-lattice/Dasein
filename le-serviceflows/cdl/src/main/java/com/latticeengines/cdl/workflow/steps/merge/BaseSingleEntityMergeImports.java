@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.merge;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -126,9 +127,23 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         log.info("Set inputMasterTableName=" + inputMasterTableName);
     }
 
-    TransformationStepConfig mergeMaster(String matchedTable, boolean entityMatch) {
+    TransformationStepConfig mergeMaster(boolean entityMatch, int mergeStep) {
         TransformationStepConfig step = new TransformationStepConfig();
-        setupMasterTable(step, matchedTable);
+        setupMasterTable(step);
+        step.setInputSteps(Collections.singletonList(mergeStep));
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        if (!entityMatch) {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false));
+        } else {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false, null, InterfaceName.EntityId.name()));
+        }
+        setTargetTable(step, batchStoreTablePrefix);
+        return step;
+    }
+
+    TransformationStepConfig mergeMaster(boolean entityMatch, String... matchedTables) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        setupMasterTable(step, matchedTables);
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
         if (!entityMatch) {
             step.setConfiguration(getConsolidateDataConfig(false, false, false));
@@ -165,16 +180,23 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    void setupMasterTable(TransformationStepConfig step, String inputTable) {
+    void setupMasterTable(TransformationStepConfig step, String... inputTables) {
         if (StringUtils.isNotBlank(inputMasterTableName)) {
             Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
             if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
-                log.info("Add inputTable=" + inputTable + " masterTable=" + inputMasterTableName);
-                addBaseTables(step, inputTable, inputMasterTableName);
+                log.info("Add inputTables=" + String.join(",", Arrays.asList(inputTables)) + " masterTable="
+                        + inputMasterTableName);
+                String[] newInputTables = new String[inputTables.length + 1];
+                int i = 0;
+                for (; i < inputTables.length; i++) {
+                    newInputTables[i] = inputTables[i];
+                }
+                newInputTables[i] = inputMasterTableName;
+                addBaseTables(step, inputTables);
             }
         } else {
-            log.info("Add inputTable=" + inputTable);
-            addBaseTables(step, inputTable);
+            log.info("Add inputTable=" + String.join(",", Arrays.asList(inputTables)));
+            addBaseTables(step, inputTables);
         }
     }
 

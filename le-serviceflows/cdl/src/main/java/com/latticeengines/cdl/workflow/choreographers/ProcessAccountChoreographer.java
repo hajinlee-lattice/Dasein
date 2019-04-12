@@ -1,12 +1,14 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE;
 
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -118,6 +120,12 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
         shouldRematch = grapherContext.isFullRematch();
+    }
+
+    @Override
+    protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
+        return super.shouldMerge(step)
+                || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
     }
 
     @Override

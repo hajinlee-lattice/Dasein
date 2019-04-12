@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
@@ -26,6 +27,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     static final String BEAN_NAME = "mergeAccount";
 
+    private int mergeStep;
     private int upsertMasterStep;
     private int diffStep;
 
@@ -33,6 +35,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String batchStoreNameInContext;
 
     private boolean shortCutMode;
+
+    private String matchedTableFromContact;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -64,25 +68,50 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private List<TransformationStepConfig> regularSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        upsertMasterStep = 0;
-        diffStep = 1;
-        String matchedTable = getMatchedTable();
-        TransformationStepConfig upsertMaster = mergeMaster(matchedTable, configuration.isEntityMatchEnabled());
-        TransformationStepConfig diff = diff(matchedTable, upsertMasterStep);
-        TransformationStepConfig report = reportDiff(diffStep);
-        steps.add(upsertMaster);
-        steps.add(diff);
-        steps.add(report);
+        boolean entityMatchEnabled = configuration.isEntityMatchEnabled();
+        if (!entityMatchEnabled) {
+            upsertMasterStep = 0;
+            diffStep = 1;
+            String matchedTable = getMatchedTable();
+            TransformationStepConfig upsertMaster = mergeMaster(entityMatchEnabled, matchedTable);
+            TransformationStepConfig diff = diff(matchedTable, upsertMasterStep);
+            TransformationStepConfig report = reportDiff(diffStep);
+            steps.add(upsertMaster);
+            steps.add(diff);
+            steps.add(report);
+        } else {
+            mergeStep = 0;
+            upsertMasterStep = 1;
+            diffStep = 2;
+            List<String> matchedTables = getAllMatchedTable();
+            TransformationStepConfig merge = mergeInputs(false, false, true, false, null, null,
+                    InterfaceName.EntityId.name(), matchedTables);
+            TransformationStepConfig upsertMaster = mergeMaster(entityMatchEnabled, mergeStep);
+            TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
+            TransformationStepConfig report = reportDiff(diffStep);
+            steps.add(merge);
+            steps.add(upsertMaster);
+            steps.add(diff);
+            steps.add(report);
+        }
 
         return steps;
     }
 
-    private String getMatchedTable() {
-        String matchedTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
-        if (StringUtils.isBlank(matchedTable)) {
-            throw new RuntimeException("There's no matched table found!");
+    private List<String> getAllMatchedTable() {
+        List<String> matchedTables = new ArrayList<>();
+        String matchedTable = getMatchedTable();
+        if (StringUtils.isNotBlank(matchedTable)) {
+            matchedTables.add(matchedTable);
         }
-        return matchedTable;
+        if (StringUtils.isNotBlank(matchedTableFromContact)) {
+            matchedTables.add(matchedTableFromContact);
+        }
+        return matchedTables;
+    }
+
+    private String getMatchedTable() {
+        return getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
     }
 
     private List<TransformationStepConfig> shortCutSteps() {
@@ -101,6 +130,15 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         });
         table.setAttributes(attrs);
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+    }
+
+    @Override
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
+        matchedTableFromContact = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
+        if (StringUtils.isNotBlank(matchedTableFromContact)) {
+            inputTableNames.add(matchedTableFromContact);
+        }
     }
 
     @Override

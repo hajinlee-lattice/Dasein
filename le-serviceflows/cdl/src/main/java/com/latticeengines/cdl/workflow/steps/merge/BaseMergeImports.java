@@ -167,23 +167,26 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly) {
-        return mergeInputs(useTargetTable, isDedupeSource, mergeOnly, mergedBatchStoreName, InterfaceName.Id.name(),
-                batchStorePrimaryKey);
+        return mergeInputs(useTargetTable, true, isDedupeSource, mergeOnly, mergedBatchStoreName,
+                InterfaceName.Id.name(),
+                batchStorePrimaryKey, inputTableNames);
     }
 
-    private TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly,
-            String targetTableNamePrefix, String srcIdField, String masterIdField) {
+    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean addTimettamps,
+            boolean isDedupeSource, boolean mergeOnly,
+            String targetTableNamePrefix, String srcIdField, String masterIdField, List<String> tableNames) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<String> baseSources = inputTableNames;
+        List<String> baseSources = tableNames;
         step.setBaseSources(baseSources);
 
         Map<String, SourceTable> baseTables = new HashMap<>();
-        for (String inputTableName : inputTableNames) {
+        for (String inputTableName : tableNames) {
             baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
         }
         step.setBaseTables(baseTables);
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly, srcIdField, masterIdField));
+        step.setConfiguration(
+                getConsolidateDataConfig(isDedupeSource, addTimettamps, mergeOnly, srcIdField, masterIdField));
         if (useTargetTable) {
             setTargetTable(step, targetTableNamePrefix);
         }

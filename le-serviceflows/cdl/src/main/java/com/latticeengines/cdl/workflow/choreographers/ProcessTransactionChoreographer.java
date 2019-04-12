@@ -188,8 +188,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
-    protected boolean shouldReset() {
-        if (!hasRawStore && !shouldMerge()) {
+    protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (!hasRawStore && !shouldMerge(step)) {
             log.info("No raw store and no imports, going to reset entity.");
             return true;
         }
