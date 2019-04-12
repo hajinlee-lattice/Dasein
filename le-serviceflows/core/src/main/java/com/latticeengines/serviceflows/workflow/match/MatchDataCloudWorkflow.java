@@ -28,23 +28,16 @@ public class MatchDataCloudWorkflow extends AbstractWorkflow<MatchDataCloudWorkf
     @Inject
     private ProcessMatchResult processMatchResult;
 
-    @Inject
-    private ProcessMatchResultCascading processMatchResultCascading;
-
     @Value("${workflowapi.use.spark}")
     private boolean useSpark;
 
     @Override
     public Workflow defineWorkflow(MatchDataCloudWorkflowConfiguration config) {
-        WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
+        return new WorkflowBuilder(name(), config) //
                 .next(prepareMatchData) //
                 .next(preMatchConfigStep) //
-                .next(bulkMatchWorkflow);
-        if (useSpark) {
-            builder = builder.next(processMatchResult);
-        } else {
-            builder = builder.next(processMatchResultCascading);
-        }
-        return builder.build();
+                .next(bulkMatchWorkflow) //
+                .next(processMatchResult) //
+                .build();
     }
 }

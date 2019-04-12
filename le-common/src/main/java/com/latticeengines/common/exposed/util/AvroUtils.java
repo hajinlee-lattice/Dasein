@@ -1313,11 +1313,7 @@ public class AvroUtils {
             List<Pair<String, Class<?>>> columns, //
             String recordName, //
             String dirPath) throws Exception {
-        Map<String, Class<?>> schemaMap = new HashMap<>();
-        for (Pair<String, Class<?>> column : columns) {
-            schemaMap.put(column.getKey(), column.getValue());
-        }
-        Schema schema = AvroUtils.constructSchema(recordName, schemaMap);
+        Schema schema = AvroUtils.constructSchema(recordName, columns);
         List<GenericRecord> records = new ArrayList<>();
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (Object[] tuple : data) {
