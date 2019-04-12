@@ -51,9 +51,7 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
       } else {
         val attrsToRename: Map[String, String] = config.getRenameAttrs.asScala.toMap
           .filterKeys(dropped.columns.contains(_))
-        val newAttrs = dropped.columns map {c => {
-          attrsToRename.getOrElse(c, c)
-        }}
+        val newAttrs = dropped.columns.map(c => attrsToRename.getOrElse(c, c))
         dropped.toDF(newAttrs: _*)
       }
 
