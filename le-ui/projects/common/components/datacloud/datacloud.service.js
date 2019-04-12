@@ -384,7 +384,6 @@ angular.module('common.datacloud')
         };
 
         this.setCube = function (cube) {
-            console.log('setcube', cube);
             DataCloudStore.cube = cube;
         };
 
@@ -592,12 +591,12 @@ angular.module('common.datacloud')
                 offset = opts.offset || 0,
                 max = opts.max || null,
                 onlySelectedAttributes = opts.onlySelectedAttributes || null,
-                url = opts.url || this.url('/attributes', '/insights'); 
-                /**
-                 * /datacollection/attributes
-                 *  - or - 
-                 * /datacollection/insights
-                 */
+                url = opts.url || this.url('/attributes', '/insights');
+            /**
+             * /datacollection/attributes
+             *  - or - 
+             * /datacollection/insights
+             */
             $http({
                 method: 'get',
                 url: url,

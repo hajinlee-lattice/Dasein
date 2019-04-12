@@ -13,7 +13,7 @@ angular.module('lp.segments', [
             modelId: $stateParams.modelId,
             tenantName: $stateParams.tenantName,
             segments: SegmentsList || [],
-            enrichments: [],
+            enrichments: Enrichments,
             enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
             segmentAttributesMap: {},
             cube: Cube,
@@ -252,11 +252,10 @@ angular.module('lp.segments', [
 
             restrictions = SegmentStore.sortAttributesByCnt(restrictions);
 
-            let attrs = AttributesStore.formatAttributes(restrictions, vm.enrichments, vm.cube)
+            let attrs = AttributesStore.formatAttributes(restrictions, vm.cube, vm.enrichments)
 
             return attrs;
         };
-
 
         function createOrUpdateSegment(segment) {
             var deferred = $q.defer();
