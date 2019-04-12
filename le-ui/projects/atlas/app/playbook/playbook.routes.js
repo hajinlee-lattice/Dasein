@@ -1,4 +1,6 @@
 import { actions, reducer } from './playbook.redux';
+import { store, injectAsyncReducer } from 'store';
+
 angular
     .module('lp.playbook', [
         'common.wizard',
@@ -29,15 +31,28 @@ angular
                     FilterService.clear();
                     // $state.get('home.playbook').data.redux.unsubscribe();
                 },
-                // onEnter: ['$state', 'ReduxService', function ($state, ReduxService) {
-                //     ReduxService.connect(
-                //         'playbook',
-                //         actions,
-                //         reducer,
-                //         $state.get('home.playbook')
-                //     );
-                // }],
                 resolve: {
+                    // playstore: ($q, $state, ReduxService) => {
+                    //     var deferred = $q.defer();
+
+                    //     deferred.resolve(ReduxService.connect(
+                    //         'playbook',
+                    //         actions,
+                    //         reducer,
+                    //         $state.get('home.playbook.overview')
+                    //     ));
+
+                    //     return deferred.promise;
+                    // },
+                    playstore: ($q, $state, ReduxService) => {
+                        var deferred = $q.defer();
+
+                        injectAsyncReducer(store, 'playbook', reducer);
+                        let playstore = store.getState()['playbook'];
+                        deferred.resolve(playstore);
+
+                        return deferred.promise;
+                    },
                     Model: function () {
                         return null;
                     },
@@ -201,33 +216,24 @@ angular
                     $state.get('home.playbook.overview').data.redux.unsubscribe();
                 },
                 resolve: {
-                    playstore: ($q, $state, ReduxService) => {
-                        var deferred = $q.defer();
-
-                        deferred.resolve(ReduxService.connect(
-                            'playbook',
-                            actions,
-                            reducer,
-                            $state.get('home.playbook.overview')
-                        ));
-
-                        return deferred.promise;
-                    },
                     play: ($q, $stateParams, playstore) => {
                         var deferred = $q.defer();
 
-                        playstore.fetchPlay($stateParams.play_name, deferred);
+                        actions.fetchPlay($stateParams.play_name, deferred);
 
                         return deferred.promise;
                     },
                     connections: ($q, $stateParams, playstore) => {
                         var deferred = $q.defer();
 
-                        playstore.fetchConnections($stateParams.play_name, deferred);
+                        actions.fetchConnections($stateParams.play_name, deferred);
 
                         return deferred.promise;
                     },
-                    Play: (play) => play,
+                    playname: ($stateParams) => {
+                        return $stateParams.play_name;
+                    },
+                    Play: () => { return {} },
                     CampaignTypes: () => {
                         return false;
                     }
