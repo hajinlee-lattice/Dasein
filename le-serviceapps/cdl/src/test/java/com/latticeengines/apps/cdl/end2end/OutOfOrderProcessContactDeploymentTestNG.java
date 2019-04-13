@@ -28,9 +28,9 @@ public class OutOfOrderProcessContactDeploymentTestNG extends CDLEnd2EndDeployme
 
     protected void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        mockCSVImport(BusinessEntity.Contact, 1, "Contact");
+        mockCSVImport(BusinessEntity.Contact, 1, "DefaultSystem_ContactData");
         Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Contact, 2, "Contact");
+        mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
