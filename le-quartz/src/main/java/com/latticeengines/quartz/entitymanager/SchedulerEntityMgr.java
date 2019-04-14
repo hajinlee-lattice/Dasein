@@ -9,6 +9,8 @@ import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
 public interface SchedulerEntityMgr {
     Boolean addJob(String tenantId, JobConfig jobConfig);
 
+    Boolean addPredefinedJob(String jobName);
+
     Boolean deleteJob(String tenantId, String jobName);
 
     List<JobInfo> listJobs(String tenantId);
