@@ -31,6 +31,11 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.S3ImportSystemServiceImpl.*(..))")
+    public void allS3ImportSystemService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+    }
     // ===================================
     // BEGIN: legacy aspects to be removed
     // ===================================

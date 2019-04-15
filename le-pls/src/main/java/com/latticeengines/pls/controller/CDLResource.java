@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
@@ -58,6 +60,7 @@ public class CDLResource {
     private static final String editS3TemplateMsg = "<p>%s template has been edited.</p>";
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
+    private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
 
     @Inject
     private CDLJobProxy cdlJobProxy;
@@ -290,5 +293,36 @@ public class CDLResource {
     public List<FileProperty> getFileList(@RequestParam String s3Path) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path);
+    }
+
+    @PostMapping(value = "/s3import/system")
+    @ResponseBody
+    @ApiOperation("create new S3 Import system")
+    public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemName,
+                                                   @RequestParam S3ImportSystem.SystemType systemType) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            cdlService.createS3ImportSystem(customerSpace.toString(), systemName, systemType);
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    String.format(createS3ImportSystemMsg, systemName));
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        } catch (RuntimeException e) {
+            log.error("Failed to create S3ImportSystem: " + e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18216,  new String[] {systemName});
+        }
+    }
+
+    @GetMapping(value = "/s3import/system")
+    @ResponseBody
+    @ApiOperation("create new S3 Import system")
+    public ResponseDocument<S3ImportSystem> getS3ImportSystem(@RequestParam String systemName) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return ResponseDocument.successResponse(cdlService.getS3ImportSystem(customerSpace.toString(), systemName));
     }
 }
