@@ -7,34 +7,40 @@ export const DIRECTION_NONE = 'none';
 
 let sortingName = '';
 let sortingDirection = '';
+let sortingType = 'string';
+let sortCheckGreater = null;
+let sortCheckLessThan = null;
+
 const compare = (a, b) => {
+
+    sortingType = typeof a[sortingName];
+
+    switch (sortingType) {
+      case 'string': {
+        sortCheckGreater = (((a[sortingName])+'').toLowerCase() < ((b[sortingName])+'').toLowerCase());
+        sortCheckLessThan = (((a[sortingName])+'').toLowerCase() > ((b[sortingName])+'').toLowerCase());
+      }
+      case 'number': {
+        sortCheckGreater = ((a, b) => a - b);
+        sortCheckLessThan = ((a, b) => b - a);
+      }
+    }
+
     switch (sortingDirection) {
       case DIRECTION_ASC: {
-        if (
-          ((a[sortingName])+'').toLowerCase() <
-          ((b[sortingName])+'').toLowerCase()
-        ) {
+        if (sortCheckGreater) {
           return -1;
         }
-        if (
-          ((a[sortingName])+'').toLowerCase() >
-          ((b[sortingName])+'').toLowerCase()
-        ) {
+        if (sortCheckLessThan) {
           return 1;
         }
         return 0;
       }
       case DIRECTION_DESC:
-        if (
-          ((a[sortingName])+'').toLowerCase() >
-          ((b[sortingName])+'').toLowerCase()
-        ) {
+        if (sortCheckLessThan) {
           return -1;
         }
-        if (
-          ((a[sortingName])+'').toLowerCase() <
-          ((b[sortingName])+'').toLowerCase()
-        ) {
+        if (sortCheckGreater) {
           return 1;
         }
         return 0;
