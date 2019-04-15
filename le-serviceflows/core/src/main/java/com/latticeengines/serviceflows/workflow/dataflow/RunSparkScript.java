@@ -73,7 +73,8 @@ public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> ex
                         log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark script " //
                                 + scriptPath);
                     }
-                    LivySession session = createLivySession(tenantId + "~" + fileName);
+                    LivySession session = createLivySession(tenantId + "~" + getClass().getSimpleName() //
+                            + "~" + fileName);
                     return sparkJobService.runScript(session, script, scriptConfig);
                 });
                 postScriptExecution(result);

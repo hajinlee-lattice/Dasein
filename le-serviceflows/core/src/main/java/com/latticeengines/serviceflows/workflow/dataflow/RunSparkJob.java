@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
@@ -83,11 +82,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
                         log.warn("Previous failure: " + context.getLastThrowable());
                         killLivySession();
                     }
-                    String jobName = tenantId + "~" + getJobClz().getSimpleName();
-                    String suffix = getSecondaryJobName();
-                    if (StringUtils.isNotBlank(suffix)) {
-                        jobName += "~" + suffix;
-                    }
+                    String jobName = tenantId + "~" + getClass().getSimpleName() + "~" + getJobClz().getSimpleName();
                     LivySession session = createLivySession(jobName);
                     return sparkJobService.runJob(session, getJobClz(), jobConfig);
                 });
@@ -117,10 +112,6 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
             return attributeMap.getOrDefault(attrName, attr);
         }).collect(Collectors.toList());
         resultTable.setAttributes(newAttrs);
-    }
-
-    protected String getSecondaryJobName() {
-        return "";
     }
 
     protected void exportToS3AndAddToContext(Table table, String contextKey) {

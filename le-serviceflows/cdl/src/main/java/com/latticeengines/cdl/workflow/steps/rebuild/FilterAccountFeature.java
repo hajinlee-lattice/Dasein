@@ -171,9 +171,5 @@ public class FilterAccountFeature extends RunSparkJob<ProcessAccountStepConfigur
         return stepConfiguration.getCustomerSpace();
     }
 
-    @Override
-    protected String getSecondaryJobName() {
-        return TableRoleInCollection.AccountFeatures.name();
-    }
 }
 
