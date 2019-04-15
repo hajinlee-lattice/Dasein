@@ -67,4 +67,6 @@ public interface HdfsSourceEntityMgr {
     String getRequest(Source source, String requestName);
 
     boolean saveReport(Source source, String reportName, String version, String report);
+
+    boolean checkSuccessFlagExist(Source source, String targetVersion);
 }

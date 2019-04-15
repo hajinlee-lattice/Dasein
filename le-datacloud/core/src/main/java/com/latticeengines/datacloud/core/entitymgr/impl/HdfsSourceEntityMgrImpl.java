@@ -55,6 +55,21 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     YarnConfiguration yarnConfiguration;
 
     @Override
+    public boolean checkSuccessFlagExist(Source source, String targetVersion) {
+        String snapshotDir = hdfsPathBuilder.constructTransformationSourceDir(source).toString();
+        String success = snapshotDir + HDFS_PATH_SEPARATOR + targetVersion + HDFS_PATH_SEPARATOR
+                + SUCCESS_FILE_SUFFIX;
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, success)) {
+                return true;
+            }
+        } catch (IOException e) {
+            log.info("Exception : " + e);
+        }
+        return false;
+    }
+
+    @Override
     public List<String> getAllSources() {
         String basePath = hdfsPathBuilder.constructSourceBaseDir().toString();
         try {
