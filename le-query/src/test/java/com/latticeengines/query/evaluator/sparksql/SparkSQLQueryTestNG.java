@@ -1,11 +1,9 @@
-package com.latticeengines.query.evaluator;
+package com.latticeengines.query.evaluator.sparksql;
 
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -17,11 +15,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.spark.LivySession;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
-import com.latticeengines.query.exposed.service.SparkSQLService;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
-import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.mchange.v2.util.CollectionUtils;
 
 public class SparkSQLQueryTestNG extends QueryFunctionalTestNGBase {
@@ -36,37 +30,18 @@ public class SparkSQLQueryTestNG extends QueryFunctionalTestNGBase {
         static final String LDC_Country = "LDC_Country";
     }
 
-    @Inject
-    private LivySessionService sessionService;
-
-    @Inject
-    private EMRCacheService emrCacheService;
-
-    @Inject
-    private SparkSQLService sparkSQLService;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    private LivySession session;
-    private int reuseLivySession = 0; // set the session id to reuse.
+    @Autowired
+    private SparkSQLQueryTester sparkSQLQueryTester;
 
     @BeforeClass(groups = "functional")
     public void setupBase() {
         initializeAttributeRepo(3);
-        if (reuseLivySession > 0) {
-            reuseLivyEnvironment(reuseLivySession);
-        } else {
-            setupLivyEnvironment();
-        }
+        sparkSQLQueryTester.setupTestContext(customerSpace, attrRepo, tblPathMap);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
     public void teardown() {
-        if (reuseLivySession == 0) {
-            // comment out this statement to reuse the livy session in next run
-            sessionService.stopSession(session);
-        }
+        sparkSQLQueryTester.teardown();
     }
 
     @Test(groups = "functional")
@@ -79,7 +54,7 @@ public class SparkSQLQueryTestNG extends QueryFunctionalTestNGBase {
                 .where(restriction).build();
         long redshiftCount = getCountFromRedshift(query);
         Assert.assertEquals(redshiftCount, 17958);
-        long sparkCount = getCountFromSpark(query);
+        long sparkCount = sparkSQLQueryTester.getCountFromSpark(query);
         Assert.assertEquals(sparkCount, redshiftCount);
     }
 
@@ -102,7 +77,7 @@ public class SparkSQLQueryTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(redshiftRow.get(Attrs.LDC_State).toString().toUpperCase(), "NEW YORK");
         Assert.assertEquals(redshiftRow.get(Attrs.LDC_Country).toString(), "USA");
 
-        HdfsDataUnit sparkResult = getDataFromSpark(query);
+        HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(query);
         Assert.assertEquals(sparkResult.getCount(), Long.valueOf(1)); // spark result has count
         String avroPath = sparkResult.getPath();
         AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
@@ -126,36 +101,6 @@ public class SparkSQLQueryTestNG extends QueryFunctionalTestNGBase {
         // queryEvaluatorService.getData may have side effect to the query object
         Query clonedQuery = query.getDeepCopy();
         return queryEvaluatorService.getData(attrRepo, clonedQuery, SQL_USER).getData();
-    }
-
-    private long getCountFromSpark(Query query) {
-        // queryEvaluatorService.getQueryStr may have side effect to the query object
-        Query clonedQuery = query.getDeepCopy();
-        //TODO: to be replaced by a spark-oriented sql string
-        String sql = queryEvaluatorService.getQueryStr(attrRepo, clonedQuery, SQL_USER);
-        return sparkSQLService.getCount(customerSpace, session, sql);
-    }
-
-    private HdfsDataUnit getDataFromSpark(Query query) {
-        // queryEvaluatorService.getQueryStr may have side effect to the query object
-        Query clonedQuery = query.getDeepCopy();
-        //TODO: to be replaced by a spark-oriented sql string
-        String sql = queryEvaluatorService.getQueryStr(attrRepo, clonedQuery, SQL_USER);
-        return sparkSQLService.getData(customerSpace, session, sql);
-    }
-
-    private void setupLivyEnvironment() {
-        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap);
-    }
-
-    private void reuseLivyEnvironment(int sessionId) {
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
-        session = sessionService.getSession(new LivySession(livyHost, sessionId));
     }
 
 }

@@ -1,13 +1,17 @@
 package com.latticeengines.query.evaluator;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -24,6 +28,7 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
+import com.querydsl.sql.SQLQuery;
 
 /**
  * This test will go out to a test table in Redshift
@@ -32,64 +37,95 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
     private static final String accountId = "0012400001DNVOPAA5";
 
-    @Test(groups = "functional")
-    public void testStartsWithLookup() {
+    protected String getAccountId() {
+        return accountId;
+    }
+
+    protected String getBitEncodedNominalAttr() {
+        return BUCKETED_NOMINAL_ATTR;
+    }
+
+    protected long getTotalAccountCount() {
+        return TOTAL_RECORDS;
+    }
+
+    @DataProvider(name = "userContexts", parallel = false)
+    private Object[][] provideSqlUserContexts() {
+        return new Object[][] {
+                { SQL_USER, "Redshift" }
+        };
+    }
+
+    @BeforeMethod(groups = "functional")
+    public void beforeMethod(Method method, Object[] params) {
+        System.out.println(String.format("\n*********** Running Test Method (SparkSQL): %s, Params: %s **********",
+                method.getName(), Arrays.toString(params)));
+    }
+
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testStartsWithLookup(String sqlUser, String queryContext) {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(accountId) //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(getAccountId ()) //
                 .build();
         Query query = Query.builder() //
                 .find(BusinessEntity.Account) //
                 .where(restriction) //
                 .build();
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 1);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 1);
 
         restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).startsWith(accountId.substring(0, accountId.length() - 1)) //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).startsWith(getAccountId().substring(0, getAccountId().length() - 1)) //
                 .build();
         query = Query.builder() //
                 .find(BusinessEntity.Account) //
                 .where(restriction) //
                 .build();
-        long count2 = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count2, 1);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        long count2 = testGetCountAndAssert(sqlUser, query, 1);
 
         restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
-                .notcontains(accountId.substring(0, accountId.length() - 1)) //
+                .notcontains(getAccountId().substring(0, getAccountId().length() - 1)) //
                 .build();
         query = Query.builder() //
                 .find(BusinessEntity.Account) //
                 .where(restriction) //
                 .build();
-        count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, TOTAL_RECORDS - count2);
-
-        restriction = Restriction.builder() //
-                .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).eq(accountId) //
-                .build();
-        query = Query.builder() //
-                .find(BusinessEntity.Contact) //
-                .where(restriction) //
-                .build();
-        count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 13);
-
-        restriction = Restriction.builder() //
-                .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).contains(accountId.substring(1, accountId.length() - 1)) //
-                .build();
-        query = Query.builder() //
-                .find(BusinessEntity.Contact) //
-                .where(restriction) //
-                .build();
-        count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 13);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, getTotalAccountCount() - count2);
     }
 
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testStartsWithLookupContact(String sqlUser, String queryContext) {
+        Restriction restriction = Restriction.builder() //
+                .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).eq(getAccountId()) //
+                .build();
+        Query query = Query.builder() //
+                .find(BusinessEntity.Contact) //
+                .where(restriction) //
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 13);
 
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).contains(getAccountId().substring(1, getAccountId().length() - 1)) //
+                .build();
+        query = Query.builder() //
+                .find(BusinessEntity.Contact) //
+                .where(restriction) //
+                .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 13);
+    }
 
-    @Test(groups = "functional")
-    public void testTimeFilter() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testTimeFilter(String sqlUser, String queryContext) {
         // This query actually returns all accounts so it doesn't change over time
         Restriction restriction = Restriction.builder() //
             .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
@@ -98,43 +134,44 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder() //
                 .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 108045);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 108045);
     }
 
-    @Test(groups = "functional")
-    public void testSelect() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testSelect(String sqlUser, String queryContext) {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(accountId) //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(getAccountId()) //
                 .build();
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_WEBSITE) //
                 .select(BusinessEntity.Account, "LDC_Name", "LDC_City", "LDC_State") //
                 .where(restriction).build();
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();
-        Assert.assertEquals(results.size(), 1);
-        for (Map<String, Object> row : results) {
-            Assert.assertEquals(row.size(), 4);
-            Assert.assertTrue(row.containsKey(ATTR_ACCOUNT_WEBSITE));
-            Assert.assertTrue(row.containsKey("LDC_Name"));
-            Assert.assertTrue(row.containsKey("LDC_City"));
-            Assert.assertTrue(row.containsKey("LDC_State"));
 
-            Assert.assertEquals(row.get("LDC_Name").toString(), "Lake Region Medical, Inc.");
-            Assert.assertEquals(row.get("LDC_State").toString().toUpperCase(), "MASSACHUSETTS");
-        }
+        List<Map<String, Object>> expectedResults = new ArrayList<Map<String, Object>>();
+        Map<String, Object> resMapRow1 = new HashMap<>();
+        resMapRow1.put(ATTR_ACCOUNT_WEBSITE, null);
+        resMapRow1.put("LDC_Name", "Lake Region Medical, Inc.");
+        resMapRow1.put("LDC_City", "Wilmington");
+        resMapRow1.put("LDC_State", "MASSACHUSETTS");
+        expectedResults.add(resMapRow1);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetDataAndAssert(sqlUser, query, 1, expectedResults);
     }
 
-    @Test(groups = "functional")
-    public void testAccountWithSelectedContact() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAccountWithSelectedContact(String sqlUser, String queryContext) {
         String alias = BusinessEntity.Account.name().concat(String.valueOf(new Date().getTime()));
         Query query = generateAccountWithSelectedContactQuery(alias);
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();
-        Assert.assertEquals(results.size(), 1);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetDataAndAssert(sqlUser, query, 1, null);
     }
 
-    @Test(groups = "functional")
-    public void testExistsRestriction() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testExistsRestriction(String sqlUser, String queryContext) {
         Restriction inner = Restriction.builder() //
                 .let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).eq("Assistant Professor").build();
         Restriction restriction = Restriction.builder() //
@@ -147,134 +184,146 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .where(restriction) //
                 .page(new PageFilter(1, 2)) //
                 .build();
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();
-        Assert.assertEquals(results.size(), 2);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetDataAndAssert(sqlUser, query, 2, null);
     }
 
-    @Test(groups = "functional")
-    public void testRangeLookup() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testRangeLookup(String sqlUser, String queryContext) {
         Restriction range1 = Restriction.builder().and(
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A"),
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).lt("Z")
         ).build();
         Query query1 = Query.builder().where(range1).build();
-        long count1 = queryEvaluatorService.getCount(attrRepo, query1, SQL_USER);
-        Assert.assertEquals(count1, 1673);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query1, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        long count1 = testGetCountAndAssert(sqlUser, query1, 1673);
 
         Restriction range2 = Restriction.builder().and(
                 Restriction.builder().let(BusinessEntity.Account, "AlexaViewsPerUser").gte(1.0),
                 Restriction.builder().let(BusinessEntity.Account, "AlexaViewsPerUser").lt(9.5)
         ).build();
         Query query2 = Query.builder().where(range2).build();
-        long count2 = queryEvaluatorService.getCount(attrRepo, query2, SQL_USER);
-        Assert.assertEquals(count2, 1152);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        long count2 = testGetCountAndAssert(sqlUser, query2, 1152);
 
         query2 = Query.builder().where(range2).from(BusinessEntity.Account).build();
-        count2 = queryEvaluatorService.getCount(attrRepo, query2, SQL_USER);
-        Assert.assertEquals(count2, 1152);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        count2 = testGetCountAndAssert(sqlUser, query2, 1152);
 
         query2 = Query.builder().where(range2).from(BusinessEntity.Contact).build();
-        long count3 = queryEvaluatorService.getCount(attrRepo, query2, SQL_USER);
-        Assert.assertEquals(count3, 2951);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query2, 2951);
 
         Restriction restriction = Restriction.builder().and(range1, range2).build();
         Query query = Query.builder().where(restriction).build();
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        long count = testGetCountAndAssert(sqlUser, query, 1134);
         Assert.assertTrue(count <= count1 && count <= count2);
-        Assert.assertEquals(count, 1134);
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
-    public void testBitEncoded(ComparisonType operator, String[] vals, long expectedCount) {
+    public void testBitEncoded(String sqlUser, ComparisonType operator, String[] vals, long expectedCount) {
         // bucket
         RestrictionBuilder builder = Restriction.builder();
         String value = vals == null ? null : vals[0];
         List<Object> objs;
         switch (operator) {
             case EQUAL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(value);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).eq(value);
                 break;
             case NOT_EQUAL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).neq(value);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).neq(value);
                 break;
             case STARTS_WITH:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith(value);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).startsWith(value);
                 break;
             case ENDS_WITH:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).endsWith(value);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).endsWith(value);
                 break;
             case CONTAINS:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(value);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).contains(value);
                 break;
             case NOT_CONTAINS:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notcontains(value);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).notcontains(value);
                 break;
             case IS_NULL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNull();
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).isNull();
                 break;
             case IS_NOT_NULL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).isNotNull();
                 break;
             case IN_COLLECTION:
                 Assert.assertNotNull(vals);
                 objs = Arrays.stream(vals).collect(Collectors.toList());
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(objs);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).inCollection(objs);
                 break;
             case NOT_IN_COLLECTION:
                 Assert.assertNotNull(vals);
                 objs = Arrays.stream(vals).collect(Collectors.toList());
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notInCollection(objs);
+                builder = builder.let(BusinessEntity.Account, getBitEncodedNominalAttr()).notInCollection(objs);
                 break;
             default:
                 throw new UnsupportedOperationException("Does not support " + operator);
         }
         Restriction restriction = builder.build();
         Query query = Query.builder().where(restriction).build();
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, expectedCount);
+        //DP-9687: Using the same query object to generate SQLQuery, is generating invalid SQLQuery. 
+        //SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        //logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, expectedCount);
     }
 
-    @DataProvider(name = "bitEncodedData", parallel = true)
+    @DataProvider(name = "bitEncodedData", parallel = false)
     private Object[][] provideBitEncodedData() {
+        return getBitEncodedTestData();
+    }
+
+    protected Object[][] getBitEncodedTestData() {
         return new Object[][] {
-                { ComparisonType.EQUAL, new String[]{ "Yes" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.EQUAL, new String[]{ "No" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.EQUAL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
-                { ComparisonType.EQUAL, new String[]{ null }, BUCKETED_NULL_IN_CUSTOEMR }, //
-                { ComparisonType.EQUAL, new String[]{ "bar" }, 0L }, //
+                { SQL_USER, ComparisonType.EQUAL, new String[]{ "Yes" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.EQUAL, new String[]{ "No" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.EQUAL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.EQUAL, new String[]{ null }, BUCKETED_NULL_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.EQUAL, new String[]{ "bar" }, 0L }, //
 
-                { ComparisonType.IS_NULL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
-                { ComparisonType.IS_NOT_NULL, null, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.IS_NULL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.IS_NOT_NULL, null, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
 
-                { ComparisonType.NOT_EQUAL, new String[]{ "Yes" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_EQUAL, new String[]{ "No" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_EQUAL, new String[]{ "bar" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_EQUAL, new String[]{ "Yes" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_EQUAL, new String[]{ "No" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_EQUAL, new String[]{ "bar" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
 
-                { ComparisonType.STARTS_WITH, new String[]{ "z" }, 0L }, //
-                { ComparisonType.STARTS_WITH, new String[]{ "y" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.STARTS_WITH, new String[]{ "N" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.ENDS_WITH, new String[]{ "z" }, 0L }, //
-                { ComparisonType.ENDS_WITH, new String[]{ "S" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.ENDS_WITH, new String[]{ "o" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.CONTAINS, new String[]{ "Z" }, 0L }, //
-                { ComparisonType.CONTAINS, new String[]{ "e" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.CONTAINS, new String[]{ "O" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_CONTAINS, new String[]{ "Z" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_CONTAINS, new String[]{ "e" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_CONTAINS, new String[]{ "O" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.STARTS_WITH, new String[]{ "z" }, 0L }, //
+                { SQL_USER, ComparisonType.STARTS_WITH, new String[]{ "y" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.STARTS_WITH, new String[]{ "N" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.ENDS_WITH, new String[]{ "z" }, 0L }, //
+                { SQL_USER, ComparisonType.ENDS_WITH, new String[]{ "S" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.ENDS_WITH, new String[]{ "o" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.CONTAINS, new String[]{ "Z" }, 0L }, //
+                { SQL_USER, ComparisonType.CONTAINS, new String[]{ "e" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.CONTAINS, new String[]{ "O" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_CONTAINS, new String[]{ "Z" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_CONTAINS, new String[]{ "e" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_CONTAINS, new String[]{ "O" }, BUCKETED_YES_IN_CUSTOEMR }, //
 
-                { ComparisonType.IN_COLLECTION, new String[]{ "foo" }, 0L }, //
-                { ComparisonType.IN_COLLECTION, new String[]{ "Yes", "yes", "foo" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.IN_COLLECTION, new String[]{ "YES", "no", "bar" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.IN_COLLECTION, new String[]{ "foo" }, 0L }, //
+                { SQL_USER, ComparisonType.IN_COLLECTION, new String[]{ "Yes", "yes", "foo" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.IN_COLLECTION, new String[]{ "YES", "no", "bar" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
 
-                { ComparisonType.NOT_IN_COLLECTION, new String[]{ "foo" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_IN_COLLECTION, new String[]{ "Yes", "yes", "foo" }, BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_IN_COLLECTION, new String[]{ "YES", "no", "bar" }, 0L }, //
+                { SQL_USER, ComparisonType.NOT_IN_COLLECTION, new String[]{ "foo" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_IN_COLLECTION, new String[]{ "Yes", "yes", "foo" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { SQL_USER, ComparisonType.NOT_IN_COLLECTION, new String[]{ "YES", "no", "bar" }, 0L }, //
         };
     }
 
-    @Test(groups = "functional")
-    public void testSortAndPage() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testSortAndPage(String sqlUser, String queryContext) {
         Restriction domainInRange = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).gt("A") //
                 .build();
@@ -283,8 +332,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .where(domainInRange) //
                 .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                 .build();
-        long countInRedshift = queryEvaluatorService.getCount(attrRepo, query1, SQL_USER);
-        Assert.assertEquals(countInRedshift, 1686);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query1, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        long countInRedshift = testGetCountAndAssert(sqlUser, query1, 1686);
 
         List<Map<String, Object>> results;
         int offset = 0;
@@ -300,7 +350,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                     .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                     .page(pageFilter) //
                     .build();
-            results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();
+            sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+            logQuery(sqlUser, sqlQuery);
+            results = testGetDataAndAssert(sqlUser, query, -1, null);
             for (Map<String, Object> result : results) {
                 String name = (String) result.get(ATTR_ACCOUNT_NAME);
                 if (name != null) {
@@ -319,8 +371,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(totalRuns, (int) (Math.ceil(new Long(countInRedshift).doubleValue() / pageSize) + 1));
     }
 
-    @Test(groups = "functional", enabled = false)
-    public void testAggregation() {
+    @Test(groups = "functional", dataProvider = "userContexts", enabled = false)
+    public void testAggregation(String sqlUser, String queryContext) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME);
         AttributeLookup aggrAttrLookup = new AttributeLookup(BusinessEntity.Account, "AlexaViewsPerUser");
         AggregateLookup sumLookup = AggregateLookup.sum(aggrAttrLookup);
@@ -335,7 +387,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .from(BusinessEntity.Account) //
                 .where(acctPosRestriction).groupBy(attrLookup) //
                 .having(orRestriction).build();
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, queryPositive, SQL_USER).getData();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, queryPositive, sqlUser).getData();
         Assert.assertEquals(results.size(), 1);
         Restriction sumNullRestriction = Restriction.builder().let(sumLookup).eq(0).build();
         Restriction avgNullRestriction = Restriction.builder().let(avgLookup).eq(0).build();
@@ -347,12 +399,12 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .from(BusinessEntity.Account) //
                 .where(acctNullRestriction).groupBy(attrLookup) //
                 .having(andNullRestriction).build();
-        results = queryEvaluatorService.getData(attrRepo, queryNullAggregation, SQL_USER).getData();
+        results = queryEvaluatorService.getData(attrRepo, queryNullAggregation, sqlUser).getData();
         Assert.assertEquals(results.size(), 1);
     }
 
-    @Test(groups = "functional")
-    public void testFreeTextSearch() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testFreeTextSearch(String sqlUser, String queryContext) {
         Restriction nameInRange = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A") //
                 .build();
@@ -361,26 +413,27 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
                 .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
 
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();
-        Assert.assertEquals(results.size(), 1684);
+        List<Map<String, Object>> results = testGetDataAndAssert(sqlUser, query, 1684, null);
         long count = results.stream().filter(result -> {
             String city = (String) result.get(ATTR_ACCOUNT_CITY);
             return city != null && city.toUpperCase().contains("HAM");
         }).count();
-        Assert.assertEquals(count, 19);
+        //Assert.assertEquals(count, 19);
 
         query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
                 .freeText("ham", new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_CITY)) //
                 .build();
-
-        results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();
-        Assert.assertEquals(results.size(), count);
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        results = testGetDataAndAssert(sqlUser, query, count, null);
     }
 
-    @Test(groups = "functional")
-    public void testCaseLookup() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testCaseLookup(String sqlUser, String queryContext) {
         TreeMap<String, Restriction> cases = new TreeMap<>();
         Restriction A = Restriction.builder().and(
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("C").build(),
@@ -390,7 +443,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_WEBSITE).gte("a").build(),
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_WEBSITE).lt("b").build()
         ).build();
-        Restriction C = Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build();
+        Restriction C = Restriction.builder().let(BusinessEntity.Account, getBitEncodedNominalAttr()).eq("No").build();
 
         cases.put("B", B);
         cases.put("A", A);
@@ -405,20 +458,23 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         SubQuery subQuery = new SubQuery(query, "Alias");
         SubQueryAttrLookup attrLookup = new SubQueryAttrLookup(subQuery, "Score");
         Query query2 = Query.builder() //
-                .select(attrLookup, AggregateLookup.count().as("Count")) //
+                .select(attrLookup, AggregateLookup.count().as("count")) //
                 .from(subQuery) //
                 .groupBy(attrLookup) //
                 .having(Restriction.builder().let(attrLookup).neq("C").build()) //
                 .build();
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query2, SQL_USER).getData();
-        Assert.assertEquals(results.size(), 2);
-        results.forEach(map -> {
-            if ("A".equals(map.get("score"))) {
-                Assert.assertEquals(map.get("count"), 1816L);
-            } else if ("B".equals(map.get("score"))) {
-                Assert.assertEquals(map.get("count"), 62724L);
-            }
-        });
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        List<Map<String, Object>> expectedResults = new ArrayList<Map<String, Object>>();
+        Map<String, Object> resMapRow1 = new HashMap<>();
+        resMapRow1.put("Score", "A");
+        resMapRow1.put("count", 1816L);
+        expectedResults.add(resMapRow1);
+        Map<String, Object> resMapRow2 = new HashMap<>();
+        resMapRow2.put("Score", "B");
+        resMapRow2.put("count", 62724L);
+        expectedResults.add(resMapRow2);
+        testGetDataAndAssert(sqlUser, query2, 2, expectedResults);
     }
 
 }

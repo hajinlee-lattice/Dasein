@@ -2,8 +2,11 @@ package com.latticeengines.query.evaluator;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
-import org.testng.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -23,8 +26,50 @@ import com.querydsl.sql.SQLQuery;
 
 public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGBase {
 
-    private EventQueryTranslator getEventQueryTranslator() {
+    private static Logger log = LoggerFactory.getLogger(EventQueryTranslatorTest.class);
+
+    protected EventQueryTranslator getEventQueryTranslator() {
         return new EnhancedEventQueryTranslator();
+    }
+
+    private List<String> productIds = Arrays.asList(
+            "Hd3c9G01LBGBF7LKRGu9Oc0dS8HnuRdv", // Product 0
+            "DkhSLVHpu5iIS5jw4aWOmojNlz7CvAa", // Product 1
+            "eNm3Nmt72BXLZRniXJWSFO4j2jnOUpY", // Product 2
+            "H8u0TkdKoeqD2b8bEFNwcWagzKmPJk", // Product 3
+            "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks", // Product 4 
+            "uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8", // Product 5
+            "k4Pb7AhrIccPjW5jXiWzpwWX2mTvY7I", // Product 6
+            "LHdgKhusYLJqk9JgC5SdJrwNv8tg9il", // Product 7
+            "yhJKT0T3Pu64VprFieVLFbstNw17yz1h", // Product 8
+            "zqpVPoOPufEuPkcxqjDFMykEHN7ocY", // Product 9
+            "uiUrfXNLCGpDIkTAB5he5iLbhGwLik0I", // Product 10 
+            "hpf28LuxIoQzJ4gy4u20Vwazew0t", // Product 11
+            "5Bg2lBhLITlRpSMIMv8qtVMRS9ortPL", // Product 12
+            "hLxxPy0B6A4ehW7FaaGRh9LAjNzsYicB", // Product 13
+            "uIbuNRuc30AVD8Hqz0r3bJoscKyrZoJj", // Product 14
+            "aBbvvgqeFEGCr9h1JZpGP9NZDsRerBhC", // Product 15
+            "TyZ3prYakrgeUdVTxbu7UPNAF3GtN8", // Product 16
+            "FcUOE0yZRyjId7f9MZt2WDTWo6wHXRo", // Product 17
+            "I0VN2ZbBuKtXeQs8LFPOqwBxRgjpoLq", // Product 18
+            "1ydd4TfF8tNf1yeAzi4EnrrYWrBOAa", // Product 19
+            "iGfEB6bqSCdrYXsd17BmIU5FK1Wd7A0I", // Product 20
+            "Bl2ObAv3Smmm0xLD1bXMYnQ0zs4Hsnh8" // Product 21
+    );
+
+    public List<String> getProductIds() {
+        return productIds;
+    }
+
+    @DataProvider(name = "userContexts", parallel = false)
+    private Object[][] provideSqlUserContexts() {
+        return new Object[][] {
+                { SQL_USER, "Redshift" }
+        };
+    }
+
+    protected int getDefaultPeriodId() {
+        return 10;
     }
 
     private TransactionRestriction getHasEngagedPriorToFive(String prodIdList) {
@@ -112,7 +157,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
     private EventFrontEndQuery getDefaultEventFrontEndQuery() {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         frontEndQuery.setPeriodName("Month");
-        frontEndQuery.setEvaluationPeriodId(10);
+        frontEndQuery.setEvaluationPeriodId(getDefaultPeriodId());
         return frontEndQuery;
     }
 
@@ -180,7 +225,6 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
     private TransactionRestriction getAvgAmountInCurrentPeriod(String prodIdList) {
         TransactionRestriction txRestriction = new TransactionRestriction();
-        // txRestriction.setProductId(PROD_ID2);
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
                 PeriodStrategy.Template.Month.name(), //
@@ -332,348 +376,324 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         return txRestriction;
     }
 
-    @Test(groups = "functional")
-    public void testHasEngagedPrior() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testHasEngagedPrior(String sqlUser, String queryContext) {
         // DS_Test_1
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,6B047FF03A59E42A79D1961541C1BF60,FE4D73162629DF254688CC8D553FA52A";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(1), getProductIds().get(2));
         TransactionRestriction txRestriction = getHasEngagedPriorToFive(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 5966);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 5966);
     }
 
-    @Test(groups = "functional")
-    public void testHasPurchasedInCurrentPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testHasPurchasedInCurrentPeriod(String sqlUser, String queryContext) {
         // DS_Test_2
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,6B047FF03A59E42A79D1961541C1BF60,FE4D73162629DF254688CC8D553FA52A";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(1), getProductIds().get(2));
         TransactionRestriction txRestriction = getEngagedInCurrentPeriod(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 2862);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 2862);
     }
 
-    @Test(groups = "functional")
-    public void testHasNotPurchasedWithin() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testHasNotPurchasedWithin(String sqlUser, String queryContext) {
         // DS_Test_3
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,3CA17E482511F94FCEB93195D2B146DE,94842E58561D516577E4C0377F601DA3";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(3), getProductIds().get(4));
         TransactionRestriction txRestriction = getHasNotPurchasedWithin(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 76987);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 76987);
     }
 
-    // @Test(groups = "functional")
-    public void testHasNotEngaged() {
+    // @Test(groups = "functional", dataProvider = "userContexts")
+    public void testHasNotEngaged(String sqlUser, String queryContext) {
         // DS_Test_4
         String prodIdList = "tbd";
         TransactionRestriction txRestriction = getHasNotEngagedProd1(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 68680);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 68680);
     }
 
-    @Test(groups = "functional")
-    public void testPriorOnlyNegativeCase() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testPriorOnlyNegativeCase(String sqlUser, String queryContext) {
         // DS_Test_5
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,8D6A468D2B5F99D5D2252DE0DF6F971C,A78DF03BAC196BE9A08508FFDB433A31";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(5), getProductIds().get(6));
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
 
         TransactionRestriction txRestriction = getPriorSevenEngaged(prodIdList);
         txRestriction.setNegate(true);
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 88959);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 88959);
     }
 
-    @Test(groups = "functional")
-    public void testTotalAmountLessThan1M() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testTotalAmountLessThan1M(String sqlUser, String queryContext) {
         // DS_Test_6
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,40BE92E2D8ADE18DC80A3FAEC761F91A,D7B8185BB08C1AFA624B7B9BA49AA77C,6C5E5F2F07EB909FDB480F868047586C";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(7), getProductIds().get(8), getProductIds().get(9));
         TransactionRestriction txRestriction = getTotalAmountLessThan1M(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 96058);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 96058);
     }
 
-    @Test(groups = "functional")
-    public void testEachAmountEver() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testEachAmountEver(String sqlUser, String queryContext) {
         // DS_Test_7
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,64E8729DCA85D713B8BE424E6A2828E5,EBB5D5D47420FE96255F586D37FE3EB0";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(10), getProductIds().get(11));
         TransactionRestriction txRestriction = getEachAmount(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 210);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 210);
     }
 
-    @Test(groups = "functional")
-    public void testAvgQuantityEver() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAvgQuantityEver(String sqlUser, String queryContext) {
         // DS_Test_8
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,56E3D7F5C674E7AC8026A61360A80769";
+        String prodIdList = String.join(",", getProductIds().get(0), getProductIds().get(12));
         TransactionRestriction txRestriction = getAvgQuantity(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 13985);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 13985);
     }
 
-    @Test(groups = "functional")
-    public void testQuantityAtLeastOnce() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testQuantityAtLeastOnce(String sqlUser, String queryContext) {
         // DS_Test_9
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,B365E24EC8F2C3672684ACC2F2EE208A";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(13));
         TransactionRestriction txRestriction = getTotalQuantityGTE10Once(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 1196);
-
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 1196);
     }
 
-    @Test(groups = "functional")
-    public void testAvgAmountInCurrentPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAvgAmountInCurrentPeriod(String sqlUser, String queryContext) {
         // DS_Test_10
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,8D6A468D2B5F99D5D2252DE0DF6F971C,D45763A3E784654F2C17CF906F9CD295";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(5),getProductIds().get(14));
         TransactionRestriction txRestriction = getAvgAmountInCurrentPeriod(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 3795);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 3795);
     }
 
-    @Test(groups = "functional")
-    public void testEachQuantityWithinPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testEachQuantityWithinPeriod(String sqlUser, String queryContext) {
         // DS_Test_11
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,7D18DD009AC1004A4E72B66E2D8F594F,5544C27D9C475BF2B639241F65D8D26F";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(15),getProductIds().get(16));
         TransactionRestriction txRestriction = getEachQuantityWithinPeriod(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 318);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 318);
     }
 
-    @Test(groups = "functional")
-    public void testAmountAtLeastOnceBetweenPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAmountAtLeastOnceBetweenPeriods(String sqlUser, String queryContext) {
         // DS_Test_12
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,E49000DA92C149E7BF960306185BF577,36E2AF3FC4AE03328EE407C3A3933007";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(17),getProductIds().get(18));
         TransactionRestriction txRestriction = getAtLeastOnceAmountBetweenPeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 6023);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 6023);
     }
 
-    @Test(groups = "functional")
-    public void testTotalAmountBetweenPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testTotalAmountBetweenPeriods(String sqlUser, String queryContext) {
         // DS_Test_13
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,1EF99C5568D3047FBD9D4A271614B008,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(19),getProductIds().get(20));
         TransactionRestriction txRestriction = getTotalAmountBetweenPeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 4464);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 4464);
     }
 
-    @Test(groups = "functional")
-    public void testAvgAmountWithinPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAvgAmountWithinPeriods(String sqlUser, String queryContext) {
         // DS_Test_14
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(20));
         TransactionRestriction txRestriction = getAvgAmountWithinPeriod(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 2881);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 2881);
     }
 
-    @Test(groups = "functional")
-    public void testAmountEachLessThanWithinPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAmountEachLessThanWithinPeriod(String sqlUser, String queryContext) {
         // DS_Test_15
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(20));
         TransactionRestriction amount = getAmountEachWithinPeriod(prodIdList);
         TransactionRestriction hasNotEngaged = getHasNotEngagedWithinPeriod(prodIdList);
         Restriction logicalRestriction = Restriction.builder().or(amount, hasNotEngaged).build();
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo,
-                logicalRestriction, getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER)
+                logicalRestriction, getDefaultEventFrontEndQuery(), Query.builder(), sqlUser)
                 .build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 85989);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 85989);
     }
 
-    @Test(groups = "functional")
-    public void testAvgAmountBetweenPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAvgAmountBetweenPeriods(String sqlUser, String queryContext) {
         // DS_Test_16
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,94842E58561D516577E4C0377F601DA3,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(4),getProductIds().get(20));
         TransactionRestriction txRestriction = getAvgAmountBetweenPeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 82723);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 82723);
     }
 
-    @Test(groups = "functional")
-    public void testEachQuantityInCurrentPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testEachQuantityInCurrentPeriod(String sqlUser, String queryContext) {
         // DS_Test_17
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,94842E58561D516577E4C0377F601DA3,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(4),getProductIds().get(20));
         TransactionRestriction txRestriction = getEachQuantityInCurrentPeriod(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 776);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 776);
     }
 
-    @Test(groups = "functional")
-    public void testAvgQuantityWithinPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAvgQuantityWithinPeriod(String sqlUser, String queryContext) {
         // DS_Test_18
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(20));
         TransactionRestriction txRestriction = getAvgQuantityWithinPeriod(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 95895);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 95895);
     }
 
-    @Test(groups = "functional")
-    public void testTotalQuantityBetweenPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testTotalQuantityBetweenPeriods(String sqlUser, String queryContext) {
         // DS_Test_19
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(20));
         TransactionRestriction txRestriction = getTotalQuantityBetweenPeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 95949);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 95949);
     }
 
-    @Test(groups = "functional")
-    public void testAtLeastOnceQuantityBetweenPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAtLeastOnceQuantityBetweenPeriods(String sqlUser, String queryContext) {
         // DS_Test_20
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(20));
         TransactionRestriction txRestriction = getAtLeastOnceQuantityBetweenPeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 97);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 97);
     }
 
-    @Test(groups = "functional")
-    public void testAtLeastOnceQuantityWithinPeriod() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAtLeastOnceQuantityWithinPeriod(String sqlUser, String queryContext) {
         // DS_Test_21
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,94842E58561D516577E4C0377F601DA3,A78DF03BAC196BE9A08508FFDB433A31";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(4),getProductIds().get(6));
         TransactionRestriction txRestriction = getAtLeastOnceQuantityWithinPeriod(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 596);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 596);
     }
 
-    @Test(groups = "functional")
-    public void testEachAmountWithinFivePeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testEachAmountWithinFivePeriods(String sqlUser, String queryContext) {
         // DS_Test_22
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(20));
         TransactionRestriction txRestriction = getEachAmountWithinFivePeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 317);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 317);
     }
 
-    @Test(groups = "functional")
-    public void testAvgQuantityBetweenPeriods() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testAvgQuantityBetweenPeriods(String sqlUser, String queryContext) {
         // DS_Test_23
-        String prodIdList = "3872223C9BA06C649D68E415E23A9446,2A2A5856EC1CCB78E786DF65564DA39E,94842E58561D516577E4C0377F601DA3";
+        String prodIdList = String.join(",", getProductIds().get(0),getProductIds().get(21),getProductIds().get(4));
         TransactionRestriction txRestriction = getAvgQuantityBetweenPeriods(prodIdList);
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 89763);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 89763);
     }
 
     public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
