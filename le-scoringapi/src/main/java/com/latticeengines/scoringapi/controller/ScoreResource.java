@@ -49,7 +49,11 @@ public class ScoreResource extends BaseScoring {
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        return getActiveModels(request, type, customerSpace);
+        try {
+            return getActiveModels(request, type, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -58,7 +62,11 @@ public class ScoreResource extends BaseScoring {
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        return getModelFields(request, modelId, customerSpace);
+        try {
+            return getModelFields(request, modelId, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -73,7 +81,12 @@ public class ScoreResource extends BaseScoring {
             throws ParseException {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        return getPaginatedModels(request, start, offset, maximum, considerAllStatus, considerDeleted, customerSpace);
+        try {
+            return getPaginatedModels(request, start, offset, maximum, considerAllStatus, considerDeleted,
+                    customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -86,7 +99,11 @@ public class ScoreResource extends BaseScoring {
             throws ParseException {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        return getModelCount(request, start, considerAllStatus, considerDeleted, customerSpace);
+        try {
+            return getModelCount(request, start, considerAllStatus, considerDeleted, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -95,10 +112,14 @@ public class ScoreResource extends BaseScoring {
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        return scorePercentileRecord(request, scoreRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
-                false, requestId, false, false);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            return scorePercentileRecord(request, scoreRequest, customerSpace, //
+                    ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
+                    false, requestId, false, false);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -108,10 +129,14 @@ public class ScoreResource extends BaseScoring {
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        return scorePercentileRecords(request, scoreRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
-                false, requestId, false, false);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            return scorePercentileRecords(request, scoreRequest, customerSpace, //
+                    ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
+                    false, requestId, false, false);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -122,9 +147,14 @@ public class ScoreResource extends BaseScoring {
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        return scoreRecordsDebug(request, scoreRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false, false);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            return scoreRecordsDebug(request, scoreRequest, customerSpace, //
+                    ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false,
+                    false);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -134,13 +164,22 @@ public class ScoreResource extends BaseScoring {
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         setCustomerSpaceInMDC(customerSpace);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        return scoreProbabilityRecord(request, scoreRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false, false);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            return scoreProbabilityRecord(request, scoreRequest, customerSpace, //
+                    ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false,
+                    false);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     private void setCustomerSpaceInMDC(CustomerSpace customerSpace) {
         MDC.put("customerspace", CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
+    }
+
+    private void removeCustomerSpaceFromMDC() {
+        MDC.remove("customerspace");
     }
 
 }
