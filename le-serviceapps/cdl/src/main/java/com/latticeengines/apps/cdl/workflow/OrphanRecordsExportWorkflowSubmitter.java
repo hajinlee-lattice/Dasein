@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -26,13 +28,16 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
@@ -51,6 +56,9 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @WithWorkflowJobPid
     public ApplicationId submit(String customerSpace, OrphanRecordsExportRequest request,
@@ -109,6 +117,14 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         String productTableName = getTableName(TableRoleInCollection.ConsolidatedProduct,
                 request.getArtifactVersion());
 
+        AttrConfigRequest attrRequest = cdlAttrConfigProxy.getAttrConfigByCategory(customerSpace,
+                Category.ACCOUNT_ATTRIBUTES.name());
+        if (CollectionUtils.isEmpty(attrRequest.getAttrConfigs())) {
+            return null;
+        }
+        List<String> validatedColumns = attrRequest.getAttrConfigs().stream().map(config -> config.getAttrName())
+                .collect(Collectors.toList());
+
         if (orphanRecordsType == OrphanRecordsType.TRANSACTION &&
                 !validateTableNames(new String[] { transactionTableName, accountTableName, productTableName })) {
             return null;
@@ -144,6 +160,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 .productTableName(productTableName) //
                 .transactionTableName(transactionTableName) //
                 .exportMergeFile(Boolean.TRUE) //
+                .validatedColumns(validatedColumns) //
                 .mergedFileName(orphanRecordsType.getOrphanType() + ".csv") //
                 .build();
         wfConfig.setUserId(request.getCreatedBy());
