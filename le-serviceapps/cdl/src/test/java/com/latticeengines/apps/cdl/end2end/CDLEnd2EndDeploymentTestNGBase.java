@@ -1300,7 +1300,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             return;
         }
         expectedEntityCount.forEach((key, value) -> //
-                Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value));
+                Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
@@ -1308,7 +1308,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             return;
         }
         expectedEntityCount.forEach((key, value) -> {
-            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value);
+            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value, key.getServingStore().name());
 //            if (key != BusinessEntity.ProductHierarchy) {
 //                Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value);
 //            } else {
