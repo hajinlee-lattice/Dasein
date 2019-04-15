@@ -41,7 +41,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
 
         // Test changes to MatchInput.
         MatchContext context = matchPlanner.plan(input);
-        Assert.assertEquals(input.getDataCollectionVersion(), null);
+        Assert.assertNull(input.getDataCollectionVersion());
         Assert.assertEquals(input.getDecisionGraph(), defaultAccountGraph);
         Assert.assertEquals(input.getMatchEngine(), MatchContext.MatchEngine.REAL_TIME.getName());
 
@@ -53,11 +53,12 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         // Check Column Metadata
         List<Column> expectedColumns = new ArrayList<>();
         expectedColumns.add(new Column(InterfaceName.EntityId.name()));
+        expectedColumns.add(new Column(InterfaceName.AccountId.name()));
         Assert.assertEquals(context.getColumnSelection().getColumns(), expectedColumns);
 
         // Test MatchOutput set up.
         MatchOutput output = context.getOutput();
-        Assert.assertTrue(output.getEntityKeyMaps() != null);
+        Assert.assertNotNull(output.getEntityKeyMaps());
         Assert.assertEquals(output.getEntityKeyMaps().size(), 1);
         Assert.assertTrue(output.getEntityKeyMaps().containsKey(BusinessEntity.Account.name()));
     }
@@ -70,7 +71,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
         input.setSkipKeyResolution(true);
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS",
-                "AccountId", "SfdcId", "MktoId"));
+                "CustomerAccountId", "SfdcId", "MktoId"));
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setAllocateId(false);
         input.setTargetEntity(BusinessEntity.Account.name());
@@ -82,7 +83,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         keyMap.put(MatchKey.City, Collections.singletonList("City"));
         keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
-        keyMap.put(MatchKey.SystemId, Arrays.asList("AccountId", "MktoId", "SfdcId"));
+        keyMap.put(MatchKey.SystemId, Arrays.asList("CustomerAccountId", "MktoId", "SfdcId"));
         entityKeyMap.setKeyMap(keyMap);
         input.setEntityKeyMaps(new HashMap<>());
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
