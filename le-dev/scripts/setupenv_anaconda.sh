@@ -88,10 +88,10 @@ ${ANACONDA_HOME}/bin/conda install -y \
     pytz \
     python-snappy \
     python-dateutil \
-    numpy=1.8 \
-    pandas=0.13 \
-    scikit-learn=0.14 \
-    statsmodels=0.5
+    numpy=1.16.2 \
+    pandas=0.24.2 \
+    scikit-learn=0.20.3 \
+    statsmodels=0.9.0
 
 if [[ "$(uname)" != "Darwin" ]]; then
     ${ANACONDA_HOME}/bin/conda install -y -c clinicalgraphics libgcrypt11
