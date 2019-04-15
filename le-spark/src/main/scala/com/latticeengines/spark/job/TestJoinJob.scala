@@ -7,8 +7,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class TestJoinJob extends AbstractSparkJob[TestJoinJobConfig] {
 
-  override val name = "testJoin"
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[TestJoinJobConfig]): Unit = {
     // read input
     val table1: DataFrame = lattice.input.head

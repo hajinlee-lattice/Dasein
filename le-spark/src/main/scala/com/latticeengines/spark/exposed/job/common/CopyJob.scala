@@ -15,8 +15,6 @@ import scala.collection.JavaConverters._
   */
 class CopyJob extends AbstractSparkJob[CopyConfig] {
 
-  override val name = "CopyJob"
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[CopyConfig]): Unit = {
     val config: CopyConfig = lattice.config
     val input = lattice.input.head

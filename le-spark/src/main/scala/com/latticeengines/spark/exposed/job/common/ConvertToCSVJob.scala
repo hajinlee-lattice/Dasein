@@ -15,8 +15,6 @@ import scala.collection.JavaConverters._
 
 class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
 
-  override val name = "ConvertToCSVJob"
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[ConvertToCSVConfig]): Unit = {
     val config: ConvertToCSVConfig = lattice.config
     val input = lattice.input.head
