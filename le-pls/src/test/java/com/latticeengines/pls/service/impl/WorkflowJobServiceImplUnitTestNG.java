@@ -279,12 +279,18 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testUpdateJobActionId() {
-        Job job = createFailedImportJob(jobIds[1]);
-        Assert.assertNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
-        when(actionProxy.getActionsByJobPid(anyString(), any())).thenReturn(generateActions());
-        workflowJobService.updateJobActionId(job);
-        log.info(" job is :" + JsonUtils.serialize(job));
-        Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+        Job job1 = createFailedImportJob(jobIds[1]);
+        Job job2 = createFailedImportJob(jobIds[0]);
+        List<Job> jobList = new ArrayList<>();
+        jobList.add(job1);
+        jobList.add(job2);
+        Assert.assertNull(job1.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+        Assert.assertNull(job2.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+        when(actionProxy.getActionsByJobPids(anyString(), any())).thenReturn(trackingActions());
+        workflowJobService.updateJobsWithActionId(jobList);
+        log.info(" jobs is :" + JsonUtils.serialize(jobList));
+        Assert.assertNotNull(jobList.get(0).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+        Assert.assertNotNull(jobList.get(1).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
     }
 
     @Test(groups = "unit")
@@ -454,6 +460,31 @@ public class WorkflowJobServiceImplUnitTestNG {
         actions.add(action4);
         actions.add(action5);
         actions.add(action6);
+        return actions;
+    }
+
+    private List<Action> trackingActions() {
+        List<Action> actions = new ArrayList<>();
+        Action action1 = new Action();
+        action1.setPid(2L);
+        action1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action1.setActionConfiguration(new ImportActionConfiguration());
+        action1.setTrackingPid(jobIds[0]);
+        Action action2 = new Action();
+        action2.setPid(3L);
+        action2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action2.setActionConfiguration(new ImportActionConfiguration());
+        action2.setActionStatus(ActionStatus.CANCELED);
+        action2.setTrackingPid(jobIds[1]);
+        Action action3 = new Action();
+        action3.setPid(3L);
+        action3.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action3.setActionConfiguration(new ImportActionConfiguration());
+        action3.setActionStatus(ActionStatus.ACTIVE);
+        action3.setTrackingPid(jobIds[1]);
+        actions.add(action1);
+        actions.add(action2);
+        actions.add(action3);
         return actions;
     }
 
