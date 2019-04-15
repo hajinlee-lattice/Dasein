@@ -2,6 +2,8 @@ import React, { Component, ReactDOM } from "common/react-vendor";
 import './le-modal.scss';
 
 import LeButton from '../buttons/le-button';
+// import { store, injectAsyncReducer } from 'store';
+import { actions, reducer } from './le-modal.redux';
 
 const modalRoot = document.getElementById('le-modal');
 
@@ -10,10 +12,29 @@ export default class LeModal extends Component {
     constructor(props) {
         super(props);
         this.clickHandler = this.clickHandler.bind(this);
+        console.log('MODAL PROPS ==> ', props);
+        this.state = { opened: false };
+        this.props.injectAsyncReducer(this.props.store, 'le-modal', reducer);
+        this.unsubscribe = this.props.store.subscribe(() => {
+            const data = this.props.store.getState()['le-modal'];
+            this.setState({
+                opened: data.opened,
+                callbackFn: data.callbackFn,
+                templateFn: data.templateFn
+            });
+        });
+        this.clickHandler = this.clickHandler.bind(this);
     }
 
     clickHandler(action) {
-        this.props.callback(action);
+        switch(action){
+            case 'close':
+            actions.toggleModal(this.props.store);
+            break;
+        }
+        if (this.state.callbackFn) {
+            this.state.callbackFn(action);
+        }
     }
     getTitle() {
         return this.props.title ? this.props.title : '';
@@ -43,7 +64,7 @@ export default class LeModal extends Component {
                     </div>
 
                     <div className="le-modal-body">
-                        {this.props.template()}
+                        {this.state.templateFn()}
                     </div>
 
                     <div className="le-modal-footer">
@@ -71,7 +92,7 @@ export default class LeModal extends Component {
     }
 
     render() {
-        if (this.props.opened == true) {
+        if (this.state.opened == true) {
             let modal = this.getModalUI();
             return ReactDOM.createPortal(
                 modal, modalRoot

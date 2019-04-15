@@ -1,6 +1,8 @@
 import React, { Component, react2angular, UIRouter, UIView } from "common/react-vendor";
 import ReactRouter from './router';
 import './react-main.component.scss';
+import LeModal from 'common/widgets/modal/le-modal';
+import { store, injectAsyncReducer } from 'store';
 
 export default class ReactAngularMainComponent extends Component {
     constructor(props) {
@@ -14,6 +16,7 @@ export default class ReactAngularMainComponent extends Component {
         let router = ReactRouter.getRouter();
         console.log(router);
         router.stateService.go(this.props.path);
+        
     }
     componentWillUnmount() {
         ReactRouter.clear();
@@ -27,6 +30,12 @@ export default class ReactAngularMainComponent extends Component {
     render() {
         return (
             <div className="main-panel">
+                <LeModal store={store} opened={false} injectAsyncReducer={injectAsyncReducer} 
+                callback={() =>{
+                    console.log('MODAL CB');
+                }} title="Org ID to Account ID Mapping" template={() => {
+                    return (<p>Test</p>)
+                }} />
                 <UIRouter router={ReactRouter.getRouter()}>
                     <UIView name="header" />
                     <UIView name="summary" />

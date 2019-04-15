@@ -12,6 +12,8 @@ import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
+import {actions as modalActions} from '../../../../../common/widgets/modal/le-modal.redux';
+import {store } from 'store';
 export default class SystemCreationComponent extends Component {
     constructor(props) {
         super(props);
@@ -105,7 +107,12 @@ export default class SystemCreationComponent extends Component {
                             classNames: "blue-button"
                         }}
                         callback={() => {
-                            ReactRouter.getStateService().go('templateslist');
+                            modalActions.toggleModal(store, () =>{console.log('TEST')}, () => {
+                                return (
+                                    <p>Leo</p>
+                                )
+                            });
+                            // ReactRouter.getStateService().go('templateslist');
                             // alert('Call APIS');
                         }}
                     />
