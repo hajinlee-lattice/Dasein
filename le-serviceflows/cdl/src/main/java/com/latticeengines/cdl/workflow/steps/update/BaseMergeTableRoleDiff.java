@@ -128,11 +128,6 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
         addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
     }
 
-    @Override
-    protected String getSecondaryJobName() {
-        return getTableRole().name();
-    }
-
     protected String getJoinKey() {
         return getTableRole().getPrimaryKey().name();
     }
