@@ -48,7 +48,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory
             .getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
+    private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLM1540406334891";
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
