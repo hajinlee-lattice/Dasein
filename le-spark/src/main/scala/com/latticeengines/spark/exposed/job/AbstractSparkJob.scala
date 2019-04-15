@@ -15,7 +15,6 @@ import scala.collection.JavaConverters._
 abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext => String) {
 
   var serializedConfig: String = "{}"
-  val name:String
 
   def configure(jobConfig: C): Unit = {
     serializedConfig = JsonUtils.serialize(jobConfig)

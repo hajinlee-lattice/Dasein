@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier,
             @RequestParam(value = "type", required = false) ModelType type) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         return getActiveModels(request, type, customerSpace);
     }
 
@@ -54,6 +56,7 @@ public class InternalScoreResource extends BaseScoring {
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         return getActiveModels(request, type, customerSpace);
     }
 
@@ -63,6 +66,7 @@ public class InternalScoreResource extends BaseScoring {
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         return getModelFields(request, modelId, customerSpace);
     }
 
@@ -77,6 +81,7 @@ public class InternalScoreResource extends BaseScoring {
             @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) throws ParseException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         if (!StringUtils.isEmpty(start) && start.contains("%2B")) {
             start = start.replace("%2B", "+");
         }
@@ -92,6 +97,7 @@ public class InternalScoreResource extends BaseScoring {
             @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) throws ParseException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         if (!StringUtils.isEmpty(start) && start.contains("%2B")) {
             start = start.replace("%2B", "+");
         }
@@ -112,6 +118,7 @@ public class InternalScoreResource extends BaseScoring {
             boolean enableMatching, //
             HttpServletResponse response) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
@@ -132,6 +139,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
@@ -152,6 +160,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
@@ -172,6 +181,7 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
@@ -198,10 +208,15 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        setCustomerSpaceInMDC(customerSpace);
         String requestId = RequestIdUtils.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes, requestId,
                 enforceFuzzyMatch, skipDnBCache, forceSkipMatching);
+    }
+
+    private void setCustomerSpaceInMDC(CustomerSpace customerSpace) {
+        MDC.put("customerspace", CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
     }
 
 }

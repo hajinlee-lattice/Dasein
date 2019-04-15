@@ -12,8 +12,6 @@ import scala.collection.JavaConverters._
 
 class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
 
-  override val name = "ParseMatchResultJob"
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[ParseMatchResultJobConfig]): Unit = {
     // read input
     val matchResult: DataFrame = lattice.input.head
