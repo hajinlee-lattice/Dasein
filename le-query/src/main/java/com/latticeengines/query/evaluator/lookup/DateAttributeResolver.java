@@ -7,8 +7,10 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DateAttributeLookup;
-import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
+import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQuery;
+import com.latticeengines.query.factory.sqlquery.DateTimeExpressionTemplate;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -17,8 +19,8 @@ import com.querydsl.core.types.dsl.Expressions;
 public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup>
         implements LookupResolver<DateAttributeLookup> {
 
-    public DateAttributeResolver(AttributeRepository repository) {
-        super(repository);
+    public DateAttributeResolver(AttributeRepository repository, QueryProcessor queryProcessor, String sqlUser) {
+        super(repository, queryProcessor, sqlUser);
     }
 
     @Override
@@ -47,11 +49,13 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
 
     private Expression<? extends Comparable<?>> resolveForDate(DateAttributeLookup lookup, ColumnMetadata cm, String p,
             boolean alias) {
+        BaseSQLQuery<?> query = queryProcessor.getQueryFactory().getQuery(repository, sqlUser);
+        DateTimeExpressionTemplate dateTimeExpressionTemplate = query.getDateTimeTemplate();
         String datePath = lookup.toString();
         if (cm.getJavaClass() == null || cm.getJavaClass().equals((String.class.getSimpleName()))) {
-            datePath = ExpressionTemplateUtils.strAttrToDate(datePath);
+            datePath = dateTimeExpressionTemplate.strAttrToDate(datePath);
         }
-        return Expressions.dateTemplate(Date.class, ExpressionTemplateUtils.getDateOnPeriodTemplate(p, datePath));
+        return Expressions.dateTemplate(Date.class, dateTimeExpressionTemplate.getDateOnPeriodTemplate(p, datePath));
     }
 
 }

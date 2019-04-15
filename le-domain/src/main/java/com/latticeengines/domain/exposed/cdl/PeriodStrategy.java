@@ -1,6 +1,11 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -87,7 +92,20 @@ public class PeriodStrategy implements Serializable {
     }
 
     public enum Template {
-        Date, Day, Week, Month, Quarter, Year
+        Date, Day, Week, Month, Quarter, Year;
+
+        private static Map<String, Template> lookupMap;
+
+        static {
+            lookupMap = Stream.of(Template.values()).collect(Collectors.toMap(e -> e.name().toUpperCase(), e -> e));
+        }
+
+        public static Template fromName(String templateName) {
+            if (StringUtils.isBlank(templateName)) {
+                return null;
+            }
+            return lookupMap.get(templateName.toUpperCase());
+        }
     }
 
 }
