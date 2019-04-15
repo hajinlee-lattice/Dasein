@@ -144,6 +144,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             if (HdfsUtils.fileExists(yarnConfiguration, tableDataPath)) {
                 throw new IllegalArgumentException("Target table path " + tableDataPath + " is already occupied.");
             }
+            HdfsUtils.mkdir(yarnConfiguration, tableDataPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to check target table path.", e);
         }
