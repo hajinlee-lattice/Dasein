@@ -180,23 +180,15 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    void setupMasterTable(TransformationStepConfig step, String... inputTables) {
+    private void setupMasterTable(TransformationStepConfig step, String... inputTables) {
+        log.info("Add inputTable=" + String.join(",", Arrays.asList(inputTables)));
+        addBaseTables(step, inputTables);
         if (StringUtils.isNotBlank(inputMasterTableName)) {
             Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
             if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
-                log.info("Add inputTables=" + String.join(",", Arrays.asList(inputTables)) + " masterTable="
-                        + inputMasterTableName);
-                String[] newInputTables = new String[inputTables.length + 1];
-                int i = 0;
-                for (; i < inputTables.length; i++) {
-                    newInputTables[i] = inputTables[i];
-                }
-                newInputTables[i] = inputMasterTableName;
-                addBaseTables(step, inputTables);
+                log.info("Add masterTable=" + inputMasterTableName);
+                addBaseTables(step, inputMasterTableName);
             }
-        } else {
-            log.info("Add inputTable=" + String.join(",", Arrays.asList(inputTables)));
-            addBaseTables(step, inputTables);
         }
     }
 

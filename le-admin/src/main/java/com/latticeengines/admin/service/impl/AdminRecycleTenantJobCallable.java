@@ -7,10 +7,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -48,57 +50,65 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     @Override
     public Boolean call() throws Exception {
         List<Tenant> tempTenants = tenantService.getTenantByType(TenantType.POC);
-        for (Tenant tenant : tempTenants) {
-            long expiredTime = tenant.getExpiredTime();
-            long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            // send email two weeks before user can't access tenant
-            if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
-                int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
-                List<User> users = userService.getUsers(tenant.getId());
-                users.forEach(user -> {
-                    if (userLevels.contains(user.getAccessLevel())) {
-                        emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
-                        log.info(String.format("send POC tenant %s inactive notification to user %s.", tenant.getName(),
-                                user.getUsername()));
-                    }
-                });
-            } else if (currentTime > expiredTime && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
-                tenant.setStatus(TenantStatus.INACTIVE);
-                tenantService.updateTenant(tenant);
-                log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
-            } else if (expiredTime + inAcessPeriod - emailPeriod < currentTime
-                    && currentTime < expiredTime + inAcessPeriod) {
-                // send email to user who can visit tenant two weeks before
-                // delete tenant
-                int days = (int) Math.ceil((expiredTime + inAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
-                List<User> users = userService.getUsers(tenant.getId());
-                users.forEach(user -> {
-                    if (userLevels.contains(user.getAccessLevel())) {
-                        emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
-                        log.info(String.format("send POC tenant %s inaccessible notification to user %s.",
-                                tenant.getName(), user.getUsername()));
-                    }
-                });
+        if (CollectionUtils.isNotEmpty(tempTenants)) {
+            log.info("POC tennats size is " + tempTenants.size());
+            for (Tenant tenant : tempTenants) {
+                log.info("begin dealing with tenant right" + JsonUtils.serialize(tenant));
+                long expiredTime = tenant.getExpiredTime();
+                long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                // send email two weeks before user can't access tenant
+                if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                    int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
+                    List<User> users = userService.getUsers(tenant.getId());
+                    users.forEach(user -> {
+                        if (userLevels.contains(user.getAccessLevel())) {
+                            emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                            log.info(String.format("send POC tenant %s inactive notification to user %s.",
+                                    tenant.getName(), user.getUsername()));
+                        }
+                    });
+                } else if (currentTime > expiredTime && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
+                    tenant.setStatus(TenantStatus.INACTIVE);
+                    tenantService.updateTenant(tenant);
+                    log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
+                } else if (expiredTime + inAcessPeriod - emailPeriod < currentTime
+                        && currentTime < expiredTime + inAcessPeriod) {
+                    // send email to user who can visit tenant two weeks before
+                    // delete tenant
+                    int days = (int) Math.ceil((expiredTime + inAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
+                    List<User> users = userService.getUsers(tenant.getId());
+                    users.forEach(user -> {
+                        if (userLevels.contains(user.getAccessLevel())) {
+                            emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
+                            log.info(String.format("send POC tenant %s inaccessible notification to user %s.",
+                                    tenant.getName(), user.getUsername()));
+                        }
+                    });
 
-            } else if (currentTime > expiredTime + inAcessPeriod) {
-                CustomerSpace space = CustomerSpace.parse(tenant.getId());
-                adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
-                log.info(String.format("POC tenant %s has been deleted", tenant.getName()));
+                } else if (currentTime > expiredTime + inAcessPeriod) {
+                    CustomerSpace space = CustomerSpace.parse(tenant.getId());
+                    adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
+                    log.info(String.format("POC tenant %s has been deleted", tenant.getName()));
+                }
             }
         }
-
+        log.info("begin revoke tenant right ");
         List<GlobalAuthUserTenantRight> tenantRights = userTenantRightEntityMgr.findByNonNullExprationDate();
-        for (GlobalAuthUserTenantRight tenantRight : tenantRights) {
-            if (LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() > tenantRight
-                    .getExpirationDate() && tenantRight.getGlobalAuthTenant() != null
-                    && tenantRight.getGlobalAuthUser() != null) {
-                String tenantId = tenantRight.getGlobalAuthTenant().getId();
-                String userName = tenantRight.getGlobalAuthUser().getEmail();
-                log.info(String.format(String.format("Quartz job deleted %s from tenant %s", tenantId, userName)));
-                userService.deleteUser(tenantId, userName);
+        if (CollectionUtils.isNotEmpty(tenantRights)) {
+            log.info("expired tenant size is " + tenantRights.size());
+            for (GlobalAuthUserTenantRight tenantRight : tenantRights) {
+                log.info("begin dealing with tenant right" + JsonUtils.serialize(tenantRight));
+                if (LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() > tenantRight
+                        .getExpirationDate() && tenantRight.getGlobalAuthTenant() != null
+                        && tenantRight.getGlobalAuthUser() != null) {
+                    String tenantId = tenantRight.getGlobalAuthTenant().getId();
+                    String userName = tenantRight.getGlobalAuthUser().getEmail();
+                    log.info(String.format(String.format("Quartz job deleted %s from tenant %s", tenantId, userName)));
+                    userService.deleteUser(tenantId, userName);
+                }
             }
         }
-        return null;
+        return true;
     }
 
     public static class Builder {
