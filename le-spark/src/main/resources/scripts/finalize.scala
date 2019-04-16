@@ -8,7 +8,6 @@
 //  var output: List[DataFrame] = List[DataFrame]()
 //}
 //val lattice: LatticeContext = new LatticeContext(Nil, null, List[JsonNode]())
-import org.apache.spark.storage.StorageLevel
 
 
 val targets = lattice.targets
@@ -21,13 +20,14 @@ if (targets.length != output.length) {
 
 val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val tgt = t._1
-  val df = t._2.persist(StorageLevel.MEMORY_AND_DISK_SER)
+  val df = t._2
   val path = tgt.get("Path").asText()
   df.write.format("avro").save(path)
+  val df2 = spark.read.format("avro").load(path)
   val json = mapper.createObjectNode()
   json.put("StorageType", "Hdfs")
   json.put("Path", path)
-  json.put("Count", df.count())
+  json.put("Count", df2.count())
   df.unpersist()
   json
 }
