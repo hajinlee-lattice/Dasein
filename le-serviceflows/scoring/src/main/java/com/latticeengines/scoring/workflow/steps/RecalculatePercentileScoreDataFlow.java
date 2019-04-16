@@ -7,7 +7,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -15,10 +14,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component("recalculatePercentileScoreDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -36,11 +35,7 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
 
     private static final int percentileUpperBound = 99;
 
-    @Value("${cdl.big.dataflow.am.mem.gb}")
-    private int amMemGbForPA;
-
-    @Value("${cdl.big.dataflow.am.vcores}")
-    private int amVCoresForPA;
+    private int numModels;
 
     @Override
     public void execute() {
@@ -67,7 +62,7 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
         Map<String, String> scoreFieldMap = ExpectedRevenueDataFlowUtil
                 .getScoreFieldsMap(getListObjectFromContext(RATING_MODELS, RatingModelContainer.class));
         String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
-
+        numModels = Math.max(MapUtils.size(scoreFieldMap), 1);
         if (MapUtils.isNotEmpty(scoreFieldMap)) {
             log.info(String.format("Using scoreFieldMap %s", JsonUtils.serialize(scoreFieldMap)));
             params.setOriginalScoreFieldMap(scoreFieldMap);
@@ -83,23 +78,11 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
         configuration.setDataFlowParams(params);
     }
 
-    private boolean inPA() {
-        return getNamespace().contains(ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME);
-    }
-
     protected Integer getYarnAmMemGb() {
-        if (inPA()) {
-            return amMemGbForPA;
-        } else {
-            return super.getYarnAmMemGb();
-        }
+        return ScalingUtils.scaleDataFlowAmMemGbByNumModels(numModels);
     }
 
     protected Integer getYarnAmVCores() {
-        if (inPA()) {
-            return amVCoresForPA;
-        } else {
-            return super.getYarnAmVCores();
-        }
+        return ScalingUtils.scaleDataFlowAmVCoresByNumModels(numModels);
     }
 }
