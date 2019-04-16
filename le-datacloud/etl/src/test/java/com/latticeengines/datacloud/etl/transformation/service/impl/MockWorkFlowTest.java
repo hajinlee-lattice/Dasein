@@ -107,7 +107,8 @@ public class MockWorkFlowTest
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        boolean expectedValue = false;
+        boolean expectedValue = false; // _SUCCESS flag is not uploaded and
+                                       // hence value = false
         Assert.assertTrue(pipelineTransformationService.hdfsSourceEntityMgr.checkSourceExist(source,
                 "2019-04-11_20-47-00_UTC") == expectedValue);
     }
