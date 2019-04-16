@@ -47,7 +47,7 @@ public class SparkSQLQueryTester {
     protected Configuration yarnConfiguration;
 
     private LivySession session;
-    private int reuseLivySession = 5; // set the session id to reuse.
+    private int reuseLivySession = 0; // set the session id to reuse.
 
     protected AttributeRepository attrRepo;
     protected Map<String, String> tblPathMap;
@@ -90,7 +90,7 @@ public class SparkSQLQueryTester {
     public void teardown() {
         if (reuseLivySession == 0) {
             // comment out this statement to reuse the livy session in next run
-            //sessionService.stopSession(session);
+            sessionService.stopSession(session);
         }
     }
 
