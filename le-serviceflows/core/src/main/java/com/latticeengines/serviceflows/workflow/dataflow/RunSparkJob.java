@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -21,39 +18,15 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepCon
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
-import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.SparkJobService;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class RunSparkJob<S extends BaseStepConfiguration, //
         C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
 
     @Inject
     private SparkJobService sparkJobService;
-
-    @Inject
-    private EMREnvService emrEnvService;
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
-
-    @Resource(name = "distCpConfiguration")
-    protected Configuration distCpConfiguration;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    @Value("${camille.zk.pod.id}")
-    protected String podId;
-
-    @Value("${aws.customer.s3.bucket}")
-    protected String s3Bucket;
 
     protected abstract Class<J> getJobClz();
     /**
@@ -112,25 +85,6 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
             return attributeMap.getOrDefault(attrName, attr);
         }).collect(Collectors.toList());
         resultTable.setAttributes(newAttrs);
-    }
-
-    protected void exportToS3AndAddToContext(Table table, String contextKey) {
-        String tableName = table.getName();
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
-        ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
-                customerSpace.toString(), table, //
-                pathBuilder, s3Bucket, podId, //
-                yarnConfiguration, //
-                fileStatus -> true);
-        if (batchStoreRequest == null) {
-            throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
-        }
-        HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
-                customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
-        exporter.run();
-        putStringValueInContext(contextKey, tableName);
     }
 
 }
