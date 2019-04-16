@@ -1,12 +1,19 @@
 package com.latticeengines.query.evaluator.sparksql;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema.Field;
+import org.apache.avro.util.Utf8;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -35,6 +42,9 @@ public class SparkSQLQueryTester {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    @Inject
+    protected Configuration yarnConfiguration;
 
     private LivySession session;
     private int reuseLivySession = 0; // set the session id to reuse.
@@ -94,4 +104,21 @@ public class SparkSQLQueryTester {
         return sparkSQLService.getData(customerSpace, session, queryString);
     }
 
+    public List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
+        List<Map<String, Object>> resultData = new ArrayList<>();
+        String avroPath = sparkResult.getPath();
+        AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
+        iterator.forEachRemaining(record -> {
+            Map<String, Object> row = new HashMap<>();
+            for (Field field: record.getSchema().getFields()) {
+                Object value = record.get(field.name());
+                if (value != null && value instanceof Utf8) {
+                    value = ((Utf8)value).toString();
+                }
+                row.put(field.name(), value);
+            }
+            resultData.add(row);
+        });
+        return resultData;
+    }
 }

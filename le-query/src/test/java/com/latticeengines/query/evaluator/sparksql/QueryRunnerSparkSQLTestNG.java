@@ -19,16 +19,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
 import com.latticeengines.query.factory.SparkQueryProvider;
-import com.querydsl.sql.SQLQuery;
 
 public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
     private static Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
@@ -161,7 +156,7 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
             return redshiftResults;
         case SparkQueryProvider.SPARK_BATCH_USER:
             HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(query);
-            List<Map<String, Object>> sparkResultsAsList = convertHdfsDataUnitToList(sparkResult);
+            List<Map<String, Object>> sparkResultsAsList = sparkSQLQueryTester.convertHdfsDataUnitToList(sparkResult);
             log.info("SparkSQL Query Data Size: {}", sparkResultsAsList.size());
             sparkQueryDataResults.add(sparkResultsAsList);
             return sparkResultsAsList;

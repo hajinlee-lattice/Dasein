@@ -159,7 +159,7 @@ public class EventQueryTranslatorSparkSQLTestNG extends EventQueryTranslatorTest
             return count;
         case SparkQueryProvider.SPARK_BATCH_USER:
             HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(query);
-            List<Map<String, Object>> sparkResultsAsList = convertHdfsDataUnitToList(sparkResult);
+            List<Map<String, Object>> sparkResultsAsList = sparkSQLQueryTester.convertHdfsDataUnitToList(sparkResult);
             log.info("SparkSQL Query Data Size: {}", sparkResultsAsList.size());
             Assert.assertEquals(sparkResultsAsList.size(), 24237);
             return sparkResultsAsList.size();
