@@ -19,11 +19,16 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
 import com.latticeengines.query.factory.SparkQueryProvider;
+import com.querydsl.sql.SQLQuery;
 
 public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
     private static Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
@@ -163,5 +168,4 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
         }
         throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
-
 }

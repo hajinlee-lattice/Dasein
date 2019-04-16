@@ -86,4 +86,12 @@ public class SparkSQLQueryTester {
         return sparkSQLService.getData(customerSpace, session, sql);
     }
 
+    public long getCountFromSpark(String queryString) {
+        return sparkSQLService.getCount(customerSpace, session, queryString);
+    }
+
+    public HdfsDataUnit getDataFromSpark(String queryString) {
+        return sparkSQLService.getData(customerSpace, session, queryString);
+    }
+
 }
