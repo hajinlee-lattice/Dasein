@@ -19,16 +19,6 @@ export const actions = {
                 templateFn: template
             }
         })
-        // let observer = new Observer(
-        //     response => {
-        //         httpService.unsubscribeObservable(observer);
-        //         return store.dispatch({
-        //             type: CONST.FETCH_TEMPLATES,
-        //             payload: response.data
-        //         });
-        //     }
-        // );
-        // httpService.get('/pls/cdl/s3import/template', observer, {});
     }
 };
 

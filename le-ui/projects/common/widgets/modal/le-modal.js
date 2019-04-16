@@ -14,9 +14,9 @@ export default class LeModal extends Component {
         this.clickHandler = this.clickHandler.bind(this);
         console.log('MODAL PROPS ==> ', props);
         this.state = { opened: false };
-        this.props.injectAsyncReducer(this.props.store, 'le-modal', reducer);
-        this.unsubscribe = this.props.store.subscribe(() => {
-            const data = this.props.store.getState()['le-modal'];
+        this.props.config.injectAsyncReducer(this.props.config.store, 'le-modal', reducer);
+        this.unsubscribe = this.props.config.store.subscribe(() => {
+            const data = this.props.config.store.getState()['le-modal'];
             this.setState({
                 opened: data.opened,
                 callbackFn: data.callbackFn,
@@ -29,7 +29,7 @@ export default class LeModal extends Component {
     clickHandler(action) {
         switch(action){
             case 'close':
-            actions.toggleModal(this.props.store);
+            actions.toggleModal(this.props.config.store);
             break;
         }
         if (this.state.callbackFn) {
@@ -37,7 +37,7 @@ export default class LeModal extends Component {
         }
     }
     getTitle() {
-        return this.props.title ? this.props.title : '';
+        return this.props.config.title ? this.props.config.title : '';
     }
 
     getClassName() {

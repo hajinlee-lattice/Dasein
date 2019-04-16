@@ -1,8 +1,8 @@
 import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
-import ReactRouter from '../../../react/router';
 import { actions, reducer } from './multipletemplates.redux';
 import LeHPanel from 'common/widgets/container/le-h-panel';
+import ReactRouter from '../../../react/router';
 import {
     SPACEBETWEEN,
     SPACEEVEN,
@@ -31,6 +31,9 @@ export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
         super(props);
+        console.log('TTTT ', ReactRouter.getRouter());
+        let tmp = ReactRouter.getRouter()['ngservices'].ImportWizardStore.getAccountIdState();
+        console.log('AAAAA ', tmp);
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
         this.state = {
