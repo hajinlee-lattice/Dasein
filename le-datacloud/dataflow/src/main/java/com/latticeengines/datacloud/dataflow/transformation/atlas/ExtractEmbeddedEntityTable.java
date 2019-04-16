@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +27,25 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
+/**
+ * This transformer is only used in PA match step. If there is an entity
+ * embedded in another entity match job (eg. Account embedded in Contact match),
+ * we want to extract the newly created embedded entity (eg. Account), setup a
+ * table/source with necessary match key fields and merge to the entity's batch
+ * store
+ *
+ * InputSource1: EntityIds table (EntityName, EntityId) 
+ * eg. In Contact match, we create this table source with EntityName = 'Account' 
+ * and EntityId = EntityId of all the newly created Accounts in Contact match
+ * Prerequisites: EntityId is guaranteed to be unique
+ *
+ * InputSource2: EmbeddedEntity table
+ * eg. Result table of Contact match with AllocateId mode. 
+ * Contact input/match result fields + AccountId (Account EntityId) + Account input fields
+ * 
+ * Join InputSource1 with InputSource2 by entity's EntityId, 
+ * then retain necessary match key fields
+ */
 @Component(ExtractEmbeddedEntityTable.DATAFLOW_BEAN_NAME)
 public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbeddedEntityTableConfig> {
     public static final String DATAFLOW_BEAN_NAME = "ExtractEmbeddedEntityTableFlow";
@@ -42,7 +64,7 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
     // SystemId fields are not included)
     private static final Map<String, List<String>> OPTIONAL_FLDS = ImmutableMap.of(
             BusinessEntity.Account.name(),
-            MatchKey.LDC_FUZZY_MATCH_KEYS.stream().map(key -> key.name()).collect(Collectors.toList())
+            MatchKey.LDC_MATCH_KEY_STD_FLDS.values().stream().collect(Collectors.toList())
             );
 
     private static final String ENTITYID_JOIN = "EntityId_Join";
@@ -58,8 +80,7 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
         embeddedEntities = validatePrepareEmbeddedEntitiesNode(embeddedEntities);
 
         return entityIds
-                .join(new FieldList(InterfaceName.EntityId.name()), embeddedEntities, new FieldList(ENTITYID_JOIN),
-                        JoinType.INNER)
+                .join(new FieldList(ENTITY_ID_FIELD), embeddedEntities, new FieldList(ENTITYID_JOIN), JoinType.INNER)
                 .discard(ENTITYID_JOIN);
     }
 
@@ -86,20 +107,24 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
      * @return
      */
     private Node validatePrepareEntityIdsNode(Node entityIds) {
-        Preconditions.checkNotNull(entityIds.getSchema(InterfaceName.EntityId.name()),
+        Preconditions.checkNotNull(entityIds.getSchema(ENTITY_ID_FIELD),
                 "Input source of EntityIds doesn't have EntityId field");
-        entityIds = entityIds.retain(InterfaceName.EntityId.name());
+        entityIds = entityIds.retain(ENTITY_ID_FIELD);
         if (BusinessEntity.Account.name().equals(config.getEntity())) {
-            entityIds = entityIds.apply(InterfaceName.EntityId.name(), //
+            entityIds = entityIds.apply(ENTITY_ID_FIELD, //
                     new FieldList(entityIds.getFieldNames()), //
                     new FieldMetadata(InterfaceName.AccountId.name(), String.class));
+        }
+        if (config.isFilterByEntity()) {
+            entityIds = entityIds.filter(
+                    String.format("\"%s\".equals(%s)", config.getEntity(), ENTITY_NAME_FIELD),
+                    new FieldList(ENTITY_NAME_FIELD));
         }
         return entityIds;
     }
 
     /**
-     * Retain all required fields + existed optional fields; Add non-existed
-     * optional fields with null value
+     * Retain all required fields + existed optional fields
      *
      * @param embeddedEntities
      * @return
@@ -127,17 +152,6 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
         }
         toRetainFlds.add(config.getEntityIdFld());
         embeddedEntities = embeddedEntities.retain(new FieldList(toRetainFlds));
-
-        // Add non-existed optional fields with null value
-        List<String> toAddFlds = optionalFlds.stream().filter(field -> origin.getSchema(field) == null)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(config.getSystemIdFlds())) {
-            toAddFlds.addAll(config.getSystemIdFlds().stream()
-                    .filter(field -> origin.getSchema(field) == null).collect(Collectors.toList()));
-        }
-        for (String field : toAddFlds) {
-            embeddedEntities = embeddedEntities.addColumnWithFixedValue(field, null, String.class);
-        }
         
         embeddedEntities = embeddedEntities.rename(new FieldList(config.getEntityIdFld()),
                 new FieldList(ENTITYID_JOIN));

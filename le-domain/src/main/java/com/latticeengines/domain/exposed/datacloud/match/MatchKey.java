@@ -1,8 +1,9 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
-import java.util.Set;
+import java.util.Map;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public enum MatchKey {
     ExternalId, //
@@ -22,6 +23,14 @@ public enum MatchKey {
               // MktoId, etc.
     EntityId; // for entity match, internal id for quicker lookup in entity seed
 
-    public static final Set<MatchKey> LDC_FUZZY_MATCH_KEYS = //
-            ImmutableSet.of(Domain, Name, City, State, Country, Zipcode, PhoneNumber, DUNS);
+    public static final Map<MatchKey, String> LDC_MATCH_KEY_STD_FLDS = ImmutableMap.<MatchKey, String> builder()
+            .put(Domain, InterfaceName.Website.name()) //
+            .put(Name, InterfaceName.CompanyName.name()) //
+            .put(City, InterfaceName.City.name()) //
+            .put(State, InterfaceName.State.name()) //
+            .put(Country, InterfaceName.Country.name()) //
+            .put(Zipcode, InterfaceName.PostalCode.name()) //
+            .put(PhoneNumber, InterfaceName.PhoneNumber.name()) //
+            .put(DUNS, InterfaceName.DUNS.name()) //
+            .build();
 }

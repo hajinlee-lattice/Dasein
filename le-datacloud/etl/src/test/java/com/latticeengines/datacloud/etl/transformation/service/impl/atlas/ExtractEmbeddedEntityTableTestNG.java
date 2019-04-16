@@ -1,18 +1,20 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.atlas;
 
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.City;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.DUNS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Domain;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.PhoneNumber;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Zipcode;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.City;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DUNS;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PostalCode;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Website;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
 import java.util.ArrayList;
@@ -128,13 +130,13 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
 
     private void prepareEntityIds() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of("EntityName", String.class));
-        schema.add(Pair.of(EntityId.name(), String.class));
+        schema.add(Pair.of(ENTITY_NAME_FIELD, String.class));
+        schema.add(Pair.of(ENTITY_ID_FIELD, String.class));
 
         uploadBaseSourceData(entityIds.getSourceName(), baseSourceVersion, schema, entityIdsData);
     }
 
-    // Test Scenario: Partial Account match fields
+    // Test Scenario: Partial Account match fields (No SystemIds)
     private String[] embeddedAcctTableSchema1 = { //
             // Contact EntityId
             EntityId.name(), ContactId.name(),
@@ -143,8 +145,18 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
             // Matched Account LatticeAccountId
             LatticeAccountId.name(),
             // Account match key fields
-            Domain.name(), DUNS.name() };
+            Website.name(), DUNS.name() };
 
+    private String[] expectedAcctTableSchema1 = { //
+            // Account EntityId
+            EntityId.name(), AccountId.name(),
+            // Matched Account LatticeAccountId
+            LatticeAccountId.name(),
+            // Account match key fields
+            Website.name(), DUNS.name()
+    };
+
+    // Schema: EntityId, ContactId, AccountId, LatticeAccountId, Website, DUNS
     private Object[][] embeddedAcctTableData1 = new Object[][] { //
             { "C01", "C01", "A01", "LDC01", "dom1.com", "duns1" }, //
             { "C02", "C02", "A01", "LDC02", null, "duns1" }, //
@@ -173,7 +185,7 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
         uploadBaseSourceData(embeddedAcctTable1.getSourceName(), baseSourceVersion, schema, embeddedAcctTableData1);
     }
 
-    // Test Scenario: Complete Account match fields
+    // Test Scenario: Complete Account match fields (With SystemIds)
     private String[] embeddedAcctTableSchema2 = {
             // Contact EntityId
             EntityId.name(), ContactId.name(),
@@ -182,8 +194,18 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
             // Matched Account LatticeAccountId
             LatticeAccountId.name(),
             // Account match key fields
-            CustomerAccountId.name(), Domain.name(), DUNS.name(), Name.name(), City.name(), State.name(),
-            Country.name(), Zipcode.name(), PhoneNumber.name()
+            CustomerAccountId.name(), Website.name(), DUNS.name(), CompanyName.name(), City.name(), State.name(),
+            Country.name(), PostalCode.name(), PhoneNumber.name()
+    };
+
+    private String[] expectedAcctTableSchema2 = {
+            // Account EntityId
+            EntityId.name(), AccountId.name(),
+            // Matched Account LatticeAccountId
+            LatticeAccountId.name(),
+            // Account match key fields
+            CustomerAccountId.name(), Website.name(), DUNS.name(), CompanyName.name(), City.name(), State.name(),
+            Country.name(), PostalCode.name(), PhoneNumber.name() //
     };
 
     private Object[][] embeddedAcctTableData2 = new Object[][] { //
@@ -224,28 +246,25 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
         log.info("Verifying intermediate source " + source);
         switch (source) {
         case "AccountTable1":
-            verifyIntermediateSource(records, embeddedAcctTableSchema1, embeddedAcctTableData1);
+            verifyIntermediateSource(records, Arrays.asList(expectedAcctTableSchema1),
+                    Arrays.asList(embeddedAcctTableSchema1), embeddedAcctTableData1);
             break;
         case "AccountTable2":
-            verifyIntermediateSource(records, embeddedAcctTableSchema2, embeddedAcctTableData2);
+            verifyIntermediateSource(records, Arrays.asList(expectedAcctTableSchema2),
+                    Arrays.asList(embeddedAcctTableSchema2), embeddedAcctTableData2);
             break;
         default:
             throw new IllegalArgumentException("Unknown intermediate source " + source);
         }
     }
 
-    private void verifyIntermediateSource(Iterator<GenericRecord> records, String[] inputSchema,
-            Object[][] inputData) {
-        List<String> expectedSchema = Arrays.asList(EntityId.name(), AccountId.name(), //
-                CustomerAccountId.name(), LatticeAccountId.name(), //
-                Domain.name(), DUNS.name(), Name.name(), City.name(), State.name(), //
-                Country.name(), Zipcode.name(), PhoneNumber.name());
+    private void verifyIntermediateSource(Iterator<GenericRecord> records, List<String> expectedSchema,
+            List<String> inputSchema, Object[][] inputData) {
         Collections.sort(expectedSchema);
-        List<String> inputFieldList = Arrays.asList(inputSchema);
-        // Expected field name -> Index of the field in INPUT data (-1 as not existed)
+        // Expected field name -> Index of the field in INPUT data
         Map<String, Integer> schemaIdxes = expectedSchema.stream()
                 .collect(Collectors.toMap(field -> field,
-                        field -> inputFieldList.indexOf(EntityId.name().equals(field) ? AccountId.name() : field)));
+                        field -> inputSchema.indexOf(EntityId.name().equals(field) ? AccountId.name() : field)));
 
         Set<String> expectedAIDs = ImmutableSet.of("A01", "A02", "A03", "A04", "A05");
         // RecordId (Use LatticeAccountId which is designed to be unique in test
@@ -266,16 +285,7 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
             String recordId = record.get(LatticeAccountId.name()).toString();
             Assert.assertTrue(expectedData.containsKey(recordId));
             schemaIdxes.entrySet().forEach(ent -> {
-                if (ent.getValue() == -1) {
-                    // Expected field doesn't exist in input: expected to be
-                    // populated with null
-                    Assert.assertNull(record.get(ent.getKey()),
-                            ent.getKey() + " field is expected to be populated with null");
-                } else {
-                    // Expected field exists in input: expected to be same as
-                    // input
-                    isObjEquals(record.get(ent.getKey()), expectedData.get(recordId)[ent.getValue()]);
-                }
+                isObjEquals(record.get(ent.getKey()), expectedData.get(recordId)[ent.getValue()]);
             });
             expectedData.remove(recordId);
         }
