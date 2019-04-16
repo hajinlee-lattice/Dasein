@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -13,18 +15,39 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
+import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends BaseWorkflowStep<S> {
 
     @Inject
     private LivySessionManager livySessionManager;
 
+    @Inject
+    private EMREnvService emrEnvService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
+    @Resource(name = "distCpConfiguration")
+    protected Configuration distCpConfiguration;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Value("${camille.zk.pod.id}")
     protected String podId;
+
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
 
     @Value("${dataflowapi.spark.driver.cores}")
     private int driverCores;
@@ -92,6 +115,30 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
         return conf;
+    }
+
+    protected void exportToS3AndAddToContext(Table table, String contextKey) {
+        String tableName = table.getName();
+        boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
+        if (!shouldSkip) {
+            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+            String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
+            queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
+            ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
+                    customerSpace.toString(), table, //
+                    pathBuilder, s3Bucket, podId, //
+                    yarnConfiguration, //
+                    fileStatus -> true);
+            if (batchStoreRequest == null) {
+                throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
+            }
+            HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
+                    customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
+            exporter.run();
+        } else {
+            log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
+        }
+        putStringValueInContext(contextKey, tableName);
     }
 
 }

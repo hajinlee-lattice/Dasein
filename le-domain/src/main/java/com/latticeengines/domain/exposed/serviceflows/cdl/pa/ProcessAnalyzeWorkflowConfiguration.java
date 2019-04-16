@@ -240,7 +240,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder skipPublishToS3(boolean skip) {
-            processStepConfiguration.setSkipPublishToS3(true);
+            processStepConfiguration.setSkipPublishToS3(skip);
             return this;
         }
 
