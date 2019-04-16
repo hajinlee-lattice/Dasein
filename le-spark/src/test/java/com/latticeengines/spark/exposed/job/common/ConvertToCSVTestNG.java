@@ -101,6 +101,7 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
         SimpleDateFormat fmtr2 = new SimpleDateFormat(fmt2);
         fmtr1.setTimeZone(TimeZone.getTimeZone("UTC"));
         fmtr2.setTimeZone(TimeZone.getTimeZone("UTC"));
+        int count = 0;
         for (CSVRecord record : records) {
             System.out.println(record);
             long rowNum = record.getRecordNumber();
@@ -140,7 +141,9 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
             } catch (ParseException e) {
                 Assert.fail("Failed to parse date string.", e);
             }
+            count++;
         }
+        Assert.assertEquals(tgt.getCount(), Long.valueOf(count));
         return true;
     }
 
