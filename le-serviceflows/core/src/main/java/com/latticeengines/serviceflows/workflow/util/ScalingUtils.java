@@ -38,4 +38,28 @@ public final class ScalingUtils {
         return maxCnt.get();
     }
 
+    /**
+     * 16 -> 8G
+     * 24 -> 12G
+     * 32 -> 16G
+     * 40 -> 20G
+     * 48 -> 24G
+     */
+    public static int scaleDataFlowAmMemGbByNumModels(int numModels) {
+        int div8 = Math.floorDiv(numModels, 8);
+        return Math.min(Math.max(4, div8 * 4), 24); // between 4G and 24G
+    }
+
+    /**
+     * 16 -> 2
+     * 24 -> 3
+     * 32 -> 4
+     * 40 -> 5
+     * 48 -> 6
+     */
+    public static int scaleDataFlowAmVCoresByNumModels(int numModels) {
+        int div8 = Math.floorDiv(numModels, 8);
+        return Math.min(Math.max(1, div8), 6); // between 1 and 6
+    }
+
 }

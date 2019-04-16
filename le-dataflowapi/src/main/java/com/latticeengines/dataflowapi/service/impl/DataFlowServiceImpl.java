@@ -44,8 +44,8 @@ public class DataFlowServiceImpl implements DataFlowService {
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
 
-    @Value("${dataflowapi.am.mem}")
-    private int amMemory;
+    @Value("${dataflowapi.am.mem.gb}")
+    private int amMemGb;
 
     @Override
     public ApplicationId submitDataFlow(DataFlowConfiguration dataFlowConfig) {
@@ -72,13 +72,9 @@ public class DataFlowServiceImpl implements DataFlowService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getDataflowQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 dataFlowConfig.getDataFlowBeanName().replace(" ", "_"));
-        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(vcores));
-        appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(memMb));
 
         Properties containerProperties = new Properties();
         containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(vcores));
-        containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(memMb));
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
@@ -87,6 +83,12 @@ public class DataFlowServiceImpl implements DataFlowService {
             appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));
             containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
             containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));
+        } else {
+            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(vcores));
+            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(memMb));
+            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(vcores));
+            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(memMb));
+
         }
 
         String swLib = dataFlowConfig.getSwlib();
@@ -108,7 +110,7 @@ public class DataFlowServiceImpl implements DataFlowService {
     private int getAmMemoryMb(DataFlowConfiguration dataFlowConfig) {
         Integer memGb = dataFlowConfig.getAmMemGb();
         if (memGb == null) {
-            return amMemory;
+            return amMemGb * 1024;
         } else {
             return memGb * 1024;
         }
