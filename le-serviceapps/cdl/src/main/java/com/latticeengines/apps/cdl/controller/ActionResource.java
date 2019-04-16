@@ -80,9 +80,9 @@ public class ActionResource {
     }
 
     @GetMapping(value = "/actions")
-    @ApiOperation(value = "get Actions By TrackingPid")
-    public List<Action> getActionByjobPid(@PathVariable String customerSpace, @RequestParam Long jobPid) {
-        return actionService.getActionsByJobPid(jobPid);
+    @ApiOperation(value = "get Actions By TrackingPids")
+    public List<Action> getActionByjobPids(@PathVariable String customerSpace, @RequestParam List<Long> jobPids) {
+        return actionService.getActionsByJobPids(jobPids);
     }
 
 }

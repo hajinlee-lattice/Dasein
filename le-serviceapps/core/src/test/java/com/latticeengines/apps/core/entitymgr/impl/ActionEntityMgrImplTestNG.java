@@ -41,6 +41,7 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
     private static final Long NEW_OWNER_ID = 10003L;
 
     private List<Action> actions;
+    private List<Long> jobPids;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -56,6 +57,10 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         actions.add(actionWithOwner);
         actions.add(actionWithoutOwner1);
         actions.add(actionWithoutOwner2);
+        jobPids = new ArrayList<>();
+        jobPids.add(actionWithOwner.getTrackingPid());
+        jobPids.add(actionWithoutOwner1.getTrackingPid());
+        jobPids.add(actionWithoutOwner2.getTrackingPid());
     }
 
     private Action generateCDLImportAction() {
@@ -113,9 +118,9 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = {"testCreate"})
-    public void testGetActionByJodPid() {
-        List<Action> action = getActionsByJobPid(actions.get(0).getTrackingPid());
-        Assert.assertNotNull(action);
+    public void testGetActionByJodPids() {
+        List<Action> actions = getActionsByJobPids(jobPids);
+        Assert.assertNotNull(actions);
     }
 
     @Test(groups = "functional", dependsOnMethods = {"testCreate"})
@@ -214,5 +219,5 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         return actionEntityMgr.findByPidIn(actionPids);
     }
 
-    protected List<Action> getActionsByJobPid(Long jobPid) { return actionEntityMgr.getActionsByJobPid(jobPid); }
+    protected List<Action> getActionsByJobPids(List<Long> jobPids) { return actionEntityMgr.getActionsByJobPids(jobPids); }
 }

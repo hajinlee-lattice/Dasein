@@ -561,6 +561,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         updateExpiredOrphanJobs(jobs);
+        updateJobsWithActionId(jobs);
 
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);
@@ -570,7 +571,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 updateJobWithRatingEngineSummaryInfo(job, true, ratingIdToRatingEngineSummaries);
             }
             updateJobWithSubJobsIfIsPnA(job);
-            updateJobActionId(job);
         }
     }
 
@@ -637,29 +637,52 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
     }
 
-    List<Job> updateJobsWithActionId(List<Job> jobs) {
-        for (Job job1 : jobs) {
-            updateJobActionId(job1);
-        }
-        return jobs;
-    }
-
     @VisibleForTesting
-    void updateJobActionId(Job job) {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        if (job.getInputs() != null) {
-            String actionIdsStr = job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS);
-            if (StringUtils.isEmpty(actionIdsStr) && job.getPid() != null) {
-                List<Action> actions = actionProxy.getActionsByJobPid(tenantId, job.getPid());
-                if (CollectionUtils.isNotEmpty(actions)) {
-                    if (actions.size() > 1) {
-                        log.warn("this trackingPid " + job.getPid() + " has multi action, using the first one");
-                    }
-                    job.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID,
-                            String.valueOf(actions.get(0).getPid()));
+    List<Job> updateJobsWithActionId(List<Job> jobs) {
+        Set<Long> jobPids = new HashSet<>();
+        Map<Long, Job> updateJobs = new HashMap<>();
+        for (Job job : jobs) {
+            if (job.getJobType().equals(PA_JOB_TYPE)) {
+                continue;
+            }
+            if (job.getInputs() == null) {
+                if (job.getPid() != null) {
+                    jobPids.add(job.getPid());
+                    updateJobs.put(job.getPid(), job);
+                }
+            } else {
+                String actionIdsStr = job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID);
+                if (StringUtils.isEmpty(actionIdsStr) && job.getPid() != null) {
+                    jobPids.add(job.getPid());
+                    updateJobs.put(job.getPid(), job);
                 }
             }
         }
+        jobs.removeAll(updateJobs.values());
+        if (CollectionUtils.isNotEmpty(jobPids)) {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            List<Action> actions = actionProxy.getActionsByJobPids(tenantId, new ArrayList<>(jobPids));
+            if (CollectionUtils.isNotEmpty(actions)) {
+                for (Action action : actions) {
+                    Job actionJob = updateJobs.get(action.getTrackingPid());
+                    if (actionJob != null) {
+                        if (actionJob.getInputs() == null) {
+                            Map<String, String> inputContext = new HashMap<>();
+                            actionJob.setInputs(inputContext);
+                        }
+                        String actionIdsStr = actionJob.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID);
+                        if (StringUtils.isNotEmpty(actionIdsStr)) {
+                            log.warn("this trackingPid " + action.getTrackingPid() + " has multi action, using the first one");
+                        }
+                        actionJob.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID,
+                                String.valueOf(action.getPid()));
+                        updateJobs.put(action.getTrackingPid(), actionJob);
+                    }
+                }
+            }
+        }
+        jobs.addAll(updateJobs.values());
+        return jobs;
     }
 
     private boolean validateArtifactTypeAndOrphanType(String artifactType, OrphanRecordsType orphanRecordsType) {

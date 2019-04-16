@@ -20,6 +20,6 @@ public interface ActionProxy {
 
     void patchOwnerIdByPids(String customerSpace, Long ownerId, List<Long> actionPids);
 
-    List<Action> getActionsByJobPid(String customerSpace, Long jobPid);
+    List<Action> getActionsByJobPids(String customerSpace, List<Long> jobPids);
 
 }
