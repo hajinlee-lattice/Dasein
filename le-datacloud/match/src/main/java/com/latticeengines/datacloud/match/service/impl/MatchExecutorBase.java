@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,10 +231,16 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 if (InterfaceName.EntityId.name().equalsIgnoreCase(field)) {
                     // retrieve entity ID (for entity match)
                     value = internalRecord.getEntityId();
-                } else if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
-                        && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
-                    value = StringStandardizationUtils
-                            .getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
+                } else if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)) {
+                    if (StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
+                        value = StringStandardizationUtils
+                                .getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
+                    }
+                    if (value == null && isEntityMatch) {
+                        // try to retrieve lattice account ID from entityId map next
+                        value = StringStandardizationUtils.getStandardizedOutputLatticeID(
+                                getEntityId(internalRecord, BusinessEntity.LatticeAccount.name()));
+                    }
                 } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
@@ -269,12 +276,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     }
                 } else if (InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
                     // retrieve Account EntityId (for entity match)
-                    value = internalRecord.getEntityIds() == null ? null
-                            : internalRecord.getEntityIds().get(BusinessEntity.Account.name());
+                    value = getEntityId(internalRecord, BusinessEntity.Account.name());
                 } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
                     // retrieve Contact EntityId (for entity match)
-                    value = internalRecord.getEntityIds() == null ? null
-                            : internalRecord.getEntityIds().get(BusinessEntity.Contact.name());
+                    value = getEntityId(internalRecord, BusinessEntity.Contact.name());
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);
@@ -375,5 +380,13 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         return matchContext;
+    }
+
+    private String getEntityId(InternalOutputRecord record, String entity) {
+        if (record == null || MapUtils.isEmpty(record.getEntityIds()) || StringUtils.isBlank(entity)) {
+            return null;
+        }
+
+        return record.getEntityIds().get(entity);
     }
 }

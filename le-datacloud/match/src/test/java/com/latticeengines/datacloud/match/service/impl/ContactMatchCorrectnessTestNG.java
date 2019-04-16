@@ -193,7 +193,7 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     @Override
     protected List<String> getExpectedOutputColumns() {
         return Arrays.asList(InterfaceName.EntityId.name(), InterfaceName.ContactId.name(),
-                InterfaceName.AccountId.name());
+                InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name());
     }
 
     @Override

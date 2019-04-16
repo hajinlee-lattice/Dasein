@@ -190,7 +190,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 return Arrays.asList( //
                         new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.ContactId.name(), String.class.getSimpleName()), //
-                        new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()) //
+                        new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
+                        new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
                         );
             }
             throw new IllegalArgumentException("Unsupported entity " + input.getTargetEntity());
