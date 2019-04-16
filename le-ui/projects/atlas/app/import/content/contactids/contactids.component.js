@@ -16,7 +16,7 @@ angular.module('lp.import.wizard.contactids', [])
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
             contact: (entityMatchEnabled ? 'CustomerContactId' : 'ContactId'),
-            account: 'AccountId',
+            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId')
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),

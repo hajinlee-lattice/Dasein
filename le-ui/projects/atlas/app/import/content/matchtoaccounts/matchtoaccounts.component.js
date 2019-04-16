@@ -20,7 +20,8 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
 
     var matchingFieldsList = makeList(MatchingFields),
         ignoredFieldLabel = '-- Unmapped Field --',
-        noFieldLabel = '-- No Fields Available --';
+        noFieldLabel = '-- No Fields Available --',
+        entityMatchEnabled = ImportWizardStore.entityMatchEnabled;
 
     angular.extend(vm, {
         state: ImportWizardStore.getAccountIdState(),
@@ -31,8 +32,8 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         unavailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            contact: 'ContactId',
-            account: 'CustomerAccountId',
+            contact: (entityMatchEnabled ? 'CustomerContactId' : 'ContactId'),
+            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId')
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
