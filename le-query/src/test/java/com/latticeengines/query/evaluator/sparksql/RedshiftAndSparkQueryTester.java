@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.query.evaluator.sparksql.SparkSQLQueryTester;
 
 public interface RedshiftAndSparkQueryTester {
 
