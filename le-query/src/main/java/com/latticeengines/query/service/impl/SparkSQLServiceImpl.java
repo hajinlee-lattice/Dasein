@@ -1,11 +1,16 @@
 package com.latticeengines.query.service.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,7 +97,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
-        params.put("SQL", sql);
+        params.put("SQL", compressSql(sql));
         params.put("SAVE", false);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
@@ -105,7 +110,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(1);
         Map<String, Object> params = new HashMap<>();
-        params.put("SQL", sql);
+        params.put("SQL", compressSql(sql));
         params.put("SAVE", true);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
@@ -157,7 +162,20 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         conf.put("spark.executor.instances", String.valueOf(Math.max(Integer.valueOf(minExecutors), 1)));
         conf.put("spark.dynamicAllocation.minExecutors", minExecutors);
         conf.put("spark.dynamicAllocation.maxExecutors", maxExecutors);
+        conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
         return conf;
+    }
+
+    private String compressSql(String sql) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            try (GzipCompressorOutputStream gzip = new GzipCompressorOutputStream(baos)) {
+                gzip.write(sql.getBytes(Charset.forName("UTF-8")));
+                gzip.close();
+                return Base64.getEncoder().encodeToString(baos.toByteArray());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to compress sql: " + sql);
+        }
     }
 
 }

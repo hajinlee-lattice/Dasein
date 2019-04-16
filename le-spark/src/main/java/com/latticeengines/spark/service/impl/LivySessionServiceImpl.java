@@ -3,7 +3,10 @@ package com.latticeengines.spark.service.impl;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -43,10 +46,14 @@ public class LivySessionServiceImpl implements LivySessionService {
             payLoad.put("name", name);
         }
         Map<String, String> conf = new HashMap<>();
-        conf.put("spark.jars.packages", getSparkPackages());
         if (MapUtils.isNotEmpty(sparkConf)) {
             conf.putAll(sparkConf);
         }
+        Set<String> pkgs = new HashSet<>(getSparkPackages());
+        if (sparkConf.containsKey("spark.jars.packages")) {
+            pkgs.addAll(Arrays.asList(sparkConf.get("spark.jars.packages").split(",")));
+        }
+        conf.put("spark.jars.packages", StringUtils.join(pkgs, ","));
         log.info("conf=" + JsonUtils.serialize(conf));
         payLoad.put("conf", conf);
         if (MapUtils.isNotEmpty(livyConf)) {
@@ -152,11 +159,11 @@ public class LivySessionServiceImpl implements LivySessionService {
         }
     }
 
-    private String getSparkPackages() {
-        return StringUtils.join(Arrays.asList( //
+    private List<String> getSparkPackages() {
+        return Arrays.asList( //
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.9.6", //
                 "org.apache.spark:spark-avro_2.11:2.4.0" //
-        ), ",");
+        );
     }
 
 }
