@@ -111,4 +111,17 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         delete("remove config by tenant ", url);
 
     }
+
+    public AttrConfigRequest getAttrConfigByProperty(String customerSpace, String propertyName, boolean enabled) {
+        StringBuilder url = new StringBuilder();
+        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/properties/{propertyName}", //
+                shortenCustomerSpace(customerSpace), propertyName));
+        if (!enabled) {
+            url.append("?enabled=0");
+        }
+        AttrConfigRequest result = getKryo("get attr config by Property", url.toString(), AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
+    }
+
 }
