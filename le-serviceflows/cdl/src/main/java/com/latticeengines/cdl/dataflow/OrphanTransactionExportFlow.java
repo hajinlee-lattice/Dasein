@@ -3,6 +3,7 @@ package com.latticeengines.cdl.dataflow;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,7 +36,9 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         // dedup by ProductId
         srcProduct = srcProduct.groupByAndLimit(new FieldList(InterfaceName.ProductId.name()), 1);
 
-        List<String> retainFields = srcTxn.getFieldNames();
+        List<String> validatedColumns = parameters.getValidatedColumns();
+        List<String> retainFields = srcTxn.getFieldNames().stream().filter(name -> validatedColumns.contains(name))
+                .collect(Collectors.toList());
         String renamedAccount = RENAME_PREFIX + InterfaceName.AccountId.name();
         String renamedProduct = RENAME_PREFIX + InterfaceName.ProductId.name();
         srcAccount = renameFields(srcAccount, InterfaceName.AccountId.name(), renamedAccount);

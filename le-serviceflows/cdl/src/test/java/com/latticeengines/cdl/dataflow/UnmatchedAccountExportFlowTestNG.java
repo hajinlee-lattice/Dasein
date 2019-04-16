@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +71,8 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
         UnmatchedAccountExportParameters parameters = new UnmatchedAccountExportParameters();
         uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
         parameters.setAccountTable(ACCOUNT_TABLE);
+        parameters.setValidatedColumns(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.Name.name(),
+                InterfaceName.LatticeAccountId.name()));
         return parameters;
     }
 

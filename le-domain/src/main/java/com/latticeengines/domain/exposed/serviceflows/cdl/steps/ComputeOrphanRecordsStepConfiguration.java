@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 
@@ -15,6 +17,7 @@ public class ComputeOrphanRecordsStepConfiguration extends BaseCDLDataFlowStepCo
     private String accountTableName;
     private String productTableName;
     private String contactTableName;
+    private List<String> validatedColumns;
 
     @Override
     public void setBeanName(String beanName) {
@@ -88,4 +91,13 @@ public class ComputeOrphanRecordsStepConfiguration extends BaseCDLDataFlowStepCo
     public void setOrphanRecordsType(OrphanRecordsType type) {
         this.orphanRecordsType = type;
     }
+
+    public void setValidatedColumns(List<String> validatedColumns) {
+        this.validatedColumns = validatedColumns;
+    }
+
+    public List<String> getValidatedColumns() {
+        return validatedColumns;
+    }
+
 }
