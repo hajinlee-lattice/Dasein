@@ -1,31 +1,24 @@
 package com.latticeengines.query.evaluator.sparksql;
 
 import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
-import static org.testng.Assert.assertTrue;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.ITestResult;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
-import com.latticeengines.query.factory.SparkQueryProvider;
 
-public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
+public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements RedshiftAndSparkQueryTester {
     private static Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
 
     private static final String BITENCODED_NOMINAL_ATTR = "TechIndicator_EmailCampaigns";
@@ -38,26 +31,15 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
     @Autowired
     private SparkSQLQueryTester sparkSQLQueryTester;
 
-    /*
-     * Used as intermediate state to compare the Results between Redshift and SparkSQL
-     * As same test case is calling the count() api multiple times, storing one latest count would not be suffice.
-     * We need to store sequence of results in test case and compare Between different Environment contexts
-     */
-    private List<Long> redshiftQueryCountResults = new ArrayList<>();
-    private List<Long> sparkQueryCountResults = new ArrayList<>();
-
-    private List<List<Map<String, Object>>> redshiftQueryDataResults = new ArrayList<>();
-    private List<List<Map<String, Object>>> sparkQueryDataResults = new ArrayList<>();
-
     @BeforeClass(groups = "functional")
     public void setupBase() {
         initializeAttributeRepo(3);
-        sparkSQLQueryTester.setupTestContext(customerSpace, attrRepo, tblPathMap);
+        setupQueryTester(customerSpace, attrRepo, tblPathMap);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
     public void teardown() {
-        sparkSQLQueryTester.teardown();
+        teardownQueryTester();
     }
 
     @DataProvider(name = "userContexts", parallel = false)
@@ -84,83 +66,34 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
         return basicTestsWithMultipleUsers;
     }
 
-    @BeforeMethod(groups = "functional")
-    public void beforeMethod(Method method, Object[] params) {
-        System.out.println(String.format("\n*********** Running Test Method (SparkSQL): %s, Params: %s **********",
-                method.getName(), Arrays.deepToString(params)));
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 
-    @AfterMethod(groups = "functional")
-    public void afterMethod(ITestResult testResult, Object[] params) {
-        long timeTaken = testResult.getEndMillis() - testResult.getStartMillis();
-        String currUserContext = String.valueOf(params[0]);
-        try {
-            switch (currUserContext) {
-            case SQL_USER:
-                log.info("Redshift Query Count Collection: {}", redshiftQueryCountResults);
-                log.info("Redshift Query Data Collection Size: {}",
-                        redshiftQueryDataResults.stream().map(lst -> lst.size()).collect(Collectors.toList()));
-                break;
-            case SPARK_BATCH_USER:
-                log.info("SparkSQL Query Count Collection: {}", sparkQueryCountResults);
-                log.info("Spark Query Data Collection Size: {}",
-                        sparkQueryDataResults.stream().map(lst -> lst.size()).collect(Collectors.toList()));
-                assertTrue(redshiftQueryCountResults.equals(sparkQueryCountResults),
-                        String.format("Counts doesn't match for %s : %s", testResult.getMethod().getMethodName(),
-                                Arrays.deepToString(params)));
-                assertTrue(redshiftQueryDataResults.equals(sparkQueryDataResults),
-                        String.format("Data doesn't match for %s : %s", testResult.getMethod().getMethodName(),
-                                Arrays.deepToString(params)));
-                break;
-            }
-        } finally {
-            System.out.println(String.format(
-                    "---------- Completed Test Method (SparkSQL): %s, Params: %s, Time: %d ms ----------\n",
-                    testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken));
-            if (SPARK_BATCH_USER.equalsIgnoreCase(currUserContext)) {
-                // We Need to reset these counts only when SparkSQLTest is run. Because
-                // @AfterMethod gets triggered for each user context
-                redshiftQueryCountResults = new ArrayList<>();
-                sparkQueryCountResults = new ArrayList<>();
-                
-                redshiftQueryDataResults = new ArrayList<>();
-                sparkQueryDataResults = new ArrayList<>();
-            }
-        }
+    @Override
+    public SparkSQLQueryTester getSparkSQLQueryTester() {
+        return sparkSQLQueryTester;
     }
 
     @Override
     protected long testGetCountAndAssert(String sqlUser, Query query, long expectedCount) {
-        switch (sqlUser) {
-        case SQL_USER:
-            long redshiftQueryCount = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
-            log.info("Redshift Query Count: {}", redshiftQueryCount);
-            redshiftQueryCountResults.add(redshiftQueryCount);
-            return redshiftQueryCount;
-        case SparkQueryProvider.SPARK_BATCH_USER:
-            long sparkQueryCount = sparkSQLQueryTester.getCountFromSpark(query);
-            log.info("SparkSQL Query Count: {}", sparkQueryCount);
-            sparkQueryCountResults.add(sparkQueryCount);
-            return sparkQueryCount;
-        }
-        throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
+        return testGetCountAndAssertFromTester(sqlUser, query, expectedCount);
     }
 
     @Override
     protected List<Map<String, Object>> testGetDataAndAssert(String sqlUser, Query query, long expectedCount, List<Map<String, Object>> expectedResult) {
-        switch (sqlUser) {
-        case SQL_USER:
-            List<Map<String, Object>> redshiftResults = queryEvaluatorService.getData(attrRepo, query, sqlUser).getData();
-            log.info("Redshift Query Data Size: {}", redshiftResults.size());
-            redshiftQueryDataResults.add(redshiftResults);
-            return redshiftResults;
-        case SparkQueryProvider.SPARK_BATCH_USER:
-            HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(query);
-            List<Map<String, Object>> sparkResultsAsList = sparkSQLQueryTester.convertHdfsDataUnitToList(sparkResult);
-            log.info("SparkSQL Query Data Size: {}", sparkResultsAsList.size());
-            sparkQueryDataResults.add(sparkResultsAsList);
-            return sparkResultsAsList;
-        }
-        throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
+        return testGetDataAndAssertFromTester(sqlUser, query, expectedCount, expectedResult);
     }
+
+    @Override
+    public long getCountFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
+        return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
+    }
+
+    @Override
+    public DataPage getDataFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
+        return queryEvaluatorService.getData(attrRepo, query, sqlUser);
+    }
+    
 }
