@@ -46,7 +46,7 @@ public final class ScalingUtils {
      * 48 -> 24G
      */
     public static int scaleDataFlowAmMemGbByNumModels(int numModels) {
-        int div8 = Math.floorDiv(numModels, 8);
+        int div8 = (int) Math.ceil(numModels * 1.0D / 8.0D);
         return Math.min(Math.max(4, div8 * 4), 24); // between 4G and 24G
     }
 
@@ -58,7 +58,7 @@ public final class ScalingUtils {
      * 48 -> 6
      */
     public static int scaleDataFlowAmVCoresByNumModels(int numModels) {
-        int div8 = Math.floorDiv(numModels, 8);
+        int div8 = (int) Math.ceil(numModels * 1.0D / 8.0D);
         return Math.min(Math.max(1, div8), 6); // between 1 and 6
     }
 
