@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -360,6 +361,21 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path) {
         return dropBoxProxy.getFileListForPath(customerSpace, s3Path);
+    }
+
+    @Override
+    public void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType) {
+        S3ImportSystem s3ImportSystem = new S3ImportSystem();
+        s3ImportSystem.setSystemType(systemType);
+        s3ImportSystem.setName(systemName);
+        s3ImportSystem.setTenant(MultiTenantContext.getTenant());
+        cdlProxy.createS3ImportSystem(customerSpace, s3ImportSystem);
+        dropBoxProxy.createTemplateFolder(customerSpace, systemName, null, null);
+    }
+
+    @Override
+    public S3ImportSystem getS3ImportSystem(String customerSpace, String systemName) {
+        return cdlProxy.getS3ImportSystem(customerSpace, systemName);
     }
 
     private void populateDefaultTemplate(List<S3ImportTemplateDisplay> templates) {

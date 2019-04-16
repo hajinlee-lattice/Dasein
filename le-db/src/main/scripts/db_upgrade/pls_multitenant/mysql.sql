@@ -102,6 +102,32 @@ CREATE PROCEDURE `CreateS3ImportMessageTable`()
 //
 DELIMITER;
 
+CREATE PROCEDURE `CreateS3ImportSystemTable`()
+  BEGIN
+    CREATE TABLE `ATLAS_S3_IMPORT_SYSTEM`
+      (
+         `PID`          BIGINT NOT NULL auto_increment,
+         `NAME`         VARCHAR(255) NOT NULL,
+         `SYSTEM_TYPE`  VARCHAR(30) NOT NULL,
+         `TENANT_ID`    BIGINT NOT NULL,
+         `FK_TENANT_ID` BIGINT NOT NULL,
+         PRIMARY KEY (`PID`)
+      )
+    engine=InnoDB;
+
+    CREATE INDEX IX_SYSTEM_NAME ON `ATLAS_S3_IMPORT_SYSTEM` (`NAME`);
+
+    ALTER TABLE `ATLAS_S3_IMPORT_SYSTEM`
+      ADD CONSTRAINT `UKecvbed8d0hcubasf0fthwqs2r` UNIQUE (`TENANT_ID`, `NAME`);
+
+    ALTER TABLE `ATLAS_S3_IMPORT_SYSTEM`
+      ADD CONSTRAINT `FK_ATLASS3IMPORTSYSTEM_FKTENANTID_TENANT` FOREIGN KEY (
+      `FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+
+  END;
+//
+DELIMITER;
+
 CREATE PROCEDURE `CreateDataCollectionArtifactTable`()
   BEGIN
   END;
@@ -138,3 +164,4 @@ CALL `Update_SEGEMENT_EXPORT_OBJECT_TYPES`();
 CALL `Update_CDL_BUSINESS_CALENDAR`();
 CALL `CreateDataIntegrationMonitoringTable`();
 CALL `CreateDataIntegrationMessageTable`();
+CALL `CreateS3ImportSystemTable`();
