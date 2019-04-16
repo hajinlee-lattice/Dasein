@@ -19,38 +19,37 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
     val config: CopyConfig = lattice.config
     val input = lattice.input.head
 
-    val colsToSelect: List[String] =
+    val colsToSelect: Option[List[String]] =
       if (config.getSelectAttrs == null)
-        List()
+        None
       else
-        config.getSelectAttrs.asScala.toList.intersect(input.columns)
-    val selected =
-      if (colsToSelect.isEmpty) {
-        input
-      } else {
-        input.select(colsToSelect map col: _*)
-      }
+        Some(config.getSelectAttrs.asScala.toList)
 
-    val colsToDrop: List[String] =
+    val colsToDrop: Option[List[String]] =
       if (config.getDropAttrs == null)
-        List()
+        None
       else
-        config.getDropAttrs.asScala.toList.intersect(selected.columns)
-    val dropped =
-      if (colsToDrop.isEmpty) {
-        selected
-      } else {
-        selected.drop(colsToDrop: _*)
-      }
+        Some(config.getDropAttrs.asScala.toList)
+
+    val filtered = (colsToSelect, colsToDrop) match {
+      case (None, None) => input
+      case _ =>
+        val (colsToSelectOrDrop, selectMode) = getColsToSelectOrDrop(input.columns.toList, colsToSelect, colsToDrop)
+        if (selectMode) {
+          input.select(colsToSelectOrDrop map col: _*)
+        } else {
+          input.drop(colsToSelectOrDrop: _*)
+        }
+    }
 
     val renamed =
       if (MapUtils.isEmpty(config.getRenameAttrs)) {
-        dropped
+        filtered
       } else {
         val attrsToRename: Map[String, String] = config.getRenameAttrs.asScala.toMap
-          .filterKeys(dropped.columns.contains(_))
-        val newAttrs = dropped.columns.map(c => attrsToRename.getOrElse(c, c))
-        dropped.toDF(newAttrs: _*)
+          .filterKeys(filtered.columns.contains(_))
+        val newAttrs = filtered.columns.map(c => attrsToRename.getOrElse(c, c))
+        filtered.toDF(newAttrs: _*)
       }
 
     val result =
@@ -64,6 +63,27 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
       }
 
     lattice.output = result :: Nil
+  }
+
+  // second return toggles select vs drop
+  private def getColsToSelectOrDrop(colsInDf: List[String], colsToSelect: Option[List[String]],
+                                    colsToDrop: Option[List[String]]): (List[String], Boolean) = {
+    val selected = colsToSelect match {
+      case None => colsInDf
+      case Some(lst) => colsInDf.intersect(lst)
+    }
+
+    val dropped = colsToDrop match {
+      case None => selected
+      case Some(lst) => selected.diff(lst)
+    }
+
+    if (dropped.length < colsInDf.length / 3) {
+      (dropped, true)
+    } else {
+      (colsInDf.diff(dropped), false)
+    }
+
   }
 
 }
