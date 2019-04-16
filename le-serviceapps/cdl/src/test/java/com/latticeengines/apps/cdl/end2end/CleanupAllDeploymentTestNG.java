@@ -32,7 +32,7 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CleanupAllDeploymentTestNG.class);
 
-    private static final int ACCOUNT_IMPORT_SIZE_1 = 500;
+    private static final int ACCOUNT_IMPORT_SIZE_1 = 900;
 
     private String customerSpace;
 
