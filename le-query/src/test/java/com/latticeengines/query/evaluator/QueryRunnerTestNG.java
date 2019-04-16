@@ -57,12 +57,6 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         };
     }
 
-    @BeforeMethod(groups = "functional")
-    public void beforeMethod(Method method, Object[] params) {
-        System.out.println(String.format("\n*********** Running Test Method (SparkSQL): %s, Params: %s **********",
-                method.getName(), Arrays.toString(params)));
-    }
-
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testStartsWithLookup(String sqlUser, String queryContext) {
         Restriction restriction = Restriction.builder() //
@@ -323,8 +317,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         };
     }
 
-    @Test(groups = "functional", dataProvider = "userContexts")
-    public void testSortAndPage(String sqlUser, String queryContext) {
+    @Test(groups = "functional")
+    public void testSortAndPage() {
+        String sqlUser = SQL_USER;
         Restriction domainInRange = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).gt("A") //
                 .build();
