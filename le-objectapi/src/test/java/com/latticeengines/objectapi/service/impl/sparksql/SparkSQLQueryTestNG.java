@@ -1,5 +1,7 @@
-package com.latticeengines.objectapi.service.impl;
+package com.latticeengines.objectapi.service.impl.sparksql;
 
+
+import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +13,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -38,14 +40,10 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
-import com.latticeengines.domain.exposed.spark.LivySession;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
-import com.latticeengines.objectapi.service.EntityQueryService;
-import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.service.RatingQueryService;
+import com.latticeengines.objectapi.service.impl.QueryServiceImplTestNGBase;
+import com.latticeengines.query.evaluator.sparksql.SparkSQLQueryTester;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
-import com.latticeengines.query.exposed.service.SparkSQLService;
-import com.latticeengines.spark.exposed.service.LivySessionService;
 
 /**
  * This is a skeleton test to check basic functionality of spark sql
@@ -63,45 +61,20 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
     }
 
     @Inject
-    private EntityQueryService entityQueryService;
-
-    @Inject
-    private EventQueryService eventQueryService;
-
-    @Inject
     private RatingQueryService ratingQueryService;
 
-    @Inject
-    private LivySessionService sessionService;
-
-    @Inject
-    private EMRCacheService emrCacheService;
-
-    @Inject
-    private SparkSQLService sparkSQLService;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    private LivySession session;
-    private int reuseLivySession = 39; // set the session id to reuse.
+    @Autowired
+    private SparkSQLQueryTester sparkSQLQueryTester;
 
     @BeforeClass(groups = "functional")
     public void setupBase() {
         setupTestDataWithSpark(3);
-        if (reuseLivySession > 0) {
-            reuseLivyEnvironment(reuseLivySession);
-        } else {
-            setupLivyEnvironment();
-        }
+        sparkSQLQueryTester.setupTestContext(customerSpace, attrRepo, tblPathMap);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
     public void teardown() {
-        if (reuseLivySession == 0) {
-            // comment out this statement to reuse the livy session in next run
-            sessionService.stopSession(session);
-        }
+        sparkSQLQueryTester.teardown();
     }
 
     @Test(groups = "functional", enabled = false)
@@ -124,6 +97,8 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName)), false));
 
+        String redshiftQueryStr = ratingQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        System.out.println("Redshift SQL: " + redshiftQueryStr);
         DataPage dataPage = ratingQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
@@ -136,8 +111,10 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
                     Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
-        HdfsDataUnit sparkResult = ratingQueryService.getDataViaSparkSQL(frontEndQuery, //
-                DataCollection.Version.Blue, session);
+        String sparkQueryStr = ratingQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SPARK_BATCH_USER);
+        System.out.println("Spark SQL: " + sparkQueryStr);
+        HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(sparkQueryStr);
+
         Assert.assertEquals(sparkResult.getCount(), Long.valueOf(10)); // spark result has count
         String avroPath = sparkResult.getPath();
         AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
@@ -174,20 +151,6 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
         model.setRatingRule(rule);
 
         return model;
-    }
-
-    private void setupLivyEnvironment() {
-        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap);
-    }
-
-    private void reuseLivyEnvironment(int sessionId) {
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
-        session = sessionService.getSession(new LivySession(livyHost, sessionId));
     }
 
 }
