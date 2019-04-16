@@ -42,20 +42,7 @@ public class MatchInputValidator {
     }
 
     public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput, DecisionGraph decisionGraph) {
-        commonValidation(input);
-
-        // Perform a different set of validation operations for Entity Match case.
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
-            validateEntityMatch(input, decisionGraph);
-        } else {
-            input.setKeyMap(validateNonEntityMatch(input));
-            if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
-                validateRTSMatchKeys(input.getKeyMap().keySet());
-            } else {
-                validateLDCAccountMatchKeys(input.getKeyMap().keySet());
-            }
-        }
-
+        validateMatchInput(input, decisionGraph);
         validateInputData(input, maxRealTimeInput);
     }
 
@@ -92,7 +79,23 @@ public class MatchInputValidator {
         }
         input.setFields(inputFields);
 
-        commonValidation(input);
+        validateMatchInput(input, decisionGraph);
+    }
+
+    /*
+     * validation for match input base on operational mode
+     */
+    private static void validateMatchInput(MatchInput input, DecisionGraph decisionGraph) {
+        if (input.getTenant() == null) {
+            throw new IllegalArgumentException("Must provide tenant to run a match.");
+        }
+        if (input.getTenant().getId() == null) {
+            throw new IllegalArgumentException("Must provide tenant identifier to run a match.");
+        }
+
+        if (CollectionUtils.isEmpty(input.getFields())) {
+            throw new IllegalArgumentException("Empty list of fields.");
+        }
 
         // Perform a different set of validation operations for Entity Match
         // case.
@@ -105,19 +108,6 @@ public class MatchInputValidator {
             } else {
                 validateLDCAccountMatchKeys(input.getKeyMap().keySet());
             }
-        }
-    }
-
-    private static void commonValidation(MatchInput input) {
-        if (input.getTenant() == null) {
-            throw new IllegalArgumentException("Must provide tenant to run a match.");
-        }
-        if (input.getTenant().getId() == null) {
-            throw new IllegalArgumentException("Must provide tenant identifier to run a match.");
-        }
-
-        if (CollectionUtils.isEmpty(input.getFields())) {
-            throw new IllegalArgumentException("Empty list of fields.");
         }
     }
 
@@ -160,12 +150,11 @@ public class MatchInputValidator {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
             validateAccountMatchKeys(keyMap, input.isFetchOnly());
-        } else if (input.getEntityKeyMaps().containsKey(BusinessEntity.Contact.name())) {
-            EntityKeyMap entityKeyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name());
-            Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
+        }
 
-            validateContactMatchKeys(keyMap);
-        } else {
+        // TODO add validation to check key maps for required entities are valid
+        if (!input.getEntityKeyMaps().containsKey(BusinessEntity.Account.name())
+                && !input.getEntityKeyMaps().containsKey(BusinessEntity.Contact.name())) {
             throw new UnsupportedOperationException(
                     "Entity Map currently only supports Account & Contact match and requires this entity's key map.");
         }
@@ -194,7 +183,7 @@ public class MatchInputValidator {
             return;
         }
         List<String> reservedFields = input.getFields().stream() //
-                .filter(field -> MatchKeyUtils.isEntityReservedField(field)) //
+                .filter(MatchKeyUtils::isEntityReservedField) //
                 .collect(Collectors.toList());
         if (!reservedFields.isEmpty()) {
             throw new IllegalArgumentException(
@@ -396,55 +385,27 @@ public class MatchInputValidator {
     }
 
     /**
-     * Account entity match support 4 kinds of lookup: Duns, Domain, Name,
-     * SystemId. So at least one of them is required to provide. For LDC match
-     * embedded inside Account match, required key is Duns, Domain and Name.
-     * It's covered.
+     * Since user is allowed to not map any match field, restriction for match keys
+     * is relaxed. Only check for fetch only mode for now.
      *
      * Compare to validateLDCAccountMatchKeys():
      *
      * Don't allow setting MatchKey without mapping any fields. In
-     * validateLDCAccountMatchKeys(), if setting match key without mapping
-     * field, matcher interprets it as not using this match key. Feel this
-     * tolerance makes match key config confusing. If don't use, then don't set.
-     * Don't make change to validateLDCAccountMatchKeys() because it could break
-     * some existing external services
-     *
-     * TODO: In M28, might need to relax the restriction if UI allow user not
-     * mapping any match field
+     * validateLDCAccountMatchKeys(), if setting match key without mapping field,
+     * matcher interprets it as not using this match key. Feel this tolerance makes
+     * match key config confusing. If don't use, then don't set. Don't make change
+     * to validateLDCAccountMatchKeys() because it could break some existing
+     * external services
      *
      * @param keyMap
      * @param fetchOnly
      */
     private static void validateAccountMatchKeys(Map<MatchKey, List<String>> keyMap, boolean fetchOnly) {
-        if (!fetchOnly) {
-            if (!isKeyMappedToField(keyMap, MatchKey.DUNS) //
-                    && !isKeyMappedToField(keyMap, MatchKey.Domain) //
-                    && !isKeyMappedToField(keyMap, MatchKey.Name) //
-                    && !isKeyMappedToField(keyMap, MatchKey.SystemId)) {
-                throw new IllegalArgumentException(
-                        "For non-fetch-only mode Account match, at least one of following match key should be provided: Duns, Domain, Name and SystemId");
-            }
-        } else {
+        if (fetchOnly) {
             if (!isKeyMappedToField(keyMap, MatchKey.EntityId)) {
                 throw new IllegalArgumentException(
                         "For fetch-only mode Account match, must provide EntityId match key");
             }
-        }
-    }
-
-    /**
-     * TODO: In M28, might need to relax the restriction if UI allow user not
-     * mapping any match field
-     *
-     * @param keyMap
-     */
-    private static void validateContactMatchKeys(Map<MatchKey, List<String>> keyMap) {
-        if (!isKeyMappedToField(keyMap, MatchKey.SystemId) //
-                && !isKeyMappedToField(keyMap, MatchKey.Email) //
-                && !(isKeyMappedToField(keyMap, MatchKey.Name) && isKeyMappedToField(keyMap, MatchKey.PhoneNumber))) {
-            throw new IllegalArgumentException(
-                    "For contact match, at least one of following match key should be provided: Email, Name + PhoneNumber and SystemId");
         }
     }
 

@@ -82,6 +82,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Value("${datacloud.match.default.decision.graph.account}")
     private String defaultAccountGraph;
 
+    @Value("${datacloud.match.default.decision.graph.contact}")
+    private String defaultContactGraph;
+
     void setDataCloudVersion(MatchInput input) {
         if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
             log.warn("Found a match request against deprecated RTS source, using input=" + JsonUtils.serialize(input));
@@ -104,8 +107,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (StringUtils.isBlank(input.getDecisionGraph())) {
             if (BusinessEntity.Account.name().equals(input.getTargetEntity())) {
                 input.setDecisionGraph(defaultAccountGraph);
+            } else if (BusinessEntity.Contact.name().equals(input.getTargetEntity())) {
+                input.setDecisionGraph(defaultContactGraph);
+            }
+            if (StringUtils.isNotBlank(input.getDecisionGraph())) {
                 log.debug(String.format("Did no specify decision graph for target entity %s, use default one %s",
-                        input.getTargetEntity(), defaultAccountGraph));
+                        input.getTargetEntity(), input.getDecisionGraph()));
             }
             return;
         }
@@ -175,15 +182,16 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             if (BusinessEntity.Account.name().equals(input.getTargetEntity())) {
                 return Arrays.asList( //
                         new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
-                        new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()) //
-                        //new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName())
+                        new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
+                        new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
                         );
             }
             if (BusinessEntity.Contact.name().equals(input.getTargetEntity())) {
                 return Arrays.asList( //
                         new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
-                        new ColumnMetadata(InterfaceName.ContactId.name(), String.class.getSimpleName()) //
-                        //new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName())
+                        new ColumnMetadata(InterfaceName.ContactId.name(), String.class.getSimpleName()), //
+                        new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
+                        new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
                         );
             }
             throw new IllegalArgumentException("Unsupported entity " + input.getTargetEntity());
@@ -258,10 +266,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             record.setOrigTenant(input.getTenant());
             // NOTE tenant in match input should be already validated
             record.setParsedTenant(standardizedTenant);
-            if (record != null) {
-                record.setColumnMatched(new ArrayList<>());
-                records.add(record);
-            }
+            record.setColumnMatched(new ArrayList<>());
+            records.add(record);
         }
         context.setInternalResults(records);
         return context;
