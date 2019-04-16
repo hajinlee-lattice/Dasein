@@ -24,7 +24,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
 
     private static final Logger log = LoggerFactory.getLogger(QueryServiceImplTestNGBase.class);
 
-    static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
+    public static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
 
     @Inject
     private TransactionService transactionService;

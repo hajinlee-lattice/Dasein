@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
@@ -412,6 +413,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
+                .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_ID)
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
@@ -426,6 +428,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
                 .freeText("ham", new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_CITY)) //
+                .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_ID)
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
@@ -461,6 +464,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(attrLookup, AggregateLookup.count().as("count")) //
                 .from(subQuery) //
                 .groupBy(attrLookup) //
+                .orderBy(new Sort(Arrays.asList(attrLookup), false))
                 .having(Restriction.builder().let(attrLookup).neq("C").build()) //
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
@@ -468,11 +472,11 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         List<Map<String, Object>> expectedResults = new ArrayList<Map<String, Object>>();
         Map<String, Object> resMapRow1 = new HashMap<>();
         resMapRow1.put("Score", "A");
-        resMapRow1.put("count", 1816L);
+        resMapRow1.put("count", 197L);
         expectedResults.add(resMapRow1);
         Map<String, Object> resMapRow2 = new HashMap<>();
         resMapRow2.put("Score", "B");
-        resMapRow2.put("count", 62724L);
+        resMapRow2.put("count", 2643L);
         expectedResults.add(resMapRow2);
         testGetDataAndAssert(sqlUser, query2, 2, expectedResults);
     }

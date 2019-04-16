@@ -10,15 +10,12 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.avro.Schema.Field;
-import org.apache.avro.util.Utf8;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -31,14 +28,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -278,21 +273,4 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
                 String.format("Should not find pattern [%s] in query: %s", content, query));
     }
 
-    protected List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
-        List<Map<String, Object>> resultData = new ArrayList<>();
-        String avroPath = sparkResult.getPath();
-        AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
-        iterator.forEachRemaining(record -> {
-            Map<String, Object> row = new HashMap<>();
-            for (Field field: record.getSchema().getFields()) {
-                Object value = record.get(field.name());
-                if (value != null && value instanceof Utf8) {
-                    value = ((Utf8)value).toString();
-                }
-                row.put(field.name(), value);
-            }
-            resultData.add(row);
-        });
-        return resultData;
-    }
 }

@@ -156,12 +156,11 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG {
             return redshiftResults;
         case SparkQueryProvider.SPARK_BATCH_USER:
             HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(query);
-            List<Map<String, Object>> sparkResultsAsList = convertHdfsDataUnitToList(sparkResult);
+            List<Map<String, Object>> sparkResultsAsList = sparkSQLQueryTester.convertHdfsDataUnitToList(sparkResult);
             log.info("SparkSQL Query Data Size: {}", sparkResultsAsList.size());
             sparkQueryDataResults.add(sparkResultsAsList);
             return sparkResultsAsList;
         }
         throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
-
 }
