@@ -37,24 +37,6 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
     @Inject
     private SparkJobService sparkJobService;
 
-    @Inject
-    private EMREnvService emrEnvService;
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
-
-    @Resource(name = "distCpConfiguration")
-    protected Configuration distCpConfiguration;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    @Value("${camille.zk.pod.id}")
-    protected String podId;
-
-    @Value("${aws.customer.s3.bucket}")
-    protected String s3Bucket;
-
     protected abstract Class<J> getJobClz();
     /**
      * Set job config except jobName and workspace.
@@ -112,25 +94,6 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
             return attributeMap.getOrDefault(attrName, attr);
         }).collect(Collectors.toList());
         resultTable.setAttributes(newAttrs);
-    }
-
-    protected void exportToS3AndAddToContext(Table table, String contextKey) {
-        String tableName = table.getName();
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
-        ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
-                customerSpace.toString(), table, //
-                pathBuilder, s3Bucket, podId, //
-                yarnConfiguration, //
-                fileStatus -> true);
-        if (batchStoreRequest == null) {
-            throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
-        }
-        HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
-                customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
-        exporter.run();
-        putStringValueInContext(contextKey, tableName);
     }
 
 }
