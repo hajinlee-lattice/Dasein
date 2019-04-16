@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.IngestionNames;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
@@ -19,10 +20,9 @@ import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTran
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.IngestedFileToSourceTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(OrbFileToSourceTestNG.class);

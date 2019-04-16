@@ -23,8 +23,8 @@ import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTran
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.IngestedFileToSourceTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
