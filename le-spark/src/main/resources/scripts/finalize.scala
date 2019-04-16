@@ -28,7 +28,6 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   json.put("StorageType", "Hdfs")
   json.put("Path", path)
   json.put("Count", df2.count())
-  df.unpersist()
   json
 }
 
