@@ -430,14 +430,14 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
-    @DataProvider(name = "entityMatchEnvironment")
+    @DataProvider(name = "entityMatchEnvironment", parallel = true)
     private Object[][] provideEntityMatchEnv() {
         return new Object[][] {
                 { STAGING }, { SERVING },
         };
     }
 
-    @DataProvider(name = "serdeTestData")
+    @DataProvider(name = "serdeTestData", parallel = true)
     private Object[][] provideSerdeTestData() {
         // TODO add account lookup keys as well, only testing contact lookup keys first
         return new Object[][] { //
@@ -470,7 +470,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         }; //
     }
 
-    @DataProvider(name = "updateAttributes")
+    @DataProvider(name = "updateAttributes", parallel = true)
     private Object[][] updateAttributesTestData() {
         return new Object[][] { //
                 // lattice account ID attribute
@@ -501,7 +501,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         };
     }
 
-    @DataProvider(name = "updateIfNotSet")
+    @DataProvider(name = "updateIfNotSet", parallel = true)
     private Object[][] provideUpdateIfNotSetTestData() {
         return new Object[][] {
                 /*

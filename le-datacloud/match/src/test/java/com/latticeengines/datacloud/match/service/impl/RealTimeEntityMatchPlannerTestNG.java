@@ -54,6 +54,7 @@ public class RealTimeEntityMatchPlannerTestNG extends DataCloudMatchFunctionalTe
         List<Column> expectedColumns = new ArrayList<>();
         expectedColumns.add(new Column(InterfaceName.EntityId.name()));
         expectedColumns.add(new Column(InterfaceName.AccountId.name()));
+        expectedColumns.add(new Column(InterfaceName.LatticeAccountId.name()));
         Assert.assertEquals(context.getColumnSelection().getColumns(), expectedColumns);
 
         // Test MatchOutput set up.

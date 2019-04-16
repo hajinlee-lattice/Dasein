@@ -9,17 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -29,22 +25,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
-import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.datacloud.match.testframework.TestEntityMatchService;
+import com.latticeengines.datacloud.match.testframework.EntityMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
@@ -57,7 +45,7 @@ import com.latticeengines.testframework.service.impl.SimpleRetryListener;
  * dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
  */
 @Listeners({ SimpleRetryListener.class })
-public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AccountMatchCorrectnessTestNG.class);
 
@@ -144,24 +132,9 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     private final static Set<String> ACCOUNT_KEYS_MANY_TO_MANY = new HashSet<>(
             Arrays.asList(MatchKey.Domain.name(), MatchKey.Name.name()));
 
-    private static final EntityMatchEnvironment DEST_ENV = EntityMatchEnvironment.SERVING;
-
-    @Inject
-    private RealTimeMatchService realTimeMatchService;
-
-    @Inject
-    private TestEntityMatchService testEntityMatchService;
-
-    @Inject
-    private EntityMatchInternalService entityMatchInternalService;
-
-    @Inject
-    private EntityMatchConfigurationService entityMatchConfigurationService;
-
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testAllocateAndLookup() {
-        String tenantId = createNewTenantId();
-        Tenant tenant = new Tenant(tenantId);
+        Tenant tenant = newTestTenant();
 
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
@@ -171,9 +144,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         String entityId = verifyAndGetEntityId(output);
 
         // publish for testing lookup
-        entityMatchInternalService.publishEntity(BusinessEntity.Account.name(), tenant, tenant, DEST_ENV,
-                true);
-
+        publishToServing(tenant, BusinessEntity.Account);
 
         // test lookup, make sure we get the correct entity id with each match key
         Assert.assertEquals(lookupAccount(tenant, "acct_1", null, null, null, null, null, null, null), entityId);
@@ -183,8 +154,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPublicDomain() {
-        String tenantId = createNewTenantId();
-        Tenant tenant = new Tenant(tenantId);
+        Tenant tenant = newTestTenant();
 
         // Baseline Normal Case
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
@@ -234,8 +204,7 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testMultiDomainKeys() {
-        String tenantId = createNewTenantId();
-        Tenant tenant = new Tenant(tenantId);
+        Tenant tenant = newTestTenant();
 
         //
         // Pre-populate entries in the match table to match against during tests.
@@ -747,31 +716,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         return verifyAndGetEntityId(output);
     }
 
-    /*
-     * make sure that match output has exactly one row that only contains entityId
-     * column and return the entityId
-     */
-    private static String verifyAndGetEntityId(@NotNull MatchOutput output) {
-        Assert.assertNotNull(output);
-        Assert.assertNotNull(output.getResult());
-        Assert.assertEquals(output.getResult().size(), 1);
-        OutputRecord record = output.getResult().get(0);
-        Assert.assertNotNull(record);
-        Assert.assertNotNull(record.getOutput());
-        // check if output contains only AccountId & EntityId column
-        Assert.assertEquals(output.getOutputFields(),
-                Arrays.asList(InterfaceName.EntityId.name(), InterfaceName.AccountId.name()));
-        Assert.assertEquals(record.getOutput().size(), 2);
-        for (int i = 0; i < 2; i++) {
-            if (record.getOutput().get(i) != null) {
-                Assert.assertTrue(record.getOutput().get(i) instanceof String);
-            }
-        }
-        // EntityId and AccountId should have same value
-        Assert.assertEquals(record.getOutput().get(0), record.getOutput().get(1));
-        return (String) record.getOutput().get(0);
-    }
-
     /**
      * @param data
      * @param isAllocateMode
@@ -809,31 +753,6 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
     private Pair<MatchInput, MatchOutput> matchAccount(List<Object> data, boolean isAllocateMode,
                                                        Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields) {
         return matchAccount(data, isAllocateMode, tenant, entityKeyMap, fields, false);
-    }
-
-
-    /*
-     * helper to prepare basic MatchInput for entity match
-     */
-    private MatchInput prepareEntityMatchInput(@NotNull Tenant tenant, @NotNull String targetEntity,
-            @NotNull Map<String, EntityKeyMap> entityKeyMaps) {
-        MatchInput input = new MatchInput();
-
-        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
-        input.setTenant(tenant);
-        input.setTargetEntity(targetEntity);
-        // only support this predefined selection for now
-        input.setPredefinedSelection(ColumnSelection.Predefined.ID);
-        input.setEntityKeyMaps(entityKeyMaps);
-        input.setDataCloudVersion(currentDataCloudVersion);
-        input.setSkipKeyResolution(true);
-        input.setUseRemoteDnB(true);
-        input.setUseDnBCache(true);
-        input.setRootOperationUid(UUID.randomUUID().toString());
-        // Enable debug logs for Match Traveler.
-        input.setLogLevelEnum(Level.DEBUG);
-
-        return input;
     }
 
     private static EntityKeyMap getEntityKeyMap() {
@@ -1152,52 +1071,22 @@ public class AccountMatchCorrectnessTestNG extends DataCloudMatchFunctionalTestN
         return toReturn;
     }
 
+    private String verifyAndGetEntityId(@NotNull MatchOutput output) {
+        return verifyAndGetEntityId(output, InterfaceName.AccountId.name());
+    }
+
     private static List<String> getKeysIntersection(List<String> keys1, List<String> keys2) {
         return keys1.stream().filter(keys2::contains).collect(Collectors.toList());
     }
 
-    private static String createNewTenantId() {
-        return AccountMatchCorrectnessTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString();
+    @Override
+    protected List<String> getExpectedOutputColumns() {
+        return Arrays.asList(InterfaceName.EntityId.name(), InterfaceName.AccountId.name(),
+                InterfaceName.LatticeAccountId.name());
     }
 
-    // This function is useful for debugging tests.  It prints out the input fields and data and then the output
-    // with the match logs and error messages nicely formatted. logLevel must be set to "DEBUG" in the MatchInput for
-    // this function to work properly, eg. matchInput.setLogLevelEnum(Level.DEBUG);
-    private static void logAndVerifyMatchLogsAndErrors(List<String> fieldList, List<Object> dataList,
-            MatchOutput matchOutput, List<String> expectedErrorMsgs) {
-        StringBuilder msg = new StringBuilder("Test Case Results:");
-        String fields = String.join(" ", fieldList);
-        msg.append("\nFields:\n  " + fields);
-        String data = dataList.stream().map(x -> x == null ? "null" : x.toString())
-                .collect(Collectors.joining(" "));
-        msg.append("\nData:\n  " + data);
-
-        List<OutputRecord> outputRecordList = matchOutput.getResult();
-        for (OutputRecord outputRecord : outputRecordList) {
-            msg.append("\nOutput Record row: " + outputRecord.getRowNumber() + " matched: " + outputRecord.isMatched()
-                    + " Entity ID: " + verifyAndGetEntityId(matchOutput));
-
-            if (CollectionUtils.isNotEmpty(outputRecord.getMatchLogs())) {
-                String matchLog = String.join("\n  ", outputRecord.getMatchLogs());
-                msg.append("\nLogs:\n  " + matchLog);
-            } else {
-                msg.append("\nNo Logs");
-            }
-
-            if (CollectionUtils.isNotEmpty(outputRecord.getErrorMessages())) {
-                String matchErrors = String.join("\n  ", outputRecord.getErrorMessages());
-                msg.append("\nErrors:\n  " + matchErrors);
-            } else {
-                msg.append("\nNo Errors");
-            }
-            if (CollectionUtils.isNotEmpty(expectedErrorMsgs)) {
-                Assert.assertEquals(String.join(" && ", outputRecord.getErrorMessages()),
-                        String.join(" && ", expectedErrorMsgs));
-            } else {
-                Assert.assertTrue(CollectionUtils.isEmpty(outputRecord.getErrorMessages()));
-            }
-        }
-        log.info(msg.toString());
+    @Override
+    protected Logger getLogger() {
+        return log;
     }
-
 }
