@@ -216,8 +216,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         map.put(BusinessEntity.Contact, CONTACT_1);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
         return map;
     }
 
