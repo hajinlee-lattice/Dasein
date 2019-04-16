@@ -24,8 +24,7 @@ public enum LatticeFeatureFlag {
     ENABLE_CROSS_SELL_MODELING("EnableCrossSellModeling", "Enable Cross Sell Modeling"), //
     ENABLE_PRODUCT_PURCHASE_IMPORT("EnableProductPurchaseImport", "Enable Product Purchase Import"), //
     ENABLE_PRODUCT_BUNDLE_IMPORT("EnableProductBundleImport", "Enable Product Bundle Import"), //
-    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport",
-            "Enable Product Hierarchy Import"), //
+    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport", "Enable Product Hierarchy Import"), //
     ENABLE_EXTERNAL_INTEGRATION("EnableExternalIntegration", "Enable External Integration"), //
     PLAYBOOK_MODULE("PlaybookModule", "Playbook Module"), //
     LAUNCH_PLAY_TO_MAP_SYSTEM("LaunchPlayToMapSystem", "Launch Play to MAP System"), //
@@ -33,7 +32,10 @@ public enum LatticeFeatureFlag {
     IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."), //
     ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"), //
     ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
-    MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"),
+    MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
+    PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
+    ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
+    BETA_FEATURE("BetaFeature", "Allows beta features"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
