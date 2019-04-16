@@ -2,6 +2,7 @@ package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -26,8 +27,10 @@ public class OrphanContactExportFlow extends TypesafeDataFlowBuilder<OrphanConta
         }
 
         Node srcAccount = addSource(parameters.getAccountTable());
-        List<String> retainFields = srcContact.getFieldNames();
+        List<String> validatedColumns = parameters.getValidatedColumns();
 
+        List<String> retainFields = srcContact.getFieldNames().stream().filter(name -> validatedColumns.contains(name))
+                .collect(Collectors.toList());
         // rename fields to avoid field conflicts
         String renamedAccountId = RENAME_PREFIX + InterfaceName.AccountId.name();
         srcAccount = renameFields(srcAccount, InterfaceName.AccountId.name(), renamedAccountId);

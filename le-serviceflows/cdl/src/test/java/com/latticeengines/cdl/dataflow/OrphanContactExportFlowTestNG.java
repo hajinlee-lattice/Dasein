@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -114,6 +115,8 @@ public class OrphanContactExportFlowTestNG extends ServiceFlowsDataFlowFunctiona
         }
         uploadAvro(contactData, prepareContactData(), CONTACT_TABLE, CONTACT_DIR);
         parameters.setContactTable(CONTACT_TABLE);
+        parameters.setValidatedColumns(Arrays.asList(InterfaceName.ContactId.name(), InterfaceName.ContactName.name(),
+                InterfaceName.AccountId.name()));
         return parameters;
     }
 

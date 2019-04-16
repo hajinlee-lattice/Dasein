@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -125,7 +126,8 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
 
         uploadAvro(transactionData, prepareTxnData(), TRANSACTION_TABLE, TRANSACTION_DIR);
         parameters.setTransactionTable(TRANSACTION_TABLE);
-
+        parameters.setValidatedColumns(Arrays.asList(InterfaceName.TransactionId.name(), InterfaceName.AccountId.name(),
+                InterfaceName.ProductId.name(), InterfaceName.TransactionCount.name()));
         return parameters;
     }
 

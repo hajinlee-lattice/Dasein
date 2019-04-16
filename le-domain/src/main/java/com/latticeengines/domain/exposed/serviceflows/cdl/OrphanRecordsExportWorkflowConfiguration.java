@@ -163,5 +163,11 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(exportToS3);
             return configuration;
         }
+
+        public Builder validatedColumns(List<String> validatedColumns) {
+            computeOrphans.setValidatedColumns(validatedColumns);
+            return this;
+        }
     }
+
 }

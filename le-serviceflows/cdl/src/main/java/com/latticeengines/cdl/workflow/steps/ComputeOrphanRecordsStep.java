@@ -80,21 +80,24 @@ public class ComputeOrphanRecordsStep extends RunDataFlow<ComputeOrphanRecordsSt
         DataFlowParameters parameters = null;
 
         switch (config.getOrphanRecordsType()) {
-            case TRANSACTION:
-                parameters = new OrphanTransactionExportParameters();
-                ((OrphanTransactionExportParameters) parameters).setAccountTable(config.getAccountTableName());
-                ((OrphanTransactionExportParameters) parameters).setProductTable(config.getProductTableName());
-                ((OrphanTransactionExportParameters) parameters).setTransactionTable(config.getTransactionTableName());
-                break;
-            case CONTACT:
-                parameters = new OrphanContactExportParameters();
-                ((OrphanContactExportParameters) parameters).setAccountTable(config.getAccountTableName());
-                ((OrphanContactExportParameters) parameters).setContactTable(config.getContactTableName());
-                break;
-            case UNMATCHED_ACCOUNT:
-                parameters = new UnmatchedAccountExportParameters();
-                ((UnmatchedAccountExportParameters) parameters).setAccountTable(config.getAccountTableName());
-                break;
+        case TRANSACTION:
+            parameters = new OrphanTransactionExportParameters();
+            ((OrphanTransactionExportParameters) parameters).setAccountTable(config.getAccountTableName());
+            ((OrphanTransactionExportParameters) parameters).setProductTable(config.getProductTableName());
+            ((OrphanTransactionExportParameters) parameters).setTransactionTable(config.getTransactionTableName());
+            ((OrphanTransactionExportParameters) parameters).setValidatedColumns(config.getValidatedColumns());
+            break;
+        case CONTACT:
+            parameters = new OrphanContactExportParameters();
+            ((OrphanContactExportParameters) parameters).setAccountTable(config.getAccountTableName());
+            ((OrphanContactExportParameters) parameters).setContactTable(config.getContactTableName());
+            ((OrphanContactExportParameters) parameters).setValidatedColumns(config.getValidatedColumns());
+            break;
+        case UNMATCHED_ACCOUNT:
+            parameters = new UnmatchedAccountExportParameters();
+            ((UnmatchedAccountExportParameters) parameters).setAccountTable(config.getAccountTableName());
+            ((UnmatchedAccountExportParameters) parameters).setValidatedColumns(config.getValidatedColumns());
+            break;
         }
 
         return parameters;

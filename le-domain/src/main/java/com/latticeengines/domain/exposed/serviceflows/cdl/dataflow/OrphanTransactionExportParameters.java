@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.dataflow;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
@@ -8,15 +10,18 @@ public class OrphanTransactionExportParameters extends DataFlowParameters {
 
     @JsonProperty("AccountTable")
     @SourceTableName
-    public String accountTable;
+    private String accountTable;
 
     @JsonProperty("ProductTable")
     @SourceTableName
-    public String productTable;
+    private String productTable;
 
     @JsonProperty("TransactionTable")
     @SourceTableName
-    public String transactionTable;
+    private String transactionTable;
+
+    @JsonProperty("validatedColumns")
+    private List<String> validatedColumns;
 
     public String getAccountTable() {
         return accountTable;
@@ -40,5 +45,13 @@ public class OrphanTransactionExportParameters extends DataFlowParameters {
 
     public void setTransactionTable(String transactionTable) {
         this.transactionTable = transactionTable;
+    }
+
+    public List<String> getValidatedColumns() {
+        return validatedColumns;
+    }
+
+    public void setValidatedColumns(List<String> validatedColumns) {
+        this.validatedColumns = validatedColumns;
     }
 }
