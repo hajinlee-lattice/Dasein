@@ -272,6 +272,8 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
             HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
                     customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
             exporter.run();
+        } else {
+            log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }
         putStringValueInContext(contextKey, tableName);
     }
