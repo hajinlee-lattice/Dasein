@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -368,5 +371,21 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
+    }
+
+    public void createS3ImportSystem(String customerSpace, S3ImportSystem system) {
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system", shortenCustomerSpace(customerSpace));
+        post("create s3 import system", url, system, Void.class);
+    }
+
+    public S3ImportSystem getS3ImportSystem(String customerSpace, String systemName) {
+        String url;
+        try {
+            url = constructUrl("/customerspaces/{customerSpace}/s3import/system?systemName={systemName}",
+                    shortenCustomerSpace(customerSpace), URLEncoder.encode(systemName, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Cannot encode systemName: " + systemName);
+        }
+        return get("get s3 import system", url, S3ImportSystem.class);
     }
 }

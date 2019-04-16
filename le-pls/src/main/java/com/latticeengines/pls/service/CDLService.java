@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -38,4 +39,8 @@ public interface CDLService {
     List<S3ImportTemplateDisplay> getS3ImportTemplate(String string);
 
     List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path);
+
+    void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType);
+
+    S3ImportSystem getS3ImportSystem(String customerSpace, String systemName);
 }

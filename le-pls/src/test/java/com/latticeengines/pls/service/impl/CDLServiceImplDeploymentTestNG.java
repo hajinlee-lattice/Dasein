@@ -27,6 +27,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -106,6 +107,18 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             }
         }
         modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument);
+    }
+
+    @Test(groups = "deployment")
+    public void testS3ImportSystem() {
+        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Salesforce);
+        cdlService.createS3ImportSystem(customerSpace, "SYSTEM2", S3ImportSystem.SystemType.Other);
+        S3ImportSystem system = cdlService.getS3ImportSystem(customerSpace, "SYSTEM1");
+        Assert.assertNotNull(system);
+        Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
+        Assert.assertThrows(RuntimeException.class,
+                () -> cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Other));
     }
 
     @Test(groups = "deployment", enabled = false)
