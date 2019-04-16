@@ -38,7 +38,7 @@ const creationSystemState = {
     // Relatively target the parent-state's parent-state's 'messagecontent' ui-view
     // This could also have been written using ui-view@state addressing: 'messagecontent@mymessages'
     // Or, this could also have been written using absolute ui-view addressing: '!$default.$default.messagecontent'
-    "main@": SystemCreationComponent
+    "main@^.^": SystemCreationComponent
   }
 };
 
