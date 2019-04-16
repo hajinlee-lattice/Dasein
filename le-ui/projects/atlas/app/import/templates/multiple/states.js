@@ -1,16 +1,36 @@
-import SystemCreationComponent from 'atlas/import/templates/multiple/system-creation.component';
+import MultipleTemplatesList from 'atlas/import/templates/multiple/multiple-templates.list';
+import SummaryContainer from 'atlas/import/templates/components/summary';
+import  SystemCreationComponent from './system-creation.component';
 
-const creationSystemState = {
-  name: 'sistemcreation.systems',
-  url: '/systems',
-  views: {
-    // Relatively target the parent-state's parent-state's 'messagecontent' ui-view
-    // This could also have been written using ui-view@state addressing: 'messagecontent@mymessages'
-    // Or, this could also have been written using absolute ui-view addressing: '!$default.$default.messagecontent'
-    "main@": {
-      component: SystemCreationComponent
+const templatesListState = {
+  parent: 'home',
+  name: "templateslist",
+  url: "/templateslist",
+  onEnter: ($transition$, $state$) => {
+    console.log('ENTEReD', $transition$, $state$);
+  },
+  resolve: [
+    {
+      token: 'templateslist',
+      resolveFn: () => {
+        console.log('FN');
+        return [];
+      }
     }
+  ],
+  views: {
+    'summary@': SummaryContainer,
+    'main@': MultipleTemplatesList
   }
 };
 
-export const states = [ creationSystemState];
+const creationSystemState = {
+  parent: 'home',
+  name: 'sistemcreation',
+  url: '/system',
+  views: {
+    "main@^.^": SystemCreationComponent
+  }
+};
+const states = [creationSystemState, templatesListState];
+export default states;
