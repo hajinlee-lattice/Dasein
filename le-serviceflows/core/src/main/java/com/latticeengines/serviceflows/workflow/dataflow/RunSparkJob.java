@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -21,15 +18,9 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepCon
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
-import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.SparkJobService;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class RunSparkJob<S extends BaseStepConfiguration, //
         C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
