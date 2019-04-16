@@ -269,7 +269,7 @@ export default class MultipleTemplatesList extends Component {
                             icon: 'fa fa-plus-circle'
                         }}
                         callback={() => {
-                            ReactRouter.getStateService().go('.sistemcreation');
+                            ReactRouter.getStateService().go('sistemcreation');
                             // alert('Call APIS');
                         }}
                     />

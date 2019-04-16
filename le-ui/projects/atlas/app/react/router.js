@@ -3,7 +3,7 @@ import {
     servicesPlugin,
     hashLocationPlugin
 } from "common/react-vendor";
-import { mtstates } from "./states";
+import appState  from "./states";
 
 class ReactRouter {
     constructor() {
@@ -21,7 +21,7 @@ class ReactRouter {
         this.routing.router.plugin(hashLocationPlugin);
 
         // Register each state
-        const states = mtstates;
+        const states = appState;
         states.forEach(state => this.routing.router.stateRegistry.register(state));
 
         // Set initial and fallback states
