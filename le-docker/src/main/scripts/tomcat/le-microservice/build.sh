@@ -40,7 +40,7 @@ function build_docker() {
 	cp -f ${DIR}/context.xml META-INF/context.xml
 	# replace web.xml
 	line=$(grep -n 'description' WEB-INF/web.xml | cut -d ":" -f 1)
-    { head -n $(($line-1)) WEB-INF/web.xml; cat ${DIR}/tomcat_filters.xml; tail -n +$(($line+1)) WEB-INF/web.xml; } > WEB-INF/web2.xml
+    { head -n ${line} WEB-INF/web.xml; cat ${DIR}/tomcat_filters.xml; tail -n +$(($line+1)) WEB-INF/web.xml; } > WEB-INF/web2.xml
     mv -f WEB-INF/web2.xml WEB-INF/web.xml
 	cd ..
 	if [[ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]]; then

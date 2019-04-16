@@ -257,7 +257,7 @@ public class HdfsUtils {
 
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) filename -> {
             Pattern p = Pattern.compile(regex);
-            Matcher matcher = p.matcher(filename.toString());
+            Matcher matcher = p.matcher(filename);
             return matcher.matches();
         });
     }

@@ -148,7 +148,7 @@ public class EventQueryTranslator extends TranslatorCommon {
             .where(periodFilter.and(productFilter));
 
         SQLQuery revenueSubQuery = factory.query()
-            .select(keysAccountId, keysPeriodId, trxnAmount.sum().coalesce(BigDecimal.ZERO))
+            .select(keysAccountId, keysPeriodId, trxnAmount.sum().coalesce(BigDecimal.ZERO).as(REVENUE))
             .from(keysPath)
             .leftJoin(productQuery, trxnPath)
             .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)))
@@ -170,7 +170,7 @@ public class EventQueryTranslator extends TranslatorCommon {
             .rows().between().following(ONE_LAG_BEHIND_OFFSET).following(laggingPeriodCount);
 
         SQLQuery revenueSubQuery = factory.query() //
-            .select(revenueAccountId, revenuePeriodId, windowAgg) //
+            .select(revenueAccountId, revenuePeriodId, windowAgg.as(REVENUE)) //
             .from(revenuePath);
 
         SubQuery subQuery = new SubQuery();

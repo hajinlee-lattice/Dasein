@@ -25,9 +25,14 @@ public class MatchStatistics {
             .appendLiteral(".").appendMillis3Digit().toFormatter();
     private static Logger log = LoggerFactory.getLogger(MatchStatistics.class);
     private Integer rowsRequested;
-    private Integer rowsMatched;
+    private Integer rowsMatched = 0;
     private Long timeElapsedInMsec;
     private List<Integer> columnMatchCount;
+
+    private Long orphanedNoMatchCount = 0L;
+    private Long orphanedUnmatchedAccountIdCount = 0L;
+    private Long matchedByMatchKeyCount = 0L;
+    private Long matchedByAccountIdCount = 0L;
 
     @MetricField(name = "RowsRequested", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsRequested")
@@ -71,6 +76,38 @@ public class MatchStatistics {
         this.columnMatchCount = columnMatchCount;
     }
 
+    public Long getOrphanedNoMatchCount() {
+        return orphanedNoMatchCount;
+    }
+
+    public void setOrphanedNoMatchCount(Long orphanedNoMatchCount) {
+        this.orphanedNoMatchCount = orphanedNoMatchCount;
+    }
+
+    public Long getOrphanedUnmatchedAccountIdCount() {
+        return orphanedUnmatchedAccountIdCount;
+    }
+
+    public void setOrphanedUnmatchedAccountIdCount(Long orphanedUnmatchedAccountIdCount) {
+        this.orphanedUnmatchedAccountIdCount = orphanedUnmatchedAccountIdCount;
+    }
+
+    public Long getMatchedByMatchKeyCount() {
+        return matchedByMatchKeyCount;
+    }
+
+    public void setMatchedByMatchKeyCount(Long matchedByMatchKeyCount) {
+        this.matchedByMatchKeyCount = matchedByMatchKeyCount;
+    }
+
+    public Long getMatchedByAccountIdCount() {
+        return matchedByAccountIdCount;
+    }
+
+    public void setMatchedByAccountIdCount(Long matchedByAccountIdCount) {
+        this.matchedByAccountIdCount = matchedByAccountIdCount;
+    }
+
     @JsonProperty("TimeElapsed")
     private String getReadableTimeElapsed() {
         return timeElapsedInMsec == null ? null
@@ -93,6 +130,15 @@ public class MatchStatistics {
     @JsonIgnore
     public Integer getTimeElapsedMetric() {
         return Integer.valueOf(getTimeElapsedInMsec().toString());
+    }
+
+    public void printMatchStatistics(String message) {
+        log.debug("Printing Match Stats: " + message);
+        log.debug("   Stats Rows Matched: " + getRowsMatched());
+        log.debug("   Stats Orphaned No Match: " + getOrphanedNoMatchCount());
+        log.debug("   Stats Orphaned Unmatched Account ID: " + getOrphanedUnmatchedAccountIdCount());
+        log.debug("   Stats Matched By MatchKey: " + getMatchedByMatchKeyCount());
+        log.debug("   Stats Matched By Account ID: " + getMatchedByAccountIdCount());
     }
 
 }

@@ -104,7 +104,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         setEvaluationDateStrAndTimestamp();
 
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     @Override
@@ -216,13 +216,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
     }
 
-    private void registerDynamoExport() {
-        exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
-    }
-
     private void finishing() {
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
-        registerDynamoExport();
+        exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
     }
 
 }

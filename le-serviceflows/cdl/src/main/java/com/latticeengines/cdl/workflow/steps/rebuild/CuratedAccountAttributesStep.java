@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -115,12 +115,12 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
             // for BusinessEntity CuratedAccounts is null or has been set to false.
             log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
             skipTransformation = true;
+        } else if (shouldResetCuratedAttributesContext()) {
+            log.warn("Should reset.  Skipping CuratedAccountAttributes Step.");
+            skipTransformation = true;
         }
 
-        if (skipTransformation) {
-            log.warn("Resetting Curated Account Attributes Step context.");
-            resetCuratedAttributesContext();
-        } else {
+        if (!skipTransformation) {
             Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
             Table contactTable = metadataProxy.getTable(customerSpace.toString(), contactTableName);
             long accCnt = ScalingUtils.getTableCount(accountTable);
@@ -165,13 +165,17 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         return contactTableName;
     }
 
-    private void resetCuratedAttributesContext() {
+    private boolean shouldResetCuratedAttributesContext() {
+        // if either Account or Contact is reset, should reset CuratedAccount too
         Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
-        if (entitySet == null) {
-            entitySet = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(entitySet) && //
+                (entitySet.contains(BusinessEntity.Account) || entitySet.contains(BusinessEntity.Contact))) {
+            entitySet.add(BusinessEntity.CuratedAccount);
+            putObjectInContext(RESET_ENTITIES, entitySet);
+            return true;
+        } else {
+            return false;
         }
-        entitySet.add(BusinessEntity.CuratedAccount);
-        putObjectInContext(RESET_ENTITIES, entitySet);
     }
 
     @Override

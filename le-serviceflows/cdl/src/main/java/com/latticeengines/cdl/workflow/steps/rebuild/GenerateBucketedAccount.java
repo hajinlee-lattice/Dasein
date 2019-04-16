@@ -1,9 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.cache.CacheName.TableRoleMetadataCache;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPIER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
@@ -25,12 +24,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.cache.exposed.service.CacheServiceBase;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -47,6 +42,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -129,7 +125,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         TransformationStepConfig filter = filter();
         TransformationStepConfig profile = profile();
         TransformationStepConfig encode = bucketEncode();
-        TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
+        TransformationStepConfig sortProfile = sortProfile(profileTablePrefix);
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
@@ -152,37 +148,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private TransformationStepConfig filter() {
         TransformationStepConfig step = new TransformationStepConfig();
         addBaseTables(step, fullAccountTableName);
-        step.setTransformer(TRANSFORMER_COPIER);
-
-        CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(customerSpace.getTenantId(), TableRoleMetadataCache);
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            log.warn("10 second sleep is interrupted.", e);
-        }
-        List<String> retainAttrNames = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
-                        tableFromActiveVersion ? active : inactive) //
-                .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
-                .filter(cm -> !Boolean.FALSE.equals(cm.getCanSegment())) //
-                .map(ColumnMetadata::getAttrName) //
-                .collectList().block();
-        if (retainAttrNames == null) {
-            retainAttrNames = new ArrayList<>();
-        }
-        if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
-            retainAttrNames.add(InterfaceName.LatticeAccountId.name());
-        }
-        if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
-            retainAttrNames.add(InterfaceName.AccountId.name());
-        }
-        if (!retainAttrNames.contains(InterfaceName.CDLUpdatedTime.name())) {
-            retainAttrNames.add(InterfaceName.CDLUpdatedTime.name());
-        }
-
-        CopierConfig conf = new CopierConfig();
-        conf.setRetainAttrs(retainAttrNames);
+        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        CopyConfig conf = new CopyConfig();
+        conf.setSelectAttrs(getRetrainAttrNames());
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -214,7 +182,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         return step;
     }
 
-    private TransformationStepConfig sortProfile(CustomerSpace customerSpace, String profileTablePrefix) {
+    private TransformationStepConfig sortProfile(String profileTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<Integer> inputSteps = Collections.singletonList(profileStep);
         step.setInputSteps(inputSteps);
@@ -227,10 +195,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
 
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(profileTablePrefix);
-        step.setTargetTable(targetTable);
+        setTargetTable(step, profileTablePrefix);
 
         return step;
     }
@@ -282,6 +247,29 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         log.info("Enriched " + dcCount.get() + " attributes using data cloud metadata.");
         log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
         log.info("BucketedAccount table has " + table.getAttributes().size() + " attributes in total.");
+    }
+
+    private List<String> getRetrainAttrNames() {
+        List<String> retainAttrNames = servingStoreProxy
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
+                        tableFromActiveVersion ? active : inactive) //
+                .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
+                .filter(cm -> !Boolean.FALSE.equals(cm.getCanSegment())) //
+                .map(ColumnMetadata::getAttrName) //
+                .collectList().block();
+        if (retainAttrNames == null) {
+            retainAttrNames = new ArrayList<>();
+        }
+        if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
+            retainAttrNames.add(InterfaceName.LatticeAccountId.name());
+        }
+        if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
+            retainAttrNames.add(InterfaceName.AccountId.name());
+        }
+        if (!retainAttrNames.contains(InterfaceName.CDLUpdatedTime.name())) {
+            retainAttrNames.add(InterfaceName.CDLUpdatedTime.name());
+        }
+        return retainAttrNames;
     }
 
     private void setupLatticeAccountIdAttr(ColumnMetadata latticeIdCm, Attribute attr) {

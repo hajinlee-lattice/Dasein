@@ -37,7 +37,7 @@ public class MatchGuideBook extends GuideBook {
     @Override
     protected String getSerializedTravelerContext(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        return matchTraveler.getMatchKeyTuple().toString();
+        return matchTraveler.getMatchKeyTuple() == null ? "" : matchTraveler.getMatchKeyTuple().toString();
     }
 
     @Override

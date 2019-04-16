@@ -32,6 +32,7 @@ export default function () {
                     sort_modeliteration: {
                         label: 'Sort By',
                         icon: 'numeric',
+                        property: 'DisplayName',
                         order: '',
                         items: [
                             { 
@@ -107,6 +108,7 @@ export default function () {
                 });
 
                 $scope.$watch('vm.queryText', function (newvalue, oldvalue) {
+
                     vm.queryInProgress = true;
 
                     if (vm.queryTimeout) {
@@ -132,7 +134,13 @@ export default function () {
                                 return vm.categoryCounts[value] > 0;
                             });
 
+                            if (vm.section == 're.model_iteration') {
+                                vm.setCategory(categories[0]);
+                                vm.filterEmptySubcategories();
+                            }
+
                             if (vm.category && (categories.indexOf(vm.category) < 0 || categories.length == 1)) {
+
                                 vm.setCategory(categories[0]);
                                 vm.filterEmptySubcategories();
                             }

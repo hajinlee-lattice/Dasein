@@ -5,9 +5,8 @@
         </li>
 
         <li class="attr-pagination" ng-if="filteredList.length > $ctrl.filters.pagesize">
-            <pd-pagination-controls
-                    current="$ctrl.filters.page"
-                    max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
+            <pd-pagination-controls current="$ctrl.filters.page"
+                max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
             </pd-pagination-controls>
         </li>
     </ul>
@@ -21,8 +20,7 @@
             <div class="attr-result-checkbox" ng-click="$ctrl.toggleAll()">
                 <!--input ng-checked="$ctrl.isAllChecked()" name="{{$ctrl.checkboxName()}}" type="checkbox" /-->
 
-                <i  class="fa" 
-                    ng-class="{ 
+                <i class="fa" ng-class="{ 
                         'fa-square-o': !$ctrl.isAllChecked() && !$ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
                         'fa-check-square-o': $ctrl.isAllChecked() && !$ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
                         'fa-minus-square-o': $ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
@@ -43,8 +41,7 @@
                         | filter: $ctrl.getFiltering()))
                         | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.getPageSize()
-                        | limitTo: $ctrl.getPageSize()"
-            ng-class="{
+                        | limitTo: $ctrl.getPageSize()" ng-class="{
                 'disabled': $ctrl.isDisabled(item),
                 'category': item.Attributes
             }">
@@ -55,9 +52,7 @@
                         name="{{item.DisplayName}}" 
                         type="checkbox" /-->
 
-                <i  class="fa" 
-                    ng-if="item.Attributes && !item.IsFrozen"
-                    ng-class="{ 
+                <i class="fa" ng-if="item.Attributes && !item.IsFrozen" ng-class="{ 
                         'fa-square-o': !$ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-check-square-o': $ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-minus-square-o': $ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
@@ -66,13 +61,18 @@
                         'fa-minus-square': $ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))
                     }">
                 </i>
-                <i class="fa fa-toggle-on" ng-if="!item.Attributes && !item.IsFrozen && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))" ng-class="{ 'fa-rotate-180': !$ctrl.isChecked(item) }"></i>
-                <i class="fa fa-toggle-off" ng-if="!item.Attributes && !item.IsFrozen && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))" ng-class="{ 'fa-rotate-180': $ctrl.isChecked(item) }"></i>
+                <i class="fa fa-toggle-on"
+                    ng-if="!item.Attributes && !item.IsFrozen && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))"
+                    ng-class="{ 'fa-rotate-180': !$ctrl.isChecked(item) }"></i>
+                <i class="fa fa-toggle-off"
+                    ng-if="!item.Attributes && !item.IsFrozen && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))"
+                    ng-class="{ 'fa-rotate-180': $ctrl.isChecked(item) }"></i>
                 <i class="fa fa-exclamation-triangle show-tooltip delay top left" ng-if="item.IsFrozen">
                     <div class="tooltip_" ng-if="item.IsFrozen">
                         <div class="cover">
                             <em>Deprecated Attribute:</em>
-                            <p>You can't take any action on these attributes.  It is advised to disable them from your workflows as they are no longer supported</p>
+                            <p>You can't take any action on these attributes. It is advised to disable them from your
+                                workflows as they are no longer supported</p>
                         </div>
                     </div>
                 </i>
@@ -99,29 +99,36 @@
                             </div>
                         </i>
 
-                        <span class="show-tooltip delay top left">
+                        <span class="show-tooltip delay top left" ng-class="{
+                            'attr-result-name': $ctrl.subcategory
+                        }">
                             <div class="tooltip_" ng-if="item.Description">
                                 <div class="cover">
                                     <em>Description:</em>
                                     <p>{{item.Description}}</p>
                                 </div>
                             </div>
-                            {{item.DisplayName}}
+                            <span title="{{item.DisplayName}}">
+                                {{item.DisplayName}}
+                            </span>
                         </span>
 
-                        <span ng-if="item.Attributes">({{(item.Attributes | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
+                        <span ng-if=" item.Attributes">
+                            ({{(item.Attributes | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})
+                        </span>
                     </label>
                 </div>
 
                 <div class="attr-result-buckets-container">
                     <ul class="attr-result-buckets" ng-if="$ctrl.subcategory">
-                        <li ng-repeat="bucket in $ctrl.getBuckets(item.Attribute) | orderBy: ['-Cnt','Lbl'] | limitTo: 3">
+                        <li
+                            ng-repeat="bucket in $ctrl.getBuckets(item.Attribute) | orderBy: ['-Cnt','Lbl'] | limitTo: 3">
                             <span>{{bucket.Lbl}}</span>
                             <em>{{bucket.Cnt}}</em>
                         </li>
                     </ul>
                 </div>
-                
+
                 <i class="fa fa-chevron-right" ng-if="item.Attributes"></i>
             </div>
         </li>
@@ -129,9 +136,8 @@
 
     <ul class="attr-pagination-bottom" ng-if="filteredList.length > $ctrl.filters.pagesize">
         <li class="attr-pagination pull-right">
-            <pd-pagination-controls
-                    current="$ctrl.filters.page"
-                    max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
+            <pd-pagination-controls current="$ctrl.filters.page"
+                max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
             </pd-pagination-controls>
         </li>
     </ul>

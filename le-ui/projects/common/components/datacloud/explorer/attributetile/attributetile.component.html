@@ -215,7 +215,7 @@
         </div>
 
         <!--  -->
-        <div ng-if="vm.showFreeTextAttributeCard(enrichment)" class="free-text-attribute">
+        <div ng-if="vm.showFreeTextAttributeCard(enrichment) && vm.section != 're.model_iteration'" class="free-text-attribute">
             {{'Free Text Attribute' | uppercase}}
             <div ng-if="vm.section != 're.model_iteration'">
                 <button class="{{vm.categoryClass(enrichment.Category)}} button attribute-count show-tooltip delay top left"
@@ -228,11 +228,11 @@
                 </button>
             </div>
         </div>
-        <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute">
+        <div ng-if="vm.showInvalidAttributeCard(enrichment) && vm.section != 're.model_iteration'" class="free-text-attribute">
             {{'No Data Available' | uppercase}}
         </div>
 
-        <div ng-if="vm.isBktEmpty(enrichment)" class="free-text-attribute">
+        <div ng-if="vm.isBktEmpty(enrichment) && vm.section == 're.model_iteration'" class="free-text-attribute">
             {{'Profiling Data is Not Available' | uppercase}}
         </div>
 

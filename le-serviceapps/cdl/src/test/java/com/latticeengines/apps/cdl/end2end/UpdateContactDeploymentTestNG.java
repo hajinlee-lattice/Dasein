@@ -24,12 +24,16 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 500);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_1);
 
-        new Thread(this::createTestSegments).start();
+        new Thread(this::createTestSegment3).start();
 
         importData();
-        processAnalyze();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
         try {
             verifyProcess();
         } finally {
@@ -40,7 +44,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private void importData() throws Exception {
-        mockCSVImport(BusinessEntity.Contact, 3, "Contact");
+        mockCSVImport(BusinessEntity.Contact, 3, "DefaultSystem_ContactData");
         Thread.sleep(2000);
     }
 
@@ -48,6 +52,49 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         clearCache();
         runCommonPAVerifications();
 
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
+                BusinessEntity.CuratedAccount);
+        verifyBatchStore(getExpectedBatchStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
+        verifyServingStore(getExpectedServingStoreCounts());
+
+        verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_3_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_3_CONTACT_2);
+        verifyTestSegment3Counts(segment3Counts);
+    }
+
+    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Contact, CONTACT_3);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Contact, CONTACT_3);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_3);
+        map.put(BusinessEntity.Contact, CONTACT_3);
+        return map;
+    }
+
+    protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
@@ -74,7 +121,8 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, TRANSACTION_1);
+        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TRANSACTION_IN_REPORT_1);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -83,43 +131,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         expectedReport.put(BusinessEntity.Transaction, transactionReport);
         expectedReport.put(BusinessEntity.PurchaseHistory, purchaseHistoryReport);
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
-
-        createTestSegment3();
-        verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-
-        long numAccounts = 1000;
-        long numContacts = 1000;
-//        long numProducts = PRODUCT_IMPORT_SIZE_1;
-//        long numTransactions = TRANSACTION_IMPORT_SIZE_1;
-
-        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), numProducts);
-//        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction), numTransactions);
-//
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
-        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_3_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_3_CONTACT_2);
-        verifyTestSegment3Counts(segment3Counts);
-//
-//        verityTestSegmentCountDiff(ImmutableList.of(BusinessEntity.Account, BusinessEntity.Contact));
-        /*
-        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_1_ACCOUNT_3, BusinessEntity.Contact, SEGMENT_1_CONTACT_3);
-        verifyTestSegment1Counts(segment1Counts);
-        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-                BusinessEntity.Account, 57L, BusinessEntity.Contact, 66L);  // Temporary fix. Need to revisit to make the check independent with datacloud release
-        verifyTestSegment2Counts(segment2Counts);
-        */
-//        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
-//                RatingBucketName.A, RATING_A_COUNT_2_REBUILD, //
-//                RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
-//                RatingBucketName.F, RATING_F_COUNT_2_REBUILD);
-        // TODO: verify by rating proxy
-        // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+        return expectedReport;
     }
 
 }

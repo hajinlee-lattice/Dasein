@@ -1,9 +1,11 @@
+import './chips-directive.scss';
 angular.module('mainApp.appCommon.directives.chips', [])
 .directive('chips', function () {
     return {
         restrict: 'E',
-        templateUrl: '/components/ai/chips.component.html',
+        templateUrl: '/app/directives/chips.component.html',
         scope: { 
+            icon: '@',
             placeholder: '@', 
             datasource: '=', 
             callback: '&callbackFunction', 
@@ -14,7 +16,10 @@ angular.module('mainApp.appCommon.directives.chips', [])
             queryscope: '@',
             showicon: '@',
             initialvalue: '=',
-            initiallyselected: '='
+            initiallyselected: '=',
+            allowcustomvalues:'@?',
+            enableremoverow: '@?',
+            removerowcallback:'&?'
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -30,6 +35,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.queryScope = scope.queryscope;
             scope.isSelectionDone = false;
             scope.showIcon = scope.showicon;
+            scope.customVals = scope.allowcustomvalues ? scope.allowcustomvalues : false
+            scope.removeRow = !scope.enableremoverow ? false : scope.enableremoverow
             scope.sortList = (objA, objB) => {
                 let a = objA[scope.displayname];
                 let b = objB[scope.displayname];
@@ -45,6 +52,14 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 }
             };
 
+            scope.getClassIcon = function(){
+                console.log('SEARCH ', scope.icon);
+                if(scope.icon){
+                    return scope.icon;
+                }else{
+                    return 'fa fa-search';
+                }
+            }
             scope.filterFunction = function(item) {
                 return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
             };
@@ -54,7 +69,13 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     return item[scope.displayName];
                 }
             }
-
+            scope.showRemove = () => {
+                if(scope.enableremoverow == 'true'){
+                    return true;
+                }else {
+                    return false;
+                }
+            }
             scope.isSelectionDone = function(){
                 if(scope.singleSelection){
                     if(Object.keys(scope.chips).length > 0){
@@ -114,11 +135,31 @@ angular.module('mainApp.appCommon.directives.chips', [])
                         scope.positionInQueryList = scope.positionInQueryList - 1;
                     }
                 }
-                if (keyEvent.key === 'Enter' && scope.query.length > 0) {
-                    scope.chooseItem(scope.filteredItems[scope.positionInQueryList]);
+                if('Escape' === keyEvent.key){
                     scope.positionInQueryList = -1;
-
                 }
+                if (keyEvent.key === 'Enter' && scope.query.length > 0) {
+                        let item = scope.filteredItems[scope.positionInQueryList];
+                        if(!item && scope.customVals){
+                            let obj = scope.getEmptyObject();
+                            obj[scope.displayName] = scope.query;
+                            obj[scope.id] = Math.random()+'_'+scope.query;
+                            obj['custom'] = true;
+                            obj.value = scope.query;
+                            scope.addCustomValue(obj);
+                        }else{
+                            scope.chooseItem(item);
+                            scope.positionInQueryList = -1;
+                        }
+                }
+            }
+
+            scope.getEmptyObject = () => {
+                let obj = {};
+                obj[scope.displayName] = undefined;
+                obj[scope.id] = undefined;
+                obj['value'] = undefined;
+                return obj;
             }
 
             scope.callCallback = function () {
@@ -152,9 +193,20 @@ angular.module('mainApp.appCommon.directives.chips', [])
 
                 // console.log(scope.chips);
             }
+            scope.addCustomValue = (value) => {
+                scope.query = '';
+                scope.chips[value[scope.id]] = value;
+                scope.callCallback();
+            }
             scope.removeItem = function (val) {
                 delete scope.chips[val[scope.id]];
                 scope.callCallback();
+            }
+
+            scope.removeRow = (item) => {
+                if (typeof (scope.removerowcallback) != undefined) {
+                    scope.removerowcallback({args:JSON.stringify(item)});
+                }
             }
 
             scope.hoverIn = function () {

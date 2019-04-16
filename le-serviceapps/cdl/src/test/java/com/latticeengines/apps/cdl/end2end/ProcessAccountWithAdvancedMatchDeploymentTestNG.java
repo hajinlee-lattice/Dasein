@@ -57,7 +57,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Inject
     private MatchProxy matchProxy;
 
-    @BeforeClass(groups = { "end2end" })
+    @BeforeClass(groups = { "end2end" }, enabled = false)
     @Override
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
@@ -67,14 +67,15 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         log.info("Setup Complete!");
     }
 
-    @Test(groups = "end2end", enabled = true)
+    // Disable the test until we work on PA integration of M28
+    @Test(groups = "end2end", enabled = false)
     @Override
     public void runTest() throws Exception {
         super.runTest();
     }
 
     @Override
-    protected void importData() throws Exception {
+    protected void importData() throws InterruptedException {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 1, "Account");
         Thread.sleep(2000);
@@ -220,7 +221,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     }
 
     @Override
-    protected Map<BusinessEntity, Long> getExpectedbatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1);

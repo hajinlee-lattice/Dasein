@@ -63,7 +63,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @BeforeClass(groups = { "end2end" })
+    @BeforeClass(groups = { "end2end" }, enabled = false)
     @Override
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
@@ -73,7 +73,8 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         log.info("Setup Complete!");
     }
 
-    @Test(groups = "end2end", enabled = true)
+    // Disable the test until we work on PA integration of M28
+    @Test(groups = "end2end", enabled = false)
     @Override
     public void runTest() throws Exception {
         super.runTest();
@@ -111,15 +112,22 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         verifyAccountSeedLookupData();
     }
 
-    @Override
-    protected void verifyBatchServingStoreCount() {
-        long numAccounts = 1000;
-        long numContacts = 523;
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, 1000L, //
+                BusinessEntity.Contact, 523L);
+    }
 
-        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, 1000L, //
+                BusinessEntity.Contact, 523L);
+    }
+
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, 1000L, //
+                BusinessEntity.Contact, 523L);
     }
 
     @Override

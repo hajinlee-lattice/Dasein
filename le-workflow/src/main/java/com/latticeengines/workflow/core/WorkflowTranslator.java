@@ -109,7 +109,7 @@ public class WorkflowTranslator {
                         if (failure == null) {
                             failure = InjectableFailure.BeforeExecute;
                         }
-                        log.info(String.format("Inject %s to [%02d] %s", failure, i, stepName));
+                        log.info(String.format("Inject %s to [%d] %s", failure, i, stepName));
                     }
                 }
                 Step step = step(abstractStep, choreographer, i, failure, initialContext);

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -22,6 +23,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -67,6 +69,10 @@ public class MatchBlock implements HasPid {
     @JsonProperty("MatchedRows")
     @Column(name = "MatchedRows")
     private Integer matchedRows;
+    @JsonProperty("MatchResults")
+    @Column(name = "MatchResults", columnDefinition = "'JSON'")
+    @org.hibernate.annotations.Type(type = "json")
+    private Map<EntityMatchResult, Long> matchResults;
     @JsonProperty("ApplicationState")
     @Enumerated(EnumType.STRING)
     @Column(name = "ApplicationState", nullable = false, length = 20)
@@ -118,6 +124,14 @@ public class MatchBlock implements HasPid {
 
     public void setMatchedRows(Integer matchedRows) {
         this.matchedRows = matchedRows;
+    }
+
+    public Map<EntityMatchResult, Long> getMatchResults() {
+        return matchResults;
+    }
+
+    public void setMatchResults(Map<EntityMatchResult, Long> matchResults) {
+        this.matchResults = matchResults;
     }
 
     public YarnApplicationState getApplicationState() {

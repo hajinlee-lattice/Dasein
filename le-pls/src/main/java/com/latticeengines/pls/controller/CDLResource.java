@@ -213,6 +213,29 @@ public class CDLResource {
         }
     }
 
+    @RequestMapping(value = "/s3/template/status", method = RequestMethod.PUT)
+    @ApiOperation(value = "Update template import status")
+    public ResponseDocument<String> updateS3TemplateStatus(
+            @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+            @RequestBody S3ImportTemplateDisplay templateDisplay) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
+                    templateDisplay.getFeedType());
+            if (dataFeedTask == null) {
+                throw new RuntimeException("Cannot find template for S3 import!");
+            }
+            if (!dataFeedTask.getS3ImportStatus().equals(templateDisplay.getImportStatus())) {
+                dataFeedTask.setS3ImportStatus(templateDisplay.getImportStatus());
+                dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
+            }
+            return ResponseDocument.successResponse(dataFeedTask.getUniqueId());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to update S3 import status: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] { "UpdateS3ImportStatus", e.getMessage() });
+        }
+    }
+
     @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> cleanup(@RequestParam(value = "fileName") String fileName,
@@ -261,7 +284,7 @@ public class CDLResource {
         return cdlService.getS3ImportTemplate(customerSpace.toString());
     }
 
-    @GetMapping(value = "/s3import/getFileList")
+    @GetMapping(value = "/s3import/fileList")
     @ResponseBody
     @ApiOperation("get file list under s3Path")
     public List<FileProperty> getFileList(@RequestParam String s3Path) {

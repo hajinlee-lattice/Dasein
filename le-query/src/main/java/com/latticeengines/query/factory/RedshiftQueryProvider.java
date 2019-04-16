@@ -10,9 +10,10 @@ import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQueryFactory;
+import com.latticeengines.query.factory.sqlquery.RedshiftSQLQueryFactory;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.PostgreSQLTemplates;
-import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 
 @Component("redshiftQueryProvider")
@@ -35,20 +36,20 @@ public class RedshiftQueryProvider extends QueryProvider {
     }
 
     @Override
-    public boolean providesQueryAgainst(AttributeRepository repository) {
-        // Redshift provides query against all attribute repository, for now
-        return true;
+    public boolean providesQueryAgainst(AttributeRepository repository, String sqlUser) {
+        return redshiftDataStores.containsKey(sqlUser);
     }
 
     @Override
-    protected SQLQueryFactory getSQLQueryFactory() {
+    protected BaseSQLQueryFactory getSQLQueryFactory() {
         return getSQLQueryFactory(USER_SEGMENT);
     }
 
     @Override
-    protected SQLQueryFactory getSQLQueryFactory(String sqlUser) {
+    protected BaseSQLQueryFactory getSQLQueryFactory(String sqlUser) {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        return new SQLQueryFactory(configuration, redshiftDataStores.get(sqlUser));
+        return new RedshiftSQLQueryFactory(configuration, redshiftDataStores.get(sqlUser));
     }
+
 }

@@ -76,16 +76,15 @@ public class MatchJunctionActor extends JunctionActorTemplate {
         matchTraveler.setMatched(Boolean.FALSE);
 
         // Initialize entity
-        DecisionGraph nextDG = findNextDecisionGraph(matchTraveler.getDecisionGraph());
-        matchTraveler.setEntity(nextDG.getEntity());
-
-        // TODO For LDC match, since match planner is still outside of actor
-        // system, matchKeyTuple should be prepared before transferring to next
-        // decision graph. Currently assume LDC match is always transferred from
-        // Account match, so matchTraveler.matchKeyTuple is already prepared and
-        // standardized
-        // Next action: move match planner for LDC match into actor system too
-
+        DecisionGraph decisionGraph = findDecisionGraphByName(matchTraveler.getDecisionGraph());
+        matchTraveler.setEntity(decisionGraph.getEntity());
+        // If MatchKeyTuple for entity of next DG is not prepared yet, it will
+        // be prepared in planner actor in next DG
+        // If MatchKeyTuple for entity of next DG is prepared, re-use the
+        // MatchKeyTuple
+        // If jump to LDC match, MatchKeyTuple for entity LatticeAccount is
+        // prepared in AccountMatchPlanner actor
+        matchTraveler.setMatchKeyTuple(matchTraveler.getEntityMatchKeyTuple(decisionGraph.getEntity()));
     }
 
     @Override
@@ -97,6 +96,7 @@ public class MatchJunctionActor extends JunctionActorTemplate {
         // JunctionActorTemplate.recoverTraveler)
         DecisionGraph decisionGraph = findDecisionGraphByName(matchTraveler.getDecisionGraph());
         matchTraveler.setEntity(decisionGraph.getEntity());
+        matchTraveler.setMatchKeyTuple(matchTraveler.getEntityMatchKeyTuple(decisionGraph.getEntity()));
     }
 
     private DecisionGraph findDecisionGraphByName(String decisionGraph) {

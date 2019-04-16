@@ -127,6 +127,10 @@ angular.module('common.datacloud')
             DataCloudService.setHost(value);
         };
 
+        this.setPath = function (value) {
+            DataCloudService.setPath(value);
+        };
+
         this.getPremiumSelectMaximum = function () {
             var deferred = $q.defer();
             if (DataCloudStore.premiumSelectMaximum) {
@@ -464,6 +468,10 @@ angular.module('common.datacloud')
             this.host = value;
         };
 
+        this.setPath = function (value) {
+            this.path = this.paths[value];
+        };
+
         this.inModel = function () {
             var name = $state.current.name.split('.');
 
@@ -583,12 +591,12 @@ angular.module('common.datacloud')
                 offset = opts.offset || 0,
                 max = opts.max || null,
                 onlySelectedAttributes = opts.onlySelectedAttributes || null,
-                url = opts.url || this.url('/attributes', '/insights'); 
-                /**
-                 * /datacollection/attributes
-                 *  - or - 
-                 * /datacollection/insights
-                 */
+                url = opts.url || this.url('/attributes', '/insights');
+            /**
+             * /datacollection/attributes
+             *  - or - 
+             * /datacollection/insights
+             */
             $http({
                 method: 'get',
                 url: url,

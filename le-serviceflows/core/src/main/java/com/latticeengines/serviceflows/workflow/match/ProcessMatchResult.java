@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -100,12 +99,7 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         if (preMatchTable != null) {
             preMatchTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
         }
-        List<Attribute> attrs = eventTable.getAttributes();
-        List<Attribute> newAttrs = attrs.stream().map(attr -> {
-            String attrName = attr.getName();
-            return attributeMap.getOrDefault(attrName, attr);
-        }).collect(Collectors.toList());
-        eventTable.setAttributes(newAttrs);
+        super.overlayTableSchema(eventTable, attributeMap);
     }
 
     private List<String> sourceCols(Table preMatchTable) {

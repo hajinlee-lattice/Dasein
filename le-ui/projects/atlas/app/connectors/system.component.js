@@ -161,13 +161,13 @@ export default class SystemComponent extends Component {
                         </GridLayout>
                     </LeTileBody>
                     <LeTileFooter>
-                        <LeHPanel hstretch={true} halignment={RIGHT}>
+                        <LeHPanel hstretch={true} halignment={RIGHT} classesName="s-controls">
                             <LeButton
                                 name={`${"edit-mappings-"}${this.state.system.orgName}`}
                                 disabled={this.state.saving || !this.state.system.isRegistered}
                                 config={{
                                     label: "Edit Mappings",
-                                    classNames: "blue-button"
+                                    classNames: "blue-button connections-edit-mappings"
                                 }}
                                 callback={this.editMappingClickHandler}
                             /></LeHPanel>

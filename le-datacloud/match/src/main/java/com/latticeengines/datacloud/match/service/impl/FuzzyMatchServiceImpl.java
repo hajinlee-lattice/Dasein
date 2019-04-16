@@ -107,11 +107,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                         // copy new entity IDs map
                         matchRecord.setNewEntityIds(traveler.getNewEntityIds());
                     }
+                    matchRecord.setEntityIds(traveler.getEntityIds());
                     // Copy data from EntityMatchKeyRecord in MatchTraveler that was set by MatchPlannerMicroEngineActor
                     // into the InternalOutputRecord.
                     copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);
                 } else {
-                    // TODO(jwinter/lming): Add code to be able to return Lattice Account ID along with Atlas ID.
                     matchRecord.setLatticeAccountId(result);
                 }
 

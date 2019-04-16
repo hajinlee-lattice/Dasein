@@ -8,6 +8,7 @@ module.exports = {
         alias: {
             common: path.resolve(__dirname, '../common'),
             app: path.resolve(__dirname, '../common/app'),
+            store: path.resolve(__dirname, '../common/app/store'),
             components: path.resolve(__dirname, '../common/components'),
             widgets: path.resolve(__dirname, '../common/widgets'),
             atlas: path.resolve(__dirname, 'app'),
@@ -28,7 +29,7 @@ module.exports = {
     },
 
     optimization: {
-       
+
     },
 
     plugins: [

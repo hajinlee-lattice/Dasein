@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 
@@ -33,10 +34,14 @@ public class YarnClientFactoryTestNG extends AbstractTestNGSpringContextTests {
     @Inject
     private EMREnvService emrEnvService;
 
+    @Inject
+    private EMRCacheService emrCacheService;
+
     @Test(groups = "manual")
     public void testYarnClient() throws IOException, YarnException {
         String emrCluster = "qa_b";
-        try (YarnClient yarnClient = emrEnvService.getYarnClient(emrCluster)) {
+        String clusterId = emrCacheService.getClusterId(emrCluster);
+        try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
             yarnClient.start();
             List<ApplicationReport> apps = yarnClient.getApplications(Sets.newEnumSet(Arrays.asList(//
                     YarnApplicationState.NEW, //
@@ -58,7 +63,7 @@ public class YarnClientFactoryTestNG extends AbstractTestNGSpringContextTests {
                 System.out.println("appId=" + app.getApplicationId() + " status=" + app.getYarnApplicationState() + " mb=" + mb + " vcores=" + vcores);
             }
         }
-        ClusterMetrics clusterMetrics = emrEnvService.getClusterMetrics(emrCluster);
+        ClusterMetrics clusterMetrics = emrEnvService.getClusterMetrics(clusterId);
         System.out.println(JsonUtils.serialize(clusterMetrics));
         Assert.assertNotNull(clusterMetrics);
         Assert.assertTrue(clusterMetrics.availableMB > 0);

@@ -110,7 +110,6 @@ public class QueryEvaluatorService {
     }
 
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {
-        sqlQuery.getSQL().getSQL();
         return String.format("%s tenantId=%s SQLQuery=%s", method, attrRepo.getCustomerSpace().getTenantId(),
                 sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "));
     }

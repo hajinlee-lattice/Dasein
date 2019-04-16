@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -72,6 +74,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @Autowired
     private PlayProxy playProxy;
+
+    @Autowired
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Autowired
     RecommendationService recommendationService;
@@ -136,16 +141,17 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     public void setup() throws Exception {
         topNCount = 1500L;
 
-        PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder()
-                .excludeItemsWithoutSalesforceId(true)
+        PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().excludeItemsWithoutSalesforceId(true)
                 .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())))
+                .destinationSystemType(CDLExternalSystemType.MAP)
+                .destinationSystemName(CDLExternalSystemName.Marketo)
+                .destinationSystemId("Marketo_" + System.currentTimeMillis())
+                .trayAuthenticationId(UUID.randomUUID().toString())
                 .topNCount(topNCount)
                 .playLaunchDryRun(true)
                 .build();
 
-        testPlayCreationHelper.setupTenantAndData();
-        testPlayCreationHelper.setupPlayTestEnv();
-        testPlayCreationHelper.createPlay(playLaunchConfig);
+        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
         testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
         testPlayCreationHelper.launchPlayWorkflow(playLaunchConfig);
 
@@ -167,9 +173,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
-        helper = new PlayLaunchInitStepTestHelper(playProxy, entityProxy, recommendationService, pageSize,
-                metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataCollectionProxy, dataDbDriver, dataDbUrl,
-                dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
+        helper = new PlayLaunchInitStepTestHelper(playProxy, lookupIdMappingProxy, entityProxy, recommendationService,
+                pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataCollectionProxy, dataDbDriver,
+                dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());

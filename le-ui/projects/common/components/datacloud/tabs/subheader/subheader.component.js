@@ -45,6 +45,7 @@ angular
                 {
                     label: 'Enriched Accounts',
                     icon: 'fa fa-building-o',
+                    class: 'export-enriched-accounts',
                     click: checkStatusBeforeExport.bind(null, 'ACCOUNT'),
                     disabledif:
                         !QueryStore.counts.accounts.loading &&
@@ -53,6 +54,7 @@ angular
                 {
                     label: 'Enriched Contacts with Account Attributes',
                     icon: 'fa fa-briefcase',
+                    class: 'export-enriched-contacts-accounts',
                     click: checkStatusBeforeExport.bind(
                         null,
                         'ACCOUNT_AND_CONTACT'
@@ -66,6 +68,7 @@ angular
                 {
                     label: 'Enriched Contacts (No Account Attributes)',
                     icon: 'fa fa-users',
+                    class: 'export-enriched-contacts',
                     click: checkStatusBeforeExport.bind(null, 'CONTACT'),
                     disabledif:
                         !QueryStore.counts.contacts.loading &&

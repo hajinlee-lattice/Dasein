@@ -1,11 +1,15 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.ACCT_EMAIL;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.ACCT_NAME_PHONE;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.C_ACCT_EMAIL;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.C_ACCT_NAME_PHONE;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.EMAIL;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.NAME_PHONE;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Preconditions;
@@ -25,17 +29,11 @@ public class EntityLookupEntryConverter {
      */
     public static List<EntityLookupEntry> fromMatchKeyTuple(@NotNull String entity, @NotNull MatchKeyTuple tuple) {
         Preconditions.checkNotNull(tuple);
-        if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
-            return tuple.getSystemIds()
-                    .stream()
-                    .map(pair -> fromExternalSystem(entity, pair.getKey(), pair.getValue()))
-                    .collect(Collectors.toList());
-        } else if (StringUtils.isNotBlank(tuple.getDuns())) {
-            return Collections.singletonList(fromDuns(entity, tuple.getDuns()));
-        } else if (StringUtils.isNotBlank(tuple.getDomain()) && StringUtils.isNotBlank(tuple.getCountry())) {
-            return Collections.singletonList(fromDomainCountry(entity, tuple.getDomain(), tuple.getCountry()));
-        } else if (StringUtils.isNotBlank(tuple.getName()) && StringUtils.isNotBlank(tuple.getCountry())) {
-            return Collections.singletonList(fromNameCountry(entity, tuple.getName(), tuple.getCountry()));
+        for (EntityLookupEntry.Type type : EntityLookupEntry.Type.values()) {
+            if (type.canTransformToEntries(tuple)) {
+                // use the first valid type, so the order in enum declaration matters
+                return type.toEntries(entity, tuple);
+            }
         }
         return Collections.emptyList();
     }
@@ -49,28 +47,7 @@ public class EntityLookupEntryConverter {
     public static MatchKeyTuple toMatchKeyTuple(@NotNull EntityLookupEntry entry) {
         Preconditions.checkNotNull(entry);
         Preconditions.checkNotNull(entry.getType());
-        switch (entry.getType()) {
-            case EXTERNAL_SYSTEM:
-                return new MatchKeyTuple.Builder()
-                        .withSystemIds(Collections.singletonList(toSystemId(entry)))
-                        .build();
-            case DOMAIN_COUNTRY:
-                Pair<String, String> domainCountry = toDomainCountry(entry);
-                return new MatchKeyTuple.Builder()
-                        .withDomain(domainCountry.getLeft())
-                        .withCountry(domainCountry.getValue())
-                        .build();
-            case NAME_COUNTRY:
-                Pair<String, String> nameCountry = toNameCountry(entry);
-                return new MatchKeyTuple.Builder()
-                        .withName(nameCountry.getKey())
-                        .withCountry(nameCountry.getValue())
-                        .build();
-            case DUNS:
-                return new MatchKeyTuple.Builder().withDuns(toDuns(entry)).build();
-            default:
-        }
-        throw new UnsupportedOperationException("Entry type " + entry.getType() + " is not supported");
+        return entry.getType().toTuple(entry);
     }
 
     /**
@@ -133,6 +110,7 @@ public class EntityLookupEntryConverter {
         String[] values = entry.getValues();
         return Pair.of(values[0], values[1]);
     }
+
     public static EntityLookupEntry fromDuns(@NotNull String entity, @NotNull String duns) {
         return new EntityLookupEntry(
                 EntityLookupEntry.Type.DUNS, entity, new String[0], new String[] { duns });
@@ -141,6 +119,37 @@ public class EntityLookupEntryConverter {
     public static String toDuns(@NotNull EntityLookupEntry entry) {
         check(entry, EntityLookupEntry.Type.DUNS);
         return entry.getValues()[0];
+    }
+
+    public static EntityLookupEntry fromAccountIdEmail(@NotNull String entity, @NotNull String accountId,
+            @NotNull String email) {
+        return new EntityLookupEntry(ACCT_EMAIL, entity, new String[0], new String[] { accountId, email });
+    }
+
+    public static EntityLookupEntry fromAccountIdNamePhoneNumber(@NotNull String entity, @NotNull String accountId,
+            @NotNull String name, @NotNull String phoneNumber) {
+        return new EntityLookupEntry(ACCT_NAME_PHONE, entity, new String[0],
+                new String[] { accountId, name, phoneNumber });
+    }
+
+    public static EntityLookupEntry fromCustomerAccountIdEmail(@NotNull String entity,
+            @NotNull String customerAccountId, @NotNull String email) {
+        return new EntityLookupEntry(C_ACCT_EMAIL, entity, new String[0], new String[] { customerAccountId, email });
+    }
+
+    public static EntityLookupEntry fromCustomerAccountIdNamePhoneNumber(@NotNull String entity,
+            @NotNull String customerAccountId, @NotNull String name, @NotNull String phoneNumber) {
+        return new EntityLookupEntry(C_ACCT_NAME_PHONE, entity, new String[0],
+                new String[] { customerAccountId, name, phoneNumber });
+    }
+
+    public static EntityLookupEntry fromEmail(@NotNull String entity, @NotNull String email) {
+        return new EntityLookupEntry(EMAIL, entity, new String[0], new String[] { email });
+    }
+
+    public static EntityLookupEntry fromNamePhoneNumber(@NotNull String entity, @NotNull String name,
+            @NotNull String phoneNumber) {
+        return new EntityLookupEntry(NAME_PHONE, entity, new String[0], new String[] { name, phoneNumber });
     }
 
     /*
@@ -167,5 +176,4 @@ public class EntityLookupEntryConverter {
         Preconditions.checkNotNull(entry);
         Preconditions.checkArgument(entry.getType() == type);
     }
-
 }

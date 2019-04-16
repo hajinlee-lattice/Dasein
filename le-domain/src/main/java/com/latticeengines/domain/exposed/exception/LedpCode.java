@@ -313,7 +313,7 @@ public enum LedpCode {
     LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
     LEDP_18187("Cannot populate full play information since No Rating Engine associated with the Play: {0}"), //
     LEDP_18188(
-            "The following field name length exceeded the limit of {0} characters. Shorten the field name to upload the file. \"{1}\""), //
+            "The following field name length exceeded the limit of {0} characters. Shorten the field name to upload the file: {1}"), //
     LEDP_18189("There are Rating Models associated with the current segment {0} and thus it cannot be deleted."), //
     LEDP_18190("Update Usage Attribute Config failed due to dependency check failure"), //
     LEDP_18191("Marketo Scoring setup is missing required {0}"), //
@@ -812,6 +812,8 @@ public enum LedpCode {
     LEDP_40055("CSV file has duplicate headers! (case insensitive)"),
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
+    LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
+    LEDP_40059("Error when validating with input file, please reference {0}."),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

@@ -1,0 +1,14 @@
+// @import "common/widgets/layout/layout.scss";
+@import "common/widgets/colors.scss";
+    .multiple-templates{
+        ul > .le-cell-template.actions{
+            // border: 1px solid red;
+            flex:  1;
+            .wrapper {
+              border: 1px solid white;
+              flex-wrap: nowrap;
+
+            }
+        }
+       
+    }

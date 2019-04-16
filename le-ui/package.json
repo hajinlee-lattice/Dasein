@@ -119,7 +119,8 @@
         "nodeproduction": "node bin/devsetup env=production",
         "nodeproductiondev": "node bin/devsetup env=proddev",
         "wpbuilddev": "concurrently \"npm run wp-loginbuilddev\" \"npm run wp-atlasbuilddev\" \"npm run wp-lpibuilddev\" \"npm run wp-insightsbuilddev\"",
-        "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-atlasprod\" \"npm run wp-lpiprod\" \"npm run wp-insightsbuild\""
+        "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-atlasprod\" \"npm run wp-lpiprod\" \"npm run wp-insightsbuild\"",
+        "debugnodea": "nodemon --nolazy --inspect-brk=9229 bin/devsetup.js env=qa"
     },
     "devDependencies": {}
 }

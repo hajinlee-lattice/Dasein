@@ -45,7 +45,7 @@ export const actions = {
         let observer = new Observer(
             response => {
                 if (response.status == 200) {
-                    console.log('RESPONSE ', response.data.Result);
+                    // console.log('RESPONSE ', response.data.Result);
                     let dateFormats = response.data.Result.date_format;
                     let timeFormats = response.data.Result.time_format;
                     let timezones = response.data.Result.timezones;

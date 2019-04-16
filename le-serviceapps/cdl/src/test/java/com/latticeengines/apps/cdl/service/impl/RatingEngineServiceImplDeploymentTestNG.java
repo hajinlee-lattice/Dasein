@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -416,6 +417,11 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
         AIModel aiModel = createAIModel(aiRatingEngine.getLatestIteration());
         aiModel.setDerivedFromRatingModel(aiRatingEngine.getLatestIteration().getId());
+
+        AIModel derivedModel = (AIModel) aiRatingEngine.getLatestIteration();
+        derivedModel.setModelingJobStatus(JobStatus.COMPLETED);
+        ratingEngineService.updateRatingModel(aiRatingEngine.getId(), derivedModel.getId(), derivedModel);
+
         aiModel = (AIModel) ratingEngineService.createModelIteration(aiRatingEngine, aiModel);
 
         List<RatingModel> ratingModels = getRatingModelsByRatingEngineId(aiRatingEngineId);

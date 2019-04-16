@@ -32,6 +32,7 @@ import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -49,10 +51,12 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -79,6 +83,9 @@ public class PlayLaunchProcessor {
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Autowired
     private SqoopProxy sqoopProxy;
@@ -136,8 +143,8 @@ public class PlayLaunchProcessor {
             log.info(String.format("Total available accounts available for Launch: %d",
                     totalAccountsAvailableForLaunch));
 
-            DataCollection.Version version =
-                    dataCollectionProxy.getActiveVersion(playLaunchContext.getCustomerSpace().toString());
+            DataCollection.Version version = dataCollectionProxy
+                    .getActiveVersion(playLaunchContext.getCustomerSpace().toString());
             log.info(String.format("Using DataCollection.Version %s", version));
 
             long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext, version);
@@ -155,8 +162,8 @@ public class PlayLaunchProcessor {
                 int pages = (int) Math.ceil((totalAccountsCount * 1.0D) / pageSize);
                 log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
-                try (DataFileWriter<GenericRecord> dataFileWriter =
-                        new DataFileWriter<>(new GenericDatumWriter<>(playLaunchContext.getSchema()))) {
+                try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
+                        new GenericDatumWriter<>(playLaunchContext.getSchema()))) {
                     dataFileWriter.create(playLaunchContext.getSchema(), localFile);
 
                     // loop over to required number of pages
@@ -174,7 +181,7 @@ public class PlayLaunchProcessor {
             // %based failure rate to decide if play launch failed or not
             if (playLaunch.getAccountsLaunched() == null || playLaunch.getAccountsLaunched() == 0L) {
                 throw new LedpException(LedpCode.LEDP_18159,
-                        new Object[] {playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored()});
+                        new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
             } else {
                 String recAvroHdfsFilePath = runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis,
                         avroFileName, localFile);
@@ -204,10 +211,8 @@ public class PlayLaunchProcessor {
     private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext,
             DataCollection.Version version) {
         long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
-        log.info("total account count");
-        log.info("" + totalAccountsCount);
-        log.info("accountFrontEndquery");
-        log.info(playLaunchContext.getAccountFrontEndQuery().toString());
+
+        applyEmailFilterToQueries(playLaunchContext);
 
         totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount, version);
 
@@ -315,14 +320,39 @@ public class PlayLaunchProcessor {
             Restriction nonNullLookupIdRestriction = Restriction.builder()
                     .let(BusinessEntity.Account, launch.getDestinationAccountId()).isNotNull().build();
 
-            Restriction accountRestrictionWithNonNullLookupId =
-                    Restriction.builder().and(accountRestriction, nonNullLookupIdRestriction).build();
+            Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
+                    .and(accountRestriction, nonNullLookupIdRestriction).build();
             accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
 
             effectiveAccountCount = accountFetcher.getCount(playLaunchContext, version);
         }
 
         return effectiveAccountCount;
+    }
+
+    private void applyEmailFilterToQueries(PlayLaunchContext playLaunchContext) {
+        PlayLaunch launch = playLaunchContext.getPlayLaunch();
+        LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
+                launch.getDestinationOrgId(), launch.getDestinationSysType());
+        CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
+        if (CDLExternalSystemName.Marketo.equals(destinationSystemName)) {
+            FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+            Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
+                    accountFrontEndQuery.getContactRestriction().getRestriction());
+            accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForAccountQuery));
+
+            FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+            Restriction newContactRestrictionForContactQuery = applyEmailFilterToContactRestriction(
+                    contactFrontEndQuery.getContactRestriction().getRestriction());
+            contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
+        }
+    }
+
+    private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
+        Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
+                .isNotNull().build();
+        Restriction newContactRestriction = Restriction.builder().and(contactRestriction, emailFilter).build();
+        return newContactRestriction;
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
@@ -432,8 +462,8 @@ public class PlayLaunchProcessor {
 
     private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage,
             DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
-        List<Object> modifiableAccountIdCollectionForContacts =
-                playLaunchContext.getModifiableAccountIdCollectionForContacts();
+        List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
+                .getModifiableAccountIdCollectionForContacts();
 
         List<Map<String, Object>> accountList = accountsPage.getData();
 
@@ -514,6 +544,11 @@ public class PlayLaunchProcessor {
     @VisibleForTesting
     void setPlayProxy(PlayProxy playProxy) {
         this.playProxy = playProxy;
+    }
+
+    @VisibleForTesting
+    void setLookupIdMappingProxy(LookupIdMappingProxy lookupIdMappingProxy) {
+        this.lookupIdMappingProxy = lookupIdMappingProxy;
     }
 
     @VisibleForTesting

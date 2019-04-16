@@ -336,12 +336,12 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(statuses.get(1), JobStatus.COMPLETED);
 
         MultiTenantContext.setTenant(tenant);
-        statuses = workflowJobService.getJobStatusByWorkflowIds(null, testWorkflowIds1);
+        statuses = workflowJobService.getJobStatusByWorkflowIds(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1);
         Assert.assertEquals(statuses.size(), 2);
         Assert.assertEquals(statuses.get(0), JobStatus.RUNNING);
         Assert.assertEquals(statuses.get(1), JobStatus.FAILED);
 
-        statuses = workflowJobService.getJobStatusByWorkflowIds(null, testWorkflowIds2);
+        statuses = workflowJobService.getJobStatusByWorkflowIds(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds2);
         Assert.assertEquals(statuses.size(), 2);
         Assert.assertEquals(statuses.get(0), JobStatus.RUNNING);
         Assert.assertEquals(statuses.get(1), JobStatus.COMPLETED);
@@ -377,17 +377,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
                 Collections.singletonList(JobStatus.PENDING.toString()), true, false, null);
         Assert.assertEquals(jobs.size(), 1);
 
-        MultiTenantContext.setTenant(null);
-        jobs = workflowJobService.getJobsByCustomerSpace(null, false);
-        Assert.assertEquals(jobs.size(), 8);
-        applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_10000"));
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_10001"));
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_10002"));
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_10003"));
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_20000"));
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_30000"));
-        Assert.assertTrue(applicationIds.contains("application_1549391605495_30001"));
+        // CustomerSpace is required now. Remove null customerSpace tests.
 
         List<Long> workflowExecutionIds = new ArrayList<>(workflowIds.values());
         jobs = workflowJobService.getJobsByWorkflowIds(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds,
@@ -961,49 +951,49 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
     private void mockWorkflowContainerService() {
         WorkflowContainerService containerService = Mockito.mock(WorkflowContainerService.class);
-        Mockito.when(containerService.getJobStatus("application_1549391605495_10000")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_10000", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
             jobStatus.setState(YarnApplicationState.RUNNING);
             return jobStatus;
         });
-        Mockito.when(containerService.getJobStatus("application_1549391605495_10001")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_10001", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
             jobStatus.setState(YarnApplicationState.SUBMITTED);
             return jobStatus;
         });
-        Mockito.when(containerService.getJobStatus("application_1549391605495_10002")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_10002", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.SUCCEEDED);
             jobStatus.setState(YarnApplicationState.FINISHED);
             return jobStatus;
         });
-        Mockito.when(containerService.getJobStatus("application_1549391605495_10003")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_10003", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.FAILED);
             jobStatus.setState(YarnApplicationState.KILLED);
             return jobStatus;
         });
-        Mockito.when(containerService.getJobStatus("application_1549391605495_20000")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_20000", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.KILLED);
             jobStatus.setState(YarnApplicationState.KILLED);
             return jobStatus;
         });
-        Mockito.when(containerService.getJobStatus("application_1549391605495_30000")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_30000", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
             jobStatus.setState(YarnApplicationState.SUBMITTED);
             return jobStatus;
         });
-        Mockito.when(containerService.getJobStatus("application_1549391605495_30001")).thenAnswer(invocation -> {
+        Mockito.when(containerService.getJobStatus("application_1549391605495_30001", null)).thenAnswer(invocation -> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus =
                     new com.latticeengines.domain.exposed.dataplatform.JobStatus();
             jobStatus.setStatus(FinalApplicationStatus.UNDEFINED);

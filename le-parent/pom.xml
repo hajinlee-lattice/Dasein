@@ -67,10 +67,11 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <hdp.guava.version>16.0</hdp.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
-        <aws.version>1.11.461</aws.version> <!-- at least keep up with emr release -->
+        <aws.version>1.11.519</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
         <spark.version>2.4.0</spark.version>
         <scala.version>2.11.12</scala.version>
+        <json4s.version>3.5.2</json4s.version> <!-- match spark version -->
         <jackson.dataformat.version>2.9.6</jackson.dataformat.version>
         <jackson.fasterxml.version>2.9.6</jackson.fasterxml.version>
         <jackson.module.version>2.9.6</jackson.module.version>
@@ -1690,6 +1691,11 @@
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-avro_2.11</artifactId>
                 <version>${spark.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json4s</groupId>
+                <artifactId>json4s-jackson_2.11</artifactId>
+                <version>${json4s.version}</version>
             </dependency>
 
             <!-- Project Reactor Dependencies -->

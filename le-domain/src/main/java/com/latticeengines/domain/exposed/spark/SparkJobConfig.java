@@ -12,8 +12,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.serviceflows.core.spark.WorkflowSparkJobConfig;
+import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
+import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 
 import reactor.core.publisher.Flux;
 
@@ -29,8 +32,11 @@ import reactor.core.publisher.Flux;
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME), //
         @JsonSubTypes.Type(value = RemoveOrphanConfig.class, name = RemoveOrphanConfig.NAME), //
+        @JsonSubTypes.Type(value = UpsertConfig.class, name = UpsertConfig.NAME), //
+        @JsonSubTypes.Type(value = CopyConfig.class, name = CopyConfig.NAME), //
+        @JsonSubTypes.Type(value = ConvertToCSVConfig.class, name = ConvertToCSVConfig.NAME), //
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
-        @JsonSubTypes.Type(value = WorkflowSparkJobConfig.class, name = "WorkflowSparkJobConfig"), //
+        @JsonSubTypes.Type(value = ParseMatchResultJobConfig.class, name = ParseMatchResultJobConfig.NAME), //
 })
 public abstract class SparkJobConfig {
 

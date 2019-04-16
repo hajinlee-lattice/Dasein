@@ -1,27 +1,22 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
-import java.util.ArrayList;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
+
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
@@ -29,9 +24,6 @@ import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfiguration>
         extends BaseTransformWrapperStep<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseProcessDiffStep.class);
-
-    protected CustomerSpace customerSpace;
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
 
@@ -61,71 +53,39 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     protected abstract PipelineTransformationRequest getTransformRequest();
 
-    protected String renameServingStoreTable(BusinessEntity servingEntity, Table servingStoreTable) {
-        String prefix = String.join("_", customerSpace.getTenantId(), servingEntity.name());
-        String goodName = NamingUtils.timestamp(prefix);
-        log.info("Renaming table " + servingStoreTable.getName() + " to " + goodName);
-        metadataProxy.updateTable(customerSpace.toString(), goodName, servingStoreTable);
-        servingStoreTable.setName(goodName);
-        return goodName;
+    protected TransformationStepConfig retainFields(int previousStep, TableRoleInCollection role) {
+        return retainFields(previousStep, null, null, false, role);
     }
 
-    protected void exportTableRoleToRedshift(String tableName, TableRoleInCollection tableRole) {
-        String targetTableName = dataCollectionProxy.getTableName(configuration.getCustomerSpace().toString(),
-                tableRole, inactive);
-        if (StringUtils.isBlank(targetTableName)) {
-            throw new IllegalStateException("Cannot find serving store table " + tableRole + " in " + inactive +" for redshift upsert.");
-        }
-
-        String distKey = tableRole.getPrimaryKey().name();
-        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
-        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
-            sortKeys.add(tableRole.getPrimaryKey().name());
-        }
-
-        RedshiftExportConfig config = new RedshiftExportConfig();
-        config.setTableName(targetTableName);
-        config.setDistKey(distKey);
-        config.setSortKeys(sortKeys);
-        config.setInputPath(getInputPath(tableName) + "/*.avro");
-        config.setUpdateMode(true);
-
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
+    protected TransformationStepConfig retainFields(int previousStep, String tgtTablePrefix, String primaryKey,
+                                                    TableRoleInCollection role) {
+        return retainFields(previousStep, tgtTablePrefix, primaryKey, true, role);
     }
 
-    protected void exportToDynamo(String srcTable, String tgtTable, String partitionKey, String sortKey) {
-        String inputPath = getInputPath(srcTable);
-        DynamoExportConfig config = new DynamoExportConfig();
-        config.setTableName(tgtTable);
-        config.setSrcTableName(srcTable);
-        config.setInputPath(inputPath);
-        config.setPartitionKey(partitionKey);
-        if (StringUtils.isNotBlank(sortKey)) {
-            config.setSortKey(sortKey);
-        }
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
-    }
+    protected TransformationStepConfig retainFields(int previousStep, String tgtTablePrefix, String primaryKey,
+                                                    boolean useTargetTable, TableRoleInCollection role) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(previousStep));
+        step.setTransformer(TRANSFORMER_COPY_TXMFR);
 
-    private String getInputPath(String tableName) {
-        Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(), tableName);
-        if (table == null) {
-            throw new IllegalArgumentException("Cannot find table named " + tableName);
+        if (useTargetTable) {
+            setTargetTable(step, tgtTablePrefix, primaryKey);
         }
-        List<Extract> extracts = table.getExtracts();
-        if (CollectionUtils.isEmpty(extracts) || extracts.size() != 1) {
-            throw new IllegalArgumentException("Table " + tableName + " does not have single extract");
+
+        CopyConfig config = new CopyConfig();
+        Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), role);
+        if (servingTable != null) {
+            List<String> fieldsToRetain = AvroUtils.getSchemaFields(yarnConfiguration,
+                    servingTable.getExtracts().get(0).getPath());
+            config.setSelectAttrs(fieldsToRetain);
         }
-        Extract extract = extracts.get(0);
-        String path = extract.getPath();
-        if (path.endsWith(".avro") || path.endsWith("/")) {
-            path = path.substring(0, path.lastIndexOf("/"));
-        }
-        return path;
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
     }
 
 }

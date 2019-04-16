@@ -84,23 +84,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(
-                    queryEvaluatorService.getQueryFactory(), attrRepo);
-            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
-                    frontEndQuery.getSegmentQuery());
-            if (frontEndQuery.getMainEntity() == null) {
-                frontEndQuery.setMainEntity(BusinessEntity.Account);
-            }
-            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
-                    timeTranslator);
-            if (frontEndQuery.getSegmentQuery() != null) {
-                frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
-                Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
-                        .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
-                map.putAll(segmentMap);
-            }
-            preprocess(map, attrRepo, timeTranslator);
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
+            Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
             return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
@@ -112,26 +96,48 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(
-                    queryEvaluatorService.getQueryFactory(), attrRepo);
-            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
-                    frontEndQuery.getSegmentQuery());
-            if (frontEndQuery.getMainEntity() == null) {
-                frontEndQuery.setMainEntity(BusinessEntity.Account);
-            }
-            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
-                    timeTranslator);
-            if (frontEndQuery.getSegmentQuery() != null) {
-                frontEndQuery.getSegmentQuery().setMainEntity(BusinessEntity.Account);
-                Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
-                        .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
-                map.putAll(segmentMap);
-            }
-            preprocess(map, attrRepo, timeTranslator);
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
+            Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
             return queryEvaluatorService.getData(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
+        }
+    }
+
+    private Query getQuery(AttributeRepository attrRepo, EventFrontEndQuery frontEndQuery, EventType eventType,
+            DataCollection.Version version) {
+        ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo);
+        TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
+                frontEndQuery.getSegmentQuery());
+        if (frontEndQuery.getMainEntity() == null) {
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
+        }
+        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+        if (frontEndQuery.getSegmentQuery() != null) {
+            Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
+                    .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
+            map.putAll(segmentMap);
+        }
+        preprocess(map, attrRepo, timeTranslator);
+        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
+        return query;
+    }
+
+    @Override
+    public String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, DataCollection.Version version) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
+        try {
+            return queryEvaluatorService.getQueryStr(attrRepo, query, BATCH_USER);
+        } catch (Exception e) {
+            String msg = "Failed to construct query string " + JsonUtils.serialize(frontEndQuery) //
+                    + " for tenant " + MultiTenantContext.getShortTenantId();
+            if (version != null) {
+                msg += " in " + version;
+            }
+            throw new QueryEvaluationException(msg, e);
         }
     }
 

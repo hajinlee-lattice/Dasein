@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTe
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -106,7 +106,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 .stream()
                 .flatMap(pair -> {
                     MatchKeyTuple tuple = pair.getKey();
-                    if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
+                    if (EntityMatchUtils.hasSystemIdsOnly(tuple)) {
                         // flatten system id, one system id name/value pair per result
                         int size = tuple.getSystemIds().size();
                         return IntStream.range(0, size).mapToObj(idx -> {
@@ -213,10 +213,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 traveler.debug(String.format(
                         "Cannot find any Entity=%s with MatchKeyTuple=%s",
                         lookupResponse.getEntity(), lookupResponse.getTuple()));
-            }
-            if (CollectionUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
-                // instantiate list
-                traveler.setEntityMatchLookupResults(new ArrayList<>());
             }
             // add lookup result
             traveler.addLookupResult(getCurrentActorName(),

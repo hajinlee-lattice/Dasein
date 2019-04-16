@@ -2,7 +2,7 @@ export default function (
     $scope, $filter, $timeout, $interval, $q, $state, $stateParams, $injector,
     LookupStore, Enrichments, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum,
-    QueryRestriction, CurrentConfiguration, LookupResponse, QueryStore, ConfigureAttributesStore,
+    QueryRestriction, WorkingBuckets, LookupResponse, QueryStore, ConfigureAttributesStore,
     RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, Notice
 ) {
     'ngInject';
@@ -78,7 +78,7 @@ export default function (
         openHighlighter: {},
         categoryCounts: {},
         TileTableItems: {},
-        workingBuckets: CurrentConfiguration,
+        workingBuckets: WorkingBuckets,
         pagesize: 24,
         categorySize: 7,
         addBucketTreeRoot: null,
@@ -130,23 +130,31 @@ export default function (
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
             $state.go('home.datacloud.explorer');
         }
-        // this is for when the datacloud is inside a rating engine model
-        if (vm.section == 're.model_iteration') {
-            var ratingId = $stateParams['rating_id'],
-                aiModel = $stateParams['aiModel'],
-                nocache = true,
-                opts = {
-                    url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/cube`
-                };
-        }
 
-        DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
-            vm.cube = result;
 
+        // Only run in Atlas
+        if (vm.section != 'insights' && vm.section != 'edit' && vm.section != 'team') {
             if (vm.section == 're.model_iteration') {
-                vm.checkEnrichmentsForDisable(Enrichments);
+                var ratingId = $stateParams['rating_id'],
+                    aiModel = $stateParams['aiModel'],
+                    nocache = true,
+                    opts = {
+                        url: `/pls/ratingengines/${ratingId}/ratingmodels/${aiModel}/metadata/cube`
+                    };
+            } else {
+                var nocache = true,
+                    opts = {
+                        url: `/pls/datacollection/statistics/cubes`
+                    };
             }
-        });
+
+            DataCloudStore.getCube(opts || {}, nocache || false).then(function (result) {
+                vm.cube = result;
+                if (vm.section == 're.model_iteration') {
+                    vm.checkEnrichmentsForDisable(Enrichments);
+                }
+            });
+        }
 
         vm.processCategories();
         vm.processEnrichments(Enrichments, true);

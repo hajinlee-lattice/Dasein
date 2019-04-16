@@ -3,12 +3,8 @@
     <div class="enrichment-wizard-container container advanced-query-builder" ng-if="vm.item && vm.bucketRestriction">
         <ul class="query-section query-tree-root">
             <li class="query-section-item-box query-section-item-box-subtree">
-                <query-tree-directive 
-                        items="[ vm.item ]" 
-                        tree="vm.picker_object.restriction" 
-                        root="vm" 
-                        parent="null" 
-                        entity="vm.entity">
+                <query-tree-directive items="[ vm.item ]" tree="vm.picker_object.restriction" root="vm" parent="null"
+                    entity="vm.entity">
                 </query-tree-directive>
             </li>
         </ul>
@@ -26,16 +22,15 @@
                     <span class="fa fa-times" ng-show="vm.query.length && !vm.queryInProgress"></span>
                     <span class="fa fa-spinner fa-pulse fa-fw" ng-show="vm.queryInProgress"></span>
                 </a>
-                <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.page = 1" />
+                <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText"
+                    ng-change="vm.page = 1" />
             </div>
-            <a class="sort button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.page = 1;">
+            <a class="sort button icon-button white-button"
+                ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.page = 1;">
                 <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
             </a>
-            <button 
-                type="button"
-                ng-if="vm.mode == 'dashboardrules'"
-                ui-sref="home.ratingsengine.dashboard.segment.attributes.rules"
-                class="pull-right button blue-button">
+            <button type="button" ng-if="vm.mode == 'dashboardrules'"
+                ui-sref="home.ratingsengine.dashboard.segment.attributes.rules" class="pull-right button blue-button">
                 Back to Rules
             </button>
         </li>
@@ -44,20 +39,19 @@
     </ul>
 
     <div class="picker-buckets picker-bucket-header noselect-children">
-        <div><label>VALUE<i>RECORDS</i></label></div>
-        <div><label>VALUE<i>RECORDS</i></label></div>
-        <div><label>VALUE<i>RECORDS</i></label></div>
+        <div><label>VALUE<i>{{vm.getRecordLabel()}}</i></label></div>
+        <div><label>VALUE<i>{{vm.getRecordLabel()}}</i></label></div>
+        <div><label>VALUE<i>{{vm.getRecordLabel()}}</i></label></div>
     </div>
 
     <div class="picker-buckets noselect-children">
-        <div ng-repeat="bucket in (filteredList = (vm.buckets | filter: { Lbl: vm.queryText })) | orderBy: [ vm.sortPrefix + 'Cnt', 'Lbl' ] | startFrom: vm.page_size * (vm.page - 1) | limitTo: vm.page_size">
-            <label for="{{ bucket.Lbl }}" class="button white-button text-ellipsis" ng-class="{ 'checked': bucket.checked }">
+        <div
+            ng-repeat="bucket in (filteredList = (vm.buckets | filter: { Lbl: vm.queryText })) | orderBy: [ vm.sortPrefix + 'Cnt', 'Lbl' ] | startFrom: vm.page_size * (vm.page - 1) | limitTo: vm.page_size">
+            <label for="{{ bucket.Lbl }}" class="button white-button text-ellipsis"
+                ng-class="{ 'checked': bucket.checked }">
                 <span>{{ bucket.Lbl }}</span>
-                <input  type="checkbox"
-                        name="{{ bucket.Lbl }}" 
-                        id="{{ bucket.Lbl }}"
-                        ng-model="bucket.checked"
-                        ng-change="vm.changeBucketState(bucket)">
+                <input type="checkbox" name="{{ bucket.Lbl }}" id="{{ bucket.Lbl }}" ng-model="bucket.checked"
+                    ng-change="vm.changeBucketState(bucket)">
                 <i>{{ bucket.Cnt }}</i>
             </label>
         </div>

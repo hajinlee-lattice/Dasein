@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,8 +32,8 @@ public class TransactionDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploym
 
     private static final Logger log = LoggerFactory.getLogger(TransactionDataQuotaLimitDeploymentTestNG.class);
 
-    @Value("${cdl.largeimport.transaction.filename:}")
-    private String transaction_csv;
+    @Value("${cdl.largeimport.transaction.filename}")
+    private String transactionCsv;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -48,7 +47,6 @@ public class TransactionDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploym
     @BeforeClass(groups = "end2end")
     public void setup() {
         setupEnd2EndTestEnvironmentByFile(jsonFileName);
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "end2end")
@@ -67,7 +65,7 @@ public class TransactionDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploym
 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importData(BusinessEntity.Transaction, transaction_csv + "1.csv", "Transaction", false, false);
+        importData(BusinessEntity.Transaction, transactionCsv, "Transaction", false, false);
     }
 
     protected void processAnalyze() {

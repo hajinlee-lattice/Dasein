@@ -73,16 +73,10 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         if (!OperationalMode.ENTITY_MATCH.equals(matchTraveler.getMatchInput().getOperationalMode())) {
             throw new RuntimeException(this.getClass().getSimpleName() + " called when not in Entity Match.");
         }
-        if (StringUtils.isBlank(matchTraveler.getEntity())) {
-            throw new IllegalArgumentException("MatchTraveler needs an entity set for Match Planning.");
-        }
         if (!BusinessEntity.Account.name().equals(matchTraveler.getEntity())) {
             throw new UnsupportedOperationException(
-                    this.getClass().getSimpleName() + " only handles Account entity.");
-        }
-        // For Entity Match, the MatchKeyTuple should not yet be set.
-        if (matchTraveler.getMatchKeyTuple() != null) {
-            throw new IllegalArgumentException("MatchTraveler should not have MatchKeyTuple set for Entity Match.");
+                    this.getClass().getSimpleName() + " only handles Account entity, but found "
+                            + matchTraveler.getEntity());
         }
         if (CollectionUtils.isEmpty(matchTraveler.getInputDataRecord())) {
             throw new IllegalArgumentException("MatchTraveler must have input record data to generate MatchKeyTuple.");
@@ -110,6 +104,11 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
 
     @Override
     protected boolean accept(Traveler traveler) {
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
+        // If MatchKeyTuple is set up already, standardization is already done
+        if (matchTraveler.getMatchKeyTuple() != null) {
+            return false;
+        }
         return true;
     }
 
@@ -122,8 +121,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
     protected void execute(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         List<Object> inputRecord = matchTraveler.getInputDataRecord();
-        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps().get(matchTraveler
-                .getEntity());
+        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
+                .get(BusinessEntity.Account.name());
         EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null,
@@ -132,10 +131,10 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap,
                 matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
-        MatchKeyTuple matchKeyTuple = MatchKeyUtils.createMatchKeyTuple(entityMatchKeyRecord);
+        MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
 
         Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
-                .get(matchTraveler.getEntity()).getKeyMap();
+                .get(BusinessEntity.Account.name()).getKeyMap();
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
                 entityMatchKeyRecord);
 
@@ -146,5 +145,7 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         }
 
         matchTraveler.setMatchKeyTuple(matchKeyTuple);
+        matchTraveler.addEntityMatchKeyTuple(BusinessEntity.Account.name(), matchKeyTuple);
+        matchTraveler.addEntityMatchKeyTuple(BusinessEntity.LatticeAccount.name(), matchKeyTuple);
     }
 }

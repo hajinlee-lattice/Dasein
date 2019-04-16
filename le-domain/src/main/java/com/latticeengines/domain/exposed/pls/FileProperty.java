@@ -18,6 +18,12 @@ public class FileProperty {
     @JsonProperty("file_path")
     private String filePath;
 
+    @JsonProperty("file_type")
+    private String fileType;
+
+    @JsonProperty("is_directory")
+    private boolean isDirectory;
+
     public String getFileName() {
         return fileName;
     }
@@ -48,5 +54,21 @@ public class FileProperty {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public boolean isDirectory() {
+        return isDirectory;
+    }
+
+    public void setDirectory(boolean directory) {
+        isDirectory = directory;
     }
 }

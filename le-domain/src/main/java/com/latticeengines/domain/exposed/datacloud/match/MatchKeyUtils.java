@@ -6,18 +6,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.kitesdk.shaded.com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class MatchKeyUtils {
 
@@ -62,6 +65,16 @@ public class MatchKeyUtils {
             MatchKey.State, 2, //
             MatchKey.City, 3 //
     );
+
+    /**
+     * Don't allow reserved fields appear in match input fields (Non-FetchOnly
+     * mode)
+     */
+    private static final Set<String> ENTITY_RESERVED_FIELDS = ImmutableSet.of( //
+            InterfaceName.EntityId.name(), //
+            InterfaceName.AccountId.name(), //
+            InterfaceName.ContactId.name() //
+            );
 
     public static Map<MatchKey, List<String>> resolveKeyMap(Schema schema) {
         List<String> fieldNames = new ArrayList<>();
@@ -288,7 +301,7 @@ public class MatchKeyUtils {
 
     }
 
-    public static MatchKeyTuple createMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
+    public static MatchKeyTuple createAccountMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
         MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
         NameLocation nameLocationInfo = entityRecord.getParsedNameLocation();
         if (nameLocationInfo != null) {
@@ -305,5 +318,20 @@ public class MatchKeyUtils {
         }
         matchKeyTuple.setDuns(entityRecord.getParsedDuns());
         return matchKeyTuple;
+    }
+
+    public static MatchKeyTuple createContactMatchKeyTuple(EntityMatchKeyRecord entityRecord) {
+        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
+        Contact contact = entityRecord.getParsedContact();
+        if (contact != null) {
+            matchKeyTuple.setEmail(contact.getEmail());
+            matchKeyTuple.setName(contact.getName());
+            matchKeyTuple.setPhoneNumber(contact.getPhoneNumber());
+        }
+        return matchKeyTuple;
+    }
+
+    public static boolean isEntityReservedField(String field) {
+        return ENTITY_RESERVED_FIELDS.contains(field);
     }
 }

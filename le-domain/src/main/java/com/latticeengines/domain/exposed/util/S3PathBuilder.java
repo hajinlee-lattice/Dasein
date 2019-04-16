@@ -8,23 +8,12 @@ import com.latticeengines.domain.exposed.query.EntityType;
 
 public final class S3PathBuilder {
 
-
-    private static String uiDisplayS3Dir = "%s/dropfolder/%s/%s/Templates/%s/";
-
     private static String uiDisplayS3Dir_old = "%s/dropfolder/%s/Templates/%s/";
 
     private static final String SPLIT_CHART = "_";
 
     public static String getUiDisplayS3Dir(String bucket, String dropBox, String folderName) {
-        return S3PathBuilder.getUiDisplayS3Dir(bucket, dropBox, getSystemNameFromFeedType(folderName),
-                getFolderNameFromFeedType(folderName));
-    }
-
-    public static String getUiDisplayS3Dir(String bucket, String dropBox, String systemName, String folderName) {
-        if (!StringUtils.isEmpty(systemName))
-            return String.format(uiDisplayS3Dir, bucket, dropBox, systemName, folderName);
-        else
-            return String.format(uiDisplayS3Dir_old, bucket, dropBox, folderName);
+        return String.format(uiDisplayS3Dir_old, bucket, dropBox, folderName);
     }
 
     public static String getSystemNameFromFeedType(String feedType) {//new path feedType=systemName#folderName
@@ -53,6 +42,13 @@ public final class S3PathBuilder {
             }
         }
         return feedType;
+    }
+
+    public static String getFolderName(String systemName, String entityObjectName) {
+        if (StringUtils.isEmpty(systemName)) {
+            return entityObjectName;
+        }
+        return systemName + SPLIT_CHART + entityObjectName;
     }
 
 }

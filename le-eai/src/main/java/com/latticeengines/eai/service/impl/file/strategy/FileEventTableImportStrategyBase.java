@@ -121,12 +121,6 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         } else {
             props.put("eai.id.column.name", idColumnName);
         }
-        String dedupEnable = ctx.getProperty(ImportProperty.DEDUP_ENABLE, String.class);
-        if (StringUtils.isEmpty(dedupEnable) || !Boolean.parseBoolean(dedupEnable)) {
-            props.put("eai.dedup.enable", "false");
-        } else {
-            props.put("eai.dedup.enable", "true");
-        }
         props.put("eai.redis.timeout", String.valueOf(redisTimeout));
         props.put("eai.redis.endpoint", elastiCacheService.getPrimaryEndpointAddress());
         props.put("eai.redis.local", String.valueOf(localRedis));

@@ -45,6 +45,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();
         private ProcessStepConfiguration processStepConfiguration = new ProcessStepConfiguration();
 
+        private MatchEntityWorkflowConfiguration.Builder matchEntityWorkflowBuilder = new MatchEntityWorkflowConfiguration.Builder();
         private ProcessAccountWorkflowConfiguration.Builder processAccountWorkflowBuilder = new ProcessAccountWorkflowConfiguration.Builder();
         private ProcessContactWorkflowConfiguration.Builder processContactWorkflowBuilder = new ProcessContactWorkflowConfiguration.Builder();
         private ProcessProductWorkflowConfiguration.Builder processProductWorkflowBuilder = new ProcessProductWorkflowConfiguration.Builder();
@@ -68,6 +69,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             processStepConfiguration.setCustomerSpace(customerSpace);
+            matchEntityWorkflowBuilder.customer(customerSpace);
             processAccountWorkflowBuilder.customer(customerSpace);
             processContactWorkflowBuilder.customer(customerSpace);
             processProductWorkflowBuilder.customer(customerSpace);
@@ -98,6 +100,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            matchEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processAccountWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processContactWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processProductWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -115,6 +118,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            processStepConfiguration.setInputProperties(inputProperties);
             return this;
         }
 
@@ -141,6 +145,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
             processRatingWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            matchEntityWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             processAccountWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
@@ -213,6 +218,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            matchEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
@@ -230,6 +236,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder setFullRematch(boolean fullRematch) {
             processStepConfiguration.setFullRematch(fullRematch);
+            return this;
+        }
+
+        public Builder skipPublishToS3(boolean skip) {
+            processStepConfiguration.setSkipPublishToS3(true);
             return this;
         }
 
@@ -252,6 +263,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
+            configuration.add(matchEntityWorkflowBuilder.build());
             configuration.add(processAccountWorkflowBuilder.build());
             configuration.add(processContactWorkflowBuilder.build());
             configuration.add(processProductWorkflowBuilder.build());

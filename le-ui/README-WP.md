@@ -190,3 +190,13 @@ launch.json file with the following content
     }
   ]
 }
+
+#Debug Node server in Visual Studio
+
+1.	Build  using npm run build IF YOU NEED TO USE THE UI
+3.	From terminal run 'npm run debugnodea'
+4.	In vs enable the Auto attach (Command Pallette > Toggle Auto Attach: on)
+
+And now you can put break point in vs
+Open postman and send requests to localhost:3001/your_path
+

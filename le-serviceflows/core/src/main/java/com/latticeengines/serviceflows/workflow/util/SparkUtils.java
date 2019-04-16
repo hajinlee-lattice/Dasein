@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.workflow.util;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -10,6 +11,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -17,13 +19,21 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 
 public final class SparkUtils {
 
-    public static Table hdfsUnitToTable(String tableName, HdfsDataUnit hdfsDataUnit, //
-                                           Configuration yarnConfiguration, //
-                                           String podId, CustomerSpace customerSpace) {
+    public static Table hdfsUnitToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
+                                        Configuration yarnConfiguration, //
+                                        String podId, CustomerSpace customerSpace) {
         String srcPath = hdfsDataUnit.getPath();
         Table table = MetadataConverter.getTable(yarnConfiguration, srcPath, //
                 null, null, true);
         table.setName(tableName);
+
+        if (StringUtils.isNotBlank(primaryKey) && table.getAttribute(primaryKey) != null) {
+            PrimaryKey pk = new PrimaryKey();
+            pk.setName(primaryKey);
+            pk.setDisplayName(primaryKey);
+            pk.addAttribute(primaryKey);
+            table.setPrimaryKey(pk);
+        }
 
         String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
         try {

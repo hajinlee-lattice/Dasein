@@ -9,13 +9,13 @@ import org.springframework.context.ApplicationContextAware;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQuery;
+import com.latticeengines.query.factory.sqlquery.BaseSQLQueryFactory;
 
 public abstract class QueryProvider implements ApplicationContextAware {
 
     private static final int MAX_CACHE_SIZE = 10000;
-    private Cache<String, SQLQueryFactory> factoryCache;
+    private Cache<String, BaseSQLQueryFactory> factoryCache;
 
     protected ApplicationContext applicationContext;
 
@@ -24,14 +24,14 @@ public abstract class QueryProvider implements ApplicationContextAware {
         factoryCache = Caffeine.newBuilder().initialCapacity(MAX_CACHE_SIZE).build();
     }
 
-    public abstract boolean providesQueryAgainst(AttributeRepository repository);
+    public abstract boolean providesQueryAgainst(AttributeRepository repository, String sqlUser);
 
-    public SQLQuery<?> getQuery(AttributeRepository repository, String sqlUser) {
+    public BaseSQLQuery<?> getQuery(AttributeRepository repository, String sqlUser) {
         return getCachedSQLQueryFactory(repository, sqlUser).query();
     }
 
-    public SQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository, String sqlUser) {
-        SQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier(sqlUser));
+    public BaseSQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository, String sqlUser) {
+        BaseSQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier(sqlUser));
         if (factory != null) {
             return factory;
         } else {
@@ -41,9 +41,9 @@ public abstract class QueryProvider implements ApplicationContextAware {
         }
     }
 
-    protected abstract SQLQueryFactory getSQLQueryFactory();
+    protected abstract BaseSQLQueryFactory getSQLQueryFactory();
 
-    protected abstract  SQLQueryFactory getSQLQueryFactory(String sqlUser);
+    protected abstract  BaseSQLQueryFactory getSQLQueryFactory(String sqlUser);
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

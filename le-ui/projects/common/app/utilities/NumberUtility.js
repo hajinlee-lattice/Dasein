@@ -37,6 +37,28 @@ angular.module('common.utilities.number', [])
         };
 
         /**
+         * RoundNumber Given a number and decimal point, will round to the number to that specific decimal 
+         * e.g. (1.258, 2) = 1.26, (1258, 2) = 1258.00, (1258, -2) = 1200
+         * @param {[type]} number         an integer
+         * @param {[type]} decimal_places an integer
+         * return: a string
+         */
+        this.RoundNumber = function (number, decimal_places) {
+            if (number == null || typeof number != "number") {
+                return number;
+            }
+            decimal_places = decimal_places != null && typeof decimal_places === 'number' ? decimal_places : 2;
+
+            // Shift
+            number = number.toString().split('e');
+            number = Math.round(+(number[0] + 'e' + (number[1] ? (+number[1] + decimal_places) : decimal_places)));
+
+            // Shift back
+            number = number.toString().split('e');
+            return +(number[0] + 'e' + (number[1] ? (+number[1] - decimal_places) : -decimal_places));
+        };
+
+        /**
          * make a percentage form a total
          * MakePercentage(10, 100, '%', 0) = 10%
          * MakePercentage(10, 100, null, 2) = 10.00

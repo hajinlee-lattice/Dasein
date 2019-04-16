@@ -93,7 +93,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
 
     @Override
     protected void finalize(Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context)
-            throws IOException, InterruptedException {
+            throws IOException {
         Configuration config = getConfig();
         csvFilePrinter.flush();
         String outputFileName = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
@@ -103,7 +103,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     }
 
     @Override
-    public void startRecord(Record record) throws IOException {
+    public void startRecord(Record record) {
     }
 
     @Override

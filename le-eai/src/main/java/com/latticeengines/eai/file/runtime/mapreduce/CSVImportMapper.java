@@ -54,10 +54,9 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.CriticalImportException;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -69,7 +68,6 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
-import com.latticeengines.redis.util.RedisTemplateUtils;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
@@ -92,8 +90,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private Path outputPath;
 
     private Configuration conf;
-
-    private boolean deduplicate;
 
     private boolean missingRequiredColValue = Boolean.FALSE;
     private boolean fieldMalFormed = Boolean.FALSE;
@@ -142,22 +138,20 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
 
-        deduplicate = Boolean.parseBoolean(conf.get("eai.dedup.enable"));
-        LOG.info("Deduplicate enable = " + String.valueOf(deduplicate));
+        LOG.info("Deduplicate enable = false");
 
         idColumnName = conf.get("eai.id.column.name");
         LOG.info("Import file id column is: " + idColumnName);
 
         if (StringUtils.isEmpty(idColumnName)) {
             LOG.info("The id column does not exist.");
-            deduplicate = false;
         }
 
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
 
         csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
-                LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+                LECSVFormat.format.withHeader(ImportProperty.ERROR_HEADER));
 
         if (StringUtils.isEmpty(table.getName())) {
             avroFileName = "file.avro";
@@ -166,17 +160,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         avroRecord = new GenericData.Record(schema);
-        if (deduplicate) {
-            redisEndpoint = conf.get("eai.redis.endpoint");
-            redisTimeout = Integer.parseInt(conf.get("eai.redis.timeout"));
-            localRedis = Boolean.parseBoolean(conf.get("eai.redis.local"));
-            LOG.info(String.format("Redis endpoint: %s, timeout: %d, localRedis: %b", redisEndpoint, redisTimeout, localRedis));
-            cacheKey = CACHE_PREFIX + NamingUtils.uuid(avroFileName);
-            currentIds = 0;
-            blockIdx = 0;
-            retryTemplate = RetryUtils.getRetryTemplate(3);
-            redisTemplate = RedisTemplateUtils.createPoolingRedisTemplate(localRedis, redisTimeout, redisEndpoint);
-        }
     }
 
     @Override
@@ -331,11 +314,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             id = String.valueOf(avroFieldValue);
                             if (id.equalsIgnoreCase(NULL)) {
                                 throw new RuntimeException(String.format("The %s value is equals to string null", attr.getDisplayName()));
-                            }
-                            if (deduplicate) {
-                                if (containsId(id)) {
-                                    throw new LedpException(LedpCode.LEDP_17017, new String[]{id});
-                                }
                             }
                         }
                     }
@@ -523,9 +501,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         if (context.getCounter(RecordImportCounter.ROW_ERROR).getValue() == 0) {
             context.getCounter(RecordImportCounter.ROW_ERROR).setValue(0);
-        }
-        if (deduplicate) {
-            clearCache();
         }
     }
 

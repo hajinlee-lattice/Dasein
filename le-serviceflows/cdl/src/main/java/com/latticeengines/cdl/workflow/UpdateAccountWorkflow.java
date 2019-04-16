@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
+import com.latticeengines.cdl.workflow.steps.update.FilterAccountFeatureDiff;
+import com.latticeengines.cdl.workflow.steps.update.MergeAccountDiff;
+import com.latticeengines.cdl.workflow.steps.update.MergeAccountFeatureDiff;
 import com.latticeengines.cdl.workflow.steps.update.ProcessAccountDiffWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -23,13 +26,25 @@ public class UpdateAccountWorkflow extends AbstractWorkflow<UpdateAccountWorkflo
     private CloneAccount cloneAccount;
 
     @Inject
-    private ProcessAccountDiffWrapper processAccountDiffWrapper;
+    private ProcessAccountDiffWrapper processAccountDiff;
+
+    @Inject
+    private MergeAccountDiff mergeAccountDiff;
+
+    @Inject
+    private FilterAccountFeatureDiff filterAccountFeatureDiff;
+
+    @Inject
+    private MergeAccountFeatureDiff mergeAccountFeatureDiff;
 
     @Override
     public Workflow defineWorkflow(UpdateAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(cloneAccount) //
-                .next(processAccountDiffWrapper) //
+                .next(processAccountDiff) //
+                .next(mergeAccountDiff) //
+                .next(filterAccountFeatureDiff) //
+                .next(mergeAccountFeatureDiff) //
                 .build();
     }
 }

@@ -1,10 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CONSOLIDATE_RETAIN;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,17 +10,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateRetainFieldConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
@@ -35,10 +26,10 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     protected BusinessEntity entity;
 
-    private String sortedTablePrefix;
-    protected String diffTableName;
-    private String profileTableName;
+    String diffTableName;
 
+    private String sortedTablePrefix;
+    private String profileTableName;
     private TableRoleInCollection servingStore;
     private String servingStorePrimaryKey;
     private List<String> servingStoreSortKeys;
@@ -54,14 +45,15 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     @Override
     protected void onPostTransformationCompleted() {
-        String redshiftTableName = TableUtils.getFullTableName(sortedTablePrefix, pipelineVersion);
-        Table redshiftTable = metadataProxy.getTable(customerSpace.toString(), redshiftTableName);
-        if (redshiftTable == null) {
-            throw new RuntimeException("Diff table has not been created.");
+        String diffServingTableName = TableUtils.getFullTableName(sortedTablePrefix, pipelineVersion);
+        Map<TableRoleInCollection, String> processedTableNames = getMapObjectFromContext(PROCESSED_DIFF_TABLES, //
+                TableRoleInCollection.class, String.class);
+        if (processedTableNames == null) {
+            processedTableNames = new HashMap<>();
         }
-        redshiftTableName = renameServingStoreTable(redshiftTable);
-        exportTableRoleToRedshift(redshiftTableName, entity.getServingStore());
-        addToListInContext(TEMPORARY_CDL_TABLES, redshiftTableName, String.class);
+        processedTableNames.put(entity.getServingStore(), diffServingTableName);
+        putObjectInContext(PROCESSED_DIFF_TABLES, processedTableNames);
+        addToListInContext(TEMPORARY_CDL_TABLES, diffServingTableName, String.class);
     }
 
     @Override
@@ -87,7 +79,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     protected TransformationStepConfig bucket(boolean heavyEngine) {
@@ -96,15 +88,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     protected TransformationStepConfig bucket(int inputStep, boolean heavyEngine) {
         TransformationStepConfig step = new TransformationStepConfig();
-        String sourceName = entity.name() + "Profile";
-        SourceTable sourceTable = new SourceTable(profileTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(sourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(sourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        addBaseTables(step, profileTableName);
         if (inputStep < 0) {
-            useDiffTableAsSource(step, diffTableName);
+            addBaseTables(step, diffTableName);
         } else {
             step.setInputSteps(Collections.singletonList(inputStep));
         }
@@ -114,40 +100,14 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
-    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable) {
-        return retainFields(previousStep, useTargetTable, servingStore);
-    }
-
-    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable,
-            TableRoleInCollection role) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(previousStep));
-        step.setTransformer(TRANSFORMER_CONSOLIDATE_RETAIN);
-
-        if (useTargetTable) {
-            TargetTable targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(sortedTablePrefix);
-            targetTable.setPrimaryKey(servingStorePrimaryKey);
-            targetTable.setExpandBucketedAttrs(true);
-            step.setTargetTable(targetTable);
-        }
-
-        ConsolidateRetainFieldConfig config = new ConsolidateRetainFieldConfig();
-        Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), role);
-        if (servingTable != null) {
-            List<String> fieldsToRetain = AvroUtils.getSchemaFields(yarnConfiguration,
-                    servingTable.getExtracts().get(0).getPath());
-            config.setFieldsToRetain(fieldsToRetain);
-        }
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
+    protected TransformationStepConfig retainFields(int previousStep) {
+        return retainFields(previousStep, sortedTablePrefix, servingStorePrimaryKey, true, servingStore);
     }
 
     protected TransformationStepConfig sort(int diffStep, int partitions) {
         TransformationStepConfig step = new TransformationStepConfig();
         if (diffStep < 0) {
-            useDiffTableAsSource(step, diffTableName);
+            addBaseTables(step, diffTableName);
         } else {
             step.setInputSteps(Collections.singletonList(diffStep));
         }
@@ -173,29 +133,6 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
-    protected void useDiffTableAsSource(TransformationStepConfig step, String diffTable) {
-        String sourceName = entity.name() + "Diff";
-        SourceTable sourceTable = new SourceTable(diffTable, customerSpace);
-        List<String> baseSources = step.getBaseSources();
-        if (CollectionUtils.isEmpty(baseSources)) {
-            baseSources = Collections.singletonList(sourceName);
-        } else {
-            baseSources = new ArrayList<>(baseSources);
-            baseSources.add(sourceName);
-        }
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = step.getBaseTables();
-        if (MapUtils.isEmpty(baseTables)) {
-            baseTables = new HashMap<>();
-        }
-        baseTables.put(sourceName, sourceTable);
-        step.setBaseTables(baseTables);
-    }
-
     protected abstract TableRoleInCollection profileTableRole();
-
-    protected String renameServingStoreTable(Table servingStoreTable) {
-        return renameServingStoreTable(entity, servingStoreTable);
-    }
 
 }

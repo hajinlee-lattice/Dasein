@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,7 +45,12 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier,
             @RequestParam(value = "type", required = false) ModelType type) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return getActiveModels(request, type, customerSpace);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            return getActiveModels(request, type, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @Deprecated
@@ -54,7 +60,12 @@ public class InternalScoreResource extends BaseScoring {
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return getActiveModels(request, type, customerSpace);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            return getActiveModels(request, type, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -63,7 +74,12 @@ public class InternalScoreResource extends BaseScoring {
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return getModelFields(request, modelId, customerSpace);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            return getModelFields(request, modelId, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -77,10 +93,16 @@ public class InternalScoreResource extends BaseScoring {
             @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) throws ParseException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        if (!StringUtils.isEmpty(start) && start.contains("%2B")) {
-            start = start.replace("%2B", "+");
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            if (!StringUtils.isEmpty(start) && start.contains("%2B")) {
+                start = start.replace("%2B", "+");
+            }
+            return getPaginatedModels(request, start, offset, maximum, considerAllStatus, considerDeleted,
+                    customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
         }
-        return getPaginatedModels(request, start, offset, maximum, considerAllStatus, considerDeleted, customerSpace);
     }
 
     @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -92,10 +114,15 @@ public class InternalScoreResource extends BaseScoring {
             @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
             @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) throws ParseException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        if (!StringUtils.isEmpty(start) && start.contains("%2B")) {
-            start = start.replace("%2B", "+");
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            if (!StringUtils.isEmpty(start) && start.contains("%2B")) {
+                start = start.replace("%2B", "+");
+            }
+            return getModelCount(request, start, considerAllStatus, considerDeleted, customerSpace);
+        } finally {
+            removeCustomerSpaceFromMDC();
         }
-        return getModelCount(request, start, considerAllStatus, considerDeleted, customerSpace);
     }
 
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -112,10 +139,15 @@ public class InternalScoreResource extends BaseScoring {
             boolean enableMatching, //
             HttpServletResponse response) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        boolean forceSkipMatching = !enableMatching;
-        return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            boolean forceSkipMatching = !enableMatching;
+            return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                    performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -132,10 +164,15 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        boolean forceSkipMatching = !enableMatching;
-        return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            boolean forceSkipMatching = !enableMatching;
+            return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                    performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -152,10 +189,15 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        boolean forceSkipMatching = !enableMatching;
-        return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            boolean forceSkipMatching = !enableMatching;
+            return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                    performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -172,10 +214,15 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        boolean forceSkipMatching = !enableMatching;
-        return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            boolean forceSkipMatching = !enableMatching;
+            return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                    performFetchOnlyForMatching, requestId, forceSkipMatching, true);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
     }
 
     @RequestMapping(value = "/record/apiconsole/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -198,10 +245,23 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
             boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        boolean forceSkipMatching = !enableMatching;
-        return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes, requestId,
-                enforceFuzzyMatch, skipDnBCache, forceSkipMatching);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            boolean forceSkipMatching = !enableMatching;
+            return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                    requestId, enforceFuzzyMatch, skipDnBCache, forceSkipMatching);
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
+    }
+
+    private void setCustomerSpaceInMDC(CustomerSpace customerSpace) {
+        MDC.put("customerspace", CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
+    }
+
+    private void removeCustomerSpaceFromMDC() {
+        MDC.remove("customerspace");
     }
 
 }

@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,18 +15,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.datacloud.match.Contact;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 
 @Component("matchStandardizationService")
@@ -40,18 +37,6 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
 
     @Inject
     private NameLocationService nameLocationService;
-
-    // Customer standard attr name -> Internal standard attr name
-    // Current use case is to standardize SystemId fields:
-    // AccountId from customer is named as CustomerAccountId in file import (In
-    // future, might extend this naming convention to other match key fields too
-    // to avoid naming conflicts). But SystemId field names managed in
-    // seed/lookup should use standard name, eg. AccountId. So need to do
-    // standardization for SystemId field names too.
-    private static final Map<String, String> STANDARD_ATTR_DICT = new HashMap<>();
-    static {
-        STANDARD_ATTR_DICT.put(InterfaceName.CustomerAccountId.name().toLowerCase(), InterfaceName.AccountId.name());
-    }
 
 
     // parseRecordForDomain() depends on having parsed Name/Location and DUNS and thus must run after
@@ -214,6 +199,14 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
         return nameLocation;
     }
 
+    private Contact createContact(String name, String email, String phoneNumber) {
+        Contact contact = new Contact();
+        contact.setName(name);
+        contact.setEmail(email);
+        contact.setPhoneNumber(phoneNumber);
+        return contact;
+    }
+
     @Override
     public void parseRecordForDuns(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
                                    EntityMatchKeyRecord record) {
@@ -247,7 +240,6 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
             List<Integer> systemIdPositions = keyPositionMap.get(MatchKey.SystemId);
 
             for (int i = 0; i < systemIdNames.size(); i++) {
-                String cleanSystemIdName = getStandardizedAttrName(systemIdNames.get(i));
                 String cleanSystemId = null;
                 Integer systemIdPos = systemIdPositions.get(i);
                 if (inputRecord.get(systemIdPos) != null) {
@@ -261,25 +253,63 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     }
                     // TODO(jwinter): Complete work to clean up System IDs.
                     cleanSystemId = StringStandardizationUtils.getStandardizedSystemId(systemId);
-                    record.addOrigSystemId(cleanSystemIdName, systemId);
-                    record.addParsedSystemId(cleanSystemIdName, cleanSystemId);
+                    record.addOrigSystemId(systemIdNames.get(i), systemId);
+                    record.addParsedSystemId(systemIdNames.get(i), cleanSystemId);
                 }
-                systemIds.add(Pair.of(cleanSystemIdName, cleanSystemId));
+                systemIds.add(Pair.of(systemIdNames.get(i), cleanSystemId));
             }
         }
         matchKeyTuple.setSystemIds(systemIds);
     }
 
-    // TODO: If predefined dictionary doesn't have the attr, just do trim(),
-    // don't standardize attr name case for now. Not very sure about use case
-    // yet. Need to revisit in the future
-    private String getStandardizedAttrName(@NotNull String attrName) {
-        Preconditions.checkNotNull(attrName);
-        attrName = attrName.trim();
-        if (STANDARD_ATTR_DICT.containsKey(attrName.toLowerCase())) {
-            return STANDARD_ATTR_DICT.get(attrName.toLowerCase());
+    @Override
+    public void parseRecordForContact(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+            EntityMatchKeyRecord record) {
+        try {
+            String originalName = null;
+            if (keyPositionMap.containsKey(MatchKey.Name)) {
+                List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
+                for (Integer namePos : namePosList) {
+                    originalName = (String) inputRecord.get(namePos);
+                }
+            }
+            String originalEmail = null;
+            if (keyPositionMap.containsKey(MatchKey.Email)) {
+                List<Integer> emailPosList = keyPositionMap.get(MatchKey.Email);
+                for (Integer emailPos : emailPosList) {
+                    originalEmail = (String) inputRecord.get(emailPos);
+                }
+            }
+            // Country is needed for PhoneNumber standardization. If not
+            // mapped/provided, use USA as default
+            String originalCountry = null;
+            if (keyPositionMap.containsKey(MatchKey.Country)) {
+                List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
+                for (Integer countryPos : countryPosList) {
+                    originalCountry = (String) inputRecord.get(countryPos);
+                }
+            }
+            String originalPhone = null;
+            if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
+                List<Integer> phonePosList = keyPositionMap.get(MatchKey.PhoneNumber);
+                for (Integer phonePos : phonePosList) {
+                    originalPhone = (String) inputRecord.get(phonePos);
+                }
+            }
+
+            Contact origContact = createContact(originalName, originalEmail, originalPhone);
+            record.setOrigContact(origContact);
+
+            NameLocation nameLocation = getNameLocation(null, originalCountry, null, null, null, null);
+            nameLocationService.normalize(nameLocation);
+
+            Contact parsedContact = origContact.normalize(nameLocation.getCountryCode());
+            record.setParsedContact(parsedContact);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            record.setFailed(true);
+            record.addErrorMessages("Error when cleanup contact fields: " + e.getMessage());
         }
-        return attrName;
     }
 
     // TODO(jwinter): The two methods below are not used right now but I'm not deleting them in case they are needed

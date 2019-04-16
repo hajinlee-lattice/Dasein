@@ -7,7 +7,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,9 +15,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkScriptStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.LocalFileSparkScript;
@@ -26,28 +23,17 @@ import com.latticeengines.domain.exposed.spark.ScriptJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkInterpreter;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.SparkScript;
-import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.spark.exposed.service.SparkJobService;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> extends BaseWorkflowStep<S> {
+public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> extends BaseSparkStep<S> {
 
     @Inject
     private SparkJobService sparkJobService;
 
-    @Inject
-    private LivySessionHolder livySessionHolder;
-
-    @Value("${camille.zk.pod.id}")
-    private String podId;
-
-    protected CustomerSpace customerSpace;
     protected boolean skipScriptExecution;
 
     protected abstract String getScriptPath();
-
     protected abstract List<DataUnit> getInputUnits();
-
     protected abstract void postScriptExecution(SparkJobResult result);
 
     @Override
@@ -72,29 +58,34 @@ public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> ex
             ScriptJobConfig scriptConfig = getScriptConfig();
             scriptConfig.setInput(getInputUnits());
 
+            computeScalingMultiplier(scriptConfig.getInput());
+
             String tenantId = customerSpace.getTenantId();
             String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
             scriptConfig.setWorkspace(workspace);
 
             log.info("Spark script configuration: " + JsonUtils.serialize(scriptConfig));
-            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-            SparkJobResult result = retry.execute(context -> {
-                if (context.getRetryCount() > 0) {
-                    log.warn("Previous failure:", context.getLastThrowable());
-                    log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark script " //
-                            + scriptPath);
-                }
-                LivySession session = livySessionHolder //
-                        .createLivySession(tenantId + "~" + fileName);
-                return sparkJobService.runScript(session, script, scriptConfig);
-            });
-            postScriptExecution(result);
             try {
-                HdfsUtils.rmdir(yarnConfiguration, workspace);
-            } catch (Exception e) {
-                log.warn("Failed to clean up workspace", e);
+                RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+                SparkJobResult result = retry.execute(context -> {
+                    if (context.getRetryCount() > 0) {
+                        log.warn("Previous failure:", context.getLastThrowable());
+                        log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark script " //
+                                + scriptPath);
+                    }
+                    LivySession session = createLivySession(tenantId + "~" + getClass().getSimpleName() //
+                            + "~" + fileName);
+                    return sparkJobService.runScript(session, script, scriptConfig);
+                });
+                postScriptExecution(result);
+                try {
+                    HdfsUtils.rmdir(yarnConfiguration, workspace);
+                } catch (Exception e) {
+                    log.warn("Failed to clean up workspace", e);
+                }
+            } finally {
+                killLivySession();
             }
-            livySessionHolder.killSession();
         }
     }
 
@@ -124,10 +115,6 @@ public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> ex
         }
         sparkScript.setInterpreter(interpreter);
         return sparkScript;
-    }
-
-    protected Table toTable(String tableName, HdfsDataUnit jobTarget) {
-        return SparkUtils.hdfsUnitToTable(tableName, jobTarget, yarnConfiguration, podId, customerSpace);
     }
 
     private ScriptJobConfig getScriptConfig() {

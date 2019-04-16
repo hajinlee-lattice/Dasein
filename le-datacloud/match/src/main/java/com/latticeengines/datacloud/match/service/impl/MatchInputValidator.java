@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -121,6 +122,12 @@ public class MatchInputValidator {
     }
 
     private static void validateEntityMatch(MatchInput input, DecisionGraph decisionGraph) {
+        // Validate flags for entity match are set properly
+        validateEntityMatchFlags(input);
+
+        // Validate naming conflict in match input fields
+        validateEntityMatchInputFields(input);
+
         // Verify that column selection is set appropriately for Entity Match.
         validateEntityMatchColumnSelection(input);
 
@@ -153,11 +160,46 @@ public class MatchInputValidator {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
             validateAccountMatchKeys(keyMap, input.isFetchOnly());
+        } else if (input.getEntityKeyMaps().containsKey(BusinessEntity.Contact.name())) {
+            EntityKeyMap entityKeyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name());
+            Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
+
+            validateContactMatchKeys(keyMap);
         } else {
-            // TODO(jwinter): Remove this constraint once we start supporting other entities.
-            // For now, require that the map of EntityKeyMaps has a EntityKeyMap for Account Entity.
             throw new UnsupportedOperationException(
-                    "Entity Map currently only supports Account match and requires this entity's key map.");
+                    "Entity Map currently only supports Account & Contact match and requires this entity's key map.");
+        }
+    }
+
+    private static void validateEntityMatchFlags(MatchInput input) {
+        if (input.isAllocateId() && input.isFetchOnly()) {
+            throw new IllegalArgumentException("AllocateID mode and FetchOnly mode cannot be set at same time");
+        }
+    }
+
+    /**
+     * TODO: For now, only validate Non-FetchOnly mode to avoid attribute
+     * conflict in match result (EntityId).
+     *
+     * FetchOnly mode validation will be more complicate because it could fetch
+     * any attribute from Seed table. Whether we should fail any attribute name
+     * conflict or overwrite existing attribute or do some attribute rename
+     * (hard to read renamed attributes as renaming logic is not exposed to
+     * outside of matcher), needs more thoughts
+     *
+     * @param input
+     */
+    private static void validateEntityMatchInputFields(MatchInput input) {
+        if (input.isFetchOnly()) {
+            return;
+        }
+        List<String> reservedFields = input.getFields().stream() //
+                .filter(field -> MatchKeyUtils.isEntityReservedField(field)) //
+                .collect(Collectors.toList());
+        if (!reservedFields.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Reserved fields are not allowed to show up in Non-FetchOnly mode match input fields: "
+                            + String.join(",", reservedFields));
         }
     }
 
@@ -174,10 +216,6 @@ public class MatchInputValidator {
         }
         if (input.getUnionSelection() != null) {
             throw new IllegalArgumentException("Entity Match cannot have union column selection set.");
-        }
-
-        if (input.isAllocateId() && input.isFetchOnly()) {
-            throw new IllegalArgumentException("AllocateID mode and FetchOnly mode cannot be set at same time");
         }
 
         // For Entity Match Allocated ID mode, predefined column selection must be "ID".  Otherwise, the predefined
@@ -372,6 +410,9 @@ public class MatchInputValidator {
      * Don't make change to validateLDCAccountMatchKeys() because it could break
      * some existing external services
      *
+     * TODO: In M28, might need to relax the restriction if UI allow user not
+     * mapping any match field
+     *
      * @param keyMap
      * @param fetchOnly
      */
@@ -382,12 +423,28 @@ public class MatchInputValidator {
                     && !isKeyMappedToField(keyMap, MatchKey.Name) //
                     && !isKeyMappedToField(keyMap, MatchKey.SystemId)) {
                 throw new IllegalArgumentException(
-                        "For non-fetch-only mode, at least one of following match key should be provided: Duns, Domain, Name and SystemId");
+                        "For non-fetch-only mode Account match, at least one of following match key should be provided: Duns, Domain, Name and SystemId");
             }
         } else {
             if (!isKeyMappedToField(keyMap, MatchKey.EntityId)) {
-                throw new IllegalArgumentException("For fetch-only mode, must provide EntityId match key");
+                throw new IllegalArgumentException(
+                        "For fetch-only mode Account match, must provide EntityId match key");
             }
+        }
+    }
+
+    /**
+     * TODO: In M28, might need to relax the restriction if UI allow user not
+     * mapping any match field
+     *
+     * @param keyMap
+     */
+    private static void validateContactMatchKeys(Map<MatchKey, List<String>> keyMap) {
+        if (!isKeyMappedToField(keyMap, MatchKey.SystemId) //
+                && !isKeyMappedToField(keyMap, MatchKey.Email) //
+                && !(isKeyMappedToField(keyMap, MatchKey.Name) && isKeyMappedToField(keyMap, MatchKey.PhoneNumber))) {
+            throw new IllegalArgumentException(
+                    "For contact match, at least one of following match key should be provided: Email, Name + PhoneNumber and SystemId");
         }
     }
 

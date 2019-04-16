@@ -4,17 +4,25 @@ import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_R
 import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_FILENAME;
 import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLEJSONS_S3_FILENAME;
 import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLES_S3_FILENAME;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema.Field;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,12 +31,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -49,6 +59,8 @@ import net.lingala.zip4j.exception.ZipException;
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
 public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
+    private static Logger log = LoggerFactory.getLogger(QueryFunctionalTestNGBase.class);
 
     @Inject
     protected QueryEvaluator queryEvaluator;
@@ -106,6 +118,42 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @BeforeClass(groups = "functional")
     public void setupBase() {
         attrRepo = getCustomerAttributeRepo();
+    }
+
+    protected long testGetCountAndAssert(String sqlUser, Query query, long expectedCount) {
+        long count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
+        Assert.assertEquals(count, expectedCount);
+        return count;
+    }
+
+    protected List<Map<String, Object>> testGetDataAndAssert(String sqlUser, Query query, long expectedCount,
+            List<Map<String, Object>> expectedResult) {
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query, sqlUser).getData();
+        if (expectedCount >= 0) {
+            Assert.assertEquals(results.size(), expectedCount);
+        }
+        if (expectedResult != null) {
+            assertResults(results, expectedResult);
+        }
+        return results;
+    }
+
+    protected void assertResults(List<Map<String, Object>> results, List<Map<String, Object>> expectedResults) {
+        assertNotNull(results);
+        assertEquals(results.size(), expectedResults.size());
+        for (int rowId = 0; rowId <expectedResults.size(); rowId++) {
+            Map<String, Object> expectedRow = expectedResults.get(rowId);
+            Map<String, Object> actualRow = results.get(rowId);
+            assertEquals(actualRow.size(), expectedRow.size());
+            for (String key : expectedRow.keySet()) {
+                assertEquals(actualRow.get(key), expectedRow.get(key));
+            }
+        }
+    }
+
+    protected void logQuery(String sqlUser, SQLQuery<?> sqlQuery) {
+        sqlQuery.setUseLiterals(true);
+        log.info("sqlUser= {}, sqlQuery = {}", sqlUser, sqlQuery);
     }
 
     protected Query generateAccountWithSelectedContactQuery(String subSelectAlias) {
@@ -230,4 +278,21 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
                 String.format("Should not find pattern [%s] in query: %s", content, query));
     }
 
+    protected List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
+        List<Map<String, Object>> resultData = new ArrayList<>();
+        String avroPath = sparkResult.getPath();
+        AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
+        iterator.forEachRemaining(record -> {
+            Map<String, Object> row = new HashMap<>();
+            for (Field field: record.getSchema().getFields()) {
+                Object value = record.get(field.name());
+                if (value != null && value instanceof Utf8) {
+                    value = ((Utf8)value).toString();
+                }
+                row.put(field.name(), value);
+            }
+            resultData.add(row);
+        });
+        return resultData;
+    }
 }

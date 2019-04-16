@@ -200,7 +200,7 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         
         ImportWizardStore.setSaveObjects(_mapping);
-        console.log('MAPPING &&&&&&&&&&&& ',_mapping);
+        // console.log('MAPPING &&&&&&&&&&&& ',_mapping);
         vm.checkValidDelay(form);
         
     };

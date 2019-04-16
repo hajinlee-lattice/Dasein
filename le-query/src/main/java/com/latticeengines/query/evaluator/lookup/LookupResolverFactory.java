@@ -47,11 +47,11 @@ public final class LookupResolverFactory {
     @SuppressWarnings("rawtypes")
     private <T extends Lookup> void initializeResolver(Class<T> lookupType) {
         if (lookupType.isAssignableFrom(AttributeLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new AttributeResolver<>(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new AttributeResolver<>(attrRepo, queryProcessor, sqlUser));
             return;
         }
         if (lookupType.isAssignableFrom(DateAttributeLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new DateAttributeResolver(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new DateAttributeResolver(attrRepo, queryProcessor, sqlUser));
             return;
         }
         if (lookupType.isAssignableFrom(SubQueryAttrLookup.class)) {
@@ -75,7 +75,7 @@ public final class LookupResolverFactory {
             return;
         }
         if (lookupType.isAssignableFrom(DateValueLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new DateValueResolver(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new DateValueResolver(attrRepo, queryProcessor, sqlUser));
             return;
         }
         if (lookupType.isAssignableFrom(AggregateLookup.class)) {

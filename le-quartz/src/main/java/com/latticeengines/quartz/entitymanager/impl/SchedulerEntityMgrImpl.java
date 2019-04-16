@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -94,6 +95,25 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
     @Override
     public Boolean addJob(String tenantId, JobConfig jobConfig) {
         return addJob(tenantId, jobConfig, JobSourceType.MANUAL, true);
+    }
+
+    @Override
+    public Boolean addPredefinedJob(String jobName) {
+        if (StringUtils.isEmpty(jobName)) {
+            return Boolean.FALSE;
+        }
+        @SuppressWarnings("unchecked")
+        List<JobConfig> jobConfigs = (List<JobConfig>) appContext.getBean("predefinedJobs");
+        if (CollectionUtils.isNotEmpty(jobConfigs)) {
+            for (JobConfig jobConfig : jobConfigs) {
+                if (jobName.equals(jobConfig.getJobName())) {
+                    log.info("Trying to add predefined job " + jobConfig.getJobName());
+                    addPredefinedJob(jobConfig);
+                    return Boolean.TRUE;
+                }
+            }
+        }
+        return Boolean.FALSE;
     }
 
     private Boolean addJob(String tenantId, JobConfig jobConfig, JobSourceType sourceType, boolean checkJobBean) {

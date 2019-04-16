@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,7 +43,6 @@ public class ProductDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
     @BeforeClass(groups = "end2end")
     public void setup() {
         setupEnd2EndTestEnvironmentByFile(jsonFileName);
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "end2end")

@@ -82,7 +82,7 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
     protected TransformationWorkflowConfiguration executePreTransformation() {
         intializeConfiguration();
         PipelineTransformationRequest request = generateRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request, configuration.getPodId());
     }
 
     @Override

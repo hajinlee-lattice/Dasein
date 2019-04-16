@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +40,7 @@ import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
@@ -203,16 +205,54 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
             Long count = 0L;
             List<MatchBlock> blocks = matchCommandService.getBlocks(rootOperationUid);
+
+            long orphanedNoMatchCount = 0L;
+            long orphanedUnmatchedAccountIdCount = 0L;
+            long matchedByMatchKeyCount = 0L;
+            long matchedByAccountIdCount = 0L;
             if (blocks != null && !blocks.isEmpty()) {
                 for (MatchBlock block : blocks) {
-                    count += block.getMatchedRows() != null ? block.getMatchedRows() : 0;
+                    count += block.getMatchedRows() != null ? block.getMatchedRows() : 0L;
+                    if (MapUtils.isNotEmpty(block.getMatchResults())) {
+                        Map<EntityMatchResult, Long> map = block.getMatchResults();
+                        orphanedNoMatchCount += map.containsKey(EntityMatchResult.ORPHANED_NO_MATCH) ?
+                                map.get(EntityMatchResult.ORPHANED_NO_MATCH) : 0L;
+                        orphanedUnmatchedAccountIdCount +=
+                                map.containsKey(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID) ?
+                                        map.get(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID) : 0L;
+                        matchedByMatchKeyCount += map.containsKey(EntityMatchResult.MATCHED_BY_MATCHKEY) ?
+                                map.get(EntityMatchResult.MATCHED_BY_MATCHKEY) : 0L;
+                        matchedByAccountIdCount += map.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID) ?
+                                map.get(EntityMatchResult.MATCHED_BY_ACCOUNTID) : 0L;
+                    }
                 }
             }
-            log.info("Aggregated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
+
+
+            log.info("Match Command Statistics:");
+            log.info("   Rows Matched: " + count);
+            Map<EntityMatchResult, Long> entityMatchResultMap = new HashMap<>();
+            if (orphanedNoMatchCount != 0L || orphanedUnmatchedAccountIdCount != 0L || matchedByMatchKeyCount != 0L
+                    || matchedByAccountIdCount != 0L) {
+                entityMatchResultMap.put(EntityMatchResult.ORPHANED_NO_MATCH, orphanedNoMatchCount);
+                entityMatchResultMap.put(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID,
+                        orphanedUnmatchedAccountIdCount);
+                entityMatchResultMap.put(EntityMatchResult.MATCHED_BY_MATCHKEY, matchedByMatchKeyCount);
+                entityMatchResultMap.put(EntityMatchResult.MATCHED_BY_ACCOUNTID, matchedByAccountIdCount);
+
+                log.info("   MatchBlock Orphaned No Match: " + orphanedNoMatchCount);
+                log.info("   MatchBlock Orphaned Unmatched Account ID: " +
+                        orphanedUnmatchedAccountIdCount);
+                log.info("   MatchBlock Matched By MatchKey: " + matchedByMatchKeyCount);
+                log.info("   MatchBlock Matched By Account ID: " + matchedByAccountIdCount);
+            }
+
+            log.info("Aggregated statistics will be stored in " + MatchUtils.toAvroGlobs(avroDir));
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
                     .dnbCommands() //
                     .rowsMatched(count.intValue()) //
+                    .matchResults(entityMatchResultMap) //
                     .status(MatchStatus.FINISHED) //
                     .progress(1f) //
                     .commit();

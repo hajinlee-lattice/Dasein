@@ -102,6 +102,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             BusinessEntity ownerEntity = getOwnerEntity(role);
             if (ownerEntity != null && resetEntities.contains(ownerEntity)) {
                 // skip swap for reset entities
+                log.info("Skip attempt to link " + role + " because its owner entity " //
+                        + ownerEntity + " is being reset.");
                 continue;
             }
             cloneTableService.linkInactiveTable(role);
@@ -145,15 +147,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 ? (ArrayNode) report.get(ReportPurpose.SYSTEM_ACTIONS.getKey())
                 : report.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
         List<Action> dataCloudChangeActions = getDataCloudChangeActions();
-        dataCloudChangeActions.forEach(action -> {
-            ObjectNode actionNode = JsonUtils.createObjectNode();
-            // discussed with Afroz that displaying action time here is
-            // confusing and should be removed.
-            // actionNode.put(ReportConstants.TIME,
-            // sdf.format(action.getCreated()));
-            actionNode.put(ReportConstants.ACTION, action.getType().getDisplayName());
-            systemActionNode.add(actionNode);
-        });
+        dataCloudChangeActions.forEach(action -> systemActionNode.add(action.getType().getDisplayName()));
     }
 
     private void updateReportEntitiesSummaryReport(ObjectNode report) {

@@ -17,6 +17,7 @@ public class EntityMatchKeyRecord {
     private String parsedEmail;
     private Tenant parsedTenant;
     private Map<String, String> parsedSystemIds;
+    private Contact parsedContact;
 
     private String origDomain;
     private NameLocation origNameLocation;
@@ -24,6 +25,7 @@ public class EntityMatchKeyRecord {
     private String origEmail;
     private Tenant origTenant;
     private Map<String, String> origSystemIds;
+    private Contact origContact;
 
     // TODO(jwinter): Fix handling of error messages which should be passed using the actor system.
     private Boolean failed = false;
@@ -176,5 +178,21 @@ public class EntityMatchKeyRecord {
             this.parsedSystemIds = new HashMap<>();
         }
         this.parsedSystemIds.put(idField, idVal);
+    }
+
+    public Contact getParsedContact() {
+        return parsedContact;
+    }
+
+    public void setParsedContact(Contact parsedContact) {
+        this.parsedContact = parsedContact;
+    }
+
+    public Contact getOrigContact() {
+        return origContact;
+    }
+
+    public void setOrigContact(Contact origContact) {
+        this.origContact = origContact;
     }
 }

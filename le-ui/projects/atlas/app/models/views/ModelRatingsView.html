@@ -48,7 +48,7 @@
                 		class="button orange-button"
                 		ng-mousedown="vm.publishConfiguration($event)"
                 		ng-disabled="vm.chartNotUpdated">
-                        Publish Configuration
+                        Activate Configuration
                     </button>
                 </div>
             </div><!-- End .chart-header -->
@@ -172,7 +172,7 @@
 
             <div ng-if="vm.showCurrentConfig">
                 <hr/>
-                <h3>Currently published configuration</h3>
+                <h3>Active configuration (Iteration {{ vm.activeConfigNumber }})</h3>
                 <refresher condition="vm.updateContent">
                 
                 <ul class="bucket-tiles published buckets-{{::vm.currentConfiguration.length}}">

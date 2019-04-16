@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
@@ -44,10 +45,11 @@ public class TransformationProxy extends MicroserviceRestApiProxy {
         return post("transform", url, transformationRequest, TransformationProgress.class);
     }
 
-    public TransformationWorkflowConfiguration getWorkflowConf(PipelineTransformationRequest transformationRequest,
+    public TransformationWorkflowConfiguration getWorkflowConf(String customerSpace, PipelineTransformationRequest transformationRequest,
             String hdfsPod) {
         hdfsPod = StringUtils.isEmpty(hdfsPod) ? "" : hdfsPod;
         String url = constructUrl("/pipelineconf?podid={hdfsPod}", hdfsPod);
+        transformationRequest.setSubmitter(CustomerSpace.shortenCustomerSpace(customerSpace));
         return post("get workflow config", url, transformationRequest, TransformationWorkflowConfiguration.class);
     }
 

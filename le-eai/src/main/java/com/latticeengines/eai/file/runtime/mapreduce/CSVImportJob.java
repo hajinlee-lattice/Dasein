@@ -60,8 +60,6 @@ public class CSVImportJob extends MRJobCustomizationBase {
             String tableSchema = properties.getProperty("eai.table.schema");
             config.set("eai.table.schema", tableSchema);
 
-            config.set("eai.dedup.enable", properties.getProperty("eai.dedup.enable"));
-
             config.set("eai.id.column.name", properties.getProperty("eai.id.column.name"));
 
             config.set("eai.redis.local", properties.getProperty("eai.redis.local"));

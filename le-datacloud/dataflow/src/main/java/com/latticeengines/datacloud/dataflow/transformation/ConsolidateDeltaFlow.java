@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -38,7 +40,9 @@ public class ConsolidateDeltaFlow extends ConsolidateBaseFlow<ConsolidateDataTra
         if (sources.size() != 2) {
             throw new RuntimeException("There should be two tables: input and master table!");
         }
-
+        if (config.isInputLast()) {
+            sources = new ArrayList<>(Arrays.asList(sources.get(1), sources.get(0)));
+        }
         Node idNode = sources.get(0).retain(new FieldList(masterId));
         Node masterNode = sources.get(1);
         List<String> fieldToRetain = masterNode.getFieldNames();
@@ -60,7 +64,7 @@ public class ConsolidateDeltaFlow extends ConsolidateBaseFlow<ConsolidateDataTra
 
     @Override
     public String getTransformerName() {
-        return "consolidateDeltaTransformer";
+        return DataCloudConstants.TRANSFORMER_CONSOLIDATE_DELTA;
 
     }
 }

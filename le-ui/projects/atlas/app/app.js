@@ -22,6 +22,7 @@ angular
         'common.exceptions',
         'common.attributes',
         'common.datacloud',
+        'atlas.segmentation',
         'lp.navigation',
         'lp.widgets',
         'lp.jobs',
@@ -39,7 +40,8 @@ angular
         'lp.sfdc',
         'lp.sfdc.credentials',
         'lp.apiconsole',
-        'lp.configureattributes'
+        'lp.configureattributes',
+        'le.react.maincomponent'
     ])
     .run(HTTP.AxiosAuthorization)
     .run(StateTransitions)

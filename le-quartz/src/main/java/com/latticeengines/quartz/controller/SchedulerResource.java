@@ -52,6 +52,13 @@ public class SchedulerResource {
         return schedulerEntityMgr.addJob(tenantId, jobConfig);
     }
 
+    @RequestMapping(value = "/predefined/jobs/{jobName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Add a job for certain tenant")
+    public Boolean addPredefinedJob(@PathVariable String jobName, HttpServletRequest request) {
+        return schedulerEntityMgr.addPredefinedJob(jobName);
+    }
+
     @RequestMapping(value = "/jobs/{tenantId}/{jobName}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a certain job with tenantId & job name")

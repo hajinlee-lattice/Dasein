@@ -49,7 +49,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
 
         if (hasSchemaChange()) {
-            List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE, BusinessEntity.class);
+            List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE,
+                    BusinessEntity.class);
             if (entityList == null) {
                 entityList = new ArrayList<>();
             }
@@ -79,10 +80,12 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                     dataCount = dataCount + extract.getProcessedRecords();
                     log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
                     if (configuration.getDataQuotaLimit() < dataCount)
-                        throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
-                                ", The data you uploaded has exceeded the limit.");
+                        throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is "
+                                + configuration.getDataQuotaLimit()
+                                + ", The data you uploaded has exceeded the limit.");
                 }
-                log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+                log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is "
+                        + configuration.getDataQuotaLimit());
             }
         }
     }
@@ -124,12 +127,29 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         log.info("Set inputMasterTableName=" + inputMasterTableName);
     }
 
-    TransformationStepConfig mergeMaster(int mergeStep) {
+    TransformationStepConfig mergeMaster(boolean entityMatch, int mergeStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(getConsolidateDataConfig(false, false, false, true));
+        if (!entityMatch) {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false));
+        } else {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false, null, InterfaceName.EntityId.name()));
+        }
+        setTargetTable(step, batchStoreTablePrefix);
+        return step;
+    }
+
+    TransformationStepConfig mergeMaster(boolean entityMatch, String... matchedTables) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        setupMasterTable(step, matchedTables);
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        if (!entityMatch) {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false));
+        } else {
+            step.setConfiguration(getConsolidateDataConfig(true, false, false, null, InterfaceName.EntityId.name()));
+        }
         setTargetTable(step, batchStoreTablePrefix);
         return step;
     }
@@ -146,10 +166,27 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    void setupMasterTable(TransformationStepConfig step) {
+    TransformationStepConfig diff(String inputTable, int newMaster) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(newMaster));
+        addBaseTables(step, inputTable);
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DELTA);
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setInputLast(true);
+        config.setSrcIdField(InterfaceName.Id.name());
+        config.setMasterIdField(batchStorePrimaryKey);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        setTargetTable(step, diffTablePrefix);
+        return step;
+    }
+
+    private void setupMasterTable(TransformationStepConfig step, String... inputTables) {
+        log.info("Add inputTable=" + String.join(",", Arrays.asList(inputTables)));
+        addBaseTables(step, inputTables);
         if (StringUtils.isNotBlank(inputMasterTableName)) {
             Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
             if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                log.info("Add masterTable=" + inputMasterTableName);
                 addBaseTables(step, inputMasterTableName);
             }
         }
@@ -173,6 +210,10 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     Set<String> getInputTableColumnNames(int tableIdx) {
         String tableName = inputTableNames.get(tableIdx);
+        return getTableColumnNames(tableName);
+    }
+
+    Set<String> getTableColumnNames(String tableName) {
         return metadataProxy.getTableColumns(customerSpace.toString(), tableName) //
                 .stream() //
                 .map(ColumnMetadata::getAttrName) //

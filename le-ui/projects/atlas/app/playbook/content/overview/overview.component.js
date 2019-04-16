@@ -1,6 +1,6 @@
 import React, { Component, react2angular } from "common/react-vendor";
+import { store, injectAsyncReducer } from 'store';
 import { actions, reducer } from '../../playbook.redux';
-import { store } from 'common/app/store';
 import './overview.component.scss';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
@@ -10,44 +10,48 @@ import MainComponent from "./main.component";
 import RatingsComponent from "./ratings.component";
 import SystemsComponent from "./systems.component";
 import {
-  LEFT,
-  RIGHT,
-  TOP,
-  BOTTOM,
-  CENTER,
-  SPACEAROUND,
-  SPACEBETWEEN,
-  SPACEEVEN
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+    CENTER,
+    SPACEAROUND,
+    SPACEBETWEEN,
+    SPACEEVEN
 } from "common/widgets/container/le-alignments";
 
 export class OverviewComponent extends Component {
     constructor(props) {
         super(props);
-        this.state = { play: null };
+        this.state = {
+            play: props.play,
+            connections: props.connections
+        };
     }
 
     componentDidMount() {
         this.unsubscribe = store.subscribe(this.handleChange);
 
-        let play = this.props.OverviewService.getPlay();
+        //injectAsyncReducer(store, 'playbook', reducer);
+        //let playstore = store.getState()['playbook'];
+        //actions.fetchPlay(this.props.playname);
+        //actions.fetchConnections(this.props.playname);
 
-        this.setState({
-            play: play
-        });
+        console.log('props', this.props);
+    }
 
-        //actions.fetchConnections(play.name);
-
+    componentWillUnmount() {
+        this.unsubscribe();
     }
 
     handleChange = () => {
         const state = store.getState()['playbook'];
-        this.setState({});
-
+        this.setState(state);
         console.log('handleChange', state);
     }
 
     render() {
-        if(this.state.play) {
+        if (this.state.play) {
             return (
                 <div className="playbook-overview">
                     <LeHPanel halignment={SPACEAROUND}>
@@ -85,7 +89,7 @@ export class OverviewComponent extends Component {
         } else {
             return (
                 <div className="playbook-overview">
-                        loading...
+                    loading...
                 </div>
             );
         }
@@ -94,38 +98,7 @@ export class OverviewComponent extends Component {
 
 angular
     .module("lp.playbook.overview", [])
-    .service('OverviewService', function () {
-        this.Play;
-        this.getPlay = () => {
-            return this.Play;
-        }
-        this.setPlay = (Play) =>{
-            this.Play = Play;
-        }
-    })
-    .component('playbookOverview', {
-        template: `<playbookOverviewReact></playbookOverviewReact>`,
-        binding: {
-            Play: '<'
-        },
-        controllerAs: 'vm',
-        controller: function ($state, OverviewService, $ngRedux) {
-            'ngInject';
-
-            let vm = this;
-
-            vm.OverviewService = OverviewService;
-            vm.ReduxStore = $state.get('home.playbook.overview').data.store;
-console.log('controller', this, $state.get('home.playbook.overview').data.store);
-            vm.$onInit = function() {
-                $ngRedux.subscribe(state => {
-                    console.log('-!- Redux store has changed', vm.redux.store);
-                    vm.ReduxStore.fetchConnections(this.Play.name);
-                });
-            }
-        }
-    })
     .component(
-        "playbookOverviewReact",
-        react2angular(OverviewComponent, [], ['$state','$stateParams', 'OverviewService'])
+        "playbookOverview",
+        react2angular(OverviewComponent, ['play', 'connections'], ['$state', '$stateParams'])
     );

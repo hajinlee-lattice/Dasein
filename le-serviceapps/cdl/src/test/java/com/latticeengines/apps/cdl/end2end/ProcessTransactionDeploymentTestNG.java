@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -36,8 +35,6 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     @Inject
     private EntityProxy entityProxy;
 
-    private RatingEngine ratingEngine;
-
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
@@ -49,7 +46,11 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         }).start();
 
         importData();
-        processAnalyze();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
         try {
             verifyProcess();
         } finally {
@@ -60,60 +61,27 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     }
 
     private void importData() throws Exception {
-        mockCSVImport(BusinessEntity.Transaction, 1, "Transaction");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Transaction, 2, "Transaction");
+        mockCSVImport(BusinessEntity.Transaction, 1, "DefaultSystem_TransactionData");
+        Thread.sleep(1100);
+        mockCSVImport(BusinessEntity.Transaction, 2, "DefaultSystem_TransactionData");
         Thread.sleep(2000);
     }
 
     private void verifyProcess() {
+        clearCache();
         runCommonPAVerifications();
-
-        Map<String, Object> transactionReport = new HashMap<>();
-        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                TRANSACTION_1);
-        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, TRANSACTION_1);
-
-        Map<String, Object> purchaseHistoryReport = new HashMap<>();
-        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                PURCHASE_HISTORY_1);
-
-        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
-        expectedReport.put(BusinessEntity.Transaction, transactionReport);
-        expectedReport.put(BusinessEntity.PurchaseHistory, purchaseHistoryReport);
-
-        verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
         verifyNumAttrsInAccount();
-        verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
+                BusinessEntity.CuratedAccount);
+        verifyBatchStore(getExpectedBatchStoreCounts());
+        verifyServingStore(getExpectedServingStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
 
-        long numAccounts = 500;
-        long numContacts = 500;
-        long numProducts = 99;
-        long numTransactions = 1000;
-
-        // Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()),
-        // numAccounts);
-        // Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()),
-        // numContacts);
-        // Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()),
-        // numProducts);
-        // Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction),
-        // numTransactions);
-        //
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Account),
-        // numAccounts);
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact),
-        // numContacts);
-
-        // Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-        // BusinessEntity.Account, SEGMENT_1_ACCOUNT_1, BusinessEntity.Contact,
-        // SEGMENT_1_CONTACT_1);
-        // verifyTestSegment1Counts(segment1Counts);
-        // Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-        // BusinessEntity.Account, SEGMENT_2_ACCOUNT_1, BusinessEntity.Contact,
-        // SEGMENT_2_CONTACT_1);
-        // verifyTestSegment2Counts(segment2Counts);
+        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
+                VERIFY_DAILYTXN_AMOUNT_1, //
+                VERIFY_DAILYTXN_QUANTITY_1, //
+                VERIFY_DAILYTXN_COST);
     }
 
     private void verifyNumAttrsInAccount() {
@@ -143,9 +111,55 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         count = entityProxy.getCount(mainCustomerSpace, query);
         log.info("count " + count);
-        Assert.assertTrue(count.longValue() > 0);
-        Assert.assertTrue(count.longValue() < ACCOUNT_1);
+        Assert.assertTrue(count > 0);
+        Assert.assertTrue(count < ACCOUNT_1);
         log.info("verify date done");
+    }
+
+    protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
+        Map<String, Object> transactionReport = new HashMap<>();
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
+                TRANSACTION_IN_REPORT_1);
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TRANSACTION_IN_REPORT_1);
+
+        Map<String, Object> purchaseHistoryReport = new HashMap<>();
+        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                PURCHASE_HISTORY_1);
+
+        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
+        expectedReport.put(BusinessEntity.Transaction, transactionReport);
+        expectedReport.put(BusinessEntity.PurchaseHistory, purchaseHistoryReport);
+        return expectedReport;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_1);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_1);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Transaction, TRANSACTION_1);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        return map;
+    }
+
+    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_1);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        return map;
     }
 
 }

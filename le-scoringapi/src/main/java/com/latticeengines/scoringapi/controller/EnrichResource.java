@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,12 +42,24 @@ public class EnrichResource extends BaseEnrich {
         String tenantId = unpacked.getKey();
         String credentialId = unpacked.getValue();
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        setCustomerSpaceInMDC(customerSpace);
+        try {
+            EnrichResponse enrichResponse = enrichRecord(request, enrichRequest, customerSpace, //
+                    ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), credentialId);
 
-        EnrichResponse enrichResponse = enrichRecord(request, enrichRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), credentialId);
+            String requestId = RequestIdUtils.getRequestIdentifierId(request);
+            enrichResponse.setRequestId(requestId);
+            return enrichResponse;
+        } finally {
+            removeCustomerSpaceFromMDC();
+        }
+    }
 
-        String requestId = RequestIdUtils.getRequestIdentifierId(request);
-        enrichResponse.setRequestId(requestId);
-        return enrichResponse;
+    private void setCustomerSpaceInMDC(CustomerSpace customerSpace) {
+        MDC.put("customerspace", CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
+    }
+
+    private void removeCustomerSpaceFromMDC() {
+        MDC.remove("customerspace");
     }
 }

@@ -10,46 +10,35 @@
     <div ng-if="!vm.hidePage()">
 
         <div class="dashboard-rules navigation" ng-if="vm.section =='dashboard.rules'">
-            <button 
-                type="button"
-                class="button blue-button pull-right"
-                ng-click="">
+            <button type="button" class="button blue-button pull-right" ng-click="">
                 Save Attributes &amp; Set Rules
             </button>
         </div>
 
         <explorer-filters class="filters-container" vm="vm" ng-if="vm.lookupMode ? !vm.hideLookupResponse() : true"></explorer-filters>
-        
+
         <div class="carousel-container">
-            <div class="row enrichment-wizard-category-pagination noselect-children" ng-init="vm.metadata.currentCategory = 1" ng-if="vm.categoriesMenu.length > (vm.category ? vm.categorySize : vm.pagesize)">
+            <div class="row enrichment-wizard-category-pagination noselect-children" ng-init="vm.metadata.currentCategory = 1"
+                ng-if="vm.categoriesMenu.length > (vm.category ? vm.categorySize : vm.pagesize)">
                 <div class="twelve columns">
-                    <pd-pagination-controls
-                            current="vm.metadata.currentCategory"
-                            max="vm.maxCategory = vm.categoriesMenu.length / vm.categorySize"
-                            >
+                    <pd-pagination-controls current="vm.metadata.currentCategory" max="vm.maxCategory = vm.categoriesMenu.length / vm.categorySize">
                     </pd-pagination-controls>
                 </div>
             </div>
-            
+
             <ul class="categories" ng-class="{'has-category': vm.category}">
-                <li explorer-lattice-rating-card
-                    ng-if="!vm.category && vm.section == 'segment.analysis' && vm.inModel() && vm.workingBuckets.length"
-                    class="category lattice-rating-card first-spot-info-card"
-                    vm="vm">
+                <li explorer-lattice-rating-card ng-if="!vm.category && vm.section == 'segment.analysis' && vm.inModel() && vm.workingBuckets.length"
+                    class="category lattice-rating-card first-spot-info-card" vm="vm">
                 </li>
-                <li explorer-company-profile
-                    ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights' && !vm.hideLookupResponse()"
-                    class="category company first-spot-info-card"
-                    vm="vm">
+                <li explorer-company-profile ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights' && !vm.hideLookupResponse()"
+                    class="category company first-spot-info-card" vm="vm">
                 </li>
-                <li explorer-category-tile
-                    ng-repeat="category in (vm.categoriesMenu = vm.removeEmptyCategories(vm.categories))
+                <li explorer-category-tile ng-repeat="category in (vm.categoriesMenu = vm.removeEmptyCategories(vm.categories))
                         | startFrom: vm.categoryStartFrom()
-                        | limitTo: vm.categoryLimitTo()" class="category"
-                    ng-if="(count = vm.categoryCount(category)) && (isEnabled = vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true) && (vm.lookupMode ? !vm.hideLookupResponse() : true) || (vm.query ? vm.checkEmptyCategory(category, count, isEnabled) : false)"
+                        | limitTo: vm.categoryLimitTo()"
+                    class="category" ng-if="(count = vm.categoryCount(category)) && (isEnabled = vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true) && (vm.lookupMode ? !vm.hideLookupResponse() : true) || (vm.query ? vm.checkEmptyCategory(category, count, isEnabled) : false)"
                     ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
-                    ng-click="vm.categoryClick(category, $event);"
-                    vm="vm" category="category" count="count">
+                    ng-click="vm.categoryClick(category, $event);" vm="vm" category="category" count="count">
                 </li>
             </ul>
         </div>
@@ -59,25 +48,19 @@
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
-                    <pd-pagination-controls
-                            current="vm.metadata.current"
-                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
+                    <pd-pagination-controls current="vm.metadata.current" max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
             </div>
 
             <ul class="subcategories">
-                <li explorer-subcategory-tile
-                    ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
+                <li explorer-subcategory-tile ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
                         | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize
                         | limitTo: vm.pagesize
                         track by $index"
-                    class="subcategory"
-                    ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
-                    ng-class="{active: vm.subcategory == subcategory, 'disabled-grayout': vm.highlightMetadata.categories[vm.category].subcategories[subcategory] && !vm.highlightMetadata.categories[vm.category].subcategories[subcategory].enabled && vm.section == 'team'}"
-                    ng-click="vm.subcategoryClick(subcategory, $event)"
-                    vm="vm" subcategory="subcategory" count="count">
+                    class="subcategory" ng-if="count = vm.subcategoryCount(vm.category, subcategory)" ng-class="{active: vm.subcategory == subcategory, 'disabled-grayout': vm.highlightMetadata.categories[vm.category].subcategories[subcategory] && !vm.highlightMetadata.categories[vm.category].subcategories[subcategory].enabled && vm.section == 'team'}"
+                    ng-click="vm.subcategoryClick(subcategory, $event)" vm="vm" subcategory="subcategory" count="count">
                 </li>
 
                 <li class="load-status" ng-show="!subcategoriesList.length && loading_image" ng-init="loading_image">
@@ -91,9 +74,7 @@
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns pd-pagination-container-margin-top">
-                    <pd-pagination-controls
-                            current="vm.metadata.current"
-                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
+                    <pd-pagination-controls current="vm.metadata.current" max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
             </div>
@@ -103,7 +84,8 @@
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length">
                 <div ng-if="(!vm.checkSelectedRatingEngineAttrs() && vm.hasSubcategories(vm.category)) 
                             || (vm.checkSelectedRatingEngineAttrs() && vm.subcategories[vm.category].length > 1) ">
-                    <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
+                    <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+                    | {{vm.subcategory}}
                 </div>
             </div>
             <div class="subcategory-back" ng-if="vm.category && !vm.hasSubcategories(vm.category) && !vm.stateParams.gotoNonemptyCategory">
@@ -111,9 +93,7 @@
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="filteredList.length > vm.pagesize">
                 <div class="twelve columns">
-                    <pd-pagination-controls
-                            current="vm.metadata.current"
-                            max="vm.max = filteredList.length / vm.pagesize">
+                    <pd-pagination-controls current="vm.metadata.current" max="vm.max = filteredList.length / vm.pagesize">
                     </pd-pagination-controls>
                 </div>
             </div>
@@ -122,27 +102,24 @@
                 ng-if="vm.section == 're.model_iteration'">
                 <button 
                     class="button link-button"
-                    ng-click="vm.select('all')">
+                    ng-click="vm.select('selectall')">
                     All
                 </button> | 
                 <button 
                     class="button link-button"
-                    ng-click="vm.select('none')">
+                    ng-click="vm.select('selectnone')">
                     None
                 </button>
             </div>
             <ul class="enrichments {{vm.view}}">
-                <li explorer-attribute-tile
-                    class="box enrichment"
-                    ng-repeat="enrichment in (filteredList = (vm.getAttributes([vm.category])
+                <li explorer-attribute-tile class="box enrichment" ng-repeat="enrichment in (filteredList = (vm.getAttributes([vm.category])
                         | filter: vm.searchFields
                         | filter: vm.enrichmentsFilter()
                         | orderBy: vm.sortOrder()))
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize
                         | limitTo: vm.pagesize
                         track by enrichment.ColumnId"
-                    ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.ColumnId]"
-                    ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}"
+                    ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.ColumnId]" ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}"
                     vm="vm" enrichment="enrichment" cube="vm.cube">
                 </li>
                 <li class="load-status" ng-show="!filteredList.length">
@@ -155,9 +132,7 @@
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="filteredList.length > vm.pagesize">
                 <div class="twelve columns pd-pagination-container-margin-top">
-                    <pd-pagination-controls
-                            current="vm.metadata.current"
-                            max="vm.max = filteredList.length / vm.pagesize">
+                    <pd-pagination-controls current="vm.metadata.current" max="vm.max = filteredList.length / vm.pagesize">
                     </pd-pagination-controls>
                 </div>
             </div>
@@ -166,13 +141,8 @@
     <div ng-if="vm.no_lookup_results_message" class="no-results-lookup">
         <h2>Account Not Found</h2>
         <p>We were unable to find a matching account for the information provided</p>
-        <a class="lookup-back" ui-sref="home.datacloud.lookup.form" ng-if="vm.section != 'insights'"><ico class="fa fa-arrow-left"></ico> Try again</a>
+        <a class="lookup-back" ui-sref="home.datacloud.lookup.form" ng-if="vm.section != 'insights'">
+            <ico class="fa fa-arrow-left"></ico> Try again
+        </a>
     </div>
-
 </div>
-
-
-
-
-
-
