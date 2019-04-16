@@ -8,6 +8,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.source.Source;
@@ -106,8 +107,8 @@ public class MockWorkFlowTest
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // TODO Auto-generated method stub
-
+        boolean expectedValue = false;
+        Assert.assertTrue(pipelineTransformationService.hdfsSourceEntityMgr.checkSourceExist(source,
+                "2019-04-11_20-47-00_UTC") == expectedValue);
     }
-
 }

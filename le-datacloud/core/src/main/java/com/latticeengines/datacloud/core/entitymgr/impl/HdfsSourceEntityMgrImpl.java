@@ -55,21 +55,6 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     YarnConfiguration yarnConfiguration;
 
     @Override
-    public boolean checkSuccessFlagExist(Source source, String targetVersion) {
-        String snapshotDir = hdfsPathBuilder.constructTransformationSourceDir(source).toString();
-        String success = snapshotDir + HDFS_PATH_SEPARATOR + targetVersion + HDFS_PATH_SEPARATOR
-                + SUCCESS_FILE_SUFFIX;
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, success)) {
-                return true;
-            }
-        } catch (IOException e) {
-            log.info("Exception : " + e);
-        }
-        return false;
-    }
-
-    @Override
     public List<String> getAllSources() {
         String basePath = hdfsPathBuilder.constructSourceBaseDir().toString();
         try {
@@ -469,7 +454,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public boolean checkSourceExist(Source source, String version) {
-        boolean sourceExists = false;
+        boolean sourceAndSuccessFlagExists = false;
         String versionDir = null;
         if (source instanceof IngestionSource) {
             versionDir = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngestionName(), version)
@@ -479,13 +464,17 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         try {
             if (HdfsUtils.isDirectory(yarnConfiguration, versionDir)) {
-                sourceExists = true;
+                String success = versionDir + HDFS_PATH_SEPARATOR + version + HDFS_PATH_SEPARATOR
+                        + SUCCESS_FILE_SUFFIX;
+                if (HdfsUtils.fileExists(yarnConfiguration, success)) {
+                    sourceAndSuccessFlagExists = true;
+                }
             }
         } catch (Exception e) {
             log.info(String.format("Failed to check %s %s @version %s in HDFS", source.getSourceName(),
                     (source instanceof IngestionSource ? ((IngestionSource) source).getIngestionName() : ""), version));
         }
-        return sourceExists;
+        return sourceAndSuccessFlagExists;
     }
 
     @Override

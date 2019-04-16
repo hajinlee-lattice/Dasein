@@ -469,9 +469,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             String workflowDir) {
         try {
             log.info("Transforming step " + step.getName());
-            if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())
-                    && hdfsSourceEntityMgr.checkSuccessFlagExist(step.getTarget(),
-                            step.getTargetVersion())) {
+            if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
                 step.setElapsedTime(0);
                 log.info("Skip executed step " + step.getName());
                 return true;
