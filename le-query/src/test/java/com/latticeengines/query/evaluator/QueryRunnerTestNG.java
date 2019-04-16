@@ -1,6 +1,5 @@
 package com.latticeengines.query.evaluator;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,7 +10,6 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
