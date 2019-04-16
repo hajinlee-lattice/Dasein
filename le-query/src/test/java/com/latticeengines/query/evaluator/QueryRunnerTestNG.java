@@ -467,8 +467,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .orderBy(new Sort(Arrays.asList(attrLookup), false))
                 .having(Restriction.builder().let(attrLookup).neq("C").build()) //
                 .build();
-        //SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
-        //logQuery(sqlUser, sqlQuery);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query2, sqlUser);
+        logQuery(sqlUser, sqlQuery);
         List<Map<String, Object>> expectedResults = new ArrayList<Map<String, Object>>();
         Map<String, Object> resMapRow1 = new HashMap<>();
         resMapRow1.put("Score", "A");
