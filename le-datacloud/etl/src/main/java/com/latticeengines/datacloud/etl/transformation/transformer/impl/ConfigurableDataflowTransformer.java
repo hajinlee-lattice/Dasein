@@ -13,7 +13,7 @@ import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class ConfigurableDataflowTransformer extends AbstractDataflowTransformer<TransformerConfig, TransformationFlowParameters> {

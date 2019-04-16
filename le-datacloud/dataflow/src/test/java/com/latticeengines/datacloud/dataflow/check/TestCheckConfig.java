@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.dataflow.check;
 
 import com.latticeengines.domain.exposed.datacloud.check.CheckParam;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public class TestCheckConfig extends TransformerConfig {
 

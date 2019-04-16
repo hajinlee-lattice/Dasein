@@ -10,8 +10,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.cdl.TrimFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TrimConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TrimConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(TrimFlow.DATAFLOW_BEAN_NAME)

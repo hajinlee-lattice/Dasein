@@ -9,9 +9,9 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ValidationReportFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SourceValidationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ValidationConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("sourceValidationFlow")

@@ -8,8 +8,8 @@ import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TechIndicatorsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(BuiltWithTechIndicatorsFlow.DATAFLOW_BEAN_NAME)
 public class BuiltWithTechIndicatorsFlow extends ConfigurableFlowBase<TechIndicatorsConfig> {

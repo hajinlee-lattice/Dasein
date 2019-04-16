@@ -13,7 +13,7 @@ import com.latticeengines.datacloud.core.source.impl.BomboraFirehose;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.service.impl.BomboraFirehoseIngestionService;
 import com.latticeengines.datacloud.etl.transformation.service.impl.FirehoseTransformationServiceImplTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraFirehoseConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraFirehoseConfiguration;
 
 @Component
 public class BomboraFirehoseIngestionServiceImplTestNG

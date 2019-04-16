@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SourceValidationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationReportTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ValidationConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ValidationReportTransformerConfig;
 
 @Component("validationReportTransformer")
 public class ValidationReportTransformer extends AbstractDataflowTransformer<ValidationReportTransformerConfig, SourceValidationFlowParameters> {

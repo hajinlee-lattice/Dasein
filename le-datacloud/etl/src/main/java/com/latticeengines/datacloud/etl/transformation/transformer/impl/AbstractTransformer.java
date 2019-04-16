@@ -15,7 +15,7 @@ import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationP
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class AbstractTransformer<T extends TransformerConfig> implements Transformer {

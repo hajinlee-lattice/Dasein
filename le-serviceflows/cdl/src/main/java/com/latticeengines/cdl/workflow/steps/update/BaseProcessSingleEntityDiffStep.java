@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;

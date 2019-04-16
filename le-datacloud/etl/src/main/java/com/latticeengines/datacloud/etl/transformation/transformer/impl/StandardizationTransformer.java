@@ -16,8 +16,8 @@ import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.dataflow.transformation.SourceStandardizationFlow;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(SourceStandardizationFlow.TRANSFORMER_NAME)

@@ -9,8 +9,8 @@ import com.latticeengines.datacloud.dataflow.utils.CheckUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ManSeedChkConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ManSeedChkConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(ManSeedChkFlow.DATAFLOW_BEAN_NAME)
 public class ManSeedChkFlow extends ConfigurableFlowBase<ManSeedChkConfig> {

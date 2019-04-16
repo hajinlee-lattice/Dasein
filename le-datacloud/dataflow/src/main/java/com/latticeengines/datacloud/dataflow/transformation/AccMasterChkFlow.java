@@ -11,8 +11,8 @@ import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckPar
 import com.latticeengines.domain.exposed.datacloud.check.EmptyFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceededCountCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccMasterChkConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccMasterChkConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(AccMasterChkFlow.DATAFLOW_BEAN_NAME)
 public class AccMasterChkFlow extends ConfigurableFlowBase<AccMasterChkConfig> {
