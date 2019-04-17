@@ -1,39 +1,82 @@
-import './connectors-list.component';
-import './systems.component';
-import './profiles.component';
-import ConnectorsRoutes from "./connectors-routing";
-
+// import './connectors-list.component';
+// import './systems.component';
+// import './profiles.component';
+// import ConnectorsRoutes from "./connectors-routing";
+import 'atlas/react/react-angular-main.component';
 // &.ico-connectors{
 //     background-color: $pearl-white;
 //     -webkit-mask-image: url("/assets/images/connections.png");
 //     mask: url("/assets/images/connections.png");
 // }
 angular
-.module('le.connectors', ['le.connectors.list', 'le.connectors.profile','le.systems.list'
-])
+.module('le.connectors', ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
+.service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
+        let ConnectorsService = this;
+        this.getConnector = function () {
+            console.log('Test', $state.router.locationConfig.$location.$$hash);
+            let hash = $state.router.locationConfig.$location.$$hash;
+            console.log(hash);
+            let selected = '';
+            if (hash != '') {
+                let hashArray = hash.split('/');
+                // console.log('ARRAY ', hashArray[1]);
+                selected = hashArray[1];
+            }
+            return selected;
+        };
+        this.generateAuthToken = function () {
+            let clientSession = BrowserStorageUtility.getClientSession();
+            let emailAddress = clientSession.EmailAddress;
+            let tenantId = clientSession.Tenant.Identifier;
+            SfdcService.generateAuthToken(emailAddress, tenantId).then(function (result) {
+                if (result.Success == true) {
+                    Notice.success({
+                        delay: 5000,
+                        title: 'Email sent to ' + emailAddress,
+                        message: 'Your one-time authentication token has been sent to your email.'
+                    });
+                } else {
+                    Banner.error({ message: 'Failed to Generate Salesforce Access Token.' });
+
+                }
+            });
+        }
+        this.isMarketoEnabled = function () {
+            let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
+            return connectorsEnabled;
+        }
+    })
 .config(function($stateProvider) {
     $stateProvider
 
         .state('home.connectors', {
             url: '/connectors',
-            onEnter: function(){
-            },
-            onExit: () => {
-                ConnectorsRoutes.clearRouter();
-            },
             params: {
                 tenantName: { dynamic: true, value: '' },
                 pageIcon: 'ico-connectors',
                 pageTitle: 'Connections'
             },
-            
-            views: {
-                'summary@': {
-                    component: 'connectorListComponent'
+            resolve: {
+                path: () => {
+                    return 'connectorslist';
                 },
-                'main@': {
-                    component: 'systemsComponent'
+                ngservices: (ConnectorsService) => {
+                    let obj = {
+                        ConnectorsService: ConnectorsService
+                    }
+                    return obj;
                 }
+            },
+            views: {
+                'main@': {
+                    component: 'reactAngularMainComponent'
+                }
+                // 'summary@': {
+                //     component: 'connectorListComponent'
+                // },
+                // 'main@': {
+                //     component: 'systemsComponent'
+                // }
             }
         });
         

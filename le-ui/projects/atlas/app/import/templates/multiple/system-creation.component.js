@@ -12,7 +12,7 @@ import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
-import {actions as modalActions} from '../../../../../common/widgets/modal/le-modal.redux';
+import {actions as modalActions} from 'common/widgets/modal/le-modal.redux';
 import {store } from 'store';
 export default class SystemCreationComponent extends Component {
     constructor(props) {

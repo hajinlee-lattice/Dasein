@@ -13,6 +13,7 @@ export default class ReactAngularMainComponent extends Component {
 
     componentDidMount() {
         console.log('ROUTER', ReactRouter);
+        console.log('THE STORE ==> ', store);
         let router = ReactRouter.getRouter();
         console.log(router);
         router.stateService.go(this.props.path);

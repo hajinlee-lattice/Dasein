@@ -1,0 +1,53 @@
+@import "common/widgets/colors.scss";
+
+.le-tool-bar {
+  padding: 0 0 1em 0;
+  margin-top: 1em;
+}
+.connectors-title {
+  padding: 1em 0;
+}
+
+.connectors-list {
+  .le-connector {
+    height: 100%;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 1.5em;
+    .le-card-image-container {
+      height: 60px;
+      align-items: center;
+    }
+    .le-card-body {
+      font-size: 12px;
+      & > p {
+        display: inline-flex;
+        justify-content: space-around;
+        text-align: center;
+      }
+    }
+  }
+  .le-connector {
+    border-radius: 0;
+    border-top: 0;
+    border-bottom: 0;
+    border-left: 0;
+    max-width: 500px;
+  }
+}
+
+.connectors-list .le-connector:last-child {
+  border: 0;
+}
+
+.le-connectors {
+  margin-top: 1px;
+  padding: 1em 0;
+  width: 100%;
+  max-width: 1000px;
+  height: 100%;
+  &.white-background {
+    background-color: $pearl-white;
+  }
+}

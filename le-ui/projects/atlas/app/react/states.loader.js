@@ -1,5 +1,5 @@
 import states from 'atlas/import/templates/multiple/states';
-
+import connectrosstates from 'atlas/connectors/connectors.state'
 
 const modulesStates = [];
 
@@ -10,5 +10,6 @@ function mergeStates(imported) {
 }
 
 mergeStates(states);
+mergeStates(connectrosstates);
 
 export default modulesStates;
