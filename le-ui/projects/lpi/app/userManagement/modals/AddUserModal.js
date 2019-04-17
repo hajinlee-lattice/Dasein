@@ -112,7 +112,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
             return false;
         }
 
-        if (_.contains($scope.emails, $scope.user.Email)) {
+        if (_.includes($scope.emails, $scope.user.Email)) {
             $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_CONFLICT_EMAIL");
             return false;
         }
