@@ -289,6 +289,10 @@ export default function (
                 ret.push(attributes[i]);
             }
         }
+
+        // console.log(ret.find( enrichment => enrichment.DisplayName === 'Domestic HQ Country') );
+        // console.log(ret.find( enrichment => enrichment.DisplayName === 'Latest Funding Date') );
+
         return ret;
     }
 
@@ -1315,6 +1319,8 @@ export default function (
         var suffix = suffix || '',
             percentage = 0;
 
+        console.log(number, total);
+
         if (number && total) {
             percentage = ((number / total) * 100);
 
@@ -1336,6 +1342,16 @@ export default function (
             }
         }
         return ar;
+    }
+
+    vm.getHighestLift = function (stats) {
+        var highest = 0;
+        stats.forEach(function (stat) {
+            if (stat.Lift.toFixed(1) > highest) {
+                highest = stat.Lift.toFixed(1);
+            }
+        })
+        return highest;
     }
 
     vm.getHighestStat = function (stats) {

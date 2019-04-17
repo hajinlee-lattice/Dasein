@@ -245,9 +245,9 @@ export default function () {
                                 disabledCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'ModelAndAllInsights');
                         };
 
-                        // vm.setCategory(vm.categories[0]);
+                        var categories = vm.removeEmptyCategories(vm.categories);
+                        vm.setCategory(categories[0]);
                         Notice.success({ message: 'Enabled all attributes for remodeling' });
-
                         break;
                     default:
 
@@ -265,7 +265,8 @@ export default function () {
                                 disabledCategoryAttributes.forEach( attr => attr.ApprovedUsage[0] = 'None');
                         };
 
-                        // vm.setCategory(vm.categories[0]);
+                        var categories = vm.removeEmptyCategories(vm.categories);
+                        vm.setCategory(categories[0]);
                         Notice.warning({ message: 'Disabled all ' + vm.category + ' attributes from remodeling' });
                 }
                 RatingsEngineStore.setIterationEnrichments(vm.enrichments)

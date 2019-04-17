@@ -37,8 +37,19 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>
         </a>
     </li>
-    <li role="presentation" ui-sref-active="active" ng-disabled="!modelIsReady">
+    <li ng-if="!isRuleBased"role="presentation" ui-sref-active="active" ng-disabled="!modelIsReady">
         <a ui-sref="home.ratingsengine.dashboard.notes({ rating_id: rating_id, modelId: modelId })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
+                <span class="ico ico-notes"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}</span>
+        </a>
+    </li>
+    <li ng-if="isRuleBased" role="presentation" ui-sref-active="active" ng-disabled="menuDisabled || dashboardDisabled">
+        <a 
+            ui-sref="home.ratingsengine.dashboard.notes({ rating_id: rating_id, modelId: modelId })" 
+            analytics-on="click" 
+            analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
                 <span class="ico ico-notes"></span>
             </span>
