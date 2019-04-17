@@ -1,8 +1,5 @@
 package com.latticeengines.matchapi.controller;
 
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -436,8 +433,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private void runAndVerify(MatchInput input, String scenario) {
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, this.getClass().getSimpleName());
-        int numNewAccounts = CASE_ALL_KEYS.equals(scenario) ? DATA_ALL_KEYS.length : 0;
-        validateNewlyAllocatedAcct(finalStatus.getResultLocation(), numNewAccounts);
+        validateNoNewAccountFile(finalStatus.getResultLocation());
 
         if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
@@ -609,30 +605,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         }
     }
 
-    // check whether newly allocated account records match the expected number and
-    // has entityName & entityId field
-    private void validateNewlyAllocatedAcct(String outputPath, int numNewAccounts) {
+    // for account match, we should not generate any new entities file
+    private void validateNoNewAccountFile(String outputPath) {
         // TODO maybe find a better way to get the path to new entity dir
         outputPath = outputPath.replace("Output", "NewEntities");
         String avroGlob = outputPath + "/*.avro";
         Long fileCount = fileCount(avroGlob);
-        if (numNewAccounts == 0) {
-            // should have no file if there are no new accounts
-            Assert.assertEquals(fileCount.longValue(), 0L);
-            return;
-        } else {
-            Assert.assertTrue(fileCount > 0, "Should have new entity avro file in path: " + outputPath);
-        }
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroGlob);
-        int total = 0;
-        for (int i = 0; records.hasNext(); i++) {
-            GenericRecord record = records.next();
-            Assert.assertNotNull(record, String.format("Got null avro record at index = %d", i));
-            Assert.assertNotNull(record.get(ENTITY_NAME_FIELD), getMissingFieldErrorMsg(ENTITY_NAME_FIELD, i));
-            Assert.assertNotNull(record.get(ENTITY_ID_FIELD), getMissingFieldErrorMsg(ENTITY_ID_FIELD, i));
-            total++;
-        }
-        Assert.assertEquals(total, numNewAccounts);
+        // should have no file if there are no new accounts
+        Assert.assertEquals(fileCount.longValue(), 0L);
     }
 
     private long fileCount(String avroGlob) {
@@ -643,10 +623,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             // directory not exist
             return 0;
         }
-    }
-
-    private String getMissingFieldErrorMsg(String field, int recordIdx) {
-        return String.format("Missing field %s in record at index %d", field, recordIdx);
     }
 
     private void validateAcctMatchFetchOnlyResult(String path) {

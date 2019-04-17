@@ -41,9 +41,6 @@ public class EntityMatchUtils {
     private static final Map<String, Set<String>> FIRST_WIN_ATTRIBUTES = new HashMap<>();
 
     static {
-        // FIXME put account here for testing, no need to output new accounts when it is
-        // Account match. remove this after we have contact match
-        OUTPUT_NEW_ENTITY_MAP.put(Account.name(), Sets.newHashSet(Account.name()));
         OUTPUT_NEW_ENTITY_MAP.put(Contact.name(), Sets.newHashSet(Account.name()));
         // currently only LDC ID in account match is first win, others are last win
         FIRST_WIN_ATTRIBUTES.put(Account.name(), Collections.singleton(InterfaceName.LatticeAccountId.name()));
