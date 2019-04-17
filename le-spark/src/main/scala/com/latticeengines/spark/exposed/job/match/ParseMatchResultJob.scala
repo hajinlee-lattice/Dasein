@@ -27,8 +27,10 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     }
 
     if (sourceTable != null) {
-      val internalId: Option[String] = if (result.columns.contains(InterfaceName.InternalId.name)) Some(InterfaceName.InternalId.name) else None
-      val matchGroupId: Option[String] = if (StringUtils.isNotBlank(config.matchGroupId)) Some(config.matchGroupId) else None
+      val internalId: Option[String] =
+        if (result.columns.contains(InterfaceName.InternalId.name)) Some(InterfaceName.InternalId.name) else None
+      val matchGroupId: Option[String] =
+        if (StringUtils.isNotBlank(config.matchGroupId)) Some(config.matchGroupId) else None
       val joinKey = if (config.joinInternalId) {
         internalId.orElse(matchGroupId).orElse(null).get
       } else {
@@ -53,15 +55,19 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     val withOutPrefix = resultCols.filterNot(field => field.startsWith(prefix))
     val conflictingFields = withOutPrefix.intersect(withPrefix.map(field => field.substring(prefix.length))).toList
     val dropped = result.drop(conflictingFields:_*)
-    removePrefix(dropped, withPrefix.toList)._1
+    removePrefix(dropped)
   }
 
-  def removePrefix(df: DataFrame, withPrefix: List[String]): (DataFrame, List[String]) = {
-    withPrefix match {
-      case Nil => (df, Nil)
-      case field::remaining => //
-        (df.withColumnRenamed(field, field.substring(MatchConstants.SOURCE_PREFIX.length)), remaining)
+  def removePrefix(df: DataFrame): DataFrame = {
+    val prefix = MatchConstants.SOURCE_PREFIX
+    val newNames = df.columns map { field =>
+      if (field.startsWith(prefix)) {
+        field.substring(prefix.length)
+      } else {
+        field
+      }
     }
+    df.toDF(newNames: _*)
   }
 
   def excludeDCAttrs(result: DataFrame, srcAttrs: List[String], keepLid: Boolean): DataFrame = {
@@ -79,7 +85,7 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     val retainAttrs = joinKey::matchResult.columns.diff(sourceTable.columns).toList
     val dropAttrs = matchResult.columns.diff(retainAttrs)
     val reducedResult = matchResult.drop(dropAttrs:_*)
-    sourceTable.join(reducedResult, joinKey::Nil, "inner")
+    sourceTable.join(reducedResult, Seq(joinKey), "inner")
   }
 
 }
