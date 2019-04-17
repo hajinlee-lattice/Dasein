@@ -1,4 +1,6 @@
 const UIActionsFactory = require('../uiactions-factory');
+const jwt = require('jsonwebtoken');
+const uuid = require('uuid/v4');
 
 /**
  * Routing for '/reset' api
@@ -33,15 +35,17 @@ class ResetPasswordRouter {
          *  query params:
          *      userName: string
          */
-        this.router.put('/', function (req, res) {
-            if(!req.query.userName || req.query.userName == null || req.query.userName.trim() == ''){
+        this.router.get('/publish/', function (req, res) {
+            if(!req.query.jwt || req.query.jwt == null || req.query.jwt.trim() == ''){
                 res.status(400).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Notice', 'Request missing userName'));
                 return;
             }
             try{
+                var payload = jwt.verify(req.query.jwt, 'e6b6376591584a6990e3a56306247cc2');
+
                 let body = {
-                    Username: req.query.userName,
-                    HostPort: this.getPlsHost() + ':443',
+                    Username: payload.username,
+                    HostPort: this.getPlsHost(),
                     Product: 'Lead Prioritization'
                 };
                 let options = {
@@ -57,12 +61,11 @@ class ResetPasswordRouter {
                     },
                     mode: "cors",
                     body: JSON.stringify(body)
-
-                }
+                };
                 this.request(options, (error, response, body) => {
                     this.log('Call back ', error, response, body);
                     if(body) {
-                        res.status(200).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', 'Password Reset'));
+                        res.status(200).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', payload.username + ' password Reset'));
                     }else{
                         res.status(response.statusCode).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', 'Error Password Reset'));
                     }
@@ -71,6 +74,25 @@ class ResetPasswordRouter {
                 res.status(500).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', 'Generic server error'));
             }
 
+        }.bind(this));
+
+         /**
+         *  query params:
+         *      userName: string
+         */
+        this.router.get('/confirm/', function (req, res) {
+            if(!req.query.userName || req.query.userName == null || req.query.userName.trim() == ''){
+                res.status(400).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Notice', 'Request missing userName'));
+                return;
+            }
+            //will be called by reset password button
+            //will send /reset/publish?userName={JWT} to pramods api to be included in email
+            var payload = {
+                username: req.query.userName,
+                jti: uuid.v4()
+            };
+            var token = jwt.sign(payload, 'e6b6376591584a6990e3a56306247cc2', { expiresIn: '1d' });
+            res.status(200).send(token);
         }.bind(this));
 
         return this.router;

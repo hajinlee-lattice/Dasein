@@ -1,11 +1,10 @@
 package com.latticeengines.spark.exposed.job.common
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.common.CopyConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.collections4.MapUtils
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.functions.col
 
 import scala.collection.JavaConverters._
 
@@ -52,17 +51,7 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
         filtered.toDF(newAttrs: _*)
       }
 
-    val result =
-      if (config.isAddTimestampAttrs) {
-        val nowMills = System.currentTimeMillis()
-        renamed
-          .withColumn(InterfaceName.CDLCreatedTime.name(), lit(nowMills))
-          .withColumn(InterfaceName.CDLUpdatedTime.name(), lit(nowMills))
-      } else {
-        renamed
-      }
-
-    lattice.output = result :: Nil
+    lattice.output = renamed :: Nil
   }
 
   // second return toggles select vs drop
