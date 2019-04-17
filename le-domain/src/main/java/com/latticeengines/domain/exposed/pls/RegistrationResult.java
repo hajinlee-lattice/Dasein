@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.security.User;
@@ -9,6 +10,7 @@ public class RegistrationResult {
     private User conflictingUser;
     private boolean valid;
     private String errMsg;
+    private boolean validEmail;
 
     @JsonProperty("Password")
     public String getPassword() {
@@ -53,5 +55,15 @@ public class RegistrationResult {
     @JsonProperty("ErrMsg")
     public void setErrMsg(String errMsg) {
         this.errMsg = errMsg;
+    }
+
+    @JsonIgnore
+    public boolean isValidEmail() {
+        return validEmail;
+    }
+
+    @JsonIgnore
+    public void setValidEmail(boolean validEmail) {
+        this.validEmail = validEmail;
     }
 }
