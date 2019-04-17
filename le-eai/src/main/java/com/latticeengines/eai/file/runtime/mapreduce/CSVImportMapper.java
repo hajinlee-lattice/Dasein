@@ -79,6 +79,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String SCIENTIFIC_REGEX = "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$";
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
+    private static final Set<String> VAL_TRUE = Sets.newHashSet("true", "t", "1", "yes", "y");
+    private static final Set<String> VAL_FALSE = Sets.newHashSet("false", "f", "0", "no", "n");
 
     private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
     private static final int MAX_CACHE_IDS = 5000000;
@@ -436,11 +438,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case ENUM:
                 return fieldCsvValue;
             case BOOLEAN:
-                if (fieldCsvValue.equals("1") || fieldCsvValue.equalsIgnoreCase("true")) {
-                    return Boolean.TRUE;
-                } else if (fieldCsvValue.equals("0") || fieldCsvValue.equalsIgnoreCase("false")) {
-                    return Boolean.FALSE;
-                }
+                return convertBooleanVal(fieldCsvValue);
             default:
                 LOG.info("size is:" + fieldCsvValue.length());
                 throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
@@ -457,6 +455,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.\n" +
                     "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
                     e.getMessage()), e);
+        }
+    }
+
+    private Boolean convertBooleanVal(String val) {
+        if (VAL_TRUE.contains(val.toLowerCase())) {
+            return Boolean.TRUE;
+        } else if (VAL_FALSE.contains(val.toLowerCase())) {
+            return Boolean.FALSE;
+        } else {
+            throw new IllegalArgumentException(String.format("Cannot parse %s as Boolean!", val));
         }
     }
 
