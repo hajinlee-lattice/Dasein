@@ -343,7 +343,8 @@ public class PlayServiceImpl implements PlayService {
         PlayLaunch lastIncompleteLaunch =
                 playLaunchService.findLatestByPlayId(play.getPid(), Collections.singletonList(LaunchState.UnLaunched));
         PlayLaunch lastCompletedLaunch =
-                playLaunchService.findLatestByPlayId(play.getPid(), Collections.singletonList(LaunchState.Launched));
+                playLaunchService.findLatestByPlayId(play.getPid(),
+                        Arrays.asList(LaunchState.Launched, LaunchState.PartialSync, LaunchState.Synced));
         PlayLaunch mostRecentLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
         launchHistory.setLastIncompleteLaunch(lastIncompleteLaunch);
