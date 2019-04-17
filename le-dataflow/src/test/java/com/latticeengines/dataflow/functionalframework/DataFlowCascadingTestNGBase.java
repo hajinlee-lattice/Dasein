@@ -51,7 +51,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:dataflow-context.xml" })
 public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringContextTests {
-    protected boolean local = getenv("SERVICEFLOWS_LOCAL", true, Boolean.class);
+    private boolean local = getenv("SERVICEFLOWS_LOCAL", true, Boolean.class);
     private String engine = getenv("SERVICEFLOWS_ENGINE", "FLINK", String.class);
     protected static final String AVRO_INPUT = "AvroInput";
     protected static final String AVRO_DIR = "/tmp/avro";
@@ -91,7 +91,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
 
     @BeforeTest(groups = "functional")
     public void setup() throws Exception {
-        if (useLocal()) {
+        if (local) {
             yarnConfiguration.set("fs.defaultFS", "file:///");
             log.info("Running locally");
         } else {
@@ -127,18 +127,14 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
                     path = path.substring(0, path.lastIndexOf("/"));
                     path += "/*.avro";
                 }
-                System.out.println("ZDD");
-                System.out.println(path);
                 sourcePaths.put(parts[parts.length - 2], path);
             }
-            if (!useLocal()) {
+            if (!local) {
                 List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
                 Map<String, String> modifiedSourcePaths = new HashMap<>();
                 for (String key : sourcePaths.keySet()) {
                     String hdfsDestination = AVRO_DIR + "/" + key + ".avro";
-                    entries.add(new AbstractMap.SimpleEntry<>(
-                            sourcePaths.get(key).substring(0, sourcePaths.get(key).length() - "/*.avro".length()),
-                            hdfsDestination));
+                    entries.add(new AbstractMap.SimpleEntry<>(sourcePaths.get(key), hdfsDestination));
                     modifiedSourcePaths.put(key, hdfsDestination);
                 }
                 copy(entries);
@@ -458,9 +454,5 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
 
     protected void setEngine(String engine) {
         this.engine = engine;
-    }
-
-    protected boolean useLocal() {
-        return this.local;
     }
 }
