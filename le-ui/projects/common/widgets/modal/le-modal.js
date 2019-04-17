@@ -1,6 +1,10 @@
 import React, { Component, ReactDOM } from "common/react-vendor";
 import './le-modal.scss';
 
+export const INFO = 'INFO';
+export const WARNING = 'WARNING';
+export const ERROR = 'ERROR';
+
 import LeButton from '../buttons/le-button';
 // import { store, injectAsyncReducer } from 'store';
 import { actions, reducer } from './le-modal.redux';
@@ -12,45 +16,87 @@ export default class LeModal extends Component {
     constructor(props) {
         super(props);
         this.clickHandler = this.clickHandler.bind(this);
-        console.log('MODAL PROPS ==> ', props);
-        this.state = { opened: false };
-        if(this.props.config.injectAsyncReducer){
-            this.props.config.injectAsyncReducer(this.props.config.store, 'le-modal', reducer);
+        this.state = {store: props.store, open: false, config: {}};
+        if (this.props.injectAsyncReducer) {
+            this.props.injectAsyncReducer(props.store, 'le-modal', reducer);
         }
-        
-        this.unsubscribe = this.props.config.store.subscribe(() => {
-            const data = this.props.config.store.getState()['le-modal'];
+
+        this.unsubscribe = props.store.subscribe(() => {
+            const data = props.store.getState()['le-modal'];
             this.setState({
-                opened: data.opened,
-                callbackFn: data.callbackFn,
-                templateFn: data.templateFn
+                open: data.open,
+                callbackFn: data.config.callback,
+                templateFn: data.config.template,
+                title: data.config.title,
+                hideFooter: data.config.hideFooter ? data.config.hideFooter : false
             });
         });
         this.clickHandler = this.clickHandler.bind(this);
     }
 
     clickHandler(action) {
-        switch(action){
+        switch (action) {
             case 'close':
-            actions.toggleModal(this.props.config.store);
-            break;
+                actions.closeModal(this.props.store);
+                break;
         }
         if (this.state.callbackFn) {
             this.state.callbackFn(action);
         }
     }
+
     getTitle() {
-        return this.props.config.title ? this.props.config.title : '';
+        if(typeof this.state.title === 'function'){
+            return this.state.title();
+        }else {
+            return '';
+        }
     }
 
+    hideFooter() {
+        return this.state.hideFooter;
+    }
+
+    getFooter() {
+        if (this.state.hideFooter) {
+            return null;
+        } else {
+            return (
+                <div className="le-modal-footer">
+                    <LeButton
+                        name={`${"modal-ok"}`}
+                        config={{
+                            label: "Done",
+                            classNames: "blue-button"
+                        }}
+                        callback={() => { return this.clickHandler('ok') }}
+                    />
+                    <LeButton
+                        name={`${"modal-cancel"}`}
+                        config={{
+                            label: "Cancel",
+                            classNames: "gray-button"
+                        }}
+                        callback={() => { return this.clickHandler('close') }}
+                    />
+                </div>
+            );
+        }
+    }
+
+    getTemplate(){
+        if(this.state.templateFn){
+            return this.state.templateFn();
+        }else{
+            return null;
+        }
+    }
     getClassName() {
     }
 
     getModalUI() {
-        console.log('Render modal');
         return (
             <div className="le_modal opened">
-
                 <div className="le-modal-content">
                     <div className="le-modal-header">
                         <span className="close" onClick={() => {
@@ -65,37 +111,17 @@ export default class LeModal extends Component {
                             </p>
                         </div>
                     </div>
-
                     <div className="le-modal-body">
-                        {this.state.templateFn()}
+                        {this.getTemplate()}
                     </div>
-
-                    <div className="le-modal-footer">
-                        <LeButton
-                            name={`${"modal-ok"}`}
-                            config={{
-                                label: "Done",
-                                classNames: "blue-button"
-                            }}
-                            callback={() => { return this.clickHandler('ok') }}
-                        />
-                        <LeButton
-                            name={`${"modal-cancel"}`}
-                            config={{
-                                label: "Cancel",
-                                classNames: "gray-button"
-                            }}
-                            callback={() => { return this.clickHandler('close') }}
-                        />
-                    </div>
+                    {this.getFooter()}
                 </div>
-
             </div>
         );
     }
 
     render() {
-        if (this.state.opened == true) {
+        if (this.state.open == true) {
             let modal = this.getModalUI();
             return ReactDOM.createPortal(
                 modal, modalRoot

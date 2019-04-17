@@ -12,8 +12,8 @@ export default class ReactAngularMainComponent extends Component {
 
 
     componentDidMount() {
-        console.log('ROUTER', ReactRouter);
-        console.log('THE STORE ==> ', store);
+        // console.log('ROUTER', ReactRouter);
+        // console.log('THE STORE ==> ', store);
         let router = ReactRouter.getRouter();
         console.log(router);
         router.stateService.go(this.props.path);
@@ -27,12 +27,7 @@ export default class ReactAngularMainComponent extends Component {
         return (
             
             <div className="main-panel">
-                <LeModal config={{store: store,  injectAsyncReducer:injectAsyncReducer}} 
-                callback={() =>{
-                    console.log('MODAL CB');
-                }} title="Org ID to Account ID Mapping" template={() => {
-                    return (<p>Test</p>)
-                }} />
+                <LeModal store={store}  injectAsyncReducer={injectAsyncReducer} />
                 <UIRouter router={ReactRouter.getRouter()}>
                     <UIView name="header" />
                     <UIView name="summary"/>

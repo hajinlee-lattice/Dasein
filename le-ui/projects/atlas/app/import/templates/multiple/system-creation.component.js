@@ -103,15 +103,21 @@ export default class SystemCreationComponent extends Component {
                         name="create"
                         disabled={!this.state.valid}
                         config={{
-                            label: "Create",
+                            label: "Create Leo",
                             classNames: "blue-button"
                         }}
                         callback={() => {
-                            modalActions.toggleModal(store, () =>{console.log('TEST')}, () => {
-                                return (
-                                    <p>Leo</p>
-                                )
-                            });
+                            let config = { callback: (action) =>{
+                                console.log('ACTION', action);
+                                modalActions.closeModal(store);
+                            }, template: () => {
+                                return (<p>Leo test</p>)
+                            }, title: () => { 
+                                return(
+                                    <p>TEST</p>
+                                );
+                            }}
+                            modalActions.openModal(store, config);
                             // ReactRouter.getStateService().go('templateslist');
                             // alert('Call APIS');
                         }}

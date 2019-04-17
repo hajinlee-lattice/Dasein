@@ -30,15 +30,19 @@ export default class SystemComponent extends Component {
 
     }
     editMappingClickHandler() {
-        console.log('Clicked');
-        modalActions.toggleModal(store, this.modalCallback, () => {
-            this.editMapping = Object.assign({}, this.state.system);
-            return (
-                <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
-            );
-
-        });
-        // this.setState({ openModal: true });
+        let config = {
+            callback : this.modalCallback,
+            template: () => {
+                this.editMapping = Object.assign({}, this.state.system);
+                return (
+                    <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
+                );
+            },
+            title: () => {
+                return <p>Org ID to Account ID Mapping</p>
+            }
+        };
+        modalActions.openModal(store, config);
     }
 
     mappingClosed(system) {
@@ -61,15 +65,12 @@ export default class SystemComponent extends Component {
 
     modalCallback(action) {
 
-        // console.log('CHANGED? =====>',this.editMapping);
         switch (action) {
             case 'close':
-                // this.setState({ openModal: false });
-                modalActions.toggleModal(store, () => {}, () => {});
+                modalActions.closeModal(store);
                 break;
             case 'ok':
-                modalActions.toggleModal(store, () => {}, () => {});
-                // this.setState({ openModal: false, saving: true });
+                modalActions.closeModal(store);
                 break;
         }
     }

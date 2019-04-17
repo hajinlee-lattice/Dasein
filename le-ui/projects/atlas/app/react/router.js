@@ -56,9 +56,9 @@ class ReactRouter {
         return this.routing.router.stateService;
     }
     getCurrentState() {
-        console.log('SS ==> ',this.routing.router.stateService);
+        // console.log('SS ==> ',this.routing.router.stateService);
         let currentState = this.routing.router.stateService.current;
-        console.log('CURRENT ',currentState);
+        // console.log('CURRENT ',currentState);
         return currentState;
     }
     clear() {

@@ -1,22 +1,41 @@
-// import {store} from 'store';
-
-var CONST = {
-    TOGGLE_MODAL: 'TOGGLE_MODAL'
+const CONST = {
+    REFRESH_VIEW: 'REFRESH_VIEW',
+    OPEN_MODAL: 'OPEN_MODAL',
+    CLOSE_MODAL: 'CLOSE_MODAL'
 };
 const initialState = {
-    opened: false,
-    callback: undefined,
-    template: undefined
+    open: false,
+    config : {}
 };
 
 export const actions = {
-    toggleModal: (store, callback, template) => {
-        console.log(store, callback, template);
+
+    refreshView: (store, config) => {
         return store.dispatch({
-            type: CONST.TOGGLE_MODAL,
+            type: CONST.REFRESH_VIEW,
             payload: {
-                callbackFn: callback,
-                templateFn: template
+                open: true,
+                config: config
+            }
+        })
+    },
+
+    openModal: (store, config) => {
+        return store.dispatch({
+            type: CONST.OPEN_MODAL,
+            payload: {
+                open: true,
+                config: config
+            }
+        })
+    },
+
+    closeModal: (store) => {
+        return store.dispatch({
+            type: CONST.CLOSE_MODAL,
+            payload: {
+                open: false,
+                config : {}
             }
         })
     }
@@ -24,11 +43,20 @@ export const actions = {
 
 export const reducer = (state = initialState, action) => {
     switch (action.type) {
-        case CONST.TOGGLE_MODAL:
+        case CONST.OPEN_MODAL:
             return {
-                opened: !state.opened,
-                templateFn: action.payload.templateFn,
-                callbackFn: action.payload.callbackFn
+                open: action.payload.open,
+                config: action.payload.config
+            };
+        case CONST.CLOSE_MODAL:
+            return {
+                open: action.payload.open,
+                config: action.payload.config
+            };
+        case CONST.REFRESH_VIEW:
+            return {
+                open: action.payload.open,
+                config: action.payload.config
             };
         default:
             return state;

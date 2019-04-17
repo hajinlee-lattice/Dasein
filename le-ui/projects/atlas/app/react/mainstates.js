@@ -6,7 +6,7 @@ const appState = {
 }
 
 const mainState = [appState];
-console.log(modulesStates);
+// console.log(modulesStates);
 modulesStates.forEach(moduleStates => {
   mainState.push(moduleStates);
 })
