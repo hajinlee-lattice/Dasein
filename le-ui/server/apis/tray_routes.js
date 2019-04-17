@@ -57,7 +57,7 @@ class TrayRouter {
         console.log('============> TRAY API ========================');
         this.router.use(function timeLog(req, res, next) {
             var plsUrl = this.proxies['/pls']['remote_host'];
-            var validationUrl = '/pls/cdl/s3import/template';
+            var validationUrl = '/pls/tenantconfig';
             const options = {
                 url: plsUrl + validationUrl,
                 method: 'GET',
