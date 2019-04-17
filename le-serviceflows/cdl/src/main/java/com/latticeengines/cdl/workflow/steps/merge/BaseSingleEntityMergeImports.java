@@ -132,10 +132,10 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        if (!entityMatch) {
-            step.setConfiguration(getConsolidateDataConfig(false, false, false));
-        } else {
+        if (entityMatch) {
             step.setConfiguration(getConsolidateDataConfig(false, false, false, null, InterfaceName.EntityId.name()));
+        } else {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false));
         }
         setTargetTable(step, batchStoreTablePrefix);
         return step;
@@ -145,10 +145,10 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, matchedTables);
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        if (!entityMatch) {
-            step.setConfiguration(getConsolidateDataConfig(false, false, false));
-        } else {
+        if (entityMatch) {
             step.setConfiguration(getConsolidateDataConfig(true, false, false, null, InterfaceName.EntityId.name()));
+        } else {
+            step.setConfiguration(getConsolidateDataConfig(false, false, false));
         }
         setTargetTable(step, batchStoreTablePrefix);
         return step;
@@ -168,7 +168,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     TransformationStepConfig diff(String inputTable, int newMaster) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(newMaster));
+        step.setInputSteps(Collections.singletonList(newMaster));
         addBaseTables(step, inputTable);
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DELTA);
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();

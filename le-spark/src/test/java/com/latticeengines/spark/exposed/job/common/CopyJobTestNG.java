@@ -8,13 +8,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class CopyTestNG extends SparkJobFunctionalTestNGBase {
+public class CopyJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
@@ -23,7 +22,6 @@ public class CopyTestNG extends SparkJobFunctionalTestNGBase {
         config.setSelectAttrs(Arrays.asList("Id", "Attr1", "Attr2", "Attr4"));
         config.setDropAttrs(Arrays.asList("Attr2", "Attr3"));
         config.setRenameAttrs(ImmutableMap.of("Attr1", "newAttr1"));
-        config.setAddTimestampAttrs(true);
         SparkJobResult result = runSparkJob(CopyJob.class, config);
         verifyResult(result);
     }
@@ -47,12 +45,9 @@ public class CopyTestNG extends SparkJobFunctionalTestNGBase {
     @Override
     protected Boolean verifySingleTarget(HdfsDataUnit tgt) {
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-//            System.out.println(record);
+            Assert.assertEquals(record.getSchema().getFields().size(), 2);
             Assert.assertNotNull(record.getSchema().getField("Id"), record.toString());
             Assert.assertNotNull(record.getSchema().getField("newAttr1"), record.toString());
-            Assert.assertNotNull(record.getSchema().getField(InterfaceName.CDLCreatedTime.name()), record.toString());
-            Assert.assertNotNull(record.getSchema().getField(InterfaceName.CDLUpdatedTime.name()), record.toString());
-            Assert.assertEquals(record.getSchema().getFields().size(), 4);
         });
         return true;
     }
