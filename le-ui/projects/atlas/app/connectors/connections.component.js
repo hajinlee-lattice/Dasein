@@ -15,10 +15,10 @@ import Connector from './connector.component';
 
 import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
-import TestSystemsComponent from './systesms-list.component';
+import SystemsListComponent from './systesms-list.component';
 import ReactMainContainer from "../react/react-main-container";
 
-export default class TestComponent extends Component {
+export default class ConnectionsComponent extends Component {
     constructor(props) {
         super(props);
         this.ConnectorsService = ReactRouter.getRouter().ngservices.ConnectorsService;
@@ -226,7 +226,7 @@ export default class TestComponent extends Component {
                         />
                     </div>
                 </LeToolBar>
-                <TestSystemsComponent></TestSystemsComponent>
+                <SystemsListComponent />
             </LeVPanel>
             </ReactMainContainer>
         );

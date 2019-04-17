@@ -11,7 +11,7 @@ import ConnectorService from './connectors.service';
 import LeVPanel from 'common/widgets/container/le-v-panel';
 import './systesms-list.component.scss';
 import { MEDIUM_GAP } from "../../../common/widgets/container/grid-layout.component";
-export default class TestSystemsComponent extends Component {
+export default class SystemsListComponent extends Component {
     constructor(props) {
         super(props);
         this.state = { connectors: [], loading: true };

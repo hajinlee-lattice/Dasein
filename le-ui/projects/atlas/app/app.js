@@ -41,7 +41,8 @@ angular
         'lp.sfdc.credentials',
         'lp.apiconsole',
         'lp.configureattributes',
-        'le.react.maincomponent'
+        'le.react.maincomponent',
+        'le.connectors'
     ])
     .run(HTTP.AxiosAuthorization)
     .run(StateTransitions)
