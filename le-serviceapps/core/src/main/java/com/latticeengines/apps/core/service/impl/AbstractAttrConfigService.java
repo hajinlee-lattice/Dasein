@@ -98,6 +98,30 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
+    public List<AttrConfig> getRenderedList(String propertyName, Boolean enabled) {
+        log.info("propertyNames are " + propertyName + ", enabled " + enabled);
+        List<Category> categories = Arrays.stream(Category.values()).filter(category -> !category.isHiddenFromUi())
+                        .collect(Collectors.toList());
+        final Tenant tenant = MultiTenantContext.getTenant();
+
+        List<AttrConfig> configs = new ArrayList<>();
+        List<Runnable> runnables = new ArrayList<>();
+        categories.forEach(category -> {
+            Runnable runnable = () -> {
+                MultiTenantContext.setTenant(tenant);
+                List<AttrConfig> attrConfigs = getRenderedList(category).stream()
+                        .filter(config -> enabled.equals(config.getPropertyFinalValue(propertyName, Boolean.class)))
+                        .collect(Collectors.toList());
+                configs.addAll(attrConfigs);
+            };
+            runnables.add(runnable);
+        });
+        // fork join execution
+        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+        return configs;
+    }
+
+    @Override
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
             List<String> propertyNames, boolean activeOnly) {
         ConcurrentMap<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new ConcurrentHashMap<>();
