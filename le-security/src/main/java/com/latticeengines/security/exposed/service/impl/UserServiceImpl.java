@@ -462,16 +462,16 @@ public class UserServiceImpl implements UserService {
         User oldUser = findByEmail(email);
         RegistrationResult result = new RegistrationResult();
         result.setValid(true);
-
+        result.setValidEmail(true);
         if (!emailValidator.isValid(email)) {
             result.setValid(false);
+            result.setValidEmail(false);
             result.setErrMsg("Not a valid email address");
             return result;
         }
 
         if (oldUser != null) {
             result.setValid(false);
-            result.setErrMsg("There is already a user in this tenant using the same email address.");
             if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);
             }
