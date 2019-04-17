@@ -65,7 +65,7 @@ public enum EntityType {
                 return entry;
             }
         }
-        throw new IllegalArgumentException(String.format("There is no corresponding EntityType for %s", feedTypeName));
+        return null;
     }
 
     public BusinessEntity getEntity() {
