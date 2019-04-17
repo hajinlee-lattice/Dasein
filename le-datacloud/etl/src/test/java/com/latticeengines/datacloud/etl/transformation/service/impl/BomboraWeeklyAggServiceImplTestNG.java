@@ -20,7 +20,7 @@ import com.latticeengines.datacloud.core.source.impl.BomboraDepivoted;
 import com.latticeengines.datacloud.core.source.impl.BomboraWeeklyAgg;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 
 public class BomboraWeeklyAggServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {

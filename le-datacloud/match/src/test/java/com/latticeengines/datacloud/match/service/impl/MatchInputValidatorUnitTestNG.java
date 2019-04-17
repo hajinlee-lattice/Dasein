@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -508,25 +506,6 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertFalse(failed, "Entity Match Column Selection Validation should have passed.");
     }
 
-
-    @Test(groups = "unit", dataProvider = "unrequiredAccountMatchKey", //
-            expectedExceptions = { IllegalArgumentException.class }, //
-            expectedExceptionsMessageRegExp = "For non-fetch-only mode Account match, at least one of following match key should be provided: "
-                    + "Duns, Domain, Name and SystemId")
-    public void testValidateAccountMatchKeysNonFetchOnly1(MatchKey[] keys) {
-        // Don't set any required match key
-        validateAccountMatchKey(keys, true, false);
-    }
-
-    @Test(groups = "unit", dataProvider = "requiredAccountMatchKey", //
-            expectedExceptions = { IllegalArgumentException.class }, //
-            expectedExceptionsMessageRegExp = "For non-fetch-only mode Account match, at least one of following match key should be provided: "
-                    + "Duns, Domain, Name and SystemId")
-    public void testValidateAccountMatchKeysNonFetchOnly2(MatchKey[] keys) {
-        // Set required match key, but don't map field
-        validateAccountMatchKey(keys, false, false);
-    }
-
     @Test(groups = "unit", dataProvider = "requiredAccountMatchKey")
     public void testValidateAccountMatchKeysNonFetchOnly3(MatchKey[] keys) {
         // Set required match key and map field. Should pass without exception
@@ -580,15 +559,6 @@ public class MatchInputValidatorUnitTestNG {
         input.setData(generateMockData(100, true));
 
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-    }
-
-    @DataProvider(name = "unrequiredAccountMatchKey")
-    public Object[][] dataUnrequiredAccountMatchKey() {
-        Set<MatchKey> requiredKeySet = new HashSet<>(Arrays.asList(REQUIRED_ENTITY_KEYS));
-        List<MatchKey> unrequiredKeys = Arrays.stream(MatchKey.values()) //
-                .filter(key -> !requiredKeySet.contains(key) && !MatchKeyUtils.isEntityReservedField(key.name())) //
-                .collect(Collectors.toList());
-        return getAllMatchKeyCombinations(unrequiredKeys.toArray(new MatchKey[unrequiredKeys.size()]));
     }
 
     @DataProvider(name = "requiredAccountMatchKey")

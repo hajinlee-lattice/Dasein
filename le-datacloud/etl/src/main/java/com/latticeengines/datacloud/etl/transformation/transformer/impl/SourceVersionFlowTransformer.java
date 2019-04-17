@@ -20,7 +20,7 @@ import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.dataflow.transformation.SourceVersionDiff;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMValidatorParams;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMValidatorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMValidatorConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(SourceVersionDiff.TRANSFORMER_NAME)

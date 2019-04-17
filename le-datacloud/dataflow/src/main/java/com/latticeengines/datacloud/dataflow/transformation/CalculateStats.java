@@ -42,7 +42,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 

@@ -32,7 +32,7 @@ import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;

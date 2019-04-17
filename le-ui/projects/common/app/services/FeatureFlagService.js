@@ -58,7 +58,6 @@ angular.module('common.services.featureflag', [
         // ====================
         // These are actually product flag (whether the customer has purchased the product or not)
         ENABLE_CDL: 'EnableCdl',
-        IMPORT_WITHOUT_IDS: 'ImportWithoutIds',
         ENABLE_ENTITY_MATCH: 'EnableEntityMatch',
         ALWAYS_ON_CAMPAIGNS: 'AlwaysOnCampaigns',
         // ====================
@@ -157,7 +156,6 @@ angular.module('common.services.featureflag', [
 
             // product flags
             SetFlag(flags.ENABLE_CDL, false);
-            SetFlag(flags.IMPORT_WITHOUT_IDS, true);
             SetFlag(flags.ENABLE_ENTITY_MATCH, false);
             SetFlag(flags.ALWAYS_ON_CAMPAIGNS, false);
 

@@ -17,7 +17,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsHQDunsFunction2;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 

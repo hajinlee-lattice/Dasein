@@ -19,8 +19,8 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.FileInputSourceConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.FileInputSourceConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 

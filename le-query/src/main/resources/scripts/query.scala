@@ -8,7 +8,8 @@ import org.apache.commons.io.IOUtils
 val sqlB64: String = lattice.params.get("SQL").asText()
 val saveResult = lattice.params.get("SAVE").asBoolean()
 
-val sql = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), Charset.forName("UTF-8"))
+val sql = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), //
+  Charset.forName("UTF-8"))
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"SQL Statement:")

@@ -11,8 +11,8 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddNotNullFieldFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DenseFieldsCountFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceDedupeWithDenseFieldsTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceDedupeWithDenseFieldsTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("sourceDedupeWithDenseFieldsFlow")

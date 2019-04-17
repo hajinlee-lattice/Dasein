@@ -18,8 +18,8 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedDedup;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedDedupConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedDedupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {

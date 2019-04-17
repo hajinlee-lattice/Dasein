@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForCo
 import com.latticeengines.domain.exposed.datacloud.check.OutOfCoverageForRowChkParam;
 import com.latticeengines.domain.exposed.datacloud.check.UnderPopulatedFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedChkConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterSeedChkConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(AccountMasterSeedChkFlow.DATAFLOW_BEAN_NAME)
 public class AccountMasterSeedChkFlow extends ConfigurableFlowBase<AccountMasterSeedChkConfig> {

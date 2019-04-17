@@ -183,7 +183,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
         }
     }
 
-    @DataProvider(name = "serdeTestData")
+    @DataProvider(name = "serdeTestData", parallel = true)
     private Object[][] provideSerdeTestData() {
         return new Object[][] { //
                 { NAME_COUNTRY, new String[0], new String[] { "Google", "United States" } }, //
@@ -201,7 +201,7 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
         };
     }
 
-    @DataProvider(name = "entityMatchEnvironment")
+    @DataProvider(name = "entityMatchEnvironment", parallel = true)
     private Object[][] entityMatchEnvironment() {
         return new Object[][] {
                 { EntityMatchEnvironment.STAGING },

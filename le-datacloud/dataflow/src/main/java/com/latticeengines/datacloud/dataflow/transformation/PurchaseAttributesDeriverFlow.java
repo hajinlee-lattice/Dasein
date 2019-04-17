@@ -13,8 +13,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.AttrHasPurchasedFu
 import com.latticeengines.dataflow.runtime.cascading.propdata.AttrMarginFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PurchaseAttributesDeriverConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PurchaseAttributesDeriverConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 

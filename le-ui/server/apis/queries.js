@@ -240,7 +240,7 @@ const Queries = {
                   },
                   max_return: {
                       type: "integer",
-                      value: 25
+                      value: 200
                   }
               }
           };

@@ -25,8 +25,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.TypeBatchConvertFu
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMCleanerParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMCleanerParameters.CleanOpt;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;

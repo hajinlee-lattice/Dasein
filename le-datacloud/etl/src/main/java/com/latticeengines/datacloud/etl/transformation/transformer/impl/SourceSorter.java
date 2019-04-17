@@ -41,7 +41,7 @@ import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SorterParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SorterConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)

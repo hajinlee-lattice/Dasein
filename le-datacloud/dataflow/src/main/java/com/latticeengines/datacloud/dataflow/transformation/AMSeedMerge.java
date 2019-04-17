@@ -21,7 +21,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.AMSeedMergeWithout
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;

@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterRebuild
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSourceParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;

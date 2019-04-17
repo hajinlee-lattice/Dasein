@@ -25,8 +25,8 @@ import com.latticeengines.datacloud.dataflow.transformation.AccMastrManChkReport
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccMastrManChkReportConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccMastrManChkReportConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AccMastrManChkReportGenerateTestNG

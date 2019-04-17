@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 
 public abstract class TransformationFlowBase<C extends TransformationConfiguration, P extends TransformationFlowParameters>
         extends TypesafeDataFlowBuilder<P> {

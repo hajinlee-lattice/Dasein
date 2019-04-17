@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceSeedFileMergeTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceSeedFileMergeTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component("sourceSeedFileMergeFlow")
 public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFileMergeTransformerConfig> {

@@ -22,7 +22,7 @@ import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.dataflow.transformation.Diff;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiffferParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DifferConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DifferConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 

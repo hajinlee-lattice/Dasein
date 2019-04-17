@@ -56,8 +56,8 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters.Attribute;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProfileConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 

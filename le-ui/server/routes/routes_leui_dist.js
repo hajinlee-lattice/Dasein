@@ -17,6 +17,7 @@ module.exports = [{
 },{
     path: '/projects/login',
     html5mode: true,
+    xframe_options: 'deny',
     pages: {
         '/login':'/dist/indexwp.html',
         '/login/form':'/dist/indexwp.html',

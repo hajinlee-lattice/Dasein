@@ -128,8 +128,10 @@ public class UserResource {
         RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
         response.setResult(result);
         if (!result.isValid()) {
-            httpResponse.setStatus(400);
-            response.setErrors(Collections.singletonList(result.getErrMsg()));
+            if (!result.isValidEmail()) {
+                httpResponse.setStatus(400);
+                response.setErrors(Collections.singletonList(result.getErrMsg()));
+            }
             return response;
         }
 

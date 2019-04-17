@@ -14,7 +14,7 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.cdl.RemoveOrphanTxfmr;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 

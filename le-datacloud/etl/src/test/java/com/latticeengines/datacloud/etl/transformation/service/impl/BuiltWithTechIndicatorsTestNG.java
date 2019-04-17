@@ -25,8 +25,8 @@ import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class BuiltWithTechIndicatorsTestNG

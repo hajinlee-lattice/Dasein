@@ -20,9 +20,6 @@ public class CopyConfig extends SparkJobConfig {
     @JsonProperty("RenameAttrs")
     private Map<String, String> renameAttrs;
 
-    @JsonProperty("AddTimestampAttrs")
-    private boolean addTimestampAttrs;
-
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -51,13 +48,5 @@ public class CopyConfig extends SparkJobConfig {
 
     public void setRenameAttrs(Map<String, String> renameAttrs) {
         this.renameAttrs = renameAttrs;
-    }
-
-    public boolean isAddTimestampAttrs() {
-        return addTimestampAttrs;
-    }
-
-    public void setAddTimestampAttrs(boolean addTimestampAttrs) {
-        this.addTimestampAttrs = addTimestampAttrs;
     }
 }

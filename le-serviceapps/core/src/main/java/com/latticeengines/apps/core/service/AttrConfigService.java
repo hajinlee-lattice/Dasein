@@ -29,4 +29,6 @@ public interface AttrConfigService {
 
     void removeAttrConfigForEntity(String tenantId, BusinessEntity entity);
 
+    List<AttrConfig> getRenderedList(String propertyName, Boolean enabled);
+
 }

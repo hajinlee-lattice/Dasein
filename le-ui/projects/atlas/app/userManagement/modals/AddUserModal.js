@@ -112,14 +112,14 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
             return false;
         }
 
-        if (_.contains($scope.emails, $scope.user.Email)) {
+        if (_.includes($scope.emails, $scope.user.Email)) {
             $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_CONFLICT_EMAIL");
             return false;
         }
 
         var targetLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel);
 
-        // only lattice email can be assigned to levels higher than INTERNAL_USER
+//         only lattice email can be assigned to levels higher than INTERNAL_USER
         if (targetLevel.ordinal === 0 && isLatticeEmail($scope.user.Email)) {
             targetLevel = RightsUtility.accessLevel.INTERNAL_USER;
             $scope.user.AccessLevel = targetLevel.name;

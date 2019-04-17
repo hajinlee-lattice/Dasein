@@ -31,8 +31,8 @@ import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedReport;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedMarkerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase {

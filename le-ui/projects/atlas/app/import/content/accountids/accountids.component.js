@@ -4,7 +4,7 @@ angular.module('lp.import.wizard.accountids', [])
     ResourceUtility, FeatureFlagService, ImportWizardStore, FieldDocument, UnmappedFields
 ) {
     var vm = this;
-    
+
     var entityMatchEnabled = ImportWizardStore.entityMatchEnabled;
 
     angular.extend(vm, {
@@ -23,6 +23,7 @@ angular.module('lp.import.wizard.accountids', [])
         mappedFieldMap: {
             account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId')
         },
+        entityMatchEnabled: entityMatchEnabled,
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
@@ -32,7 +33,6 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.init = function() {
         var flags = FeatureFlagService.Flags();
-        vm.importWithoutIds = FeatureFlagService.FlagIsEnabled(flags.IMPORT_WITHOUT_IDS);
 
         vm.UnmappedFields = UnmappedFields;
         ImportWizardStore.setUnmappedFields(UnmappedFields);

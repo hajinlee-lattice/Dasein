@@ -26,8 +26,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProfileConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;

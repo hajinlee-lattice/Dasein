@@ -23,9 +23,9 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectFromManualMatchConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectFromManualMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class DunsRedirectFromManualMatchTestNG

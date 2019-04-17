@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKe
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class AbstractTransformationService<T extends TransformationConfiguration>

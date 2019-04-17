@@ -69,6 +69,7 @@ public class UpsertTestNG extends SparkJobFunctionalTestNGBase {
         return new Object[][] { //
                 { getJoinByConfig(),  getJoinByVerifier() }, //
                 { getAttr2FromLhsConfig(), getAttr2FromLhsByVerifier() }, //
+                { getNotOverwriteNullConfig(), getNotOverwriteNullVerifier() } //
         };
     }
 
@@ -162,6 +163,58 @@ public class UpsertTestNG extends SparkJobFunctionalTestNGBase {
                     case 3:
                         Assert.assertEquals(attr1, "23", record.toString());
                         Assert.assertEquals(attr2, Long.valueOf(3), record.toString());
+                        Assert.assertEquals(attr3, Boolean.FALSE, record.toString());
+                        break;
+                    case 4:
+                        Assert.assertEquals(attr1, "24", record.toString());
+                        Assert.assertEquals(attr2, Long.valueOf(4), record.toString());
+                        Assert.assertNull(attr3, record.toString());
+                        break;
+                    case 5:
+                        Assert.assertEquals(attr1, "25", record.toString());
+                        Assert.assertEquals(attr2, Long.valueOf(-5), record.toString());
+                        Assert.assertEquals(attr3, Boolean.FALSE, record.toString());
+                        break;
+                    default:
+                        Assert.fail("Should not see a record with id " + id + ": " + record.toString());
+                }
+            }
+
+            @Override
+            public void verifyCount(int count) {
+
+            }
+        };
+    }
+
+    private UpsertConfig getNotOverwriteNullConfig() {
+        UpsertConfig config = UpsertConfig.joinBy("Id");
+        config.setNotOverwriteByNull(true);
+        return config;
+    }
+
+    private UpsertResultVerifier getNotOverwriteNullVerifier() {
+        return new UpsertResultVerifier() {
+            @Override
+            public void verifyRecord(GenericRecord record) {
+                int id = (int) record.get("Id");
+                String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
+                Long attr2 = record.get("Attr2") == null ? null : (long) record.get("Attr2");
+                Boolean attr3 = record.get("Attr3") == null ? null : (boolean) record.get("Attr3");
+                switch (id) {
+                    case 1:
+                        Assert.assertEquals(attr1, "1", record.toString());
+                        Assert.assertEquals(attr2, Long.valueOf(1), record.toString());
+                        Assert.assertNull(attr3, record.toString());
+                        break;
+                    case 2:
+                        Assert.assertEquals(attr1, "22", record.toString());
+                        Assert.assertNull(attr2, record.toString());
+                        Assert.assertEquals(attr3, Boolean.TRUE, record.toString());
+                        break;
+                    case 3:
+                        Assert.assertEquals(attr1, "23", record.toString());
+                        Assert.assertEquals(attr2, Long.valueOf(-3), record.toString());
                         Assert.assertEquals(attr3, Boolean.FALSE, record.toString());
                         break;
                     case 4:

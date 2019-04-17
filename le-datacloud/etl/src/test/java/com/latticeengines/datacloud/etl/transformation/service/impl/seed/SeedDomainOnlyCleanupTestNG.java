@@ -22,8 +22,8 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.seed.SeedDomainOnlyCleanup;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.seed.SeedDomainOnlyCleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SeedDomainOnlyCleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class SeedDomainOnlyCleanupTestNG extends PipelineTransformationTestNGBase {

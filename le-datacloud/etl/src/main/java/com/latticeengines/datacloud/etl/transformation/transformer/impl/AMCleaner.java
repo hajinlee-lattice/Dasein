@@ -20,8 +20,8 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMCleanerParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMCleanerParameters.CleanOpt;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMCleanerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMCleanerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)

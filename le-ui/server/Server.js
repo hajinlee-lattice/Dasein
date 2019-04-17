@@ -539,6 +539,10 @@ class Server {
                                 }
                             }
                             */
+                           if (route.xframe_options) {
+                               res.setHeader('X-Frame-Options', route.xframe_options);
+                           }
+
                         res.render(dir + "/" + route.pages[page]);
                     });
                 });

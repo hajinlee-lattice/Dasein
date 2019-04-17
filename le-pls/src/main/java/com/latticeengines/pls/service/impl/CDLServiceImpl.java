@@ -317,27 +317,28 @@ public class CDLServiceImpl implements CDLService {
             throw new RuntimeException("Tenant " + customerSpace //
                     + " does not have a dropbox.");
         }
-
-        S3ImportTemplateDisplay display = null;
         if (CollectionUtils.isEmpty(folderNames)) {
             log.info(String.format("Empty path in s3 folders for tenant %s in", customerSpace));
         }
         for (String folderName : folderNames) {
-            display = new S3ImportTemplateDisplay();
             DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
             if (task == null) {
-                display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
-                        folderName));
-                display.setExist(Boolean.FALSE);
                 EntityType entityType =
                         EntityType.fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
-                display.setTemplateName(entityType.getDefaultFeedTypeName());
-                display.setObject(entityType.getDisplayName());
-                display.setFeedType(folderName);
-                display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
-                display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
-                templates.add(display);
+                if (entityType != null) {
+                    S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
+                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                            folderName));
+                    display.setExist(Boolean.FALSE);
+                    display.setTemplateName(entityType.getDefaultFeedTypeName());
+                    display.setObject(entityType.getDisplayName());
+                    display.setFeedType(folderName);
+                    display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
+                    display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
+                    templates.add(display);
+                }
             } else {
+                S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
                 display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         folderName));
                 display.setExist(Boolean.TRUE);

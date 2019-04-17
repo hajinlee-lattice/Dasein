@@ -20,8 +20,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PivotBuiltWithConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotBuiltWithConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(BEAN_NAME)
 public class PivotBuiltWith extends ConfigurableFlowBase<PivotBuiltWithConfig> {

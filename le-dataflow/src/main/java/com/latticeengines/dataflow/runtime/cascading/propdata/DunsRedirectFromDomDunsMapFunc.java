@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

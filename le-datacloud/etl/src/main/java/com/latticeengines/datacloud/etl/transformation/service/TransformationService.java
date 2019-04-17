@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 
 public interface TransformationService<T extends TransformationConfiguration> {
 

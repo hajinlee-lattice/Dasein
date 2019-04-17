@@ -18,9 +18,9 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.AddKeyPartitionStr
 import com.latticeengines.dataflow.runtime.cascading.propdata.ManualSeedKeyPartitionRowFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PrepareDunsRedirectManualMatchConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PrepareDunsRedirectManualMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;

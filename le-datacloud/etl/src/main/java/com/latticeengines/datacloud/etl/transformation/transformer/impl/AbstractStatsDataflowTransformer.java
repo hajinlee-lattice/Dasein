@@ -21,8 +21,8 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsPa
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterStatisticsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterStatisticsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;

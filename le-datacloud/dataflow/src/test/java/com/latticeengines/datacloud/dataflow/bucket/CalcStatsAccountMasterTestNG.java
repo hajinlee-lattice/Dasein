@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CalculateStatsConfig;
 
 public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 

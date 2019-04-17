@@ -18,6 +18,8 @@ public interface CDLAttrConfigProxy {
 
     AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName);
 
+    AttrConfigRequest getAttrConfigByProperty(String customerSpace, String propertyName, boolean enabled);
+
     AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);
 
     AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);

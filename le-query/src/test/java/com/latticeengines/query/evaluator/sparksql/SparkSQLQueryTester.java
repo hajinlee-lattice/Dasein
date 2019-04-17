@@ -49,9 +49,17 @@ public class SparkSQLQueryTester {
     private LivySession session;
     private int reuseLivySession = 0; // set the session id to reuse.
 
-    private AttributeRepository attrRepo;
+    protected AttributeRepository attrRepo;
     protected Map<String, String> tblPathMap;
     protected CustomerSpace customerSpace;
+
+    public AttributeRepository getAttrRepo() {
+        return attrRepo;
+    }
+
+    public CustomerSpace getCustomerSpace() {
+        return customerSpace;
+    }
 
     public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
         this.customerSpace = customerSpace;
@@ -121,4 +129,5 @@ public class SparkSQLQueryTester {
         });
         return resultData;
     }
+
 }

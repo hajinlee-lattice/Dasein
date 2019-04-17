@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.ams.DomainOwnershipConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.DomainOwnershipConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationMessage;

@@ -2,9 +2,9 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public abstract class ConfigurableFlowBase<T extends TransformerConfig>
        extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters>

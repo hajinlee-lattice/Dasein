@@ -31,11 +31,11 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunctio
 import com.latticeengines.dataflow.runtime.cascading.propdata.ValueToRangeMappingFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.IDStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.IDStrategy;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;

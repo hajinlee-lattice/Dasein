@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(Merge.DATAFLOW_BEAN_NAME)
 public class Merge extends ConfigurableFlowBase<TransformerConfig> {

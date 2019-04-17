@@ -79,9 +79,9 @@ public class ActionResource {
         actionService.patchOwnerIdByPids(ownerId, pids);
     }
 
-    @GetMapping(value = "/actions")
+    @PostMapping(value = "/actions")
     @ApiOperation(value = "get Actions By TrackingPids")
-    public List<Action> getActionByjobPids(@PathVariable String customerSpace, @RequestParam List<Long> jobPids) {
+    public List<Action> getActionByjobPids(@PathVariable String customerSpace, @RequestBody List<Long> jobPids) {
         return actionService.getActionsByJobPids(jobPids);
     }
 

@@ -6,8 +6,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SeedDomainDunsCleanupConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SeedDomainDunsCleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(SeedDomainDunsCleanup.DATAFLOW_BEAN_NAME)
 public class SeedDomainDunsCleanup extends ConfigurableFlowBase<SeedDomainDunsCleanupConfig> {

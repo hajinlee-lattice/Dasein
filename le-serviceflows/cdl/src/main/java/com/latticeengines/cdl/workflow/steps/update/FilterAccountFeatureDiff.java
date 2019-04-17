@@ -61,7 +61,6 @@ public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConf
     @Override
     protected CopyConfig configureJob(ProcessAccountStepConfiguration stepConfiguration) {
         CopyConfig config = new CopyConfig();
-        config.setAddTimestampAttrs(false);
 
         String enrichedDiffTableName = getStringValueFromContext(ENRICHED_ACCOUNT_DIFF_TABLE_NAME);
         Table enrichedDiffTable = metadataProxy.getTable(customerSpace.toString(), enrichedDiffTableName);
