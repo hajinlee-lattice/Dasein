@@ -15,8 +15,8 @@ import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CopierParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CopierConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(TRANSFORMER_NAME)
 public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, CopierParameters> {

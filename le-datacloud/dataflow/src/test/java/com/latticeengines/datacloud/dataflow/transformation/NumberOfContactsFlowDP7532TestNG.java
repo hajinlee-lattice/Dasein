@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.NumberOfContactsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.NumberOfContactsConfig;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class NumberOfContactsFlowDP7532TestNG extends DataCloudDataFlowFunctionalTestNGBase {

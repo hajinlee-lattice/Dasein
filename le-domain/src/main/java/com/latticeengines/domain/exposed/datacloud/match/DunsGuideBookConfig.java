@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public class DunsGuideBookConfig extends TransformerConfig {
     // Lower value, higher book priority

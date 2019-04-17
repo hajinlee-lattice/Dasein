@@ -31,8 +31,8 @@ import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTran
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.am.AMDecoder;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.am.AMDecoderConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.am.AMDecoderConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 

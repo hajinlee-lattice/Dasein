@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PrepareDunsRedirectManualMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PrepareDunsRedirectManualMatchConfig;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

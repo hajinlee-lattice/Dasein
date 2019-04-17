@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ValidationConfig;
 
 public class SourceValidationFlowParameters extends TransformationFlowParameters {
 

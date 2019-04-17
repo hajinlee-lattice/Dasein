@@ -16,8 +16,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.TransactionAggrega
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransactionAggregateConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;

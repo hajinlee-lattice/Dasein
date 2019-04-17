@@ -14,8 +14,8 @@ import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TblDrivenFuncConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TblDrivenTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TblDrivenFuncConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TblDrivenTransformerConfig;
 
 public abstract class TblDrivenFlowBase<T extends TblDrivenTransformerConfig, E extends TblDrivenFuncConfig>
        extends ConfigurableFlowBase<T> {

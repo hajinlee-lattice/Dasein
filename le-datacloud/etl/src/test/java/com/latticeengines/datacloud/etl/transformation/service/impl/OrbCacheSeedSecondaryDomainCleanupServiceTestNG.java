@@ -22,10 +22,10 @@ import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.OrbCacheSeedSecondaryDomainAccumulationTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.OrbCacheSeedSecondaryDomainCleanupTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.OrbCacheSeedSecondaryDomainMarkerTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecondaryDomainAccumulationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecondaryDomainCleanupTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecondaryDomainMarkerTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG

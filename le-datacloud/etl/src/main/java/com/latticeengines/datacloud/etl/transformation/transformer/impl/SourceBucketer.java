@@ -32,8 +32,8 @@ import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BucketEncodeConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.BucketedAttribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;

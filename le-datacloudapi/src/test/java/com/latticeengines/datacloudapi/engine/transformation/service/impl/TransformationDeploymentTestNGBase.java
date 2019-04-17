@@ -26,7 +26,7 @@ import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineDeploy
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 
 public abstract class TransformationDeploymentTestNGBase<T extends TransformationConfiguration>
         extends PropDataEngineDeploymentTestNGBase {

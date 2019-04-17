@@ -15,7 +15,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CleanupConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CleanupTestNG extends DataCloudDataFlowFunctionalTestNGBase {

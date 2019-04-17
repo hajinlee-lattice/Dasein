@@ -20,8 +20,8 @@ import com.latticeengines.datacloud.dataflow.transformation.LatticeIdRefreshFlow
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.LatticeIdStrategyEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.LatticeIdRefreshFlowParameter;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdRefreshConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.LatticeIdRefreshConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(LatticeIdAssignTransformer.TRANSFORMER_NAME)
 public class LatticeIdAssignTransformer

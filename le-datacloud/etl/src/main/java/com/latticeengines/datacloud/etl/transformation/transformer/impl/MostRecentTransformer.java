@@ -16,8 +16,8 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.dataflow.transformation.MostRecentFlow;
 import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MostRecentConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MostRecentConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(MostRecentFlow.TRANSFORMER_NAME)

@@ -12,16 +12,16 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.Join;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.JoinConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.JoinConfig.JoinType;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.JoinConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.JoinConfig.JoinType;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class SourceJoinTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(SourceJoinTestNG.class);

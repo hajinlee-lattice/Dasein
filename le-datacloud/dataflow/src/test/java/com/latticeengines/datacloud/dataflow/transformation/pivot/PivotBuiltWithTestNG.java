@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PivotBuiltWithConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotBuiltWithConfig;
 
 public class PivotBuiltWithTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 

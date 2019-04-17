@@ -10,8 +10,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceededCountCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccMastrLookupChkConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccMastrLookupChkConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(AccMasterLookupChkFlow.DATAFLOW_BEAN_NAME)
 public class AccMasterLookupChkFlow extends ConfigurableFlowBase<AccMastrLookupChkConfig> {

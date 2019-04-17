@@ -25,8 +25,8 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMCleaner;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMCleanerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMCleanerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {

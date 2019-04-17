@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.source.FixedIntervalSource;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 
 public abstract class FixedIntervalTransformationServiceTestNGBase<T extends TransformationConfiguration>
         extends TransformationServiceImplTestNGBase<T> {
