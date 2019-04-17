@@ -1,14 +1,58 @@
+import {TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING} from './le-modal.utils';
 const CONST = {
     REFRESH_VIEW: 'REFRESH_VIEW',
     OPEN_MODAL: 'OPEN_MODAL',
     CLOSE_MODAL: 'CLOSE_MODAL'
 };
+
 const initialState = {
     open: false,
-    config : {}
+    config: {}
 };
 
 export const actions = {
+
+    error: (store, config) => {
+        config.type = TYPE_ERROR;
+        return store.dispatch({
+            type: CONST.OPEN_MODAL,
+            payload: {
+                open: true,
+                config: config
+            }
+        })
+    },
+    info: (store, config = {}) => {
+        config.type = TYPE_INFO;
+        return store.dispatch({
+            type: CONST.OPEN_MODAL,
+            payload: {
+                open: true,
+                config: config
+            }
+        })
+    },
+
+    success: (store, config) => {
+        config.type = TYPE_SUCCESS;
+        return store.dispatch({
+            type: CONST.OPEN_MODAL,
+            payload: {
+                open: true,
+                config: config
+            }
+        })
+    },
+    warning: (store, config) => {
+        config.type = TYPE_WARNING;
+        return store.dispatch({
+            type: CONST.OPEN_MODAL,
+            payload: {
+                open: true,
+                config: config
+            }
+        })
+    },
 
     refreshView: (store, config) => {
         return store.dispatch({
@@ -35,7 +79,7 @@ export const actions = {
             type: CONST.CLOSE_MODAL,
             payload: {
                 open: false,
-                config : {}
+                config: {}
             }
         })
     }

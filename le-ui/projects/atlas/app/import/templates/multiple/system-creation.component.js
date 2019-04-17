@@ -116,7 +116,7 @@ export default class SystemCreationComponent extends Component {
                                 return(
                                     <p>TEST</p>
                                 );
-                            }}
+                            }, oneButton: true}
                             modalActions.openModal(store, config);
                             // ReactRouter.getStateService().go('templateslist');
                             // alert('Call APIS');

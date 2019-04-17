@@ -1,3 +1,5 @@
+@import '../colors.scss';
+
 .le_modal {
     display: none;
     position: fixed;
@@ -64,6 +66,7 @@
                 font-size: 20px;
                 width: 90%;
                 padding: 10px 1.2em;
+                padding-left: 0;
                 display: flex;
                 align-items: center;
   
@@ -82,6 +85,55 @@
                   height: 1.6em;
                   white-space: nowrap;
                 }
+            }
+
+            &.modal-error{
+              color: $pearl-white;
+              background-color: $ruby-two;
+              .ico-container{
+                background-color: $ruby-two;
+                .title-icon::after{
+                  content: "\f071";
+                  font-family: FontAwesome;
+                }
+              }
+            }
+
+            &.modal-info{
+              @extend .modal-error;
+              background-color: $saphire-three;
+              .ico-container{
+                background-color: $saphire-three;
+                .title-icon::after{
+                  content: "\f05a";
+                  font-family: FontAwesome;
+                }
+              }
+              
+            }
+
+            &.modal-success{
+              @extend .modal-error;
+              background-color: $jade;
+              .ico-container{
+                background-color: $jade;
+                .title-icon::after{
+                  content: "\f05a";
+                  font-family: FontAwesome;
+                }
+              }
+            }
+
+            &.modal-warning{
+              @extend .modal-error;
+              background-color: $amber-two;
+              .ico-container{
+                background-color: $amber-two;
+                .title-icon::after{
+                  content: "\f071";
+                  font-family: FontAwesome;
+                }
+              }
             }
         }
         .le-modal-body {
@@ -136,40 +188,12 @@
             align-items: center;
             justify-content: center;
             padding: 0.75em 2em;
-            // min-height: 4em;
-  
-            // button {
-            //   width: 50%;
-            //   padding: 1em 0;
-            //   margin: 1em;
-  
-            //   &:last-child {
-            //     margin-left: 0;
-            //   }
-  
-            //   &:first-child {
-            //     margin-right: 0;
-            //   }
-  
-            //   &.white-button:hover {
-            //       border-color: #457EBA;
-            //   }
-  
-            //   &.white-button:active {
-            //       border-color: #999;
-            //   }
-            // }
         }
     }
     
     &.opened:last-child {
         display: block;
         opacity: 1;
-        //animation-name: fadeInOpacity;
-        //animation-iteration-count: 1;
-        //animation-timing-function: ease-in;
-        //animation-duration: .12s;
-        
     }
   
     &.closed {
