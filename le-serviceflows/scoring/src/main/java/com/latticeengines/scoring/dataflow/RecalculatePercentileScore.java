@@ -49,31 +49,26 @@ public class RecalculatePercentileScore extends TypesafeDataFlowBuilder<Recalcul
 
         Node mergedScoreCount = mergeCount(inputTable, modelGuidFieldName, scoreFieldName);
 
-        Map<String, Node> nodes = nodeSplitter.split(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
-        Node merged = null;
-        for (Map.Entry<String, Node> entry : nodes.entrySet()) {
-            String modelGuid = entry.getKey();
-            Node node = entry.getValue();
-            boolean isNotEV = ScoreResultField.RawScore.displayName.equals(originalScoreFieldMap.get(modelGuid));
-            log.info(String.format("isNotEV = %s, modelGuid = %s", isNotEV, modelGuid));
-            Node output = null;
-            if (isNotEV) {
-                output = node.groupByAndBuffer(new FieldList(modelGuidFieldName), new FieldList(rawScoreFieldName),
-                        new CalculatePercentile(new Fields(mergedScoreCount.getFieldNames().toArray(new String[0])),
-                                minPct, maxPct, scoreFieldName, SCORE_COUNT_FIELD_NAME, rawScoreFieldName),
-                        true, new ArrayList<>(mergedScoreCount.getSchema()));
-            } else {
-                output = node.sort(rawScoreFieldName, true);
-            }
-
-            if (merged == null) {
-                merged = output;
-            } else {
-                merged = merged.merge(output);
-            }
+        Node[] nodes = nodeSplitter.splitEv(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
+        Node model = null, evModel = null;
+        if (nodes[0] != null) {
+            model = nodes[0].groupByAndBuffer(new FieldList(modelGuidFieldName), new FieldList(rawScoreFieldName),
+                    new CalculatePercentile(new Fields(mergedScoreCount.getFieldNames().toArray(new String[0])), minPct,
+                            maxPct, scoreFieldName, SCORE_COUNT_FIELD_NAME, rawScoreFieldName),
+                    true, new ArrayList<>(mergedScoreCount.getSchema()));
+        }
+        if (nodes[1] != null) {
+            evModel = nodes[1].sort(Arrays.asList(modelGuidFieldName, rawScoreFieldName), true);
         }
 
-        return merged.retain(originalFields);
+        Node output = model;
+        if (model != null && evModel != null) {
+            output = model.merge(evModel);
+        } else if (model == null) {
+            output = evModel;
+        }
+        return output.retain(originalFields);
+
     }
 
     private Node mergeCount(Node node, String modelGuidFieldName, String scoreFieldName) {

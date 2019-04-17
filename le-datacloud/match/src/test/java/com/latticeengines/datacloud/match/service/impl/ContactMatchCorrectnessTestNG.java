@@ -47,7 +47,6 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
     private static final Logger log = LoggerFactory.getLogger(ContactMatchCorrectnessTestNG.class);
 
-    // [ contact fields + account fields ]
     private static final String[] DEFAULT_FIELDS = new String[] {
             // contact fields (email used in both)
             CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(),
