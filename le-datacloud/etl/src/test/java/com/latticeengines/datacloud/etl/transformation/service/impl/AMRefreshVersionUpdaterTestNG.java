@@ -1,11 +1,15 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -79,7 +83,7 @@ public class AMRefreshVersionUpdaterTestNG
     @Override
     protected String getPathToUploadBaseData() {
         return hdfsPathBuilder
-                .constructSnapshotDir(source.getSourceName(), "2019-04-16_23-33-18_UTC").toString();
+                .constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
@@ -87,7 +91,7 @@ public class AMRefreshVersionUpdaterTestNG
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("WeeklyRefreshVersionUpdate");
-            configuration.setVersion("2019-04-16_23-33-18_UTC");
+            configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSourcesStep1 = new ArrayList<String>();
@@ -95,6 +99,7 @@ public class AMRefreshVersionUpdaterTestNG
             step1.setBaseSources(baseSourcesStep1);
             step1.setTransformer(AMRefreshVersionUpdater.TRANSFORMER_NAME);
             step1.setTargetSource(source.getSourceName());
+
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
             configuration.setSteps(steps);
@@ -125,6 +130,18 @@ public class AMRefreshVersionUpdaterTestNG
             if (iteration1) {
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
+                if (iteration1) {
+                    String targetSrcPath = "/Pods/LDCDEV_AMRefreshVersionUpdater/Services/PropData/Sources/"
+                            + source + "/Snapshot/" + hdfsSourceEntityMgr.getCurrentVersion(source)
+                            + "/_SUCCESS";
+                    FileSystem fs;
+                    try {
+                        fs = FileSystem.get(new Configuration());
+                        fs.delete(new Path(targetSrcPath), true);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
             if (iteration2) {
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "google.com"));
