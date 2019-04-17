@@ -28,12 +28,12 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -117,8 +117,8 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         String productTableName = getTableName(TableRoleInCollection.ConsolidatedProduct,
                 request.getArtifactVersion());
 
-        AttrConfigRequest attrRequest = cdlAttrConfigProxy.getAttrConfigByCategory(customerSpace,
-                Category.ACCOUNT_ATTRIBUTES.name());
+        AttrConfigRequest attrRequest = cdlAttrConfigProxy.getAttrConfigByProperty(customerSpace,
+                ColumnSelection.Predefined.Enrichment.getName(), true);
         if (CollectionUtils.isEmpty(attrRequest.getAttrConfigs())) {
             return null;
         }

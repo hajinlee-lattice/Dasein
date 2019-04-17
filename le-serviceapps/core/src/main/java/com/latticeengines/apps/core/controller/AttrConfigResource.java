@@ -68,6 +68,18 @@ public class AttrConfigResource {
         return request;
     }
 
+    @GetMapping(value = "/properties/{propertyName}")
+    @ResponseBody
+    @ApiOperation("get cdl attribute config request by property")
+    public AttrConfigRequest getAttrConfigByProperty(@PathVariable String customerSpace,
+            @PathVariable String propertyName,
+            @RequestParam(value = "enabled", required = false, defaultValue = "true") Boolean enabled) {
+        AttrConfigRequest request = new AttrConfigRequest();
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(propertyName, enabled);
+        request.setAttrConfigs(attrConfigs);
+        return request;
+    }
+
     @PostMapping(value = "/overview")
     @ResponseBody
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
