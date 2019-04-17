@@ -1,10 +1,10 @@
 <div class="import-accountid container file-import-content">
     <div class="header">
         <h2>Account ID</h2>
-        <p ng-if="!vm.importWithoutIds">
+        <p ng-if="!vm.entityMatchEnabled">
             Select your unique ID to de-duplicate your account records.
         </p>
-        <p ng-if="vm.importWithoutIds">
+        <p ng-if="vm.entityMatchEnabled">
             Select your unique ID to be the primary match key for your accounts update in Atlas.
         </p>
     </div>
@@ -18,8 +18,8 @@
                         ng-model="vm.fieldMapping.account"
                         ng-init="vm.checkValidDelay(form)"
                         ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
-                        ng-required="!vm.importWithoutIds"
-                        ng-class="{'required': !vm.importWithoutIds}">
+                        ng-required="!vm.entityMatchEnabled"
+                        ng-class="{'required': !vm.entityMatchEnabled}">
                         <option value="" hidden disabled>-- Unmapped Field --</option>
                         <option ng-repeat="AvailableField in vm.AvailableFields" 
                                 value="{{AvailableField.userField}}" 
