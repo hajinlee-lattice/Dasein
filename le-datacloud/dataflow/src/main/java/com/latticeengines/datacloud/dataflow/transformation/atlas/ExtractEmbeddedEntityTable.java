@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.E
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,16 +35,16 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
  * table/source with necessary match key fields and merge to the entity's batch
  * store
  *
- * InputSource1: EntityIds table (EntityName, EntityId) 
- * eg. In Contact match, we create this table source with EntityName = 'Account' 
+ * InputSource1: EntityIds table (EntityName, EntityId)
+ * eg. In Contact match, we create this table source with EntityName = 'Account'
  * and EntityId = EntityId of all the newly created Accounts in Contact match
  * Prerequisites: EntityId is guaranteed to be unique
  *
  * InputSource2: EmbeddedEntity table
- * eg. Result table of Contact match with AllocateId mode. 
+ * eg. Result table of Contact match with AllocateId mode.
  * Contact input/match result fields + AccountId (Account EntityId) + Account input fields
- * 
- * Join InputSource1 with InputSource2 by entity's EntityId, 
+ *
+ * Join InputSource1 with InputSource2 by entity's EntityId,
  * then retain necessary match key fields
  */
 @Component(ExtractEmbeddedEntityTable.DATAFLOW_BEAN_NAME)
@@ -57,14 +58,14 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
     // EntityId fields are not included)
     private static final Map<String, List<String>> REQUIRED_FLDS = ImmutableMap.of(
             BusinessEntity.Account.name(),
-            Arrays.asList(InterfaceName.LatticeAccountId.name())
+            Collections.singletonList(InterfaceName.LatticeAccountId.name())
             );
 
     // Entity -> Optional fields from embedded entity table (Configurable
     // SystemId fields are not included)
     private static final Map<String, List<String>> OPTIONAL_FLDS = ImmutableMap.of(
             BusinessEntity.Account.name(),
-            MatchKey.LDC_MATCH_KEY_STD_FLDS.values().stream().collect(Collectors.toList())
+            new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values())
             );
 
     private static final String ENTITYID_JOIN = "EntityId_Join";
@@ -102,7 +103,7 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
     /**
      * For Account entity, retain EntityId and add AccountId with same value as
      * EntityId
-     * 
+     *
      * @param entityIds
      * @return
      */
@@ -152,7 +153,7 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
         }
         toRetainFlds.add(config.getEntityIdFld());
         embeddedEntities = embeddedEntities.retain(new FieldList(toRetainFlds));
-        
+
         embeddedEntities = embeddedEntities.rename(new FieldList(config.getEntityIdFld()),
                 new FieldList(ENTITYID_JOIN));
         // To solve column mis-alignment issue after rename operation

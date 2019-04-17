@@ -102,7 +102,6 @@ public class FilterAccountFeature extends RunSparkJob<ProcessAccountStepConfigur
         }
 
         CopyConfig config = new CopyConfig();
-        config.setAddTimestampAttrs(false);
         config.setInput(Collections.singletonList(fullAccountTable.toHdfsDataUnit("FullAccount")));
         config.setSelectAttrs(getRetrainAttrs());
         return config;
