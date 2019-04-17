@@ -5,6 +5,8 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +46,18 @@ public class AMRefreshVersionUpdater extends AbstractTransformer<TransformerConf
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
             String avroName = getSourceHdfsDir(step, 0);
+            String targetAvroName = getTargetHdfsDir(step);
             try {
-                List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroName, ".*.avro$");
+                List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroName,
+                        ".*.avro$");
+                if (HdfsUtils.fileExists(yarnConfiguration, targetAvroName)) {
+                    List<String> successFile = HdfsUtils.getFilesForDir(yarnConfiguration,
+                            targetAvroName, "_SUCCESS");
+                    if (successFile.size() > 0) {
+                        FileSystem fs = FileSystem.get(new Configuration());
+                        fs.delete(new Path(successFile.get(0)), true);
+                    }
+                }
                 HdfsUtils.copyFiles(yarnConfiguration, avroFiles.get(0), workflowDir);
             } catch (Exception e) {
                 log.error("Failed to copy file from " + avroName + " to " + workflowDir, e);

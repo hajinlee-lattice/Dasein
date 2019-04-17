@@ -98,6 +98,32 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         return sourceDirInHdfs;
     }
 
+    protected String getTargetHdfsDir(TransformStep step) {
+        Source source = step.getTarget();
+
+        String targetSourceVersion = step.getTargetVersion();
+        String targetDirInHdfs = null;
+        if (!(source instanceof TableSource)) {
+            targetDirInHdfs = hdfsPathBuilder
+                    .constructTransformationSourceDir(source, targetSourceVersion).toString();
+        } else {
+            Table table = ((TableSource) source).getTable();
+            if (table.getExtracts().size() > 1) {
+                throw new IllegalArgumentException("Can only handle single extract table.");
+            }
+            targetDirInHdfs = table.getExtracts().get(0).getPath();
+            if (targetDirInHdfs.endsWith(".avro")) {
+                targetDirInHdfs = targetDirInHdfs.substring(0, targetDirInHdfs.lastIndexOf("/"));
+            } else {
+                targetDirInHdfs = targetDirInHdfs.endsWith("/")
+                        ? targetDirInHdfs.substring(0, targetDirInHdfs.length() - 1)
+                        : targetDirInHdfs;
+            }
+        }
+
+        return targetDirInHdfs;
+    }
+
     @SuppressWarnings("unchecked")
     protected T getConfiguration(String confStr) {
         T configuration = null;

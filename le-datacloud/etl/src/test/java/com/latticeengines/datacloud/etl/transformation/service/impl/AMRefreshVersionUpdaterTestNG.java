@@ -26,16 +26,28 @@ public class AMRefreshVersionUpdaterTestNG
     private DataCloudVersionService dataCloudVersionService;
     GeneralSource source = new GeneralSource("LDCDEV_AMRefreshVersionUpdater");
     GeneralSource baseSource = new GeneralSource("AMRefreshVersionUpdater");
+    private boolean iteration1 = false;
+    private boolean iteration2 = false;
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        refreshVerValBefore = Long.valueOf(dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
-        prepareData();
-        TransformationProgress progress = createNewProgress();
-        progress = transformData(progress);
-        finish(progress);
-        confirmResultFile(progress);
-        cleanupProgressTables();
+        for (int i = 0; i < 2; i++) {
+            if (i == 0) {
+                iteration1 = true;
+            }
+            if (i == 1) {
+                iteration2 = true;
+                iteration1 = false;
+            }
+            refreshVerValBefore = Long.valueOf(
+                    dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
+            prepareData();
+            TransformationProgress progress = createNewProgress();
+            progress = transformData(progress);
+            finish(progress);
+            confirmResultFile(progress);
+            cleanupProgressTables();
+        }
     }
 
     // This data is not useful. It is used to fake an AVRO file
@@ -43,9 +55,15 @@ public class AMRefreshVersionUpdaterTestNG
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("Domain", String.class));
         columns.add(Pair.of("DUNS", String.class));
-        Object[][] data = new Object[][] { { "kaggle.com", "123456789" } };
+        Object[][] data1 = new Object[][] { { "kaggle.com", "123456789" } };
+        Object[][] data2 = new Object[][] { { "google.com", "342141241" } };
+        if (iteration1) {
+            uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data1);
+        }
+        if (iteration2) {
+            uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data2);
+        }
 
-        uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
 
     @Override
@@ -60,7 +78,8 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        return hdfsPathBuilder
+                .constructSnapshotDir(source.getSourceName(), "2019-04-16_23-33-18_UTC").toString();
     }
 
     @Override
@@ -68,7 +87,7 @@ public class AMRefreshVersionUpdaterTestNG
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("WeeklyRefreshVersionUpdate");
-            configuration.setVersion(targetVersion);
+            configuration.setVersion("2019-04-16_23-33-18_UTC");
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSourcesStep1 = new ArrayList<String>();
@@ -98,6 +117,22 @@ public class AMRefreshVersionUpdaterTestNG
                 .valueOf(dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
         // To verify if the new timestamp is greater i.e it refreshed
         Assert.assertTrue(refreshVerValAfter > refreshVerValBefore);
+        // verify target Source for use case : _SUCCESS flag absent then
+        // re-generate that source
+        int rowCount = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            if (iteration1) {
+                Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
+                Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
+            }
+            if (iteration2) {
+                Assert.assertTrue(isObjEquals(record.get("Domain"), "google.com"));
+                Assert.assertTrue(isObjEquals(record.get("DUNS"), "342141241"));
+            }
+            rowCount++;
+        }
+        Assert.assertEquals(rowCount, 1);
     }
 
 }
