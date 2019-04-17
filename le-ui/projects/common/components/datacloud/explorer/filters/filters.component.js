@@ -276,7 +276,7 @@ export default function () {
                             retArr.push(nullImportance, importance, '');
                         }
                         if (vm.header.sort_modeliteration.property == 'PredictivePower') {
-                            retArr.push(nullPredictive, predictive, '');
+                            retArr.push(predictive);
                         }
                         if (vm.header.sort_modeliteration.property == 'DisplayName') {
                             retArr.push(name);
@@ -340,7 +340,7 @@ export default function () {
                     filter.HasWarnings = '!!';
                 }
 
-                if (DataCloudStore.ratingIterationFilter == 'disabled') {
+                if (DataCloudStore.ratingIterationFilter == 'disabled') {                    
                     filter.ApprovedUsage = 'None';
                 }
 
