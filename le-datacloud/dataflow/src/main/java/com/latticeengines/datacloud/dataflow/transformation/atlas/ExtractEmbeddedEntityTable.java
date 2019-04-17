@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.E
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
