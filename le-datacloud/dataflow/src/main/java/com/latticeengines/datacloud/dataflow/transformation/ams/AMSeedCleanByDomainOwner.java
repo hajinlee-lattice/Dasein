@@ -14,8 +14,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.ams.DomOwnerCalRoo
 import com.latticeengines.dataflow.runtime.cascading.propdata.ams.UpdatePriDomAlexaRankFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.ams.DomainOwnershipConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.DomainOwnershipConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 

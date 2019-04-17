@@ -1,6 +1,5 @@
 package com.latticeengines.query.evaluator;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,7 +10,6 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -55,12 +53,6 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         return new Object[][] {
                 { SQL_USER, "Redshift" }
         };
-    }
-
-    @BeforeMethod(groups = "functional")
-    public void beforeMethod(Method method, Object[] params) {
-        System.out.println(String.format("\n*********** Running Test Method (SparkSQL): %s, Params: %s **********",
-                method.getName(), Arrays.toString(params)));
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -323,8 +315,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         };
     }
 
-    @Test(groups = "functional", dataProvider = "userContexts")
-    public void testSortAndPage(String sqlUser, String queryContext) {
+    @Test(groups = "functional")
+    public void testSortAndPage() {
+        String sqlUser = SQL_USER;
         Restriction domainInRange = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).gt("A") //
                 .build();

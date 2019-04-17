@@ -18,8 +18,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.ams.AMSeedDuDomAgg
 import com.latticeengines.dataflow.runtime.cascading.propdata.ams.AMSeedPriDomAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedMarkerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;

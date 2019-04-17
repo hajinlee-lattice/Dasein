@@ -57,7 +57,7 @@ import com.latticeengines.datacloud.core.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateCollectionConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateCollectionConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;

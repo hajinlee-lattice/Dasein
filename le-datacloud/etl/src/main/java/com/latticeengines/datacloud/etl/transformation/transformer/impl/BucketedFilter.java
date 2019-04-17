@@ -19,8 +19,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.dataflow.transformation.FilterBucketed;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.FilterBucketedParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketedFilterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BucketedFilterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)

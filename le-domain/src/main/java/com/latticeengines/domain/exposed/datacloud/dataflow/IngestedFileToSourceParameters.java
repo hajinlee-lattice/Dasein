@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
 
 public class IngestedFileToSourceParameters extends TransformationFlowParameters {
     @JsonProperty("IngestionName")

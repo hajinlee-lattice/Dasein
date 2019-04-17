@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation.am;
 
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public abstract class AccountMasterBase<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
 

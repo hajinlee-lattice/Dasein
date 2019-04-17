@@ -16,7 +16,7 @@ import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.EMRScalingConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.EMRScalingConfig;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 

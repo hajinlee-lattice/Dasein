@@ -31,8 +31,8 @@ import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttri
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.am.AMDecoderConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.am.AMDecoderConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 @Component(AMDecoder.TRANSFORMER_NAME)

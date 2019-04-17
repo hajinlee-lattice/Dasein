@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 /**

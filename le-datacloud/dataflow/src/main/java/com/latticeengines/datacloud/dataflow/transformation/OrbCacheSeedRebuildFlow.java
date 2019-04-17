@@ -10,7 +10,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.OrbCacheSeedRebuildBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.OrbCacheSeedRebuildConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedRebuildConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;

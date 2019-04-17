@@ -17,9 +17,9 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MapAttributeConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TblDrivenFuncConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MapAttributeConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TblDrivenFuncConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(MapAttributeFlow.BEAN_NAME)
 public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapAttributeConfig.MapFunc> {

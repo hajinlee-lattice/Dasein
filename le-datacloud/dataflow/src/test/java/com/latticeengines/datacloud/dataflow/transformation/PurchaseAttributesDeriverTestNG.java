@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PurchaseAttributesDeriverConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PurchaseAttributesDeriverConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class PurchaseAttributesDeriverTestNG extends DataCloudDataFlowFunctionalTestNGBase {

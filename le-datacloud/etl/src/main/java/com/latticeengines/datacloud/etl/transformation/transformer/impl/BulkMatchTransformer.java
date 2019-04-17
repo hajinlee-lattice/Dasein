@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;

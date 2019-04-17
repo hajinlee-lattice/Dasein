@@ -12,8 +12,8 @@ import com.latticeengines.domain.exposed.datacloud.check.EmptyFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceededCountCheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.UnderPopulatedFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeCacheSeedChkConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.LatticeCacheSeedChkConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(LatticeCacheSeedChkFlow.DATAFLOW_BEAN_NAME)
 public class LatticeCacheSeedChkFlow extends ConfigurableFlowBase<LatticeCacheSeedChkConfig> {

@@ -446,7 +446,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
             return dflt;
         }
         try {
-            return (T) clazz.getConstructor(new Class[] { String.class }).newInstance(value);
+            return clazz.getConstructor(new Class[] { String.class }).newInstance(value);
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse %s as a %s", value, clazz.getSimpleName()));
         }

@@ -17,8 +17,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.seed.SeedDomainOnlyCleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SeedDomainOnlyCleanupConfig;
 
 /**
  * Remove domain-only entries from seed whose domain cannot match to any domain

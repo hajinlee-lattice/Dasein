@@ -29,7 +29,7 @@ import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunction
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CalculateStatsConfig;
 
 public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
     private static final int ENC_ATTR_1 = 0;

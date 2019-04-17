@@ -11,8 +11,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.check.ExceedCntDiffBetwenVersionChkParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceedDomDiffBetwenVersionChkParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMValidatorParams;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 
 @Component(SourceVersionDiff.DATAFLOW_BEAN_NAME)
 public class SourceVersionDiff extends TransformationFlowBase<BasicTransformationConfiguration, AMValidatorParams> {

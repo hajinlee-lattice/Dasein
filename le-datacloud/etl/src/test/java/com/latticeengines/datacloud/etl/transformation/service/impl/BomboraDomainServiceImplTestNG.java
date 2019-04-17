@@ -16,7 +16,7 @@ import com.latticeengines.datacloud.core.source.impl.BomboraDepivoted;
 import com.latticeengines.datacloud.core.source.impl.BomboraDomain;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 
 public class BomboraDomainServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {

@@ -3,7 +3,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DeriveAttributeConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DeriveAttributeConfig;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

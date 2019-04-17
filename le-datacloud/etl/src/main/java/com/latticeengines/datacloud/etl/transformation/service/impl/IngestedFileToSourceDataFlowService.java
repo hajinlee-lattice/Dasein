@@ -33,7 +33,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IngestedFileToSourceParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;

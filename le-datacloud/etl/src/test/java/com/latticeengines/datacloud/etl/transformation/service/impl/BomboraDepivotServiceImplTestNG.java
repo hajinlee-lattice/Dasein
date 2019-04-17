@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.BomboraDepivoted;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraDepivotConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraDepivotConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraFirehoseInputSourceConfig;
 
 @Component
 public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformationServiceTestNGBase<BomboraDepivotConfiguration> {
