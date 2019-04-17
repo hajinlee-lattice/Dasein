@@ -4,8 +4,6 @@ import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_R
 import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_FILENAME;
 import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLEJSONS_S3_FILENAME;
 import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLES_S3_FILENAME;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,22 +126,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
             Assert.assertEquals(results.size(), expectedCount);
         }
         if (expectedResult != null) {
-            assertResults(results, expectedResult);
+            Assert.assertEquals(results, expectedResult, "Data doesn't match");
         }
         return results;
-    }
-
-    protected void assertResults(List<Map<String, Object>> results, List<Map<String, Object>> expectedResults) {
-        assertNotNull(results);
-        assertEquals(results.size(), expectedResults.size());
-        for (int rowId = 0; rowId <expectedResults.size(); rowId++) {
-            Map<String, Object> expectedRow = expectedResults.get(rowId);
-            Map<String, Object> actualRow = results.get(rowId);
-            assertEquals(actualRow.size(), expectedRow.size());
-            for (String key : expectedRow.keySet()) {
-                assertEquals(actualRow.get(key), expectedRow.get(key));
-            }
-        }
     }
 
     protected void logQuery(String sqlUser, SQLQuery<?> sqlQuery) {

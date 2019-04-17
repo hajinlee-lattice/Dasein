@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -58,7 +59,9 @@ public interface RedshiftAndSparkQueryTester {
     @AfterMethod(groups = "functional")
     public default void afterMethod(ITestResult testResult, Object[] params) {
         long timeTaken = testResult.getEndMillis() - testResult.getStartMillis();
-        String currUserContext = String.valueOf(params[0]);
+        // There could be some methods in base class, which doesn't support DataProvider implementation. 
+        // Those methods will not have any arguments
+        String currUserContext = params.length > 1 ? String.valueOf(params[0]) : "";
         try {
             switch (currUserContext) {
             case USER_SEGMENT:
@@ -82,7 +85,7 @@ public interface RedshiftAndSparkQueryTester {
             System.out.println(String.format(
                     "---------- Completed Test Method (Redshift-SparkSQL): %s, Params: %s, Time: %d ms ----------\n",
                     testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken));
-            if (SPARK_BATCH_USER.equalsIgnoreCase(currUserContext)) {
+            if (SPARK_BATCH_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
                 // We Need to reset these counts only when SparkSQLTest is run. Because
                 // @AfterMethod gets triggered for each user context
                 redshiftQueryCountResults.clear();
