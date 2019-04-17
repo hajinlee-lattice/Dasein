@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.flink.api.common.typeutils.TypeSerializer;
+import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
@@ -222,9 +223,13 @@ public class DefinedTupleSerializer extends TypeSerializer<Tuple> {
         return 31 * this.fields.hashCode() + Arrays.hashCode(this.fieldSers);
     }
 
-    @Override
-    public boolean canEqual(Object obj) {
+    private boolean canEqual(Object obj) {
         return obj instanceof DefinedTupleSerializer;
+    }
+
+    @Override
+    public TypeSerializerSnapshot<Tuple> snapshotConfiguration() {
+        return new DefinedTupleSerializerSnapshot(fields, fieldSers);
     }
 
     private Tuple getReuseOrNew(Tuple reuse) {

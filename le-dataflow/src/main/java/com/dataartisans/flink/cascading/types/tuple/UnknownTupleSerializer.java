@@ -19,6 +19,7 @@ package com.dataartisans.flink.cascading.types.tuple;
 import java.io.IOException;
 
 import org.apache.flink.api.common.typeutils.TypeSerializer;
+import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
@@ -198,9 +199,13 @@ public class UnknownTupleSerializer extends TypeSerializer<Tuple> {
         return this.fieldSer.hashCode();
     }
 
-    @Override
-    public boolean canEqual(Object obj) {
+    private boolean canEqual(Object obj) {
         return obj instanceof UnknownTupleSerializer;
+    }
+
+    @Override
+    public TypeSerializerSnapshot<Tuple> snapshotConfiguration() {
+        return new UnknownTupleSerializerSnapshot(fieldSer);
     }
 
     private Tuple getReuseOrNew(Tuple reuse, int arity) {

@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.client.CliFrontend;
+import org.apache.flink.client.cli.CliFrontend;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.GlobalConfiguration;
 import org.apache.hadoop.conf.Configuration;

@@ -85,14 +85,14 @@
         <jpmml.version>1.2.15</jpmml.version> <!-- seems a customized jar, cannot upgrade -->
 
         <!-- Cascading -->
-        <cascading.version>3.2.1</cascading.version>
+        <cascading.version>3.3.0</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version> <!-- should cut this dep -->
         <!-- if until 2018 or cascading 3.3, they still do not release new
             version, we should move away from cascading-flink -->
-        <cascading.flink.version>0.3.0</cascading.flink.version>
-        <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
+        <flink.version>1.8.0</flink.version>
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
+        <akka.version>2.4.20</akka.version>
 
         <!-- versions should be easy to upgrade: keep them updated! -->
         <checkstyle.version>8.15</checkstyle.version>
