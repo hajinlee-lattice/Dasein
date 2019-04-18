@@ -13,4 +13,5 @@ public class TestLatticeComponentUpgrader implements CustomerSpaceServiceUpgrade
             DocumentDirectory source, Map<String, String> properties) {
         return null;
     }
+
 }

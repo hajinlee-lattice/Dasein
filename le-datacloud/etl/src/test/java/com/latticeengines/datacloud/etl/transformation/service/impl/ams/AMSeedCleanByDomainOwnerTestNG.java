@@ -175,8 +175,8 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             { "craigslist.com", "DUNS03", null, "DUNS62", 5020405L, "2123", 2, "Media", 142,
                 null, DOMSRC_DNB },
                 // ReasonType = OTHER
-                // Added reason_type = 'OTHER' for domains present in multiple trees having firmographics same in both trees. 
-                // So, can't choose the tree, so will update ROOT_DUNS = null and DUNS_TYPE = null for such entries. 
+                // Added reason_type = 'OTHER' for domains present in multiple trees having firmographics same in both trees.
+                // So, can't choose the tree, so will update ROOT_DUNS = null and DUNS_TYPE = null for such entries.
                 // Such entries will not be cleaned up
             { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal", 229, null, DOMSRC_DNB },
             { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal", 230, null, DOMSRC_DNB },
@@ -194,7 +194,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                 // MISSING_ROOT_DUNS
             { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236,
                     null, DOMSRC_DNB },
-            // Case 7 : 
+            // Case 7 :
             // sbiDuns1.com domain replaced with domain paypal.com. Update corresponding alexaRank.
             { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services", 225, null, DOMSRC_DNB },
             { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,"Manufacturing - Semiconductors", 226, null, DOMSRC_DNB },
@@ -205,7 +205,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             { "karlDuns2.com", null, "DUNS28", null, 304500L, "2200", 1, "Media", 215, null,
                     DOMSRC_DNB },
             // Case 9 :
-            // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain. 
+            // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain.
             // Primary domain already exists in AMSeed. The final result should not have duplicate domain + duns entries.
             { "music.com", "DUNS37", null, null, 24178781L, "2343", 2, "Media", 213, null,
                         DOMSRC_DNB },
@@ -225,13 +225,13 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                 // with values
                 // similar to that of secondary domain as the corresponding
                 // Secondary domain is present in amSeed
-                { "netappDuns1.com", "karlDuns2.com" }, 
+                { "netappDuns1.com", "karlDuns2.com" },
                 { "paypal.com", "sbiDuns1.com" },
-                
-                // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain. 
+
+                // saavn.com exists in OrbSec.SecondaryDomain, then this domain is replaced by OrbSec.PrimaryDomain.
                 // Primary domain already exists in AMSeed. The final result should not have duplicate domain + duns entries.
                 { "music.com", "saavn.com" },
-                
+
                 // primary domain not added as corresponding secondary domain
                 // not present in amSeed
                 { "oracle.com", "sap.com" },
@@ -244,7 +244,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             // AlexaRank, LE_OperationLogs, LE_IS_PRIMARY_DOMAIN, DomainSource
             // Case 1 : Domains present in domain ownership table with SINGLE_TREE type : result = not cleaned up
             { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200, null, null, DOMSRC_DNB },
-        
+
             // Case 2 : Domains present in OwnershipTable : rootDuns match = not cleaned up
             { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216,
                     null, null, DOMSRC_DNB },
@@ -281,7 +281,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
                     700,"[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]",
                     null, DOMSRC_ORB },
             { "paypal.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1, "Manufacturing - Semiconductors", 700,
-                        "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null, 
+                        "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,
                     DOMSRC_ORB },
             { "paypal.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production", 700,
                         "[Step=AMSeedCleanByDomainOwner,Code=SECDOM_TO_PRI,Log=sbiDuns1.com is orb sec domain]", null,

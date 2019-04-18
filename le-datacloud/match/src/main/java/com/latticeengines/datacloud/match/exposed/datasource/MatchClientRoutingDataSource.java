@@ -8,4 +8,5 @@ public class MatchClientRoutingDataSource extends AbstractRoutingDataSource {
     protected Object determineCurrentLookupKey() {
         return MatchClientContextHolder.getMatchClient();
     }
+
 }

@@ -16,12 +16,10 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings("rawtypes")
 public class AppendOptLogFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 6037269301787373242L;
 
-    private Map<String, Integer> namePositionMap;
     // copyMode = true: copy pre-defined log message from appendFromField and
     // append to LE_OperationLog
     // copyMode = false: append log (message) to LE_OperationLog
@@ -32,11 +30,11 @@ public class AppendOptLogFunction extends BaseOperation implements Function {
 
     /**
      * Only one of log and appendFromField should be populated
-     * 
+     *
      * ATTENTION: LE_OperationLog should already exist in the node,
      * AppendOptLogFunction will not create it. FieldStrategy for
      * AppendOptLogFunction is REPLACE
-     * 
+     *
      * @param fieldDeclaration
      * @param log:
      *            append pre-defined log message to LE_OperationLog field
@@ -48,7 +46,7 @@ public class AppendOptLogFunction extends BaseOperation implements Function {
         super(fieldDeclaration);
         Preconditions.checkArgument(validate(log, appendFromField),
                 "Only one of log and appendFromField should be populated");
-        namePositionMap = getPositionMap(fieldDeclaration);
+        Map<String, Integer> namePositionMap = getPositionMap(fieldDeclaration);
         this.log = log;
         this.appendFromField = appendFromField;
         optLogIdx = namePositionMap.get(OperationLogUtils.DEFAULT_FIELD_NAME);

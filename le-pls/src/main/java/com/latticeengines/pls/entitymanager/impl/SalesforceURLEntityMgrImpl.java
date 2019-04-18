@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,7 @@ import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
 @Component("salesforceURLEntityMgr")
 public class SalesforceURLEntityMgrImpl extends BaseEntityMgrImpl<SalesforceURL> implements SalesforceURLEntityMgr {
 
-    @Autowired
+    @Inject
     private SalesforceURLDao salesforceURLDao;
 
     @Override

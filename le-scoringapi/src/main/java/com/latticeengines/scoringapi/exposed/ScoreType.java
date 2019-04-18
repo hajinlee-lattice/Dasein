@@ -12,7 +12,7 @@ public enum ScoreType {
     CLASSIFICATION(String.class), //
     MODEL_NAME(String.class);
 
-    private ScoreType(Class<?> type) {
+    ScoreType(Class<?> type) {
         this.type = type;
     }
 

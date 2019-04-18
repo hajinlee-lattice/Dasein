@@ -9,8 +9,6 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.source.IngestionNames;
@@ -46,8 +44,7 @@ public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowP
         return node;
     }
 
-    private Node addDepivotNode(Node node, List<SourceColumn> sourceColumns)
-            throws JsonParseException, JsonMappingException, IOException {
+    private Node addDepivotNode(Node node, List<SourceColumn> sourceColumns) throws IOException {
         DepivotFieldMapping mapping = null;
 
         for (SourceColumn sourceColumn : sourceColumns) {

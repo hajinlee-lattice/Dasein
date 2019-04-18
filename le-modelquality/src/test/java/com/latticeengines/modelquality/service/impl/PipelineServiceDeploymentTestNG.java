@@ -4,7 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,7 +15,7 @@ import com.latticeengines.modelquality.service.PipelineService;
 
 public class PipelineServiceDeploymentTestNG extends ModelQualityTestNGBase {
 
-    @Autowired
+    @Inject
     private PipelineService pipelineService;
 
     @Test(groups = "deployment", enabled = true)
@@ -38,4 +39,5 @@ public class PipelineServiceDeploymentTestNG extends ModelQualityTestNGBase {
         f.setAccessible(true);
         return (String) f.get(obj); // IllegalAccessException
     }
+
 }

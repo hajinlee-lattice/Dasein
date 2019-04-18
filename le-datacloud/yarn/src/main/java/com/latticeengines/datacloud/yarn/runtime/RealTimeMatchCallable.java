@@ -43,4 +43,5 @@ public class RealTimeMatchCallable implements Callable<MatchContext> {
             return BulkMatchCallable.generateFakeOutput(matchContext, e);
         }
     }
+
 }

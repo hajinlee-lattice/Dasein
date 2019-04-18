@@ -1,6 +1,7 @@
 package com.latticeengines.app.testframework;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -18,10 +19,10 @@ import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed
 @ContextConfiguration(locations = { "classpath:test-app-context.xml" })
 public class AppTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     protected GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
 
-    @Autowired
+    @Inject
     protected DynamoService dynamoService;
 
     @Value("${common.le.environment}")

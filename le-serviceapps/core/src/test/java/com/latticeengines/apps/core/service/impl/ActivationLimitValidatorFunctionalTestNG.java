@@ -32,6 +32,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
 
     @InjectMocks
     private ActivationLimitValidator limitationValidator;
+
     @Mock
     private ZKConfigService zkConfigService;
 

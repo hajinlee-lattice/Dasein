@@ -5,8 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TalkingPointPreview {
-    private final static String defaultContextValue = "lpipreview";
-    private final static String defaultNotionValue = "lead";
+    private static final String defaultContextValue = "lpipreview";
+    private static final String defaultNotionValue = "lead";
 
     @JsonProperty(index = 1)
     private String context = defaultContextValue;

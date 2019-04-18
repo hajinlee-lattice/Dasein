@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,10 +17,10 @@ public class SalesforceURLServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
     private SalesforceURL sfdcURLLPCreated;
     private SalesforceURL sfdcURLAPCreated;
 
-    @Autowired
+    @Inject
     private SalesforceURLService salesforceURLService;
 
-    @Autowired
+    @Inject
     private SalesforceURLEntityMgr salesforceURLEntityMgr;
 
     @BeforeClass(groups = "functional")
