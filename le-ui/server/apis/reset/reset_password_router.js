@@ -37,7 +37,7 @@ class ResetPasswordRouter {
          */
         this.router.get('/publish/', function (req, res) {
             if(!req.query.jwt || req.query.jwt == null || req.query.jwt.trim() == ''){
-                res.status(400).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Notice', 'Request missing userName'));
+                res.status(400).send(UIActionsFactory.getUIActionsObject('Reset Password Failed', 'Notice', 'Request missing jwt'));
                 return;
             }
             try{
@@ -65,34 +65,35 @@ class ResetPasswordRouter {
                 this.request(options, (error, response, body) => {
                     this.log('Call back ', error, response, body);
                     if(body) {
-                        res.status(200).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', payload.username + ' password Reset'));
+                        res.redirect(303, '/login/form');
                     }else{
-                        res.status(response.statusCode).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', 'Error Password Reset'));
+                        res.status(500).send(UIActionsFactory.getUIActionsObject('Reset Password Failed', 'Banner', 'There was an error reseting your password.'));
                     }
                 });
             }catch(err) {
-                res.status(500).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Banner', 'Generic server error'));
+                res.status(500).send(UIActionsFactory.getUIActionsObject('Reset Password Failed', 'Banner', 'There was an error reseting your password.'));
             }
 
         }.bind(this));
 
-         /**
+        //will be called by reset password button
+        //will send /reset/publish?userName={JWT} to pramods api to be included in email
+        /**
          *  query params:
          *      userName: string
          */
         this.router.get('/confirm/', function (req, res) {
             if(!req.query.userName || req.query.userName == null || req.query.userName.trim() == ''){
-                res.status(400).send(UIActionsFactory.getUIActionsObject('Reset Password', 'Notice', 'Request missing userName'));
+                res.status(400).send(UIActionsFactory.getUIActionsObject('Reset Password Failed', 'Banner', 'There was an error reseting your password.'));
                 return;
             }
-            //will be called by reset password button
-            //will send /reset/publish?userName={JWT} to pramods api to be included in email
+
             var payload = {
                 username: req.query.userName,
                 jti: uuid.v4()
             };
             var token = jwt.sign(payload, 'e6b6376591584a6990e3a56306247cc2', { expiresIn: '1d' });
-            res.status(200).send(token);
+            res.redirect(303, '/reset/publish?jwt=' + token);
         }.bind(this));
 
         return this.router;
