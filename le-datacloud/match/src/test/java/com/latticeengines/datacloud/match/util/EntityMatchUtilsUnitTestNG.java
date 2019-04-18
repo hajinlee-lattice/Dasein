@@ -107,7 +107,7 @@ public class EntityMatchUtilsUnitTestNG {
                 { newEntityMatchInput(null), Account.name(), false }, //
                 { newEntityMatchInput(null), Contact.name(), false }, //
                 // for account match, no need to output newly allocated entity
-                // TODO add case to make sure we do not output new account for account match
+                { newEntityMatchInput(Account.name()), Account.name(), false }, //
                 { newEntityMatchInput(Account.name()), Contact.name(), false }, //
                 { newEntityMatchInput(Account.name()), Transaction.name(), false }, //
                 // for contact match, only output newly created account
