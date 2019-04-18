@@ -16,8 +16,8 @@ import com.latticeengines.admin.dynamicopts.OptionsProvider;
 
 public class SubdirectoryOptionsProviderUnitTestNG {
 
-    final private String parent = "tmp";
-    final private String[] folders = { "folder1", "folder2" };
+    private final String parent = "tmp";
+    private final String[] folders = { "folder1", "folder2" };
 
     private String rootPath;
     private OptionsProvider provider;

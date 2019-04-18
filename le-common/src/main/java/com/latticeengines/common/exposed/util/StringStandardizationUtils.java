@@ -18,7 +18,7 @@ public class StringStandardizationUtils {
     private Character[] removed = {};
     private Character[] replacedBySpace = {};
     private String[][] replaced = {};
-    private final static int LATTICE_ID_LENGTH = 13;
+    private static final int LATTICE_ID_LENGTH = 13;
     private static StringStandardizationUtils singletonUtil = new StringStandardizationUtils();
 
     public static boolean objectIsNullOrEmptyString(Object obj) {

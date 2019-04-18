@@ -391,7 +391,7 @@ public class S3ServiceImpl implements S3Service {
         return workers;
     }
 
-    private synchronized static void initializeWorkers() {
+    private static synchronized void initializeWorkers() {
         if (workers == null) {
             workers = ThreadPoolUtils.getFixedSizeThreadPool("s3-service", 8);
         }

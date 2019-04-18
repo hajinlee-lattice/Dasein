@@ -12,7 +12,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 
 public class RuntimeConfig {
 
-    private final static Logger log = LoggerFactory.getLogger(RuntimeConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(RuntimeConfig.class);
 
     private Properties runtimeConfig;
 

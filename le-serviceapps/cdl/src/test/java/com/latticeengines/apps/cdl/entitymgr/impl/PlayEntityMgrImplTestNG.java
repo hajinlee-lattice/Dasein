@@ -31,11 +31,11 @@ import com.latticeengines.security.exposed.service.TenantService;
 public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImplTestNG.class);
-    private final static String NEW_DISPLAY_NAME = "playHarder!";
-    private final static String DESCRIPTION = "playHardest";
-    private final static String CREATED_BY = "lattice@lattice-engines.com";
-    private final static String UPDATED_BY = "updated@lattice-engines.com";
-    private final static String PLAY_SEGMENT_NAME = "PlayTargetSegment";
+    private static final String NEW_DISPLAY_NAME = "playHarder!";
+    private static final String DESCRIPTION = "playHardest";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String UPDATED_BY = "updated@lattice-engines.com";
+    private static final String PLAY_SEGMENT_NAME = "PlayTargetSegment";
 
     @Autowired
     private PlayEntityMgr playEntityMgr;

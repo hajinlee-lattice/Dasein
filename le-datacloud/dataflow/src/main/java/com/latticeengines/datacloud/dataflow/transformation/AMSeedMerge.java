@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,9 +32,6 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
     public static final String DATAFLOW_BEAN_NAME = "AMSeedMerge";
     public static final String TRANSFORMER_NAME = "AMSeedMergeTransformer";
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AMSeedMerge.class);
-
     private Map<String, SeedMergeFieldMapping> amsColumns = new HashMap<>();
     // dnb columns -> ams columns
     private Map<String, String> dnbToAms = new HashMap<>();
@@ -46,7 +41,8 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
     private Map<String, String> amsToLe = new HashMap<>();
     // ams columns -> dnb columns
     private Map<String, String> amsToDnB = new HashMap<>();
-    private List<String> amsAttrs = new ArrayList<String>();
+
+    private List<String> amsAttrs = new ArrayList<>();
 
     private String dnbDunsCol;
     private String leDunsCol;
@@ -96,7 +92,7 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
         amsWithoutDuns = processWithoutDuns(amsWithoutDuns);
 
         Node amsMerged = amsWithDuns.merge(amsWithoutDuns);
-        
+
         amsMerged = addColumnNode(amsMerged, parameters.getColumns());
 
         return amsMerged;

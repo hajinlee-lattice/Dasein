@@ -35,17 +35,17 @@ public class TargetUtil {
     private TargetUtil() {
     }
 
-    static public Map<FieldName, ?> evaluateRegressionDefault(ModelEvaluationContext context) {
+    public static Map<FieldName, ?> evaluateRegressionDefault(ModelEvaluationContext context) {
         return evaluateRegression((Double) null, context);
     }
 
-    static public Map<FieldName, ?> evaluateRegression(Double value, ModelEvaluationContext context) {
+    public static Map<FieldName, ?> evaluateRegression(Double value, ModelEvaluationContext context) {
         ModelEvaluator<?> evaluator = context.getModelEvaluator();
 
         return evaluateRegression(evaluator.getTargetField(), value, context);
     }
 
-    static public Map<FieldName, ?> evaluateRegression(FieldName name, Double value, ModelEvaluationContext context) {
+    public static Map<FieldName, ?> evaluateRegression(FieldName name, Double value, ModelEvaluationContext context) {
         return Collections.singletonMap(name, evaluateRegressionInternal(name, value, context));
     }
 
@@ -90,19 +90,19 @@ public class TargetUtil {
         return value;
     }
 
-    static public Map<FieldName, ? extends Classification> evaluateClassificationDefault(
+    public static Map<FieldName, ? extends Classification> evaluateClassificationDefault(
             ModelEvaluationContext context) {
         return evaluateClassification((Classification) null, context);
     }
 
-    static public Map<FieldName, ? extends Classification> evaluateClassification(Classification value,
+    public static Map<FieldName, ? extends Classification> evaluateClassification(Classification value,
             ModelEvaluationContext context) {
         ModelEvaluator<?> evaluator = context.getModelEvaluator();
 
         return evaluateClassification(evaluator.getTargetField(), value, context);
     }
 
-    static public Map<FieldName, ? extends Classification> evaluateClassification(FieldName name, Classification value,
+    public static Map<FieldName, ? extends Classification> evaluateClassification(FieldName name, Classification value,
             ModelEvaluationContext context) {
         return Collections.singletonMap(name, evaluateClassificationInternal(name, value, context));
     }
@@ -147,7 +147,7 @@ public class TargetUtil {
         return value;
     }
 
-    static public Double processValue(Target target, Double value) {
+    public static Double processValue(Target target, Double value) {
         double result = value;
 
         Double min = target.getMin();
@@ -184,7 +184,7 @@ public class TargetUtil {
         }
     }
 
-    static public TargetValue getTargetValue(Target target, Object value) {
+    public static TargetValue getTargetValue(Target target, Object value) {
         DataType dataType = TypeUtil.getDataType(value);
 
         List<TargetValue> targetValues = target.getTargetValues();

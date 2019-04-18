@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 @Component(BEAN_NAME)
 public class ExtractCube extends ConfigurableFlowBase<TransformerConfig> {
 
-
     private static final Logger logger = LoggerFactory.getLogger(ExtractCube.class);
     public static final String BEAN_NAME = "extractCube";
     public static final String TRANSFORMER_NAME = "CubeExtractor";

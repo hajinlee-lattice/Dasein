@@ -23,23 +23,23 @@ import cascading.tuple.Fields;
 
 @Component(AMSeedCleanByDomainOwner.DATAFLOW_BEAN_NAME)
 public class AMSeedCleanByDomainOwner extends ConfigurableFlowBase<DomainOwnershipConfig> {
-    public final static String DATAFLOW_BEAN_NAME = DataCloudConstants.TRANSFORMER_AMS_CLEANBY_DOM_OWNER + "Flow";
-    public final static String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_AMS_CLEANBY_DOM_OWNER;
+    public static final String DATAFLOW_BEAN_NAME = DataCloudConstants.TRANSFORMER_AMS_CLEANBY_DOM_OWNER + "Flow";
+    public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_AMS_CLEANBY_DOM_OWNER;
 
-    private final static String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
-    private final static String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
-    private final static String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
-    private final static String REASON_TYPE = DomainOwnershipConfig.REASON_TYPE;
-    private final static String AMS_DOMAIN = DataCloudConstants.AMS_ATTR_DOMAIN;
-    private final static String AMS_DUNS = DataCloudConstants.AMS_ATTR_DUNS;
-    private final static String AMS_GU_DUNS = DataCloudConstants.ATTR_GU_DUNS;
-    private final static String AMS_DU_DUNS = DataCloudConstants.ATTR_DU_DUNS;
-    private final static String AMS_DOM_SRC = DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE;
-    private final static String ALEXA_RANK = DataCloudConstants.ALEXA_ATTR_RANK; // AlexaMostRecent Rank field
-    private final static String ORBSEC_PRIDOM = DataCloudConstants.ORBSEC_ATTR_PRIDOM;
-    private final static String ORBSRC_SECDOM = DataCloudConstants.ORBSEC_ATTR_SECDOM;
+    private static final String ROOT_DUNS = DomainOwnershipConfig.ROOT_DUNS;
+    private static final String DUNS_TYPE = DomainOwnershipConfig.DUNS_TYPE;
+    private static final String TREE_NUMBER = DomainOwnershipConfig.TREE_NUMBER;
+    private static final String REASON_TYPE = DomainOwnershipConfig.REASON_TYPE;
+    private static final String AMS_DOMAIN = DataCloudConstants.AMS_ATTR_DOMAIN;
+    private static final String AMS_DUNS = DataCloudConstants.AMS_ATTR_DUNS;
+    private static final String AMS_GU_DUNS = DataCloudConstants.ATTR_GU_DUNS;
+    private static final String AMS_DU_DUNS = DataCloudConstants.ATTR_DU_DUNS;
+    private static final String AMS_DOM_SRC = DataCloudConstants.AMS_ATTR_DOMAIN_SOURCE;
+    private static final String ALEXA_RANK = DataCloudConstants.ALEXA_ATTR_RANK; // AlexaMostRecent Rank field
+    private static final String ORBSEC_PRIDOM = DataCloudConstants.ORBSEC_ATTR_PRIDOM;
+    private static final String ORBSRC_SECDOM = DataCloudConstants.ORBSEC_ATTR_SECDOM;
 
-    private final static String PRI_DOM_ALEXA_RANK = "PRI_DOM_ALEXA_RANK";
+    private static final String PRI_DOM_ALEXA_RANK = "PRI_DOM_ALEXA_RANK";
 
     @Override
     public String getDataFlowBeanName() {

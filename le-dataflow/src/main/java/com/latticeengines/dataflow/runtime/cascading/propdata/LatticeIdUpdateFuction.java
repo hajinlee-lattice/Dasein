@@ -14,8 +14,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class LatticeIdUpdateFuction extends BaseOperation implements Function {
-    private final static String ACTIVE = "ACTIVE";
-    private final static String UPDATED = "UPDATED";
+    private static final String ACTIVE = "ACTIVE";
+    private static final String UPDATED = "UPDATED";
     private Map<String, Integer> namePositionMap;
     private String status;
     private String statusField;

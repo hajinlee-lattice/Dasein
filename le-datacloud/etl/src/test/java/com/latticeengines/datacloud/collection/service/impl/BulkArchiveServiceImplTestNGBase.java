@@ -16,7 +16,7 @@ import com.latticeengines.datacloud.core.source.BulkSource;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
-abstract public class BulkArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
+public abstract class BulkArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     BulkArchiveService archiveService;
     ArchiveProgressEntityMgr progressEntityMgr;

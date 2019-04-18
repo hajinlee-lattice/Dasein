@@ -24,13 +24,13 @@ public class DateBucket extends BucketAlgorithm  {
 
     private static final long serialVersionUID = -3698813164354927625L;
 
-    public static final String DEFAULT_LAST_7_DAYS = "Last 7 Days";
-    public static final String DEFAULT_LAST_30_DAYS = "Last 30 Days";
-    public static final String DEFAULT_LAST_90_DAYS = "Last 90 Days";
-    public static final String DEFAULT_LAST_180_DAYS = "Last 180 Days";
-    public static final String DEFAULT_EVER = "Ever";
+    private static final String DEFAULT_LAST_7_DAYS = "Last 7 Days";
+    private static final String DEFAULT_LAST_30_DAYS = "Last 30 Days";
+    private static final String DEFAULT_LAST_90_DAYS = "Last 90 Days";
+    private static final String DEFAULT_LAST_180_DAYS = "Last 180 Days";
+    private static final String DEFAULT_EVER = "Ever";
 
-    public static final long oneDayInMilliSeconds = 24 * 60 * 60 * 1000;
+    private static final long oneDayInMilliSeconds = 24 * 60 * 60 * 1000;
 
     @JsonProperty("last7Days")
     private String last7DaysLabel;
@@ -179,7 +179,7 @@ public class DateBucket extends BucketAlgorithm  {
     // a year, the function to compute the bucket boundaries is the same for all date attributes and does not require
     // profiling the values that date attributes hold.
     @JsonIgnore
-    static public List<Long> defineDateBoundaries(long curTimestamp) {
+    public static List<Long> defineDateBoundaries(long curTimestamp) {
         Instant curTime = Instant.ofEpochMilli(curTimestamp);
         // Truncate the current time to the day boundary in UTC to compute the various boundary points.
         Instant roundedDayTime = curTime.truncatedTo(ChronoUnit.DAYS);

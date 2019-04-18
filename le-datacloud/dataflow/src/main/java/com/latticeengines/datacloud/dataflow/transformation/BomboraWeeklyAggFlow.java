@@ -24,23 +24,23 @@ import cascading.tuple.Fields;
 public class BomboraWeeklyAggFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters> {
 
-    private final static String ID = "ID";
-    private final static String DOMAIN = "Domain";
-    private final static String TOTAL_VIEWS = "TotalViews";
-    private final static String TOPIC_SCORE = "TopicScore";
-    private final static String TOTAL_AGGREGATED_SCORE = "TotalAggregatedScore";
-    private final static String TOPIC = "Topic";
-    private final static String POSTAL_CODE = "PostalCode";
-    private final static String CONTENT_SOURCES = "ContentSources";
-    private final static String UNIQUE_USERS = "UniqueUsers";
-    private final static String ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE = "ZipCodeOfHighestAggregatedScore";
-    private final static String HIGHLY_RELEVANT_SOURCES = "HighlyRelevantSources";
-    private final static String MOST_RELEVANT_SOURCES = "MostRelevantSources";
-    private final static String TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT = "TotalAggregatedScore_HighlyRelevant";
-    private final static String TOTAL_AGGREGATED_SCORE_MOST_RELEVANT = "TotalAggregatedScore_MostRelevant";
-    private final static String SOURCE_ID = "SourceID";
-    private final static String HASHED_EMAIL_ID = "HashedEmailIDBase64";
-    private final static String DATE = "Date";
+    private static final String ID = "ID";
+    private static final String DOMAIN = "Domain";
+    private static final String TOTAL_VIEWS = "TotalViews";
+    private static final String TOPIC_SCORE = "TopicScore";
+    private static final String TOTAL_AGGREGATED_SCORE = "TotalAggregatedScore";
+    private static final String TOPIC = "Topic";
+    private static final String POSTAL_CODE = "PostalCode";
+    private static final String CONTENT_SOURCES = "ContentSources";
+    private static final String UNIQUE_USERS = "UniqueUsers";
+    private static final String ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE = "ZipCodeOfHighestAggregatedScore";
+    private static final String HIGHLY_RELEVANT_SOURCES = "HighlyRelevantSources";
+    private static final String MOST_RELEVANT_SOURCES = "MostRelevantSources";
+    private static final String TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT = "TotalAggregatedScore_HighlyRelevant";
+    private static final String TOTAL_AGGREGATED_SCORE_MOST_RELEVANT = "TotalAggregatedScore_MostRelevant";
+    private static final String SOURCE_ID = "SourceID";
+    private static final String HASHED_EMAIL_ID = "HashedEmailIDBase64";
+    private static final String DATE = "Date";
 
 
     @Override

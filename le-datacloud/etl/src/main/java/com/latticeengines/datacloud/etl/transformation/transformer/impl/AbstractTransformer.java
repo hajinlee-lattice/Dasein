@@ -2,9 +2,10 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
@@ -22,22 +23,22 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
 
-    @Autowired
+    @Inject
     protected TransformationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     private ProgressHelper progressHelper;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
     protected T configuration;
 
-    abstract public String getName();
+    public abstract String getName();
 
-    abstract protected boolean validateConfig(T config, List<String> sourceNames);
+    protected abstract boolean validateConfig(T config, List<String> sourceNames);
 
-    abstract protected boolean transformInternal(TransformationProgress progress, String workflowDir,
+    protected abstract boolean transformInternal(TransformationProgress progress, String workflowDir,
             TransformStep step);
 
     protected Class<? extends TransformerConfig> getConfigurationClass() {

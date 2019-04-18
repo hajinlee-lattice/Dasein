@@ -15,8 +15,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(DnbCacheSeedCheckFlow.DATAFLOW_BEAN_NAME)
 public class DnbCacheSeedCheckFlow extends ConfigurableFlowBase<DnbCacheSeedChkConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "DnbCacheSeedCheckFlow";
-    public final static String TRANSFORMER_NAME = "DnbSeedFlowTransformer";
+
+    public static final String DATAFLOW_BEAN_NAME = "DnbCacheSeedCheckFlow";
+    public static final String TRANSFORMER_NAME = "DnbSeedFlowTransformer";
 
     @Override
     public String getDataFlowBeanName() {

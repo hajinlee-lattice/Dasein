@@ -21,16 +21,15 @@ import cascading.tuple.Fields;
 @Component(AMSeedManualFixFlow.DATAFLOW_BEAN_NAME)
 public class AMSeedManualFixFlow extends AccountMasterBase<ManualSeedTransformerConfig> {
 
-    public final static String DATAFLOW_BEAN_NAME = "AMSeedManualFixFlow";
-    public final static String TRANSFORMER_NAME = "AMSeedManualFixTransformer";
-    private final static String PRIMARY_ACCOUNT_YES = "Y";
-    private final static String PRIMARY_ACCOUNT_NO = "N";
-    private final static String DUNS = "DUNS";
-    private final static String DU = "DU";
-    private final static String LE_HQ = "LE_HQ";
-    private final static String INDICATOR = "INDICATOR";
-    public final static String MANUAL_SEED_LE_HQ = "MANUAL_SEED_LE_HQ";
-    private final static String MANUAL_DOMAIN_SOURCE = "Manual";
+    public static final String DATAFLOW_BEAN_NAME = "AMSeedManualFixFlow";
+    public static final String TRANSFORMER_NAME = "AMSeedManualFixTransformer";
+    private static final String PRIMARY_ACCOUNT_YES = "Y";
+    private static final String PRIMARY_ACCOUNT_NO = "N";
+    private static final String DUNS = "DUNS";
+    private static final String DU = "DU";
+    private static final String LE_HQ = "LE_HQ";
+    private static final String INDICATOR = "INDICATOR";
+    private static final String MANUAL_DOMAIN_SOURCE = "Manual";
 
     @Override
     public String getDataFlowBeanName() {
@@ -60,19 +59,18 @@ public class AMSeedManualFixFlow extends AccountMasterBase<ManualSeedTransformer
                 .filter(checkNullDuns, new FieldList(config.getManualSeedDuns()));
 
         // prepare manual Seed fieldList
-        List<String> manSeedFields = new ArrayList<String>();
+        List<String> manSeedFields = new ArrayList<>();
         manSeedFields.addAll(manualSeedDataSet.getFieldNames());
         manSeedFields.add(LE_HQ);
         manSeedFields.add(INDICATOR);
 
         // populate all field names
-        List<String> allFieldNames = new ArrayList<String>();
+        List<String> allFieldNames = new ArrayList<>();
         allFieldNames.addAll(manualSeedDataSet.getFieldNames());
         allFieldNames.addAll(amSeedDataSet.getFieldNames());
 
         // populate am Seed columns
-        List<String> amSeedFields = new ArrayList<String>();
-        amSeedFields.addAll(amSeedDataSet.getFieldNames());
+        List<String> amSeedFields = new ArrayList<>(amSeedDataSet.getFieldNames());
 
         // populate LE_HQ and INDICATOR fields in manual Seed
         Node manualSeedWithLeHq = populateLeHqInManSeed(config, amSeedDataSet, manualSeedDataSet, allFieldNames,

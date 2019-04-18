@@ -13,11 +13,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(RowsInRTSInOrbInAMFlow.DATAFLOW_BEAN_NAME)
 public class RowsInRTSInOrbInAMFlow extends ConfigurableFlowBase<RowsInRTSInOrbInAMConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "RowsInRTSInOrbInAMFlow";
-    public final static String TRANSFORMER_NAME = "RowsInRTSInOrbInAMTransformer";
-    public final static String RTS = "RTS";
-    public final static String DOMAIN_SRC_RTS = "DOMAIN_SRC_RTS";
-    public final static String RENAME = "RENAMED_";
+
+    public static final String DATAFLOW_BEAN_NAME = "RowsInRTSInOrbInAMFlow";
+    public static final String TRANSFORMER_NAME = "RowsInRTSInOrbInAMTransformer";
+    public static final String RTS = "RTS";
+    public static final String DOMAIN_SRC_RTS = "DOMAIN_SRC_RTS";
+    public static final String RENAME = "RENAMED_";
 
     @Override
     public String getDataFlowBeanName() {

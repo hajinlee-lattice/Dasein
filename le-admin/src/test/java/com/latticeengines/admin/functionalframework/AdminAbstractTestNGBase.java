@@ -66,8 +66,8 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
 
     private static final Logger log = LoggerFactory.getLogger(AdminAbstractTestNGBase.class);
 
-    protected static final String ADTesterUsername = "testuser1";
-    protected static final String ADTesterPassword = "Lattice1";
+    private static final String ADTesterUsername = "testuser1";
+    private static final String ADTesterPassword = "Lattice1";
     protected static BatonService batonService;
     protected static final FeatureFlagDefinition FLAG_DEFINITION = newFlagDefinition();
     protected static final String FLAG_ID = "TestFlag";
@@ -98,7 +98,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         }
     }
 
-    abstract protected String getRestHostPort();
+    protected abstract String getRestHostPort();
 
     protected void bootstrap(String contractId, String tenantId, String serviceName) {
         CustomerSpace space = new CustomerSpace();

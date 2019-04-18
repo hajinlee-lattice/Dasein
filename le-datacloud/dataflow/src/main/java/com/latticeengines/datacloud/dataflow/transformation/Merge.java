@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(Merge.DATAFLOW_BEAN_NAME)
 public class Merge extends ConfigurableFlowBase<TransformerConfig> {
+
     public static final String DATAFLOW_BEAN_NAME = "MergeFlow";
     public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_MERGE;
 

@@ -33,8 +33,10 @@ import cascading.tuple.Fields;
 
 @Component(AMCleanFlow.DATAFLOW_BEAN_NAME)
 public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfiguration, AMCleanerParameters> {
+
     public static final String DATAFLOW_BEAN_NAME = "AMCleanFlow";
     public static final String TRANSFORMER_NAME = "AMCleaner";
+
     private Map<CleanOpt, Pair<TypeConvertStrategy, Class<?>>> typeStrategies;
     private Map<TypeConvertStrategy, Class<?>> typeMetadata;
 

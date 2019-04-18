@@ -13,8 +13,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component("miniAMDomainDunsInitFlow")
 public class MiniAMDomainDunsInitFlow extends ConfigurableFlowBase<MiniAMDomainDunsInitConfig> {
-    private final static String DOMAIN_TYPE = "Domain";
-    private final static String DUNS_TYPE = "Duns";
+
+    private static final String DOMAIN_TYPE = "Domain";
+    private static final String DUNS_TYPE = "Duns";
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         List<String> miniAMAttr = getMiniAMAttr(parameters);

@@ -13,13 +13,13 @@ import com.latticeengines.domain.exposed.cdl.TalkingPoint;
 
 public class PlayUnitTestNG {
 
-    private final static String DISPLAY_NAME = "playHarder";
-    private final static String DESCRIPTION = "playHardest";
-    private final static String CREATED_BY = "lattice@lattice-engines.com";
-    private final static String TALKING_POINT_TITLE = "Reason to Buy";
-    private final static String TALKING_POINT_CONTENT = "Because we want your money";
+    private static final String DISPLAY_NAME = "playHarder";
+    private static final String DESCRIPTION = "playHardest";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String TALKING_POINT_TITLE = "Reason to Buy";
+    private static final String TALKING_POINT_CONTENT = "Because we want your money";
 
-    private final static Logger log = LoggerFactory.getLogger(PlayUnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayUnitTestNG.class);
 
     @Test(groups = "unit")
     public void testDeserialization() throws JsonProcessingException {

@@ -29,6 +29,6 @@ public abstract class ConfigurableFlowBase<T extends TransformerConfig>
         return config;
     }
 
-    abstract public Class<? extends TransformerConfig> getTransformerConfigClass();
+    public abstract Class<? extends TransformerConfig> getTransformerConfigClass();
 
 }

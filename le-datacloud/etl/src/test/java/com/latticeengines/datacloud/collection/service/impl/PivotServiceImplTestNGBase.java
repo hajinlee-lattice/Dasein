@@ -22,7 +22,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
-abstract public class PivotServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
+public abstract class PivotServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     PivotService pivotService;
     RefreshProgressEntityMgr progressEntityMgr;

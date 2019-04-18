@@ -56,7 +56,7 @@ public class RedisDataServiceProvider implements FabricDataServiceProvider {
         this.jedisPool = null;
     }
 
-    synchronized private void init() {
+    private synchronized void init() {
         if (initialized)
             return;
 

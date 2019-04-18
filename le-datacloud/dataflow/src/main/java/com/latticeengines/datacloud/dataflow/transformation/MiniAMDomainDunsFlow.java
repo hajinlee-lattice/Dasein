@@ -18,11 +18,14 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("miniAMDomainDunsFlow")
 public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsConfig> {
+
     private static final Logger log = LoggerFactory.getLogger(MiniAMDomainDunsFlow.class);
-    private final static String DNB_GU_VALUE = "GuDnbValue";
-    private final static String DNB_DU_VALUE = "DuDnbValue";
-    private final static String DOMAIN_TYPE = "Domain";
-    private final static String DUNS_TYPE = "Duns";
+
+    private static final String DNB_GU_VALUE = "GuDnbValue";
+    private static final String DNB_DU_VALUE = "DuDnbValue";
+    private static final String DOMAIN_TYPE = "Domain";
+    private static final String DUNS_TYPE = "Duns";
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         List<String> miniTargetTableAttr = getMiniTargetTableAttr(parameters);

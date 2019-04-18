@@ -47,13 +47,13 @@ public class FabricDataServiceImpl implements FabricDataService {
         return dataStore;
     }
 
-    synchronized public void addServiceProvider(FabricDataServiceProvider dsp) {
+    public synchronized void addServiceProvider(FabricDataServiceProvider dsp) {
         if (serviceProviders == null)
             initServiceProviders();
         serviceProviders.put(dsp.getName(), dsp);
     }
 
-    synchronized private FabricDataServiceProvider getServiceProvider(String store) {
+    private synchronized FabricDataServiceProvider getServiceProvider(String store) {
         if (serviceProviders == null) {
             initServiceProviders();
         }
@@ -62,7 +62,7 @@ public class FabricDataServiceImpl implements FabricDataService {
 
     private void initServiceProviders() {
 
-        serviceProviders = new HashMap<String, FabricDataServiceProvider>();
+        serviceProviders = new HashMap<>();
 
         // Add preconfigured data services
         if (redisService != null) {

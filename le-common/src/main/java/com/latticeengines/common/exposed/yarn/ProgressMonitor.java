@@ -19,7 +19,7 @@ import org.springframework.yarn.am.allocate.ContainerAllocator;
 
 public class ProgressMonitor {
 
-    private final static Logger log = LoggerFactory.getLogger(ProgressMonitor.class);
+    private static final Logger log = LoggerFactory.getLogger(ProgressMonitor.class);
 
     private static final int MAX_ATTEMPTS = 5;
 

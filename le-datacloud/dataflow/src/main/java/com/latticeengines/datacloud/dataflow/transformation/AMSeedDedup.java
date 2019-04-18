@@ -14,8 +14,9 @@ import cascading.tuple.Fields;
 
 @Component(AMSeedDedup.DATAFLOW_BEAN_NAME)
 public class AMSeedDedup extends ConfigurableFlowBase<AMSeedDedupConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "AMSeedDedup";
-    public final static String TRANSFORMER_NAME = "AMSeedDeduper";
+
+    public static final String DATAFLOW_BEAN_NAME = "AMSeedDedup";
+    public static final String TRANSFORMER_NAME = "AMSeedDeduper";
 
     @Override
     public String getDataFlowBeanName() {

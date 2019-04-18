@@ -213,11 +213,11 @@ public class TranslatorCommon {
         return translateTimeWindow(timeFilter, windowAgg);
     }
 
-    static public boolean isHasEngagedRestriction(TransactionRestriction txRestriction) {
+    public static boolean isHasEngagedRestriction(TransactionRestriction txRestriction) {
         return (txRestriction.getSpentFilter() == null && txRestriction.getUnitFilter() == null);
     }
 
-    static public Restriction translateHasEngagedToLogicalGroup(TransactionRestriction hasEngaged) {
+    public static Restriction translateHasEngagedToLogicalGroup(TransactionRestriction hasEngaged) {
         // PLS-8016, fix is commented out to match playmaker behavior
         /*
          * if (hasEngaged.getTimeFilter().getRelation() ==
@@ -244,12 +244,12 @@ public class TranslatorCommon {
         }
     }
 
-    static public boolean excludeNotPurchased(TransactionRestriction txRestriction) {
+    public static boolean excludeNotPurchased(TransactionRestriction txRestriction) {
         return excludeNotPurchasedInLessThanOperation(txRestriction.getSpentFilter())
                 || excludeNotPurchasedInLessThanOperation(txRestriction.getUnitFilter());
     }
 
-    static public Restriction translateExcludeNotPurchased(TransactionRestriction txRestriction) {
+    public static Restriction translateExcludeNotPurchased(TransactionRestriction txRestriction) {
 
         TransactionRestriction hasPurchased = new TransactionRestriction(txRestriction.getProductId(),
                 txRestriction.getTimeFilter(), false, null, null);

@@ -24,6 +24,9 @@
         <!-- Annotations -->
         <module name="PackageAnnotation"/>
 
+        <!-- Modifiers -->
+        <module name="ModifierOrder"/>
+
         <!-- Imports -->
         <module name="AvoidStarImport"/>
         <module name="UnusedImports"/>

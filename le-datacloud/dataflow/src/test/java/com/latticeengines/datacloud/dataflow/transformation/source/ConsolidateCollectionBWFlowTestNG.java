@@ -14,9 +14,9 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectio
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class ConsolidateCollectionBWFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private final static String FIELD_DOMAIN = "Domain";
-    private final static String FIELD_TECH_NAME = "Technology_Name";
-    private final static String FIELD_TIMESTAMP = "Last_Modification_Date";
+    private static final String FIELD_DOMAIN = "Domain";
+    private static final String FIELD_TECH_NAME = "Technology_Name";
+    private static final String FIELD_TIMESTAMP = "Last_Modification_Date";
 
     @Override
     protected String getFlowBeanName() {

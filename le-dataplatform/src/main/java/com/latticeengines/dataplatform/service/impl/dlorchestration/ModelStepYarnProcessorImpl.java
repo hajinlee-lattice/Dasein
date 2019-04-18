@@ -88,8 +88,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     @Autowired
     private DataLoaderService dataLoaderService;
 
-    private final static String FEATURES_THRESHOLD = "FeaturesThreshold";
-    private final static String MODELING_SERVICE_NAME = "Modeling";
+    private static final String FEATURES_THRESHOLD = "FeaturesThreshold";
+    private static final String MODELING_SERVICE_NAME = "Modeling";
 
     @VisibleForTesting
     void setDBConfig(String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, String dbType) {

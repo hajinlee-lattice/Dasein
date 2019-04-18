@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.FilterBucketedParame
 @Component(FilterBucketed.BEAN_NAME)
 public class FilterBucketed extends TypesafeDataFlowBuilder<FilterBucketedParameters> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(FilterBucketed.class);
 
     public static final String BEAN_NAME = "filterBucketed";

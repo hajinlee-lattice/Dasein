@@ -12,22 +12,22 @@ public final class StaticLoggerBinder implements LoggerFactoryBinder {
      * with each release.
      */
     public static final String REQUESTED_API_VERSION = "1.6.6";
-    
-    private static final StaticLoggerBinder singleton = new StaticLoggerBinder();
-    
-    private final ILoggerFactory loggerFactory = LoggerAdapter.newLoggerFactory(); 
- 
-    public static final StaticLoggerBinder getSingleton() {
+
+    private static static finalLoggerBinder singleton = new StaticLoggerBinder();
+
+    private final ILoggerFactory loggerFactory = LoggerAdapter.newLoggerFactory();
+
+    public static static finalLoggerBinder getSingleton() {
     	return singleton;
     }
-    
+
     private StaticLoggerBinder() { }
-    
+
     @Override
     public ILoggerFactory getLoggerFactory() {
         return loggerFactory;
     }
-    
+
     @Override
     public String getLoggerFactoryClassStr() {
         return loggerFactory.getClass().getName();

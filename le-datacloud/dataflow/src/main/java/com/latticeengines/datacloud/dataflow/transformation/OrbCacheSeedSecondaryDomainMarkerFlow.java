@@ -20,6 +20,7 @@ import cascading.operation.Function;
 @Component("orbCacheSeedMarkerTransformerFlow")
 public class OrbCacheSeedSecondaryDomainMarkerFlow
         extends ConfigurableFlowBase<OrbCacheSeedSecondaryDomainMarkerTransformerConfig> {
+
     private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedSecondaryDomainMarkerFlow.class);
 
     @Override

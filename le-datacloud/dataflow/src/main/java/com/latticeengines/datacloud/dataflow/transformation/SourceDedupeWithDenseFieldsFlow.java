@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("sourceDedupeWithDenseFieldsFlow")
 public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<SourceDedupeWithDenseFieldsTransformerConfig> {
+
     private static final String DENSE_FIELDS_COUNT = "__DENSE_FIELDS_COUNT__";
     private static final String NEW_DEDUPE_FIELD_PREFIX = "__NEW_DEDUPE_FIELD_PREFIX__";
 

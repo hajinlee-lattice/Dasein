@@ -23,11 +23,12 @@ import cascading.tuple.Fields;
 
 @Component(Diff.DATAFLOW_BEAN_NAME)
 public class Diff extends TransformationFlowBase<BasicTransformationConfiguration, DiffferParameters> {
-    public final static String DATAFLOW_BEAN_NAME = "DiffFlow";
-    public final static String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_DIFFER;
 
-    public final static String CHECK_SUM = "_CHECKSUM_";
-    public final static String COMP = "_COMP_";
+    public static final String DATAFLOW_BEAN_NAME = "DiffFlow";
+    public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_DIFFER;
+
+    private static final String CHECK_SUM = "_CHECKSUM_";
+    private static final String COMP = "_COMP_";
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -57,7 +58,7 @@ public class Diff extends TransformationFlowBase<BasicTransformationConfiguratio
                 JoinType.LEFT);
         joined = joined.filter(String.format("!%s.equals(%s)", CHECK_SUM, renameCompAttr(CHECK_SUM)),
                 new FieldList(CHECK_SUM, renameCompAttr(CHECK_SUM))).retain(new FieldList(finalAttrs));
-        
+
         return joined;
     }
 

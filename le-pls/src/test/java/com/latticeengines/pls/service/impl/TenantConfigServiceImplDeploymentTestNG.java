@@ -42,14 +42,14 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
-    private final static String contractId = "PLSTenantConfig";
-    private final static String tenantId = contractId;
-    private final static String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
+    private static final String contractId = "PLSTenantConfig";
+    private static final String tenantId = contractId;
+    private static final String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
     private static String PLSTenantId;
 
-    private final static String flagId = "PlsTestFlag";
-    private final static String undefinedFlagId = "PlsTestFlagUndefined";
-    private final static String noDefaultFlagId = "PlsTestFlagNoDefault";
+    private static final String flagId = "PlsTestFlag";
+    private static final String undefinedFlagId = "PlsTestFlagUndefined";
+    private static final String noDefaultFlagId = "PlsTestFlagNoDefault";
 
     @Value("${pls.dataloader.rest.api}")
     private String defaultDataLoaderUrl;
