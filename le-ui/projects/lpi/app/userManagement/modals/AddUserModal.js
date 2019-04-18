@@ -85,7 +85,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
     }
 
     $scope.allowExpireSelect = function(){
-        if ($scope.user && $scope.user.Email && $scope.user.Email.length && !$scope.showAddUserSuccess && isLatticeEmail($scope.user.Email)) {
+        if ($scope.user && $scope.user.Email && $scope.user.Email.length && isLatticeEmail($scope.user.Email)) {
             return true;
         }
     }
@@ -115,6 +115,11 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
         if (_.includes($scope.emails, $scope.user.Email)) {
             $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_CONFLICT_EMAIL");
             return false;
+        }
+
+        if (!$scope.user.AccessLevel) {
+        	$scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_NO_ACCESS_LEVEL");
+        	return false;
         }
 
         var targetLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel);

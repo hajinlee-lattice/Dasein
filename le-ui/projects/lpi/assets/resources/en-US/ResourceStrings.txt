@@ -120,6 +120,7 @@ ADD_USER_LAST_NAME_LABEL=Last Name
 ADD_USER_REQUIERD=All fields are required.
 ADD_USER_INVALID_EMAIL=Not a valid email address.
 ADD_USER_CONFLICT_EMAIL=There is already a user in this tenant using the same email address.
+ADD_USER_NO_ACCESS_LEVEL=Invalid operation.
 ADD_USER_EXTERNAL_EMAIL_INTERNAL_ROLE=Only emails in the domain lattice-engines.com can be assigned to an internal access level.
 ADD_USER_INTERNAL_EMAIL_EXTERNAL_ROLE=An email in the domain lattice-engines.com cannot be assigned to an external access level.
 ADD_USERS_WAIT=Adding new user ...
