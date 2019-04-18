@@ -72,7 +72,7 @@
         <Connector port="9076" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -95,7 +95,7 @@
         <Connector port="9085" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -118,7 +118,7 @@
         <Connector port="9071" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -141,7 +141,7 @@
         <Connector port="9072" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -164,7 +164,7 @@
         <Connector port="9073" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -187,7 +187,7 @@
         <Connector port="9087" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -210,7 +210,7 @@
         <Connector port="9074" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -233,7 +233,7 @@
         <Connector port="9075" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -256,7 +256,7 @@
         <Connector port="9080" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />
@@ -279,7 +279,7 @@
         <Connector port="9081" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-                   connectionTimeout="60000"
+                   useAsyncIO="true" connectionTimeout="60000"
                    compression="on" compressibleMimeType="text/plain,application/json" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="60000" writeTimeout="60000" compression="on" />

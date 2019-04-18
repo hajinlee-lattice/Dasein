@@ -12,10 +12,6 @@ export LE_PROPDIR=$WSHOME/le-config/conf/env/${LE_ENVIRONMENT}
 echo "Using LE_PROPDIR=${LE_PROPDIR}"
 echo "Using LE_CLIENT_ADDRESS=${LE_CLIENT_ADDRESS}"
 
-if [[ -n "${J11_HOME}" ]]; then
-    export JAVA_HOME=${J11_HOME}
-fi
-
 export CATALINA_OPTS="-server -Xmx4g -XX:ReservedCodeCacheSize=512m"
 export CATALINA_OPTS="${CATALINA_OPTS} -Djava.net.preferIPv4Stack=true"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dsqoop.throwOnError=true"

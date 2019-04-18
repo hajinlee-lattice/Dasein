@@ -27,6 +27,12 @@ source $WSHOME/le-dev/aliases
 # Top-level compile
 echo "Changing dir into workspace"
 cd $WSHOME
+
+OLD_JAVA_HOME=${JAVA_HOME}
+if [[ -n "${J11_HOME}" ]]; then
+    export JAVA_HOME=${J11_HOME}
+fi
+
 echo "Top-level compile"
 mvn -T8 -Pcheckstyle -DskipTests clean install 2> /tmp/errors.txt
 processErrors
@@ -65,6 +71,7 @@ fi
 source ${ANACONDA_HOME}/bin/deactivate
 
 echo "Clean up old test tenants"
+export JAVA_HOME=${OLD_JAVA_HOME}
 runtest testframework -g cleanup -t GlobalAuthCleanupTestNG
 
 echo "Success!!!"
