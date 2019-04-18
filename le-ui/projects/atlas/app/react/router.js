@@ -3,8 +3,9 @@ import {
     servicesPlugin,
     hashLocationPlugin
 } from "common/react-vendor";
-import { mtstates } from "atlas/import/templates/multiple/multiple-templates.state.js";
-
+import mainStates  from "./mainstates";
+import {actions as bannerActions} from 'common/widgets/banner/le-banner.redux';
+import { store } from 'store';
 
 class ReactRouter {
     constructor() {
@@ -22,7 +23,8 @@ class ReactRouter {
         this.routing.router.plugin(hashLocationPlugin);
 
         // Register each state
-        const states = mtstates;
+        const states = mainStates;
+        console.log('STATE ',states);
         states.forEach(state => this.routing.router.stateRegistry.register(state));
 
         // Set initial and fallback states
@@ -34,8 +36,8 @@ class ReactRouter {
         });
 
         this.routing.router.transitionService.onSuccess(true, function (trans) {
-            // console.log("Nav End");
-            // Do something after transition
+            // // Do something after transition
+            bannerActions.closeBanner(store);
         });
 
         this.routing.router.transitionService.onError(true, function (err) {
@@ -56,11 +58,14 @@ class ReactRouter {
         return this.routing.router.stateService;
     }
     getCurrentState() {
-        console.log('SS ==> ',this.routing.router.stateService);
+        // console.log('SS ==> ',this.routing.router.stateService);
         let currentState = this.routing.router.stateService.current;
-        console.log('CURRENT ',currentState);
+        // console.log('CURRENT ',currentState);
         return currentState;
     }
+    /**
+     * 
+     */
     clear() {
         delete this.routing.router;
     }

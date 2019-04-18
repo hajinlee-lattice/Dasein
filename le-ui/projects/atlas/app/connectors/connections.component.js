@@ -1,31 +1,31 @@
-
 import React, { Component } from "common/react-vendor";
-import './connectors-list.scss';
-import LeVPanel from 'common/widgets/container/le-v-panel';
-import LeHPanel from 'common/widgets/container/le-h-panel';
-import { LeToolBar, HORIZONTAL } from 'common/widgets/toolbar/le-toolbar';
-import LeModal from "common/widgets/modal/le-modal";
-import LeButton from "common/widgets/buttons/le-button";
+
 import { CENTER, LEFT } from 'common/widgets/container/le-alignments';
-import Connector from './connector.component';
-import ReactRouter from 'atlas/react/router';
-// import ConnectorsRoutes from "./connectors-routing";
 import { openConfigWindow, solutionInstanceConfig } from "./configWindow";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
+import LeButton from "common/widgets/buttons/le-button";
+import ReactRouter from 'atlas/react/router';
+import './connections.component.scss';
+import LeVPanel from 'common/widgets/container/le-v-panel';
+import LeHPanel from 'common/widgets/container/le-h-panel';
+import { LeToolBar, HORIZONTAL } from 'common/widgets/toolbar/le-toolbar';
+import Connector from './connector.component';
+
 import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
-export class ConnectorList extends Component {
+import SystemsListComponent from './systesms-list.component';
+import ReactMainContainer from "../react/react-main-container";
+
+export default class ConnectionsComponent extends Component {
     constructor(props) {
         super(props);
-        // console.log('THE PROPS ', props);
-        this.clickHandler = this.clickHandler.bind(this);
+        this.ConnectorsService = ReactRouter.getRouter().ngservices.ConnectorsService;
         this.generateAuthTokenClickHandler = this.generateAuthTokenClickHandler.bind(this);
-        this.modalCallback = this.modalCallback.bind(this);
-        this.getIFrame = this.getIFrame.bind(this);
+        this.clickHandler = this.clickHandler.bind(this);
         this.state = {
-            connectorSelected: this.props.ConnectorsService.getConnector(),
+            connectorSelected: '',
             userValidated: false,
             userInfo: null,
             userName: null,
@@ -34,9 +34,10 @@ export class ConnectorList extends Component {
             solutionInstanceId: null,
             openModal: false
         };
-        this.connectors = ConnectorService.getList(this.props.ConnectorsService.isMarketoEnabled());
-
+        this.connectors = this.connectors = ConnectorService.getList(this.ConnectorsService.isMarketoEnabled());
+        // console.log('UUUUUUU ',ReactRouter.getRouter().ngservices.ConnectorsService.isMarketoEnabled());
     }
+
     componentDidMount() {
         this.getTrayUserName(response => {
             console.log("getTrayUserName");
@@ -47,21 +48,6 @@ export class ConnectorList extends Component {
         } else {
             this.validateUser(userName);
         }
-
-        this.router.stateService.go('profiles', { nameConnector: this.state.connectorSelected });
-        ConnectorService.getList();
-
-    }
-
-    generateAuthTokenClickHandler() {
-        if (ConnectorService.getConnectorName() != '' && ConnectorService.getConnectorName() != MARKETO) {
-            ConnectorService.sendMSG(() => {
-                this.props.ConnectorsService.generateAuthToken();
-            });
-        } else if (ConnectorService.getConnectorName() == MARKETO) {
-            this.getSolutionConfiguration(this.state.userInfo.id, MARKETO, this.state.userName + '_' + MARKETO + '_' + (new Date()).getTime());
-        }
-
     }
 
     clickHandler(name) {
@@ -73,7 +59,17 @@ export class ConnectorList extends Component {
             ConnectorService.setUserValidated(true);
             this.validateUser(this.state.userName)
         }
-        this.router.stateService.go('profilesconnector', { nameConnector: name });
+        // this.router.stateService.go('profilesconnector', { nameConnector: name });
+
+    }
+    generateAuthTokenClickHandler() {
+        if (ConnectorService.getConnectorName() != '' && ConnectorService.getConnectorName() != MARKETO) {
+            ConnectorService.sendMSG(() => {
+                this.ConnectorsService.generateAuthToken();
+            });
+        } else if (ConnectorService.getConnectorName() == MARKETO) {
+            this.getSolutionConfiguration(this.state.userInfo.id, MARKETO, this.state.userName + '_' + MARKETO + '_' + (new Date()).getTime());
+        }
 
     }
 
@@ -162,17 +158,6 @@ export class ConnectorList extends Component {
         httpService.post('/tray/authorize?userId=' + userId, {}, observer);
     }
 
-    modalCallback(action) {
-        switch (action) {
-            case 'close':
-                this.setState({ openModal: false });
-                break;
-            case 'ok':
-                this.setState({ openModal: false, saving: true });
-                break;
-        }
-    }
-
     getIFrame() {
         let partnerId = 'LatticeEngines';
         let url = `https://app.tray.io/external/solutions/${partnerId}/configure/${this.state.solutionInstanceId}?code=${this.state.authorizationCode}`;
@@ -198,8 +183,6 @@ export class ConnectorList extends Component {
         );
     }
 
-
-
     getConnectros() {
         let connectors = this.connectors.map((obj, index) => {
             return (
@@ -215,15 +198,11 @@ export class ConnectorList extends Component {
         return connectors;
     }
 
-
-
     render() {
         return (
-            <div className="main-panel">
-                <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Configuration Wizard" template={this.getIFrame} />
+            <ReactMainContainer>
+            <LeVPanel hstrech={'true'}>
                 <h2 className="connectors-title">Add a new connection</h2>
-                {/* <LeHPanel hstretch={"true"} halignment={CENTER}>
-                </LeHPanel> */}
                 <LeVPanel halignment={CENTER}>
                     
                     <LeHPanel hstretch={"true"} halignment={CENTER} valignment={CENTER}>
@@ -233,10 +212,8 @@ export class ConnectorList extends Component {
                         </LeHPanel>
                         {/* <button>R</button> */}
                     </LeHPanel>
-
                 </LeVPanel>
-
-                <LeToolBar direction={HORIZONTAL}>
+                <LeToolBar direction={HORIZONTAL} className={"strech"}>
                     <div className="right">
                         <LeButton
                             name="credentials"
@@ -249,50 +226,9 @@ export class ConnectorList extends Component {
                         />
                     </div>
                 </LeToolBar>
-            </div>
+                <SystemsListComponent />
+            </LeVPanel>
+            </ReactMainContainer>
         );
     }
 }
-
-// angular
-//     .module("le.connectors.list", ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
-//     .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
-//         let ConnectorsService = this;
-//         this.getConnector = function () {
-//             console.log('Test', $state.router.locationConfig.$location.$$hash);
-//             let hash = $state.router.locationConfig.$location.$$hash;
-//             console.log(hash);
-//             let selected = '';
-//             if (hash != '') {
-//                 let hashArray = hash.split('/');
-//                 // console.log('ARRAY ', hashArray[1]);
-//                 selected = hashArray[1];
-//             }
-//             return selected;
-//         };
-//         this.generateAuthToken = function () {
-//             let clientSession = BrowserStorageUtility.getClientSession();
-//             let emailAddress = clientSession.EmailAddress;
-//             let tenantId = clientSession.Tenant.Identifier;
-//             SfdcService.generateAuthToken(emailAddress, tenantId).then(function (result) {
-//                 if (result.Success == true) {
-//                     Notice.success({
-//                         delay: 5000,
-//                         title: 'Email sent to ' + emailAddress,
-//                         message: 'Your one-time authentication token has been sent to your email.'
-//                     });
-//                 } else {
-//                     Banner.error({ message: 'Failed to Generate Salesforce Access Token.' });
-
-//                 }
-//             });
-//         }
-//         this.isMarketoEnabled = function () {
-//             let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
-//             return connectorsEnabled;
-//         }
-//     })
-//     .component(
-//         "connectorListComponent",
-//         react2angular(ConnectorList, [], ['$state', 'ConnectorsService'])
-//     );

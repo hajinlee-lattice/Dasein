@@ -39,21 +39,15 @@ angular
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Data Processing & Analysis'
             },
-            onEnter: ($state, ReduxService) => {
-                ReduxService.connect(
-                    'multitemplates',
-                    actions,
-                    reducer,
-                    $state.get('home.multipletemplates')
-                )
-            },
-            onExit: function ($state) {
-                console.log('multitemplates unsubscribe store');
-                $state.get('home.multipletemplates').data.redux.unsubscribe();
-            },
             resolve: {
                 path: () => {
                     return 'templateslist';
+                },
+                ngservices: (ImportWizardStore) => {
+                    let obj = {
+                        ImportWizardStore: ImportWizardStore
+                    }
+                    return obj;
                 }
             },
             views: {

@@ -12,6 +12,9 @@ import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
+import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
+import { store } from 'store';
+import { LARGE_SIZE, MEDIUM_SIZE } from "../../../../../common/widgets/modal/le-modal.utils";
 export default class SystemCreationComponent extends Component {
     constructor(props) {
         super(props);
@@ -30,21 +33,21 @@ export default class SystemCreationComponent extends Component {
     componentWillUnmount() {
 
     }
-    validate(){
-        if(this.state.systemSelected && this.state.newSystemName.trim() != ''){
-            this.setState({valid:true});
-        }else {
-            this.setState({valid:false});
+    validate() {
+        if (this.state.systemSelected && this.state.newSystemName.trim() != '') {
+            this.setState({ valid: true });
+        } else {
+            this.setState({ valid: false });
         }
     }
 
     getSystemSupported() {
         let systems = [];
         this.systemsObj.forEach(system => {
-            console.log(this.state);
+            // console.log(this.state);
             systems.push(
                 <LeCard classNames={`${'system-creation'} ${(this.state.systemSelected && this.state.systemSelected.name) == system.name ? 'selected' : ''}`} clickHandler={() => {
-                    console.log('CLIKC');
+                    // console.log('CLIKC');
                     this.setState({ systemSelected: system }, this.validate);
                 }}>
                     <div className="system-image"><LeCardImg src={system.img} /></div>
@@ -75,14 +78,14 @@ export default class SystemCreationComponent extends Component {
                             label: 'System Name'
                         }} callback={
                             (val) => {
-                                console.log('VALUE ', val);
-                                this.setState({newSystemName: val}, this.validate);
+                                // console.log('VALUE ', val);
+                                this.setState({ newSystemName: val }, this.validate);
                             }
                         }></LeInputText>
                     </LeHPanel>
-                    <p className="le-description">The system will automatically create default field mappings between Lattice and Salesforce. The system will automatically create 3 separate field mapping one each for Salesforce Accounts, Contacts & Leads. ​
+                    <p className="le-description">The system will automatically create default field mappings between Lattice and Salesforce. The system will automatically create 3 separate field mapping one each for Salesforce Accounts, Contacts & Leads.
                      <br /><br />
-                     These field mappings are here to help you get you started quickly and can be edited anytime. 
+                        These field mappings are here to help you get you started quickly and can be edited anytime.
                     </p>
                 </LeVPanel>
                 <LeToolBar justifycontent={SPACE_BETWEEN}>
@@ -101,12 +104,25 @@ export default class SystemCreationComponent extends Component {
                         name="create"
                         disabled={!this.state.valid}
                         config={{
-                            label: "Create",
+                            label: "Create Leo",
                             classNames: "blue-button"
                         }}
                         callback={() => {
-                            ReactRouter.getStateService().go('templateslist');
-                            // alert('Call APIS');
+                            let config = {
+                                callback: (action) => {
+                                    modalActions.closeModal(store);
+                                },
+                                template: () => {
+                                    return (<p>Leo test</p>)
+                                },
+                                title: () => {
+                                    return (<p>TEST</p>);
+                                },
+                                oneButton: false,
+                                hideFooter: false,
+                                size: MEDIUM_SIZE
+                            }
+                            modalActions.error(store, config);
                         }}
                     />
                 </LeToolBar>

@@ -1,8 +1,8 @@
 import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
-import ReactRouter from '../../../react/router';
 import { actions, reducer } from './multipletemplates.redux';
 import LeHPanel from 'common/widgets/container/le-h-panel';
+import ReactRouter from '../../../react/router';
 import {
     SPACEBETWEEN,
     SPACEEVEN,
@@ -27,10 +27,15 @@ import './multiple-templates.list.scss';
 import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
 import ReactMainContainer from "atlas/react/react-main-container";
 import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
+
+import {actions as bannerActions} from '../../../../../common/widgets/banner/le-banner.redux';
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
         super(props);
+        console.log('TTTT ', ReactRouter.getRouter());
+        let tmp = ReactRouter.getRouter()['ngservices'].ImportWizardStore.getAccountIdState();
+        console.log('AAAAA ', tmp);
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
         this.state = {
@@ -234,7 +239,9 @@ export default class MultipleTemplatesList extends Component {
                     template: cell => {
                         return (
                             <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
-                                <i class="fa fa-upload" aria-hidden="true"></i>
+                                <i class="fa fa-upload" aria-hidden="true" onClick={() => {
+                                    bannerActions.openBanner(store, {title: 'Test Banner', message: 'Here the message'});
+                                }}></i>
                                 <i class="fa fa-plus" aria-hidden="true"></i>
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
 

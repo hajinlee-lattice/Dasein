@@ -1,4 +1,4 @@
-import React, { Component, react2angular } from "common/react-vendor";
+import React, { Component } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
@@ -8,16 +8,17 @@ import SystemComponent from './system.component';
 
 import SystemsService from './systems.service';
 import ConnectorService from './connectors.service';
-
-import './systems.component.scss';
+import LeVPanel from 'common/widgets/container/le-v-panel';
+import './systesms-list.component.scss';
 import { MEDIUM_GAP } from "../../../common/widgets/container/grid-layout.component";
-export default class SystemsComponent extends Component {
+export default class SystemsListComponent extends Component {
     constructor(props) {
         super(props);
         this.state = { connectors: [], loading: true };
     }
 
     componentDidMount() {
+        this.setState({loading: true});
         httpService.get(
             "/pls/lookup-id-mapping",
             new Observer(response => {
@@ -25,7 +26,8 @@ export default class SystemsComponent extends Component {
                 let MAPs = response.data.MAP || [];
                 let connectors = CRMs.concat(MAPs);
                 SystemsService.cleanupLookupId(connectors);
-                this.setState({ loading: false, connectors: connectors, count: connectors.length });
+                    this.setState({ loading: false, connectors: connectors, count: connectors.length });
+                
             })
         );
     }
@@ -59,18 +61,10 @@ export default class SystemsComponent extends Component {
     }
     render() {
         return (
-            <div className="systems-main">
+            <LeVPanel hstretch={'true'} className="systems-main">
                 {this.getCount()}
-                <GridLayout gap={MEDIUM_GAP} classNames="systems-list">{this.getSystems()}</GridLayout>
-            </div>
+                <GridLayout gap={MEDIUM_GAP} classNames="systems-list extends">{this.getSystems()}</GridLayout>
+            </LeVPanel>
         );
     }
 }
-
-angular
-    .module("le.systems.list", [])
-
-    .component(
-        "systemsComponent",
-        react2angular(SystemsComponent, [], ['$state'])
-    );
