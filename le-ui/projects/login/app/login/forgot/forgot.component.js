@@ -44,7 +44,7 @@ angular.module('login.forgot', [
                 if (result.Success === true) {
                     vm.resetPasswordSuccess = true;
                 } else {
-                    var message = "";
+                    var message = '';
 
                     if (result.Error.errorCode == 'LEDP_18018') {
                         vm.forgotPasswordUsernameInvalid = true;

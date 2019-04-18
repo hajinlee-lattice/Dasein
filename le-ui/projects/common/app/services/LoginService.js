@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 angular.module('mainApp.login.services.LoginService', [
     'common.utilities.browserstorage',
     'mainApp.appCommon.utilities.UnderscoreUtility',
@@ -178,21 +179,21 @@ angular.module('mainApp.login.services.LoginService', [
         var deferred = $q.defer();
 
         $http({
-            method: 'PUT',
-            url: "/pls/forgotpassword/",
-            data: {Username: username, Product: "Lead Prioritization", HostPort: this.getHostPort()},
-            headers: {"Content-Type": "application/json"}
+            method: 'GET',
+            url: '/reset/confirm',
+            params: {userName: username},
+            headers: {'Content-Type': 'application/json'}
         }).then(
-            function onSuccess(data, status, headers, config){
+            function onSuccess(data, status, _headers, _config){
                 var result = { Success: false };
-                if (data.data === true || data.data === 'true') {
+                if (data.status === 200) {
                     result.Success = true;
                 } else {
                     SessionService.HandleResponseErrors(data.data, status);
                 }
                 deferred.resolve(result);
             },
-            function onError(data, status, headers, config){
+            function onError(data, _status, _headers, _config){
                 var result = { Success: false, Error: data.data };
                 deferred.resolve(result);
             }
