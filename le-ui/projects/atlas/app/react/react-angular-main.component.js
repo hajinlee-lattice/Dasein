@@ -34,7 +34,7 @@ export default class ReactAngularMainComponent extends Component {
                 <UIRouter router={ReactRouter.getRouter()}>
                     <UIView name="header" />
 
-                    <UIView name="summary" ui-view="summary"/>
+                    <UIView name="summary"/>
                     <UIView name="subsummary" />
                     <div id="react-banner-container"></div>
                     <LeBanner store={store}  injectAsyncReducer={injectAsyncReducer} reduxstate={REDUX_STATE_BANNER} />

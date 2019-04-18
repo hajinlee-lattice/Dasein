@@ -1,13 +1,4 @@
-// import './connectors-list.component';
-// import './systems.component';
-// import './profiles.component';
-// import ConnectorsRoutes from "./connectors-routing";
 import 'atlas/react/react-angular-main.component';
-// &.ico-connectors{
-//     background-color: $pearl-white;
-//     -webkit-mask-image: url("/assets/images/connections.png");
-//     mask: url("/assets/images/connections.png");
-// }
 angular
 .module('le.connectors', ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
 .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
@@ -71,12 +62,6 @@ angular
                 'main@': {
                     component: 'reactAngularMainComponent'
                 }
-                // 'summary@': {
-                //     component: 'connectorListComponent'
-                // },
-                // 'main@': {
-                //     component: 'systemsComponent'
-                // }
             }
         });
         
