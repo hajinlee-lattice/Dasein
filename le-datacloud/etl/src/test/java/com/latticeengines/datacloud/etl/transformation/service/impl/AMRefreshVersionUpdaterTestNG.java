@@ -36,8 +36,9 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        for (int i = 0; i < 3; i++) { // iterating twice to test if step is
-                                      // re-run and source is re-generated if _SUCCESS flag is absent
+        for (int i = 0; i < 3; i++) { // iterating thrice to test if step is
+                                      // re-run and source is re-generated if
+                                      // _SUCCESS flag is present and absent cases
             iteration = i;
             refreshVerValBefore = Long.valueOf(
                     dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
@@ -130,7 +131,8 @@ public class AMRefreshVersionUpdaterTestNG
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
             }
-            if (iteration == 1) {
+            if (iteration == 1) { // success flag present so should not retry :
+                                  // output same as earlier
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
                 String targetSrcPath = getPathForResult() + "/_SUCCESS";
@@ -140,7 +142,8 @@ public class AMRefreshVersionUpdaterTestNG
                     log.error("Error in deleting provided source path : ", e);
                 }
             }
-            if (iteration == 2) {
+            if (iteration == 2) { // success flag absent so should retry : new
+                                  // output generated
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "yahoo.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "111111111"));
             }
