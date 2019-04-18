@@ -14,20 +14,20 @@ import cascading.tuple.TupleEntry;
 public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstructAggregator.Context>
         implements Aggregator<DomOwnerConstructAggregator.Context> {
 
-    public final static String GOVERNMENT = "Government";
-    public final static String EDUCATION = "Education";
-    public final static String NON_PROFIT = "Non-profit";
-    public final static Long NON_PROFIT_TOTAL_SALES = 1000000L;
-    public final static Integer NON_PROFIT_TOTAL_EMP = 200;
+    public static final String GOVERNMENT = "Government";
+    public static final String EDUCATION = "Education";
+    public static final String NON_PROFIT = "Non-profit";
+    public static final Long NON_PROFIT_TOTAL_SALES = 1000000L;
+    public static final Integer NON_PROFIT_TOTAL_EMP = 200;
     private static final long serialVersionUID = -4258093110031791835L;
-    private final static String FRANCHISE = "FRANCHISE";
-    private final static String HIGHER_SALES_VOLUME = "HIGHER_SALES_VOLUME";
-    private final static String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
-    private final static String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
-    private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
-    private final static String MISSING_ROOT_DUNS = "MISSING_ROOT_DUNS";
-    private final static String SINGLE_TREE = "SINGLE_TREE";
-    private final static String OTHER = "OTHER";
+    private static final String FRANCHISE = "FRANCHISE";
+    private static final String HIGHER_SALES_VOLUME = "HIGHER_SALES_VOLUME";
+    private static final String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
+    private static final String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
+    private static final String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
+    private static final String MISSING_ROOT_DUNS = "MISSING_ROOT_DUNS";
+    private static final String SINGLE_TREE = "SINGLE_TREE";
+    private static final String OTHER = "OTHER";
     private String domainField = DataCloudConstants.AMS_ATTR_DOMAIN;
     private String rootDunsField;
     private String treeRootDunsField;

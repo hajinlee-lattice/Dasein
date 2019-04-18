@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -23,9 +21,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CopierParameters;
  */
 @Component(BEAN_NAME)
 public class Copy extends TypesafeDataFlowBuilder<CopierParameters> {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(Copy.class);
 
     public static final String BEAN_NAME = "copy";
 

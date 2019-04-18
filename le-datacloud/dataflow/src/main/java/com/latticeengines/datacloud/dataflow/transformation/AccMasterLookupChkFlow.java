@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(AccMasterLookupChkFlow.DATAFLOW_BEAN_NAME)
 public class AccMasterLookupChkFlow extends ConfigurableFlowBase<AccMastrLookupChkConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "AccMasterLookupChkFlow";
-    public final static String TRANSFORMER_NAME = "AMLookupFlowTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "AccMasterLookupChkFlow";
+    public static final String TRANSFORMER_NAME = "AMLookupFlowTransformer";
 
     @Override
     public String getDataFlowBeanName() {

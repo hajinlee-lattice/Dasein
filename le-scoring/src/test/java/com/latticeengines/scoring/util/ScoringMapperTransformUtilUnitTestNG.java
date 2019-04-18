@@ -36,16 +36,16 @@ public class ScoringMapperTransformUtilUnitTestNG {
 
     private static final String SUMMARY = "Summary";
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
-    private final static String DATA_PATH = "com/latticeengines/scoring/data/";
-    private final static String MODEL_PATH = "com/latticeengines/scoring/models/";
-    private final static String PYTHON_PATH = "com/latticeengines/scoring/python/testscoring.py";
-    private final static String MODEL_SUPPORTED_FILE_PATH = "com/latticeengines/scoring/models/supportedFiles/";
-    private final static String UUID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
-    private final static String MODEL_NAME = "2Checkout_relaunch_PLSModel_2015-03-19_15-37";
-    private final static String PROPER_TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
+    private static final String DATA_PATH = "com/latticeengines/scoring/data/";
+    private static final String MODEL_PATH = "com/latticeengines/scoring/models/";
+    private static final String PYTHON_PATH = "com/latticeengines/scoring/python/testscoring.py";
+    private static final String MODEL_SUPPORTED_FILE_PATH = "com/latticeengines/scoring/models/supportedFiles/";
+    private static final String UUID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
+    private static final String MODEL_NAME = "2Checkout_relaunch_PLSModel_2015-03-19_15-37";
+    private static final String PROPER_TEST_RECORD = "{\"LeadID\": \"837394\", \"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI\"}";
-    private final static String IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID = "{\"ModelingID\": 113880, \"PercentileModel\": null, "
+    private static final String IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID = "{\"ModelingID\": 113880, \"PercentileModel\": null, "
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
 

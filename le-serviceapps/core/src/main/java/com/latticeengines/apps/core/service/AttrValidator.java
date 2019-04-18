@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 
 public abstract class AttrValidator {
 
-    private final static Map<String, AttrValidator> validators = new HashMap<>();
+    private static final Map<String, AttrValidator> validators = new HashMap<>();
 
     protected AttrValidator(String name) {
         validators.put(name, this);

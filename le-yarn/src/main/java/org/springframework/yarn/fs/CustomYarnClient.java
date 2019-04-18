@@ -3,20 +3,20 @@ package org.springframework.yarn.fs;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.yarn.client.ClientRmOperations;
 import org.springframework.yarn.client.ClientRmTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 
 public class CustomYarnClient extends CommandYarnClient {
 
-    private final static Logger log = LoggerFactory.getLogger(CommandYarnClient.class);
+    private static final Logger log = LoggerFactory.getLogger(CommandYarnClient.class);
 
     private ClientRmTemplate clientRmTemplate;
 

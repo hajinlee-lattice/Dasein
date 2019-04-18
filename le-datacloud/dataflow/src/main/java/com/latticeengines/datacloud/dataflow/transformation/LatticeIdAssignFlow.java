@@ -26,9 +26,9 @@ public class LatticeIdAssignFlow
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(LatticeIdAssignFlow.class);
 
-    public final static String BEAN_NAME = "latticeIdAssignFlow";
+    public static final String BEAN_NAME = "latticeIdAssignFlow";
 
-    private final static String ID = "ID_";
+    private static final String ID = "ID_";
 
     @Override
     public Node construct(LatticeIdRefreshFlowParameter parameters) {

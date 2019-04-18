@@ -26,7 +26,7 @@ public abstract class AbstractModelWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractModelWorkflowSubmitter.class);
 
-    private final static String MODELING_PROFILING_VERSION = "ModelingProfilingVersion";
+    private static final String MODELING_PROFILING_VERSION = "ModelingProfilingVersion";
     private static final String MODELING_PROFILING_V2 = "v2";
 
     @Inject

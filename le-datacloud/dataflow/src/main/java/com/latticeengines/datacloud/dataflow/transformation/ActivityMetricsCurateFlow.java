@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -47,8 +45,6 @@ import cascading.tuple.Fields;
 
 @Component(ActivityMetricsCurateFlow.BEAN_NAME)
 public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityMetricsCuratorConfig> {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ActivityMetricsCurateFlow.class);
 
     public static final String BEAN_NAME = "activityMetricsCurateFlow";
 
@@ -288,7 +284,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
                 .singletonList(new Aggregation("_SPSpend_", "_STSpend_", AggregationType.SUM));
         Node stSpend = spSpend.groupBy(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), semgentTotalSpendAgg)
                 .renamePipe("_st_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
-        
+
         Node base = atSpend
                 .join(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), spSpend,
                         new FieldList(InterfaceName.SpendAnalyticsSegment.name()), JoinType.INNER) //

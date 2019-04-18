@@ -38,8 +38,8 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
     public static final String MAP_STAGE = "MapStage";
     public static final String DERIVE_STAGE = "DeriveStage";
     public static final String REFRESH_STAGE = "RefreshStage";
-  
-    int joinKeyIdx = 0;
+
+    private int joinKeyIdx = 0;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -82,7 +82,7 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
         for (MapAttributeConfig.JoinConfig joinConfig : joinConfigs) {
 
              List<String> seedJoinFields = joinConfig.getKeys();
-             
+
              List<Node> sources = new ArrayList<Node>();
 
              for (MapAttributeConfig.JoinTarget joinTarget : joinConfig.getTargets()) {
@@ -99,7 +99,7 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
 
              joined = convergeSources(joined, seed, sources, seedId, seedJoinFields, joinKeyMap);
              log.info("Converged " + sources.size() + " sources");
- 
+
         }
 
         FieldList joinFields = getJoinFields(joined);
@@ -157,7 +157,7 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
                   if (found) {
                       continue;
                   }
-             } 
+             }
              sourceAttrs.add(srcAttr);
              outputAttrs.add(mapConfig.getTarget());
         }
@@ -196,9 +196,9 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
                 sourceAttributes.put(origSource, attrsPerSrc);
             }
             attrsPerSrc.add(mapFunc);
-        } 
+        }
         return sourceAttributes;
-    } 
+    }
 
     private Node convergeSources(Node joined, Node seed, List<Node> nodes, String seedId, List<String> seedJoinKey, Map<Node, String> joinKeyMap) {
 

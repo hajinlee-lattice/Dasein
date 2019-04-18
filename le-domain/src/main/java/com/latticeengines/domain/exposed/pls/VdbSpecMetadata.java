@@ -177,14 +177,14 @@ public class VdbSpecMetadata {
     }
 
     @JsonIgnore
-    private final static Set<String> NUMERIC_TYPE = new HashSet<>(Arrays.asList(
+    private static final Set<String> NUMERIC_TYPE = new HashSet<>(Arrays.asList(
             "byte", "int", "long", "float", "double"));
 
     @JsonIgnore
-    private final static Set<String> BOOLEAN_TYPE = new HashSet<>(Collections.singletonList("bit"));
+    private static final Set<String> BOOLEAN_TYPE = new HashSet<>(Collections.singletonList("bit"));
 
     @JsonIgnore
-    private final static Set<String> DATE_TYPE = new HashSet<>(Arrays.asList("date", "datetime", "datetimeoffset"));
+    private static final Set<String> DATE_TYPE = new HashSet<>(Arrays.asList("date", "datetime", "datetimeoffset"));
 
     @JsonIgnore
     public boolean isNumericType() {

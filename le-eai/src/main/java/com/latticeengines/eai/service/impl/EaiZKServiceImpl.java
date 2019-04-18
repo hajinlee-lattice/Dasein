@@ -16,15 +16,15 @@ import com.latticeengines.eai.service.EaiZKService;
 @Component("eaiZKService")
 public class EaiZKServiceImpl implements EaiZKService {
 
-    private final static String SERVICE_NAME = "Eai";
+    private static final String SERVICE_NAME = "Eai";
 
-    private final static String SFSC_ENDPOINT_CONFIG = "SalesforceEndpointConfig";
+    private static final String SFSC_ENDPOINT_CONFIG = "SalesforceEndpointConfig";
 
-    private final static String HTTP_Client = "HttpClient";
+    private static final String HTTP_Client = "HttpClient";
 
-    private final static String CONNECT_TIMEOUT = "ConnectTimeout";
+    private static final String CONNECT_TIMEOUT = "ConnectTimeout";
 
-    private final static String IMPORT_TIMEOUT = "ImportTimeout";
+    private static final String IMPORT_TIMEOUT = "ImportTimeout";
 
     @Override
     public HttpClientConfig getHttpClientConfig(String customerSpace) {

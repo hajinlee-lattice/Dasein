@@ -45,7 +45,7 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
 
     @Override
     @Transactional(value = "propdata", propagation = Propagation.REQUIRED)
-    synchronized public Commands createCommand(String sourceTable, String contractExternalID, String destTables,
+    public synchronized Commands createCommand(String sourceTable, String contractExternalID, String destTables,
                                                Map<String, String> parameters) {
         Commands command = commandDao.createCommandByStoredProcedure(sourceTable, contractExternalID, destTables);
         if (parameters != null && !parameters.isEmpty()) {

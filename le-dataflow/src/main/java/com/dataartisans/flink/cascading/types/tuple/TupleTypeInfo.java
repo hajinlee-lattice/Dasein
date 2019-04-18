@@ -41,7 +41,7 @@ public class TupleTypeInfo extends CompositeType<Tuple> {
      */
     private static final long serialVersionUID = -4659435539093884831L;
 
-    private final static int NEG_FIELD_POS_OFFSET = Integer.MAX_VALUE / 2;
+    private static final int NEG_FIELD_POS_OFFSET = Integer.MAX_VALUE / 2;
     private final int length;
     private Fields schema;
     private LinkedHashMap<String, FieldTypeInfo> fieldTypes;

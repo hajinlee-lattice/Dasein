@@ -13,14 +13,14 @@ import org.slf4j.LoggerFactory;
 
 public class SecureFileTransferAgent {
 
-    private final static Logger log = LoggerFactory.getLogger(SecureFileTransferAgent.class);
+    private static final Logger log = LoggerFactory.getLogger(SecureFileTransferAgent.class);
 
     private String serverAddress;
 
     private String userId;
 
     private String password;
-    
+
     public SecureFileTransferAgent(String serverAddress, String userId, String password) {
         this.serverAddress = serverAddress;
         this.userId = userId;

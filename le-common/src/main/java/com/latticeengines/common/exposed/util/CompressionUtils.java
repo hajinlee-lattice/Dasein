@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public final class CompressionUtils {
 
-    private final static Logger log = LoggerFactory.getLogger(CompressionUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(CompressionUtils.class);
 
     public static byte[] decompressByteArray(final byte[] input) {
         return decompressByteArray(input, 1024);

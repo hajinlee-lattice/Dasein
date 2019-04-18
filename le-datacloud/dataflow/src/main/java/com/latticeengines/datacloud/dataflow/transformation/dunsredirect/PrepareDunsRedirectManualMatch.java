@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.ValidationUtils;
@@ -37,7 +38,7 @@ public class PrepareDunsRedirectManualMatch
     private static final String EMP_SIZE_LARGE = PrepareDunsRedirectManualMatchConfig.LARGE_COMPANY_EMPLOYEE_SIZE;
     private static final String EMP_SIZE_SMALL = PrepareDunsRedirectManualMatchConfig.SMALL_COMPANY_EMPLOYEE_SIZE;
 
-    @Autowired
+    @Inject
     private BeanValidationService beanValidationService;
 
     @Override

@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 @Component
 public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
-    private final static Logger log = LoggerFactory.getLogger(CDLComponentDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CDLComponentDeploymentTestNG.class);
 
     @Value("${common.test.microservice.url}")
     private String microserviceUrl;

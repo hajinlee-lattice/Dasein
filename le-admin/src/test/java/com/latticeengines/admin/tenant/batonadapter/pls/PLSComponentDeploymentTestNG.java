@@ -44,7 +44,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 @Component
 public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
-    private final static Logger log = LoggerFactory.getLogger(PLSComponentDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PLSComponentDeploymentTestNG.class);
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;

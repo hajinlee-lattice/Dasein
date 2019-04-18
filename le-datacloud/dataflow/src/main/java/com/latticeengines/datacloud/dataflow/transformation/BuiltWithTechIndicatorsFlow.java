@@ -18,11 +18,9 @@ public class BuiltWithTechIndicatorsFlow extends ConfigurableFlowBase<TechIndica
 
     public static final String TRANSFORMER_NAME = "builtWithTechIndicatorsTransformer";
 
-    private TechIndicatorsConfig config;
-
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        config = getTransformerConfig(parameters);
+        TechIndicatorsConfig config = getTransformerConfig(parameters);
         Node source = addSource(parameters.getBaseTables().get(0));
         List<SourceColumn> sourceColumns = parameters.getColumns();
         Node encoded = BitEncodeUtils.encode(source, config.getGroupByFields(), sourceColumns);

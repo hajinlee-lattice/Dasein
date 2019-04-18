@@ -3,9 +3,8 @@ package com.latticeengines.datacloud.etl.purge.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -19,14 +18,12 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 
 @Component
 public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTestNGBase {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(PurgeStrategyEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
-    private final static String TEST_SRC1 = PurgeStrategyEntityMgrImplTestNG.class.getSimpleName() + "_TestSrc1";
-    private final static String TEST_SRC2 = PurgeStrategyEntityMgrImplTestNG.class.getSimpleName() + "_TestSrc2";
+    private static final String TEST_SRC1 = PurgeStrategyEntityMgrImplTestNG.class.getSimpleName() + "_TestSrc1";
+    private static final String TEST_SRC2 = PurgeStrategyEntityMgrImplTestNG.class.getSimpleName() + "_TestSrc2";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

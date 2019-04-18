@@ -32,8 +32,8 @@ import com.latticeengines.security.exposed.Constants;
  */
 public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTestNGBase {
 
-    protected final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
-    protected final static String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
+    protected static final String testAdminUsername = "pls-installer-tester@lattice-engines.com";
+    protected static final String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
 
     protected String contractId, tenantId, serviceName;
     private static final long TIMEOUT = 180000L;

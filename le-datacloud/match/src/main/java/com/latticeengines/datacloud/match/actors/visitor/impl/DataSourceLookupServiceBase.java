@@ -39,9 +39,9 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     private volatile boolean instantiated = false;
 
-    abstract protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
+    protected abstract Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
 
-    abstract protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
+    protected abstract void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress);
 
     @Override

@@ -100,7 +100,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
      * Name -> [Name + Country] or [Name]
      * NOTE: Be cautious to add more key groups / mapped keys. It could make some test case sets too large
      **/
-    private final static Map<String, List<List<String>>> KEY_GROUP_MAP = new HashMap<>();
+    private static final Map<String, List<List<String>>> KEY_GROUP_MAP = new HashMap<>();
     static {
         KEY_GROUP_MAP.put(ID_ACCT, Arrays.asList(Arrays.asList(ID_ACCT)));
         KEY_GROUP_MAP.put(ID_MKTO, Arrays.asList(Arrays.asList(ID_MKTO)));
@@ -119,17 +119,17 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
     // MatchKeys used in Account match decision graph (Don't consider MatchKey
     // combinations in LDC match)
-    private final static String[] ACCOUNT_KEYS_PRIORITIZED = { ID_ACCT, ID_MKTO, MatchKey.DUNS.name(),
+    private static final String[] ACCOUNT_KEYS_PRIORITIZED = { ID_ACCT, ID_MKTO, MatchKey.DUNS.name(),
             MatchKey.Domain.name(), MatchKey.Name.name() };
     // Reduced set of MatchKeys used in Account match decision graph. Only one
     // key per actor to reduce # test case
-    private final static String[] ACCOUNT_KEYS_REDUCED = { ID_ACCT, MatchKey.DUNS.name(), MatchKey.Domain.name(),
+    private static final String[] ACCOUNT_KEYS_REDUCED = { ID_ACCT, MatchKey.DUNS.name(), MatchKey.Domain.name(),
             MatchKey.Name.name() };
     // Account MatchKey -> Index in FIELDS
-    private final static Map<String, Integer> ACCOUNT_KEYIDX_MAP = Stream.of(ACCOUNT_KEYS_PRIORITIZED)
+    private static final Map<String, Integer> ACCOUNT_KEYIDX_MAP = Stream.of(ACCOUNT_KEYS_PRIORITIZED)
             .collect(Collectors.toMap(key -> key, key -> FIELDS.indexOf(key)));
     // Account MatchKey with many-to-many relationship to Account
-    private final static Set<String> ACCOUNT_KEYS_MANY_TO_MANY = new HashSet<>(
+    private static final Set<String> ACCOUNT_KEYS_MANY_TO_MANY = new HashSet<>(
             Arrays.asList(MatchKey.Domain.name(), MatchKey.Name.name()));
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)

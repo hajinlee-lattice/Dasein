@@ -24,8 +24,8 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
-    private final static String SEGMENT_NAME = "segment";
-    private final static String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String SEGMENT_NAME = "segment";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
 
     @Autowired
     private MetadataSegmentExportService metadataSegmentExportService;

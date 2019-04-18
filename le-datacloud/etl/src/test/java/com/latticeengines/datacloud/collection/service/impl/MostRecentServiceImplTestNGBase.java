@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
-abstract public class MostRecentServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
+public abstract class MostRecentServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     private RefreshService refreshService;
     private RefreshProgressEntityMgr progressEntityMgr;

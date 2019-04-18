@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 public enum TransactionMetrics {
+
     PURCHASED("Purchased"), //
     QUANTITY("Quantity"), //
     AMOUNT("Amount");
@@ -37,19 +38,19 @@ public enum TransactionMetrics {
         }
     }
 
-    static public String getProductIdFromAttr(String attr) {
+    public static String getProductIdFromAttr(String attr) {
         return splitAttr(attr, 0);
     }
 
-    static public String getPeriodFromAttr(String attr) {
+    public static String getPeriodFromAttr(String attr) {
         return splitAttr(attr, 1);
     }
 
-    static public String getMetricFromAttr(String attr) {
+    public static String getMetricFromAttr(String attr) {
         return splitAttr(attr, 2);
     }
 
-    static private String splitAttr(String name, int index) {
+    private static String splitAttr(String name, int index) {
         if (!name.startsWith("PH_")) {
             return null;
         }
@@ -61,7 +62,7 @@ public enum TransactionMetrics {
         return attrs[index];
     }
 
-    static public String getAttrName(String product, String period, String metrics) {
+    public static String getAttrName(String product, String period, String metrics) {
         return "PH_" + product + "_" + period + "_" + metrics;
     }
 

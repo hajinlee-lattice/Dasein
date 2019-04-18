@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 public class ManualSeedCleanFlow
         extends ConfigurableFlowBase<ManualSeedCleanTransformerConfig> {
 
-    public final static String DATAFLOW_BEAN_NAME = "manualSeedCleanFlow";
-    public final static String TRANSFORMER_NAME = "manualSeedCleanTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "manualSeedCleanFlow";
+    public static final String TRANSFORMER_NAME = "manualSeedCleanTransformer";
 
     public String getDataFlowBeanName() {
         return DATAFLOW_BEAN_NAME;

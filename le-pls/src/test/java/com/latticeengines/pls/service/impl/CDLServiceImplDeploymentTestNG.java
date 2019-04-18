@@ -47,7 +47,7 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private final static Logger log = LoggerFactory.getLogger(CDLServiceImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CDLServiceImplDeploymentTestNG.class);
 
     public static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 

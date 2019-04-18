@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
 public class IngestionServiceTestNG extends PropDataEngineFunctionalTestNGBase {
 
-    private final static String PREFIX = IngestionServiceTestNG.class.getSimpleName();
+    private static final String PREFIX = IngestionServiceTestNG.class.getSimpleName();
     private static final String FILE_NAME = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
     private static final String TEST_SUBMITTER = PropDataConstants.SCAN_SUBMITTER;
     private static final String VERSION = "2019-01-01_00-00-00_UTC";

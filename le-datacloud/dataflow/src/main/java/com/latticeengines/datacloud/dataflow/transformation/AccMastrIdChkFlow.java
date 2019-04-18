@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(AccMastrIdChkFlow.DATAFLOW_BEAN_NAME)
 public class AccMastrIdChkFlow extends ConfigurableFlowBase<AccMastrIdChkConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "AccMastrIdChkFlow";
-    public final static String TRANSFORMER_NAME = "AccMastrIdChkTransformer";
-    public final static String ACTIVE = "ACTIVE";
+    public static final String DATAFLOW_BEAN_NAME = "AccMastrIdChkFlow";
+    public static final String TRANSFORMER_NAME = "AccMastrIdChkTransformer";
+    private static final String ACTIVE = "ACTIVE";
 
     @Override
     public String getDataFlowBeanName() {

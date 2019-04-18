@@ -24,8 +24,10 @@ import cascading.tuple.Fields;
 
 @Component(ProductMapperFlow.BEAN_NAME)
 public class ProductMapperFlow extends ConfigurableFlowBase<ProductMapperConfig> {
-    private static final String PREFIX = "__";
+
     private static final Logger log = LoggerFactory.getLogger(ProductMapperFlow.class);
+
+    private static final String PREFIX = "__";
     public static final String BEAN_NAME = "productMapperFlow";
 
     @Override

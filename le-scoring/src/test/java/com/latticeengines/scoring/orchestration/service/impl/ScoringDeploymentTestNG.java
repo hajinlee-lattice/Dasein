@@ -51,12 +51,12 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringDeploymentTestNG.class);
 
-    private final static String LEAD_INPUT_BASE_TABLE_NAME = "ScoringDeploymentTestNG_Base_LeadsTable";
-    private final static String LEAD_INPUT_TABLE_NAME = "ScoringDeploymentTestNG_LeadsTable";
+    private static final String LEAD_INPUT_BASE_TABLE_NAME = "ScoringDeploymentTestNG_Base_LeadsTable";
+    private static final String LEAD_INPUT_TABLE_NAME = "ScoringDeploymentTestNG_LeadsTable";
 
     // (YSong - M25) This is hacky, but since it is a retiring test, I think it
     // is OK.
-    private final static String QUARTZ_EMR = "quartz";
+    private static final String QUARTZ_EMR = "quartz";
 
     @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;

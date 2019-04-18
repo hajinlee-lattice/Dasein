@@ -11,8 +11,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component("miniAmSeedSampleSetFlow")
 public class MiniAMSeedSampleSetFlow extends ConfigurableFlowBase<MiniAMSeedSampleSetConfig> {
-    private final static String DOMAIN_TYPE = "Domain";
-    private final static String DUNS_TYPE = "Duns";
+
+    private static final String DOMAIN_TYPE = "Domain";
+    private static final String DUNS_TYPE = "Duns";
+
     @Override
     public String getDataFlowBeanName() {
         return "miniAmSeedSampleSetFlow";
@@ -41,16 +43,16 @@ public class MiniAMSeedSampleSetFlow extends ConfigurableFlowBase<MiniAMSeedSamp
                 .filter(filterDomain, new FieldList(config.getMiniDataSetType())); //
 
         // Filtering duns
-        Node miniDunsSampledSet = miniDataUniverse // 
+        Node miniDunsSampledSet = miniDataUniverse //
                 .filter(filterDuns, new FieldList(config.getMiniDataSetType()));
 
-        // Matching domain 
+        // Matching domain
         Node miniSampledSetByDomain = seedDataSet //
                 .join(new FieldList(config.getSampledSetDomain()), miniDomainSampledSet,
                         new FieldList(config.getMiniDataSetValue()), JoinType.INNER, false) //
                 .retain(new FieldList(seedDataSet.getFieldNames()));
 
-        // Matching duns 
+        // Matching duns
         Node miniSampledSetByDuns = seedDataSet //
                 .join(new FieldList(config.getSampledSetDuns()), miniDunsSampledSet,
                         new FieldList(config.getMiniDataSetValue()), JoinType.INNER, false) //

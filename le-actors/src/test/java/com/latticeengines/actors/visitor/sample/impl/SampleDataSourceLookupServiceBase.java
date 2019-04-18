@@ -1,8 +1,9 @@
 package com.latticeengines.actors.visitor.sample.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.visitor.sample.SampleDataSourceLookupRequest;
@@ -12,10 +13,10 @@ import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem
 public abstract class SampleDataSourceLookupServiceBase implements SampleDataSourceLookupService {
     private static final Logger log = LoggerFactory.getLogger(SampleDataSourceLookupServiceBase.class);
 
-    @Autowired
+    @Inject
     private SampleMatchActorSystem actorSystem;
 
-    abstract protected String lookupFromService(String lookupRequestId, SampleDataSourceLookupRequest request);
+    protected abstract String lookupFromService(String lookupRequestId, SampleDataSourceLookupRequest request);
 
     @Override
     public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
@@ -26,28 +27,25 @@ public abstract class SampleDataSourceLookupServiceBase implements SampleDataSou
 
     private Runnable createLookupRunnable(final String lookupRequestId, final Object request,
             final String returnAddress) {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                }
-
-                String result = null;
-                if (request instanceof SampleDataSourceLookupRequest) {
-                    result = lookupFromService(lookupRequestId, (SampleDataSourceLookupRequest) request);
-                }
-
-                Response response = new Response();
-                response.setRequestId(lookupRequestId);
-                response.setResult(result);
-
-                log.info("Returned response for " + lookupRequestId + " to " + returnAddress);
-                actorSystem.sendResponse(response, returnAddress);
+        return () -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                log.warn("Sleep interrupted.", e);
             }
+
+            String result = null;
+            if (request instanceof SampleDataSourceLookupRequest) {
+                result = lookupFromService(lookupRequestId, (SampleDataSourceLookupRequest) request);
+            }
+
+            Response response = new Response();
+            response.setRequestId(lookupRequestId);
+            response.setResult(result);
+
+            log.info("Returned response for " + lookupRequestId + " to " + returnAddress);
+            actorSystem.sendResponse(response, returnAddress);
         };
-        return task;
     }
 
     @Override

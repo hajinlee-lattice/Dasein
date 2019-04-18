@@ -108,5 +108,5 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
         return MatchClient.valueOf(testMatchClientName);
     }
 
-    abstract protected String getRestAPIHostPort();
+    protected abstract String getRestAPIHostPort();
 }

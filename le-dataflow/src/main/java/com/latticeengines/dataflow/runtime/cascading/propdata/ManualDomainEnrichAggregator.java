@@ -14,7 +14,7 @@ public class ManualDomainEnrichAggregator
         extends BaseAggregator<ManualDomainEnrichAggregator.Context>
         implements Aggregator<ManualDomainEnrichAggregator.Context> {
     private static final long serialVersionUID = 1059291855974074063L;
-    private final static String MANUAL_DOMAIN_SOURCE = "Manual";
+    private static final String MANUAL_DOMAIN_SOURCE = "Manual";
     private String manSeedDomain;
     private String amSeedDomain;
     private int domainLoc;

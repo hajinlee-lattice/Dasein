@@ -29,11 +29,11 @@ import com.latticeengines.domain.exposed.datacloud.check.UnderPopulatedFieldChec
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public final class CheckUtils {
-    private final static String TOTAL_COUNT = "__COUNT__";
-    private final static String PREV_TOTAL_COUNT = "__PREV_COUNT__";
-    private final static String POPULATED_COUNT = "__POPULATED_COUNT__";
-    private final static String DUMMY_GROUP = "DUMMY_GROUP";
-    private final static String DUMMY_VALUE = "DUMMY_VALUE";
+    private static final String TOTAL_COUNT = "__COUNT__";
+    private static final String PREV_TOTAL_COUNT = "__PREV_COUNT__";
+    private static final String POPULATED_COUNT = "__POPULATED_COUNT__";
+    private static final String DUMMY_GROUP = "DUMMY_GROUP";
+    private static final String DUMMY_VALUE = "DUMMY_VALUE";
     protected Map<String, Integer> namePositionMap;
 
     public static Node runCheck(List<Node> input, CheckParam param) {

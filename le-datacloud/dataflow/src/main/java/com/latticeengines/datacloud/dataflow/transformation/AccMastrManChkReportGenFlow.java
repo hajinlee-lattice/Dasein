@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(AccMastrManChkReportGenFlow.DATAFLOW_BEAN_NAME)
 public class AccMastrManChkReportGenFlow extends TypesafeDataFlowBuilder<AmReportGenerateParams> {
-    public final static String DATAFLOW_BEAN_NAME = "AccMastrManChkReportGenFlow";
-    public final static String TRANSFORMER_NAME = "AccMastrManChkTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "AccMastrManChkReportGenFlow";
+    public static final String TRANSFORMER_NAME = "AccMastrManChkTransformer";
 
     public String getDataFlowBeanName() {
         return DATAFLOW_BEAN_NAME;

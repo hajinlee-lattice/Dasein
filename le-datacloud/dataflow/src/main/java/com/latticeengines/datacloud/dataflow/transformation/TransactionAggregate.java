@@ -28,14 +28,12 @@ import cascading.tuple.Fields;
 @Component(TransactionAggregate.DATAFLOW_BEAN_NAME)
 public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggregateConfig> {
 
-    private TransactionAggregateConfig config;
-
     public static final String DATAFLOW_BEAN_NAME = "TransactionAggregate";
     public static final String TRANSFORMER_NAME = TRANSFORMER_TRANSACTION_AGGREGATOR;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        config = getTransformerConfig(parameters);
+        TransactionAggregateConfig config = getTransformerConfig(parameters);
         Map<String, List<Product>> productMap = config.getProductMap();
         String idField = config.getIdField();
         String accountField = config.getAccountField();

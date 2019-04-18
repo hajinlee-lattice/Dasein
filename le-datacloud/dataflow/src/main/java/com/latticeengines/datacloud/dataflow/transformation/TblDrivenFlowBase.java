@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
@@ -22,7 +23,7 @@ public abstract class TblDrivenFlowBase<T extends TblDrivenTransformerConfig, E 
 
     private static final Logger log = LoggerFactory.getLogger(TblDrivenFlowBase.class);
 
-    @Autowired
+    @Inject
     SourceAttributeEntityMgr attrMgr;
 
     protected List<SourceAttribute> getAttributes(T config) {
@@ -58,7 +59,7 @@ public abstract class TblDrivenFlowBase<T extends TblDrivenTransformerConfig, E 
     protected Map<String, Node> initiateSourceMap(TransformationFlowParameters parameters, TblDrivenTransformerConfig config) {
 
         List<String> tableNames = parameters.getBaseTables();
-        List<String> sourceNames = config.getTemplates();     
+        List<String> sourceNames = config.getTemplates();
 
         if (tableNames.size() != sourceNames.size()) {
             log.error("Source names and tables does not match");
@@ -76,5 +77,5 @@ public abstract class TblDrivenFlowBase<T extends TblDrivenTransformerConfig, E 
         return sourceMap;
     }
 
-    abstract public Class<? extends TblDrivenFuncConfig> getTblDrivenFuncConfigClass();
+    public abstract Class<? extends TblDrivenFuncConfig> getTblDrivenFuncConfigClass();
 }
