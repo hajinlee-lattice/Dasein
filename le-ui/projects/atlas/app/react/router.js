@@ -4,6 +4,8 @@ import {
     hashLocationPlugin
 } from "common/react-vendor";
 import mainStates  from "./mainstates";
+import {actions as bannerActions} from 'common/widgets/banner/le-banner.redux';
+import { store } from 'store';
 
 class ReactRouter {
     constructor() {
@@ -34,8 +36,8 @@ class ReactRouter {
         });
 
         this.routing.router.transitionService.onSuccess(true, function (trans) {
-            // console.log("Nav End");
-            // Do something after transition
+            // // Do something after transition
+            bannerActions.closeBanner(store);
         });
 
         this.routing.router.transitionService.onError(true, function (err) {
@@ -61,6 +63,9 @@ class ReactRouter {
         // console.log('CURRENT ',currentState);
         return currentState;
     }
+    /**
+     * 
+     */
     clear() {
         delete this.routing.router;
     }

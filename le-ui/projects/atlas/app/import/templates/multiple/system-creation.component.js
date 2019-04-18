@@ -122,7 +122,7 @@ export default class SystemCreationComponent extends Component {
                                 hideFooter: false,
                                 size: MEDIUM_SIZE
                             }
-                            modalActions.openModal(store, config);
+                            modalActions.error(store, config);
                         }}
                     />
                 </LeToolBar>

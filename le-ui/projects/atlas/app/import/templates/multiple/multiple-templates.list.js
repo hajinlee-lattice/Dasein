@@ -27,6 +27,8 @@ import './multiple-templates.list.scss';
 import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
 import ReactMainContainer from "atlas/react/react-main-container";
 import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
+
+import {actions as bannerActions} from '../../../../../common/widgets/banner/le-banner.redux';
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
@@ -237,7 +239,9 @@ export default class MultipleTemplatesList extends Component {
                     template: cell => {
                         return (
                             <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
-                                <i class="fa fa-upload" aria-hidden="true"></i>
+                                <i class="fa fa-upload" aria-hidden="true" onClick={() => {
+                                    bannerActions.openBanner(store, {title: 'Test Banner', message: 'Here the message'});
+                                }}></i>
                                 <i class="fa fa-plus" aria-hidden="true"></i>
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
 
