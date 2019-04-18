@@ -40,7 +40,7 @@ public class MarketoRestValidationServiceImpl implements MarketoRestValidationSe
             if(response.getStatusCode() != HttpStatus.OK) {
                 throw new LedpException(LedpCode.LEDP_21033, new String[] { restEndPoint });
             }
-            
+
             String responseString = response.getBody();
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseString);
@@ -54,7 +54,7 @@ public class MarketoRestValidationServiceImpl implements MarketoRestValidationSe
         }
         return result;
     }
-    
+
     @SuppressWarnings("rawtypes")
     private String getToken(String identityEndpoint, String clientId, String clientSecret) {
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
@@ -79,7 +79,7 @@ public class MarketoRestValidationServiceImpl implements MarketoRestValidationSe
         } catch(RestClientException rce) {
             throw new LedpException(LedpCode.LEDP_21029, new String[] { rce.getMessage() });
         }
-        
+
         if (StringUtils.isBlank(accessToken.toString())) {
             throw new LedpException(LedpCode.LEDP_21030, new String[] { clientId, clientSecret });
         }

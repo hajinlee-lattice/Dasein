@@ -4,5 +4,4 @@ import com.latticeengines.apps.cdl.repository.DataIntegrationStatusMonitoringRep
 
 public interface DataIntegrationStatusMonitoringReaderRepository
         extends DataIntegrationStatusMonitoringRepository {
-
 }

@@ -1,12 +1,12 @@
 package com.latticeengines.pls.controller;
 
+import javax.inject.Inject;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolException;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,10 +31,10 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
     private SalesforceURL sfdcURLLPCreated;
     private SalesforceURL sfdcURLAPCreated;
 
-    @Autowired
+    @Inject
     private SalesforceURLService salesforceURLService;
 
-    @Autowired
+    @Inject
     private SalesforceURLEntityMgr salesforceURLEntityMgr;
 
     @BeforeClass(groups = { "functional" })
@@ -139,8 +139,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     private class NoRedirectStrategy extends DefaultRedirectStrategy {
         @Override
-        public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)
-                throws ProtocolException {
+        public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)  {
             return false;
         }
 

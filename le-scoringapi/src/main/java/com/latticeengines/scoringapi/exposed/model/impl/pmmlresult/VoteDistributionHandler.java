@@ -20,16 +20,16 @@ public class VoteDistributionHandler extends PMMLResultHandlerBase {
     public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         VoteDistribution distribution = (VoteDistribution) originalResult;
         Object r = null;
-        
+
         try {
             r = distribution.getResult();
             result.put(ScoreType.CLASSIFICATION, r);
         } catch (EvaluationException e) {
             // this means it's Lattice RF model
         }
-        
+
         double predicted = distribution.getProbability((String) r);
-        
+
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
         result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
     }

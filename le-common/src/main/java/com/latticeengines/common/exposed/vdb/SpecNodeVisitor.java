@@ -24,7 +24,7 @@ public class SpecNodeVisitor implements Visitor {
         this(keyword, exactMatch, true);
     }
 
-    SpecNodeVisitor(String keyword, boolean exactMatch, boolean ignoreCase) {
+    private SpecNodeVisitor(String keyword, boolean exactMatch, boolean ignoreCase) {
         this.keyword = keyword;
         this.exactMatch = exactMatch;
         this.ignoreCase = ignoreCase;

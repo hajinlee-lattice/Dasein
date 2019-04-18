@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -9,7 +10,8 @@ import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
 public class SalesforceURLEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
-    @Autowired
+
+    @Inject
     private SalesforceURLEntityMgr salesforceURLEntityMgr;
 
     @Test(groups = "functional")

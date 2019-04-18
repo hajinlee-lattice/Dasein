@@ -2,7 +2,8 @@ package com.latticeengines.pls.qbean;
 
 import java.util.concurrent.Callable;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.pls.service.MetadataSegmentExportCleanupService;
@@ -12,7 +13,7 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 @Component("segmentExportCleanupJob")
 public class SegmentExportCleanupJobBean implements QuartzJobBean {
 
-    @Autowired
+    @Inject
     private MetadataSegmentExportCleanupService metadataSegmentExportCleanupService;
 
     @Override

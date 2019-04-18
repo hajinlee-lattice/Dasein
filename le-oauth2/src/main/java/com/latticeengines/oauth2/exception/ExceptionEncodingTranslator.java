@@ -13,4 +13,5 @@ public class ExceptionEncodingTranslator extends DefaultWebResponseExceptionTran
         Exception ex = new InsufficientAuthenticationException(HtmlUtils.htmlEscape(e.getMessage()));
         return super.translate(ex);
     }
+
 }

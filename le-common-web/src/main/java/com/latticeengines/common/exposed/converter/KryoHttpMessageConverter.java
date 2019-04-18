@@ -2,8 +2,6 @@ package com.latticeengines.common.exposed.converter;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -13,8 +11,6 @@ import com.latticeengines.common.exposed.util.KryoUtils;
 
 public class KryoHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(KryoHttpMessageConverter.class);
     public static final MediaType KRYO = new MediaType("application", "x-kryo");
     public static final String KRYO_VALUE = "application/x-kryo";
 

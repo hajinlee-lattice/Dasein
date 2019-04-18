@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -12,7 +13,8 @@ import com.latticeengines.pls.service.SalesforceURLService;
 
 @Component("salesforceURLService")
 public class SalesforceURLServiceImpl implements SalesforceURLService {
-    @Autowired
+
+    @Inject
     private SalesforceURLEntityMgr salesforceURLEntityMgr;
 
     @Override

@@ -12,11 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -47,22 +48,22 @@ import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private EaiService eaiService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private CrmCredentialZKService crmCredentialZKService;
 
-    @Autowired
+    @Inject
     private DataExtractionService dataExtractionService;
 
-    @Autowired
+    @Inject
     private EaiMetadataService eaiMetadataService;
 
-    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Activity", "Lead", "ActivityType" });
+    private List<String> tableNameList = Arrays.asList("Activity", "Lead", "ActivityType");
 
     private String customer = "Marketo-Eai";
 
@@ -99,6 +100,7 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
         try {
             tenantService.discardTenant(tenant);
         } catch (Exception e) {
+            log.warn("Failed to discard tenant", e);
         }
         tenantService.registerTenant(tenant);
 

@@ -40,4 +40,5 @@ public class AMStatsResource {
     private TopNAttributeTree getTopAttrTree() {
         return accountMasterStatisticsService.getTopAttrTree();
     }
+
 }

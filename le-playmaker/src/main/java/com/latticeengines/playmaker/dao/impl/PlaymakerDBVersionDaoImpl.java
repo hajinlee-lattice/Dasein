@@ -18,6 +18,6 @@ public class PlaymakerDBVersionDaoImpl extends BaseGenericDaoImpl implements Pla
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         return queryForObject(sql, source, String.class);
-
     }
+
 }
