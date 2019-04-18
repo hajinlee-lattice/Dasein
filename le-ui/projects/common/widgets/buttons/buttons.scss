@@ -73,12 +73,12 @@ a.button,
         border: $black-titanium solid 1px;
     }
     &.red-button {
-        background-color: $ruby;
+        background-color: $ruby-two;
         &:hover {
-            background-color: $ruby-two;
+            background-color: $ruby-three;
         }
         &:active {
-            background-color: $ruby-three;
+            background-color: $ruby;
         }
     }
     &.green-button {
@@ -114,13 +114,13 @@ a.button,
         }
     }
     &.orange-button {
-        background-color: $amber;
+        background-color: $amber-two;
         &:hover {
-            background-color: $amber-two;
+            background-color: $amber-three;
             color: $pearl-white;
         }
         &:active {
-            background-color: $amber-three;
+            background-color: $amber-four;
         }
         &:focus {
             color: $pearl-white;

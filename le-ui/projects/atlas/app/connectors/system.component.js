@@ -6,16 +6,17 @@ import LeTileHeader from 'common/widgets/container/tile/le-tile-header';
 import LeTileBody from 'common/widgets/container/tile/le-tile-body';
 import LeTileFooter from 'common/widgets/container/tile/le-tile-footer';
 import LeButton from "common/widgets/buttons/le-button";
-import LeModal from "common/widgets/modal/le-modal";
 import SystemMappingComponent from './system-mapping.component';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
-import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
-import './systems.component.scss';
+import './systesms-list.component.scss';
 import LeHPanel from "common/widgets/container/le-h-panel";
 import GridLayout from 'common/widgets/container/grid-layout.component';
 import { RIGHT, CENTER } from "common/widgets/container/le-alignments";
+
+import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
+import { store } from 'store';
 
 export default class SystemComponent extends Component {
     constructor(props) {
@@ -29,8 +30,19 @@ export default class SystemComponent extends Component {
 
     }
     editMappingClickHandler() {
-        console.log('Clicked');
-        this.setState({ openModal: true });
+        let config = {
+            callback : this.modalCallback,
+            template: () => {
+                this.editMapping = Object.assign({}, this.state.system);
+                return (
+                    <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
+                );
+            },
+            title: () => {
+                return <p>Org ID to Account ID Mapping</p>
+            }
+        };
+        modalActions.openModal(store, config);
     }
 
     mappingClosed(system) {
@@ -53,13 +65,12 @@ export default class SystemComponent extends Component {
 
     modalCallback(action) {
 
-        // console.log('CHANGED? =====>',this.editMapping);
         switch (action) {
             case 'close':
-                this.setState({ openModal: false });
+                modalActions.closeModal(store);
                 break;
             case 'ok':
-                this.setState({ openModal: false, saving: true });
+                modalActions.closeModal(store);
                 break;
         }
     }
@@ -139,7 +150,7 @@ export default class SystemComponent extends Component {
         // console.log('Render', this.state.openModal);
         return (
             <Aux>
-                <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} />
+                {/* <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} /> */}
                 <LeTile>
                     <LeTileHeader>
                         <LeHPanel valignment={CENTER}>
