@@ -12,13 +12,14 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
-public abstract class ActivityMetricsBaseFlow<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
+abstract class ActivityMetricsBaseFlow<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
 
-    protected Map<InterfaceName, Class<?>> metricsClasses;
-    protected Map<ActivityMetrics, FieldMetadata> metricsMetadata;
-    protected Map<ActivityMetrics, Map<String, FieldMetadata>> pivotMetricsMetadata;
+    Map<ActivityMetrics, FieldMetadata> metricsMetadata;
 
-    protected void prepareMetricsMetadata(List<ActivityMetrics> metrics, List<String> pivotVals) {
+    private Map<InterfaceName, Class<?>> metricsClasses;
+    private Map<ActivityMetrics, Map<String, FieldMetadata>> pivotMetricsMetadata;
+
+    void prepareMetricsMetadata(List<ActivityMetrics> metrics, List<String> pivotVals) {
         metricsClasses = new HashMap<>();
         metricsClasses.put(InterfaceName.Margin, Integer.class);
         metricsClasses.put(InterfaceName.ShareOfWallet, Integer.class);

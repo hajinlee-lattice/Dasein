@@ -27,16 +27,17 @@ public class LatticeIdRefreshFlow
         return BasicTransformationConfiguration.class;
     }
 
-    public final static String BEAN_NAME = "latticeIdRefreshFlow";
+    public static final String BEAN_NAME = "latticeIdRefreshFlow";
 
-    public final static String STATUS_FIELD = "Status";
-    public final static String TIMESTAMP_FIELD = "LE_Last_Update_Date";
-    public final static String REDIRECT_FROM_FIELD = "RedirectFromId";
+    public static final String STATUS_FIELD = "Status";
+    public static final String TIMESTAMP_FIELD = "LE_Last_Update_Date";
+    public static final String REDIRECT_FROM_FIELD = "RedirectFromId";
 
-    public final static String OBSOLETE = "OBSOLETE";
-    public final static String ACTIVE = "ACTIVE";
-    public final static String UPDATED = "UPDATED";
-    private final static String ENTITY = "ENTITY_";
+    static final String ACTIVE = "ACTIVE";
+
+    private static final String OBSOLETE = "OBSOLETE";
+    private static final String UPDATED = "UPDATED";
+    private static final String ENTITY = "ENTITY_";
 
     private static final Logger log = LoggerFactory.getLogger(LatticeIdRefreshFlow.class);
 

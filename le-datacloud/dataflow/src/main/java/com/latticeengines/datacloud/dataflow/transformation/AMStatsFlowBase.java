@@ -21,9 +21,8 @@ import cascading.tuple.Fields;
 
 public abstract class AMStatsFlowBase
         extends TransformationFlowBase<BasicTransformationConfiguration, AccountMasterStatsParameters> {
-    protected static final String TEMP_RENAMED_PREFIX = "_RENAMED_";
+
     protected static final String MIN_MAX_JOIN_FIELD = "_JoinFieldMinMax_";
-    protected static final String MIN_MAX_JOIN_FIELD_RENAMED = TEMP_RENAMED_PREFIX + "_JoinFieldMinMax_";
 
     @Autowired
     protected ColumnMetadataProxy columnMetadataProxy;

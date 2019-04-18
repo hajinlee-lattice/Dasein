@@ -29,7 +29,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     @Autowired
     private DnBRealTimeLookupService dnBRealTimeLookupService;
 
-    private final static int THREAD_NUM = 50;
+    private static final int THREAD_NUM = 50;
 
     @Test(groups = "dnb", dataProvider = "entityInputData", enabled = true, priority = 1)
     public void testRealTimeEntityLookupService(String name, String city, String state, String country,

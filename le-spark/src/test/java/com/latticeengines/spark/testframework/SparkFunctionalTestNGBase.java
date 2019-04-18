@@ -11,7 +11,7 @@ import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
-abstract public class SparkFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class SparkFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Inject
     private EMRCacheService emrCacheService;

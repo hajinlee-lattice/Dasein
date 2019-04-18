@@ -99,21 +99,21 @@ public class CamilleEnvironment {
         return PodLifecycleManager.getInfo(getPodId());
     }
 
-    public synchronized static String getPodId() {
+    public static synchronized String getPodId() {
         if (camilleConfig == null) {
             throw new IllegalStateException("CamilleEnvironment has not been started");
         }
         return camilleConfig.getPodId();
     }
 
-    public synchronized static String getDivision() {
+    public static synchronized String getDivision() {
         if (camilleConfig == null) {
             throw new IllegalStateException("CamilleEnvironment has not been started");
         }
         return camilleConfig.getDivision();
     }
 
-    public synchronized static void setDivision(String division, String sharedQueues) {
+    public static synchronized void setDivision(String division, String sharedQueues) {
         if (camilleConfig == null) {
             throw new IllegalStateException("CamilleEnvironment has not been started");
         }
@@ -121,7 +121,7 @@ public class CamilleEnvironment {
         camilleConfig.setSharedQueues(sharedQueues);
     }
 
-    public synchronized static boolean isSharedQueue(String queueName) {
+    public static synchronized boolean isSharedQueue(String queueName) {
         if (camilleConfig == null) {
             throw new IllegalStateException("CamilleEnvironment has not been started");
         }

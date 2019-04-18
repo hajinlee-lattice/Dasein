@@ -32,7 +32,7 @@ public abstract class MatchapiAbstractTestNGBase extends AbstractTestNGSpringCon
         metricService.disable();
     }
 
-    abstract protected String getRestAPIHostPort();
+    protected abstract String getRestAPIHostPort();
 
     protected void prepareCleanPod(String podId) {
         HdfsPodContext.changeHdfsPodId(podId);

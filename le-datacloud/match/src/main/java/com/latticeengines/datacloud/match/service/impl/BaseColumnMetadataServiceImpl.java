@@ -56,7 +56,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         }
     }
 
-    abstract protected MetadataColumnService<E> getMetadataColumnService();
+    protected abstract MetadataColumnService<E> getMetadataColumnService();
 
     private List<ColumnMetadata> fromMetadataColumnService(Predefined selectionName,
             String dataCloudVersion) {

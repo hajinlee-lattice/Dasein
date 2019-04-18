@@ -19,6 +19,7 @@ public class SourceValidationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, SourceValidationFlowParameters> {
 
     private static final String[] reportAttrs = new String[]{"Rule", "Id"};
+
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;

@@ -49,7 +49,7 @@ public class CamilleTestEnvironment {
     /**
      * Starts a testing cluster and the camille environment.
      */
-    public synchronized static void start() throws Exception {
+    public static synchronized void start() throws Exception {
         try {
 
             if (server != null) {
@@ -176,7 +176,7 @@ public class CamilleTestEnvironment {
         return sharedQueues;
     }
 
-    public synchronized static void setDivision(String div, String sharedQs) {
+    public static synchronized void setDivision(String div, String sharedQs) {
         division = div;
         sharedQueues = sharedQs;
         CamilleEnvironment.setDivision(div, sharedQs);
@@ -185,7 +185,7 @@ public class CamilleTestEnvironment {
     /**
      * Stops the testing cluster and the camille environment.
      */
-    public synchronized static void stop() throws Exception {
+    public static synchronized void stop() throws Exception {
         try {
             CamilleEnvironment.stop();
             FeatureFlagClient.teardown();

@@ -20,7 +20,6 @@ public class TrimFlow extends ConfigurableFlowBase<TrimConfig> {
     public static final String DATAFLOW_BEAN_NAME = "TrimFlow";
     public static final String TRANSFORMER_NAME = "TrimTransformer";
 
-
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
         return TrimConfig.class;

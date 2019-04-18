@@ -16,7 +16,7 @@ public class LatticeIdStrategyEntityMgrImplTestNG extends DataCloudEtlFunctional
     @Autowired
     private LatticeIdStrategyEntityMgr latticeIdStrategyEntityMgr;
 
-    private final static String STRATEGY = "AccountMasterSeedRebuild";
+    private static final String STRATEGY = "AccountMasterSeedRebuild";
 
     @Test(groups = "functional", enabled = true)
     public void testLatticeIdStrategy() {

@@ -23,6 +23,7 @@ import cascading.tuple.Fields;
 
 @Component(ActivityMetricsPivotFlow.BEAN_NAME)
 public class ActivityMetricsPivotFlow extends ActivityMetricsBaseFlow<ActivityMetricsPivotConfig> {
+
     public static final String BEAN_NAME = "activityMetricsPivotFlow";
 
     private ActivityMetricsPivotConfig config;

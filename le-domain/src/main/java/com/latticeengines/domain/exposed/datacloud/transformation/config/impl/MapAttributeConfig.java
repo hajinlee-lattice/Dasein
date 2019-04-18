@@ -61,7 +61,7 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
         this.joinConfigs = joinConfigs;
     }
 
-    static public class JoinTarget {
+    public static class JoinTarget {
 
         @JsonProperty("Keys")
         List<String> keys;
@@ -86,7 +86,7 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
         }
     }
 
-    static public class JoinConfig {
+    public static class JoinConfig {
 
         @JsonProperty("Keys")
         List<String> keys;
@@ -111,7 +111,7 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
         }
     }
 
-    static public class MapFunc extends TblDrivenFuncConfig {
+    public static class MapFunc extends TblDrivenFuncConfig {
 
         @JsonProperty("Source")
         String source;

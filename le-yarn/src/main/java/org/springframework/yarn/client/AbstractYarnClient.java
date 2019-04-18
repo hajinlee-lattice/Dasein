@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -41,6 +39,8 @@ import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.Records;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -57,7 +57,7 @@ import org.springframework.yarn.support.compat.ResourceCompat;
  */
 public abstract class AbstractYarnClient implements YarnClient, InitializingBean {
 
-    private final static Logger log = LoggerFactory.getLogger(AbstractYarnClient.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractYarnClient.class);
 
     /** Template communicating for resource manager */
     private ClientRmOperations clientRmOperations;
@@ -100,7 +100,7 @@ public abstract class AbstractYarnClient implements YarnClient, InitializingBean
 
     /** App specific dir name under staging dir */
     private String applicationDirName;
-    
+
     private int maxAppAttempts;
 
     /**
@@ -374,7 +374,7 @@ public abstract class AbstractYarnClient implements YarnClient, InitializingBean
     public void setApplicationDirName(String applicationDirName) {
         this.applicationDirName = applicationDirName;
     }
-    
+
     public void setMaxAppAttempts(int maxAppAttempt) {
         this.maxAppAttempts = maxAppAttempt;
     }

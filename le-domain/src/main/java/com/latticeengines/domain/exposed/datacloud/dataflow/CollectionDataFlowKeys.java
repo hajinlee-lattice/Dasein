@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
-final public class CollectionDataFlowKeys {
+public final class CollectionDataFlowKeys {
 
     public static final String MOST_RECENT_FLOW = "MostRecentFlow";
     public static final String PIVOT_FLOW = "PivotFlow";

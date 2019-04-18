@@ -28,7 +28,7 @@ public class MessageQueueUnitTestNG {
     }
 
     public static class Message {
-        public final static String MESSAGE_TEXT = "Hello World!";
+        public static final String MESSAGE_TEXT = "Hello World!";
 
         public Message() {
             text = MESSAGE_TEXT;

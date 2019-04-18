@@ -23,10 +23,10 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
     @Autowired
     private SmbFilesMBean smbFilesMBean;
 
-    private final static String quote_type = "quote";
-    private final static String order_detail_type = "order_detail";
-    private final static String channel_type = "Channel";
-    private final static String[] sortedFileNames = { "tgt_quote_trans_global_1_2015.zip",
+    private static final String quote_type = "quote";
+    private static final String order_detail_type = "order_detail";
+    private static final String channel_type = "Channel";
+    private static final String[] sortedFileNames = { "tgt_quote_trans_global_1_2015.zip",
             "tgt_quote_trans_global_5_2015.zip", "tgt_quote_trans_global_1_20150107_053143.zip",
             "tgt_quote_trans_global_2_20151007_035025.zip", "tgt_quote_trans_global_11_20151007_035025.zip",
             "tgt_quote_trans_global_1_2016.zip", "tgt_quote_trans_global_1_20161007_035025.zip",

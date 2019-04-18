@@ -34,7 +34,7 @@ import com.latticeengines.yarn.exposed.service.YarnService;
 public class CommandLineAppMaster extends StaticEventingAppmaster
         implements ContainerLauncherInterceptor {
 
-    private final static Logger log = LoggerFactory.getLogger(CommandLineAppMaster.class);
+    private static final Logger log = LoggerFactory.getLogger(CommandLineAppMaster.class);
 
     @Autowired
     private YarnService yarnService;

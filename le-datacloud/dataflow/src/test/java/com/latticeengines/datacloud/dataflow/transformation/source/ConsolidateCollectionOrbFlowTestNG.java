@@ -18,9 +18,11 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectio
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class ConsolidateCollectionOrbFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private final static Logger log = LoggerFactory.getLogger(ConsolidateCollectionOrbFlowTestNG.class);
-    private final static String FIELD_DOMAIN = "Domain";
-    private final static String FIELD_TIMESTAMP = "LE_Last_Upload_Date";
+
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionOrbFlowTestNG.class);
+
+    private static final String FIELD_DOMAIN = "Domain";
+    private static final String FIELD_TIMESTAMP = "LE_Last_Upload_Date";
 
     @Override
     protected String getFlowBeanName() {

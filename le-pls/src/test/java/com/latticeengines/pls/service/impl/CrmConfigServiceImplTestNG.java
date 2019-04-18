@@ -43,7 +43,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecate
 
     private final String tenant = "PLSCrmConfigTestTenant";
 
-    private final static int SUCCESS = 3;
+    private static final int SUCCESS = 3;
 
     @BeforeClass(groups = { "functional" }, enabled = false)
     public void setup() throws Exception {
@@ -102,7 +102,7 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecate
         crmConfig = new CrmConfig();
         crmConfig.setCrmCredential(crmCredential);
         crmService.config("marketo", "PLSTestContract." + tenant + ".Production", crmConfig);
-        
+
         //sfdc
         crmCredential = new CrmCredential();
         crmCredential.setUserName("apeters-widgettech@lattice-engines.com");

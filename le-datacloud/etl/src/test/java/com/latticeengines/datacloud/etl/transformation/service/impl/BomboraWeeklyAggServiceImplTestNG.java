@@ -27,18 +27,18 @@ public class BomboraWeeklyAggServiceImplTestNG
     private String baseSourceVersion = "2016-10-07_00-00-00_UTC";
     private String targetVersion = "2016-10-08_00-00-00_UTC";
 
-    private final static String DOMAIN = "Domain";
-    private final static String DATE = "Date";
-    private final static String TOPIC = "Topic";
-    private final static String ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE = "ZipCodeOfHighestAggregatedScore";
-    private final static String CONTENT_SOURCES = "ContentSources";
-    private final static String TOTAL_VIEWS = "TotalViews";
-    private final static String UNIQUE_USERS = "UniqueUsers";
-    private final static String TOTAL_AGGREGATED_SCORE = "TotalAggregatedScore";
-    private final static String HIGHLY_RELEVANT_SOURCES = "HighlyRelevantSources";
-    private final static String MOST_RELEVANT_SOURCES = "MostRelevantSources";
-    private final static String TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT = "TotalAggregatedScore_HighlyRelevant";
-    private final static String TOTAL_AGGREGATED_SCORE_MOST_RELEVANT = "TotalAggregatedScore_MostRelevant";
+    private static final String DOMAIN = "Domain";
+    private static final String DATE = "Date";
+    private static final String TOPIC = "Topic";
+    private static final String ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE = "ZipCodeOfHighestAggregatedScore";
+    private static final String CONTENT_SOURCES = "ContentSources";
+    private static final String TOTAL_VIEWS = "TotalViews";
+    private static final String UNIQUE_USERS = "UniqueUsers";
+    private static final String TOTAL_AGGREGATED_SCORE = "TotalAggregatedScore";
+    private static final String HIGHLY_RELEVANT_SOURCES = "HighlyRelevantSources";
+    private static final String MOST_RELEVANT_SOURCES = "MostRelevantSources";
+    private static final String TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT = "TotalAggregatedScore_HighlyRelevant";
+    private static final String TOTAL_AGGREGATED_SCORE_MOST_RELEVANT = "TotalAggregatedScore_MostRelevant";
 
     @Autowired
     BomboraWeeklyAgg source;

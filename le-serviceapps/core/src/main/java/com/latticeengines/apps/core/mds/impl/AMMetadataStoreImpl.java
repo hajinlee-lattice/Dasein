@@ -2,8 +2,6 @@ package com.latticeengines.apps.core.mds.impl;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.mds.AMMetadataStore;
@@ -20,10 +18,8 @@ import reactor.core.scheduler.Schedulers;
 @Component
 public class AMMetadataStoreImpl implements AMMetadataStore {
 
-    private static final Logger log = LoggerFactory.getLogger(AMMetadataStoreImpl.class);
-
     private final ColumnMetadataProxy columnMetadataProxy;
-    private final static Scheduler scheduler = Schedulers.newParallel("am-metadata");
+    private static final Scheduler scheduler = Schedulers.newParallel("am-metadata");
 
     @Inject
     public AMMetadataStoreImpl(ColumnMetadataProxy columnMetadataProxy) {

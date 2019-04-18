@@ -21,9 +21,9 @@ public class EventDataSamplingJobTestNG extends DataplatformMiniClusterFunctiona
     private String input = ClassLoader
             .getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
 
-    private final static String CUSTOMER = EventDataSamplingJobTestNG.class.getSimpleName();
+    private static final String CUSTOMER = EventDataSamplingJobTestNG.class.getSimpleName();
 
-    private final static String EVENT_TABLE_NAME = "DELL_EVENT_TABLE";
+    private static final String EVENT_TABLE_NAME = "DELL_EVENT_TABLE";
 
     @Test(groups = "functional")
     public void test() throws Exception {

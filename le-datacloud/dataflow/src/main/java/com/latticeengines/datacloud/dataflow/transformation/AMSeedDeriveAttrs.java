@@ -21,11 +21,11 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(AMSeedDeriveAttrs.DATAFLOW_BEAN_NAME)
 public class AMSeedDeriveAttrs extends AccountMasterBase<AMSeedDeriveAttrsConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "AMSeedDeriveAttrs";
-    public final static String TRANSFORMER_NAME = "AMSeedDeriveAttrsTransformer";
-    private final static String DU_SALES_VOLUME = "DOMESTIC_HQ_SALES_VOLUME";
-    private final static String GU_SALES_VOLUME = "GLOBAL_HQ_SALES_VOLUME";
-    private final static String PARENT_SALES_VOLUME = "PARENTS_SALES_VOLUME";
+    public static final String DATAFLOW_BEAN_NAME = "AMSeedDeriveAttrs";
+    public static final String TRANSFORMER_NAME = "AMSeedDeriveAttrsTransformer";
+    private static final String DU_SALES_VOLUME = "DOMESTIC_HQ_SALES_VOLUME";
+    private static final String GU_SALES_VOLUME = "GLOBAL_HQ_SALES_VOLUME";
+    private static final String PARENT_SALES_VOLUME = "PARENTS_SALES_VOLUME";
 
     @Override
     public String getDataFlowBeanName() {

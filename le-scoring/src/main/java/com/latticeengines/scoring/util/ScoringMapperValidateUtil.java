@@ -22,7 +22,7 @@ public class ScoringMapperValidateUtil {
 
     private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
 
-    static public enum MetadataPurpose {
+    public enum MetadataPurpose {
         FEATURE(3), TARGET(4);
         private int value;
 

@@ -26,7 +26,7 @@ public class QueuedStateProcessorUnitTestNG  {
     private File queuedDir = new File(root + "/queued");
     private File processingDir = new File(root + "/processing");
     private QueuedStateProcessor processor = new QueuedStateProcessor();
-    private final static String TENANT = "DemoContract.DemoTenant.Production";
+    private static final String TENANT = "DemoContract.DemoTenant.Production";
 
     private void createFiles(int numFiles, String tenant, File parent) throws Exception {
         for (int i = 0; i < numFiles; i++) {
@@ -35,26 +35,26 @@ public class QueuedStateProcessorUnitTestNG  {
             FileUtils.write(new File(parent.getAbsolutePath() + "/" + filename), "");
         }
     }
-    
+
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         dataDir.mkdir();
         createFiles(5, TENANT, dataDir);
     }
-    
+
     @AfterClass(groups = "unit")
     public void tearDown() throws Exception {
         FileUtils.deleteDirectory(dataDir);
         FileUtils.deleteDirectory(queuedDir);
         FileUtils.deleteDirectory(processingDir);
     }
-    
+
     @Test(groups = "unit")
     public void processDir() throws Exception {
         processor.processDir(new File(root), FileProcessingState.QUEUED, null, new Properties());
-        
+
         assertTrue(queuedDir.exists());
-        Collection<File> files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false); 
+        Collection<File> files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false);
         assertEquals(files.size(), 5);
         Map<String, Long> fileToTimestampMap = new HashMap<>();
         for (File f : files) {
@@ -69,7 +69,7 @@ public class QueuedStateProcessorUnitTestNG  {
         processor.processDir(new File(root), FileProcessingState.QUEUED, null, new Properties());
         files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false);
         assertEquals(files.size(), 10);
-        
+
         for (File f : files) {
             FilePayload payload = JsonUtils.deserialize(FileUtils.readFileToString(f), FilePayload.class);
             File dataFile = new File(payload.filePath);
@@ -83,7 +83,7 @@ public class QueuedStateProcessorUnitTestNG  {
     @Test(groups = "unit", dependsOnMethods = { "processDir" })
     public void processDirWithFilesMovedToProcessingState() throws Exception {
         Collection<File> files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false);
-        
+
         int i = 0;
         for (File file : files) {
             if (i == 5) {

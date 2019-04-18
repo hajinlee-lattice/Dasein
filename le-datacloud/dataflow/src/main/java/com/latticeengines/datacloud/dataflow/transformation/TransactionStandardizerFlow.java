@@ -22,6 +22,7 @@ import cascading.tuple.Fields;
 
 @Component(BEAN_NAME)
 public class TransactionStandardizerFlow extends ConfigurableFlowBase<TransactionStandardizerConfig> {
+
     public static final String BEAN_NAME = "transactionStandardizerFlow";
 
     @Override

@@ -16,8 +16,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Ba
 
 @Component(SourceVersionDiff.DATAFLOW_BEAN_NAME)
 public class SourceVersionDiff extends TransformationFlowBase<BasicTransformationConfiguration, AMValidatorParams> {
-    public final static String DATAFLOW_BEAN_NAME = "SourceVersionDiff";
-    public final static String TRANSFORMER_NAME = "SourceVersionFlowTransformer";
+
+    public static final String DATAFLOW_BEAN_NAME = "SourceVersionDiff";
+    public static final String TRANSFORMER_NAME = "SourceVersionFlowTransformer";
 
     public static String getTableName(String source, String version) {
         if (StringUtils.isEmpty(version)) {

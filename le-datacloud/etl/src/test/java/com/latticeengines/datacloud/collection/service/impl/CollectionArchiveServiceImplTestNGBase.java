@@ -19,7 +19,7 @@ import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
-abstract public class CollectionArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
+public abstract class CollectionArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     CollectedArchiveService collectedArchiveService;
     ArchiveProgressEntityMgr progressEntityMgr;

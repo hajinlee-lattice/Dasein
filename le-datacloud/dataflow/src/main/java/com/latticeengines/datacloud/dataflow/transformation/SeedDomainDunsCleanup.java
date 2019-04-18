@@ -11,14 +11,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(SeedDomainDunsCleanup.DATAFLOW_BEAN_NAME)
 public class SeedDomainDunsCleanup extends ConfigurableFlowBase<SeedDomainDunsCleanupConfig> {
+
     public static final String DATAFLOW_BEAN_NAME = "SeedDomainDunsCleanup";
     public static final String TRANSFORMER_NAME = "SeedDomainDunsCleanupTransformer";
 
-    private SeedDomainDunsCleanupConfig config;
-
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        config = getTransformerConfig(parameters);
+        SeedDomainDunsCleanupConfig config = getTransformerConfig(parameters);
 
         Node seed = addSource(parameters.getBaseTables().get(0));
         Node goldenDom = addSource(parameters.getBaseTables().get(1));

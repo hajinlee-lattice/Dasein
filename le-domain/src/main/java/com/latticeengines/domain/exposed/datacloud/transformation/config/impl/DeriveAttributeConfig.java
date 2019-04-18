@@ -14,7 +14,7 @@ public class DeriveAttributeConfig extends TblDrivenTransformerConfig {
     public static final String LONG_TYPE = "Long";
     public static final String DOUBLE_TYPE = "Double";
 
-    static public class DeriveFunc extends TblDrivenFuncConfig implements Serializable {
+    public static class DeriveFunc extends TblDrivenFuncConfig implements Serializable {
 
         /**
          *

@@ -19,8 +19,9 @@ import cascading.tuple.Fields;
 
 @Component(CleanupOrbSecSrcFlow.DATAFLOW_BEAN_NAME)
 public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<DomainOwnershipConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "CleanupOrbSecSrcFlow";
-    public final static String TRANSFORMER_NAME = "CleanupOrbSecSrcTransformer";
+
+    public static final String DATAFLOW_BEAN_NAME = "CleanupOrbSecSrcFlow";
+    public static final String TRANSFORMER_NAME = "CleanupOrbSecSrcTransformer";
 
     @Override
     public String getDataFlowBeanName() {

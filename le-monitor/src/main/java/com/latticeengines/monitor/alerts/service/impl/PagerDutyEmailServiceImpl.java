@@ -76,7 +76,7 @@ public class PagerDutyEmailServiceImpl implements PagerDutyService {
         return "success";
     }
 
-    private final static String EMAIL_CONTENT = "<Host>%s</Host><Client>%s</Client>%n<ClientUrl>%s</ClientUrl>%n<DeDupKey>%s</DeDupKey>%n<Message>%s</Message>";
+    private static final String EMAIL_CONTENT = "<Host>%s</Host><Client>%s</Client>%n<ClientUrl>%s</ClientUrl>%n<DeDupKey>%s</DeDupKey>%n<Message>%s</Message>";
 
     private String getContent(String tenantId, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) {

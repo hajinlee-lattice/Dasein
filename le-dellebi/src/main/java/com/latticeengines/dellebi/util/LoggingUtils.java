@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
-final public class LoggingUtils {
+public final class LoggingUtils {
 
     public static String durationSince(long startTime) {
         return DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss.SSS");

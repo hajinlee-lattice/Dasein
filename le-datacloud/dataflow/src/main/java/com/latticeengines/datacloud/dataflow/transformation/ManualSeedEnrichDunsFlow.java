@@ -17,8 +17,8 @@ import cascading.tuple.Fields;
 @Component(ManualSeedEnrichDunsFlow.DATAFLOW_BEAN_NAME)
 public class ManualSeedEnrichDunsFlow extends ConfigurableFlowBase<ManualSeedEnrichDunsConfig> {
 
-    public final static String DATAFLOW_BEAN_NAME = "ManSeedEnrichDunsFlow";
-    public final static String TRANSFORMER_NAME = "ManSeedEnrichDunsTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "ManSeedEnrichDunsFlow";
+    public static final String TRANSFORMER_NAME = "ManSeedEnrichDunsTransformer";
 
     @Override
     public String getDataFlowBeanName() {

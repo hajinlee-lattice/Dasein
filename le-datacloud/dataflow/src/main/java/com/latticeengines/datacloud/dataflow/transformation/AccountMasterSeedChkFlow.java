@@ -19,8 +19,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(AccountMasterSeedChkFlow.DATAFLOW_BEAN_NAME)
 public class AccountMasterSeedChkFlow extends ConfigurableFlowBase<AccountMasterSeedChkConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "AccountMasterSeedChkFlow";
-    public final static String TRANSFORMER_NAME = "AMSeedFlowTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "AccountMasterSeedChkFlow";
+    public static final String TRANSFORMER_NAME = "AMSeedFlowTransformer";
 
     @Override
     public String getDataFlowBeanName() {

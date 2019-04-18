@@ -9,7 +9,7 @@ import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 public class NormalizationUtils {
 
-    private final static double offset = 1.1; // Magic Number given by the
+    private static final double offset = 1.1; // Magic Number given by the
                                               // DataScience Team
 
     public static double percentileScoreFunction(double percentile, double minimumScore, double maximumScore) {

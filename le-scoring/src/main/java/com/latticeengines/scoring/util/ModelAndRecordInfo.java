@@ -22,7 +22,7 @@ public class ModelAndRecordInfo {
         this.totalRecordCount = totalRecordCount;
     }
 
-    static public class ModelInfo {
+    public static class ModelInfo {
         private String modelGuid;
         private long recordCount;
 

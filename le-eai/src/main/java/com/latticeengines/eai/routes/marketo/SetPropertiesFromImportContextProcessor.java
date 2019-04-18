@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public class SetPropertiesFromImportContextProcessor implements Processor {
 
-    private final static Logger log = LoggerFactory.getLogger(SetPropertiesFromImportContextProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(SetPropertiesFromImportContextProcessor.class);
 
     @Override
     public void process(Exchange exchange) throws Exception {

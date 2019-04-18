@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsUtils {
 
-    private final static String SEPARATOR = "__";
-    private final static String SUB_SEPARATOR = "_";
-    private final static String HEADER = "AM_"; // Avro field name only allows
+    private static final String SEPARATOR = "__";
+    private static final String SUB_SEPARATOR = "_";
+    private static final String HEADER = "AM_"; // Avro field name only allows
                                                 // to start with letter or "_"
 
     // Metrics enum -> display name

@@ -44,17 +44,15 @@ import cascading.tuple.Fields;
 public class SourceStandardizationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, StandardizationFlowParameter> {
 
+    private static final String IS_VALID_DOMAIN = "IsValidDomain";
+    private static final String DOMAIN = "Domain";
+    public static final String TRANSFORMER_NAME = "standardizationTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "sourceStandardizationFlow";
+
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;
     }
-
-    private final static String IS_VALID_DOMAIN = "IsValidDomain";
-    private final static String DOMAIN = "Domain";
-
-    public static final String TRANSFORMER_NAME = "standardizationTransformer";
-
-    public static final String DATAFLOW_BEAN_NAME = "sourceStandardizationFlow";
 
     @Override
     public Node construct(StandardizationFlowParameter parameters) {

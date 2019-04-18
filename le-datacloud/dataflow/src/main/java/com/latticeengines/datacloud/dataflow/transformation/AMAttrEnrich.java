@@ -3,8 +3,6 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -17,9 +15,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(AMAttrEnrich.BEAN_NAME)
 public class AMAttrEnrich extends ConfigurableFlowBase<AMAttrEnrichConfig> {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AMSeedMerge.class);
 
     public static final String BEAN_NAME = "AMAttrEnrich";
 

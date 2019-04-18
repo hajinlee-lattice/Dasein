@@ -38,11 +38,11 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 @Component(PivotFlow.DATAFLOW_BEAN_NAME)
 public class PivotFlow extends ConfigurableFlowBase<PivotConfig> {
 
-    protected static ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper();
     private String rowIdField = "RowId" + UUID.randomUUID().toString().replace("-", "");
     private static final String ESCAPED_COMMA = "{{COMMA}}";
-    public final static String DATAFLOW_BEAN_NAME = "pivotFlowTransform";
-    private final static String TRANSFORMER_NAME = "pivotFlowTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "pivotFlowTransform";
+    private static final String TRANSFORMER_NAME = "pivotFlowTransformer";
 
     @Override
     public String getDataFlowBeanName() {

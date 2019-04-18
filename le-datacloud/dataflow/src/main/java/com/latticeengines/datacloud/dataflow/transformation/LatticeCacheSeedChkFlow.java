@@ -17,8 +17,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 
 @Component(LatticeCacheSeedChkFlow.DATAFLOW_BEAN_NAME)
 public class LatticeCacheSeedChkFlow extends ConfigurableFlowBase<LatticeCacheSeedChkConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "LatticeCacheSeedChkFlow";
-    public final static String TRANSFORMER_NAME = "LatticeSeedFlowTransformer";
+
+    public static final String DATAFLOW_BEAN_NAME = "LatticeCacheSeedChkFlow";
+    public static final String TRANSFORMER_NAME = "LatticeSeedFlowTransformer";
 
     @Override
     public String getDataFlowBeanName() {

@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 public class MostRecentFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, MostRecentParameters> {
 
-    public final static String DATAFLOW_BEAN_NAME = "mostRecentFlowTransform";
-    public final static String TRANSFORMER_NAME = "mostRecentTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "mostRecentFlowTransform";
+    public static final String TRANSFORMER_NAME = "mostRecentTransformer";
 
     public String getDataFlowBeanName() {
         return DATAFLOW_BEAN_NAME;
@@ -38,7 +38,7 @@ public class MostRecentFlow
         return findMostRecent(source, parameters);
     }
 
-    protected Node findMostRecent(Node source, MostRecentParameters parameters) {
+    private Node findMostRecent(Node source, MostRecentParameters parameters) {
         String[] groupbyFields = parameters.getGroupbyFields();
         String timestampField = parameters.getTimestampField();
         String domainField = parameters.getDomainField();
