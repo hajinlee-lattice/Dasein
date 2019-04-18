@@ -49,7 +49,7 @@ public class RecalculatePercentileScore extends TypesafeDataFlowBuilder<Recalcul
 
         Node mergedScoreCount = mergeCount(inputTable, modelGuidFieldName, scoreFieldName);
 
-        Node[] nodes = nodeSplitter.splitEv(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
+        Node[] nodes = nodeSplitter.splitRevenue(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
         Node model = null, evModel = null;
         if (nodes[0] != null) {
             model = nodes[0].groupByAndBuffer(new FieldList(modelGuidFieldName), new FieldList(rawScoreFieldName),
