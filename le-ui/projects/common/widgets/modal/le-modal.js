@@ -2,11 +2,10 @@ import React, { Component, ReactDOM } from "common/react-vendor";
 import propTypes from "prop-types";
 import './le-modal.scss';
 import { TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING, MEDIUM_SIZE } from './le-modal.utils';
-
-
 import LeButton from '../buttons/le-button';
 import { actions, reducer } from './le-modal.redux';
-import { isBoolean } from "util";
+
+
 const modalRoot = document.getElementById('le-modal');
 
 export default class LeModal extends Component {
@@ -29,7 +28,10 @@ export default class LeModal extends Component {
                 hideFooter: data.config.hideFooter ? data.config.hideFooter : false,
                 type: data.config.type ? data.config.type : '',
                 oneButton: data.config.oneButton ? data.config.oneButton : false,
-                size: data.config.size ? data.config.size : MEDIUM_SIZE
+                size: data.config.size ? data.config.size : MEDIUM_SIZE,
+                cancelLabel : data.config.cancelLabel ? data.config.cancelLabel : 'Cancel',
+                confirmLabel: data.config.confirmLabel ? data.config.confirmLabel : 'Done'
+
             });
         });
         this.clickHandler = this.clickHandler.bind(this);
@@ -82,7 +84,7 @@ export default class LeModal extends Component {
             return (<LeButton
                 name={`${"modal-cancel"}`}
                 config={{
-                    label: "Cancel",
+                    label: this.state.cancelLabel,
                     classNames: "gray-button"
                 }}
                 callback={() => { return this.clickHandler('close') }}
@@ -100,7 +102,7 @@ export default class LeModal extends Component {
                     <LeButton
                         name={`${"modal-ok"}`}
                         config={{
-                            label: "Done",
+                            label: this.state.confirmLabel,
                             classNames: this.getConfirmClass()
                         }}
                         callback={() => { return this.clickHandler('ok') }}
@@ -118,11 +120,8 @@ export default class LeModal extends Component {
             return null;
         }
     }
-    getClassName() {
-    }
 
     getModalUI() {
-        console.log('MODAL STATE ', this.state);
         return (
             <div className="le_modal opened">
                 <div className={`${"le-modal-content"} ${this.state.size}`}>
@@ -164,13 +163,14 @@ export default class LeModal extends Component {
 
 LeModal.propTypes = {
     config: propTypes.objectOf(propTypes.shape({
-        open: propTypes.bool,
         callback: propTypes.func,
         template: propTypes.func,
         title: propTypes.func,
         hideFooter: propTypes.bool,
         type: propTypes.string,
         oneButton: propTypes.bool,
-        size: propTypes.string
+        size: propTypes.string,
+        cancelLabel: propTypes.string,
+        confirmLabel: propTypes.string
     }))
 };
