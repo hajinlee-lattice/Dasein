@@ -51,7 +51,7 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
         private final LedpMasterSlaveConfiguration configuration;
         private final LettuceClientConfiguration clientConfiguration;
 
-        public ElasticacheConnectionProvider(RedisClient client, RedisCodec<?, ?> codec, Optional<ReadFrom> readFrom,
+        ElasticacheConnectionProvider(RedisClient client, RedisCodec<?, ?> codec, Optional<ReadFrom> readFrom,
                 LedpMasterSlaveConfiguration configuration, LettuceClientConfiguration clientConfiguration) {
 
             this.client = client;

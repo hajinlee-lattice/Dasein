@@ -111,7 +111,7 @@ public class SchemaRepository {
         Table table = null;
         switch (entity) {
         case Account:
-            table = getAccountSchema(cdlSchema, withoutId);
+            table = getAccountSchema(cdlSchema, enableEntityMatch);
             break;
         case Contact:
             table = getContactSchema(cdlSchema, enableEntityMatch);
@@ -129,13 +129,7 @@ public class SchemaRepository {
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
 
-        // For M27 Lead-to-Account Match, only Contact Entity has special schema behavior and requires a special
-        // function to setup the match keys.
-        if (enableEntityMatch && entity == BusinessEntity.Contact) {
-            table.addAttributes(getContactAttributesForEntityMatch());
-        } else {
-            table.addAttributes(matchingAttributes(entity));
-        }
+        table.addAttributes(matchingAttributes(entity, enableEntityMatch));
 
         return table;
     }
@@ -167,7 +161,7 @@ public class SchemaRepository {
             table = getSalesforceLeadSchema();
             break;
         case Account:
-            table = getAccountSchema(false, withoutId);
+            table = getAccountSchema(false, enableEntityMatch);
             break;
         case Contact:
             table = getContactSchema(false, enableEntityMatch);
@@ -208,10 +202,8 @@ public class SchemaRepository {
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
 
-        // For M27 Lead-to-Account Match, only Contact Entity has special schema behavior and requires a special
-        // function to setup the match keys.
         if (enableEntityMatch && schema == SchemaInterpretation.Contact) {
-            table.addAttributes(getContactAttributesForEntityMatch());
+            table.addAttributes(getMatchingAttributes(SchemaInterpretation.ContactEntityMatch));
         } else {
             table.addAttributes(getMatchingAttributes(schema));
         }
@@ -550,11 +542,22 @@ public class SchemaRepository {
         return getAccountSchema(false, false);
     }
 
-    private Table getAccountSchema(boolean cdlSchema, boolean withoutId) {
+    private Table getAccountSchema(boolean cdlSchema, boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.Account);
-        table.setPrimaryKey(createPrimaryKey(InterfaceName.AccountId.name()));
+        if (!enableEntityMatch) {
+            table.setPrimaryKey(createPrimaryKey(InterfaceName.AccountId.name()));
+        }
 
-        if (!withoutId) {
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerAccountId.name()) //
+                    .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerAccountId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .fundamentalType(FundamentalType.ALPHA.name()) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .build());
+        } else {
             table.addAttribute(attr(InterfaceName.AccountId.name()) //
                     .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
                     .type(Schema.Type.STRING) //
@@ -649,18 +652,31 @@ public class SchemaRepository {
 
     private Table getContactSchema(boolean cdlSchema, boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.Contact);
-        table.setPrimaryKey(createPrimaryKey(InterfaceName.ContactId.name()));
+        if (!enableEntityMatch) {
+            table.setPrimaryKey(createPrimaryKey(InterfaceName.ContactId.name()));
+        }
 
-        table.addAttribute(attr(InterfaceName.ContactId.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
-                .type(Schema.Type.STRING) //
-                .notNull() //
-                .required() //
-                .interfaceName(InterfaceName.ContactId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerContactId.name()) //
+                    .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerContactId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        } else {
+            table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                    .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
+                    .type(Schema.Type.STRING) //
+                    .notNull() //
+                    .required() //
+                    .interfaceName(InterfaceName.ContactId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.ContactName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("NAME", "CONTACT NAME", "CONTACT_NAME", "DISPLAY_NAME")) //
                 .type(Schema.Type.STRING) //
@@ -685,7 +701,17 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        if (!enableEntityMatch) {
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerAccountId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerAccountId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        } else {
             table.addAttribute(attr(InterfaceName.AccountId.name()) //
                     .allowedDisplayNames(
                             Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
@@ -1322,23 +1348,6 @@ public class SchemaRepository {
         return builder;
     }
 
-    private List<Attribute> getContactAttributesForEntityMatch() {
-        List<Attribute> attrs = new ArrayList<>();
-        Attribute customAccountId = attr(InterfaceName.CustomerAccountId.name()) //
-                .allowedDisplayNames(
-                        Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
-                .type(Schema.Type.STRING) //
-                .notNull() //
-                .interfaceName(InterfaceName.CustomerAccountId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
-        attrs.add(customAccountId);
-        attrs.addAll(getMatchingAttributes(SchemaInterpretation.ContactEntityMatch));
-        return attrs;
-    }
-
     public List<Attribute> getMatchingAttributes(SchemaInterpretation schema) {
         Attribute website = attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet("WEBSITE")) //
@@ -1463,15 +1472,20 @@ public class SchemaRepository {
         } else if (schema == SchemaInterpretation.ContactEntityMatch) {
             email.setDefaultValueStr("");
             attrs.addAll(Arrays.asList(email, website, accountCompanyName, duns, city, state, country, postalCode,
-                    phoneNumber));
+                    phoneNumber, address1, address2));
             attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
         }
         return attrs;
     }
 
-    public List<Attribute> matchingAttributes(BusinessEntity entity) {
-        if (entity == BusinessEntity.Contact)
-            return getMatchingAttributes(SchemaInterpretation.Contact);
+    public List<Attribute> matchingAttributes(BusinessEntity entity, boolean enableEntityMatch) {
+        if (entity == BusinessEntity.Contact) {
+            if (enableEntityMatch) {
+                return getMatchingAttributes(SchemaInterpretation.ContactEntityMatch);
+            } else {
+                return getMatchingAttributes(SchemaInterpretation.Contact);
+            }
+        }
         if (entity == BusinessEntity.Account)
             return getMatchingAttributes(SchemaInterpretation.Account);
         return Collections.emptyList();

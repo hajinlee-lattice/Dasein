@@ -5,7 +5,7 @@ public enum ScoringCommandStatus {
 
     private int value;
 
-    private ScoringCommandStatus(int value) {
+    ScoringCommandStatus(int value) {
         this.value = value;
     }
 

@@ -54,7 +54,7 @@ public class AttrConfigLifeCycleChangeConfiguration extends ActionConfiguration 
 
         private String format;
 
-        private SubType(String format) {
+        SubType(String format) {
             this.format = format;
         }
 

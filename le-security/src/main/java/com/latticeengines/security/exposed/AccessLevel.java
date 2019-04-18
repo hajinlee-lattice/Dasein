@@ -234,7 +234,7 @@ public enum AccessLevel implements GrantedAuthority {
         return maxLevel;
     }
 
-    public static final List<AccessLevel> getInternalAccessLevel() {
+    public static List<AccessLevel> getInternalAccessLevel() {
         return Arrays.asList(AccessLevel.INTERNAL_ADMIN, AccessLevel.INTERNAL_USER, AccessLevel.SUPER_ADMIN);
     }
 }

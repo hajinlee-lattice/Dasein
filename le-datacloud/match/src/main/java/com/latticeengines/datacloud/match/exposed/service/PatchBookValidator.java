@@ -24,20 +24,20 @@ public interface PatchBookValidator {
     /**
      * Error Messages for conflict in patchItems in patchBook
      */
-    static final String CONFLICT_IN_PATCH_ITEM = "Conflict exists in provided patch items for match keys : ";
+    String CONFLICT_IN_PATCH_ITEM = "Conflict exists in provided patch items for match keys : ";
 
-    static final String ATTRI_PATCH_DOM_BASED_SRC_ERR = "Cannot patch domain source attributes : ";
+    String ATTRI_PATCH_DOM_BASED_SRC_ERR = "Cannot patch domain source attributes : ";
 
-    static final String ATTRI_PATCH_DUNS_BASED_SRC_ERR = "Cannot patch duns source attributes : ";
+    String ATTRI_PATCH_DUNS_BASED_SRC_ERR = "Cannot patch duns source attributes : ";
 
-    static final String DOMAIN_PATCH_MATCH_KEY_ERR = "Provided Match Key/Patch item attribute is incorrect. "
+    String DOMAIN_PATCH_MATCH_KEY_ERR = "Provided Match Key/Patch item attribute is incorrect. "
             + "Expected input match key is DUNS and patched Item attribute is Domain.";
 
-    static final String ERR_IN_PATCH_ITEMS = "Allowed Patch Item is only Domain Attribute.";
+    String ERR_IN_PATCH_ITEMS = "Allowed Patch Item is only Domain Attribute.";
 
-    static final String DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO = "Duplicate combination of Match Key DUNS and Patch Item Domain exists : ";
+    String DUPLI_MATCH_KEY_AND_PATCH_ITEM_COMBO = "Duplicate combination of Match Key DUNS and Patch Item Domain exists : ";
 
-    static final String ENCODED_ATTRS_NOT_SUPPORTED = "Encoded Attributes not supported : ";
+    String ENCODED_ATTRS_NOT_SUPPORTED = "Encoded Attributes not supported : ";
 
     /**
      * Validate a list of {@link PatchBook} under specified DataCloud version. Only entries with the given type and

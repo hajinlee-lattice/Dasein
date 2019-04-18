@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -25,7 +26,7 @@ import com.latticeengines.domain.exposed.datafabric.CompositeGraphEntity;
 
 public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DynamoService dynamoService;
 
     @Value("${common.le.environment}")
@@ -141,17 +142,17 @@ public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBa
     }
 
     class AccountEntityMgr extends CompositeFabricEntityMgrImpl<Account> {
-         public AccountEntityMgr(BaseFabricEntityMgrImpl.Builder builder) {
+         AccountEntityMgr(BaseFabricEntityMgrImpl.Builder builder) {
              super(builder);
          }
     }
     class ContactEntityMgr extends CompositeFabricEntityMgrImpl<Contact> {
-         public ContactEntityMgr(BaseFabricEntityMgrImpl.Builder builder) {
+         ContactEntityMgr(BaseFabricEntityMgrImpl.Builder builder) {
              super(builder);
          }
     }
     class HistoryEntityMgr extends TimeSeriesFabricEntityMgrImpl<History> {
-         public HistoryEntityMgr(BaseFabricEntityMgrImpl.Builder builder) {
+         HistoryEntityMgr(BaseFabricEntityMgrImpl.Builder builder) {
              super(builder);
          }
     }

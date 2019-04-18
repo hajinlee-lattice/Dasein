@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 
 public interface ScoringCommandLogService {
 
-    public void log(ScoringCommand scoringCommand, String message);
+    void log(ScoringCommand scoringCommand, String message);
 
     void logBeginStep(ScoringCommand scoringCommand, ScoringCommandStep step);
 

@@ -43,7 +43,7 @@ public class TopologicalTraverse extends DepthFirstSearch {
         public Stack<GraphNode> topologicalTrace = new Stack<>();
         private Visitor innerVisitor;
 
-        public TopologicalVisitor(Visitor visitor) { innerVisitor = visitor; }
+        TopologicalVisitor(Visitor visitor) { innerVisitor = visitor; }
 
         @Override
         public void visit(Object o, VisitorContext ctx){

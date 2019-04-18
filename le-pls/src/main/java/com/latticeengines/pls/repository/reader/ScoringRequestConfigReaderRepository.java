@@ -15,15 +15,15 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 public interface ScoringRequestConfigReaderRepository extends BaseJpaRepository<ScoringRequestConfig, Long> {
 
     @EntityGraph(value="ScoringRequestConfig.details", type=EntityGraphType.LOAD)
-    public ScoringRequestConfig findByMarketoCredentialPidAndConfigId(Long marketoCredentialPid, String configId);
-    
+    ScoringRequestConfig findByMarketoCredentialPidAndConfigId(Long marketoCredentialPid, String configId);
+
     @EntityGraph(value="ScoringRequestConfig.details", type=EntityGraphType.LOAD)
-    public ScoringRequestConfig findByMarketoCredentialPidAndModelUuid(Long marketoCredentialPid, String modelUuid);
+    ScoringRequestConfig findByMarketoCredentialPidAndModelUuid(Long marketoCredentialPid, String modelUuid);
 
     @Query(name = ScoringRequestConfig.NQ_FIND_CONFIGS_BY_CREDENTIAL_ID)
-    public List<ScoringRequestConfigSummary> findByMarketoCredentialPid(@Param("credentialPid")Long credentialPid);
+    List<ScoringRequestConfigSummary> findByMarketoCredentialPid(@Param("credentialPid")Long credentialPid);
 
     @Query(name = ScoringRequestConfig.NQ_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID)
-    public ScoringRequestConfigContext retrieveScoringRequestConfigContext(@Param("configId")String configUuid);
-    
+    ScoringRequestConfigContext retrieveScoringRequestConfigContext(@Param("configId")String configUuid);
+
 }

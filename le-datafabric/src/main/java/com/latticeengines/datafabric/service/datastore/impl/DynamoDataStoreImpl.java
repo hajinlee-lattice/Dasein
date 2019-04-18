@@ -605,9 +605,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         } else if (compositeIds.length == 0) {
             ids[0] = id;
         } else {
-            for (int i = 0; i < compositeIds.length; i++) {
-                ids[i] = compositeIds[i];
-            }
+            System.arraycopy(compositeIds, 0, ids, 0, compositeIds.length);
         }
         return constructDynamoKey(ids);
     }
@@ -789,7 +787,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         PrimaryKey pk;
         String[] ids;
 
-        public DynamoKey(String hashAttr, String rangeAttr, String[] ids) {
+        DynamoKey(String hashAttr, String rangeAttr, String[] ids) {
             this.ids = ids;
             if (rangeAttr == null) {
                 pk = new PrimaryKey(hashAttr, ids[0]);

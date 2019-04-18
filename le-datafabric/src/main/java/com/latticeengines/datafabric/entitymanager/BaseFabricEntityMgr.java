@@ -7,7 +7,7 @@ public interface BaseFabricEntityMgr<T> {
 
     void create(T entity);
 
-    public void batchCreate(List<T> entities);
+    void batchCreate(List<T> entities);
 
     void update(T entity);
 

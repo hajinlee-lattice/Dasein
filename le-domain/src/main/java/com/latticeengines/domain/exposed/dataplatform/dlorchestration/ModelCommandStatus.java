@@ -5,7 +5,7 @@ public enum ModelCommandStatus {
 
     private int value;
 
-    private ModelCommandStatus(int value) {
+    ModelCommandStatus(int value) {
         this.value = value;
     }
 
@@ -23,4 +23,5 @@ public enum ModelCommandStatus {
     public int getValue() {
         return value;
     }
+
 }

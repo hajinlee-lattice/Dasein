@@ -78,7 +78,7 @@ public class TestEntityMatchService {
      *            whether to expire test data in the specified environment
      * @return created test data, lookup entry -> entityId pairs
      */
-    public List<Pair<EntityLookupEntry, String>> prepareLookupTestData(@NotNull Tenant tenant,
+    List<Pair<EntityLookupEntry, String>> prepareLookupTestData(@NotNull Tenant tenant,
             @NotNull EntityMatchEnvironment env, @NotNull String entity, @NotNull Object[] header,
             @NotNull Object[][] lookupData, boolean setTTL) {
         return prepareTestData(tenant, env, entity, header, lookupData, (req) -> {
@@ -110,7 +110,7 @@ public class TestEntityMatchService {
      *            whether to expire test data in the specified environment
      * @return created test data
      */
-    public List<EntityRawSeed> prepareSeedTestData(@NotNull Tenant tenant, @NotNull EntityMatchEnvironment env,
+    List<EntityRawSeed> prepareSeedTestData(@NotNull Tenant tenant, @NotNull EntityMatchEnvironment env,
             @NotNull String entity, @NotNull Object[] header, @NotNull Object[][] seedData, boolean setTTL) {
         return prepareTestData(tenant, env, entity, header, seedData, (req) -> {
             // create seeds
@@ -144,7 +144,7 @@ public class TestEntityMatchService {
      * @param env
      *            target environment
      */
-    public void bumpVersion(@NotNull String tenantId, @NotNull EntityMatchEnvironment env) {
+    void bumpVersion(@NotNull String tenantId, @NotNull EntityMatchEnvironment env) {
         Preconditions.checkNotNull(tenantId);
 
         // standardize tenant ID
@@ -343,7 +343,7 @@ public class TestEntityMatchService {
         final Map<String, Integer> systemIdx;
         final boolean setTTL;
 
-        public PrepareTestDataRequest(Tenant tenant, EntityMatchEnvironment env, String entity, int entityIdIdx,
+        PrepareTestDataRequest(Tenant tenant, EntityMatchEnvironment env, String entity, int entityIdIdx,
                 int latticeAccountIdIdx, Map<MatchKey, Integer> matchKeyIdx, Map<String, Integer> systemIdx,
                 boolean setTTL) {
             this.tenant = tenant;

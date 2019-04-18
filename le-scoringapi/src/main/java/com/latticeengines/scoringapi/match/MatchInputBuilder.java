@@ -12,7 +12,7 @@ import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public interface MatchInputBuilder {
-    public boolean accept(String dataCloudVersion);
+    boolean accept(String dataCloudVersion);
 
     MatchInput buildMatchInput(CustomerSpace space, //
             InterpretedFields interpreted, //

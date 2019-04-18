@@ -24,8 +24,12 @@
         <!-- Annotations -->
         <module name="PackageAnnotation"/>
 
+        <!-- Block -->
+        <module name="AvoidNestedBlocks"/>
+
         <!-- Modifiers -->
         <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
 
         <!-- Imports -->
         <module name="AvoidStarImport"/>

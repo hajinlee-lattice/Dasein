@@ -5,7 +5,9 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 
 public interface AMStatsInterface {
+
     TopNAttributeTree getTopAttrTree();
 
-    public AccountMasterCube getCube(AccountMasterFactQuery query, boolean considerOnlyEnrichments);
+    AccountMasterCube getCube(AccountMasterFactQuery query, boolean considerOnlyEnrichments);
+
 }

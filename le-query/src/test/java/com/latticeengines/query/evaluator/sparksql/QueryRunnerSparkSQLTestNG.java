@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
 
 public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements RedshiftAndSparkQueryTester {
+
     private static Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
 
     private static final String BITENCODED_NOMINAL_ATTR = "TechIndicator_EmailCampaigns";
@@ -53,7 +54,7 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
     @DataProvider(name = "bitEncodedData", parallel = false)
     private Object[][] provideBitEncodedDataWithSparkUser() {
         Object[][] basicTests = super.getBitEncodedTestData();
-        
+
         Object[][] basicTestsWithMultipleUsers = new Object[basicTests.length*2][];
         for (int i=0; i<basicTests.length; i++) {
             basicTestsWithMultipleUsers[i*2] = basicTests[i];
@@ -95,5 +96,5 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
     public DataPage getDataFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
         return queryEvaluatorService.getData(attrRepo, query, sqlUser);
     }
-    
+
 }

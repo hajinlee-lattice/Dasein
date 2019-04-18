@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.FileReader;
@@ -27,7 +29,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -66,7 +67,7 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTes
  * Lastly, this is the parallel version of the test that spawns multiple threads
  * to ensure that RecordTransformer and ModelEvaluator can run concurrently
  * without impacting scoring correctness.
- * 
+ *
  * @author zandrogonzalez
  *
  */
@@ -76,7 +77,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
 
     private File modelExtractionDir;
 
-    @Autowired
+    @Inject
     private RecordTransformer recordTransformer;
 
     @BeforeClass(groups = "functional")
@@ -219,7 +220,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         private Map<Double, Double> expectedScores;
         private Schema schema;
 
-        public RecordTransformerCallable(Schema schema, //
+        RecordTransformerCallable(Schema schema, //
                 BlockingQueue<GenericRecord> inputQueue, //
                 BlockingQueue<QueueEntry<Double, Double>> outputQueue, //
                 BlockingQueue<QueueEntry<Double, Double>> errorQueue, //
@@ -320,11 +321,11 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
 
         private static final long serialVersionUID = 1L;
 
-        public QueueEntry(K key, V value) {
+        QueueEntry(K key, V value) {
             super(key, value);
         }
 
-        public QueueEntry(Entry<? extends K, ? extends V> entry) {
+        QueueEntry(Entry<? extends K, ? extends V> entry) {
             super(entry);
         }
 

@@ -9,7 +9,7 @@ public enum MadisonLogicDailyProgressStatus {
 
     private String status;
 
-    private MadisonLogicDailyProgressStatus(String status) {
+    MadisonLogicDailyProgressStatus(String status) {
         this.status = status;
     }
 

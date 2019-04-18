@@ -8,7 +8,7 @@ public enum NoteOrigin {
 
     private String origin;
 
-    private NoteOrigin(String origin) {
+    NoteOrigin(String origin) {
         this.setOrigin(origin);
     }
 

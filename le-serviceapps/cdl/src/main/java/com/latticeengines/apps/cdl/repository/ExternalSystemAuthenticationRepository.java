@@ -12,12 +12,12 @@ public interface ExternalSystemAuthenticationRepository
         extends BaseJpaRepository<ExternalSystemAuthentication, Long> {
 
     @Query(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_LOOKUPMAP_IDS)
-    public List<ExternalSystemAuthentication> findByLookupMapIds(@Param("lookupMapIds")List<String> lookupMapIds);
+    List<ExternalSystemAuthentication> findByLookupMapIds(@Param("lookupMapIds")List<String> lookupMapIds);
 
     @Query(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_AUTH_ID)
-    public ExternalSystemAuthentication findByAuthId(@Param("authId")String authId);
+    ExternalSystemAuthentication findByAuthId(@Param("authId")String authId);
 
     @Query(name = ExternalSystemAuthentication.NQ_FIND_ALL_AUTHS)
-    public List<ExternalSystemAuthentication> findAllAuths();
+    List<ExternalSystemAuthentication> findAllAuths();
 
 }

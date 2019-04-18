@@ -5,13 +5,13 @@ import java.util.Map;
 
 public interface PlaymakerRecommendationEntityMgr {
 
-    public static final String ID_KEY = "ID";
-    public static final String RECORDS_KEY = "records";
-    public static final String END_KEY = "endDatetime";
-    public static final String START_KEY = "startDatetime";
-    public static final String LAST_MODIFIATION_DATE_KEY = "LastModificationDate";
-    public static final String COUNT_KEY = "count";
-    public static final String RECOMMENDATION_DATE = "recommendationDate";
+    String ID_KEY = "ID";
+    String RECORDS_KEY = "records";
+    String END_KEY = "endDatetime";
+    String START_KEY = "startDatetime";
+    String LAST_MODIFIATION_DATE_KEY = "LastModificationDate";
+    String COUNT_KEY = "count";
+    String RECOMMENDATION_DATE = "recommendationDate";
 
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName, String lookupSource);
 

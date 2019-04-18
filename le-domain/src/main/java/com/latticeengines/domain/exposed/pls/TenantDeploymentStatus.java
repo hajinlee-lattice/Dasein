@@ -5,7 +5,7 @@ public enum TenantDeploymentStatus {
 
     private int value;
 
-    private TenantDeploymentStatus(int value) {
+    TenantDeploymentStatus(int value) {
         this.value = value;
     }
 

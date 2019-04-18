@@ -12,7 +12,7 @@ public class CategoryRegexMatchFcn extends TransformWithImpAndVetoFunctionBase {
         public String name;
         public Pattern pattern;
 
-        public Category(String name, Pattern pattern) {
+        Category(String name, Pattern pattern) {
             this.name = name;
             this.pattern = pattern;
         }
@@ -62,20 +62,12 @@ public class CategoryRegexMatchFcn extends TransformWithImpAndVetoFunctionBase {
 
         for (Category category : categories) {
             if (category.pattern.matcher(s).matches()) {
-                if (categoryValue.containsKey(category.name)) {
-                    return categoryValue.get(category.name);
-                } else {
-                    return 0.0;
-                }
+                return categoryValue.getOrDefault(category.name, 0.0);
             }
         }
 
         if (!isValid(s)) {
-            if (categoryValue.containsKey("invalid")) {
-                return categoryValue.get("invalid");
-            } else {
-                return 0.0;
-            }
+            return categoryValue.getOrDefault("invalid", 0.0);
         }
 
         if (categoryValue.containsKey("")) {

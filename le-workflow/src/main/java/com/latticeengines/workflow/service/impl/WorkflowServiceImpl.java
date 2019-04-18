@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
 import org.slf4j.Logger;
@@ -35,7 +37,6 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -80,31 +81,31 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 36;
     public static final long HEARTBEAT_MILLIS = 1000 * 120;
 
-    @Autowired
+    @Inject
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
-    @Autowired
+    @Inject
     private JobLauncher jobLauncher;
 
-    @Autowired
+    @Inject
     private JobRegistry jobRegistry;
 
-    @Autowired
+    @Inject
     private JobOperator jobOperator;
 
-    @Autowired
+    @Inject
     private WorkflowTenantService workflowTenantService;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private JobCacheService jobCacheService;
 
-    @Autowired
+    @Inject
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
-    @Autowired
+    @Inject
     private LEJobCallerRegister callerRegister;
 
     @Override
@@ -461,7 +462,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         private WorkflowExecutionId workflowId;
         private volatile boolean isDone = false;
 
-        public JobWaitCaller(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval) {
+        JobWaitCaller(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval) {
             this.maxWaitTime = maxWaitTime;
             this.checkInterval = checkInterval;
             this.workflowId = workflowId;

@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface RequestInfo {
 
-    static final String TENANT = "Tenant";
+    String TENANT = "Tenant";
 
     String get(String key);
 

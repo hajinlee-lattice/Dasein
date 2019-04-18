@@ -24,7 +24,7 @@ public class CamilleTransaction {
     private abstract static class Operation {
         protected Path path;
 
-        public Operation(Path path) {
+        Operation(Path path) {
             this.path = path;
         }
 
@@ -43,7 +43,7 @@ public class CamilleTransaction {
     }
 
     private static class DeleteOperation extends Operation {
-        public DeleteOperation(Path path) {
+        DeleteOperation(Path path) {
             super(path);
         }
 
@@ -71,7 +71,7 @@ public class CamilleTransaction {
     private static class CheckOperation extends Operation {
         private Document document;
 
-        public CheckOperation(Path path, Document document) {
+        CheckOperation(Path path, Document document) {
             super(path);
             this.document = document;
         }
@@ -102,7 +102,7 @@ public class CamilleTransaction {
         private List<ACL> acl;
         private byte[] data;
 
-        public CreateOperation(Path path, Document document, List<ACL> acl) {
+        CreateOperation(Path path, Document document, List<ACL> acl) {
             super(path);
             this.document = document;
             this.acl = acl;
@@ -134,7 +134,7 @@ public class CamilleTransaction {
         private Document document;
         private byte[] data;
 
-        public SetOperation(Path path, Document document) {
+        SetOperation(Path path, Document document) {
             super(path);
             this.document = document;
             this.data = document.getData().getBytes();

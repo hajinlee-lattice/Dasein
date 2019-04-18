@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +23,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -41,6 +41,8 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>, ApplicationContextAware {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseCacheLoaderService.class);
+
     @Value("${datacloud.match.cache.loader.batch.size:25}")
     private int batchSize;
 
@@ -50,16 +52,16 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     @Value("${datacloud.match.cache.loader.thread.pool.size:16}")
     private int poolSize;
 
-    private static Logger log = LoggerFactory.getLogger(BaseCacheLoaderService.class);
-
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
-    @Autowired
+
+    @Inject
     protected Configuration yarnConfiguration;
-    @Autowired
+
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private NameLocationService nameLocationService;
 
     private ApplicationContext applicationContext;
@@ -70,7 +72,8 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     protected abstract Object getFieldValue(E record, String dunsField);
 
     // Map from source fields to NameLocation fields
-    protected static Map<String, String> defaultFieldMap = new HashMap<>();
+    private static Map<String, String> defaultFieldMap = new HashMap<>();
+
     static {
         defaultFieldMap.put("LDC_Name", "name");
         defaultFieldMap.put("LDC_Country", "country");
@@ -79,9 +82,9 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         defaultFieldMap.put("LDC_ZipCode", "zipcode");
         defaultFieldMap.put("LDC_PhoneNumber", "phoneNumber");
     }
-    protected static String defaultDunsField = "LDC_DUNS";
-    protected static String defaultMatchGrade = "AAAAAAAAAAA";
-    protected static int defaultConfidenceCode = 10;
+    private static String defaultDunsField = "LDC_DUNS";
+    private static String defaultMatchGrade = "AAAAAAAAAAA";
+    private static int defaultConfidenceCode = 10;
 
     @Override
     public void loadCache(CacheLoaderConfig config) {
@@ -120,7 +123,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                 break;
             }
             currentRow++;
-            
+
             records.add(record);
             if (records.size() >= batchSize) {
                 Future<Integer> future = executor
@@ -233,8 +236,8 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
 
     private List<DnBMatchContext> toCacheContexts(List<E> records, CacheLoaderConfig config) {
         List<DnBMatchContext> matchContexts = new ArrayList<DnBMatchContext>();
-        for (int i = 0; i < records.size(); i++) {
-            DnBMatchContext matchContext = createMatchContext(records.get(i), config);
+        for (E record : records) {
+            DnBMatchContext matchContext = createMatchContext(record, config);
             if (matchContext != null)
                 matchContexts.add(matchContext);
         }
@@ -347,7 +350,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         private String dirPath;
         private CacheLoaderConfig config;
 
-        public CacheLoaderDisplatchRunnable(String dirPath, CacheLoaderConfig config) {
+        CacheLoaderDisplatchRunnable(String dirPath, CacheLoaderConfig config) {
             this.dirPath = dirPath;
             this.config = config;
         }
@@ -367,7 +370,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         private long recordStart;
         private CacheLoaderConfig config;
 
-        public CacheLoaderCallable(List<E> records, long recordStart, CacheLoaderConfig config) {
+        CacheLoaderCallable(List<E> records, long recordStart, CacheLoaderConfig config) {
             this.records = records;
             this.recordStart = recordStart;
             this.config = config;

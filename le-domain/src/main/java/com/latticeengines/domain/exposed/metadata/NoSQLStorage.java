@@ -22,7 +22,7 @@ public class NoSQLStorage extends StorageMechanism {
         this.databaseName = databaseName;
     }
 
-    public static enum DatabaseName {
+    public enum DatabaseName {
         DYNAMO
     }
 }

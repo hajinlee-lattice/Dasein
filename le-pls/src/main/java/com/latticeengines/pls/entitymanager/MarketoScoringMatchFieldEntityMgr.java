@@ -6,7 +6,7 @@ import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.pls.MarketoScoringMatchField;
 
 public interface MarketoScoringMatchFieldEntityMgr extends BaseEntityMgrRepository<MarketoScoringMatchField, Long> {
-    
-    public Integer deleteFields(List<MarketoScoringMatchField> fields);
-    
+
+    Integer deleteFields(List<MarketoScoringMatchField> fields);
+
 }

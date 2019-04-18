@@ -5,7 +5,7 @@ public enum GenericFabricStatusEnum {
 
     private String value;
 
-    private GenericFabricStatusEnum(String status) {
+    GenericFabricStatusEnum(String status) {
         this.value = status;
     }
 

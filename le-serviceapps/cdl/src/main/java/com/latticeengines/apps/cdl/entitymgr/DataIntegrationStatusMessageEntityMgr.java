@@ -6,7 +6,8 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 
 public interface DataIntegrationStatusMessageEntityMgr {
 
-    public void create(DataIntegrationStatusMessage statusMessage);
+    void create(DataIntegrationStatusMessage statusMessage);
 
-    public List<DataIntegrationStatusMessage> getAllStatusMessages(Long statusMonitorPid);
+    List<DataIntegrationStatusMessage> getAllStatusMessages(Long statusMonitorPid);
+
 }
