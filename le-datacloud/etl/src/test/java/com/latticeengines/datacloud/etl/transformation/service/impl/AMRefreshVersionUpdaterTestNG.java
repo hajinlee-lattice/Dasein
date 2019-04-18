@@ -10,6 +10,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -25,23 +27,23 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class AMRefreshVersionUpdaterTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(AMRefreshVersionUpdaterTestNG.class);
     private Long refreshVerValBefore;
     @Autowired
     private DataCloudVersionService dataCloudVersionService;
     GeneralSource source = new GeneralSource("LDCDEV_AMRefreshVersionUpdater");
     GeneralSource baseSource = new GeneralSource("AMRefreshVersionUpdater");
-    private boolean iteration1 = false;
-    private boolean iteration2 = false;
+    private int iteration = 0;
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) { // iterating twice to test if step is
+                                      // re-run and source is re-generated if _SUCCESS flag is absent
             if (i == 0) {
-                iteration1 = true;
+                iteration = 1;
             }
             if (i == 1) {
-                iteration2 = true;
-                iteration1 = false;
+                iteration = 2;
             }
             refreshVerValBefore = Long.valueOf(
                     dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
@@ -61,10 +63,10 @@ public class AMRefreshVersionUpdaterTestNG
         columns.add(Pair.of("DUNS", String.class));
         Object[][] data1 = new Object[][] { { "kaggle.com", "123456789" } };
         Object[][] data2 = new Object[][] { { "google.com", "342141241" } };
-        if (iteration1) {
+        if (iteration == 1) {
             uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data1);
         }
-        if (iteration2) {
+        if (iteration == 2) {
             uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data2);
         }
 
@@ -127,10 +129,10 @@ public class AMRefreshVersionUpdaterTestNG
         int rowCount = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            if (iteration1) {
+            if (iteration == 1) {
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
-                if (iteration1) {
+                if (iteration == 1) {
                     String targetSrcPath = "/Pods/LDCDEV_AMRefreshVersionUpdater/Services/PropData/Sources/"
                             + source + "/Snapshot/" + hdfsSourceEntityMgr.getCurrentVersion(source)
                             + "/_SUCCESS";
@@ -139,11 +141,11 @@ public class AMRefreshVersionUpdaterTestNG
                         fs = FileSystem.get(new Configuration());
                         fs.delete(new Path(targetSrcPath), true);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("Error in deleting provided source path : ", e);
                     }
                 }
             }
-            if (iteration2) {
+            if (iteration == 2) {
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "google.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "342141241"));
             }
