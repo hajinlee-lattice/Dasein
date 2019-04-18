@@ -56,7 +56,10 @@ angular.module('lp.playbook.plays', [
         },
         barChartConfig: PlaybookWizardStore.barChartConfig,
         barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig,
-        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS),
+        startedStates: ['Launching','Launched','Syncing', 'Synced', 'PartialSync', 'SyncFailed'],
+        failedStates: ['Failed', 'SyncFailed'],
+        completedStates: ['Launched', 'Synced', 'PartialSync']
     });
 
     vm.sumValuesOfObject = function(object) {
