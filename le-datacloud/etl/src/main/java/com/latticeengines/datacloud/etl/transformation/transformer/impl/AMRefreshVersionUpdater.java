@@ -45,7 +45,8 @@ public class AMRefreshVersionUpdater extends AbstractTransformer<TransformerConf
         try {
             String avroName = getSourceHdfsDir(step, 0);
             try {
-                List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroName, ".*.avro$");
+                List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroName,
+                        ".*.avro$");
                 HdfsUtils.copyFiles(yarnConfiguration, avroFiles.get(0), workflowDir);
             } catch (Exception e) {
                 log.error("Failed to copy file from " + avroName + " to " + workflowDir, e);
