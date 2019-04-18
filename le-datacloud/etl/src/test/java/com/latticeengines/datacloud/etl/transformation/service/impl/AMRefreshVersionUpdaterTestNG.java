@@ -35,12 +35,12 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
+        refreshVerValBefore = Long.valueOf(
+                dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
         for (int i = 0; i < 3; i++) { // iterating thrice to test if step is
                                       // re-run and source is re-generated if
                                       // _SUCCESS flag is present and absent cases
             iteration = i;
-            refreshVerValBefore = Long.valueOf(
-                    dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
             prepareData();
             TransformationProgress progress = createNewProgress();
             progress = transformData(progress);
@@ -117,10 +117,13 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        Long refreshVerValAfter = Long.valueOf(
-                dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
-        // To verify if the new timestamp is greater i.e it refreshed
-        Assert.assertTrue(refreshVerValAfter > refreshVerValBefore);
+        if (iteration == 1) { // execute once : since if executed multiple times
+                              // then previous and current value will be same
+            Long refreshVerValAfter = Long.valueOf(
+                    dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
+            // To verify if the new timestamp is greater i.e it refreshed
+            Assert.assertTrue(refreshVerValAfter > refreshVerValBefore);
+        }
         // verify target Source for use case : _SUCCESS flag absent then
         // re-generate that source
         int rowCount = 0;
