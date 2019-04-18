@@ -178,18 +178,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         String[] headers;
-        try (CSVParser parser = new CSVParser(
-                new InputStreamReader((new FileInputStream(csvFileName)), StandardCharsets.UTF_8),
-                LECSVFormat.format)) {
-            headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[] {});
-        }
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
-            CSVFormat format = LECSVFormat.format.withHeader(headers).withFirstRecordAsHeader();
+            CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
             try (CSVParser parser = new CSVParser(
                     new BufferedReader(new InputStreamReader(new FileInputStream(csvFileName), StandardCharsets.UTF_8)),
                     format)) {
+                headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[] {});
                 Iterator<CSVRecord> iter = parser.iterator();
                 while (true) {
                     // capture IO exception produced during dealing with line
@@ -311,7 +307,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                             csvFieldValue = attr.getDefaultValueStr();
                         }
-                        avroFieldValue = toAvro(csvFieldValue, avroType, attr);
+                        avroFieldValue = toAvro(csvFieldValue, avroType, attr, attr.getName().equals(idColumnName));
                         if (attr.getName().equals(idColumnName)) {
                             id = String.valueOf(avroFieldValue);
                             if (id.equalsIgnoreCase(NULL)) {
@@ -384,8 +380,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
     }
 
-    private Object toAvro(String fieldCsvValue, Type avroType, Attribute attr) {
+    private Object toAvro(String fieldCsvValue, Type avroType, Attribute attr, boolean trimInput) {
         try {
+            if (trimInput && StringUtils.isNotEmpty(fieldCsvValue)) {
+                fieldCsvValue = fieldCsvValue.trim();
+            }
             switch (avroType) {
             case DOUBLE:
                 return new Double(parseStringToNumber(fieldCsvValue).doubleValue());
