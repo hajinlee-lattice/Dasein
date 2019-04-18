@@ -91,8 +91,7 @@
         <!-- if until 2018 or cascading 3.3, they still do not release new
             version, we should move away from cascading-flink -->
         <flink.version>1.8.0</flink.version>
-        <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
-        <akka.version>2.4.20</akka.version>
+        <akka.version>2.4.20</akka.version> <!-- match flink version -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
         <checkstyle.version>8.15</checkstyle.version>

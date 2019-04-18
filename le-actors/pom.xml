@@ -30,12 +30,6 @@
 
     <dependencies>
         <!-- akka -->
-        <!--<dependency>-->
-            <!--<groupId>com.data-artisans</groupId> &lt;!&ndash; have to use data-artisans dist to be compatible with flink &ndash;&gt;-->
-            <!--<artifactId>flakka-actor_2.11</artifactId>-->
-            <!--<version>${flink.akka-version}</version>-->
-        <!--</dependency>-->
-
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.11</artifactId>
