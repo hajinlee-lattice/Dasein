@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PivotBuiltWithConfig extends TransformerConfig {
+public class PivotHGDataConfig extends TransformerConfig {
     @JsonProperty("JoinFields")
     private String[] joinFields;
 
