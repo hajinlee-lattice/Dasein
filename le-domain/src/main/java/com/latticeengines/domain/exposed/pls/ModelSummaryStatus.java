@@ -25,7 +25,7 @@ public enum ModelSummaryStatus {
     private int statusId;
     private String statusCode;
 
-    private ModelSummaryStatus(int statusId, String status) {
+    ModelSummaryStatus(int statusId, String status) {
         this.statusId = statusId;
         this.statusCode = status;
     }

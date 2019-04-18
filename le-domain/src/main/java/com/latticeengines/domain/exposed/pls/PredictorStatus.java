@@ -19,7 +19,7 @@ public enum PredictorStatus {
     private String statusCode;
     private boolean status;
 
-    private PredictorStatus(String statusCode, boolean status) {
+    PredictorStatus(String statusCode, boolean status) {
         this.statusCode = statusCode;
         this.status = status;
     }

@@ -8,7 +8,7 @@ public interface Choreographer {
 
     void linkStepNamespaces(List<String> stepNamespaces);
 
-    boolean skipStep(final AbstractStep<? extends BaseStepConfiguration> step, int seq);
+    boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq);
 
     Choreographer DEFAULT_CHOREOGRAPHER = new BaseChoreographer();
 

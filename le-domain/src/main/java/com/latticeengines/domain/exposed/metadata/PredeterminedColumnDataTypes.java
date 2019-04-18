@@ -15,7 +15,7 @@ public enum PredeterminedColumnDataTypes {
                                                                                             "Cloud_Plan__c");
     private String dataType;
 
-    private PredeterminedColumnDataTypes(String dataType) {
+    PredeterminedColumnDataTypes(String dataType) {
         this.dataType = dataType;
     }
 

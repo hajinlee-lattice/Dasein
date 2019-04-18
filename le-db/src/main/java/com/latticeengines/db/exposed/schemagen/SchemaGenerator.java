@@ -319,7 +319,7 @@ public class SchemaGenerator {
         return classes;
     }
 
-    private static enum DBDialect {
+    private enum DBDialect {
         /**
          * uses a custom dialect for SQLSERVER
          **/
@@ -330,7 +330,7 @@ public class SchemaGenerator {
 
         private String dialectClass;
 
-        private DBDialect(String dialectClass) {
+        DBDialect(String dialectClass) {
             this.dialectClass = dialectClass;
         }
 

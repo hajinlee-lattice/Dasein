@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import io.confluent.kafka.serializers.KafkaAvroDecoder;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
@@ -137,16 +136,14 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
         private KafkaStream<Object, Object> stream;
         private FabricStreamProc processor;
 
-        public FabricStreamRunnable(KafkaStream<Object, Object> stream, FabricStreamProc processor) {
+        FabricStreamRunnable(KafkaStream<Object, Object> stream, FabricStreamProc processor) {
             this.stream = stream;
             this.processor = processor;
         }
 
         public void run() {
-            ConsumerIterator<Object, Object> it = stream.iterator();
 
-            while (it.hasNext()) {
-                MessageAndMetadata<Object, Object> record = it.next();
+            for (MessageAndMetadata<Object, Object> record : stream) {
                 GenericRecord key = (GenericRecord) record.key();
                 GenericRecord value = (GenericRecord) record.message();
                 if (key.get("record") == null) {

@@ -3,7 +3,7 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
 public interface FittedConversionRateCalculator {
-    public double calculate(int percentile);
+    double calculate(int percentile);
 
     default void validateParameters(FitFunctionParameters params) {
         if (Double.isInfinite(params.getAlpha()) || Double.isNaN(params.getAlpha())) {

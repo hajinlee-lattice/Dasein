@@ -12,7 +12,7 @@ public class LiaisonResponse {
         private final int code;
         private final String message;
 
-        private Report(int code, String message) {
+        Report(int code, String message) {
             this.code = code;
             this.message = message;
         }

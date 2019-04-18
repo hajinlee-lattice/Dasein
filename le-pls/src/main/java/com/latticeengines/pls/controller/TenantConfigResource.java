@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/config")
 public class TenantConfigResource {
 
-    @Autowired
+    @Inject
     private TenantConfigService configService;
 
     @RequestMapping(value = "/topology", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -54,7 +55,7 @@ public class TenantConfigResource {
         @JsonProperty("Topology")
         public CRMTopology topology;
 
-        public TopologyJson(CRMTopology topology) {
+        TopologyJson(CRMTopology topology) {
             this.topology = topology;
         }
     }

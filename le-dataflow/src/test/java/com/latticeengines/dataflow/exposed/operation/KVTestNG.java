@@ -274,7 +274,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
 
         private String valClzName;
 
-        public ExampleAttrPicker(Class<?> valClz) {
+        ExampleAttrPicker(Class<?> valClz) {
             valClzName = valClz.getSimpleName();
         }
 

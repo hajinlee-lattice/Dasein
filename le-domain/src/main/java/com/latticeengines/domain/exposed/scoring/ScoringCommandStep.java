@@ -7,7 +7,7 @@ public enum ScoringCommandStep {
 
     private String description;
 
-    private ScoringCommandStep(String description) {
+    ScoringCommandStep(String description) {
         this.description = description;
     }
 

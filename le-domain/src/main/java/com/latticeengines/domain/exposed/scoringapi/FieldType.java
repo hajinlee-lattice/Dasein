@@ -36,7 +36,8 @@ public enum FieldType {
     private final Class<?> type;
     private final String[] avroTypes;
     private final DataType[] pmmlTypes;
-    private FieldType(Class<?> type, DataType[] pmmlTypes, String... avroTypes) {
+
+    FieldType(Class<?> type, DataType[] pmmlTypes, String... avroTypes) {
         this.type = type;
         this.pmmlTypes = pmmlTypes;
         this.avroTypes = avroTypes;

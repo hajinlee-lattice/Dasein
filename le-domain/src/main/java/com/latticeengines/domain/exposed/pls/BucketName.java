@@ -18,7 +18,7 @@ public enum BucketName {
         this.value = value;
     }
 
-    private BucketName(String value, int defaultUpperBound, int defaultLowerBound) {
+    BucketName(String value, int defaultUpperBound, int defaultLowerBound) {
         this.value = value;
         this.defaultUpperBound = defaultUpperBound;
         this.defaultLowerBound = defaultLowerBound;

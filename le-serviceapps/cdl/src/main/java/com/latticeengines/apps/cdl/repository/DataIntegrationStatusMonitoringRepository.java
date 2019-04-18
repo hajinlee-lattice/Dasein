@@ -8,10 +8,11 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 public interface DataIntegrationStatusMonitoringRepository
         extends BaseJpaRepository<DataIntegrationStatusMonitor, Long> {
 
-    public DataIntegrationStatusMonitor findByWorkflowRequestId(String workflowRequestId);
+    DataIntegrationStatusMonitor findByWorkflowRequestId(String workflowRequestId);
 
-    public List<DataIntegrationStatusMonitor> findAllByTenantPid(Long tenantPid);
+    List<DataIntegrationStatusMonitor> findAllByTenantPid(Long tenantPid);
 
-    public List<DataIntegrationStatusMonitor> findAllByTenantPidAndEntityNameAndEntityIdIn(Long tenantPid,
-            String entityName, List<String> entityIds);
+    List<DataIntegrationStatusMonitor> findAllByTenantPidAndEntityNameAndEntityIdIn(Long tenantPid, String entityName,
+            List<String> entityIds);
+
 }

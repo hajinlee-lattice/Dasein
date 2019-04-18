@@ -5,6 +5,6 @@ import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 
 public interface ExternalSystemAuthenticationDao extends BaseDao<ExternalSystemAuthentication> {
 
-    public ExternalSystemAuthentication updateAuthentication(ExternalSystemAuthentication extSysAuth);
+    ExternalSystemAuthentication updateAuthentication(ExternalSystemAuthentication extSysAuth);
 
 }

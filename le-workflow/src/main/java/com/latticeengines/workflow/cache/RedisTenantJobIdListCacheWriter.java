@@ -145,7 +145,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
         Long id;
         String applicationId;
 
-        public JobIdCache() {
+        JobIdCache() {
         }
 
         public Long getPid() {
@@ -175,7 +175,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
         /* transform to/from external representation */
 
         @JsonIgnore
-        public JobIdCache(Job job) {
+        JobIdCache(Job job) {
             this.pid = job.getPid();
             this.id = job.getId();
             this.applicationId = job.getApplicationId();
@@ -197,7 +197,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
         List<JobIdCache> caches;
         Long updatedAt;
 
-        public JobIdListCache() {
+        JobIdListCache() {
         }
 
         public List<JobIdCache> getCaches() {
@@ -216,7 +216,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
             this.updatedAt = updatedAt;
         }
 
-        public JobIdListCache(List<JobIdCache> caches, Long updatedAt) {
+        JobIdListCache(List<JobIdCache> caches, Long updatedAt) {
             this.caches = caches;
             this.updatedAt = updatedAt;
         }

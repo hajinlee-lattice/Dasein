@@ -750,7 +750,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         private String fileName;
 
-        public MultipartFileResource(InputStream inputStream, String fileName) {
+        MultipartFileResource(InputStream inputStream, String fileName) {
             super(inputStream);
             this.fileName = fileName;
         }

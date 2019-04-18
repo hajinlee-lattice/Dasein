@@ -24,7 +24,7 @@ public enum PlayStatus {
 
     private int stautsId;
 
-    private PlayStatus(int statusId) {
+    PlayStatus(int statusId) {
         this.stautsId = statusId;
     }
 

@@ -11,7 +11,7 @@ public class MultiConditionalQueryLoadTest extends AbstractLoadTest {
     private List<Column> columns;
 
     private class Column {
-        public Column(String cName, String cType) {
+        Column(String cName, String cType) {
             columnName = cName;
             columnType = cType;
 

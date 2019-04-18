@@ -57,7 +57,7 @@ public class QueryDataResult {
         this.remainingRows = remainingRows;
     }
 
-    public static enum VdbDataType {
+    public enum VdbDataType {
         Bit(0), Byte(1), Short(2), Int(3), Long(4), Float(5), Double(6), VarChar(7), NVarChar(
                 8), Date(9), DateTime(10), DateTimeOffset(11), Binary(12);
 

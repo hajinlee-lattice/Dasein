@@ -45,5 +45,5 @@ public interface AttributeService {
 
     List<LeadEnrichmentAttribute> getAttributesBaseOnSubCategory(Category category, String subCategory);
 
-    public Map<String, Integer> getSelectedAttributePremiumMap(Tenant tenant, Boolean considerInternalAttributes);
+    Map<String, Integer> getSelectedAttributePremiumMap(Tenant tenant, Boolean considerInternalAttributes);
 }

@@ -9,7 +9,7 @@ public enum BardJamsTenantStatus {
 
     private String status;
 
-    private BardJamsTenantStatus(String status) {
+    BardJamsTenantStatus(String status) {
         this.status = status;
     }
 

@@ -8,7 +8,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public final class MetadataUtils {
 
-    public static final Table getEventTableFromModelId(String modelId, //
+    public static Table getEventTableFromModelId(String modelId, //
            ModelSummaryProxy modelSummaryProxy, //
            MetadataProxy metadataProxy) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();

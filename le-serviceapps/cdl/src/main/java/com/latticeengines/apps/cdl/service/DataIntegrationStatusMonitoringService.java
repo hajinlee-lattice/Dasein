@@ -7,13 +7,15 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 
 public interface DataIntegrationStatusMonitoringService {
-    public boolean createOrUpdateStatus(DataIntegrationStatusMonitorMessage status);
 
-    public DataIntegrationStatusMonitor getStatus(String eventId);
+    boolean createOrUpdateStatus(DataIntegrationStatusMonitorMessage status);
 
-    public List<DataIntegrationStatusMonitor> getAllStatuses(String tenantId);
+    DataIntegrationStatusMonitor getStatus(String eventId);
 
-    public List<DataIntegrationStatusMessage> getAllStatusMessages(String workflowRequestId);
+    List<DataIntegrationStatusMonitor> getAllStatuses(String tenantId);
 
-    public List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(String tenantId, String entityName, List<String> entityIds);
+    List<DataIntegrationStatusMessage> getAllStatusMessages(String workflowRequestId);
+
+    List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(String tenantId, String entityName, List<String> entityIds);
+
 }

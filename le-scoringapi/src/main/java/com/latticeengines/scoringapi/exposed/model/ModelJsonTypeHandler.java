@@ -14,12 +14,12 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 
 public interface ModelJsonTypeHandler {
-    static final String PMML_FILENAME = "rfpmml.xml";
-    static final String PMML_MODEL = "PmmlModel";
-    static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
-    static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
-    static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
-    static final String PATH_SEPARATOR = "/";
+    String PMML_FILENAME = "rfpmml.xml";
+    String PMML_MODEL = "PmmlModel";
+    String HDFS_ENHANCEMENTS_DIR = "enhancements/";
+    String SCORE_DERIVATION_FILENAME = "scorederivation.json";
+    String DATA_COMPOSITION_FILENAME = "datacomposition.json";
+    String PATH_SEPARATOR = "/";
 
     boolean accept(String modelJsonType);
 

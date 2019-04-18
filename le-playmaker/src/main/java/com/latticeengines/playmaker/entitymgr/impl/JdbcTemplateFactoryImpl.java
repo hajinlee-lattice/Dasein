@@ -121,7 +121,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
 
             BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
             cpds.setDataSourceName(String.format("pm-%s-%s", currentEnv, tenant.getTenantName()));
-            
+
             cpds.setMinPoolSize(minPoolSize);
             cpds.setMaxPoolSize(maxPoolSize);
             cpds.setMaxIdleTime(maxPoolIdleTime);
@@ -151,7 +151,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
         private byte[] hash;
         private ComboPooledDataSource cpds;
 
-        public TemplateInfo(NamedParameterJdbcTemplate template, byte[] hash, ComboPooledDataSource cpds) {
+        TemplateInfo(NamedParameterJdbcTemplate template, byte[] hash, ComboPooledDataSource cpds) {
             this.template = template;
             this.hash = hash;
             this.cpds = cpds;

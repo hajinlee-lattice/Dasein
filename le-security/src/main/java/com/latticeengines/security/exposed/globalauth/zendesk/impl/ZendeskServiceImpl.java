@@ -294,10 +294,10 @@ public class ZendeskServiceImpl implements ZendeskService {
         private ZendeskUser user;
 
         @SuppressWarnings("unused")
-        public UserWrapper() {
+        UserWrapper() {
         }
 
-        public UserWrapper(ZendeskUser user) {
+        UserWrapper(ZendeskUser user) {
             this.user = user;
         }
 
@@ -318,11 +318,11 @@ public class ZendeskServiceImpl implements ZendeskService {
         private List<ZendeskUser> users;
 
         @SuppressWarnings("unused")
-        public UserListWrapper() {
+        UserListWrapper() {
         }
 
         @SuppressWarnings("unused")
-        public UserListWrapper(List<ZendeskUser> users) {
+        UserListWrapper(List<ZendeskUser> users) {
             this.users = users;
         }
 

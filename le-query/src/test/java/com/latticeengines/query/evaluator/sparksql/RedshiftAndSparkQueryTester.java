@@ -25,41 +25,41 @@ import com.latticeengines.domain.exposed.query.Query;
 
 public interface RedshiftAndSparkQueryTester {
 
-    public Logger getLogger();
-    public SparkSQLQueryTester getSparkSQLQueryTester();
+    Logger getLogger();
+    SparkSQLQueryTester getSparkSQLQueryTester();
 
-    public default long getCountFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
+    default long getCountFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
         throw new UnsupportedOperationException("Implement the method in TestClass");
     }
 
-    public default DataPage getDataFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
+    default DataPage getDataFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
         throw new UnsupportedOperationException("Implement the method in TestClass");
     }
 
-    public List<Long> redshiftQueryCountResults = new ArrayList<>();
-    public List<Long> sparkQueryCountResults = new ArrayList<>();
+    List<Long> redshiftQueryCountResults = new ArrayList<>();
+    List<Long> sparkQueryCountResults = new ArrayList<>();
 
-    public List<List<Map<String, Object>>> redshiftQueryDataResults = new ArrayList<>();
-    public List<List<Map<String, Object>>> sparkQueryDataResults = new ArrayList<>();
+    List<List<Map<String, Object>>> redshiftQueryDataResults = new ArrayList<>();
+    List<List<Map<String, Object>>> sparkQueryDataResults = new ArrayList<>();
 
-    public default void setupQueryTester(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
+    default void setupQueryTester(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
         getSparkSQLQueryTester().setupTestContext(customerSpace, attrRepo, tblPathMap);
     }
 
-    public default void teardownQueryTester() {
+    default void teardownQueryTester() {
         getSparkSQLQueryTester().teardown();
     }
 
     @BeforeMethod(groups = "functional")
-    public default void beforeMethod(Method method, Object[] params) {
+    default void beforeMethod(Method method, Object[] params) {
         System.out.println(String.format("\n*********** Running Test Method (Redshift-SparkSQL): %s, Params: %s **********",
                 method.getName(), Arrays.deepToString(params)));
     }
 
     @AfterMethod(groups = "functional")
-    public default void afterMethod(ITestResult testResult, Object[] params) {
+    default void afterMethod(ITestResult testResult, Object[] params) {
         long timeTaken = testResult.getEndMillis() - testResult.getStartMillis();
-        // There could be some methods in base class, which doesn't support DataProvider implementation. 
+        // There could be some methods in base class, which doesn't support DataProvider implementation.
         // Those methods will not have any arguments
         String currUserContext = params.length > 1 ? String.valueOf(params[0]) : "";
         try {
@@ -90,14 +90,14 @@ public interface RedshiftAndSparkQueryTester {
                 // @AfterMethod gets triggered for each user context
                 redshiftQueryCountResults.clear();
                 sparkQueryCountResults.clear();
-                
+
                 redshiftQueryDataResults.clear();
                 sparkQueryDataResults.clear();
             }
         }
     }
 
-    public default long testGetCountAndAssertFromTester(String sqlUser, Query query, long expectedCount) {
+    default long testGetCountAndAssertFromTester(String sqlUser, Query query, long expectedCount) {
         switch (sqlUser) {
         case USER_SEGMENT:
             long redshiftQueryCount = getCountFromRedshift(getSparkSQLQueryTester().getAttrRepo(), query, sqlUser);
@@ -113,7 +113,7 @@ public interface RedshiftAndSparkQueryTester {
         throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
 
-    public default List<Map<String, Object>> testGetDataAndAssertFromTester(String sqlUser, Query query, long expectedCount, List<Map<String, Object>> expectedResult) {
+    default List<Map<String, Object>> testGetDataAndAssertFromTester(String sqlUser, Query query, long expectedCount, List<Map<String, Object>> expectedResult) {
         switch (sqlUser) {
         case USER_SEGMENT:
             List<Map<String, Object>> redshiftResults = getDataFromRedshift(getSparkSQLQueryTester().getAttrRepo(), query, sqlUser).getData();

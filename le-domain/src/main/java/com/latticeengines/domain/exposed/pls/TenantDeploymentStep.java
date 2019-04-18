@@ -7,7 +7,7 @@ public enum TenantDeploymentStep {
 
     private int value;
 
-    private TenantDeploymentStep(int value) {
+    TenantDeploymentStep(int value) {
         this.value = value;
     }
 

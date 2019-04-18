@@ -26,7 +26,7 @@ public class ScoringMapperValidateUtil {
         FEATURE(3), TARGET(4);
         private int value;
 
-        private MetadataPurpose(int value) {
+        MetadataPurpose(int value) {
             this.value = value;
         }
     }
@@ -92,7 +92,7 @@ public class ScoringMapperValidateUtil {
     }
 
     private static List<String> validate(JsonNode datatype, String modelGuid, ArrayNode metadata) {
-        List<String> toReturn = new ArrayList<String>();
+        List<String> toReturn = new ArrayList<>();
         if (metadata != null) {
             for (JsonNode obj : metadata) {
                 String name = obj.get(ScoringDaemonService.INPUT_COLUMN_METADATA_NAME).asText();

@@ -21,7 +21,7 @@ public interface TenantService {
 
     Collection<TenantDocument> getTenantsInCache(String contractId);
 
-    boolean deleteTenant(final String userName, String contractId, String tenantId, boolean uninstallComponent);
+    boolean deleteTenant(String userName, String contractId, String tenantId, boolean uninstallComponent);
 
     TenantDocument getTenant(String contractId, String tenantId);
 

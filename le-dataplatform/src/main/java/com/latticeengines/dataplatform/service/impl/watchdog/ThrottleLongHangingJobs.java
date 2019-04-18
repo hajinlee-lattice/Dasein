@@ -141,7 +141,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         private long timeAtLastProgress;
         private float progress;
 
-        public AppStatus(long timeAtLastProgress, float progress) {
+        AppStatus(long timeAtLastProgress, float progress) {
             this.setTimeAtLastProgress(timeAtLastProgress);
             this.setProgress(progress);
         }

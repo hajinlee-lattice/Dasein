@@ -31,7 +31,7 @@ public class CompositeGraphEntityMgrImpl implements CompositeGraphEntityMgr {
     private List<CompositeGraphEntityMgr> children;
     private Map<String, CompositeGraphEntityMgr> childMap;
 
-    public CompositeGraphEntityMgrImpl(String name, CompositeFabricEntityMgr<? extends CompositeFabricEntity> manager) {
+    CompositeGraphEntityMgrImpl(String name, CompositeFabricEntityMgr<? extends CompositeFabricEntity> manager) {
         this.name = name;
         this.manager = manager;
         childMap = new HashMap<String, CompositeGraphEntityMgr>();
@@ -214,7 +214,7 @@ public class CompositeGraphEntityMgrImpl implements CompositeGraphEntityMgr {
         Map<CompositeGraphEntityMgr, List<CompositeGraphEntity>> entityMgrMap;
         Map<CompositeGraphEntityMgr, String> idMap;
 
-        public GraphCollector() {
+        GraphCollector() {
             parentMap = new HashMap<CompositeGraphEntityMgr, List<String>>();
             entityMap = new HashMap<String, CompositeGraphEntity>();
             entityMgrMap = new HashMap<CompositeGraphEntityMgr, List<CompositeGraphEntity>>();

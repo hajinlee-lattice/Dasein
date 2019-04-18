@@ -26,7 +26,7 @@ public enum JobStepType {
     private int typeId;
     private String type;
 
-    private JobStepType(int typeId, String type) {
+    JobStepType(int typeId, String type) {
         this.typeId = typeId;
         this.type = type;
     }

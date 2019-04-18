@@ -5,7 +5,7 @@ public enum TriggeredJobStatus {
 
     private int value;
 
-    private TriggeredJobStatus(int value) {
+    TriggeredJobStatus(int value) {
         this.value = value;
     }
 
@@ -23,4 +23,5 @@ public enum TriggeredJobStatus {
     public int getValue() {
         return value;
     }
+
 }

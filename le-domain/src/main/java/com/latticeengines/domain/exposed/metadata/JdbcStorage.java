@@ -22,7 +22,7 @@ public class JdbcStorage extends StorageMechanism {
         this.databaseName = databaseName;
     }
 
-    public static enum DatabaseName {
+    public enum DatabaseName {
         REDSHIFT, //
         MYSQL, //
         SQLSERVER
