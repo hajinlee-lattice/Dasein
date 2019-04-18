@@ -44,10 +44,10 @@ export default class SystemCreationComponent extends Component {
     getSystemSupported() {
         let systems = [];
         this.systemsObj.forEach(system => {
-            console.log(this.state);
+            // console.log(this.state);
             systems.push(
                 <LeCard classNames={`${'system-creation'} ${(this.state.systemSelected && this.state.systemSelected.name) == system.name ? 'selected' : ''}`} clickHandler={() => {
-                    console.log('CLIKC');
+                    // console.log('CLIKC');
                     this.setState({ systemSelected: system }, this.validate);
                 }}>
                     <div className="system-image"><LeCardImg src={system.img} /></div>
@@ -78,7 +78,7 @@ export default class SystemCreationComponent extends Component {
                             label: 'System Name'
                         }} callback={
                             (val) => {
-                                console.log('VALUE ', val);
+                                // console.log('VALUE ', val);
                                 this.setState({ newSystemName: val }, this.validate);
                             }
                         }></LeInputText>
@@ -110,7 +110,6 @@ export default class SystemCreationComponent extends Component {
                         callback={() => {
                             let config = {
                                 callback: (action) => {
-                                    console.log('ACTION', action);
                                     modalActions.closeModal(store);
                                 },
                                 template: () => {

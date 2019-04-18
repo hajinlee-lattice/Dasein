@@ -27,15 +27,16 @@ export default class ReactAngularMainComponent extends Component {
         ReactRouter.getRouter()['ngservices'] = this.props.ngservices;
         return (
             
-            <div className="main-panel">
+            <div className="main-panel" id="read-main-panel">
+                <div id="le-modal"></div>
                 <LeModal store={store}  injectAsyncReducer={injectAsyncReducer} reduxstate={REDUX_STATE_MODAL}/>
                 <UIRouter router={ReactRouter.getRouter()}>
                     <UIView name="header" />
                     <UIView name="summary"/>
                     <UIView name="subsummary" />
-                    <UIView name="banner" id="react-banner"/>
+                    <UIView name="banner"/>
                     <UIView name="notice" />
-                    <div className="main-body">
+                    <div className="main-body" id="react-main-body">
                         <UIView name="main"/>
                     </div>
                 </UIRouter>

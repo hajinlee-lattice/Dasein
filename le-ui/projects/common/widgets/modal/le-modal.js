@@ -5,9 +5,6 @@ import { TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING, MEDIUM_SIZE } from '
 import LeButton from '../buttons/le-button';
 import { actions, reducer } from './le-modal.redux';
 
-
-const modalRoot = document.getElementById('le-modal');
-
 export default class LeModal extends Component {
 
     constructor(props) {
@@ -35,6 +32,11 @@ export default class LeModal extends Component {
             });
         });
         this.clickHandler = this.clickHandler.bind(this);
+    }
+
+    componentDidMount() {
+        this.modalRoot = document.getElementById('le-modal')
+        // console.log('MOUNTED ',document.getElementById('react-main-body'));
     }
 
     clickHandler(action) {
@@ -151,7 +153,7 @@ export default class LeModal extends Component {
         if (this.state.open == true) {
             let modal = this.getModalUI();
             return ReactDOM.createPortal(
-                modal, modalRoot
+                modal, this.modalRoot
             );
         } else {
             return null;
