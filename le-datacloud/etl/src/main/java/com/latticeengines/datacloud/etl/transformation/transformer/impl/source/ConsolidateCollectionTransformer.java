@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.source;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.source.ConsolidateCollectionTransformer.TRANSFORMER_NAME;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -50,7 +48,7 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 
-@Component(TRANSFORMER_NAME)
+@Component(ConsolidateCollectionTransformer.TRANSFORMER_NAME)
 public class ConsolidateCollectionTransformer extends AbstractDataflowTransformer<ConsolidateCollectionConfig, ConsolidateCollectionParameters> {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionTransformer.class);
