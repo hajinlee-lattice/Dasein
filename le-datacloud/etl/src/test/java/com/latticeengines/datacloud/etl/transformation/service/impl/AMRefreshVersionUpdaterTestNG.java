@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +136,7 @@ public class AMRefreshVersionUpdaterTestNG
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
                 String targetSrcPath = getPathForResult() + "/_SUCCESS";
                 try {
-                    HdfsUtils.rmdir(new Configuration(), targetSrcPath);
+                    HdfsUtils.rmdir(yarnConfiguration, targetSrcPath);
                 } catch (IOException e) {
                     log.error("Error in deleting provided source path : ", e);
                 }
