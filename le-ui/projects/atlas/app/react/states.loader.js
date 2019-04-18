@@ -1,5 +1,5 @@
 import states from 'atlas/import/templates/multiple/states';
-import connectrosstates from 'atlas/connectors/connectors.state'
+import connectrosstates from 'atlas/connectors/connectors.states';
 
 const modulesStates = [];
 
