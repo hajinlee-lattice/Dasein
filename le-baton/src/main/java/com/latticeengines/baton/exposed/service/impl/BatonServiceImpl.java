@@ -17,7 +17,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
@@ -66,6 +65,7 @@ public class BatonServiceImpl implements BatonService {
     private static final int MAX_RETRY_TIMES = 3;
 
     private static TreeCache cache = null;
+
     @Override
     public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
             CustomerSpaceInfo spaceInfo) {
@@ -271,7 +271,7 @@ public class BatonServiceImpl implements BatonService {
                 try {
                     spaceConfig = new SpaceConfiguration(spaceConfigDir);
                 } catch (Exception e) {
-                    // ignore
+                    log.warn("Failed to construct SpaceConfiguration", e);
                 }
 
                 CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
@@ -538,7 +538,7 @@ public class BatonServiceImpl implements BatonService {
                 try {
                     spaceConfig = new SpaceConfiguration(spaceConfigDir);
                 } catch (Exception e) {
-                    // ignore
+                    log.warn("Failed to construct SpaceConfiguration", e);
                 }
 
                 CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
@@ -656,27 +656,18 @@ public class BatonServiceImpl implements BatonService {
                         log.error(String.format("TreeCache don't start normally because of %s",
                                 e1.getMessage()));
                     }
-                    TreeCacheListener listener = new TreeCacheListener() {
-
-                        @Override
-                        public void childEvent(CuratorFramework client, TreeCacheEvent event)
-                                throws Exception {
-                            switch (event.getType()) {
-                            case INITIALIZED: {
-                                long endTime = System.currentTimeMillis();
-                                log.info("Tree cache is initialized, duration = {} ms", (endTime - startTime));
-                                sem.release();
-                                break;
-                            }
-                            default:
-                                break;
-                                }
+                    TreeCacheListener listener = (client, event) -> {
+                        if (event.getType() == TreeCacheEvent.Type.INITIALIZED) {
+                            long endTime = System.currentTimeMillis();
+                            log.info("Tree cache is initialized, duration = {} ms", (endTime - startTime));
+                            sem.release();
                         }
                     };
                     cache.getListenable().addListener(listener);
                     try {
                         sem.acquire();
                     } catch (InterruptedException e) {
+                        log.warn("Interrupted", e);
                     }
                 }
             }
