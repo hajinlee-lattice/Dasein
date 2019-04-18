@@ -179,14 +179,27 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
         if (acctCMList.stream()
                 .anyMatch(cm -> cm.getAttrName().equalsIgnoreCase(InterfaceName.SpendAnalyticsSegment.name()))) {
+            String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
+                    BusinessEntity.PeriodTransaction);
             String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
-            log.info(String.format("Get Account Table %s for %s", accountTableName, tenant.getId()));
+            log.info(String.format("Get Period Transaction Table %s, Account Table %s for %s ",
+                    periodTransactionTableName, accountTableName, tenant.getId()));
+
             String query = MessageFormat.format(
-                    "SELECT distinct {0}, count({1}) as {2}, True as IsSegment, {0} as AccountId FROM {3} WHERE {0} IS NOT NULL GROUP BY {0}",
-                    InterfaceName.SpendAnalyticsSegment, InterfaceName.AccountId, InterfaceName.RepresentativeAccounts,
-                    accountTableName);
+                    "SELECT distinct ac.{0}, count(ac.{1}) as {2}, True as IsSegment, ac.{0} as AccountId " //
+                            + "FROM {3} as ac " //
+                            + "WHERE ac.{0} IS NOT NULL and ac.{1} in" //
+                            + "(select distinct pt.{1} from {4} as pt where pt.{5} = ?)" //
+                            + "GROUP BY ac.{0}" //
+                            + "ORDER BY ac.{0}", //
+                    InterfaceName.SpendAnalyticsSegment, // 0
+                    InterfaceName.AccountId, // 1
+                    InterfaceName.RepresentativeAccounts, // 2
+                    accountTableName, // 3
+                    periodTransactionTableName, // 4
+                    InterfaceName.ProductType); // 5
             log.info("query for getAllSpendAnalyticsSegments " + query);
-            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, ProductType.Spending.name());
             return new DataPage(retList);
         }
         return new DataPage(Collections.emptyList());
