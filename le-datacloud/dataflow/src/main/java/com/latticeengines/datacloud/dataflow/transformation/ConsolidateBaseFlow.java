@@ -14,12 +14,14 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
-    protected static final String COMPOSITE_KEY = InterfaceName.__Composite_Key__.name();
-    public static String CREATE_DATE = "CREATION_DATE";
-    public static String UPDATE_DATE = "UPDATE_DATE";
 
-    protected String processIdColumns(TransformationFlowParameters parameters, ConsolidateDataTransformerConfig config,
-            List<Node> sources, List<Table> sourceTables, List<String> sourceNames) {
+    static final String COMPOSITE_KEY = InterfaceName.__Composite_Key__.name();
+
+    private static String CREATE_DATE = "CREATION_DATE";
+    private static String UPDATE_DATE = "UPDATE_DATE";
+
+    String processIdColumns(TransformationFlowParameters parameters, ConsolidateDataTransformerConfig config,
+                            List<Node> sources, List<Table> sourceTables, List<String> sourceNames) {
         String srcId = config.getSrcIdField();
         String masterId = config.getMasterIdField();
         if (masterId == null) {
@@ -42,7 +44,7 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
         return masterId;
     }
 
-    protected void createTimestampColumns(ConsolidateDataTransformerConfig config, List<Node> sources) {
+    void createTimestampColumns(ConsolidateDataTransformerConfig config, List<Node> sources) {
         long currentTime = System.currentTimeMillis();
         for (int i = 0; i < sources.size(); i++) {
             Node source = sources.get(i);
@@ -56,7 +58,7 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
         }
     }
 
-    protected String buildNewIdColumn(ConsolidateDataTransformerConfig config, List<Node> sources) {
+    String buildNewIdColumn(ConsolidateDataTransformerConfig config, List<Node> sources) {
         List<String> keys = config.getCompositeKeys();
 
         for (int i = 0; i < sources.size(); i++) {

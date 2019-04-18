@@ -45,7 +45,7 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
         runSearch(node, visitor, false);
     }
 
-    public void runSearch(GraphNode node, Visitor visitor, boolean reverse) {
+    private void runSearch(GraphNode node, Visitor visitor, boolean reverse) {
         if (seenNodes.contains(node)) return;
 
         VisitorContext originalCtx = stack.peek();

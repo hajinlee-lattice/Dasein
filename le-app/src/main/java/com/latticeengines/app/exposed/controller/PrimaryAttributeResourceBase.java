@@ -1,8 +1,8 @@
 package com.latticeengines.app.exposed.controller;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -19,7 +19,7 @@ public class PrimaryAttributeResourceBase {
         super();
     }
 
-    @Autowired
+    @Inject
     private PrimaryAttributeService attributeService;
 
     @RequestMapping(value = "/primaryfield-configuration", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -27,7 +27,7 @@ public class PrimaryAttributeResourceBase {
     public PrimaryFieldConfiguration getPrimaryAttributeConfiguration(HttpServletRequest request) {
             PrimaryFieldConfiguration primaryConfig = new  PrimaryFieldConfiguration();
             primaryConfig.setPrimaryFields(attributeService.getPrimaryFields());
-    
+
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             primaryConfig.setValidationExpression(attributeService.getPrimaryFieldValidationExpression(customerSpace));
             return primaryConfig;

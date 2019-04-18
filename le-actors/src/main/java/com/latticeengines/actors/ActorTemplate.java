@@ -7,7 +7,7 @@ import akka.actor.UntypedActor;
 public abstract class ActorTemplate extends UntypedActor {
     /**
      * Safe check whether the message is in valid type
-     * 
+     *
      * @param msg
      * @return
      */
@@ -15,7 +15,7 @@ public abstract class ActorTemplate extends UntypedActor {
 
     /**
      * Process message received in mail box
-     * 
+     *
      * @param msg
      */
     protected abstract void processMessage(Object msg);

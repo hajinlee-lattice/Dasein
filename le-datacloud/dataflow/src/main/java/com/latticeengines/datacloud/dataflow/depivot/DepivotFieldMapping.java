@@ -4,7 +4,7 @@ public class DepivotFieldMapping {
     private String[] targetFields;
     private String[][] sourceFieldTuples;
 
-    public DepivotFieldMapping() {
+    private DepivotFieldMapping() {
         super();
     }
 

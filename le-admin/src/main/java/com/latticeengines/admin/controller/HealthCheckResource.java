@@ -23,4 +23,5 @@ public class HealthCheckResource {
     public StatusDocument healthCheck() {
         return StatusDocument.online();
     }
+
 }

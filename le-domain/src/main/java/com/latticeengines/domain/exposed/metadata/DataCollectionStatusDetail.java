@@ -13,8 +13,9 @@ public class DataCollectionStatusDetail implements Serializable {
     private static final long serialVersionUID = 7817179046757931427L;
 
     public static final String NOT_SET = "not set";
+
     @JsonProperty("DateMap")
-    Map<String, Long> dateMap;
+    private Map<String, Long> dateMap;
 
     @JsonProperty("MinTxnDate")
     private Integer minTxnDate = 0;

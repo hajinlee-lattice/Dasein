@@ -41,7 +41,7 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
         }
 
         List<String> newFieldNames = getNewFields(enrichedFields, latticeSeedFieldNames);
-        
+
         Node source = sourceLatticeSeed.leftJoin(leftMatchField, sourceDnbSeed, rightMatchField);
 
         for (int i = 0; i < enrichedFields.size(); i++) {
@@ -59,13 +59,13 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
                         source.getSchema(enrichedField)), new FieldList(newFieldNames), Fields.REPLACE);
             }
         }
-        
+
         if (CollectionUtils.isNotEmpty(config.getGroupFields())) {
             source = source.groupByAndLimit(new FieldList(config.getGroupFields()), 1);
         }
-        
+
         source = source.retain(new FieldList(newFieldNames));
-        
+
         if (!config.isKeepInternalColumns()) {
             List<String> retainedFieldNames = resolveFieldNames(source.getFieldNames());
             source = source.retain(new FieldList(retainedFieldNames));

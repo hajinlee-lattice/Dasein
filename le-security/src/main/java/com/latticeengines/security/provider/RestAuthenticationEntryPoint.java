@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component("restAuthenticationEntryPoint")
 public final class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException {

@@ -5,7 +5,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,10 +24,10 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestin
 @Component("publicationProgressEntityMgr")
 public class PublicationProgressEntityMgrImpl implements PublicationProgressEntityMgr {
 
-    @Autowired
+    @Inject
     private PublicationProgressDao progressDao;
 
-    @Autowired
+    @Inject
     private PublicationDao publicationDao;
 
     @Override

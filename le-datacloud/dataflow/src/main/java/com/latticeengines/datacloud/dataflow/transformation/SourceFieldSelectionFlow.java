@@ -26,8 +26,8 @@ public class SourceFieldSelectionFlow extends ConfigurableFlowBase<SourceFieldSe
         List<String> retainFields = config.getRetainFields();
 
         if (CollectionUtils.isNotEmpty(newFields)) {
-            for (int i = 0; i < newFields.size(); i++) {
-                source = source.addColumnWithFixedValue(newFields.get(i), null, String.class);
+            for (String newField : newFields) {
+                source = source.addColumnWithFixedValue(newField, null, String.class);
             }
         }
         if (renameFieldMap != null && renameFieldMap.size() > 0) {

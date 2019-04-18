@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,9 +18,9 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 
 
 public class ConsolidateCollectionAlexaFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private final static Logger log = LoggerFactory.getLogger(ConsolidateCollectionAlexaFlow.class);
-    private final static String FIELD_DOMAIN = "URL";
-    private final static String FIELD_TIMESTAMP = "Last_Modification_Date";
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionAlexaFlow.class);
+    private static final String FIELD_DOMAIN = "URL";
+    private static final String FIELD_TIMESTAMP = "Last_Modification_Date";
 
     @Override
     protected String getFlowBeanName() {
@@ -50,7 +49,7 @@ public class ConsolidateCollectionAlexaFlowTestNG extends DataCloudDataFlowFunct
 
         ConsolidateCollectionParameters parameters = new ConsolidateCollectionParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
-        parameters.setGroupBy(Arrays.asList(FIELD_DOMAIN));
+        parameters.setGroupBy(Collections.singletonList(FIELD_DOMAIN));
         parameters.setSortBy(FIELD_TIMESTAMP);
         return parameters;
     }

@@ -22,8 +22,8 @@ import cascading.tuple.Fields;
 
 @Component(DomainOwnershipRebuild.DATAFLOW_BEAN_NAME)
 public class DomainOwnershipRebuild extends ConfigurableFlowBase<DomainOwnershipConfig> {
-    public final static String DATAFLOW_BEAN_NAME = "DomainOwnershipRebuildFlow";
-    public final static String TRANSFORMER_NAME = "DomainOwnershipRebuild";
+    public static final String DATAFLOW_BEAN_NAME = "DomainOwnershipRebuildFlow";
+    public static final String TRANSFORMER_NAME = "DomainOwnershipRebuild";
 
     @Override
     public String getDataFlowBeanName() {

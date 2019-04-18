@@ -25,7 +25,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 public class CipherUtils {
     private static final Logger log = LoggerFactory.getLogger(CipherUtils.class);
 
-    public static final String ENCRYPTED = "encrypted";
+    static final String ENCRYPTED = "encrypted";
 
     // Encryption uses AES algorithm to generate 128-bit hash code
     private static final String CIPHER_METHOD = "AES";

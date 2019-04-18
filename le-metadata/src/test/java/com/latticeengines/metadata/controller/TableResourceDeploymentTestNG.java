@@ -71,16 +71,16 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         assertNotNull(table, "Table Object is empty");
         assertNotNull(table.getAttributes(), "Table Attributes are empty");
         logTableSummary("Table skeleton from S3", table);
-        
+
         assertTrue(table.getAttributes().size() >= 10100, "Doesn't have minimum attributes 10100 for this test");
         List<Attribute> minAttributes = table.getAttributes().subList(0,  10100);
-        
+
         table.setAttributes(minAttributes);
         table.setName(TABLE_NAME);
         table.setDisplayName(customerSpace1 + TABLE_NAME);
         table.setTenant(tenant1);
         logTableSummary("Creating Table", table);
-        
+
         metadataProxy.createTable(customerSpace1, TABLE_NAME, table);
         Table tableFromDB = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertNotNull(tableFromDB, "Retrieved Table from DB is empty");
@@ -113,7 +113,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         attribute.setDisplayName("DisplayName1");
         attribute.setPhysicalDataType("PhysicalDataType1");
         srcTable.addAttribute(attribute);
-        
+
         String tableDisplayName = customerSpace1 + TABLE_NAME + "-update1";
         srcTable.setDisplayName(tableDisplayName);
         metadataProxy.updateTable(customerSpace1, TABLE_NAME, srcTable);
@@ -137,11 +137,11 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
             deletedAttributes.add(delAttr.getName());
         });
         log.info("Deleted Attributes from Source Table: {}", deletedAttributes);
-        
+
         tableDisplayName = customerSpace1 + TABLE_NAME + "-update2";
         updatedTable.setDisplayName(tableDisplayName);
         metadataProxy.updateTable(customerSpace1, TABLE_NAME, updatedTable);
-        
+
         srcTable = updatedTable;
         Table updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertNotNull(updatedTable2);
@@ -153,7 +153,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
             Attribute attr = updatedTable2.getAttribute(delAttrName);
             assertNull(attr, "Attribute should not exist after update");
         }
-        
+
         // Update all Attributes
         String updateSuffix = "-Updated";
         updatedTable2.getAttributes().forEach(attr -> {
@@ -182,7 +182,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         updatedTable = metadataProxy.getTable(customerSpace1, newTableName);
         assertNotNull(updatedTable, "Couldn't find the renamed table");
         assertEquals(updatedTable.getAttributes().size(), srcTable.getAttributes().size(), "Renamed table attribute count doesn't match after Table Rename");
-        
+
         String newTableName2 = TABLE_NAME + "-rename2";
         metadataProxy.renameTable(customerSpace1, newTableName, newTableName2);
         Table updatedTable2 = metadataProxy.getTable(customerSpace1, newTableName);

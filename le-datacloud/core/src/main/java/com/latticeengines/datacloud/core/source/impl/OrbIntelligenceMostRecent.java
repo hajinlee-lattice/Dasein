@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.core.source.impl;
 
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class OrbIntelligenceMostRecent implements MostRecentSource, DomainBased,
     @Value("${propdata.job.orb.refresh.schedule:}")
     private String cronExpression;
 
-    @Autowired
+    @Inject
     private OrbIntelligence baseSource;
 
     @Override

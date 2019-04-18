@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 public class ModelCommandStateDaoImpl extends BaseDaoImpl<ModelCommandState> implements ModelCommandStateDao {
 
-    
     public ModelCommandStateDaoImpl() {
         super();
     }
