@@ -35,6 +35,8 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
+        // execute once : since if executed multiple times
+        // then previous and current value will be same
         refreshVerValBefore = Long.valueOf(
                 dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
         for (int i = 0; i < 3; i++) { // iterating thrice to test if step is
@@ -117,13 +119,6 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        if (iteration == 1) { // execute once : since if executed multiple times
-                              // then previous and current value will be same
-            Long refreshVerValAfter = Long.valueOf(
-                    dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
-            // To verify if the new timestamp is greater i.e it refreshed
-            Assert.assertTrue(refreshVerValAfter > refreshVerValBefore);
-        }
         // verify target Source for use case : _SUCCESS flag absent then
         // re-generate that source
         int rowCount = 0;
@@ -143,6 +138,10 @@ public class AMRefreshVersionUpdaterTestNG
                 } catch (IOException e) {
                     log.error("Error in deleting provided source path : ", e);
                 }
+                Long refreshVerValAfter = Long.valueOf(dataCloudVersionService
+                        .currentApprovedVersion().getRefreshVersionVersion());
+                // To verify if the new timestamp is greater i.e it refreshed
+                Assert.assertTrue(refreshVerValAfter > refreshVerValBefore);
             }
             if (iteration == 2) { // success flag absent so should retry : new
                                   // output generated
