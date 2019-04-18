@@ -53,7 +53,7 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
             //$scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
         }
         if(!$scope.hasLatticeEmail) {
-            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
+//            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
             $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);
         }
     } else if (currentLevel.ordinal == 3) {
