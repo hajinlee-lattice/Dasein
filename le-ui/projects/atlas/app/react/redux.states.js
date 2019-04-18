@@ -1,0 +1,1 @@
+export const REDUX_STATE_MODAL = 'le-modal';

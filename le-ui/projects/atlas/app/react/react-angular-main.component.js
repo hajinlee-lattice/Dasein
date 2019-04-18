@@ -3,6 +3,7 @@ import ReactRouter from './router';
 import './react-main.component.scss';
 import LeModal from 'common/widgets/modal/le-modal';
 import { store, injectAsyncReducer } from 'store';
+import { REDUX_STATE_MODAL } from "./redux.states";
 
 export default class ReactAngularMainComponent extends Component {
     constructor(props) {
@@ -27,7 +28,7 @@ export default class ReactAngularMainComponent extends Component {
         return (
             
             <div className="main-panel">
-                <LeModal store={store}  injectAsyncReducer={injectAsyncReducer} />
+                <LeModal store={store}  injectAsyncReducer={injectAsyncReducer} reduxstate={REDUX_STATE_MODAL}/>
                 <UIRouter router={ReactRouter.getRouter()}>
                     <UIView name="header" />
                     <UIView name="summary"/>

@@ -12,7 +12,7 @@ const initialState = {
 
 export const actions = {
 
-    error: (store, config) => {
+    error: (store, config = {}) => {
         config.type = TYPE_ERROR;
         return store.dispatch({
             type: CONST.OPEN_MODAL,
@@ -33,7 +33,7 @@ export const actions = {
         })
     },
 
-    success: (store, config) => {
+    success: (store, config = {}) => {
         config.type = TYPE_SUCCESS;
         return store.dispatch({
             type: CONST.OPEN_MODAL,
@@ -43,7 +43,7 @@ export const actions = {
             }
         })
     },
-    warning: (store, config) => {
+    warning: (store, config = {}) => {
         config.type = TYPE_WARNING;
         return store.dispatch({
             type: CONST.OPEN_MODAL,
@@ -54,7 +54,7 @@ export const actions = {
         })
     },
 
-    refreshView: (store, config) => {
+    refreshView: (store, config = {}) => {
         return store.dispatch({
             type: CONST.REFRESH_VIEW,
             payload: {
@@ -64,7 +64,7 @@ export const actions = {
         })
     },
 
-    openModal: (store, config) => {
+    openModal: (store, config = {}) => {
         return store.dispatch({
             type: CONST.OPEN_MODAL,
             payload: {

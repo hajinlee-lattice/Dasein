@@ -1,17 +1,12 @@
 import React, { Component, ReactDOM } from "common/react-vendor";
+import propTypes from "prop-types";
 import './le-modal.scss';
-import { TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING } from './le-modal.utils';
-
-
-export const SMALL = "sm";
-export const MEDIUM_SIZE = "md";
-export const LARGE_SIZE = "lg";
+import { TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING, MEDIUM_SIZE } from './le-modal.utils';
 
 
 import LeButton from '../buttons/le-button';
-// import { store, injectAsyncReducer } from 'store';
 import { actions, reducer } from './le-modal.redux';
-
+import { isBoolean } from "util";
 const modalRoot = document.getElementById('le-modal');
 
 export default class LeModal extends Component {
@@ -21,11 +16,11 @@ export default class LeModal extends Component {
         this.clickHandler = this.clickHandler.bind(this);
         this.state = { store: props.store, open: false, config: {} };
         if (this.props.injectAsyncReducer) {
-            this.props.injectAsyncReducer(props.store, 'le-modal', reducer);
+            this.props.injectAsyncReducer(props.store, props.reduxstate, reducer);
         }
 
         this.unsubscribe = props.store.subscribe(() => {
-            const data = props.store.getState()['le-modal'];
+            const data = props.store.getState()[props.reduxstate];
             this.setState({
                 open: data.open,
                 callbackFn: data.config.callback,
@@ -33,7 +28,8 @@ export default class LeModal extends Component {
                 title: data.config.title,
                 hideFooter: data.config.hideFooter ? data.config.hideFooter : false,
                 type: data.config.type ? data.config.type : '',
-                oneButton: data.config.oneButton ? data.config.oneButton : false
+                oneButton: data.config.oneButton ? data.config.oneButton : false,
+                size: data.config.size ? data.config.size : MEDIUM_SIZE
             });
         });
         this.clickHandler = this.clickHandler.bind(this);
@@ -129,8 +125,8 @@ export default class LeModal extends Component {
         console.log('MODAL STATE ', this.state);
         return (
             <div className="le_modal opened">
-                <div className={`${"le-modal-content"} ${this.state.size ? this.state.size : MEDIUM_SIZE}`}>
-                    <div className={`${"le-modal-header"} ${this.state.type ? this.state.type : 'pppp'}`}>
+                <div className={`${"le-modal-content"} ${this.state.size}`}>
+                    <div className={`${"le-modal-header"} ${this.state.type ? this.state.type : ''}`}>
                         <span className="close" onClick={() => {
                             this.clickHandler('close');
                         }}>&times;</span>
@@ -163,3 +159,18 @@ export default class LeModal extends Component {
         }
     }
 }
+
+
+
+LeModal.propTypes = {
+    config: propTypes.objectOf(propTypes.shape({
+        open: propTypes.bool,
+        callback: propTypes.func,
+        template: propTypes.func,
+        title: propTypes.func,
+        hideFooter: propTypes.bool,
+        type: propTypes.string,
+        oneButton: propTypes.bool,
+        size: propTypes.string
+    }))
+};

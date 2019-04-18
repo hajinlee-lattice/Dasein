@@ -12,8 +12,9 @@ import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
-import {actions as modalActions} from 'common/widgets/modal/le-modal.redux';
-import {store } from 'store';
+import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
+import { store } from 'store';
+import { LARGE_SIZE, MEDIUM_SIZE } from "../../../../../common/widgets/modal/le-modal.utils";
 export default class SystemCreationComponent extends Component {
     constructor(props) {
         super(props);
@@ -32,11 +33,11 @@ export default class SystemCreationComponent extends Component {
     componentWillUnmount() {
 
     }
-    validate(){
-        if(this.state.systemSelected && this.state.newSystemName.trim() != ''){
-            this.setState({valid:true});
-        }else {
-            this.setState({valid:false});
+    validate() {
+        if (this.state.systemSelected && this.state.newSystemName.trim() != '') {
+            this.setState({ valid: true });
+        } else {
+            this.setState({ valid: false });
         }
     }
 
@@ -78,13 +79,13 @@ export default class SystemCreationComponent extends Component {
                         }} callback={
                             (val) => {
                                 console.log('VALUE ', val);
-                                this.setState({newSystemName: val}, this.validate);
+                                this.setState({ newSystemName: val }, this.validate);
                             }
                         }></LeInputText>
                     </LeHPanel>
-                    <p className="le-description">The system will automatically create default field mappings between Lattice and Salesforce. The system will automatically create 3 separate field mapping one each for Salesforce Accounts, Contacts & Leads. ​
+                    <p className="le-description">The system will automatically create default field mappings between Lattice and Salesforce. The system will automatically create 3 separate field mapping one each for Salesforce Accounts, Contacts & Leads.
                      <br /><br />
-                     These field mappings are here to help you get you started quickly and can be edited anytime. 
+                        These field mappings are here to help you get you started quickly and can be edited anytime.
                     </p>
                 </LeVPanel>
                 <LeToolBar justifycontent={SPACE_BETWEEN}>
@@ -107,19 +108,22 @@ export default class SystemCreationComponent extends Component {
                             classNames: "blue-button"
                         }}
                         callback={() => {
-                            let config = { callback: (action) =>{
-                                console.log('ACTION', action);
-                                modalActions.closeModal(store);
-                            }, template: () => {
-                                return (<p>Leo test</p>)
-                            }, title: () => { 
-                                return(
-                                    <p>TEST</p>
-                                );
-                            }, oneButton: true}
+                            let config = {
+                                callback: (action) => {
+                                    console.log('ACTION', action);
+                                    modalActions.closeModal(store);
+                                },
+                                template: () => {
+                                    return (<p>Leo test</p>)
+                                },
+                                title: () => {
+                                    return (<p>TEST</p>);
+                                },
+                                oneButton: false,
+                                hideFooter: false,
+                                size: MEDIUM_SIZE
+                            }
                             modalActions.openModal(store, config);
-                            // ReactRouter.getStateService().go('templateslist');
-                            // alert('Call APIS');
                         }}
                     />
                 </LeToolBar>
