@@ -43,7 +43,7 @@
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_EXPIRE_PERIOD_LABEL')}}</label>
                                 <select data-ng-options="ResourceUtility.getString('EXPIRE_PERIOD_' + period) for period in periodsToSelect"
                                         class="form-control" data-ng-model="user.ExpirePeriod" name="{{ResourceUtility.getString('ADD_USER_EXPIRE_PERIOD_LABEL')}}" 
-                                        ></select>
+                                         ng-disabled="showAddUserSuccess"></select>
                             </div>
                         </div>
                     </div>

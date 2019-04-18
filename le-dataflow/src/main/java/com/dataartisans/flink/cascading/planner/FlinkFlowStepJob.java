@@ -40,17 +40,21 @@ import org.apache.flink.api.java.LocalEnvironment;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.ContextEnvironment;
 import org.apache.flink.client.program.JobWithJars;
+import org.apache.flink.client.program.MiniClusterClient;
 import org.apache.flink.client.program.OptimizerPlanEnvironment;
-import org.apache.flink.client.program.StandaloneClusterClient;
-import org.apache.flink.configuration.ConfigConstants;
+import org.apache.flink.configuration.AkkaOptions;
+import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.optimizer.DataStatistics;
 import org.apache.flink.optimizer.Optimizer;
 import org.apache.flink.optimizer.plan.OptimizedPlan;
 import org.apache.flink.optimizer.plantranslate.JobGraphGenerator;
 import org.apache.flink.runtime.jobgraph.JobGraph;
-import org.apache.flink.runtime.minicluster.FlinkMiniCluster;
-import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
+import org.apache.flink.runtime.minicluster.MiniCluster;
+import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
+import org.apache.flink.runtime.minicluster.RpcServiceSharing;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +74,7 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
     private static final Object lock = new Object();
     @SuppressWarnings("unused")
     private static final FiniteDuration DEFAULT_TIMEOUT = new FiniteDuration(60, TimeUnit.SECONDS);
-    private volatile static FlinkMiniCluster localCluster;
+    private volatile static MiniCluster localCluster;
     private volatile static int localClusterUsers;
     private final Configuration currentConf;
     private final ExecutionEnvironment env;
@@ -157,25 +161,14 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
             startLocalCluster();
 
             org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();
-            config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, localCluster.hostname());
 
-            final org.apache.flink.configuration.Configuration tmpConfig = localCluster
-                    .generateConfiguration(localCluster.configuration());
+            final String clusterHostName = localCluster.getClusterInformation().getBlobServerHostname();
+            final int jobManagerPort = localCluster.getClusterInformation().getBlobServerPort();
+            config.setString(JobManagerOptions.ADDRESS, clusterHostName);
+            config.setInteger(JobManagerOptions.PORT, jobManagerPort);
+            flowStep.logWarn("Using local cluster at " + clusterHostName + " JM port: " + jobManagerPort);
 
-            final int resourceManagerPort = tmpConfig.getInteger(
-                    ConfigConstants.RESOURCE_MANAGER_IPC_PORT_KEY,
-                    ConfigConstants.DEFAULT_RESOURCE_MANAGER_IPC_PORT);
-
-            final int jobManagerPort = tmpConfig.getInteger(
-                    ConfigConstants.JOB_MANAGER_IPC_PORT_KEY,
-                    ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);
-
-            config.setInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, jobManagerPort);
-
-            flowStep.logWarn("Using local cluster at " + localCluster.hostname() + " RM port: "
-                    + resourceManagerPort + " JM port: " + jobManagerPort);
-
-            client = new StandaloneClusterClient(config);
+            client = new MiniClusterClient(config, localCluster);
             client.setPrintStatusDuringExecution(env.getConfig().isSysoutLoggingEnabled());
 
         } else {
@@ -194,7 +187,7 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
             client = ((ContextEnvironment) env).getClient();
         }
 
-        List<URL> fileList = new ArrayList<URL>(classPath.size());
+        List<URL> fileList = new ArrayList<>(classPath.size());
         for (String path : classPath) {
             URL url;
             try {
@@ -206,11 +199,11 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
         }
 
         final ClassLoader loader = JobWithJars.buildUserCodeClassLoader(fileList,
-                Collections.<URL> emptyList(), getClass().getClassLoader());
+                Collections.emptyList(), getClass().getClassLoader());
 
         accumulatorCache.setClient(client);
 
-        final Callable<JobSubmissionResult> callable = () -> client.run(jobGraph, loader);
+        final Callable<JobSubmissionResult> callable = () -> client.submitJob(jobGraph, loader);
 
         jobSubmission = executorService.submit(callable);
 
@@ -235,12 +228,10 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
     protected boolean internalNonBlockingIsSuccessful() throws IOException {
         try {
             jobSubmission.get(0, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | TimeoutException e) {
             return false;
         } catch (ExecutionException e) {
             jobException = e.getCause();
-            return false;
-        } catch (TimeoutException e) {
             return false;
         }
 
@@ -312,7 +303,7 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
         return jobID.toString();
     }
 
-    protected boolean internalNonBlockingIsComplete() throws IOException {
+    protected boolean internalNonBlockingIsComplete() {
         return jobSubmission.isDone();
     }
 
@@ -331,12 +322,18 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
         synchronized (lock) {
             if (localCluster == null) {
                 org.apache.flink.configuration.Configuration configuration = new org.apache.flink.configuration.Configuration();
-                configuration.setInteger(ConfigConstants.TASK_MANAGER_NUM_TASK_SLOTS,
-                        env.getParallelism() * 2);
-                configuration.setString(ConfigConstants.AKKA_ASK_TIMEOUT, "300s");
-                LOG.info("Creating a new LocalFlinkMiniCluster.");
-                localCluster = new LocalFlinkMiniCluster(configuration, false);
-                localCluster.start();
+                configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS, env.getParallelism() * 2);
+                configuration.setString(AkkaOptions.ASK_TIMEOUT, "300s");
+                LOG.info("Creating a new Flink MiniCluster.");
+                configuration.setString(RestOptions.ADDRESS, "localhost");
+                MiniClusterConfiguration miniConf =
+                        new MiniClusterConfiguration(configuration, 1, RpcServiceSharing.DEDICATED, null);
+                localCluster = new MiniCluster(miniConf);
+                try {
+                    localCluster.start();
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to start flink MiniCluster.", e);
+                }
             }
             localClusterUsers++;
         }
@@ -346,8 +343,7 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
         synchronized (lock) {
             if (localCluster != null) {
                 if (--localClusterUsers <= 0) {
-                    localCluster.shutdown();
-                    localCluster.awaitTermination();
+                    localCluster.closeAsync().join();
                     localCluster = null;
                     localClusterUsers = 0;
                 }

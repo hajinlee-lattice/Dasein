@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.flink.api.common.typeutils.TypeSerializer;
+import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
@@ -41,7 +42,6 @@ public class TupleArraySerializer extends TypeSerializer<Tuple[]> {
     private final boolean[] nullFields;
 
     public TupleArraySerializer(int length, TypeSerializer<Tuple>[] tupleSerializers) {
-
         this.length = length;
         this.fillLength = tupleSerializers.length;
         this.tupleSerializers = tupleSerializers;
@@ -178,9 +178,22 @@ public class TupleArraySerializer extends TypeSerializer<Tuple[]> {
         return 31 * this.length + Arrays.hashCode(this.tupleSerializers);
     }
 
-    @Override
-    public boolean canEqual(Object obj) {
+//    @Override
+//    public boolean canEqual(Object obj) {
+//        return obj instanceof TupleArraySerializer;
+//    }
+
+    private boolean canEqual(Object obj) {
         return obj instanceof TupleArraySerializer;
+    }
+
+    public TypeSerializer<Tuple>[] getTupleSerializers() {
+        return tupleSerializers;
+    }
+
+    @Override
+    public TypeSerializerSnapshot<Tuple[]> snapshotConfiguration() {
+        return new TupleArraySerializerSnapshot(length);
     }
 
 }

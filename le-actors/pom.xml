@@ -31,15 +31,14 @@
     <dependencies>
         <!-- akka -->
         <dependency>
-            <groupId>com.data-artisans</groupId> <!-- have to use data-artisans dist to be compatible with flink -->
-            <artifactId>flakka-actor_2.11</artifactId>
-            <version>${flink.akka-version}</version>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.11</artifactId>
+            <version>${akka.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
         </dependency>
 
         <!-- swagger -->

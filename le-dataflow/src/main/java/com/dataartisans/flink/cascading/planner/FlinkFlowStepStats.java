@@ -21,6 +21,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.flink.util.FlinkException;
+import org.apache.flink.util.OptionalFailure;
+
 import com.dataartisans.flink.cascading.runtime.stats.AccumulatorCache;
 import com.dataartisans.flink.cascading.runtime.stats.EnumStringConverter;
 
@@ -108,7 +111,12 @@ public class FlinkFlowStepStats extends FlowStepStats {
         for (String key : currentAccumulators.keySet()) {
             if (EnumStringConverter.accMatchesGroupCounter(key, group, counter)) {
                 Object o = currentAccumulators.get(key);
-                return (Long) o;
+                OptionalFailure<Long> failure = (OptionalFailure<Long>) o;
+                try {
+                    return failure.get();
+                } catch (FlinkException e) {
+                    logWarn("Failed to extract count.", e);
+                }
             }
         }
         // Cascading returns 0 in case of empty accumulators
