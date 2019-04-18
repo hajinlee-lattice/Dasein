@@ -463,8 +463,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             versionDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
         }
         try {
-            String success = versionDir + HDFS_PATH_SEPARATOR + version + HDFS_PATH_SEPARATOR
-                    + SUCCESS_FILE_SUFFIX;
+            String success = versionDir + HDFS_PATH_SEPARATOR + SUCCESS_FILE_SUFFIX;
             if (HdfsUtils.isDirectory(yarnConfiguration, versionDir)
                     && HdfsUtils.fileExists(yarnConfiguration, success)) {
                 sourceExists = true;

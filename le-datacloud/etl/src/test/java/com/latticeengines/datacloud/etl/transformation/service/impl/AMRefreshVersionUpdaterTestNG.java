@@ -8,14 +8,13 @@ import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
@@ -37,14 +36,9 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        for (int i = 0; i < 2; i++) { // iterating twice to test if step is
+        for (int i = 0; i < 3; i++) { // iterating twice to test if step is
                                       // re-run and source is re-generated if _SUCCESS flag is absent
-            if (i == 0) {
-                iteration = 1;
-            }
-            if (i == 1) {
-                iteration = 2;
-            }
+            iteration = i;
             refreshVerValBefore = Long.valueOf(
                     dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
             prepareData();
@@ -63,13 +57,16 @@ public class AMRefreshVersionUpdaterTestNG
         columns.add(Pair.of("DUNS", String.class));
         Object[][] data1 = new Object[][] { { "kaggle.com", "123456789" } };
         Object[][] data2 = new Object[][] { { "google.com", "342141241" } };
-        if (iteration == 1) {
+        Object[][] data3 = new Object[][] { { "yahoo.com", "111111111" } };
+        if (iteration == 0) {
             uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data1);
         }
-        if (iteration == 2) {
+        if (iteration == 1) {
             uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data2);
         }
-
+        if (iteration == 2) {
+            uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data3);
+        }
     }
 
     @Override
@@ -120,8 +117,8 @@ public class AMRefreshVersionUpdaterTestNG
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        Long refreshVerValAfter = Long
-                .valueOf(dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
+        Long refreshVerValAfter = Long.valueOf(
+                dataCloudVersionService.currentApprovedVersion().getRefreshVersionVersion());
         // To verify if the new timestamp is greater i.e it refreshed
         Assert.assertTrue(refreshVerValAfter > refreshVerValBefore);
         // verify target Source for use case : _SUCCESS flag absent then
@@ -129,29 +126,26 @@ public class AMRefreshVersionUpdaterTestNG
         int rowCount = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
+            if (iteration == 0) {
+                Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
+                Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
+            }
             if (iteration == 1) {
                 Assert.assertTrue(isObjEquals(record.get("Domain"), "kaggle.com"));
                 Assert.assertTrue(isObjEquals(record.get("DUNS"), "123456789"));
-                if (iteration == 1) {
-                    String targetSrcPath = "/Pods/LDCDEV_AMRefreshVersionUpdater/Services/PropData/Sources/"
-                            + source + "/Snapshot/" + hdfsSourceEntityMgr.getCurrentVersion(source)
-                            + "/_SUCCESS";
-                    FileSystem fs;
-                    try {
-                        fs = FileSystem.get(new Configuration());
-                        fs.delete(new Path(targetSrcPath), true);
-                    } catch (IOException e) {
-                        log.error("Error in deleting provided source path : ", e);
-                    }
+                String targetSrcPath = getPathForResult() + "/_SUCCESS";
+                try {
+                    HdfsUtils.rmdir(new Configuration(), targetSrcPath);
+                } catch (IOException e) {
+                    log.error("Error in deleting provided source path : ", e);
                 }
             }
             if (iteration == 2) {
-                Assert.assertTrue(isObjEquals(record.get("Domain"), "google.com"));
-                Assert.assertTrue(isObjEquals(record.get("DUNS"), "342141241"));
+                Assert.assertTrue(isObjEquals(record.get("Domain"), "yahoo.com"));
+                Assert.assertTrue(isObjEquals(record.get("DUNS"), "111111111"));
             }
             rowCount++;
         }
         Assert.assertEquals(rowCount, 1);
     }
-
 }
