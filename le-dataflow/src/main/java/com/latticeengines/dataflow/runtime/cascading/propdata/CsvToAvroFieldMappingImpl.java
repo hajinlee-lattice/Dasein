@@ -80,9 +80,9 @@ public class CsvToAvroFieldMappingImpl implements CsvToAvroFieldMapping, Seriali
     }
 
     private void initMaps() {
-        csvToAvroFieldMap = new HashMap<String, String>();
-        avroToCsvFieldMap = new HashMap<String, String>();
-        csvFieldToTypeMap = new HashMap<String, Coerce<?>>();
+        csvToAvroFieldMap = new HashMap<>();
+        avroToCsvFieldMap = new HashMap<>();
+        csvFieldToTypeMap = new HashMap<>();
 
         populateMaps();
     }
@@ -137,7 +137,7 @@ public class CsvToAvroFieldMappingImpl implements CsvToAvroFieldMapping, Seriali
         private String avroFieldName;
         private Coerce<?> fieldType;
 
-        public FieldTuple(String csvFieldName, String avroFieldName, Coerce<?> fieldType) {
+        FieldTuple(String csvFieldName, String avroFieldName, Coerce<?> fieldType) {
             this.csvFieldName = csvFieldName;
             this.avroFieldName = avroFieldName;
             this.fieldType = fieldType;

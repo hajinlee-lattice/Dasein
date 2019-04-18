@@ -26,6 +26,7 @@
 
         <!-- Modifiers -->
         <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
 
         <!-- Imports -->
         <module name="AvoidStarImport"/>

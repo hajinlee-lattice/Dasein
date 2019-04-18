@@ -14,7 +14,7 @@ class IntegerNode implements GraphNode {
     public Set<IntegerNode> children = new HashSet<>();
     public Integer value;
 
-    public IntegerNode(Integer value) { this.value = value; }
+    IntegerNode(Integer value) { this.value = value; }
 
     @Override
     public Collection<IntegerNode> getChildren() { return children; }

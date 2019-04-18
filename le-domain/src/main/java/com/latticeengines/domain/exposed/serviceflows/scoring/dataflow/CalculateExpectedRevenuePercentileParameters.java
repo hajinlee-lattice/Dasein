@@ -121,7 +121,7 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
         this.scoreDerivationMaps = scoreDerivationMaps;
     }
 
-    public static enum ScoreDerivationType {
+    public enum ScoreDerivationType {
         EV, REVENUE, PROBABILITY
     }
 }

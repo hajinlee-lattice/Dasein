@@ -42,10 +42,11 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
     @Override
     public void execute() {
         PlayLaunchExportFilesGeneratorConfiguration config = getConfiguration();
-        String recAvroHdfsFilePath = getStringValueFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
+        String recAvroHdfsFilePath = getStringValueFromContext(
+                PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
 
         try (PerformanceTimer timer = new PerformanceTimer(
-            String.format("Generating PlayLaunch Export Files for:%s", config.getPlayName()))) {
+                String.format("Generating PlayLaunch Export Files for:%s", config.getPlayName()))) {
             List<Callable<String>> fileExporters = new ArrayList<>();
             Date fileExportTime = new Date();
             fileExporters.add(new CsvFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
@@ -64,13 +65,13 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
     }
 
     public String buildNamespace(PlayLaunchExportFilesGeneratorConfiguration config) {
-        return String.format("%s.%s.%s.%s.%s", config.getDestinationSysType(), config.getDestinationSysName(), config.getDestinationOrgId(),
-                config.getPlayName(), config.getPlayLaunchId());
+        return String.format("%s.%s.%s.%s.%s", config.getDestinationSysType(), config.getDestinationSysName(),
+                config.getDestinationOrgId(), config.getPlayName(), config.getPlayLaunchId());
     }
 
     private class CsvFileExporter extends ExportFileCallable {
 
-        public CsvFileExporter(Configuration yarnConfiguration, PlayLaunchExportFilesGeneratorConfiguration config,
+        CsvFileExporter(Configuration yarnConfiguration, PlayLaunchExportFilesGeneratorConfiguration config,
                 String recAvroHdfsFilePath, Date date) {
             super(yarnConfiguration, config, recAvroHdfsFilePath, date);
         }
@@ -85,12 +86,12 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         public String getFileFormat() {
             return "csv";
         }
-        
+
     }
 
     private class JsonFileExporter extends ExportFileCallable {
 
-        public JsonFileExporter(Configuration yarnConfiguration, PlayLaunchExportFilesGeneratorConfiguration config,
+        JsonFileExporter(Configuration yarnConfiguration, PlayLaunchExportFilesGeneratorConfiguration config,
                 String recAvroHdfsFilePath, Date date) {
             super(yarnConfiguration, config, recAvroHdfsFilePath, date);
         }
@@ -114,7 +115,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         Date fileGeneratedTime;
         String recAvroHdfsFilePath;
 
-        public ExportFileCallable(Configuration yarnConfiguration, PlayLaunchExportFilesGeneratorConfiguration config,
+        ExportFileCallable(Configuration yarnConfiguration, PlayLaunchExportFilesGeneratorConfiguration config,
                 String recAvroHdfsFilePath, Date date) {
             this.yarnConfiguration = yarnConfiguration;
             this.config = config;
@@ -129,13 +130,15 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         @Override
         public String call() throws Exception {
             try {
-                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s.%s", config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),
+                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s.%s",
+                        config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),
                         config.getDestinationSysType(), fileGeneratedTime.getTime(), getFileFormat()));
 
                 generateFileFromAvro(recAvroHdfsFilePath, localFile);
 
                 String namespace = buildNamespace(config);
-                String path = PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), namespace)
+                String path = PathBuilder
+                        .buildDataFileExportPath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), namespace)
                         .toString();
                 path = path.endsWith("/") ? path : path + "/";
 
@@ -143,7 +146,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
                         DateTimeUtils.currentTimeAsString(fileGeneratedTime), getFileFormat()));
 
                 try {
-                    HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), recFilePathForDestination);
+                    HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(),
+                            recFilePathForDestination);
                 } finally {
                     FileUtils.deleteQuietly(localFile);
                 }

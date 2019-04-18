@@ -8,7 +8,7 @@ public enum DataLicense {
     private String dataLicense;
     private String description;
 
-    private DataLicense(String dataLicense, String description) {
+    DataLicense(String dataLicense, String description) {
         this.dataLicense = dataLicense;
         this.description = description;
     }

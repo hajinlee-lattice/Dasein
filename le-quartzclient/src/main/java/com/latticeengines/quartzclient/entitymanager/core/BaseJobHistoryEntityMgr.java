@@ -7,6 +7,6 @@ public interface BaseJobHistoryEntityMgr extends BaseEntityMgr<JobHistory> {
 
     JobHistory getJobHistory(String tenantId, String jobName, String triggeredJobHandle);
 
-    public void updateJobHistory(JobHistory jobHistory);
+    void updateJobHistory(JobHistory jobHistory);
 
 }

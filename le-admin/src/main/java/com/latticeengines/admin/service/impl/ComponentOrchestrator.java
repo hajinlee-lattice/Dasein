@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,16 +54,16 @@ import com.latticeengines.security.exposed.service.UserService;
 @Component
 public class ComponentOrchestrator {
 
-    @Autowired
+    @Inject
     List<LatticeComponent> components;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Value("${security.app.public.url:http://localhost:8081}")
@@ -281,7 +281,7 @@ public class ComponentOrchestrator {
                                                                   // ->
                                                                   // bootstrapProerties
 
-        public OrchestratorVisitor(String contractId, String tenantId, String spaceId,
+        OrchestratorVisitor(String contractId, String tenantId, String spaceId,
                 Map<String, Map<String, String>> properties) {
             this.contractId = contractId;
             this.tenantId = tenantId;
@@ -363,7 +363,7 @@ public class ComponentOrchestrator {
         // ->
         // bootstrapProerties
 
-        public OrchestratorVisitorV2(String contractId, String tenantId, String spaceId,
+        OrchestratorVisitorV2(String contractId, String tenantId, String spaceId,
                                      Map<String, Map<String, String>> properties, Map<String, String> tenantProperties) {
             this.contractId = contractId;
             this.tenantId = tenantId;
@@ -507,7 +507,7 @@ public class ComponentOrchestrator {
 
     private static class OrchestratorVisitorForUninstall extends OrchestratorVisitor {
 
-        public OrchestratorVisitorForUninstall(String contractId, String tenantId, String spaceId,
+        OrchestratorVisitorForUninstall(String contractId, String tenantId, String spaceId,
                 Map<String, Map<String, String>> properties) {
             super(contractId, tenantId, spaceId, properties);
         }

@@ -12,8 +12,8 @@ import com.latticeengines.scoringapi.score.SingleMatchingContext;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public interface Matcher {
-    public static final String RESULT = "RESULT";
-    public static final String ENRICHMENT = "ENRICHMENT";
+    String RESULT = "RESULT";
+    String ENRICHMENT = "ENRICHMENT";
 
     boolean accept(boolean isBulk);
 
@@ -25,7 +25,7 @@ public interface Matcher {
     Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(//
             AdditionalScoreConfig additionalScoreConfig, BulkMatchingContext bulkMatchingConfig,
             List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean shouldEnrichOnly);
-    
+
     List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space,
             List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean enrichInternalAttributes);
 }

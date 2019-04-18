@@ -15,7 +15,7 @@ public enum FileType {
 
     private String type;
 
-    private FileType(String type) {
+    FileType(String type) {
         this.type = type;
     }
 

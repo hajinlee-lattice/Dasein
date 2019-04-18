@@ -5,5 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 
 public interface SourcePurger {
-    public List<PurgeSource> findSourcesToPurge(final boolean debug);
+
+    List<PurgeSource> findSourcesToPurge(boolean debug);
+
 }

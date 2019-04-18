@@ -5,7 +5,7 @@ public enum JobStatus {
 
     private int value;
 
-    private JobStatus(int value) {
+    JobStatus(int value) {
         this.value = value;
     }
 

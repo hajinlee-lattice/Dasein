@@ -27,7 +27,7 @@ public class SecureFileTransferAgent {
         this.password = password;
     }
 
-    public static enum FileTransferOption {
+    public enum FileTransferOption {
         UPLOAD, DOWNLOAD
     }
 

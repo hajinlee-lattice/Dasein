@@ -15,11 +15,12 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -41,13 +42,13 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     private String tenantId1;
@@ -567,7 +568,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         List<String> types;
         List<String> statuses;
 
-        public ClusterIdQuery(String clusterId, List<String> types, List<String> statuses) {
+        ClusterIdQuery(String clusterId, List<String> types, List<String> statuses) {
             this.clusterId = clusterId;
             this.types = types;
             this.statuses = statuses;

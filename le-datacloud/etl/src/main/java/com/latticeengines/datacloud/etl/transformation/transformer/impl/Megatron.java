@@ -16,7 +16,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -45,7 +44,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
     private Random random = new Random();
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
     @Override
@@ -346,7 +345,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
         List<GenericData.Record> accounts;
 
-        public MegatronContext(MegatronConfig config, Schema schema) {
+        MegatronContext(MegatronConfig config, Schema schema) {
             this.config = config;
             this.schema = schema;
 

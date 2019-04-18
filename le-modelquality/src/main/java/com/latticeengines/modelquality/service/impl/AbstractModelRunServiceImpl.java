@@ -2,10 +2,11 @@ package com.latticeengines.modelquality.service.impl;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,16 +33,16 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractModelRunServiceImpl.class);
 
-    @Autowired
+    @Inject
     private ModelRunEntityMgr modelRunEntityMgr;
 
-    @Autowired
+    @Inject
     private DataSetEntityMgr dataSetEntityMgr;
 
-    @Autowired
+    @Inject
     private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
 
-    @Autowired
+    @Inject
     protected MetricService metricService;
 
     protected Environment env;
@@ -135,7 +136,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     private class ModelRunRunnable implements Runnable {
         private ModelRun modelRun;
 
-        public ModelRunRunnable(ModelRun modelRun) {
+        ModelRunRunnable(ModelRun modelRun) {
             this.modelRun = modelRun;
         }
 

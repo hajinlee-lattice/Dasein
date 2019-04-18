@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,25 +52,25 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
     private static Map<String, LaunchJobsResult> importSfdcDataJobs = new HashMap<String, LaunchJobsResult>();
     private static Map<String, LaunchJobsResult> enrichDataJobs = new HashMap<String, LaunchJobsResult>();
 
-    @Autowired
+    @Inject
     private DataLoaderService dataLoaderService;
 
-    @Autowired
+    @Inject
     private TenantConfigService tenantConfigService;
 
-    @Autowired
+    @Inject
     private VdbMetadataService vdbMetadataService;
 
-    @Autowired
+    @Inject
     private TenantDeploymentService tenantDeploymentService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Value("${security.app.public.url:http://localhost:8081}")
@@ -368,38 +368,37 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             final TenantDeploymentStep step = deployment.getStep();
             final TenantDeploymentStatus status = deployment.getStatus();
             ExecutorService executorService = Executors.newSingleThreadExecutor();
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        User user = userService.findByEmail(email);
-                        if (step == TenantDeploymentStep.IMPORT_SFDC_DATA) {
-                            if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPlsImportDataSuccessEmail(user, appPublicUrl);
-                            } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPlsImportDataErrorEmail(user, appPublicUrl);
-                            }
-                        } else if (step == TenantDeploymentStep.ENRICH_DATA) {
-                            if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPlsEnrichDataSuccessEmail(user, appPublicUrl);
-                            } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPlsEnrichDataErrorEmail(user, appPublicUrl);
-                            }
-                        } else if (step == TenantDeploymentStep.VALIDATE_METADATA) {
-                            if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPlsValidateMetadataSuccessEmail(user, appPublicUrl);
-                            } else if (status == TenantDeploymentStatus.WARNING) {
-                                emailService.sendPlsMetadataMissingEmail(user, appPublicUrl);
-                            } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPlsValidateMetadataErrorEmail(user, appPublicUrl);
-                            }
+            executorService.execute(() -> {
+                try {
+                    User user = userService.findByEmail(email);
+                    if (step == TenantDeploymentStep.IMPORT_SFDC_DATA) {
+                        if (status == TenantDeploymentStatus.SUCCESS) {
+                            emailService.sendPlsImportDataSuccessEmail(user, appPublicUrl);
+                        } else if (status == TenantDeploymentStatus.FAIL) {
+                            emailService.sendPlsImportDataErrorEmail(user, appPublicUrl);
                         }
-                    } catch (Exception e) {
+                    } else if (step == TenantDeploymentStep.ENRICH_DATA) {
+                        if (status == TenantDeploymentStatus.SUCCESS) {
+                            emailService.sendPlsEnrichDataSuccessEmail(user, appPublicUrl);
+                        } else if (status == TenantDeploymentStatus.FAIL) {
+                            emailService.sendPlsEnrichDataErrorEmail(user, appPublicUrl);
+                        }
+                    } else if (step == TenantDeploymentStep.VALIDATE_METADATA) {
+                        if (status == TenantDeploymentStatus.SUCCESS) {
+                            emailService.sendPlsValidateMetadataSuccessEmail(user, appPublicUrl);
+                        } else if (status == TenantDeploymentStatus.WARNING) {
+                            emailService.sendPlsMetadataMissingEmail(user, appPublicUrl);
+                        } else if (status == TenantDeploymentStatus.FAIL) {
+                            emailService.sendPlsValidateMetadataErrorEmail(user, appPublicUrl);
+                        }
                     }
+                } catch (Exception e) {
+                    log.warn("Error", e);
                 }
             });
             executorService.shutdown();
         } catch (Exception e) {
+            log.warn("Error", e);
         }
     }
 
@@ -407,7 +406,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         private String tenantId;
         private Map<String, LaunchJobsResult> jobsMap;
 
-        public ProgressCallback(String tenantId, Map<String, LaunchJobsResult> jobsMap) {
+        ProgressCallback(String tenantId, Map<String, LaunchJobsResult> jobsMap) {
             this.tenantId = tenantId;
             this.jobsMap = jobsMap;
         }
@@ -424,7 +423,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         private String tenantId;
         private Map<String, LaunchJobsResult> jobsMap;
 
-        public CompletedCallback(String tenantId, Map<String, LaunchJobsResult> jobsMap) {
+        CompletedCallback(String tenantId, Map<String, LaunchJobsResult> jobsMap) {
             this.tenantId = tenantId;
             this.jobsMap = jobsMap;
         }
@@ -447,6 +446,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                             try {
                                 validateMetadata(tenantId, deployment);
                             } catch (Exception e) {
+                                log.warn("Error", e);
                             }
                         } else {
                             handleSuccess(deployment);
@@ -471,6 +471,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                         handleError(deployment, ex.getMessage());
                     }
                 } catch (Exception e) {
+                    log.warn("Error", e);
                 }
 
                 log.warn(String.format(

@@ -3,6 +3,7 @@ package com.latticeengines.datafabric.entitymanager.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -20,7 +22,6 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -50,10 +51,10 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
     @Resource(name = "genericFabricMessageManager")
     private GenericFabricMessageManager<SampleEntity> entityManager;
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
-    Set<String> batchIds = new HashSet<>();
+    private Set<String> batchIds = new HashSet<>();
 
     private Camille camille;
 
@@ -404,8 +405,8 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
             GenericRecordRequest recordRequest = new GenericRecordRequest();
             if (type == 1) {
                 String testFile = "testGenericFile" + type;
-                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS);
-                List<String> repositories = Arrays.asList(testFile);
+                List<FabricStoreEnum> stores = Collections.singletonList(FabricStoreEnum.HDFS);
+                List<String> repositories = Collections.singletonList(testFile);
                 recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
                         .setRepositories(repositories).setId(i + "");
             }
@@ -448,7 +449,7 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
         private List<GenericRecord> records;
         private String batchId;
 
-        public ConnectorCallable(String batchId, List<GenericRecordRequest> recordRequests,
+        ConnectorCallable(String batchId, List<GenericRecordRequest> recordRequests,
                 List<GenericRecord> records) {
             this.batchId = batchId;
             this.recordRequests = recordRequests;

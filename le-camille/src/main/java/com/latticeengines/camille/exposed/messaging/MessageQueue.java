@@ -52,7 +52,7 @@ public class MessageQueue<T> {
 
     private static class Consumer<M> implements QueueConsumer<M> {
 
-        public Consumer(MessageConsumer<M> inner, Path path) {
+        Consumer(MessageConsumer<M> inner, Path path) {
             this.inner = inner;
             this.path = path;
         }
@@ -85,7 +85,7 @@ public class MessageQueue<T> {
     }
 
     private static class Serializer<M> implements QueueSerializer<M> {
-        public Serializer(Class<M> messageClazz) {
+        Serializer(Class<M> messageClazz) {
             this.messageClazz = messageClazz;
         }
 

@@ -606,7 +606,7 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         String expectedCustomerAccountId;
         String expectedCustomerContactId;
 
-        public ContactBulkMatchTestCase(Object[] data, String expectedCustomerAccountId,
+        ContactBulkMatchTestCase(Object[] data, String expectedCustomerAccountId,
                 String expectedCustomerContactId) {
             this.data = data;
             this.expectedCustomerAccountId = expectedCustomerAccountId;

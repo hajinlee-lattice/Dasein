@@ -178,7 +178,7 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
         return JsonUtils.serialize(this);
     }
 
-    public static enum Status {
+    public enum Status {
         Inited("inited"), //
         Active("active"), //
         Started("started"), //

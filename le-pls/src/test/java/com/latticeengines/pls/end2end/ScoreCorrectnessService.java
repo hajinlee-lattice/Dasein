@@ -41,8 +41,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -106,8 +104,8 @@ public class ScoreCorrectnessService {
 
     }
 
-    public Map<String, ComparedRecord> analyzeScores(String tenantId, String pathToModelInputCsv, String modelId,
-            int numRecordsToScore) throws IOException {
+    Map<String, ComparedRecord> analyzeScores(String tenantId, String pathToModelInputCsv, String modelId,
+                                              int numRecordsToScore) throws IOException {
         String appId = "DUMMY_APP";
         String accessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId, appId).getValue();
         Oauth2HeaderHttpRequestInterceptor interceptor = new Oauth2HeaderHttpRequestInterceptor(accessToken);
@@ -324,6 +322,7 @@ public class ScoreCorrectnessService {
                                 field));
                     }
                 } catch (Exception e) {
+                    log.warn("Error", e);
                 }
                 String expectedValueString = String.valueOf(expectedRecord.get(field));
                 String scoreValueString = String.valueOf(scoreRecord.get(field));
@@ -385,6 +384,7 @@ public class ScoreCorrectnessService {
         try {
             scoreExecutorService.awaitTermination(TIMEOUT_IN_MIN, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
+            log.warn("Interrupted.", e);
         }
 
         if (!problemScores.isEmpty()) {
@@ -405,7 +405,7 @@ public class ScoreCorrectnessService {
         private int initialInputQueueSize;
         private AtomicInteger counter;
 
-        public ScoreApiCallable(String scoreApiHostPort, RestTemplate scoringRestTemplate, String modelId,
+        ScoreApiCallable(String scoreApiHostPort, RestTemplate scoringRestTemplate, String modelId,
                 Map<String, Map<String, Object>> inputRecords, Queue<String> inputQueue, Set<String> problemScores,
                 Map<String, DebugScoreResponse> responses, int initialInputQueueSize, AtomicInteger counter) {
             super();
@@ -454,6 +454,7 @@ public class ScoreCorrectnessService {
             try {
                 call();
             } catch (Exception e) {
+                log.warn("Error", e);
             }
         }
     }
@@ -468,12 +469,8 @@ public class ScoreCorrectnessService {
                 format)) {
             for (CSVRecord csvRecord : parser) {
                 final String idFieldName = artifacts.getIdField();
-                Field idField = Iterables.find(fields, new Predicate<Field>() {
-                    @Override
-                    public boolean apply(Field field) {
-                        return field.getFieldName().equals(idFieldName);
-                    }
-                });
+                Field idField = fields.stream().filter(field -> field.getFieldName().equals(idFieldName)) //
+                        .findFirst().get();
                 String id = csvRecord.get(idField.getDisplayName());
                 if (ids.contains(id)) {
                     Map<String, Object> scoreRecord = new HashMap<>();
@@ -527,7 +524,6 @@ public class ScoreCorrectnessService {
             }
             if (StringStandardizationUtils.objectIsNullOrEmptyString(idFieldValue)) {
                 log.warn("Skipping this record because missing ID field value " + record.toString());
-                continue;
             } else {
                 matchedRecords.put(String.valueOf(idFieldValue), record);
             }
@@ -549,11 +545,9 @@ public class ScoreCorrectnessService {
                         idFieldValue = csvRecord.get(fieldName);
                     }
                 }
-                Map<String, Object> record = new HashMap<>();
-                record.putAll(csvRecord.toMap());
+                Map<String, Object> record = new HashMap<>(csvRecord.toMap());
                 if (StringUtils.isBlank(idFieldValue)) {
                     log.warn("Skipping this record because missing ID field value " + record.toString());
-                    continue;
                 } else {
                     records.put(idFieldValue, record);
                 }

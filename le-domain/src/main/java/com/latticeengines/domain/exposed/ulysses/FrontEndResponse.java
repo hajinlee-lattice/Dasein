@@ -65,7 +65,7 @@ public class FrontEndResponse<T> {
         @JsonProperty("Value")
         private String value;
 
-        public KeyValuePair(String key, String value) {
+        KeyValuePair(String key, String value) {
             this.key = key;
             this.value = value;
         }
