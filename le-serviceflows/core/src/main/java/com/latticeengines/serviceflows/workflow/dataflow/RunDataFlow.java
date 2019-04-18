@@ -89,7 +89,6 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             int partitions = cascadingPartitions * scalingMultiplier;
             jobProperties.put("mapreduce.job.reduces", String.valueOf(partitions));
             jobProperties.put("mapred.reduce.tasks", String.valueOf(partitions));
-
             dataFlowConfig.setJobProperties(jobProperties);
             dataFlowConfig.setPartitions(partitions);
         } else {
@@ -158,7 +157,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         return count;
     }
 
-    private int getScalingMultiplier(long count) {
+    protected int getScalingMultiplier(long count) {
         int multiplier = ScalingUtils.getMultiplier(count);
         if (multiplier > 1) {
             log.info("Set multiplier=" + multiplier + " base on count=" + count);

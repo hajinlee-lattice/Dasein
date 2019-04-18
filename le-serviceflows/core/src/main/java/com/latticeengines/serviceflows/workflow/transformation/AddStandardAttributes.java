@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -19,6 +21,8 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("addStandardAttributesDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(AddStandardAttributes.class);
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -49,12 +53,15 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
 
     }
 
+    protected int getScalingMultiplier(long count) {
+        int multiplier = super.getScalingMultiplier(count) * 4;
+        log.info("Set multiplier=" + multiplier + " base on count=" + count);
+        return multiplier;
+    }
+
+    @Override
     protected Properties initJobProperties() {
         Properties jobProperties = new Properties();
-        int partitions = cascadingPartitions;
-        configuration.setPartitions(partitions * 4); // used by TEZ
-        jobProperties.put("mapreduce.job.reduces", String.valueOf(partitions * 4));
-        jobProperties.put("mapred.reduce.tasks", String.valueOf(partitions * 4));
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * 2));
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * 2));
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * 2));
