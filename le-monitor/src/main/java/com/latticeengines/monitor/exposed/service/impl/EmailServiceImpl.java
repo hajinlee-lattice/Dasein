@@ -229,6 +229,22 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void sendPlsForgetPasswordConfirmationEmail(String userEmail, String hostport) {
+        try {
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD_CONFIRMATION);
+
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(EmailSettings.PLS_FORGET_PASSWORD_EMAIL_SUBJECT, mp,
+                    Collections.singleton(userEmail));
+            log.info("Sending forget password email " + userEmail + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send forget password email to " + userEmail + " " + e.getMessage());
+        }
+    }
+
+    @Override
     public void sendPdNewExternalUserEmail(User user, String password, String hostport) {
         try {
             log.info("Sending new PD external user email to " + user.getEmail() + " started.");

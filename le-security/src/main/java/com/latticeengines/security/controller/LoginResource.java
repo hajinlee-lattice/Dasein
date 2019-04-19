@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.ResetPasswordConfirmationRequest;
 import com.latticeengines.domain.exposed.security.ResetPasswordRequest;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -190,6 +191,21 @@ public class LoginResource {
             }
         } catch (Exception e) {
             log.error("Failed to reset password and send an email.", e);
+        }
+
+        return true;
+    }
+
+    @RequestMapping(value = "/forgotpasswordconfirmation", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send an email to confirm a password reset request")
+    public boolean forgotPasswordConfirmation(@RequestBody ResetPasswordConfirmationRequest request) {
+        try {
+            String userEmail = request.getUserEmail();
+            String host = request.getHostPort();
+            emailService.sendPlsForgetPasswordConfirmationEmail(userEmail, host);
+        } catch (Exception e) {
+            log.error("Failed to password reset confirmation email.", e);
         }
 
         return true;
