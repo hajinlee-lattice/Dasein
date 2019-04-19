@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -53,7 +52,10 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         if (CollectionUtils.isNotEmpty(tempTenants)) {
             log.info("POC tennats size is " + tempTenants.size());
             for (Tenant tenant : tempTenants) {
-                log.info("begin dealing with tenant right" + JsonUtils.serialize(tenant));
+                log.info("begin dealing with tenant " + tenant.getName());
+                if (tenant.getExpiredTime() == null) {
+                    continue;
+                }
                 long expiredTime = tenant.getExpiredTime();
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 // send email two weeks before user can't access tenant
@@ -92,12 +94,11 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 }
             }
         }
-        log.info("begin revoke tenant right ");
+
         List<GlobalAuthUserTenantRight> tenantRights = userTenantRightEntityMgr.findByNonNullExprationDate();
         if (CollectionUtils.isNotEmpty(tenantRights)) {
-            log.info("expired tenant size is " + tenantRights.size());
+            log.info("expired tenant right size is " + tenantRights.size());
             for (GlobalAuthUserTenantRight tenantRight : tenantRights) {
-                log.info("begin dealing with tenant right" + JsonUtils.serialize(tenantRight));
                 if (LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() > tenantRight
                         .getExpirationDate() && tenantRight.getGlobalAuthTenant() != null
                         && tenantRight.getGlobalAuthUser() != null) {
