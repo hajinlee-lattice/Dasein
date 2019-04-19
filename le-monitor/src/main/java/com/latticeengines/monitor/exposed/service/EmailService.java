@@ -37,6 +37,8 @@ public interface EmailService {
 
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
 
+    void sendPlsForgetPasswordConfirmationEmail(String userEmail, String hostport);
+
     void sendPlsImportDataSuccessEmail(User user, String hostport);
 
     void sendPlsImportDataErrorEmail(User user, String hostport);

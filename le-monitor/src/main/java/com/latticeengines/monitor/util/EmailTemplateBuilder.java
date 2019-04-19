@@ -95,6 +95,7 @@ public class EmailTemplateBuilder {
         PLS_EXISTING_EXTERNAL_USER("old_user.html"), //
         PLS_EXISTING_INTERNAL_USER("old_user.html"), //
         PLS_FORGET_PASSWORD("forget_password.html"), //
+        PLS_FORGET_PASSWORD_CONFIRMATION("forget_password_confirmation.html"), //
         PD_NEW_EXTERNAL_USER("pd_new_external_user.html"), //
         PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html"), //
         PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
