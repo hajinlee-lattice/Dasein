@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -50,6 +51,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class SchemaRepositoryUnitTestNG {
 
@@ -102,6 +104,43 @@ public class SchemaRepositoryUnitTestNG {
         }
     }
 
+    @Test(groups = "unit")
+    public void testSchemaAttrUniqueness() {
+        boolean[] bools = new boolean[] {true, false};
+        SchemaRepository sr = SchemaRepository.instance();
+        for (BusinessEntity entity : BusinessEntity.values()) {
+            for (boolean cdlSchema : bools) {
+                for (boolean enableEntityMatch : bools) {
+                    try {
+                        // withoutId will be retired
+                        Table table = sr.getSchema(entity, cdlSchema, false, enableEntityMatch);
+                        Assert.assertEquals(Stream.of(table.getAttributeNames()).distinct().count(),
+                                table.getAttributeNames().length);
+                    } catch (Exception ex) {
+                        Assert.assertTrue(ex instanceof RuntimeException);
+                        Assert.assertEquals(ex.getMessage(), String.format("Unsupported schema %s", entity));
+                    }
+                }
+            }
+        }
+
+        for (SchemaInterpretation schema : SchemaInterpretation.values()) {
+            for (boolean includeCdlTimestamps : bools) {
+                for (boolean enableEntityMatch : bools) {
+                    try {
+                        // withoutId will be retired
+                        Table table = sr.getSchema(schema, includeCdlTimestamps, false, enableEntityMatch);
+                        Assert.assertEquals(Stream.of(table.getAttributeNames()).distinct().count(),
+                                table.getAttributeNames().length);
+                    } catch (Exception ex) {
+                        Assert.assertTrue(ex instanceof RuntimeException);
+                        Assert.assertEquals(ex.getMessage(), String.format("Unsupported schema %s", schema));
+                    }
+                }
+            }
+        }
+    }
+
     // schemaInterpretation, enableEntityMatch, expectedAttrs,
     // expectedPrimaryKey
     @DataProvider(name = "schemaProvider")
@@ -113,5 +152,4 @@ public class SchemaRepositoryUnitTestNG {
                 { SchemaInterpretation.Contact, false, CONTACT_ATTRS, ContactId }, //
         };
     }
-
 }
