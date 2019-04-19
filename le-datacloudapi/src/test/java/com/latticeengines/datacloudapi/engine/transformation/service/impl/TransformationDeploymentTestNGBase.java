@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.Transfo
 public abstract class TransformationDeploymentTestNGBase<T extends TransformationConfiguration>
         extends PropDataEngineDeploymentTestNGBase {
 
-    private static final int MAX_LOOPS = 200;
+    private static final int MAX_LOOPS = 400;
     private static final Logger log = LoggerFactory.getLogger(TransformationDeploymentTestNGBase.class);
 
     @Autowired

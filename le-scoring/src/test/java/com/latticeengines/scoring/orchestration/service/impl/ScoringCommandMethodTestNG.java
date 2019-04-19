@@ -65,7 +65,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     private static final String outputTable = "some_output_table";
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         ScoringManagerCallable.Builder builder = new ScoringManagerCallable.Builder();
         builder.customerBaseDir(this.customerBaseDir);
@@ -88,7 +88,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testCleanTables() throws NumberFormatException, InterruptedException {
         assertEquals(this.scoringCommandEntityMgr.findAll().size(), 0);
         assertEquals(this.scoringCommandResultEntityMgr.findAll().size(), 0);
@@ -145,7 +145,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         assertEquals(this.dbMetadataService.showTable(this.scoringJdbcTemplate, outputTable).size(), 0);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testHandleJobFailed() {
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, inputTable, 0,
                 100, new Timestamp(System.currentTimeMillis()));
@@ -163,7 +163,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         this.scoringProcessor.handleJobFailed();
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void checkIfModelGuidExists() {
         assertFalse(dbMetadataService.checkIfColumnExists(scoringJdbcTemplate, "LeadInputQueue", "Model_GUID"));
         assertTrue(dbMetadataService.checkIfColumnExists(scoringJdbcTemplate, testInputTable,
