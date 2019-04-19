@@ -63,9 +63,8 @@
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
-        <guava.version>19.0</guava.version>
+        <hdp.guava.version>20.0</hdp.guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
-        <hdp.guava.version>16.0</hdp.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <aws.version>1.11.519</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
@@ -133,7 +132,7 @@
         <kryo.serializers.version>0.42</kryo.serializers.version> <!-- needed for kryo 4.0.1 -->
         <zookeeper.version>3.4.13</zookeeper.version>
         <tinkerpop.version>3.3.4</tinkerpop.version>
-        <springfox.swagger.version>2.8.0</springfox.swagger.version>
+        <springfox.swagger.version>2.9.2</springfox.swagger.version>
         <io.swagger.version>1.5.22</io.swagger.version>
         <io.micrometer.version>1.1.1</io.micrometer.version>
 
