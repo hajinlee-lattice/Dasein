@@ -1,3 +1,5 @@
+import _ from 'common/vendor.index';
+
 angular.module('lp.import')
 .service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils){
     var ImportWizardStore = this;
