@@ -10,12 +10,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,6 +46,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.mchange.io.FileUtils;
 
 public class ScoringFileMetadataServiceImplUnitTestNG {
+
+    private static final Logger log = LoggerFactory.getLogger(ScoringFileMetadataServiceImplUnitTestNG.class);
 
     private ScoringFileMetadataServiceImpl scoringFileMetadataServiceImpl = new ScoringFileMetadataServiceImpl();
     private static final String standardAttrName1 = "Email";
@@ -123,6 +129,10 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         List<?> expectedRaw = JsonUtils.deserialize(expected, List.class);
         List<FieldMapping> expectedMappings = JsonUtils.convertList(expectedRaw, FieldMapping.class);
         Assert.assertEquals(fieldMappingDocument.getFieldMappings().size(), expectedMappings.size());
+        Collections.sort(expectedMappings, Comparator.comparing(FieldMapping::getUserField, 
+                Comparator.nullsFirst(Comparator.naturalOrder())));
+        Collections.sort(fieldMappingDocument.getFieldMappings(),
+                Comparator.comparing(FieldMapping::getUserField, Comparator.nullsFirst(Comparator.naturalOrder())));
         for (int i = 0; i < expectedMappings.size(); i++) {
             Assert.assertTrue(mappingEqual(expectedMappings.get(i), fieldMappingDocument.getFieldMappings().get(i)));
         }
