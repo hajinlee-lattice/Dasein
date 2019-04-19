@@ -20,12 +20,16 @@ public class AdminRecycleTenantJobBean implements QuartzJobBean {
 
     @Inject
     private EmailService emailService;
+
     @Inject
     private UserService userService;
+
     @Inject
     private com.latticeengines.admin.service.TenantService adminTenantService;
+
     @Inject
     private com.latticeengines.security.exposed.service.TenantService tenantService;
+
     @Inject
     private GlobalAuthUserTenantRightEntityMgr GlobalAuthUserTenantRightEntityMgr;
 
