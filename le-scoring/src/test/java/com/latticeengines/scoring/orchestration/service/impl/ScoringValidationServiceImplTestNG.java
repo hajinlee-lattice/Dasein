@@ -45,23 +45,23 @@ public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGB
     @SuppressWarnings("unused")
     private String tenant;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testValidateTotal() throws Exception {
-        int totalCommandNumber = Integer.parseInt(dbMetadataService.getRowCount(scoringJdbcTemplate, inputLeadsTable)
-                .toString());
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, totalCommandNumber, new Timestamp(System.currentTimeMillis()));
+        int totalCommandNumber = Integer
+                .parseInt(dbMetadataService.getRowCount(scoringJdbcTemplate, inputLeadsTable).toString());
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0,
+                totalCommandNumber, new Timestamp(System.currentTimeMillis()));
         try {
             scoringValidationService.validateBeforeProcessing(scoringCommand);
             assertTrue(true, "Should not throw exception");
@@ -110,7 +110,7 @@ public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGB
         }
     }
 
-    @AfterClass(enabled = true, alwaysRun = true)
+    @AfterClass(enabled = false, alwaysRun = false)
     public void cleanup() {
         try {
             dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
