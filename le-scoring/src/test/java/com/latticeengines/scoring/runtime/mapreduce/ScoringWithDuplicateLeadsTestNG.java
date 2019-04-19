@@ -64,10 +64,10 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
 
     private String scorePath;
 
-    @BeforeClass(groups = "sqoop")
+    @BeforeClass(groups = "sqoop", enabled = false)
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
             dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
@@ -109,7 +109,8 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @Override
+    @AfterMethod(enabled = false, lastTimeOnly = true, alwaysRun = false)
     public void afterEachTest() {
         try {
             HdfsUtils.rmdir(yarnConfiguration, path);
@@ -121,10 +122,10 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
         }
     }
 
-    @Test(groups = "sqoop", enabled = true)
+    @Test(groups = "sqoop", enabled = false)
     public void loadAndScore() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, 100, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0,
+                100, new Timestamp(System.currentTimeMillis()));
         // set a fake Pid
         scoringCommand.setPid(1234L);
         // submit scoring job directly without going through database

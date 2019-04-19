@@ -86,7 +86,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "sqoop")
+    @BeforeClass(groups = "sqoop", enabled = false)
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
@@ -149,8 +149,8 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
     private List<GenericRecord> loadAvroResultToHdfs(String customerName, String scoreTargetTable, String resultJdbcUrl)
             throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + CustomerSpace.parse(customerName)
-                + "/scoring");
+        HdfsUtils.rmdir(yarnConfiguration,
+                "/user/s-analytics/customers/" + CustomerSpace.parse(customerName) + "/scoring");
         scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
         if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, scoreResTable))) {
             dbMetadataService.dropTable(scoringJdbcTemplate, scoreResTable);
@@ -299,10 +299,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         return recordsAreSame;
     }
 
-    @Test(groups = "sqoop")
+    @Test(groups = "sqoop", enabled = false)
     public void loadAndScore() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, 4352, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0,
+                4352, new Timestamp(System.currentTimeMillis()));
         // set a fake Pid
         scoringCommand.setPid(1234L);
         // trigger the scoring
@@ -325,7 +325,8 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         assertTrue(compareJsonResults(records1, records2));
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @Override
+    @AfterMethod(enabled = false, lastTimeOnly = true, alwaysRun = false)
     public void afterEachTest() {
         try {
             HdfsUtils.rmdir(yarnConfiguration, path);

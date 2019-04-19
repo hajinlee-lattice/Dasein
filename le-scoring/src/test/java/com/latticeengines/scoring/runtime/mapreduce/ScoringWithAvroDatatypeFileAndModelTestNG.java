@@ -45,13 +45,13 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "sqoop")
+    @BeforeClass(groups = "sqoop", enabled = false)
     public void setup() throws Exception {
         // need to change the inputLeadsTable name to match the status in real
         // environments.
         inputLeadsTable = getClass().getSimpleName() + "__LeadsTable";
         CustomerSpace.parse(customer).toString();
-        if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
             dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
@@ -59,8 +59,8 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
 
     @Test(groups = "sqoop", enabled = false)
     public void loadAndScore() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, 7727482, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0,
+                7727482, new Timestamp(System.currentTimeMillis()));
         // set a fake Pid
         scoringCommand.setPid(1234L);
         // submit scoring job directly without going through database
@@ -68,7 +68,8 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @Override
+    @AfterMethod(enabled = false, lastTimeOnly = true, alwaysRun = false)
     public void afterEachTest() {
         try {
             dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);

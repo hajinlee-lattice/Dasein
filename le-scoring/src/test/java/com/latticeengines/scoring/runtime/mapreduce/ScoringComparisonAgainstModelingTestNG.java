@@ -111,7 +111,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "sqoop")
+    @BeforeClass(groups = "sqoop, enabled = false")
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant;
@@ -127,7 +127,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
-    @Test(groups = "sqoop")
+    @Test(groups = "sqoop", enabled = false)
     public void modelScoreAndCompare() throws Exception {
         prepareDataForModeling();
         model();
@@ -404,7 +404,8 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         return true;
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @Override
+    @AfterMethod(enabled = false, lastTimeOnly = true, alwaysRun = false)
     public void afterEachTest() {
         try {
             dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
