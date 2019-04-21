@@ -27,7 +27,7 @@ class ResetPasswordRouter {
          * Intercepts all the requests for the path '/reset'
          */
         this.router.use(function timeLog(req, res, next) {
-            this.log('Time: ', Date.now(), req.headers, this.proxies);
+            //this.log('Time: ', Date.now(), req.headers, this.proxies);
             next();
         }.bind(this));
 
@@ -53,13 +53,13 @@ class ResetPasswordRouter {
                     method: 'PUT',
                     timeout: 3000,
                     headers: {
-                        "accept": "application/json, text/plain, */*",
-                        "accept-language": "en-US,en;q=0.9",
-                        "cache-control": "no-cache",
-                        "content-type": "application/json",
-                        "pragma": "no-cache"
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'cache-control': 'no-cache',
+                        'content-type': 'application/json',
+                        'pragma': 'no-cache'
                     },
-                    mode: "cors",
+                    mode: 'cors',
                     body: JSON.stringify(body)
                 };
                 this.request(options, (error, response, body) => {
@@ -93,7 +93,34 @@ class ResetPasswordRouter {
                 jti: uuid.v4()
             };
             var token = jwt.sign(payload, 'e6b6376591584a6990e3a56306247cc2', { expiresIn: '1d' });
-            res.redirect(303, '/reset/publish?jwt=' + token);
+
+            let body = {
+                userEmail: payload.username,
+                hostPort: '<a href="' + this.getPlsHost() + '/reset/publish?jwt=' + token + '>Confirm Password Reset</a>'
+            };
+            let options = {
+                url: this.getPlsHost() + '/pls/forgotpasswordconfirmation',
+                method: 'PUT',
+                timeout: 3000,
+                headers: {
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'cache-control': 'no-cache',
+                    'content-type': 'application/json',
+                    'pragma': 'no-cache'
+                },
+                mode: 'cors',
+                body: JSON.stringify(body)
+            };
+
+            this.request(options, (error, response, body) => {
+                this.log('Call back ', error, response, body);
+                if(body) {
+                    res.redirect(303, '/login/form');
+                }else{
+                    res.status(500).send(UIActionsFactory.getUIActionsObject('Reset Password Failed', 'Banner', 'There was an error reseting your password.'));
+                }
+            });
         }.bind(this));
 
         return this.router;
