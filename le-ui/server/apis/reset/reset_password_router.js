@@ -96,7 +96,7 @@ class ResetPasswordRouter {
 
             let body = {
                 userEmail: payload.username,
-                hostPort: '<a href="' + this.getPlsHost() + '/reset/publish?jwt=' + token + '>Confirm Password Reset</a>'
+                hostPort: this.getPlsHost() + '/reset/publish?jwt=' + token
             };
             let options = {
                 url: this.getPlsHost() + '/pls/forgotpasswordconfirmation',
