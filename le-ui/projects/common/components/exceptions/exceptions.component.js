@@ -1,3 +1,4 @@
+import {BannerService} from './react.messaging.utils';
 angular
     .module("common.exceptions", [
         "common.banner",
@@ -59,7 +60,13 @@ angular
                         break;
 
                     case "banner":
-                        this.show(Banner, response, options, callback);
+                        if(document.getElementById('read-main-panel')){
+                            //This method is added from the 
+                            //ReactAngularMainComponent once it is mounted
+                            this.BannerReact(response, options, callback);
+                        }else {
+                            this.show(Banner, response, options, callback);
+                        }
                         break;
 
                     case "notice":

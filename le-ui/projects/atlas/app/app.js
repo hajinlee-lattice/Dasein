@@ -1,11 +1,12 @@
 import { HTTPFactory } from '../../common/app/http/http-service';
-import { MessagingFactory } from '../../common/app/utilities/messaging-service';
 import StateHistory from './history.service.js';
 import StateConfig from './routes.config.js';
 import StateTransitions from './transitions.config.js';
 import MainController from './app.controller.js';
 import HTTP from './http.interceptor.js';
 import Utils from './common.utils.js';
+
+
 
 angular
     .module('Atlas', [
@@ -51,7 +52,6 @@ angular
     .config(HTTP.InterceptorConfig)
     .config(HTTP.Config)
     .factory('authInterceptor', HTTP.Interceptor)
-    .factory('LeMessaging', MessagingFactory)
     .factory('LeHTTP', HTTPFactory)
     .service('StateHistory', StateHistory)
     .filter('escape', Utils.EscapeFilter)
