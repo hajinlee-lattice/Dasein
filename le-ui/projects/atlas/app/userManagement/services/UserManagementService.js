@@ -8,21 +8,17 @@ var app = angular.module('mainApp.userManagement.services.UserManagementService'
 
 app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, SessionService) {
 
-    this.AssignAccessLevel = function (username, accessLevel, expirePeriod) {
+    this.AssignAccessLevel = function (username, accessLevel, expirationDate) {
         var deferred = $q.defer();
         var result = {
             Success: false,
             ResultObj: null,
             ResultErrors: null
         };
-        var expirationDate = null;
-        var now = new Date();
-        if (expirePeriod === "SEVEN_DAYS") {
-        	now.setDate(now.getDate() + 7);
-        	expirationDate = now.getTime();
-        } else if (expirePeriod === "THIRTY_DAYS") {
-        	now.setDate(now.getDate() + 30);
-        	expirationDate = now.getTime();
+        if (expirationDate) {
+        	expirationDate =  Date.parse(expirationDate);
+        } else {
+        	expirationDate = null;
         }
         $http({
             method: 'PUT',
@@ -34,7 +30,7 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             headers: {"Content-Type": "application/json"}
         }).success(function (data) {
             result.Success = data.Success;
-            result.ResultObj = {Username: username, AccessLevel: accessLevel, ExpirePeriod: expirePeriod};
+            result.ResultObj = {Username: username, AccessLevel: accessLevel, ExpirationDate: expirationDate};
             deferred.resolve(result);
         }).error(function (data, status) {
             SessionService.HandleResponseErrors(data, status);
@@ -84,14 +80,10 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
         var deferred = $q.defer();
 
         var expirationDate = null;
-        var now = new Date();
-        if (newUser.ExpirePeriod === "SEVEN_DAYS") {
-        	now.setDate(now.getDate() + 7);
-        	expirationDate = now.getTime();
-        } else if (newUser.ExpirePeriod === "THIRTY_DAYS") {
-        	now.setDate(now.getDate() + 30);
-        	expirationDate = now.getTime();
+        if (newUser.ExpirationDate) {
+        	expirationDate =  Date.parse(newUser.ExpirationDate);
         }
+
         var user = {
             Username: newUser.Email,
             FirstName: newUser.FirstName,

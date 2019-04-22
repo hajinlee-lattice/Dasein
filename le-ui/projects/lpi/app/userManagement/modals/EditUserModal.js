@@ -37,9 +37,10 @@ app.service('EditUserModal', function ($compile, $templateCache, $rootScope, $ht
 app.controller('EditUserController', function ($scope, $rootScope, $state, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.user = $scope.$parent.user;
-    $scope.user['ExpirePeriod'] = "NEVER"; 
+    if ($scope.user.ExpirationDate) {
+    	$scope.user.ExpirationDate = new Date($scope.user.ExpirationDate);
+    }
 
-    $scope.periodsToSelect = ["NEVER", "SEVEN_DAYS", "THIRTY_DAYS" ];
     var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
     var userLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel) || {};
 
@@ -95,10 +96,16 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
         $scope.showEditUserError = false;
         $scope.showEditUserSuccess = false;
 
-        UserManagementService.AssignAccessLevel($scope.user.Username, $scope.targetLevel.AccessLevel, $scope.user.ExpirePeriod).then(function(result){
+        UserManagementService.AssignAccessLevel($scope.user.Username, $scope.targetLevel.AccessLevel, $scope.user.ExpirationDate).then(function(result){
             if (result.Success) {
                 $scope.showEditUserSuccess = true;
-                $scope.editUserSuccessMessage=ResourceUtility.getString("EDIT_USER_SUCCESS", [result.ResultObj.Username, ResourceUtility.getString("ACCESS_LEVEL_" + result.ResultObj.AccessLevel), ResourceUtility.getString("EXPIRE_PERIOD_" + result.ResultObj.ExpirePeriod)]);
+                var dateWithFormat = "Never";
+                var dateWithFormat = "Never";
+                if (result.ResultObj.ExpirationDate) {
+                	dateWithFormat = new Date(result.ResultObj.ExpirationDate);
+                	dateWithFormat = dateWithFormat.toDateString();
+                }
+                $scope.editUserSuccessMessage=ResourceUtility.getString("EDIT_USER_SUCCESS", [result.ResultObj.Username, ResourceUtility.getString("ACCESS_LEVEL_" + result.ResultObj.AccessLevel), dateWithFormat]);
                 $scope.saveInProgress = false;
                 $event.target.blur();
             } else {
