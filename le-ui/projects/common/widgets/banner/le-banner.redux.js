@@ -1,4 +1,4 @@
-import {TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING} from '../modal/le-modal.utils';
+import {TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING} from '../banner/le-banner.utils';
 const CONST = {
     REFRESH_VIEW: 'REFRESH_VIEW',
     OPEN_BANNER: 'OPEN_BANNER',

@@ -3,22 +3,23 @@ import ReactRouter from './router';
 import './react-main.component.scss';
 import LeModal from 'common/widgets/modal/le-modal';
 import { store, injectAsyncReducer } from 'store';
+import {actions} from 'common/widgets/banner/le-banner.redux'
 import { REDUX_STATE_MODAL, REDUX_STATE_BANNER } from "./redux.states";
 import LeBanner from "../../../common/widgets/banner/le-banner";
+import ReactMessagingService from '../../../common/components/exceptions/react.messaging.utils';
 
 export default class ReactAngularMainComponent extends Component {
     constructor(props) {
         super(props);
-        console.log(this.props);
     }
 
 
     componentDidMount() {
-        // console.log('ROUTER', ReactRouter);
-        // console.log('THE STORE ==> ', store);
         let router = ReactRouter.getRouter();
-        console.log(router);
         router.stateService.go(this.props.path);
+        this.props.ServiceErrorUtility['BannerReact'] = (response, options, callback) => {
+            ReactMessagingService.showBanner(response, options, callback);
+        }
         
     }
     componentWillUnmount() {
@@ -49,7 +50,7 @@ export default class ReactAngularMainComponent extends Component {
 }
 
 angular
-    .module("le.react.maincomponent", [])
+    .module("le.react.maincomponent", ['common.exceptions'])
     .component(
         "reactAngularMainComponent",
-        react2angular(ReactAngularMainComponent, ['path', 'ngservices'], []));
+        react2angular(ReactAngularMainComponent, ['path', 'ngservices'], ['ServiceErrorUtility']));

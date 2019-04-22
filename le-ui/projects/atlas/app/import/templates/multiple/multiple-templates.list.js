@@ -33,9 +33,6 @@ export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
         super(props);
-        console.log('TTTT ', ReactRouter.getRouter());
-        let tmp = ReactRouter.getRouter()['ngservices'].ImportWizardStore.getAccountIdState();
-        console.log('AAAAA ', tmp);
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
         this.state = {
@@ -228,7 +225,7 @@ export default class MultipleTemplatesList extends Component {
                                 options
                             );
                         } catch (e) {
-                            console.log(e);
+                            // console.log(e);
                         }
 
                         return buh;
@@ -262,7 +259,6 @@ export default class MultipleTemplatesList extends Component {
         return config;
     }
     render() {
-        console.log('RENDERING', this.state.data);
         return (
             <ReactMainContainer>
                 <LeToolBar justifycontent={SPACE_BETWEEN}>
@@ -277,7 +273,6 @@ export default class MultipleTemplatesList extends Component {
                         }}
                         callback={() => {
                             ReactRouter.getStateService().go('sistemcreation');
-                            // alert('Call APIS');
                         }}
                     />
                 </LeToolBar>
