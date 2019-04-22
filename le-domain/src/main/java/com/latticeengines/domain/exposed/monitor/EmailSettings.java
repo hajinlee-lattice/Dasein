@@ -57,7 +57,7 @@ public class EmailSettings {
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT = "IN PROGRESS - %s Export";
     public static final String CDL_PA_COMPLETION_EMAIL_SUBJECT = "SUCCESS - Lattice Platform Data Refresh";
     public static final String CDL_PA_ERROR_EMAIL_SUBJECT = "FAILURE - Lattice Platform Data Refresh";
-    public static final String POC_STATE_NOTICE_EMAIL_SUBJECT = "POC Tenant State Change";
+    public static final String TENANT_STATE_NOTICE_EMAIL_SUBJECT = "Tenant State Change";
     public static final String S3_CREDENTIALS_EMAIL_SUBJECT = "File Transfer Credentials";
     public static final String CDL_INGESTION_STATUS_SUBJECT = " %s - %s File Transfer";
     public static final String S3_TEMPLATE_UPDATE_SUBJECT = " Template %s has been updated";
