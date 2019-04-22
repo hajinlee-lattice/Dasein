@@ -82,6 +82,10 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${scoring.mapreduce.memory}")
+    private int memory;
+    @Value("${scoring.mapreduce.tasks.maximum}")
+    private int maxTasks;
     @Inject
     private ManifestService manifestService;
 
@@ -146,7 +150,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
         properties.setProperty(ScoringProperty.SCORE_INPUT_TYPE.name(), scoringConfig.getScoreInputType().name());
-        properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(), String.valueOf(scoringConfig.readModelIdFromRecord()));
+        properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
+                String.valueOf(scoringConfig.readModelIdFromRecord()));
         properties.setProperty(ScoringProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
 
         List<String> cacheFiles;
@@ -165,11 +170,22 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         } else {
             properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
         }
+
+        setContainerProperties(properties);
         return properties;
     }
 
     public void setConfiguration(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
+    }
+
+    private void setContainerProperties(Properties properties) {
+        String memSize = memory + "";
+        log.info(String.format("Setting container mem size for %s: %s", "Scoring", memSize));
+        properties.put("mapreduce.map.memory.mb", memSize);
+        properties.put("mapreduce.reduce.memory.mb", memSize);
+        properties.put("mapreduce.tasktracker.map.tasks.maximum", "" + maxTasks);
+        properties.put("mapreduce.tasktracker.reduce.tasks.maximum", "" + maxTasks);
     }
 
     public void syncModelsFromS3ToHdfs(String tenant) {
