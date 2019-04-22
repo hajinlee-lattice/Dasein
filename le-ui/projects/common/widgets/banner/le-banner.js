@@ -30,7 +30,6 @@ export default class LeBanner extends Component {
 
     componentDidMount() {
         this.bannerRoot = document.getElementById('react-banner-container')
-        console.log('BANNER ', this.bannerRoot);
     }
 
     clickHandler(action) {
@@ -46,7 +45,7 @@ export default class LeBanner extends Component {
                 </div>
                 <div className="le-banner-content">
                     <div className="le-banner-title">{this.state.title}</div>
-                    <div className="le-banner-content">
+                    <div className="le-banner-message">
                         {this.state.message}</div>
                 </div>
                 <div className="le-banner-close-container">

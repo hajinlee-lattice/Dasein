@@ -10,92 +10,144 @@
     width: 100%;
     max-width: 1200px;
     margin-top: 30px;
+    padding: 0 30px 0 0px;
 
     .le-banner-icon-container {
       padding: 0 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      // background-color: $saphire-three;
-      // border: 1px solid $saphire-three;
+      color: $pearl-white;
     }
 
-    &.banner-error {
-      @extend .le-banner;
-      border: 1px solid $ruby-two;
-      .le-banner-icon-container{
-        background-color: $saphire-three;
-        border: 1px solid $saphire-three;
-      }
-      .le-banner-icon::after {
-        content: "\f071";
-        font-family: FontAwesome;
-      }
-    }
-
-    &.banner-info {
-      @extend .le-banner;
-      border: 1px solid $saphire-three;
-      .le-banner-icon-container{
-        background-color: $saphire-three;
-        border: 1px solid $saphire-three;
-      }
-      .le-banner-icon::after {
-        content: "\f05a";
-        font-family: FontAwesome;
-      }
-    }
-
-    &.banner-success {
-      @extend .le-banner;
-      border: 1px solid $jade;
-
-      .le-banner-icon-container{
-        background-color: $saphire-three;
-        border: 1px solid $saphire-three;
-      }
-
-      .le-banner-icon::after {
-        content: "\f05a";
-        font-family: FontAwesome;
-      }
-    }
-
-    &.banner-warning {
-      @extend .le-banner;
-      border: 1px solid $amber-two;
-      
-      .le-banner-icon-container{
-        background-color: $amber-two;
-        border: 1px solid $amber-two;
-      }
-
-      .le-banner-icon::after {
-        content: "\f071";
-        font-family: FontAwesome;
-      }
-    }
-    .le-banner-content{
+    .le-banner-content {
       flex: 1;
       display: flex;
-      border: 1px solid orange;
+      // border: 1px solid orange;
+      padding: 10px;
       flex-direction: column;
       .le-banner-title {
         font-weight: bold;
       }
     }
 
-    .le-banner-close-container{
-      padding: 0 5px;
+    .le-banner-close-container {
+      padding: 0 12px;
       display: flex;
       align-items: center;
       justify-content: center;
+      & > i:hover {
+        cursor: pointer;
+        opacity: 0.5;
+      }
     }
+
+    &.banner-error {
+      @extend .le-banner;
+      // border: 1px solid $ruby-two;
+      .le-banner-icon-container {
+        background-color: $ruby-two;
+        border: 1px solid $ruby-two;
+        border-right: 0px solid white;
+      }
+      .le-banner-icon::after {
+        content: "\f071";
+        font-family: FontAwesome;
+      }
+      & > .le-banner-content {
+        border-top: 1px solid $ruby-two;
+        border-left: 1px solid $ruby-two;
+        border-bottom: 1px solid $ruby-two;
+      }
+      & > .le-banner-close-container {
+        border-top: 1px solid $ruby-two;
+        border-right: 1px solid $ruby-two;
+        border-bottom: 1px solid $ruby-two;
+      }
+    }
+
+    &.banner-info {
+      @extend .le-banner;
+      // border: 1px solid $saphire-three;
+      .le-banner-icon-container {
+        background-color: $saphire-three;
+        border: 1px solid $saphire-three;
+        border-right: 0px;
+      }
+      .le-banner-icon::after {
+        content: "\f05a";
+        font-family: FontAwesome;
+      }
+      & > .le-banner-content {
+        border-top: 1px solid $saphire-three;
+        border-left: 1px solid $saphire-three;
+        border-bottom: 1px solid $saphire-three;
+      }
+      & > .le-banner-close-container {
+        border-top: 1px solid $saphire-three;
+        border-right: 1px solid $saphire-three;
+        border-bottom: 1px solid $saphire-three;
+      }
+    }
+
+    &.banner-success {
+      @extend .le-banner;
+      // border: 1px solid $jade;
+
+      .le-banner-icon-container {
+        background-color: $jade;
+        border: 1px solid $jade;
+        border-right: 0px;
+      }
+
+      .le-banner-icon::after {
+        content: "\f05a";
+        font-family: FontAwesome;
+      }
+      & > .le-banner-content {
+        border-top: 1px solid $jade;
+        border-left: 1px solid $jade;
+        border-bottom: 1px solid $jade;
+      }
+      & > .le-banner-close-container {
+        border-top: 1px solid $jade;
+        border-right: 1px solid $jade;
+        border-bottom: 1px solid $jade;
+      }
+    }
+
+    &.banner-warning {
+      @extend .le-banner;
+      // border: 1px solid $amber-two;
+
+      .le-banner-icon-container {
+        background-color: $amber-two;
+        border: 1px solid $amber-two;
+        border-right: 0px;
+      }
+
+      .le-banner-icon::after {
+        content: "\f071";
+        font-family: FontAwesome;
+      }
+
+      & > .le-banner-content {
+        border-top: 1px solid $amber-two;
+        border-left: 1px solid $amber-two;
+        border-bottom: 1px solid $amber-two;
+      }
+      & > .le-banner-close-container {
+        border-top: 1px solid $amber-two;
+        border-right: 1px solid $amber-two;
+        border-bottom: 1px solid $amber-two;
+      }
+    }
+
     .blue-badge {
       cursor: pointer;
     }
+
     .long-word {
-      //overflow-wrap: break-word;
       word-wrap: break-word;
     }
   }
