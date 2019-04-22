@@ -856,7 +856,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " started.");
             EmailTemplateBuilder builder;
-            builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.POC_STATE_NOTICE);
+            builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.TENANT_STATE_NOTICE);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
@@ -864,11 +864,12 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{days}}", String.valueOf(days));
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(EmailSettings.POC_STATE_NOTICE_EMAIL_SUBJECT, mp,
+            sendMultiPartEmail(EmailSettings.TENANT_STATE_NOTICE_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
             log.info(
                     "Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Failed to send POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());
         }

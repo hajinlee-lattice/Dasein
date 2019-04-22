@@ -8,10 +8,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -99,9 +101,24 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         if (CollectionUtils.isNotEmpty(tenantRights)) {
             log.info("expired tenant right size is " + tenantRights.size());
             for (GlobalAuthUserTenantRight tenantRight : tenantRights) {
-                if (LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() > tenantRight
-                        .getExpirationDate() && tenantRight.getGlobalAuthTenant() != null
-                        && tenantRight.getGlobalAuthUser() != null) {
+                if (tenantRight.getGlobalAuthTenant() == null && tenantRight.getGlobalAuthUser() == null) {
+                    log.info("orphan record in tenant right " + tenantRight.getPid());
+                    continue;
+                }
+                long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                long expiredTime = tenantRight.getExpirationDate();
+                if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                    int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
+                    Tenant tenant = tenantService.findByTenantId(tenantRight.getGlobalAuthTenant().getId());
+                    GlobalAuthUser userData = tenantRight.getGlobalAuthUser();
+                    if (StringUtils.isBlank(userData.getFirstName())) {
+                        continue;
+                    }
+                    User user = new User();
+                    user.setFirstName(userData.getFirstName());
+                    user.setEmail(userData.getEmail());
+                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                } else if (currentTime > expiredTime) {
                     String tenantId = tenantRight.getGlobalAuthTenant().getId();
                     String userName = tenantRight.getGlobalAuthUser().getEmail();
                     log.info(String.format(String.format("Quartz job deleted %s from tenant %s", tenantId, userName)));
