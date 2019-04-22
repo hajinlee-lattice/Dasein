@@ -1,4 +1,4 @@
-import _ from 'common/vendor.index';
+import underscore from 'common/vendor.index';
 
 angular.module('lp.import')
 .service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils){
@@ -379,7 +379,7 @@ angular.module('lp.import')
                             /**
                              * if it's new item, such as a third party id, append it
                              */
-                            newItem = _.findWhere(tmpFieldMappings, {userField: item.userField});
+                            newItem = underscore.findWhere(tmpFieldMappings, {userField: item.userField});
                             _newItem = angular.copy(newItem);
 
                             var __newItem = angular.extend(_newItem, item);

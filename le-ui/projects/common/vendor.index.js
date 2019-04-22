@@ -4,8 +4,8 @@ import WebFont from 'webfontloader';
 /** CryptoJS used in the login app */
 window["CryptoJS"] = require("crypto-js");
 
-//window._ = require('underscore');
-export const _ = require('underscore');
+window._ = require('underscore');
+export const underscore = require('underscore');
 
 window["dateFormat"] = require('dateformat');
 
