@@ -4,7 +4,8 @@ import WebFont from 'webfontloader';
 /** CryptoJS used in the login app */
 window["CryptoJS"] = require("crypto-js");
 
-window._ = require('underscore');
+//window._ = require('underscore');
+export const _ = require('underscore');
 
 window["dateFormat"] = require('dateformat');
 
@@ -14,7 +15,6 @@ import './assets/css/pickaday.css'
 /*********************************************/
 require('bootstrap3');
 require('./lib/js/ui-bootstrap.js');
-
 
 require('./lib/bower/min/ocLazyLoad.min');
 
