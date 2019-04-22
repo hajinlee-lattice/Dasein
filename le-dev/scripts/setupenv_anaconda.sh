@@ -73,12 +73,12 @@ pip install --upgrade pip
 
 pip install \
     avro \
-    pexpect==4.0.1 \
-    ptyprocess==0.5.1
+    pexpect==4.6.0 \
+    ptyprocess==0.6.0
 
 pip install --no-deps \
     kazoo==2.2.1 \
-    patsy==0.3.0
+    patsy==0.5.0
 
 ${ANACONDA_HOME}/bin/conda install -y \
     fastavro \
@@ -88,10 +88,10 @@ ${ANACONDA_HOME}/bin/conda install -y \
     pytz \
     python-snappy \
     python-dateutil \
-    numpy=1.8 \
-    pandas=0.13 \
-    scikit-learn=0.14 \
-    statsmodels=0.5
+    numpy=1.12.0 \
+    pandas=0.22.0 \
+    scikit-learn=0.20.3 \
+    statsmodels=0.9.0
 
 if [[ "$(uname)" != "Darwin" ]]; then
     ${ANACONDA_HOME}/bin/conda install -y -c clinicalgraphics libgcrypt11
