@@ -19,6 +19,30 @@
             // );
             background: #D0242F;
         }
+        &.old-error {
+            min-height: 2em;
+            border-top: none;
+            border-bottom: none;
+            border-right: none;
+            border-left-width: 3px;
+            padding-left: 10px;
+            background: none;
+            display: flex;
+            align-items: center;
+            position: relative;
+            ico {
+                margin-right: 5px;
+            }
+            button {
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                font-size: 20px;
+            }
+        }
     }
 
     &.warning-messaging {
@@ -115,6 +139,11 @@
                 transition: none;
             }
     	}
+    }
+}
+.modal-content {
+    .messaging.error-messaging.old-error {
+        margin: 0 30px;
     }
 }
 
