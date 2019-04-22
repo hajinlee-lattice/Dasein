@@ -20,7 +20,7 @@ class ConnectorService {
             this._connectors = {
                 Salesforce: {
                     name: 'Salesforce',
-                    config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive reccomandations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' }
+                    config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive recommendations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' }
                 },
                 Marketo: {
                     name: 'Marketo',

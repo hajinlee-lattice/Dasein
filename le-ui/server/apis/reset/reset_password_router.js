@@ -1,6 +1,7 @@
 const UIActionsFactory = require('../uiactions-factory');
 const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
+const url = require('url');
 
 /**
  * Routing for '/reset' api
@@ -94,9 +95,11 @@ class ResetPasswordRouter {
             };
             var token = jwt.sign(payload, 'e6b6376591584a6990e3a56306247cc2', { expiresIn: '1d' });
 
+            let ref = url.parse(req.headers.referer);
+
             let body = {
                 userEmail: payload.username,
-                hostPort: this.getPlsHost() + '/reset/publish?jwt=' + token
+                hostPort: ref.protocol + '//' + ref.hostname + ':' + ref.port + '/reset/publish?jwt=' + token
             };
             let options = {
                 url: this.getPlsHost() + '/pls/forgotpasswordconfirmation',
@@ -116,7 +119,7 @@ class ResetPasswordRouter {
             this.request(options, (error, response, body) => {
                 this.log('Call back ', error, response, body);
                 if(body) {
-                    res.redirect(303, '/login/form');
+                    res.status(200).send();
                 }else{
                     res.status(500).send(UIActionsFactory.getUIActionsObject('Reset Password Failed', 'Banner', 'There was an error reseting your password.'));
                 }
