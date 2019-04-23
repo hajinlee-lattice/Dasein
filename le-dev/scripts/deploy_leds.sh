@@ -60,7 +60,7 @@ else
 fi
 
 HAS_CHANGE=""
-for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts' 'spark|spark|scripts'; do
+for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scoring|scoring|scripts' 'dpconda|na|na' 'spark|spark|scripts'; do
     artifact=$(echo ${params} | cut -d \| -f 1)
     dir1=$(echo ${params} | cut -d \| -f 2)
     dir2=$(echo ${params} | cut -d \| -f 3)
@@ -71,9 +71,15 @@ for params in 'rfmodel|dataplatform|scripts' 'evmodel|playmaker|evmodel' 'scorin
         HAS_CHANGE="true"
         pushd ${ARTIFACT_DIR}
         unzip ${artifact}-${LEDS_VERSION}.zip
-        hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
-        hdfs dfs -mkdir -p ${DS_ROOT}/${dir1}
-        hdfs dfs -copyFromLocal ${artifact} ${DS_ROOT}/${dir1}/${dir2}
+        if [[ ${artifact} == "dpconda" ]]; then
+            pushd dpconda
+            bash setupenv_conda.sh
+            popd
+        else
+            hdfs dfs -rm -r -f ${DS_ROOT}/${dir1} || true
+            hdfs dfs -mkdir -p ${DS_ROOT}/${dir1}
+            hdfs dfs -copyFromLocal ${artifact} ${DS_ROOT}/${dir1}/${dir2}
+        fi
         hdfs dfs -put -f ${ARTIFACT_DIR}/${artifact}-${LEDS_VERSION}.zip.md5 ${DS_ROOT}/
         popd
     fi
