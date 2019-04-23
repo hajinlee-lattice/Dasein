@@ -29,6 +29,7 @@ import ReactMainContainer from "atlas/react/react-main-container";
 import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
 
 import {actions as bannerActions} from '../../../../../common/widgets/banner/le-banner.redux';
+import { TYPE_SUCCESS } from "../../../../../common/widgets/banner/le-banner.utils";
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
@@ -237,10 +238,14 @@ export default class MultipleTemplatesList extends Component {
                         return (
                             <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
                                 <i class="fa fa-upload" aria-hidden="true" onClick={() => {
-                                    bannerActions.openBanner(store, {title: 'Test Banner', message: 'Here the message'});
+                                    bannerActions.info(store, {title: 'Test Banner', message: 'Here the message'});
                                 }}></i>
-                                <i class="fa fa-plus" aria-hidden="true"></i>
-                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                <i class="fa fa-plus" aria-hidden="true" onClick={() => {
+                                    bannerActions.error(store, {title: 'Test Banner 2', message: 'Here the message 1'});
+                                }}></i>
+                                <i class="fa fa-pencil-square-o" aria-hidden="true" onClick={() => {
+                                    bannerActions.success(store, {title: 'Test Banner 3', message: 'Here the message 2'});
+                                }}></i>
 
                             </LeHPanel>
                             // <TemplatesRowActions
