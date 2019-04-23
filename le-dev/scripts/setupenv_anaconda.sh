@@ -48,8 +48,10 @@ fi
 
 ${ANACONDA_HOME}/bin/conda update -n base -c defaults conda
 
+bash ${WSHOME}/le-dev/scripts/setupenv_conda_lattice.sh
+
 CONDA_ENVS_DIR=${WSHOME}//le-dev/conda/envs
-for envname in 'lattice' 'p2' 'leds'
+for envname in 'p2' 'leds'
     do
         if [[ -d ${ANACONDA_HOME}/envs/$envname ]]; then
             echo "Removing existing Anaconda environment: $envname"
@@ -61,25 +63,6 @@ for envname in 'lattice' 'p2' 'leds'
 
 source ${ANACONDA_HOME}/bin/activate p2
 pip install -r $WSHOME/le-dev/scripts/requirements.txt
-source ${ANACONDA_HOME}/bin/deactivate
-
-source ${ANACONDA_HOME}/bin/activate lattice
-if [[ "$(uname)" != "Darwin" ]]; then
-    ${ANACONDA_HOME}/bin/conda install -y -c clinicalgraphics libgcrypt11
-    ${ANACONDA_HOME}/bin/conda install -y libgfortran=1 libgpg-error
-fi
-# verify
-{
-    python -c "import avro; print \"avro: ok\"" && \
-    python -c "import numpy; print \"numpy=%s\" % numpy.__version__" && \
-    python -c "import pandas; print \"pandas=%s\" % pandas.__version__" && \
-    python -c "import sklearn; print \"sklearn=%s\" % sklearn.__version__" && \
-    python -c "import statsmodels; print \"statsmodels=%s\" % statsmodels.__version__" && \
-    python -c "from lxml import etree; print \"lxml: ok\""
-} || {
-    echo "Conda env was not installed successfully! Check log above"
-    exit -1
-}
 source ${ANACONDA_HOME}/bin/deactivate
 
 source ${ANACONDA_HOME}/bin/activate leds
