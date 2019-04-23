@@ -160,7 +160,10 @@
             </h5>
 
             <ul class="attribute-stats">
-                <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
+                <li ng-repeat="
+                    stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | 
+                    limitTo: 5 | 
+                    orderBy: vm.getStatSort()"
                     class="attribute attribute-stat delay top" ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
                                 'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0,
