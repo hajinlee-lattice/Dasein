@@ -2,9 +2,10 @@ package com.latticeengines.domain.exposed.datacloud;
 
 public enum MatchClient {
 
-    PD126("10.51.15.126", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="), //
+    // PD126 and PD144 are shut down. Redirect traffic from 126 and 144 to remaining match clients
+    PD126("10.51.15.131", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="), //
     PD131("10.51.15.131", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="), //
-    PD144("10.51.15.144", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="), //
+    PD144("10.51.15.130", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="), //
     PD130("10.51.15.130", 1433, "PropDataMatchDB", "DLTransfer", "Q1nh4HIYGkg4OnQIEbEuiw=="); //
 
     final String host;
