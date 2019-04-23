@@ -914,6 +914,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         try {
 
             String vendor = worker.getVendor();
+            log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
 
             List<File> tmpFiles = downloadWorkerOutput(worker);
             if (CollectionUtils.isEmpty(tmpFiles)) {

@@ -1301,7 +1301,7 @@ public class AvroUtils {
                 break;
             }
         } catch (Exception ex) {
-            if (!value.equals("")) {
+            if (StringUtils.isNoneBlank(value.toString())) {
                 log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value=" + value);
             }
             value = null;
