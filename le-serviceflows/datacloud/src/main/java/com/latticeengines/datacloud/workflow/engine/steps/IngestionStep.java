@@ -88,10 +88,10 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     }
 
     private void failByException(Exception e) {
+        log.error("Ingestion failed for progress: " + progress.toString(), e);
         progress = ingestionProgressService.updateProgress(progress) //
                 .status(ProgressStatus.FAILED) //
                 .errorMessage(e.getMessage().substring(0, Math.min(1000, e.getMessage().length()))) //
                 .commit(true);
-        log.error("Ingestion failed for progress: " + progress.toString(), e);
     }
 }
