@@ -822,6 +822,29 @@ public class AvroUtils {
         }
     }
 
+    public static void appendToLocalFile(String src, String dst, boolean snappy) throws IOException {
+
+        //prepare reader
+        try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(src),
+                new GenericDatumReader<GenericRecord>())) {
+
+            //prepare writer
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
+
+                //writer initialization
+                if (snappy) {
+                    writer.setCodec(CodecFactory.snappyCodec());
+                }
+                writer.appendTo(new File(dst));
+
+                //append
+                for (GenericRecord datum : reader) {
+                    writer.append(datum);
+                }
+            }
+        }
+    }
+
     public static List<GenericRecord> readFromLocalFile(String path) throws IOException {
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),

@@ -951,8 +951,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                         s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
 
-                        AvroUtils.appendToLocalFile(AvroUtils.readFromLocalFile(tmpFile.getPath()),
-                                bucketFile.getPath(), true);
+                        AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
 
                         log.info("appending to local file: " + bucketFile);
 
