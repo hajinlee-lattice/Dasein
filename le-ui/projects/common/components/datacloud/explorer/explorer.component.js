@@ -1318,9 +1318,6 @@ export default function (
     vm.percentage = function (number, total, suffix, limit) {
         var suffix = suffix || '',
             percentage = 0;
-
-        console.log(number, total);
-
         if (number && total) {
             percentage = ((number / total) * 100);
 
@@ -1345,13 +1342,17 @@ export default function (
     }
 
     vm.getHighestLift = function (stats) {
-        var highest = 0;
-        stats.forEach(function (stat) {
-            if (stat.Lift.toFixed(1) > highest) {
-                highest = stat.Lift.toFixed(1);
-            }
-        })
-        return highest;
+        if (vm.section == 're.model_iteration') {
+            var highest = 0;
+            stats.forEach(function (stat) {
+                if (stat.Lift.toFixed(1) > highest) {
+                    highest = stat.Lift.toFixed(1);
+                }
+            })
+            return highest;
+        } else {
+            return '';
+        }
     }
 
     vm.getHighestStat = function (stats) {
