@@ -55,6 +55,12 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
         metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), aggrTable.getName());
     }
 
+    protected int getScalingMultiplier(long count) {
+        int multiplier = super.getScalingMultiplier(count) * 4;
+        log.info("Set multiplier=" + multiplier + " base on count=" + count);
+        return multiplier;
+    }
+
     private void postProcessSingleModel(List<GenericRecord> records) {
         log.info("Table=" + configuration.getTargetTableName() + " Average Score="
                 + records.get(0).get(AVERAGE_SCORE_FIELD));
