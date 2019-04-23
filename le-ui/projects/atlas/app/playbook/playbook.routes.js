@@ -236,11 +236,12 @@ angular
                     // },
                     Play: (play) => { 
                         return play; 
+                    },
+                    path: () => {
+                        return 'playbookOverview';
                     }
                 },
-                path: () => {
-                    return 'playbookOverview';
-                },
+
                 views: {
                     "navigation@home": {
                         controller: 'SidebarPlaybookController',
