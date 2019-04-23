@@ -1,7 +1,6 @@
 import React, { Component, ReactDOM } from "common/react-vendor";
 import propTypes from "prop-types";
 import './le-banner.scss';
-import { TYPE_INFO } from './le-banner.utils';
 import { actions, reducer } from './le-banner.redux';
 
 
@@ -11,7 +10,7 @@ export default class LeBanner extends Component {
     constructor(props) {
         super(props);
         this.clickHandler = this.clickHandler.bind(this);
-        this.state = { store: props.store, open: false, config: {}, bannersList: [] };
+        this.state = { store: props.store, bannersList: [] };
         if (this.props.injectAsyncReducer) {
             this.props.injectAsyncReducer(props.store, props.reduxstate, reducer);
         }
@@ -24,6 +23,11 @@ export default class LeBanner extends Component {
             });
         });
         this.clickHandler = this.clickHandler.bind(this);
+    }
+    getCount(banner){
+        if(banner.count > 1){
+            return (<span className="le-banner-count">{banner.count}</span>)
+        }
     }
 
     componentDidMount() {
@@ -39,6 +43,7 @@ export default class LeBanner extends Component {
         this.state.bannersList.forEach(banner => {
             bannersUI.push(
                 (<div className={`${"le-banner"} ${banner.type}`}>
+                    {this.getCount(banner)}
                     <div className="le-banner-icon-container">
                         <i className="le-banner-icon"></i>
                     </div>

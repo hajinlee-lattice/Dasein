@@ -6,6 +6,7 @@
   margin: 0 16px;
   .le-banners-container{
     width: 100%;
+    max-width: 1200px;
   }
   .le-banner {
     display: flex;
@@ -13,6 +14,17 @@
     max-width: 1200px;
     margin-top: 30px;
     padding: 0 30px 0 0px;
+
+    .le-banner-count{
+      max-height: 20px;
+      border: 1px solid $gun-metal;
+      position: absolute;
+      color: $jet;
+      margin-top: -18px;
+      margin-left: -9px;
+      padding: 0 2px;
+      background-color: $pearl-white;
+    }
 
     .le-banner-icon-container {
       padding: 0 5px;
