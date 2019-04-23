@@ -21,7 +21,7 @@ public class CSVFileImportWithoutIdDeploymentTestNG extends CSVFileImportDeploym
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        String featureFlag = LatticeFeatureFlag.IMPORT_WITHOUT_ID.getName();
+        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
