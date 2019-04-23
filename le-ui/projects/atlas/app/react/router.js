@@ -37,7 +37,8 @@ class ReactRouter {
 
         this.routing.router.transitionService.onSuccess(true, function (trans) {
             // // Do something after transition
-            bannerActions.closeBanner(store);
+            bannerActions.clearBanners(store);
+            // bannerActions.closeBanner(store);
         });
 
         this.routing.router.transitionService.onError(true, function (err) {

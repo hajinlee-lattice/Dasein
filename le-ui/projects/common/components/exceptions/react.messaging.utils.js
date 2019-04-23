@@ -30,7 +30,7 @@ class ReactMessagingService {
         }
     }
 
-    getConfiguration(response, options,callback){
+    getConfiguration(response, options, callback){
         var payload = response.data,
         uiAction = payload.UIAction || {},
         method = (uiAction.status || "error").toLowerCase(),

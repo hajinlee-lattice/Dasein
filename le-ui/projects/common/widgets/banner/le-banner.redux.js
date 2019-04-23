@@ -1,11 +1,13 @@
-import {TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING} from '../banner/le-banner.utils';
+import { TYPE_ERROR, TYPE_INFO, TYPE_SUCCESS, TYPE_WARNING } from '../banner/le-banner.utils';
 const CONST = {
     REFRESH_VIEW: 'REFRESH_VIEW',
     OPEN_BANNER: 'OPEN_BANNER',
-    CLOSE_BANNER: 'CLOSE_BANNER'
+    CLOSE_BANNER: 'CLOSE_BANNER',
+    CLEAR_BANNERS: 'CLEAR_BANNERS'
 };
 
 const initialState = {
+    bannersList: [],
     open: false,
     config: {}
 };
@@ -14,44 +16,20 @@ export const actions = {
 
     error: (store, config = {}) => {
         config.type = TYPE_ERROR;
-        return store.dispatch({
-            type: CONST.OPEN_BANNER,
-            payload: {
-                open: true,
-                config: config
-            }
-        })
+        actions.openBanner(store, config);
     },
     info: (store, config = {}) => {
         config.type = TYPE_INFO;
-        return store.dispatch({
-            type: CONST.OPEN_BANNER,
-            payload: {
-                open: true,
-                config: config
-            }
-        })
+        actions.openBanner(store, config);
     },
 
     success: (store, config = {}) => {
         config.type = TYPE_SUCCESS;
-        return store.dispatch({
-            type: CONST.OPEN_BANNER,
-            payload: {
-                open: true,
-                config: config
-            }
-        })
+        actions.openBanner(store, config);
     },
     warning: (store, config = {}) => {
         config.type = TYPE_WARNING;
-        return store.dispatch({
-            type: CONST.OPEN_BANNER,
-            payload: {
-                open: true,
-                config: config
-            }
-        })
+        actions.openBanner(store, config);
     },
 
     refreshView: (store, config = {}) => {
@@ -65,21 +43,44 @@ export const actions = {
     },
 
     openBanner: (store, config = {}) => {
+        let bannerStore = store.getState('le-banner')['le-banner'];
+        let list = bannerStore.bannersList || [];
+        console.log('LIST ==> ', list);
+        list.push(config);
         return store.dispatch({
             type: CONST.OPEN_BANNER,
             payload: {
                 open: true,
-                config: config
+                config: config,
+                bannersList: list
             }
         })
     },
 
-    closeBanner: (store) => {
+    closeBanner: (store, banner) => {
+        let bannerStore = store.getState('le-banner')['le-banner'];
+        let list = bannerStore.bannersList || [];
+        list.forEach((element, index) => {
+            if (element.title == banner.title) {
+                list.splice(index, 1);
+            }
+        });
         return store.dispatch({
             type: CONST.CLOSE_BANNER,
             payload: {
                 open: false,
-                config: {}
+                config: {},
+                bannersList: list
+            }
+        })
+    },
+    clearBanners: (store) => {
+        return store.dispatch({
+            type: CONST.CLEAR_BANNERS,
+            payload: {
+                open: false,
+                config: {},
+                bannersList: []
             }
         })
     }
@@ -90,17 +91,26 @@ export const reducer = (state = initialState, action) => {
         case CONST.OPEN_BANNER:
             return {
                 open: action.payload.open,
-                config: action.payload.config
+                config: action.payload.config,
+                bannersList: action.payload.bannersList
             };
         case CONST.CLOSE_BANNER:
             return {
                 open: action.payload.open,
-                config: action.payload.config
+                config: action.payload.config,
+                bannersList: action.payload.bannersList
             };
         case CONST.REFRESH_VIEW:
             return {
                 open: action.payload.open,
-                config: action.payload.config
+                config: action.payload.config,
+                bannersList: action.payload.bannersList
+            };
+        case CONST.CLEAR_BANNERS:
+            return {
+                open: action.payload.open,
+                config: action.payload.config,
+                bannersList: action.payload.bannersList
             };
         default:
             return state;
