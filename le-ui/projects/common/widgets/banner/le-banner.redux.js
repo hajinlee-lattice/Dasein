@@ -32,26 +32,27 @@ export const actions = {
         actions.openBanner(store, config);
     },
 
-    refreshView: (store, config = {}) => {
-        return store.dispatch({
-            type: CONST.REFRESH_VIEW,
-            payload: {
-                open: true,
-                config: config
-            }
-        })
-    },
-
     openBanner: (store, config = {}) => {
         let bannerStore = store.getState('le-banner')['le-banner'];
-        let list = bannerStore.bannersList || [];
-        console.log('LIST ==> ', list);
-        list.push(config);
+        let list = [];
+        if(bannerStore.bannersList){
+            list = [...bannerStore.bannersList];
+        }
+        let alreadyAdded = false;
+        list.forEach(conf => {
+            if(conf.title == config.title){
+                conf.count = conf.count + 1;
+                alreadyAdded = true;
+                return;
+            }
+        });
+        if(!alreadyAdded){
+            config.count = 1;
+            list.push(config);
+        }
         return store.dispatch({
             type: CONST.OPEN_BANNER,
             payload: {
-                open: true,
-                config: config,
                 bannersList: list
             }
         })
@@ -100,12 +101,7 @@ export const reducer = (state = initialState, action) => {
                 config: action.payload.config,
                 bannersList: action.payload.bannersList
             };
-        case CONST.REFRESH_VIEW:
-            return {
-                open: action.payload.open,
-                config: action.payload.config,
-                bannersList: action.payload.bannersList
-            };
+        
         case CONST.CLEAR_BANNERS:
             return {
                 open: action.payload.open,
