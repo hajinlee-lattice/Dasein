@@ -276,7 +276,7 @@ export default function () {
                             retArr.push(nullImportance, importance, '');
                         }
                         if (vm.header.sort_modeliteration.property == 'PredictivePower') {
-                            retArr.push(predictive);
+                            retArr.push(nullPredictive, predictive, '');
                         }
                         if (vm.header.sort_modeliteration.property == 'DisplayName') {
                             retArr.push(name);
