@@ -1,0 +1,21 @@
+name: spark
+channels:
+  - conda-forge
+dependencies:
+  - python=3.7
+  - pip
+  - scikit-learn
+  - statsmodels
+  - fastavro
+  - seaborn
+  - scipy
+  - jupyter
+  - matplotlib
+  - sparkmagic
+  - jupyter_contrib_nbextensions
+  - jupyter_nbextensions_configurator
+  - ipython
+  - ipykernel=4.9.0
+  - prompt_toolkit
+  - pyyaml
+  - jinja2

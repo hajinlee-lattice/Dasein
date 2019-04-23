@@ -10,22 +10,22 @@ CONDA_ARTIFACT_DIR=${WSHOME}/le-dev/conda/artifacts
 
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
-    ANACONDA_VERSION=2018.12
+    MINICONDA_VERSION=4.6.14
 
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
         echo "You are on Mac"
-        ANACONDA_SH=Anaconda3-${ANACONDA_VERSION}-MacOSX-x86_64.sh
+        ANACONDA_SH=Miniconda3-${MINICONDA_VERSION}-MacOSX-x86_64.sh
     else
         echo "You are on ${UNAME}"
-        ANACONDA_SH=Anaconda3-${ANACONDA_VERSION}-Linux-x86_64.sh
+        ANACONDA_SH=Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh
     fi
 
     if [[ -f $ARTIFACT_DIR/$ANACONDA_SH ]]; then
-        echo "Skipping download of Anaconda"
+        echo "Skipping download of Miniconda"
     else
-        echo "Downloading Anaconda"
-        wget https://repo.continuum.io/archive/$ANACONDA_SH -O $ARTIFACT_DIR/$ANACONDA_SH
+        echo "Downloading Miniconda"
+        wget https://repo.anaconda.com/miniconda/$ANACONDA_SH -O $ARTIFACT_DIR/$ANACONDA_SH
     fi
 
     echo "Delete anaconda home, because installation script will create it"
@@ -46,143 +46,27 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     fi
 fi
 
-for CONDAENV in 'lattice|2.7' 'v01|2.7' 'p2|2.7' 'spark|3.7'
+${ANACONDA_HOME}/bin/conda update -n base -c defaults conda
+
+bash ${WSHOME}/le-dev/scripts/setupenv_conda_lattice.sh
+
+CONDA_ENVS_DIR=${WSHOME}//le-dev/conda/envs
+for envname in 'p2' 'leds'
     do
-        envname=`echo $CONDAENV | cut -d \| -f 1`
-        pythonversion=`echo $CONDAENV | cut -d \| -f 2`
         if [[ -d ${ANACONDA_HOME}/envs/$envname ]]; then
             echo "Removing existing Anaconda environment: $envname"
             ${ANACONDA_HOME}/bin/conda remove -y --name $envname --all
         fi
         echo "Creating Anaconda environment: $envname"
-        ${ANACONDA_HOME}/bin/conda create -n $envname -y python=$pythonversion pip
+        ${ANACONDA_HOME}/bin/conda env create -f ${CONDA_ENVS_DIR}/${envname}.yaml
     done
 
-${ANACONDA_HOME}/bin/conda update -y -n base conda
-
 source ${ANACONDA_HOME}/bin/activate p2
-
-pip install --upgrade pip
 pip install -r $WSHOME/le-dev/scripts/requirements.txt
-
 source ${ANACONDA_HOME}/bin/deactivate
 
-source ${ANACONDA_HOME}/bin/activate lattice
-
-pip install --upgrade pip
-
-pip install \
-    avro \
-    pexpect==4.6.0 \
-    ptyprocess==0.6.0
-
-pip install --no-deps \
-    kazoo==2.2.1 \
-    patsy==0.5.0
-
-${ANACONDA_HOME}/bin/conda install -y \
-    fastavro \
-    lxml \
-    py \
-    pytest \
-    pytz \
-    python-snappy \
-    python-dateutil \
-    numpy=1.12.0 \
-    pandas=0.22.0 \
-    scikit-learn=0.20.3 \
-    statsmodels=0.9.0
-
-if [[ "$(uname)" != "Darwin" ]]; then
-    ${ANACONDA_HOME}/bin/conda install -y -c clinicalgraphics libgcrypt11
-    ${ANACONDA_HOME}/bin/conda install -y libgfortran=1 libgpg-error
-fi
-
-# verify
-{
-    python -c "import avro; print \"avro: ok\"" && \
-    python -c "import numpy; print \"numpy=%s\" % numpy.__version__" && \
-    python -c "import pandas; print \"pandas=%s\" % pandas.__version__" && \
-    python -c "import sklearn; print \"sklearn=%s\" % sklearn.__version__" && \
-    python -c "import statsmodels; print \"statsmodels=%s\" % statsmodels.__version__" && \
-    python -c "from lxml import etree; print \"lxml: ok\""
-} || {
-    echo "Conda env was not installed successfully! Check log above"
-    exit -1
-}
-source ${ANACONDA_HOME}/bin/deactivate
-
-source ${ANACONDA_HOME}/bin/activate v01
-
-pip install --upgrade pip
-
-pip install \
-    avro \
-    pexpect==4.2.1 \
-    ptyprocess==0.5.1
-
-pip install --no-deps kazoo==2.2.1 patsy==0.4.1
-
-${ANACONDA_HOME}/bin/conda install -y \
-    fastavro \
-    lxml \
-    psutil \
-    py \
-    pytest \
-    pytz \
-    python-snappy \
-    numpy=1.12 \
-    pandas=0.19 \
-    scikit-learn=0.18 \
-    statsmodels=0.8
-
-if [[ "$(uname)" != "Darwin" ]]; then
-    ${ANACONDA_HOME}/bin/conda install -y -c clinicalgraphics libgcrypt11
-    ${ANACONDA_HOME}/bin/conda install -y libgpg-error
-fi
-
-pip install sklearn-pandas==1.3.0
-pip install git+https://github.com/jpmml/sklearn2pmml.git@0.17.4
-
-# verify
-{
-    python -c "import avro; print \"avro: ok\"" && \
-    python -c "import numpy; print \"numpy=%s\" % numpy.__version__" && \
-    python -c "import pandas; print \"pandas=%s\" % pandas.__version__" && \
-    python -c "import sklearn; print \"sklearn=%s\" % sklearn.__version__" && \
-    python -c "import statsmodels; print \"statsmodels=%s\" % statsmodels.__version__" && \
-    python -c "import sklearn_pandas as spd; print \"sklearn_pandas=%s\" % spd.__version__" && \
-    python -c "from lxml import etree; print \"lxml: ok\""
-} || {
-    echo "Conda env was not installed successfully! Check log above"
-    exit -1
-}
-
-source ${ANACONDA_HOME}/bin/deactivate
-
-source ${ANACONDA_HOME}/bin/activate spark
-
-pip install --upgrade pip
-
-${ANACONDA_HOME}/bin/conda install -y \
-	scikit-learn \
-	statsmodels \
-	fastavro \
-	seaborn \
-	scipy \
-	jupyter \
-	matplotlib \
-	sparkmagic \
-	jupyter_contrib_nbextensions \
-	jupyter_nbextensions_configurator \
-	ipython \
-	ipykernel=4.9.0 \
-	prompt_toolkit \
-	pyyaml \
-	jinja2
-
+source ${ANACONDA_HOME}/bin/activate leds
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/sparkkernel
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.5/site-packages/sparkmagic/kernels/pysparkkernel
-
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.7/site-packages/sparkmagic/kernels/sparkkernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.7/site-packages/sparkmagic/kernels/pysparkkernel
 source ${ANACONDA_HOME}/bin/deactivate

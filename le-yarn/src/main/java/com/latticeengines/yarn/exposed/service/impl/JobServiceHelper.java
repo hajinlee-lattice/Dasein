@@ -89,7 +89,9 @@ public class JobServiceHelper {
         try {
             ProcessExecutor executor = new ProcessExecutor().directory(workSpace);
             executor = executor.environment(envs) //
-                    .command("bash", "pythonlauncher.sh", conda, app).redirectOutput(System.out);
+                    .command("bash", "pythonlauncher.sh", conda, app) //
+                    .redirectOutput(System.out) //
+                    .redirectError(System.out);
             ProcessResult result = executor.execute();
             int exit = result.getExitValue();
             log.info("Exit code of python command: " + exit);
