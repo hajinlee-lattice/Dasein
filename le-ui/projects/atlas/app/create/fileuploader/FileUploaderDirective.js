@@ -11,6 +11,7 @@ angular
                 infoTemplate: '=',
                 defaultMessage: '=',
                 defaultMessageFn: '&',
+                hasSthreeFiles: '@',
                 fileRequired: '@',
                 fileAccept: '@',
                 fileSelect: '&',
@@ -29,6 +30,11 @@ angular
                 this.getTooltipConfig = function (key) {
                     return this.tooltipConfig != undefined ? JSON.parse(this.tooltipConfig)[key] : '';
                 }
+
+                this.getS3Files = function () {
+                    console.log("get S3, yo");
+                }
+
             }
         };
     })
@@ -374,6 +380,10 @@ angular
                     }, 1);
 
                     return deferred.promise;
+                }
+
+                vm.changeFile = function(){
+                    console.log("yo");
                 }
 
                 vm.uploadFile = function (file) {
