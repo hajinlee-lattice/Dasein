@@ -41,4 +41,18 @@ public class SourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFactoryImp
         }
         return (List<SourceAttribute>) query.list();
     }
+
+    @Override
+    public List<SourceAttribute> getDataCloudVersionAttrs(String sourceName, String stage,
+            String transformer) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format(
+                "from %s where Stage = :stage And Transformer = :transformer And Source = :source",
+                getEntityClass().getSimpleName());
+        Query<SourceAttribute> query = session.createQuery(queryStr, SourceAttribute.class);
+        query.setParameter("stage", stage);
+        query.setParameter("transformer", transformer);
+        query.setParameter("source", sourceName);
+        return (List<SourceAttribute>) query.list();
+    }
 }

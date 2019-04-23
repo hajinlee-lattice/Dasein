@@ -31,4 +31,11 @@ public class SourceAttributeEntityMgrImplTestNG extends DataCloudCoreFunctionalT
                 version.getVersion(), true);
         Assert.assertTrue(CollectionUtils.isNotEmpty(saList));
     }
+
+    @Test(groups = "functional")
+    public void testMaxDataCloudVersion() {
+        List<SourceAttribute> dataCloudVersions = sourceAttributeEntityMgr
+                .getDataCloudVersionAttrs("AccountMaster", "CLEAN", "AMCleaner");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(dataCloudVersions));
+    }
 }

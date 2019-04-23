@@ -1,13 +1,17 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +39,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
     private GeneralSource accMasterCleaned = new GeneralSource("AccountMasterCleaned");
     private GeneralSource baseSourceAccMaster2 = new GeneralSource("AccountMasterVerify");
     private GeneralSource source = new GeneralSource("AccountMasterVerifySource");
-    private static final String DATA_CLOUD_VERSION = "2.0.6";
+    private static final String DATA_CLOUD_VERSION = "2.0.18";
 
     @Autowired
     private SourceAttributeEntityMgr srcAttrEntityMgr;
@@ -135,15 +139,15 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             step1.setBaseSources(baseSourcesStep1);
             step1.setTransformer(AMCleaner.TRANSFORMER_NAME);
             step1.setTargetSource(accMasterCleaned.getSourceName());
-            String confParamStr1 = getAMCleanerConfig();
-            step1.setConfiguration(confParamStr1);
+            String confParamStr = getAMCleanerConfigStep();
+            step1.setConfiguration(confParamStr);
 
             TransformationStepConfig step2 = new TransformationStepConfig();
             List<String> baseSourcesStep2 = new ArrayList<>();
             baseSourcesStep2.add(baseSourceAccMaster2.getSourceName());
             step2.setBaseSources(baseSourcesStep2);
             step2.setTransformer(AMCleaner.TRANSFORMER_NAME);
-            step2.setConfiguration(getAMCleanerConfig());
+            step2.setConfiguration(confParamStr);
             step2.setTargetSource(source.getSourceName());
 
             // -----------
@@ -160,11 +164,24 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         }
     }
 
-    private String getAMCleanerConfig() throws JsonProcessingException {
+    private String getAMCleanerConfigStep() throws JsonProcessingException {
         AMCleanerConfig conf = new AMCleanerConfig();
-        conf.setDataCloudVersion(DATA_CLOUD_VERSION);
+        String maxDataCloudVersion = getMaxDataCloudVersion();
+        conf.setDataCloudVersion(maxDataCloudVersion);
         conf.setIsMini(true);
         return JsonUtils.serialize(conf);
+    }
+
+    private String getMaxDataCloudVersion() {
+        List<SourceAttribute> srcAttrVersions = srcAttrEntityMgr
+                .getDataCloudVersionAttrs("AccountMaster", "CLEAN", "AMCleaner");
+        TreeMap<Integer, String> dataCloudVersions = new TreeMap<Integer, String>();
+        for (SourceAttribute srcAttr : srcAttrVersions) {
+            String dataCloudVersion = srcAttr.getDataCloudVersion();
+            dataCloudVersions.put(Integer.parseInt(dataCloudVersion.replace(".", "")),
+                    dataCloudVersion);
+        }
+        return dataCloudVersions.lastEntry().getValue();
     }
 
     @Override
@@ -200,9 +217,13 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         Assert.assertEquals(rowNum, expectedData.length);
     }
 
+    public static boolean containsItemFromList(String inputStr, String[] items) {
+        return Arrays.stream(items).parallel().anyMatch(inputStr::contains);
+    }
+
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-            GenericRecord record = records.next();
+        GenericRecord record = records.next();
         List<Field> amfields = record.getSchema().getFields();
         // set of field and its type
         Map<String, String> mapFieldType = new HashMap<>();
@@ -216,23 +237,72 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN,
                 AMCleaner.TRANSFORMER_NAME, DATA_CLOUD_VERSION, false);
         int count = 0;
+        int ldcAttr = 0;
+        int techInd = 0;
+        String[] mustPresentList = { "BmbrSurge_BucketCode", "BmbrSurge_CompositeScore",
+                "BuiltWith_TechIndicators", "HGData_SupplierTechIndicators",
+                "HGData_SegmentTechIndicators" };
+        int mustPresentColCnt = 0;
+        int absentCols = 0;
+        int emptyStrCnt = 0;
         for (SourceAttribute srcAttr : srcAttrs) {
-            if (!srcAttr.getArguments().equals(("DROP"))) {
+            String attrName = srcAttr.getAttribute();
+            String argName = srcAttr.getArguments();
+            Object attrValue = record.get(attrName);
+            if (!argName.equals(("DROP"))) {
                 // counting total attributes retained
                 count++;
-                // verifying the presence of required attribute
-                if (srcAttr.getArguments().equals(("RETAIN")) || srcAttr.getArguments().equals(("LATTICEID"))) {
-                    Assert.assertTrue(mapFieldType.containsKey(srcAttr.getAttribute()));
-                } else if (mapFieldType.containsKey(srcAttr.getAttribute())) {
-                    // verifying type of the argument
-                    Assert.assertEquals(mapFieldType.get(srcAttr.getAttribute()), srcAttr.getArguments());
+                // verifying these 5 mustPresentList attributes are present :
+                if (containsItemFromList(attrName, mustPresentList)) {
+                    mustPresentColCnt++;
                 }
+                // verifying there are no attributes named as TechIndicator_*
+                if (attrName.startsWith("TechIndicator_")) {
+                    techInd++;
+                }
+                // no attributes as IsMatched or IsPublicDomain
+                if (attrName.equals("IsMatched") || attrName.equals("IsPublicDomain")) {
+                    absentCols++;
+                }
+                // verifying for having 10 attributes named as LDC_*
+                if (attrName.startsWith("LDC_")) {
+                    ldcAttr++;
+                }
+                // verifying LatticeAccountId exists with String type and value
+                // all populated
+                if (attrName.equals("LatticeAccountId")) {
+                    Assert.assertTrue(attrValue instanceof Utf8);
+                    Assert.assertTrue(StringUtils.isNotBlank(String.valueOf(attrValue)));
+                }
+                // verifying LatticeID exists with String type and value all populated 
+                if (attrName.equals("LatticeID")) {
+                    System.out.println(
+                            "record.get(attrName).getClass() : " + attrValue.getClass());
+                    Assert.assertEquals(attrValue.getClass(), Long.class);
+                    Assert.assertTrue(StringUtils.isNotBlank(String.valueOf(attrValue)));
+                }
+                // verifying the presence of required attribute
+                if (argName.equals(("RETAIN")) || argName.equals(("LATTICEID"))) {
+                    Assert.assertTrue(mapFieldType.containsKey(attrName));
+                } else if (mapFieldType.containsKey(attrName)) {
+                    // verifying type of the argument
+                    Assert.assertEquals(mapFieldType.get(attrName), argName);
+                }
+                // verifying that no String attribute exists with empty string "" (should all be replaced by null)
+                if (attrValue instanceof String && attrValue.equals("")) {
+                    emptyStrCnt++;
+                }    
             } else { // verifying columns which need to be dropped are really
                      // dropped
-                Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
+                Assert.assertTrue(!mapFieldType.containsKey(argName));
             }
         }
+        Assert.assertEquals(techInd, 0);
+        Assert.assertEquals(ldcAttr, 10);
         Assert.assertEquals(amfields.size(), count);
+        Assert.assertEquals(mustPresentColCnt, 5);
+        Assert.assertEquals(absentCols, 0);
+        Assert.assertTrue(emptyStrCnt == 0);
     }
 
 }
