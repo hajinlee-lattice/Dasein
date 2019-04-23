@@ -951,13 +951,29 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                         s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
 
-                        AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
+                        if (bucketFile.length() >= tmpFile.length()) {
 
-                        log.info("appending to local file: " + bucketFile);
+                            log.info("appending to local file: " + bucketFile);
+                            AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
+
+                            log.info("uploading local file: " + bucketFile);
+                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
+
+                        } else {
+
+                            log.info("appending to local file: " + tmpFile);
+                            AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
+
+                            log.info("uploading local file: " + tmpFile);
+                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
+                        }
+
+                    } else {
+
+                        log.info("uploading local file: " + bucketFile);
+                        s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                     }
-
-                    s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                     log.info("uploaded s3 file in bucket " + s3Bucket + ": " + remoteFilePath);
 
