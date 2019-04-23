@@ -45,7 +45,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
 
     private void setupTestData(int dataVersion, boolean setupSpark) {
         initializeAttributeRepo(dataVersion, setupSpark);
-        mockDataCollectionProxy();
+        mockDataCollectionProxy(queryEvaluatorService);
         mockPeriodProxy();
         tenant = new Tenant();
         tenant.setId(attrRepo.getCustomerSpace().toString());
@@ -56,7 +56,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
         log.info("Max txn date is " + maxTransactionDate);
     }
 
-    private void mockDataCollectionProxy() {
+    protected void mockDataCollectionProxy(QueryEvaluatorService queryEvaluatorService) {
         DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
         Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
         ReflectionTestUtils.setField(queryEvaluatorService, "dataCollectionProxy", proxy);

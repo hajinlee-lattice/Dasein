@@ -2,7 +2,7 @@ package com.latticeengines.query.evaluator.sparksql;
 
 import static com.latticeengines.query.factory.RedshiftQueryProvider.USER_SEGMENT;
 import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -73,10 +73,10 @@ public interface RedshiftAndSparkQueryTester {
                 getLogger().info("SparkSQL Query Count Collection: {}", sparkQueryCountResults);
                 getLogger().info("Spark Query Data Collection Size: {}",
                         sparkQueryDataResults.stream().map(lst -> lst.size()).collect(Collectors.toList()));
-                assertTrue(redshiftQueryCountResults.equals(sparkQueryCountResults),
+                assertEquals(redshiftQueryCountResults, sparkQueryCountResults,
                         String.format("Counts doesn't match for %s : %s", testResult.getMethod().getMethodName(),
                                 Arrays.deepToString(params)));
-                assertTrue(redshiftQueryDataResults.equals(sparkQueryDataResults),
+                assertEquals(redshiftQueryDataResults, sparkQueryDataResults,
                         String.format("Data doesn't match for %s : %s", testResult.getMethod().getMethodName(),
                                 Arrays.deepToString(params)));
                 break;

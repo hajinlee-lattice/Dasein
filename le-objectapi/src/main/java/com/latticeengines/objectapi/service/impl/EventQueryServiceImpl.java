@@ -33,13 +33,11 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
 
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
 
-    private final QueryEvaluatorService queryEvaluatorService;
-
     private final TransactionService transactionService;
 
     @Inject
     public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
-        this.queryEvaluatorService = queryEvaluatorService;
+        super(queryEvaluatorService);
         this.transactionService = transactionService;
     }
 
