@@ -40,7 +40,7 @@ export default class OverviewComponent extends Component {
         this.unsubscribe = store.subscribe(this.handleChange);
 
         console.log('props', this.props);
-        actions.fetchConnections(this.state.play.playname);
+        // actions.fetchConnections(this.state.play.playname);
     }
 
     componentWillUnmount() {
