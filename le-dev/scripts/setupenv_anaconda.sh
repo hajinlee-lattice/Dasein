@@ -48,8 +48,6 @@ fi
 
 ${ANACONDA_HOME}/bin/conda update -n base -c defaults conda
 
-bash ${WSHOME}/le-dev/scripts/setupenv_conda_lattice.sh
-
 CONDA_ENVS_DIR=${WSHOME}//le-dev/conda/envs
 for envname in 'p2' 'leds'
     do
