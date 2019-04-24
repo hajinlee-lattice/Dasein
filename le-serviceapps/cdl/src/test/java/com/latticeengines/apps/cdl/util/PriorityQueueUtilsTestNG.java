@@ -27,8 +27,14 @@ public class PriorityQueueUtilsTestNG {
         Assert.assertEquals(PriorityQueueUtils.getLowPriorityQueueSize(), 8);
         Assert.assertEquals(PriorityQueueUtils.pickFirstFromHighPriority(), "testTenant22");
         Assert.assertEquals(PriorityQueueUtils.getHighPriorityQueueSize(), 8);
+        Assert.assertEquals(PriorityQueueUtils.getPositionFromHighPriorityQueue("testTenant11"), 3);
+        List<String> tenantNameList = PriorityQueueUtils.getAllMemberWithSortFromHighPriorityQueue();
+        Assert.assertEquals(tenantNameList.indexOf("testTenant11"), 3);
         Assert.assertEquals(PriorityQueueUtils.pickFirstFromLowPriority(), "testTenant33");
         Assert.assertEquals(PriorityQueueUtils.getLowPriorityQueueSize(), 8);
+        Assert.assertEquals(PriorityQueueUtils.getPositionFromLowPriorityQueue("testTenant4"), 3);
+        tenantNameList = PriorityQueueUtils.getAllMemberWithSortFromLowPriorityQueue();
+        Assert.assertEquals(tenantNameList.indexOf("testTenant4"), 3);
         ActivityObject updateActivityObject = activityCustomer.get(0);
         updateActivityObject.setScheduleTime(DateTimeUtils.convertToDateUTCISO8601("2018-01-01T00:00:00+0000"));
         PriorityQueueUtils.push(updateActivityObject);

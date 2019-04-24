@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.util;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -124,6 +125,36 @@ public class PriorityQueueUtils {
         return highPriorityQueue.size();
     }
 
+    public static int getPositionFromHighPriorityQueue(String tenantName) {
+        if (highPriorityMap.containsKey(tenantName)) {
+            PriorityObject currentObject = highPriorityMap.get(tenantName);
+            List<PriorityObject> priorityQueues = new LinkedList<>();
+            int index = 0;
+            while (highPriorityQueue.peek() != null) {
+                PriorityObject priorityObject = highPriorityQueue.poll();
+                priorityQueues.add(priorityObject);
+                if (priorityObject.objectEquals(currentObject)) {
+                    highPriorityQueue.addAll(priorityQueues);
+                    return index;
+                }
+                index++;
+            }
+        }
+        return -1;
+    }
+
+    public static List<String> getAllMemberWithSortFromHighPriorityQueue() {
+        List<String> tenantNameList = new ArrayList<>();
+        List<PriorityObject> priorityQueues = new LinkedList<>();
+        while (highPriorityQueue.peek() != null) {
+            PriorityObject priorityObject = highPriorityQueue.poll();
+            priorityQueues.add(priorityObject);
+            tenantNameList.add(priorityObject.getTenantName());
+        }
+        highPriorityQueue.addAll(priorityQueues);
+        return tenantNameList;
+    }
+
     public static String pickFirstFromLowPriority() {
         if (lowPriorityQueue.size() < 1) {
             return null;
@@ -153,6 +184,36 @@ public class PriorityQueueUtils {
 
     public static int getLowPriorityQueueSize() {
         return lowPriorityQueue.size();
+    }
+
+    public static int getPositionFromLowPriorityQueue(String tenantName) {
+        if (lowPriorityMap.containsKey(tenantName)) {
+            PriorityObject currentObject = lowPriorityMap.get(tenantName);
+            List<PriorityObject> priorityQueues = new LinkedList<>();
+            int index = 0;
+            while (lowPriorityQueue.peek() != null) {
+                PriorityObject priorityObject = lowPriorityQueue.poll();
+                priorityQueues.add(priorityObject);
+                if (priorityObject.objectEquals(currentObject)) {
+                    lowPriorityQueue.addAll(priorityQueues);
+                    return index;
+                }
+                index++;
+            }
+        }
+        return -1;
+    }
+
+    public static List<String> getAllMemberWithSortFromLowPriorityQueue() {
+        List<String> tenantNameList = new ArrayList<>();
+        List<PriorityObject> priorityQueues = new LinkedList<>();
+        while (lowPriorityQueue.peek() != null) {
+            PriorityObject priorityObject = lowPriorityQueue.poll();
+            priorityQueues.add(priorityObject);
+            tenantNameList.add(priorityObject.getTenantName());
+        }
+        lowPriorityQueue.addAll(priorityQueues);
+        return tenantNameList;
     }
 
     private static PriorityObject convertObject(ActivityObject activityObject) {
