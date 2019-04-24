@@ -1,6 +1,6 @@
-const GraphQLParser = require('../parsers/graphql-parser');
-const Queries = require('./queries');
-const UIActionsFactory = require('./uiactions-factory');
+const GraphQLParser = require('../../parsers/graphql-parser');
+const Queries = require('../queries');
+const UIActionsFactory = require('../uiactions-factory');
 /**
  * Routing for tray's apis
  * End point for UI defined here
